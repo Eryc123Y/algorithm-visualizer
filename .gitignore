@@ -1,10 +1,19 @@
+# macOS system files
 .DS_Store
-node_modules
-/dist
 
+# Node.js dependencies
+node_modules
+
+# Build output
+/dist
+/output
+/build
+
+# Testing
 /tests/e2e/videos/
 /tests/e2e/screenshots/
-
+/coverage/
+/reports/
 
 # local env files
 .env.local
@@ -24,3 +33,11 @@ pnpm-debug.log*
 *.njsproj
 *.sln
 *.sw?
+
+# Temporary files
+*.tmp
+*.temp
+
+# Other system files
+.AppleDouble
+.LSOverride
