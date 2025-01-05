@@ -116,6 +116,7 @@
       </li>
     </ul>
   </div>
+  <div class="p-4 bg-blue-400 text-white">Tailwind CSS is working!</div>
 </template>
 
 <script lang="ts">
