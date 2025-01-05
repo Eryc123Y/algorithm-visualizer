@@ -7,7 +7,9 @@
     "build": "vue-cli-service build",
     "test:unit": "vue-cli-service test:unit",
     "test:e2e": "vue-cli-service test:e2e",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint && eslint . --ext .js,.vue,.ts",
+    "prepare": "husky install",
+    "format": "prettier --write \"src/**/*.{js,vue,ts,css,scss,json}\""
   },
   "dependencies": {
     "core-js": "^3.8.3",
@@ -40,6 +42,7 @@
     "prettier": "^2.8.8",
     "tailwindcss": "^3.4.17",
     "ts-jest": "^27.0.4",
-    "typescript": "~4.5.5"
+    "typescript": "~4.5.5",
+    "husky": "^8.0.0"
   }
 }

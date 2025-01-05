@@ -11,6 +11,14 @@ This project is a Vue.js application using Tailwind CSS for styling. It is built
 Make sure you have the following tools installed:
 - **Node.js**: 22.12.0 LTS, and it's recommended to install it using homebrew.
 - **npm**: For dependency management. 
+- **npx**: For running npm scripts to set up git hooks (check coding style before each commit).
+- **Vue CLI**: For creating and managing Vue projects.
+- **Tailwind CSS**: For styling the application.
+- **ESLint**: For linting JavaScript code.
+- **Prettier**: For code formatting.
+- **Jest**: For unit and end-to-end testing.
+- **Cypress**: For end-to-end testing.
+- **Git**: For version control.
 
 ### 2.2 Installation
 1. Clone the repository:
