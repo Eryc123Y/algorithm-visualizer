@@ -17,7 +17,12 @@ module.exports = {
     sourceType: 'module',
   },
   rules: {
-    'prettier/prettier': 'error', // 确保 Prettier 格式问题被标记为错误
+    'prettier/prettier': [
+      'error',
+      {
+        endOfLine: 'auto',
+      },
+    ], // 确保 Prettier 格式问题被标记为错误
     'vue/multi-word-component-names': 'off', // 允许单词组件名称
   },
 };
