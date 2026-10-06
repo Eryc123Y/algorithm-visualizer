@@ -1,0 +1,245 @@
+{
+  "version": "0.1",
+  "title": "Union-find with union by rank on {0, 1, 2, 3, 4}",
+  "source": {
+    "language": "python",
+    "code": "union(0, 1)\nunion(2, 3)\nunion(1, 3)"
+  },
+  "structures": {
+    "uf": {
+      "kind": "tree",
+      "nodes": [
+        {
+          "id": "0",
+          "value": "0"
+        },
+        {
+          "id": "1",
+          "value": "1"
+        },
+        {
+          "id": "2",
+          "value": "2"
+        },
+        {
+          "id": "3",
+          "value": "3"
+        },
+        {
+          "id": "4",
+          "value": "4"
+        }
+      ],
+      "roots": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4"
+      ]
+    }
+  },
+  "steps": [
+    {
+      "actions": [
+        {
+          "target": "uf",
+          "type": "annotate",
+          "node": "0",
+          "text": "rank=0"
+        },
+        {
+          "target": "uf",
+          "type": "annotate",
+          "node": "1",
+          "text": "rank=0"
+        },
+        {
+          "target": "uf",
+          "type": "annotate",
+          "node": "2",
+          "text": "rank=0"
+        },
+        {
+          "target": "uf",
+          "type": "annotate",
+          "node": "3",
+          "text": "rank=0"
+        },
+        {
+          "target": "uf",
+          "type": "annotate",
+          "node": "4",
+          "text": "rank=0"
+        }
+      ],
+      "meta": {
+        "line": 1,
+        "narration": "Initialize: each element is its own set with rank 0."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "uf",
+          "type": "group",
+          "node": "0",
+          "group": 0
+        },
+        {
+          "target": "uf",
+          "type": "group",
+          "node": "1",
+          "group": 0
+        }
+      ],
+      "meta": {
+        "line": 1,
+        "narration": "Find roots of 0 and 1: both are themselves."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "uf",
+          "type": "setChild",
+          "parent": "0",
+          "child": "1"
+        },
+        {
+          "target": "uf",
+          "type": "annotate",
+          "node": "0",
+          "text": "rank=1"
+        }
+      ],
+      "meta": {
+        "line": 1,
+        "narration": "Union(0, 1): Both have rank 0. Attach 1 to 0 and increase rank of 0 to 1."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "uf",
+          "type": "group",
+          "node": "2",
+          "group": 1
+        },
+        {
+          "target": "uf",
+          "type": "group",
+          "node": "3",
+          "group": 1
+        }
+      ],
+      "meta": {
+        "line": 2,
+        "narration": "Find roots of 2 and 3: both are themselves."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "uf",
+          "type": "setChild",
+          "parent": "2",
+          "child": "3"
+        },
+        {
+          "target": "uf",
+          "type": "annotate",
+          "node": "2",
+          "text": "rank=1"
+        }
+      ],
+      "meta": {
+        "line": 2,
+        "narration": "Union(2, 3): Both have rank 0. Attach 3 to 2 and increase rank of 2 to 1."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "uf",
+          "type": "highlight",
+          "nodes": [
+            "0",
+            "1"
+          ]
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Find root of 1: it is 0 (rank 1)."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "uf",
+          "type": "highlight",
+          "nodes": [
+            "2",
+            "3"
+          ]
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Find root of 3: it is 2 (rank 1)."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "uf",
+          "type": "setChild",
+          "parent": "0",
+          "child": "2"
+        },
+        {
+          "target": "uf",
+          "type": "annotate",
+          "node": "0",
+          "text": "rank=2"
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Union(1, 3): Roots 0 and 2 both have rank 1. Attach 2 to 0 and increase rank of 0 to 2."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "uf",
+          "type": "group",
+          "node": "0",
+          "group": null
+        },
+        {
+          "target": "uf",
+          "type": "group",
+          "node": "1",
+          "group": null
+        },
+        {
+          "target": "uf",
+          "type": "group",
+          "node": "2",
+          "group": null
+        },
+        {
+          "target": "uf",
+          "type": "group",
+          "node": "3",
+          "group": null
+        }
+      ],
+      "meta": {
+        "narration": "Final forest: {0, 1, 2, 3} in one set (root 0), {4} in another set (root 4)."
+      }
+    }
+  ]
+}

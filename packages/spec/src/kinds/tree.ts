@@ -341,10 +341,16 @@ const actions = <N extends z.ZodType, S extends z.ZodType>(
   ]);
 };
 
-const NewNode = z.strictObject({ id: ElementId, value: Scalar });
+const NewNode = z.strictObject({
+  id: ElementId,
+  value: Scalar,
+  color: Color.optional(),
+});
 const NewNodeInput = z
   .union([NewNode, Scalar])
-  .describe('`{ "id", "value" }`, or a bare value to get a generated id.');
+  .describe(
+    '`{ "id", "value", "color"? }`, or a bare value to get a generated id.',
+  );
 
 export const TreeAction = actions(NewNode, Slot);
 export type TreeAction = z.infer<typeof TreeAction>;

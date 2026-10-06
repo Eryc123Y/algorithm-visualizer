@@ -1,0 +1,86 @@
+{
+  "version": "0.1",
+  "title": "Hash table with separate chaining",
+  "structures": {
+    "h": {
+      "kind": "hashTable",
+      "size": 7,
+      "initial": [
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ]
+    }
+  },
+  "steps": [
+    {
+      "actions": [
+        {
+          "target": "h",
+          "type": "insert",
+          "bucket": 1,
+          "element": 15
+        }
+      ],
+      "meta": {
+        "narration": "Insert 15: h(15) = 15 mod 7 = 1. Add 15 to bucket 1."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "h",
+          "type": "insert",
+          "bucket": 4,
+          "element": 11
+        }
+      ],
+      "meta": {
+        "narration": "Insert 11: h(11) = 11 mod 7 = 4. Add 11 to bucket 4."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "h",
+          "type": "insert",
+          "bucket": 6,
+          "element": 27
+        }
+      ],
+      "meta": {
+        "narration": "Insert 27: h(27) = 27 mod 7 = 6. Add 27 to bucket 6."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "h",
+          "type": "insert",
+          "bucket": 1,
+          "element": 8
+        }
+      ],
+      "meta": {
+        "narration": "Insert 8: h(8) = 8 mod 7 = 1. Collision with 15! Add 8 to the chain in bucket 1."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "h",
+          "type": "insert",
+          "bucket": 5,
+          "element": 12
+        }
+      ],
+      "meta": {
+        "narration": "Insert 12: h(12) = 12 mod 7 = 5. Add 12 to bucket 5. All keys inserted."
+      }
+    }
+  ]
+}

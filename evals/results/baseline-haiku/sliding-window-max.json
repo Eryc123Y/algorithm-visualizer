@@ -1,0 +1,290 @@
+{
+  "version": "0.1",
+  "title": "Sliding window maximum with deque",
+  "structures": {
+    "a": {
+      "kind": "array",
+      "initial": [
+        1,
+        3,
+        -1,
+        -3,
+        5,
+        3,
+        6,
+        7
+      ],
+      "label": "input"
+    },
+    "dq": {
+      "kind": "queue",
+      "initial": [],
+      "label": "deque (indices)"
+    },
+    "res": {
+      "kind": "array",
+      "initial": [],
+      "label": "result"
+    }
+  },
+  "steps": [
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "highlight",
+          "indices": [
+            0
+          ]
+        },
+        {
+          "target": "dq",
+          "type": "enqueue",
+          "element": 0
+        }
+      ],
+      "meta": {
+        "narration": "Start with index 0 (value 1) in the deque. Window not yet full."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "highlight",
+          "indices": [
+            1
+          ]
+        },
+        {
+          "target": "dq",
+          "type": "dequeue"
+        },
+        {
+          "target": "dq",
+          "type": "enqueue",
+          "element": 1
+        }
+      ],
+      "meta": {
+        "narration": "Index 1 (value 3) > index 0 (value 1), so remove 0 and add 1. Window not yet full."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "highlight",
+          "indices": [
+            2
+          ]
+        },
+        {
+          "target": "dq",
+          "type": "enqueue",
+          "element": 2
+        }
+      ],
+      "meta": {
+        "narration": "Add index 2 (value -1) to deque. Window is now full [1, 3, -1]; max is a[1] = 3."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "res",
+          "type": "insert",
+          "index": 0,
+          "element": 3
+        }
+      ],
+      "meta": {
+        "narration": "Output the maximum: 3."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "highlight",
+          "indices": [
+            3
+          ]
+        },
+        {
+          "target": "dq",
+          "type": "enqueue",
+          "element": 3
+        }
+      ],
+      "meta": {
+        "narration": "Add index 3 (value -3). Window [3, -1, -3]; max is still a[1] = 3."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "res",
+          "type": "insert",
+          "index": 1,
+          "element": 3
+        }
+      ],
+      "meta": {
+        "narration": "Output the maximum: 3."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "highlight",
+          "indices": [
+            4
+          ]
+        },
+        {
+          "target": "dq",
+          "type": "dequeue"
+        },
+        {
+          "target": "dq",
+          "type": "dequeue"
+        },
+        {
+          "target": "dq",
+          "type": "dequeue"
+        },
+        {
+          "target": "dq",
+          "type": "enqueue",
+          "element": 4
+        }
+      ],
+      "meta": {
+        "narration": "Index 4 (value 5) is larger than all in deque. Remove indices 1, 2, 3 and add 4. Window [-1, -3, 5]; max is a[4] = 5."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "res",
+          "type": "insert",
+          "index": 2,
+          "element": 5
+        }
+      ],
+      "meta": {
+        "narration": "Output the maximum: 5."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "highlight",
+          "indices": [
+            5
+          ]
+        },
+        {
+          "target": "dq",
+          "type": "enqueue",
+          "element": 5
+        }
+      ],
+      "meta": {
+        "narration": "Add index 5 (value 3). Window [-3, 5, 3]; max is still a[4] = 5."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "res",
+          "type": "insert",
+          "index": 3,
+          "element": 5
+        }
+      ],
+      "meta": {
+        "narration": "Output the maximum: 5."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "highlight",
+          "indices": [
+            6
+          ]
+        },
+        {
+          "target": "dq",
+          "type": "dequeue"
+        },
+        {
+          "target": "dq",
+          "type": "dequeue"
+        },
+        {
+          "target": "dq",
+          "type": "enqueue",
+          "element": 6
+        }
+      ],
+      "meta": {
+        "narration": "Index 6 (value 6) > index 5 (value 3) and > index 4 (value 5). Remove 4 and 5, add 6. Window [5, 3, 6]; max is a[6] = 6."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "res",
+          "type": "insert",
+          "index": 4,
+          "element": 6
+        }
+      ],
+      "meta": {
+        "narration": "Output the maximum: 6."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "highlight",
+          "indices": [
+            7
+          ]
+        },
+        {
+          "target": "dq",
+          "type": "dequeue"
+        },
+        {
+          "target": "dq",
+          "type": "enqueue",
+          "element": 7
+        }
+      ],
+      "meta": {
+        "narration": "Index 7 (value 7) > index 6 (value 6). Remove 6, add 7. Window [3, 6, 7]; max is a[7] = 7."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "res",
+          "type": "insert",
+          "index": 5,
+          "element": 7
+        }
+      ],
+      "meta": {
+        "narration": "Output the maximum: 7. All windows processed."
+      }
+    }
+  ]
+}

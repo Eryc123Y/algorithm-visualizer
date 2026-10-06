@@ -1,0 +1,124 @@
+{
+  "version": "0.1",
+  "title": "BST Deletion with In-Order Successor",
+  "structures": {
+    "bst": {
+      "kind": "tree",
+      "levelOrder": [
+        5,
+        3,
+        8,
+        2,
+        4,
+        7,
+        9
+      ]
+    }
+  },
+  "steps": [
+    {
+      "actions": [],
+      "meta": {
+        "narration": "Binary search tree built by inserting 5, 3, 8, 2, 4, 7, 9 in order."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "bst",
+          "type": "highlight",
+          "nodes": [
+            "e1"
+          ]
+        }
+      ],
+      "meta": {
+        "narration": "We need to delete node 3 (e1), which has two children."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "bst",
+          "type": "pointer",
+          "name": "curr",
+          "node": "e1"
+        }
+      ],
+      "meta": {
+        "narration": "Node 3 has a left child (2) and a right child (4)."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "bst",
+          "type": "pointer",
+          "name": "succ",
+          "node": "e4"
+        }
+      ],
+      "meta": {
+        "narration": "The in-order successor is the smallest value in the right subtree. Start at the right child (4)."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "bst",
+          "type": "highlight",
+          "nodes": [
+            "e4"
+          ]
+        }
+      ],
+      "meta": {
+        "narration": "Node 4 has no left child, so it is the in-order successor."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "bst",
+          "type": "setValue",
+          "node": "e1",
+          "value": 4
+        }
+      ],
+      "meta": {
+        "narration": "Replace node 3's value with 4."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "bst",
+          "type": "removeNode",
+          "node": "e4"
+        }
+      ],
+      "meta": {
+        "narration": "Remove the node that contained the successor value 4."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "bst",
+          "type": "pointer",
+          "name": "curr",
+          "node": null
+        },
+        {
+          "target": "bst",
+          "type": "pointer",
+          "name": "succ",
+          "node": null
+        }
+      ],
+      "meta": {
+        "narration": "Deletion complete. The tree now has 4 in place of 3."
+      }
+    }
+  ]
+}

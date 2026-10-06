@@ -1,0 +1,374 @@
+{
+  "version": "0.1",
+  "title": "Dutch flag partition",
+  "source": {
+    "language": "python",
+    "code": "low, mid, high = 0, 0, n - 1\nwhile mid <= high:\n    if a[mid] == 0:\n        a[low], a[mid] = a[mid], a[low]\n        low += 1\n        mid += 1\n    elif a[mid] == 1:\n        mid += 1\n    else:\n        a[mid], a[high] = a[high], a[mid]\n        high -= 1"
+  },
+  "structures": {
+    "a": {
+      "kind": "array",
+      "initial": [2, 0, 2, 1, 1, 0]
+    }
+  },
+  "steps": [
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "pointer",
+          "name": "low",
+          "index": 0
+        },
+        {
+          "target": "a",
+          "type": "pointer",
+          "name": "mid",
+          "index": 0
+        },
+        {
+          "target": "a",
+          "type": "pointer",
+          "name": "high",
+          "index": 5
+        }
+      ],
+      "meta": {
+        "line": 2,
+        "narration": "Initialize pointers: low, mid at start; high at end.",
+        "vars": {
+          "low": 0,
+          "mid": 0,
+          "high": 5
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "highlight",
+          "indices": [0, 5]
+        }
+      ],
+      "meta": {
+        "line": 4,
+        "narration": "a[0]=2 (a 2), so swap with a[high]=0.",
+        "vars": {
+          "low": 0,
+          "mid": 0,
+          "high": 5
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "swap",
+          "i": 0,
+          "j": 5
+        }
+      ],
+      "meta": {
+        "line": 8,
+        "narration": "After swap: [0, 0, 2, 1, 1, 2].",
+        "vars": {
+          "low": 0,
+          "mid": 0,
+          "high": 5
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "pointer",
+          "name": "high",
+          "index": 4
+        }
+      ],
+      "meta": {
+        "line": 9,
+        "narration": "Decrement high to 4.",
+        "vars": {
+          "low": 0,
+          "mid": 0,
+          "high": 4
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "highlight",
+          "indices": [0]
+        }
+      ],
+      "meta": {
+        "line": 4,
+        "narration": "a[0]=0 (a 0), so swap with a[low]=0 (no change).",
+        "vars": {
+          "low": 0,
+          "mid": 0,
+          "high": 4
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "pointer",
+          "name": "low",
+          "index": 1
+        },
+        {
+          "target": "a",
+          "type": "pointer",
+          "name": "mid",
+          "index": 1
+        }
+      ],
+      "meta": {
+        "line": 6,
+        "narration": "Increment low and mid to 1.",
+        "vars": {
+          "low": 1,
+          "mid": 1,
+          "high": 4
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "highlight",
+          "indices": [1]
+        }
+      ],
+      "meta": {
+        "line": 4,
+        "narration": "a[1]=0 (a 0), so swap with a[low]=0 (no change).",
+        "vars": {
+          "low": 1,
+          "mid": 1,
+          "high": 4
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "pointer",
+          "name": "low",
+          "index": 2
+        },
+        {
+          "target": "a",
+          "type": "pointer",
+          "name": "mid",
+          "index": 2
+        }
+      ],
+      "meta": {
+        "line": 6,
+        "narration": "Increment low and mid to 2.",
+        "vars": {
+          "low": 2,
+          "mid": 2,
+          "high": 4
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "highlight",
+          "indices": [2, 4]
+        }
+      ],
+      "meta": {
+        "line": 8,
+        "narration": "a[2]=2 (a 2), so swap with a[high]=1.",
+        "vars": {
+          "low": 2,
+          "mid": 2,
+          "high": 4
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "swap",
+          "i": 2,
+          "j": 4
+        }
+      ],
+      "meta": {
+        "line": 8,
+        "narration": "After swap: [0, 0, 1, 1, 2, 2].",
+        "vars": {
+          "low": 2,
+          "mid": 2,
+          "high": 4
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "pointer",
+          "name": "high",
+          "index": 3
+        }
+      ],
+      "meta": {
+        "line": 9,
+        "narration": "Decrement high to 3.",
+        "vars": {
+          "low": 2,
+          "mid": 2,
+          "high": 3
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "highlight",
+          "indices": [2]
+        }
+      ],
+      "meta": {
+        "line": 7,
+        "narration": "a[2]=1, so just increment mid to 3.",
+        "vars": {
+          "low": 2,
+          "mid": 2,
+          "high": 3
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "pointer",
+          "name": "mid",
+          "index": 3
+        }
+      ],
+      "meta": {
+        "line": 7,
+        "narration": "Increment mid to 3.",
+        "vars": {
+          "low": 2,
+          "mid": 3,
+          "high": 3
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "highlight",
+          "indices": [3]
+        }
+      ],
+      "meta": {
+        "line": 7,
+        "narration": "a[3]=1, so just increment mid to 4.",
+        "vars": {
+          "low": 2,
+          "mid": 3,
+          "high": 3
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "pointer",
+          "name": "mid",
+          "index": 4
+        }
+      ],
+      "meta": {
+        "line": 7,
+        "narration": "Increment mid to 4. Now mid > high, so stop.",
+        "vars": {
+          "low": 2,
+          "mid": 4,
+          "high": 3
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "settle",
+          "index": 0
+        },
+        {
+          "target": "a",
+          "type": "settle",
+          "index": 1
+        },
+        {
+          "target": "a",
+          "type": "settle",
+          "index": 2
+        },
+        {
+          "target": "a",
+          "type": "settle",
+          "index": 3
+        },
+        {
+          "target": "a",
+          "type": "settle",
+          "index": 4
+        },
+        {
+          "target": "a",
+          "type": "settle",
+          "index": 5
+        },
+        {
+          "target": "a",
+          "type": "pointer",
+          "name": "low",
+          "index": null
+        },
+        {
+          "target": "a",
+          "type": "pointer",
+          "name": "mid",
+          "index": null
+        },
+        {
+          "target": "a",
+          "type": "pointer",
+          "name": "high",
+          "index": null
+        }
+      ],
+      "meta": {
+        "narration": "Done! Array is partitioned: [0, 0, 1, 1, 2, 2]."
+      }
+    }
+  ]
+}

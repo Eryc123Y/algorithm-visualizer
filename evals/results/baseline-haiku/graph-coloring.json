@@ -1,0 +1,148 @@
+{
+  "version": "0.1",
+  "title": "Greedy graph coloring",
+  "structures": {
+    "g": {
+      "kind": "graph",
+      "directed": false,
+      "nodes": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "edges": [
+        [
+          "A",
+          "B"
+        ],
+        [
+          "B",
+          "C"
+        ],
+        [
+          "C",
+          "A"
+        ],
+        [
+          "C",
+          "D"
+        ],
+        [
+          "D",
+          "E"
+        ]
+      ]
+    }
+  },
+  "steps": [
+    {
+      "actions": [
+        {
+          "target": "g",
+          "type": "highlight",
+          "nodes": [
+            "A"
+          ]
+        }
+      ],
+      "meta": {
+        "narration": "Process node A: no neighbors colored yet, assign color 0."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "g",
+          "type": "group",
+          "node": "A",
+          "group": 0
+        },
+        {
+          "target": "g",
+          "type": "highlight",
+          "nodes": [
+            "B"
+          ]
+        }
+      ],
+      "meta": {
+        "narration": "A colored with color 0. Process node B: neighbor A has color 0, assign color 1."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "g",
+          "type": "group",
+          "node": "B",
+          "group": 1
+        },
+        {
+          "target": "g",
+          "type": "highlight",
+          "nodes": [
+            "C"
+          ]
+        }
+      ],
+      "meta": {
+        "narration": "B colored with color 1. Process node C: neighbors A (color 0) and B (color 1), assign color 2."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "g",
+          "type": "group",
+          "node": "C",
+          "group": 2
+        },
+        {
+          "target": "g",
+          "type": "highlight",
+          "nodes": [
+            "D"
+          ]
+        }
+      ],
+      "meta": {
+        "narration": "C colored with color 2. Process node D: neighbor C (color 2), assign color 0."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "g",
+          "type": "group",
+          "node": "D",
+          "group": 0
+        },
+        {
+          "target": "g",
+          "type": "highlight",
+          "nodes": [
+            "E"
+          ]
+        }
+      ],
+      "meta": {
+        "narration": "D colored with color 0. Process node E: neighbor D (color 0), assign color 1."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "g",
+          "type": "group",
+          "node": "E",
+          "group": 1
+        }
+      ],
+      "meta": {
+        "narration": "E colored with color 1. All nodes colored successfully with 3 colors."
+      }
+    }
+  ]
+}

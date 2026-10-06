@@ -1,0 +1,196 @@
+{
+  "version": "0.1",
+  "title": "Red-black tree insertions with rotations",
+  "source": {
+    "language": "python",
+    "code": "# Insert 1, 2, 3 with rebalancing\ntree.insert(1)\ntree.insert(2)\ntree.insert(3)  # Triggers rotation and recoloring"
+  },
+  "structures": {
+    "tree": {
+      "kind": "tree",
+      "binary": true
+    }
+  },
+  "steps": [
+    {
+      "actions": [
+        {
+          "target": "tree",
+          "type": "addNode",
+          "node": {
+            "id": "n1",
+            "value": 1
+          },
+          "parent": null
+        },
+        {
+          "target": "tree",
+          "type": "setColor",
+          "node": "n1",
+          "color": "black"
+        }
+      ],
+      "meta": {
+        "line": 2,
+        "narration": "Insert 1 as the root and color it black (red-black tree property)."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "tree",
+          "type": "addNode",
+          "node": {
+            "id": "n2",
+            "value": 2
+          },
+          "parent": "n1",
+          "slot": "right"
+        },
+        {
+          "target": "tree",
+          "type": "setColor",
+          "node": "n2",
+          "color": "red"
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Insert 2 as right child of 1, colored red."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "tree",
+          "type": "highlight",
+          "nodes": [
+            "n2"
+          ]
+        }
+      ],
+      "meta": {
+        "narration": "Node 2 is valid: parent is black, so no red-red violation."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "tree",
+          "type": "addNode",
+          "node": {
+            "id": "n3",
+            "value": 3
+          },
+          "parent": "n2",
+          "slot": "right"
+        },
+        {
+          "target": "tree",
+          "type": "setColor",
+          "node": "n3",
+          "color": "red"
+        }
+      ],
+      "meta": {
+        "line": 4,
+        "narration": "Insert 3 as right child of 2, colored red."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "tree",
+          "type": "highlight",
+          "nodes": [
+            "n2",
+            "n3"
+          ]
+        }
+      ],
+      "meta": {
+        "narration": "Red-red violation: node 3 (red) has parent 2 (red). Uncle is null (black), so rotate."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "tree",
+          "type": "compare",
+          "a": "n1",
+          "b": "n2"
+        }
+      ],
+      "meta": {
+        "narration": "This is a right-right case: node 2 is right child of 1, and 3 is right child of 2."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "tree",
+          "type": "rotate",
+          "node": "n1",
+          "direction": "left"
+        }
+      ],
+      "meta": {
+        "narration": "Rotate left at node 1: node 2 rises, 1 becomes its left child."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "tree",
+          "type": "setColor",
+          "node": "n2",
+          "color": "black"
+        }
+      ],
+      "meta": {
+        "narration": "Recolor node 2 to black (was red, is now the new root)."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "tree",
+          "type": "setColor",
+          "node": "n1",
+          "color": "red"
+        }
+      ],
+      "meta": {
+        "narration": "Recolor node 1 to red (was black, now a child)."
+      }
+    },
+    {
+      "actions": [],
+      "meta": {
+        "narration": "Tree is now balanced and valid: node 2 (black) with children 1 (red) and 3 (red)."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "tree",
+          "type": "settle",
+          "node": "n1"
+        },
+        {
+          "target": "tree",
+          "type": "settle",
+          "node": "n2"
+        },
+        {
+          "target": "tree",
+          "type": "settle",
+          "node": "n3"
+        }
+      ],
+      "meta": {
+        "narration": "Final red-black tree: all properties satisfied."
+      }
+    }
+  ]
+}

@@ -1,0 +1,173 @@
+{
+  "version": "0.1",
+  "title": "Breadth-first search from A",
+  "structures": {
+    "g": {
+      "kind": "graph",
+      "directed": false,
+      "nodes": ["A", "B", "C", "D", "E"],
+      "edges": [
+        ["A", "B"],
+        ["A", "C"],
+        ["B", "D"],
+        ["C", "D"],
+        ["D", "E"]
+      ]
+    },
+    "q": {
+      "kind": "queue",
+      "initial": []
+    }
+  },
+  "steps": [
+    {
+      "actions": [
+        {
+          "target": "g",
+          "type": "pointer",
+          "name": "curr",
+          "node": "A"
+        },
+        {
+          "target": "q",
+          "type": "enqueue",
+          "element": "A"
+        },
+        {
+          "target": "g",
+          "type": "visit",
+          "node": "A"
+        }
+      ],
+      "meta": {
+        "narration": "Start BFS at A. Enqueue A and mark it as visited."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "q",
+          "type": "dequeue"
+        },
+        {
+          "target": "g",
+          "type": "pointer",
+          "name": "curr",
+          "node": "B"
+        },
+        {
+          "target": "q",
+          "type": "enqueue",
+          "element": "B"
+        },
+        {
+          "target": "g",
+          "type": "visit",
+          "node": "B"
+        }
+      ],
+      "meta": {
+        "narration": "Dequeue A. Its unvisited neighbours are B and C. Enqueue B and mark it visited."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "q",
+          "type": "enqueue",
+          "element": "C"
+        },
+        {
+          "target": "g",
+          "type": "visit",
+          "node": "C"
+        }
+      ],
+      "meta": {
+        "narration": "Enqueue C and mark it visited."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "q",
+          "type": "dequeue"
+        },
+        {
+          "target": "g",
+          "type": "pointer",
+          "name": "curr",
+          "node": "D"
+        },
+        {
+          "target": "q",
+          "type": "enqueue",
+          "element": "D"
+        },
+        {
+          "target": "g",
+          "type": "visit",
+          "node": "D"
+        }
+      ],
+      "meta": {
+        "narration": "Dequeue B. Its unvisited neighbour is D. Enqueue D and mark it visited."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "q",
+          "type": "dequeue"
+        },
+        {
+          "target": "g",
+          "type": "pointer",
+          "name": "curr",
+          "node": null
+        }
+      ],
+      "meta": {
+        "narration": "Dequeue C. Its neighbours are A (visited) and D (visited), so nothing to enqueue."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "q",
+          "type": "dequeue"
+        },
+        {
+          "target": "g",
+          "type": "pointer",
+          "name": "curr",
+          "node": "E"
+        },
+        {
+          "target": "q",
+          "type": "enqueue",
+          "element": "E"
+        },
+        {
+          "target": "g",
+          "type": "visit",
+          "node": "E"
+        }
+      ],
+      "meta": {
+        "narration": "Dequeue D. Its unvisited neighbour is E. Enqueue E and mark it visited."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "q",
+          "type": "dequeue"
+        }
+      ],
+      "meta": {
+        "narration": "Dequeue E. It has no unvisited neighbours. BFS is complete."
+      }
+    }
+  ]
+}

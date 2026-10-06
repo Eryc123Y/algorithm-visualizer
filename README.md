@@ -4,7 +4,7 @@ An AI-native library for step-by-step visualizations of algorithms and data stru
 
 A visualization is a declarative JSON document: the structures involved and a timeline of steps, each applying actions such as `compare` or `swap`. People write it with code, LLMs write it directly, and the library validates it and renders it as an interactive player, a static image, or a figure in Typst or LaTeX.
 
-> Status: early development. Eight structure kinds work end to end (protocol, timeline engine, layout, static SVG and an interactive player), with ready-made visualizations of the classic undergraduate algorithms. AI integrations (MCP) are next.
+> Status: early development. Eight structure kinds work end to end (protocol, timeline engine, layout, static SVG and an interactive player), with ready-made visualizations of the classic undergraduate algorithms, and an MCP server through which models write, check and render documents.
 
 ```json
 {
@@ -67,6 +67,10 @@ const mine = r.build();
 
 The playground's example menu shows every recipe.
 
+## For models
+
+[`@algoviz/mcp`](packages/mcp) lets a model write documents: it reads a guide written for models, validates its document (every step is replayed, and each error says where and why), inspects the state at any frame to check the result, and renders frames to SVG. The same tools work as the `algoviz` command line. [`evals/`](evals) measures how well models do on 27 undergraduate tasks, each checked for what a correct visualization must show.
+
 ## Embedding
 
 Build the standalone bundle with `npm run build -w @algoviz/elements`, then:
@@ -100,7 +104,7 @@ Display mode also accepts `once` (play a single time) and `motion` (`linear` · 
 | [`@algoviz/svg`](packages/svg)           | Available | Renders scenes to standalone SVG (no DOM needed)                  |
 | [`@algoviz/elements`](packages/elements) | Available | `<algo-player>`: interactive, animated player (Lit Web Component) |
 | [`@algoviz/recipes`](packages/recipes)   | Available | Typed recorder and visualizations of classic algorithms           |
-| `@algoviz/mcp`                           | Planned   | MCP server and MCP App for Claude, ChatGPT and others             |
+| [`@algoviz/mcp`](packages/mcp)           | Available | MCP server and CLI: authoring guide, validation, inspection, SVG  |
 
 ## Design
 

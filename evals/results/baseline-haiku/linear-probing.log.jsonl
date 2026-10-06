@@ -1,0 +1,4 @@
+{"tool":"algoviz_validate","ok":false,"codes":["LINE_OUT_OF_RANGE","LINE_OUT_OF_RANGE","LINE_OUT_OF_RANGE","LINE_OUT_OF_RANGE","LINE_OUT_OF_RANGE","LINE_OUT_OF_RANGE","LINE_OUT_OF_RANGE","LINE_OUT_OF_RANGE"],"errors":["LINE_OUT_OF_RANGE at $.steps[1].meta.line: Line 7 is past the end of the source code (hint: The source code has 6 lines.)","LINE_OUT_OF_RANGE at $.steps[3].meta.line: Line 7 is past the end of the source code (hint: The source code has 6 lines.)","LINE_OUT_OF_RANGE at $.steps[5].meta.line: Line 7 is past the end of the source code (hint: The source code has 6 lines.)","LINE_OUT_OF_RANGE at $.steps[8].meta.line: Line 7 is past the end of the source code (hint: The source code has 6 lines.)","LINE_OUT_OF_RANGE at $.steps[10].meta.line: Line 7 is past the end of the source code (hint: The source code has 6 lines.)"]}
+{"tool":"algoviz_validate","ok":true}
+{"tool":"algoviz_inspect","ok":true}
+{"tool":"submit","ok":true}

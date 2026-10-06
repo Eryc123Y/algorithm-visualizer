@@ -1,0 +1,464 @@
+{
+  "version": "0.1",
+  "title": "Topological sort with Kahn's algorithm",
+  "source": {
+    "language": "python",
+    "code": "queue = [n for n in nodes if indegree[n] == 0]\nresult = []\nwhile queue:\n    node = queue.pop(0)\n    result.append(node)\n    for neighbor in adj[node]:\n        indegree[neighbor] -= 1\n        if indegree[neighbor] == 0:\n            queue.append(neighbor)"
+  },
+  "structures": {
+    "graph": {
+      "kind": "graph",
+      "directed": true,
+      "nodes": [
+        "undershorts",
+        "pants",
+        "shirt",
+        "shoes",
+        "belt",
+        "tie",
+        "jacket",
+        "socks"
+      ],
+      "edges": [
+        ["undershorts", "pants"],
+        ["pants", "shoes"],
+        ["pants", "belt"],
+        ["shirt", "belt"],
+        ["shirt", "tie"],
+        ["tie", "jacket"],
+        ["belt", "jacket"],
+        ["socks", "shoes"]
+      ],
+      "layout": "layered"
+    },
+    "queue": {
+      "kind": "queue",
+      "initial": ["undershorts", "shirt", "socks"],
+      "label": "Queue (in-degree 0)"
+    },
+    "result": {
+      "kind": "array",
+      "initial": [],
+      "label": "Topological order"
+    }
+  },
+  "steps": [
+    {
+      "actions": [
+        {
+          "target": "graph",
+          "type": "annotate",
+          "node": "undershorts",
+          "text": "0"
+        },
+        {
+          "target": "graph",
+          "type": "annotate",
+          "node": "pants",
+          "text": "1"
+        },
+        {
+          "target": "graph",
+          "type": "annotate",
+          "node": "shirt",
+          "text": "0"
+        },
+        {
+          "target": "graph",
+          "type": "annotate",
+          "node": "shoes",
+          "text": "2"
+        },
+        {
+          "target": "graph",
+          "type": "annotate",
+          "node": "belt",
+          "text": "2"
+        },
+        {
+          "target": "graph",
+          "type": "annotate",
+          "node": "tie",
+          "text": "1"
+        },
+        {
+          "target": "graph",
+          "type": "annotate",
+          "node": "jacket",
+          "text": "2"
+        },
+        {
+          "target": "graph",
+          "type": "annotate",
+          "node": "socks",
+          "text": "0"
+        }
+      ],
+      "meta": {
+        "line": 1,
+        "narration": "Calculate in-degrees: undershorts, shirt, and socks have 0."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "highlight",
+          "indices": [0]
+        },
+        {
+          "target": "graph",
+          "type": "highlight",
+          "nodes": ["undershorts"]
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Dequeue undershorts and add to result."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "dequeue"
+        },
+        {
+          "target": "result",
+          "type": "insert",
+          "index": 0,
+          "element": "undershorts"
+        },
+        {
+          "target": "graph",
+          "type": "annotate",
+          "node": "pants",
+          "text": "0"
+        }
+      ],
+      "meta": {
+        "line": 4,
+        "narration": "Pants in-degree becomes 0, add to queue."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "enqueue",
+          "element": "pants"
+        },
+        {
+          "target": "queue",
+          "type": "highlight",
+          "indices": [1]
+        },
+        {
+          "target": "graph",
+          "type": "highlight",
+          "nodes": ["shirt"]
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Dequeue shirt and add to result."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "dequeue"
+        },
+        {
+          "target": "result",
+          "type": "insert",
+          "index": 1,
+          "element": "shirt"
+        },
+        {
+          "target": "graph",
+          "type": "annotate",
+          "node": "tie",
+          "text": "0"
+        },
+        {
+          "target": "graph",
+          "type": "annotate",
+          "node": "belt",
+          "text": "1"
+        }
+      ],
+      "meta": {
+        "line": 4,
+        "narration": "Tie in-degree becomes 0, add to queue."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "enqueue",
+          "element": "tie"
+        },
+        {
+          "target": "queue",
+          "type": "highlight",
+          "indices": [1]
+        },
+        {
+          "target": "graph",
+          "type": "highlight",
+          "nodes": ["socks"]
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Dequeue socks and add to result."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "dequeue"
+        },
+        {
+          "target": "result",
+          "type": "insert",
+          "index": 2,
+          "element": "socks"
+        },
+        {
+          "target": "graph",
+          "type": "annotate",
+          "node": "shoes",
+          "text": "1"
+        }
+      ],
+      "meta": {
+        "line": 4,
+        "narration": "Shoes in-degree becomes 1."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "highlight",
+          "indices": [0]
+        },
+        {
+          "target": "graph",
+          "type": "highlight",
+          "nodes": ["pants"]
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Dequeue pants and add to result."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "dequeue"
+        },
+        {
+          "target": "result",
+          "type": "insert",
+          "index": 3,
+          "element": "pants"
+        },
+        {
+          "target": "graph",
+          "type": "annotate",
+          "node": "shoes",
+          "text": "0"
+        },
+        {
+          "target": "graph",
+          "type": "annotate",
+          "node": "belt",
+          "text": "0"
+        }
+      ],
+      "meta": {
+        "line": 4,
+        "narration": "Shoes and belt in-degrees become 0, add both to queue."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "enqueue",
+          "element": "shoes"
+        },
+        {
+          "target": "queue",
+          "type": "enqueue",
+          "element": "belt"
+        },
+        {
+          "target": "queue",
+          "type": "highlight",
+          "indices": [0]
+        },
+        {
+          "target": "graph",
+          "type": "highlight",
+          "nodes": ["tie"]
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Dequeue tie and add to result."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "dequeue"
+        },
+        {
+          "target": "result",
+          "type": "insert",
+          "index": 4,
+          "element": "tie"
+        },
+        {
+          "target": "graph",
+          "type": "annotate",
+          "node": "jacket",
+          "text": "1"
+        }
+      ],
+      "meta": {
+        "line": 4,
+        "narration": "Jacket in-degree becomes 1."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "highlight",
+          "indices": [0]
+        },
+        {
+          "target": "graph",
+          "type": "highlight",
+          "nodes": ["shoes"]
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Dequeue shoes and add to result."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "dequeue"
+        },
+        {
+          "target": "result",
+          "type": "insert",
+          "index": 5,
+          "element": "shoes"
+        }
+      ],
+      "meta": {
+        "line": 4,
+        "narration": "No new nodes added to queue."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "highlight",
+          "indices": [0]
+        },
+        {
+          "target": "graph",
+          "type": "highlight",
+          "nodes": ["belt"]
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Dequeue belt and add to result."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "dequeue"
+        },
+        {
+          "target": "result",
+          "type": "insert",
+          "index": 6,
+          "element": "belt"
+        },
+        {
+          "target": "graph",
+          "type": "annotate",
+          "node": "jacket",
+          "text": "0"
+        }
+      ],
+      "meta": {
+        "line": 4,
+        "narration": "Jacket in-degree becomes 0, add to queue."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "enqueue",
+          "element": "jacket"
+        },
+        {
+          "target": "queue",
+          "type": "highlight",
+          "indices": [0]
+        },
+        {
+          "target": "graph",
+          "type": "highlight",
+          "nodes": ["jacket"]
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Dequeue jacket and add to result."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "dequeue"
+        },
+        {
+          "target": "result",
+          "type": "insert",
+          "index": 7,
+          "element": "jacket"
+        }
+      ],
+      "meta": {
+        "line": 4,
+        "narration": "Queue is empty. Topological order complete."
+      }
+    }
+  ]
+}

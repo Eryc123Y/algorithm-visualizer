@@ -1968,6 +1968,14 @@
                                     }
                                   ],
                                   "description": "A displayable value: number, string, boolean or null."
+                                },
+                                "color": {
+                                  "type": "string",
+                                  "enum": [
+                                    "red",
+                                    "black"
+                                  ],
+                                  "description": "Red–black tree colour."
                                 }
                               },
                               "required": [
@@ -1995,7 +2003,7 @@
                               "description": "A displayable value: number, string, boolean or null."
                             }
                           ],
-                          "description": "`{ \"id\", \"value\" }`, or a bare value to get a generated id."
+                          "description": "`{ \"id\", \"value\", \"color\"? }`, or a bare value to get a generated id."
                         },
                         "parent": {
                           "anyOf": [

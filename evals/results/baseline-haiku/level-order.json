@@ -1,0 +1,360 @@
+{
+  "version": "0.1",
+  "title": "Level-order tree traversal",
+  "structures": {
+    "tree": {
+      "kind": "tree",
+      "levelOrder": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        null,
+        6
+      ]
+    },
+    "q": {
+      "kind": "queue",
+      "initial": [
+        0
+      ],
+      "label": "queue (node indices)"
+    },
+    "out": {
+      "kind": "array",
+      "initial": [],
+      "label": "output"
+    }
+  },
+  "steps": [
+    {
+      "actions": [
+        {
+          "target": "tree",
+          "type": "highlight",
+          "nodes": [
+            "e0"
+          ]
+        },
+        {
+          "target": "q",
+          "type": "peek"
+        }
+      ],
+      "meta": {
+        "narration": "Start BFS with root node 1 (e0) in the queue."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "q",
+          "type": "dequeue"
+        },
+        {
+          "target": "tree",
+          "type": "visit",
+          "node": "e0"
+        }
+      ],
+      "meta": {
+        "narration": "Dequeue node 1 (e0) and mark it as visited."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "q",
+          "type": "enqueue",
+          "element": 1
+        },
+        {
+          "target": "q",
+          "type": "enqueue",
+          "element": 2
+        }
+      ],
+      "meta": {
+        "narration": "Enqueue its children: node 2 (e1) and node 3 (e2)."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "out",
+          "type": "insert",
+          "index": 0,
+          "element": 1
+        }
+      ],
+      "meta": {
+        "narration": "Output node 1."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "tree",
+          "type": "highlight",
+          "nodes": [
+            "e1"
+          ]
+        },
+        {
+          "target": "q",
+          "type": "peek"
+        }
+      ],
+      "meta": {
+        "narration": "Next in queue: node 2 (e1)."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "q",
+          "type": "dequeue"
+        },
+        {
+          "target": "tree",
+          "type": "visit",
+          "node": "e1"
+        }
+      ],
+      "meta": {
+        "narration": "Dequeue node 2 (e1) and mark it as visited."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "q",
+          "type": "enqueue",
+          "element": 3
+        },
+        {
+          "target": "q",
+          "type": "enqueue",
+          "element": 4
+        }
+      ],
+      "meta": {
+        "narration": "Enqueue its children: node 4 (e3) and node 5 (e4)."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "out",
+          "type": "insert",
+          "index": 1,
+          "element": 2
+        }
+      ],
+      "meta": {
+        "narration": "Output node 2."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "tree",
+          "type": "highlight",
+          "nodes": [
+            "e2"
+          ]
+        },
+        {
+          "target": "q",
+          "type": "peek"
+        }
+      ],
+      "meta": {
+        "narration": "Next in queue: node 3 (e2)."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "q",
+          "type": "dequeue"
+        },
+        {
+          "target": "tree",
+          "type": "visit",
+          "node": "e2"
+        }
+      ],
+      "meta": {
+        "narration": "Dequeue node 3 (e2) and mark it as visited."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "q",
+          "type": "enqueue",
+          "element": 5
+        }
+      ],
+      "meta": {
+        "narration": "Enqueue its only child: node 6 (e5). Left child is null."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "out",
+          "type": "insert",
+          "index": 2,
+          "element": 3
+        }
+      ],
+      "meta": {
+        "narration": "Output node 3."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "tree",
+          "type": "highlight",
+          "nodes": [
+            "e3"
+          ]
+        },
+        {
+          "target": "q",
+          "type": "peek"
+        }
+      ],
+      "meta": {
+        "narration": "Next in queue: node 4 (e3)."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "q",
+          "type": "dequeue"
+        },
+        {
+          "target": "tree",
+          "type": "visit",
+          "node": "e3"
+        }
+      ],
+      "meta": {
+        "narration": "Dequeue node 4 (e3). It has no children."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "out",
+          "type": "insert",
+          "index": 3,
+          "element": 4
+        }
+      ],
+      "meta": {
+        "narration": "Output node 4."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "tree",
+          "type": "highlight",
+          "nodes": [
+            "e4"
+          ]
+        },
+        {
+          "target": "q",
+          "type": "peek"
+        }
+      ],
+      "meta": {
+        "narration": "Next in queue: node 5 (e4)."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "q",
+          "type": "dequeue"
+        },
+        {
+          "target": "tree",
+          "type": "visit",
+          "node": "e4"
+        }
+      ],
+      "meta": {
+        "narration": "Dequeue node 5 (e4). It has no children."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "out",
+          "type": "insert",
+          "index": 4,
+          "element": 5
+        }
+      ],
+      "meta": {
+        "narration": "Output node 5."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "tree",
+          "type": "highlight",
+          "nodes": [
+            "e5"
+          ]
+        },
+        {
+          "target": "q",
+          "type": "peek"
+        }
+      ],
+      "meta": {
+        "narration": "Last in queue: node 6 (e5)."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "q",
+          "type": "dequeue"
+        },
+        {
+          "target": "tree",
+          "type": "visit",
+          "node": "e5"
+        }
+      ],
+      "meta": {
+        "narration": "Dequeue node 6 (e5). It has no children."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "out",
+          "type": "insert",
+          "index": 5,
+          "element": 6
+        }
+      ],
+      "meta": {
+        "narration": "Output node 6. Traversal complete."
+      }
+    }
+  ]
+}

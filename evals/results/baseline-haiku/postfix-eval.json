@@ -1,0 +1,202 @@
+{
+  "version": "0.1",
+  "title": "Postfix Expression Evaluation",
+  "structures": {
+    "stack": {
+      "kind": "stack",
+      "initial": [],
+      "label": "Stack"
+    }
+  },
+  "steps": [
+    {
+      "actions": [],
+      "meta": {
+        "narration": "Evaluate postfix expression: 3 4 + 2 * 7 -"
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "stack",
+          "type": "push",
+          "element": 3
+        }
+      ],
+      "meta": {
+        "narration": "Read 3: push onto stack."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "stack",
+          "type": "push",
+          "element": 4
+        }
+      ],
+      "meta": {
+        "narration": "Read 4: push onto stack."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "stack",
+          "type": "peek"
+        }
+      ],
+      "meta": {
+        "narration": "Read +: pop the top two elements."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "stack",
+          "type": "pop"
+        }
+      ],
+      "meta": {
+        "narration": "Pop 4."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "stack",
+          "type": "pop"
+        }
+      ],
+      "meta": {
+        "narration": "Pop 3. Compute 3 + 4 = 7."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "stack",
+          "type": "push",
+          "element": 7
+        }
+      ],
+      "meta": {
+        "narration": "Push 7 back onto stack."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "stack",
+          "type": "push",
+          "element": 2
+        }
+      ],
+      "meta": {
+        "narration": "Read 2: push onto stack."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "stack",
+          "type": "peek"
+        }
+      ],
+      "meta": {
+        "narration": "Read *: pop the top two elements."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "stack",
+          "type": "pop"
+        }
+      ],
+      "meta": {
+        "narration": "Pop 2."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "stack",
+          "type": "pop"
+        }
+      ],
+      "meta": {
+        "narration": "Pop 7. Compute 7 * 2 = 14."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "stack",
+          "type": "push",
+          "element": 14
+        }
+      ],
+      "meta": {
+        "narration": "Push 14 back onto stack."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "stack",
+          "type": "push",
+          "element": 7
+        }
+      ],
+      "meta": {
+        "narration": "Read 7: push onto stack."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "stack",
+          "type": "peek"
+        }
+      ],
+      "meta": {
+        "narration": "Read -: pop the top two elements."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "stack",
+          "type": "pop"
+        }
+      ],
+      "meta": {
+        "narration": "Pop 7."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "stack",
+          "type": "pop"
+        }
+      ],
+      "meta": {
+        "narration": "Pop 14. Compute 14 - 7 = 7."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "stack",
+          "type": "push",
+          "element": 7
+        }
+      ],
+      "meta": {
+        "narration": "Push 7 back onto stack. Evaluation complete. Result: 7"
+      }
+    }
+  ]
+}

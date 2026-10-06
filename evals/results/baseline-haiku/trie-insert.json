@@ -1,0 +1,326 @@
+{
+  "version": "0.1",
+  "title": "Insert Words into a Trie",
+  "source": {
+    "language": "python",
+    "code": "def insert(word):\n    node = root\n    for char in word:\n        if char not in node.children:\n            node.children[char] = TrieNode()\n        node = node.children[char]\n    node.isEnd = true"
+  },
+  "structures": {
+    "trie": {
+      "kind": "tree",
+      "nodes": [
+        {
+          "id": "root",
+          "value": "root"
+        }
+      ],
+      "roots": [
+        "root"
+      ]
+    }
+  },
+  "steps": [
+    {
+      "actions": [
+        {
+          "target": "trie",
+          "type": "pointer",
+          "name": "node",
+          "node": "root"
+        }
+      ],
+      "meta": {
+        "line": 2,
+        "narration": "Start inserting 'to'. Begin at the root.",
+        "vars": {
+          "word": "to"
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "trie",
+          "type": "addNode",
+          "node": {
+            "id": "t1",
+            "value": "t"
+          },
+          "parent": "root"
+        }
+      ],
+      "meta": {
+        "line": 4,
+        "narration": "Add node 't' under root for the first letter of 'to'."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "trie",
+          "type": "pointer",
+          "name": "node",
+          "node": "t1"
+        }
+      ],
+      "meta": {
+        "line": 5,
+        "narration": "Move pointer to node 't'.",
+        "vars": {
+          "node": "t1"
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "trie",
+          "type": "addNode",
+          "node": {
+            "id": "o1",
+            "value": "o"
+          },
+          "parent": "t1"
+        }
+      ],
+      "meta": {
+        "line": 4,
+        "narration": "Add node 'o' under 't' for the second letter of 'to'."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "trie",
+          "type": "pointer",
+          "name": "node",
+          "node": "o1"
+        }
+      ],
+      "meta": {
+        "line": 5,
+        "narration": "Move pointer to node 'o'.",
+        "vars": {
+          "node": "o1"
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "trie",
+          "type": "settle",
+          "node": "o1"
+        }
+      ],
+      "meta": {
+        "line": 7,
+        "narration": "Mark node 'o' as the end of word 'to'."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "trie",
+          "type": "pointer",
+          "name": "node",
+          "node": "root"
+        }
+      ],
+      "meta": {
+        "line": 2,
+        "narration": "Start inserting 'tea'. Begin at the root.",
+        "vars": {
+          "word": "tea"
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "trie",
+          "type": "pointer",
+          "name": "node",
+          "node": "t1"
+        }
+      ],
+      "meta": {
+        "line": 5,
+        "narration": "Move to node 't'. It already exists, so reuse it."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "trie",
+          "type": "addNode",
+          "node": {
+            "id": "e1",
+            "value": "e"
+          },
+          "parent": "t1"
+        }
+      ],
+      "meta": {
+        "line": 4,
+        "narration": "Add node 'e' under 't' for the second letter of 'tea'."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "trie",
+          "type": "pointer",
+          "name": "node",
+          "node": "e1"
+        }
+      ],
+      "meta": {
+        "line": 5,
+        "narration": "Move pointer to node 'e'.",
+        "vars": {
+          "node": "e1"
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "trie",
+          "type": "addNode",
+          "node": {
+            "id": "a1",
+            "value": "a"
+          },
+          "parent": "e1"
+        }
+      ],
+      "meta": {
+        "line": 4,
+        "narration": "Add node 'a' under 'e' for the third letter of 'tea'."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "trie",
+          "type": "pointer",
+          "name": "node",
+          "node": "a1"
+        }
+      ],
+      "meta": {
+        "line": 5,
+        "narration": "Move pointer to node 'a'.",
+        "vars": {
+          "node": "a1"
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "trie",
+          "type": "settle",
+          "node": "a1"
+        }
+      ],
+      "meta": {
+        "line": 7,
+        "narration": "Mark node 'a' as the end of word 'tea'."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "trie",
+          "type": "pointer",
+          "name": "node",
+          "node": "root"
+        }
+      ],
+      "meta": {
+        "line": 2,
+        "narration": "Start inserting 'ten'. Begin at the root.",
+        "vars": {
+          "word": "ten"
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "trie",
+          "type": "pointer",
+          "name": "node",
+          "node": "t1"
+        }
+      ],
+      "meta": {
+        "line": 5,
+        "narration": "Move to node 't'. It already exists, so reuse it."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "trie",
+          "type": "pointer",
+          "name": "node",
+          "node": "e1"
+        }
+      ],
+      "meta": {
+        "line": 5,
+        "narration": "Move to node 'e'. It already exists, so reuse it."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "trie",
+          "type": "addNode",
+          "node": {
+            "id": "n1",
+            "value": "n"
+          },
+          "parent": "e1"
+        }
+      ],
+      "meta": {
+        "line": 4,
+        "narration": "Add node 'n' under 'e' for the third letter of 'ten'."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "trie",
+          "type": "pointer",
+          "name": "node",
+          "node": "n1"
+        }
+      ],
+      "meta": {
+        "line": 5,
+        "narration": "Move pointer to node 'n'.",
+        "vars": {
+          "node": "n1"
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "trie",
+          "type": "settle",
+          "node": "n1"
+        }
+      ],
+      "meta": {
+        "line": 7,
+        "narration": "Mark node 'n' as the end of word 'ten'. All three words inserted."
+      }
+    }
+  ]
+}
