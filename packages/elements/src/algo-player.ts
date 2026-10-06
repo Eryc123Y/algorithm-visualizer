@@ -124,6 +124,8 @@ export class AlgoPlayer extends LitElement {
   readonly #reducedMotion = mediaQuery('(prefers-reduced-motion: reduce)');
   #visibility: IntersectionObserver | null = null;
   #pausedOffscreen = false;
+  /** Whether playback was running when the element was last disconnected. */
+  #playingWhenDisconnected = false;
   /** Last visibility reported by the IntersectionObserver. */
   #visible = true;
   #ownsTabIndex = false;
@@ -190,6 +192,14 @@ export class AlgoPlayer extends LitElement {
       this.#visibility = new IntersectionObserver(this.#onVisibility);
       this.#visibility.observe(this);
     }
+    // Resume after being moved or re-inserted into the document.
+    if (
+      this.trace !== null &&
+      (this.#playingWhenDisconnected || this.#isDisplay)
+    ) {
+      this.#playingWhenDisconnected = false;
+      this.#startPlayback();
+    }
   }
 
   override disconnectedCallback(): void {
@@ -198,7 +208,10 @@ export class AlgoPlayer extends LitElement {
     this.#colorScheme?.removeEventListener('change', this.#onColorScheme);
     this.#visibility?.disconnect();
     this.#visibility = null;
-    this.#controller.dispose();
+    // Pause (rather than dispose) so the UI state stays in sync and playback
+    // can resume if the element is connected again.
+    this.#playingWhenDisconnected = this.playback.playing;
+    this.#controller.pause();
   }
 
   get #isDisplay(): boolean {
@@ -220,7 +233,9 @@ export class AlgoPlayer extends LitElement {
         else if (!this.autoplay) this.#controller.pause();
       }
     }
-    if (changed.has('frame') && this.frame !== this.playback.index) {
+    if (changed.has('frame') && !Number.isFinite(this.frame)) {
+      this.frame = this.playback.index;
+    } else if (changed.has('frame') && this.frame !== this.playback.index) {
       // Before a trace is loaded, remember the frame to show once it is.
       if (this.trace === null) this.#requestedFrame = this.frame;
       else this.#controller.seek(this.frame);
@@ -305,6 +320,8 @@ export class AlgoPlayer extends LitElement {
     try {
       this.#inline = JSON.parse(script.textContent ?? '');
     } catch (error) {
+      // Inline JSON is the lowest-priority source; ignore it when another is set.
+      if (this.visualization !== undefined || this.src) return;
       this.#fail([
         {
           code: 'INVALID_JSON',

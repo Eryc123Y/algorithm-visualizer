@@ -113,6 +113,55 @@ describe('<algo-player>', () => {
     expect(text(el, '.narration')).toBe('Swap them.');
   });
 
+  it('keeps a valid frame when the frame attribute is not a number', async () => {
+    const el = await mount((e) => {
+      e.visualization = doc;
+    });
+    el.next();
+    await el.updateComplete;
+    el.setAttribute('frame', 'abc');
+    await el.updateComplete;
+    await el.updateComplete;
+    expect(el.frame).toBe(1);
+    expect(text(el, '.narration')).toBe('Compare 2 and 1.');
+  });
+
+  it('ignores malformed inline JSON when the visualization property is set', async () => {
+    const errors: unknown[] = [];
+    const el = await mount((e) => {
+      e.addEventListener('algo-error', (event) => errors.push(event.detail));
+      const script = document.createElement('script');
+      script.type = 'application/json';
+      script.textContent = '{ not json';
+      e.append(script);
+      e.visualization = doc;
+    });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    await el.updateComplete;
+    expect(errors).toEqual([]);
+    expect(el.length).toBe(2);
+    expect(shadow(el).querySelector('.errors')).toBeNull();
+  });
+
+  it('pauses when removed from the page and resumes when re-inserted', async () => {
+    const el = await mount((e) => {
+      e.speed = 5000;
+      e.visualization = doc;
+    });
+    const playing = () =>
+      (el as unknown as { playback: { playing: boolean } }).playback.playing;
+    el.play();
+    expect(playing()).toBe(true);
+    el.remove();
+    expect(playing()).toBe(false);
+    await el.updateComplete;
+    expect(
+      shadow(el).querySelector('button.primary')?.getAttribute('aria-label'),
+    ).toBe('Play');
+    document.body.append(el);
+    expect(playing()).toBe(true);
+  });
+
   it('responds to the keyboard', async () => {
     const el = await mount((e) => {
       e.visualization = doc;
@@ -209,6 +258,22 @@ describe('<algo-player>', () => {
       } finally {
         vi.unstubAllGlobals();
       }
+    });
+
+    it('keeps playing after being moved in the document', async () => {
+      const frames: number[] = [];
+      const el = await mount((e) => {
+        e.mode = 'display';
+        e.speed = 20;
+        e.visualization = doc;
+      });
+      el.remove();
+      document.body.append(el);
+      el.addEventListener('algo-frame', (event) =>
+        frames.push(event.detail.index),
+      );
+      await new Promise((resolve) => setTimeout(resolve, 120));
+      expect(frames.length).toBeGreaterThan(0);
     });
 
     it('becomes interactive again when the mode changes back', async () => {

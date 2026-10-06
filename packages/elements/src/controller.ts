@@ -60,7 +60,9 @@ export class PlayerController {
   /** Replaces the timeline (e.g. a new trace was loaded) and rewinds. */
   reset(length: number): void {
     this.#stopTimer();
-    this.#length = Math.max(0, Math.floor(length));
+    this.#length = Number.isFinite(length)
+      ? Math.max(0, Math.floor(length))
+      : 0;
     this.#index = 0;
     this.#playing = false;
     this.#emit();
@@ -80,6 +82,7 @@ export class PlayerController {
 
   /** Moves to a frame, clamped to the timeline. Does not change play state. */
   seek(index: number): void {
+    if (!Number.isFinite(index)) return;
     const next = Math.min(this.#length, Math.max(0, Math.round(index)));
     if (next === this.#index) return;
     this.#index = next;

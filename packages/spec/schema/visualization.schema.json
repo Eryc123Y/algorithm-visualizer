@@ -125,7 +125,9 @@
           }
         ]
       },
-      "description": "Structures shown in the visualization, keyed by name."
+      "description": "Structures shown in the visualization, keyed by name.",
+      "minProperties": 1,
+      "maxProperties": 16
     },
     "steps": {
       "maxItems": 10000,

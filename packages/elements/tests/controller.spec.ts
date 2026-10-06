@@ -112,6 +112,16 @@ describe('PlayerController', () => {
     expect(c.state.index).toBe(2);
   });
 
+  it('ignores non-finite seeks and lengths', () => {
+    const { c } = setup(3);
+    c.seek(2);
+    c.seek(Number.NaN);
+    c.seek(Number.POSITIVE_INFINITY);
+    expect(c.state.index).toBe(2);
+    c.reset(Number.NaN);
+    expect(c.state).toEqual({ index: 0, length: 0, playing: false });
+  });
+
   it('pauses and cancels the pending tick', () => {
     const { c, clock } = setup(3);
     c.play();
