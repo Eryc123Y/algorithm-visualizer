@@ -1,5 +1,5 @@
 {
-  "description": "Hand-computed layout of a two-element array with one pointer, using the default options. Cell width is the 48 minimum because \"42\" needs ceil(2 \u00d7 18 \u00d7 0.6 + 2 \u00d7 12) = 46.",
+  "description": "Hand-computed layout of a two-element array with one pointer, using the default options. Cell width is the 52 minimum because \"42\" needs ceil(2 \u00d7 20 \u00d7 0.6 + 2 \u00d7 14) = 52; the badge is the 20 minimum because \"i\" needs ceil(1 \u00d7 12 \u00d7 0.6 + 12) = 20.",
   "input": {
     "version": "0.1",
     "structures": {
@@ -31,25 +31,25 @@
     {
       "index": 1,
       "scene": {
-        "width": 134,
-        "height": 152,
+        "width": 152,
+        "height": 180,
         "title": "Visualization",
         "items": [
           {
             "type": "text",
             "key": "arr/title",
-            "x": 16,
-            "y": 27,
+            "x": 20,
+            "y": 32,
             "anchor": "start",
             "role": "title",
             "text": "arr",
-            "fontSize": 14
+            "fontSize": 13
           },
           {
             "type": "text",
             "key": "arr/index/0",
-            "x": 40,
-            "y": 47,
+            "x": 46,
+            "y": 54,
             "anchor": "middle",
             "role": "index",
             "text": "0",
@@ -58,19 +58,19 @@
           {
             "type": "box",
             "key": "arr/element/e0",
-            "x": 16,
-            "y": 56,
-            "width": 48,
-            "height": 48,
+            "x": 20,
+            "y": 64,
+            "width": 52,
+            "height": 52,
             "role": "compare",
             "text": "7",
-            "fontSize": 18
+            "fontSize": 20
           },
           {
             "type": "text",
             "key": "arr/index/1",
-            "x": 94,
-            "y": 47,
+            "x": 106,
+            "y": 54,
             "anchor": "middle",
             "role": "index",
             "text": "1",
@@ -79,32 +79,33 @@
           {
             "type": "box",
             "key": "arr/element/e1",
-            "x": 70,
-            "y": 56,
-            "width": 48,
-            "height": 48,
+            "x": 80,
+            "y": 64,
+            "width": 52,
+            "height": 52,
             "role": "compare",
             "text": "42",
-            "fontSize": 18
+            "fontSize": 20
           },
           {
             "type": "arrow",
             "key": "arr/pointer-arrow/i",
-            "x1": 40,
-            "y1": 119,
-            "x2": 40,
-            "y2": 107,
+            "x1": 46,
+            "y1": 134,
+            "x2": 46,
+            "y2": 120,
             "role": "pointer"
           },
           {
-            "type": "text",
+            "type": "badge",
             "key": "arr/pointer/i",
-            "x": 40,
-            "y": 128,
-            "anchor": "middle",
+            "x": 46,
+            "y": 146,
+            "width": 20,
+            "height": 20,
             "role": "pointer",
             "text": "i",
-            "fontSize": 13
+            "fontSize": 12
           }
         ]
       }

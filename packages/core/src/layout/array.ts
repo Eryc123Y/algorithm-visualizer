@@ -2,14 +2,14 @@
  * Layout for the `array` kind.
  *
  * ```
- *  arr                       ← title
- *   0     1     2     3      ← indices
- * ┌───┐ ┌───┐ ┌───┐ ┌───┐
- * │ 5 │ │ 3 │ │ 8 │ │ 1 │    ← cells, keyed by element id
- * └───┘ └───┘ └───┘ └───┘
- *   ↑           ↑
- *   i           j            ← pointers; several at one index stack
- *   lo                         below the first, which alone has the arrow
+ *  A                          ← title
+ *    0      1      2      3   ← indices
+ *  ╭────╮ ╭────╮ ╭────╮ ╭────╮
+ *  │ 5  │ │ 3  │ │ 8  │ │ 1  │ ← cells, keyed by element id
+ *  ╰────╯ ╰────╯ ╰────╯ ╰────╯
+ *    ↑             ↑
+ *   (i)           (j)          ← pointer badges; several at one index stack
+ *   (lo)                         below the first, which alone has the arrow
  * ```
  */
 import type { Scalar } from '@algoviz/spec';
@@ -58,8 +58,9 @@ export const mergeArrayMetrics = (
 });
 
 function roleOf(state: ArrayState, index: number, id: string): BoxRole {
-  const { compare, highlight, settled } = state.marks;
+  const { compare, swapped, highlight, settled } = state.marks;
   if (compare !== null && compare.includes(index)) return 'compare';
+  if (swapped !== null && swapped.includes(index)) return 'swap';
   if (highlight.includes(index)) return 'highlight';
   if (settled.includes(id)) return 'settled';
   return 'default';
@@ -88,15 +89,16 @@ export function layoutArray(
   const pitch = cellWidth + o.cellGap;
   const centerX = (index: number) => origin.x + index * pitch + cellWidth / 2;
 
-  const titleRow = o.titleFontSize + 8;
-  const indexRow = o.indexFontSize + 6;
+  const titleRow = o.titleFontSize + 11;
+  const indexRow = o.indexFontSize + 8;
   const cellsTop = origin.y + titleRow + indexRow;
   const cellsBottom = cellsTop + o.cellHeight;
-  const pointerLine = o.pointerFontSize + 3;
+  // Pointer area: a 14-unit arrow, then badges stacked every `badgePitch`.
+  const badgeHeight = o.pointerFontSize + 8;
+  const badgePitch = badgeHeight + 4;
+  const badgeTop = cellsBottom + 20;
   const pointerArea =
-    metrics.pointerRows === 0
-      ? 0
-      : 24 + (metrics.pointerRows - 1) * pointerLine + 8;
+    metrics.pointerRows === 0 ? 0 : 20 + metrics.pointerRows * badgePitch;
 
   const items: SceneItem[] = [
     {
@@ -150,18 +152,24 @@ export function layoutArray(
           type: 'arrow',
           key: `${name}/pointer-arrow/${pointer}`,
           x1: x,
-          y1: cellsBottom + 15,
+          y1: cellsBottom + 18,
           x2: x,
-          y2: cellsBottom + 3,
+          y2: cellsBottom + 4,
           role: 'pointer',
         });
       }
       items.push({
-        type: 'text',
+        type: 'badge',
         key: `${name}/pointer/${pointer}`,
         x,
-        y: cellsBottom + 24 + depth * pointerLine,
-        anchor: 'middle',
+        y: badgeTop + depth * badgePitch + badgeHeight / 2,
+        width: Math.max(
+          badgeHeight,
+          Math.ceil(
+            [...pointer].length * o.pointerFontSize * o.charWidthRatio + 12,
+          ),
+        ),
+        height: badgeHeight,
         role: 'pointer',
         text: pointer,
         fontSize: o.pointerFontSize,

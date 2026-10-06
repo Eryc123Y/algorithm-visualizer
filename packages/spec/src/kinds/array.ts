@@ -3,7 +3,8 @@
  *
  * Mark semantics (implemented by the core reducer, documented here because
  * they are part of the protocol):
- * - `compare` and `highlight` are transient: they last for one step.
+ * - `compare`, `highlight` and the swap mark set by `swap` are transient:
+ *   they last for one step.
  * - `pointer` and `settle` persist until changed.
  */
 import { z } from 'zod';
@@ -80,7 +81,9 @@ export const ArrayAction = z.discriminatedUnion('type', [
     .describe('Replace the value at `index`; the element keeps its id.'),
   z
     .strictObject({ type: z.literal('swap'), i: Index, j: Index })
-    .describe('Swap the elements at positions `i` and `j`.'),
+    .describe(
+      'Swap the elements at positions `i` and `j`, marking both as swapped for this step.',
+    ),
   z
     .strictObject({
       type: z.literal('insert'),

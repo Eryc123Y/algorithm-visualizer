@@ -174,6 +174,7 @@
             ],
             "marks": {
               "compare": null,
+              "swapped": null,
               "highlight": [],
               "pointers": {},
               "settled": []
@@ -208,6 +209,7 @@
             ],
             "marks": {
               "compare": [0, 1],
+              "swapped": null,
               "highlight": [],
               "pointers": {
                 "j": 0
@@ -244,6 +246,7 @@
             ],
             "marks": {
               "compare": null,
+              "swapped": [0, 1],
               "highlight": [],
               "pointers": {
                 "j": 0
@@ -280,6 +283,7 @@
             ],
             "marks": {
               "compare": [1, 2],
+              "swapped": null,
               "highlight": [],
               "pointers": {
                 "j": 1
@@ -316,6 +320,7 @@
             ],
             "marks": {
               "compare": null,
+              "swapped": [2, 3],
               "highlight": [],
               "pointers": {
                 "j": 2
@@ -352,6 +357,7 @@
             ],
             "marks": {
               "compare": null,
+              "swapped": null,
               "highlight": [],
               "pointers": {},
               "settled": ["c"]

@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import type { VisualizationInput } from '@algoviz/spec';
 
 import {
+  defaultLayoutOptions,
   layoutTrace,
   loadTrace,
   type Scene,
@@ -60,7 +61,10 @@ describe('layoutTrace', () => {
 
   it('sizes cells for the longest value in any frame', () => {
     // "12345" only appears from frame 2, but frame 0 already reserves room.
-    expect(boxes(scenes[0]!)[0]!.width).toBe(Math.ceil(5 * 18 * 0.6 + 24));
+    const o = defaultLayoutOptions;
+    expect(boxes(scenes[0]!)[0]!.width).toBe(
+      Math.ceil(5 * o.valueFontSize * o.charWidthRatio + 2 * o.cellPadding),
+    );
   });
 
   it('keys cells by element id so a swap moves boxes instead of relabelling them', () => {
@@ -90,13 +94,36 @@ describe('layoutTrace', () => {
       (item) => item.key === 'arr/pointer/i',
     );
     const lastBox = boxes(scenes[2]!).at(-1)!;
-    expect(pointer?.type === 'text' && pointer.x).toBeGreaterThan(
+    expect(pointer?.type === 'badge' && pointer.x).toBeGreaterThan(
       lastBox.x + lastBox.width,
     );
   });
 });
 
 describe('cell roles', () => {
+  it('marks swapped cells for the step of the swap only', () => {
+    const trace = mustLoad(
+      doc(
+        [1, 2, 3],
+        [
+          { actions: [{ target: 'arr', type: 'swap', i: 0, j: 2 }] },
+          { actions: [] },
+        ],
+      ),
+    );
+    const layout = layoutTrace(trace);
+    expect(boxes(layout.sceneAt(1)).map((b) => b.role)).toEqual([
+      'swap',
+      'default',
+      'swap',
+    ]);
+    expect(boxes(layout.sceneAt(2)).map((b) => b.role)).toEqual([
+      'default',
+      'default',
+      'default',
+    ]);
+  });
+
   it('prefers compare over highlight over settled', () => {
     const trace = mustLoad(
       doc(
@@ -132,11 +159,12 @@ describe('cell roles', () => {
       ),
     );
     const scene = layoutTrace(trace).sceneAt(1);
-    const labels = scene.items.filter(
-      (i) => i.type === 'text' && i.role === 'pointer',
-    );
+    const labels = scene.items.filter((i) => i.type === 'badge');
     const arrows = scene.items.filter((i) => i.type === 'arrow');
-    expect(labels.map((l) => l.type === 'text' && l.text)).toEqual(['i', 'lo']);
+    expect(labels.map((l) => l.type === 'badge' && l.text)).toEqual([
+      'i',
+      'lo',
+    ]);
     expect(arrows).toHaveLength(1);
     expect(arrows[0]?.key).toBe('arr/pointer-arrow/i');
   });

@@ -8,9 +8,11 @@
  */
 
 /** How a cell is emphasised. When several marks apply, the first wins. */
-export type BoxRole = 'compare' | 'highlight' | 'settled' | 'default';
+export type BoxRole = 'compare' | 'swap' | 'highlight' | 'settled' | 'default';
 
-export type TextRole = 'title' | 'index' | 'pointer';
+export type TextRole = 'title' | 'index';
+
+export type BadgeRole = 'pointer';
 
 export type ArrowRole = 'pointer';
 
@@ -50,7 +52,21 @@ export interface SceneArrow {
   readonly role: ArrowRole;
 }
 
-export type SceneItem = SceneBox | SceneText | SceneArrow;
+/** A short label on a rounded background, e.g. a pointer name. */
+export interface SceneBadge {
+  readonly type: 'badge';
+  readonly key: string;
+  /** Centre of the badge. */
+  readonly x: number;
+  readonly y: number;
+  readonly width: number;
+  readonly height: number;
+  readonly role: BadgeRole;
+  readonly text: string;
+  readonly fontSize: number;
+}
+
+export type SceneItem = SceneBox | SceneText | SceneBadge | SceneArrow;
 
 export interface Scene {
   readonly width: number;
