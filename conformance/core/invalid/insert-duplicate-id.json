@@ -1,0 +1,33 @@
+{
+  "description": "An inserted element must not reuse an existing id.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "arr": {
+        "kind": "array",
+        "initial": [1]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "arr",
+            "type": "insert",
+            "index": 0,
+            "element": {
+              "id": "e0",
+              "value": 2
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "expectedErrors": [
+    {
+      "code": "DUPLICATE_ID",
+      "path": "$.steps[0].actions[0].element.id"
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "description": "An index past the end is rejected at the field that holds it.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "arr": {
+        "kind": "array",
+        "initial": [1, 2]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "arr",
+            "type": "swap",
+            "i": 0,
+            "j": 2
+          }
+        ]
+      }
+    ]
+  },
+  "expectedErrors": [
+    {
+      "code": "OUT_OF_RANGE",
+      "path": "$.steps[0].actions[0].j"
+    }
+  ]
+}

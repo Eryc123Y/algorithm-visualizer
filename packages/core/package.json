@@ -1,0 +1,24 @@
+{
+  "name": "@algoviz/core",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Structure kinds, reducers and the timeline engine for algoviz traces.",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "@algoviz/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc --build tsconfig.lib.json"
+  },
+  "dependencies": {
+    "@algoviz/spec": "*"
+  }
+}

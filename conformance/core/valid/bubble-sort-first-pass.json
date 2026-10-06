@@ -1,0 +1,364 @@
+{
+  "description": "Replaying the first pass of bubble sort: swaps move elements, compare marks last one step, pointers persist.",
+  "input": {
+    "version": "0.1",
+    "title": "Bubble sort",
+    "structures": {
+      "arr": {
+        "kind": "array",
+        "label": "a",
+        "initial": [
+          {
+            "id": "a",
+            "value": 5
+          },
+          {
+            "id": "b",
+            "value": 3
+          },
+          {
+            "id": "c",
+            "value": 8
+          },
+          {
+            "id": "d",
+            "value": 1
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "arr",
+            "type": "pointer",
+            "name": "j",
+            "index": 0
+          }
+        ],
+        "meta": {
+          "line": 2,
+          "vars": {
+            "i": 0,
+            "j": 0
+          }
+        }
+      },
+      {
+        "actions": [
+          {
+            "target": "arr",
+            "type": "compare",
+            "i": 0,
+            "j": 1
+          }
+        ],
+        "meta": {
+          "line": 3,
+          "narration": "Compare 5 and 3."
+        }
+      },
+      {
+        "actions": [
+          {
+            "target": "arr",
+            "type": "swap",
+            "i": 0,
+            "j": 1
+          }
+        ],
+        "meta": {
+          "line": 4,
+          "narration": "5 > 3, so swap them."
+        }
+      },
+      {
+        "actions": [
+          {
+            "target": "arr",
+            "type": "pointer",
+            "name": "j",
+            "index": 1
+          },
+          {
+            "target": "arr",
+            "type": "compare",
+            "i": 1,
+            "j": 2
+          }
+        ],
+        "meta": {
+          "line": 3,
+          "narration": "Compare 5 and 8; no swap needed."
+        }
+      },
+      {
+        "actions": [
+          {
+            "target": "arr",
+            "type": "pointer",
+            "name": "j",
+            "index": 2
+          },
+          {
+            "target": "arr",
+            "type": "compare",
+            "i": 2,
+            "j": 3
+          }
+        ],
+        "meta": {
+          "line": 3
+        }
+      },
+      {
+        "actions": [
+          {
+            "target": "arr",
+            "type": "swap",
+            "i": 2,
+            "j": 3
+          }
+        ],
+        "meta": {
+          "line": 4
+        }
+      },
+      {
+        "actions": [
+          {
+            "target": "arr",
+            "type": "pointer",
+            "name": "j",
+            "index": null
+          },
+          {
+            "target": "arr",
+            "type": "settle",
+            "index": 3
+          }
+        ],
+        "meta": {
+          "line": 7,
+          "narration": "8 is now in its final position."
+        }
+      }
+    ]
+  },
+  "expectedLength": 7,
+  "expectedFrames": [
+    {
+      "index": 0,
+      "state": {
+        "arr": {
+          "kind": "array",
+          "state": {
+            "data": [
+              {
+                "id": "a",
+                "value": 5
+              },
+              {
+                "id": "b",
+                "value": 3
+              },
+              {
+                "id": "c",
+                "value": 8
+              },
+              {
+                "id": "d",
+                "value": 1
+              }
+            ],
+            "marks": {
+              "compare": null,
+              "highlight": [],
+              "pointers": {},
+              "settled": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 2,
+      "state": {
+        "arr": {
+          "kind": "array",
+          "state": {
+            "data": [
+              {
+                "id": "a",
+                "value": 5
+              },
+              {
+                "id": "b",
+                "value": 3
+              },
+              {
+                "id": "c",
+                "value": 8
+              },
+              {
+                "id": "d",
+                "value": 1
+              }
+            ],
+            "marks": {
+              "compare": [0, 1],
+              "highlight": [],
+              "pointers": {
+                "j": 0
+              },
+              "settled": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 3,
+      "state": {
+        "arr": {
+          "kind": "array",
+          "state": {
+            "data": [
+              {
+                "id": "b",
+                "value": 3
+              },
+              {
+                "id": "a",
+                "value": 5
+              },
+              {
+                "id": "c",
+                "value": 8
+              },
+              {
+                "id": "d",
+                "value": 1
+              }
+            ],
+            "marks": {
+              "compare": null,
+              "highlight": [],
+              "pointers": {
+                "j": 0
+              },
+              "settled": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 4,
+      "state": {
+        "arr": {
+          "kind": "array",
+          "state": {
+            "data": [
+              {
+                "id": "b",
+                "value": 3
+              },
+              {
+                "id": "a",
+                "value": 5
+              },
+              {
+                "id": "c",
+                "value": 8
+              },
+              {
+                "id": "d",
+                "value": 1
+              }
+            ],
+            "marks": {
+              "compare": [1, 2],
+              "highlight": [],
+              "pointers": {
+                "j": 1
+              },
+              "settled": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 6,
+      "state": {
+        "arr": {
+          "kind": "array",
+          "state": {
+            "data": [
+              {
+                "id": "b",
+                "value": 3
+              },
+              {
+                "id": "a",
+                "value": 5
+              },
+              {
+                "id": "d",
+                "value": 1
+              },
+              {
+                "id": "c",
+                "value": 8
+              }
+            ],
+            "marks": {
+              "compare": null,
+              "highlight": [],
+              "pointers": {
+                "j": 2
+              },
+              "settled": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 7,
+      "state": {
+        "arr": {
+          "kind": "array",
+          "state": {
+            "data": [
+              {
+                "id": "b",
+                "value": 3
+              },
+              {
+                "id": "a",
+                "value": 5
+              },
+              {
+                "id": "d",
+                "value": 1
+              },
+              {
+                "id": "c",
+                "value": 8
+              }
+            ],
+            "marks": {
+              "compare": null,
+              "highlight": [],
+              "pointers": {},
+              "settled": ["c"]
+            }
+          }
+        }
+      }
+    }
+  ]
+}

@@ -20,13 +20,20 @@ export type ProtocolErrorCode =
   /** Two elements of one structure share an id. */
   | 'DUPLICATE_ID';
 
-export interface ProtocolError {
-  readonly code: ProtocolErrorCode;
+/**
+ * A located, actionable problem in a document. Generic over its code so that
+ * later stages (for example the core engine) can report their own codes in
+ * the same format.
+ */
+export interface Diagnostic<Code extends string = string> {
+  readonly code: Code;
   /** Location in the input, e.g. `$.steps[3].actions[0].j`. */
   readonly path: string;
   readonly message: string;
   readonly hint?: string;
 }
+
+export type ProtocolError = Diagnostic<ProtocolErrorCode>;
 
 /** Formats a property path as `$.a.b[0].c`. */
 export function formatPath(path: readonly PropertyKey[]): string {
@@ -67,7 +74,7 @@ export function fromZodIssues(
  * returning to an LLM so it can correct its output.
  */
 export function formatErrors(
-  errors: readonly ProtocolError[],
+  errors: readonly Diagnostic[],
   { max = 20 }: { max?: number } = {},
 ): string {
   const lines = errors
