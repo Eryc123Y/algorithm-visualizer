@@ -7,4 +7,11 @@ Language-agnostic test data for the protocol (ADR 0005). Every implementation, i
 - `valid/*.json`: `{ "description", "input", "expected" }`. Parsing `input` must succeed and produce exactly `expected` (the canonical form).
 - `invalid/*.json`: `{ "description", "input", "expectedErrors" }`. Parsing `input` must fail with exactly these `{ code, path }` pairs, in order. Messages and hints are not compared.
 
-Later suites will add expected states (`core/`) and scenes (`layout/`).
+## `core/`: replay
+
+- `valid/*.json`: `{ "description", "input", "expectedLength", "expectedFrames" }`. Loading `input` must succeed with `expectedLength` steps, and each listed frame `{ index, state }` must equal the engine's state at that index. Frame 0 is the initial state; frame `n` is the state after step `n`.
+- `invalid/*.json`: `{ "description", "input", "expectedErrors" }`. Loading must fail with exactly these `{ code, path }` pairs. Static protocol errors take precedence over replay errors, and replay stops at the first invalid action.
+
+A state maps each structure name to `{ "kind", "state": { "data", "marks" } }`.
+
+A later suite will add expected scenes (`layout/`).

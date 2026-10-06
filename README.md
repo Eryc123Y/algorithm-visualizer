@@ -4,7 +4,7 @@ An AI-native library for step-by-step visualizations of algorithms and data stru
 
 A visualization is a declarative JSON document: the structures involved and a timeline of steps, each applying actions such as `compare` or `swap`. People write it with code, LLMs write it directly, and the library validates it and renders it as an interactive player, a static image, or a figure in Typst or LaTeX.
 
-> Status: early development. The protocol package exists; the engine, renderers and integrations are in progress.
+> Status: early development. The protocol and the timeline engine exist for arrays; layout, renderers and integrations are next.
 
 ```json
 {

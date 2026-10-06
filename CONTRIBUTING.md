@@ -17,6 +17,7 @@ This is an npm workspaces monorepo.
 | Path               | Package               | Purpose                                                                                |
 | ------------------ | --------------------- | -------------------------------------------------------------------------------------- |
 | `packages/spec/`   | `@algoviz/spec`       | Protocol: Zod schemas, inferred types, parsing and validation. No DOM or Node.js APIs. |
+| `packages/core/`   | `@algoviz/core`       | Structure kinds, reducers and the timeline engine. No DOM or Node.js APIs.             |
 | `apps/playground/` | `@algoviz/playground` | Vite + Vue app for demos and, later, documentation.                                    |
 | `conformance/`     | —                     | Language-agnostic JSON fixtures every implementation must pass.                        |
 | `docs/adr/`        | —                     | Architecture decision records. Read these before changing the design.                  |

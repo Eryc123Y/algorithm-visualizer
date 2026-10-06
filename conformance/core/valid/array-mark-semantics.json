@@ -1,0 +1,241 @@
+{
+  "description": "Settled marks follow their element through swaps and are dropped on removal; highlights last one step; a pointer may point one past the end.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "arr": {
+        "kind": "array",
+        "initial": [10, 20, 30]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "arr",
+            "type": "settle",
+            "index": 0
+          },
+          {
+            "target": "arr",
+            "type": "highlight",
+            "indices": [1, 2]
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "arr",
+            "type": "swap",
+            "i": 0,
+            "j": 2
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "arr",
+            "type": "insert",
+            "index": 1,
+            "element": {
+              "id": "x",
+              "value": 15
+            }
+          },
+          {
+            "target": "arr",
+            "type": "pointer",
+            "name": "p",
+            "index": 4
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "arr",
+            "type": "remove",
+            "index": 3
+          },
+          {
+            "target": "arr",
+            "type": "set",
+            "index": 0,
+            "value": 99
+          }
+        ]
+      },
+      {
+        "actions": [],
+        "meta": {
+          "narration": "A step may only narrate."
+        }
+      }
+    ]
+  },
+  "expectedLength": 5,
+  "expectedFrames": [
+    {
+      "index": 1,
+      "state": {
+        "arr": {
+          "kind": "array",
+          "state": {
+            "data": [
+              {
+                "id": "e0",
+                "value": 10
+              },
+              {
+                "id": "e1",
+                "value": 20
+              },
+              {
+                "id": "e2",
+                "value": 30
+              }
+            ],
+            "marks": {
+              "compare": null,
+              "highlight": [1, 2],
+              "pointers": {},
+              "settled": ["e0"]
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 2,
+      "state": {
+        "arr": {
+          "kind": "array",
+          "state": {
+            "data": [
+              {
+                "id": "e2",
+                "value": 30
+              },
+              {
+                "id": "e1",
+                "value": 20
+              },
+              {
+                "id": "e0",
+                "value": 10
+              }
+            ],
+            "marks": {
+              "compare": null,
+              "highlight": [],
+              "pointers": {},
+              "settled": ["e0"]
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 3,
+      "state": {
+        "arr": {
+          "kind": "array",
+          "state": {
+            "data": [
+              {
+                "id": "e2",
+                "value": 30
+              },
+              {
+                "id": "x",
+                "value": 15
+              },
+              {
+                "id": "e1",
+                "value": 20
+              },
+              {
+                "id": "e0",
+                "value": 10
+              }
+            ],
+            "marks": {
+              "compare": null,
+              "highlight": [],
+              "pointers": {
+                "p": 4
+              },
+              "settled": ["e0"]
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 4,
+      "state": {
+        "arr": {
+          "kind": "array",
+          "state": {
+            "data": [
+              {
+                "id": "e2",
+                "value": 99
+              },
+              {
+                "id": "x",
+                "value": 15
+              },
+              {
+                "id": "e1",
+                "value": 20
+              }
+            ],
+            "marks": {
+              "compare": null,
+              "highlight": [],
+              "pointers": {
+                "p": 4
+              },
+              "settled": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 5,
+      "state": {
+        "arr": {
+          "kind": "array",
+          "state": {
+            "data": [
+              {
+                "id": "e2",
+                "value": 99
+              },
+              {
+                "id": "x",
+                "value": 15
+              },
+              {
+                "id": "e1",
+                "value": 20
+              }
+            ],
+            "marks": {
+              "compare": null,
+              "highlight": [],
+              "pointers": {
+                "p": 4
+              },
+              "settled": []
+            }
+          }
+        }
+      }
+    }
+  ]
+}

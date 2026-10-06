@@ -1,0 +1,39 @@
+{
+  "description": "Bounds are checked against the state at that step, not the initial state.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "arr": {
+        "kind": "array",
+        "initial": [1, 2]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "arr",
+            "type": "remove",
+            "index": 1
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "arr",
+            "type": "compare",
+            "i": 0,
+            "j": 1
+          }
+        ]
+      }
+    ]
+  },
+  "expectedErrors": [
+    {
+      "code": "OUT_OF_RANGE",
+      "path": "$.steps[1].actions[0].j"
+    }
+  ]
+}

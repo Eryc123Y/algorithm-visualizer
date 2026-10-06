@@ -49,6 +49,7 @@
   },
   "workspaces": [
     "packages/spec",
+    "packages/core",
     "apps/playground"
   ]
 }

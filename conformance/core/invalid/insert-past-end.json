@@ -1,0 +1,33 @@
+{
+  "description": "Insert may append (index = length) but not skip positions.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "arr": {
+        "kind": "array",
+        "initial": [1]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "arr",
+            "type": "insert",
+            "index": 2,
+            "element": {
+              "id": "n",
+              "value": 2
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "expectedErrors": [
+    {
+      "code": "OUT_OF_RANGE",
+      "path": "$.steps[0].actions[0].index"
+    }
+  ]
+}

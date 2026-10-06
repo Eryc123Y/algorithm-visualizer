@@ -1,0 +1,39 @@
+{
+  "description": "Replay stops at the first invalid action; later errors would describe an impossible state.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "arr": {
+        "kind": "array",
+        "initial": [1, 2]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "arr",
+            "type": "settle",
+            "index": 9
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "arr",
+            "type": "swap",
+            "i": 7,
+            "j": 8
+          }
+        ]
+      }
+    ]
+  },
+  "expectedErrors": [
+    {
+      "code": "OUT_OF_RANGE",
+      "path": "$.steps[0].actions[0].index"
+    }
+  ]
+}

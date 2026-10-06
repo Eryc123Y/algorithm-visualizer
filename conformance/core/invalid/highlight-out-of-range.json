@@ -1,0 +1,29 @@
+{
+  "description": "Each highlighted index is checked.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "arr": {
+        "kind": "array",
+        "initial": [1, 2]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "arr",
+            "type": "highlight",
+            "indices": [0, 5]
+          }
+        ]
+      }
+    ]
+  },
+  "expectedErrors": [
+    {
+      "code": "OUT_OF_RANGE",
+      "path": "$.steps[0].actions[0].indices[1]"
+    }
+  ]
+}
