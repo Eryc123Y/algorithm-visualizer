@@ -20,6 +20,7 @@ This is an npm workspaces monorepo.
 | `packages/core/`     | `@algoviz/core`       | Structure kinds, reducers, the timeline engine and layout to scenes. No DOM or Node.js APIs. |
 | `packages/svg/`      | `@algoviz/svg`        | Scene → standalone SVG string. No DOM or Node.js APIs.                                       |
 | `packages/elements/` | `@algoviz/elements`   | `<algo-player>` Web Component (Lit) and a standalone CDN bundle.                             |
+| `packages/recipes/`  | `@algoviz/recipes`    | Typed recorder and classic algorithms, each tested against a reference implementation.       |
 | `apps/playground/`   | `@algoviz/playground` | Vite + Vue app for demos and, later, documentation.                                          |
 | `conformance/`       | —                     | Language-agnostic JSON fixtures every implementation must pass.                              |
 | `docs/adr/`          | —                     | Architecture decision records. Read these before changing the design.                        |
@@ -30,17 +31,18 @@ Workspace packages expose their TypeScript sources through the `@algoviz/source`
 
 Run from the repository root.
 
-| Command                                     | Purpose                                                           |
-| ------------------------------------------- | ----------------------------------------------------------------- |
-| `npm run dev`                               | Start the playground dev server                                   |
-| `npm run build`                             | Type-check and build every workspace                              |
-| `npm run typecheck`                         | Type-check every project (`vue-tsc --build`)                      |
-| `npm run lint` / `lint:fix`                 | ESLint                                                            |
-| `npm run format` / `format:check`           | Prettier                                                          |
-| `npm test` / `test:watch` / `test:coverage` | Unit tests for all workspaces (Vitest)                            |
-| `npm run test:e2e`                          | Playwright tests against the playground's production build        |
-| `npm run check`                             | Typecheck, lint, format check and unit tests (what CI runs first) |
-| `npm run generate:schema -w @algoviz/spec`  | Regenerate `packages/spec/schema/visualization.schema.json`       |
+| Command                                     | Purpose                                                             |
+| ------------------------------------------- | ------------------------------------------------------------------- |
+| `npm run dev`                               | Start the playground dev server                                     |
+| `npm run build`                             | Type-check and build every workspace                                |
+| `npm run typecheck`                         | Type-check every project (`vue-tsc --build`)                        |
+| `npm run lint` / `lint:fix`                 | ESLint                                                              |
+| `npm run format` / `format:check`           | Prettier                                                            |
+| `npm test` / `test:watch` / `test:coverage` | Unit tests for all workspaces (Vitest)                              |
+| `npm run test:e2e`                          | Playwright tests against the playground's production build          |
+| `npm run check`                             | Typecheck, lint, format check and unit tests (what CI runs first)   |
+| `npm run generate:schema -w @algoviz/spec`  | Regenerate `packages/spec/schema/visualization.schema.json`         |
+| `npm run gallery -- out.html [file.json …]` | Render every frame of fixtures or documents to one page, for review |
 
 The pre-commit hook runs ESLint and Prettier on staged files. Run `npm run check` before pushing.
 
@@ -52,6 +54,15 @@ The pre-commit hook runs ESLint and Prettier on staged files. Run `npm run check
 - **Protocol changes:** edit the Zod schemas, regenerate the JSON Schema, and add conformance fixtures for the new behaviour.
 - **Naming:** files in `packages/` use kebab-case; Vue components use PascalCase file and component names; variables and functions use camelCase.
 - **Comments:** start each module with a short summary of its purpose, document exported functions and types with JSDoc, and explain non-obvious decisions where they are made.
+
+## Adding a structure kind
+
+Kinds are plug-ins (ADR 0012). Use an existing kind of similar shape as the model (`stack` for a linear kind, `tree` or `graph` for node-link kinds).
+
+1. **Protocol:** add `packages/spec/src/kinds/<kind>.ts` exporting a `KindSpec`, register it in `kinds/index.ts`, and add its schemas to `TargetedAction`, `TargetedActionInput`, `StructureDecl` and `StructureDeclInput` in `visualization.ts`. Regenerate the JSON Schema.
+2. **Engine:** add the reducer in `packages/core/src/kinds/` and the layout in `packages/core/src/layout/`, and register both in `packages/core/src/registry.ts`. The `satisfies` check there fails until the runtime matches the protocol.
+3. **Tests:** add conformance fixtures (valid replays with hand-computed states, invalid documents with expected error paths); scene invariants then run on them automatically. Check the result with `npm run gallery`.
+4. **Recipes:** the recorder picks up the new actions by itself; add a recipe if a classic algorithm uses the kind.
 
 ## Tests
 

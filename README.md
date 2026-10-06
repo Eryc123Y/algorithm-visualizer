@@ -4,7 +4,7 @@ An AI-native library for step-by-step visualizations of algorithms and data stru
 
 A visualization is a declarative JSON document: the structures involved and a timeline of steps, each applying actions such as `compare` or `swap`. People write it with code, LLMs write it directly, and the library validates it and renders it as an interactive player, a static image, or a figure in Typst or LaTeX.
 
-> Status: early development. Arrays work end to end: protocol, timeline engine, layout, static SVG and an interactive player. More structures and AI integrations (MCP) are next.
+> Status: early development. Eight structure kinds work end to end (protocol, timeline engine, layout, static SVG and an interactive player), with ready-made visualizations of the classic undergraduate algorithms. AI integrations (MCP) are next.
 
 ```json
 {
@@ -22,6 +22,50 @@ A visualization is a declarative JSON document: the structures involved and a ti
   ]
 }
 ```
+
+## Structures
+
+| Kind         | For                                                        | Notable actions                                              |
+| ------------ | ---------------------------------------------------------- | ------------------------------------------------------------ |
+| `array`      | sorting, searching, two pointers; `view: "tree"` for heaps | `compare` `swap` `set` `insert` `remove` `pointer` `settle`  |
+| `stack`      | call stacks, bracket matching, DFS                         | `push` `pop` `peek`                                          |
+| `queue`      | BFS, schedulers; also a deque                              | `enqueue` `dequeue` `pushFront` `popBack` `peek`             |
+| `linkedList` | singly, doubly and circular lists                          | `insert` `remove` `link` `pointer` `visit`                   |
+| `tree`       | BST, AVL, red–black, tries, recursion trees, union–find    | `addNode` `setChild` `rotate` `setColor` `annotate` `visit`  |
+| `graph`      | traversals, shortest paths, spanning trees, flows          | `addEdge` `setWeight` `markEdge` `annotate` `visit` `settle` |
+| `table`      | dynamic programming, adjacency matrices                    | `set` `depend` `highlight` `settle`                          |
+| `hashTable`  | separate chaining                                          | `insert` `remove` `highlight` `settle`                       |
+
+Shorthands keep documents short: `"initial": [5, 3, 8]` generates element ids, a tree can be given in LeetCode `levelOrder`, and a graph as `"nodes": ["A", "B"]` with `"edges": [["A", "B", 4]]`. The JSON Schema is in [`packages/spec/schema`](packages/spec/schema).
+
+## Recipes
+
+`@algoviz/recipes` has a typed recorder for producing documents from running code, and ready-made visualizations of 29 algorithms: seven sorts, binary search, list reversal, bracket matching, BST, AVL, traversals, binary heap, trie, union–find, BFS, DFS, Dijkstra, Bellman–Ford, Prim, Kruskal, topological sort, Floyd–Warshall, LCS, edit distance, 0/1 knapsack and two hashing schemes.
+
+```ts
+import { dijkstra, Recorder } from '@algoviz/recipes';
+
+const doc = dijkstra(
+  {
+    nodes: ['A', 'B', 'C'],
+    edges: [
+      ['A', 'B', 4],
+      ['B', 'C', 1],
+      ['A', 'C', 7],
+    ],
+  },
+  'A',
+);
+
+// Or record your own: every handle method is typed from the protocol.
+const r = new Recorder({ title: 'Swap' });
+const a = r.add('a', { kind: 'array', initial: [2, 1] });
+r.step('Swap the two values.');
+a.swap({ i: 0, j: 1 });
+const mine = r.build();
+```
+
+The playground's example menu shows every recipe.
 
 ## Embedding
 
@@ -55,6 +99,7 @@ Display mode also accepts `once` (play a single time) and `motion` (`linear` · 
 | [`@algoviz/core`](packages/core)         | Available | Structure kinds, reducers, timeline engine and layout to scenes   |
 | [`@algoviz/svg`](packages/svg)           | Available | Renders scenes to standalone SVG (no DOM needed)                  |
 | [`@algoviz/elements`](packages/elements) | Available | `<algo-player>`: interactive, animated player (Lit Web Component) |
+| [`@algoviz/recipes`](packages/recipes)   | Available | Typed recorder and visualizations of classic algorithms           |
 | `@algoviz/mcp`                           | Planned   | MCP server and MCP App for Claude, ChatGPT and others             |
 
 ## Design
