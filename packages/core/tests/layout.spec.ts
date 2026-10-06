@@ -217,3 +217,52 @@ describe('bare layout', () => {
     expect(scene.height).toBe(8 + 52 + 44 + 8);
   });
 });
+
+describe('scene bounds', () => {
+  it('keeps wide pointer badges and long titles inside the scene', () => {
+    const trace = mustLoad({
+      version: '0.1',
+      structures: {
+        arr: {
+          kind: 'array',
+          label: 'a rather long title for a two-cell array',
+          initial: [1, 2],
+        },
+      },
+      steps: [
+        {
+          actions: [
+            {
+              target: 'arr',
+              type: 'pointer',
+              name: 'very_long_name16',
+              index: 0,
+            },
+            {
+              target: 'arr',
+              type: 'pointer',
+              name: 'other_long_name',
+              index: 2,
+            },
+          ],
+        },
+      ],
+    });
+    const layout = layoutTrace(trace);
+    for (const index of [0, 1]) {
+      const scene = layout.sceneAt(index);
+      for (const item of scene.items) {
+        const [left, right] =
+          item.type === 'badge'
+            ? [item.x - item.width / 2, item.x + item.width / 2]
+            : item.type === 'box'
+              ? [item.x, item.x + item.width]
+              : item.type === 'text' && item.role === 'title'
+                ? [item.x, item.x + item.text.length * item.fontSize * 0.6]
+                : [0, 0];
+        expect(left, item.key).toBeGreaterThanOrEqual(0);
+        expect(right, item.key).toBeLessThanOrEqual(scene.width);
+      }
+    }
+  });
+});

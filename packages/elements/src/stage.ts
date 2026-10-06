@@ -43,6 +43,7 @@ export class SceneStage {
   readonly #svg: SVGSVGElement;
   readonly #root: SVGGElement;
   readonly #title: SVGTitleElement;
+  readonly #background: SVGRectElement;
   readonly #entries = new Map<string, Entry>();
 
   constructor(svg: SVGSVGElement) {
@@ -50,7 +51,8 @@ export class SceneStage {
     const doc = svg.ownerDocument;
     this.#title = doc.createElementNS(SVG_NS, 'title');
     this.#root = doc.createElementNS(SVG_NS, 'g');
-    svg.replaceChildren(this.#title, this.#root);
+    this.#background = doc.createElementNS(SVG_NS, 'rect');
+    svg.replaceChildren(this.#title, this.#background, this.#root);
     svg.setAttribute('role', 'img');
   }
 
@@ -69,6 +71,16 @@ export class SceneStage {
     svg.setAttribute('height', num(scene.height));
     this.#root.setAttribute('font-family', scene.fontFamily);
     this.#title.textContent = scene.title;
+    // Same as renderSvg: the theme's background fills the whole scene.
+    const bg = this.#background;
+    if (scene.background === null) {
+      bg.setAttribute('display', 'none');
+    } else {
+      bg.removeAttribute('display');
+      bg.setAttribute('width', num(scene.width));
+      bg.setAttribute('height', num(scene.height));
+      bg.setAttribute('fill', scene.background);
+    }
 
     const animate = duration > 0;
     const seen = new Set<string>();

@@ -16,12 +16,24 @@ export const LIMITS = {
   sourceLength: 20_000,
 } as const;
 
+/**
+ * Whether a name can be used as an object key without colliding with
+ * properties every JavaScript object inherits, such as `constructor` or
+ * `__proto__`. Names that collide could resolve to inherited values or
+ * change an object's prototype.
+ */
+export const isSafeKey = (name: string): boolean => !(name in Object.prototype);
+
+const RESERVED =
+  'must not be a built-in JavaScript property name such as "constructor" or "__proto__"';
+
 /** Name of a structure in a visualization; actions refer to it as `target`. */
 export const StructureName = z
   .string()
   .regex(/^[A-Za-z_][A-Za-z0-9_]{0,63}$/)
+  .refine(isSafeKey, { message: `Structure names ${RESERVED}` })
   .describe(
-    'Identifier of a structure, e.g. "arr" or "dist". Letters, digits and underscores; must not start with a digit.',
+    `Identifier of a structure, e.g. "arr" or "dist". Letters, digits and underscores; must not start with a digit; ${RESERVED}.`,
   );
 export type StructureName = z.infer<typeof StructureName>;
 
@@ -58,7 +70,10 @@ export const StepMeta = z
       .optional()
       .describe('One or two sentences explaining the step to a learner.'),
     vars: z
-      .record(z.string(), z.json())
+      .record(
+        z.string().refine(isSafeKey, { message: `Variable names ${RESERVED}` }),
+        z.json(),
+      )
       .optional()
       .describe('Variable values to display, e.g. { "i": 0, "j": 1 }.'),
   })

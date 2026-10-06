@@ -12,6 +12,7 @@ import { z } from 'zod';
 import {
   ElementId,
   Index,
+  isSafeKey,
   LIMITS,
   PROTOCOL_CODE_PARAM,
   Scalar,
@@ -109,7 +110,10 @@ export const ArrayAction = z.discriminatedUnion('type', [
   z
     .strictObject({
       type: z.literal('pointer'),
-      name: z.string().regex(/^[A-Za-z_][A-Za-z0-9_]{0,15}$/),
+      name: z
+        .string()
+        .regex(/^[A-Za-z_][A-Za-z0-9_]{0,15}$/)
+        .refine(isSafeKey, { message: 'Reserved pointer name' }),
       index: Index.nullable(),
     })
     .describe(

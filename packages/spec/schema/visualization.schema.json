@@ -36,7 +36,7 @@
       "propertyNames": {
         "type": "string",
         "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
-        "description": "Identifier of a structure, e.g. \"arr\" or \"dist\". Letters, digits and underscores; must not start with a digit."
+        "description": "Identifier of a structure, e.g. \"arr\" or \"dist\". Letters, digits and underscores; must not start with a digit; must not be a built-in JavaScript property name such as \"constructor\" or \"__proto__\"."
       },
       "additionalProperties": {
         "oneOf": [

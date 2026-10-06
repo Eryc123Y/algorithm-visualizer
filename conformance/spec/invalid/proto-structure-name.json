@@ -1,0 +1,19 @@
+{
+  "description": "\"__proto__\" cannot name a structure.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "__proto__": {
+        "kind": "array",
+        "initial": [1]
+      }
+    },
+    "steps": []
+  },
+  "expectedErrors": [
+    {
+      "code": "INVALID_SHAPE",
+      "path": "$.structures.__proto__"
+    }
+  ]
+}

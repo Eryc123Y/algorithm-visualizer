@@ -1,0 +1,47 @@
+{
+  "description": "Element ids are unique for the whole trace: an id that was removed cannot be inserted again.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "arr": {
+        "kind": "array",
+        "initial": [
+          {
+            "id": "x",
+            "value": 1
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "arr",
+            "type": "remove",
+            "index": 0
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "arr",
+            "type": "insert",
+            "index": 0,
+            "element": {
+              "id": "x",
+              "value": 9
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "expectedErrors": [
+    {
+      "code": "DUPLICATE_ID",
+      "path": "$.steps[1].actions[0].element.id"
+    }
+  ]
+}

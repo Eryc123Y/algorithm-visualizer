@@ -37,6 +37,8 @@ export function parseVisualization(
 ): Result<Visualization, readonly ProtocolError[]> {
   const versionError = checkVersion(input);
   if (versionError) return err([versionError]);
+  const protoErrors = checkProtoKeys(input);
+  if (protoErrors.length > 0) return err(protoErrors);
 
   const envelope = Envelope.safeParse(input);
   if (!envelope.success)
@@ -48,6 +50,11 @@ export function parseVisualization(
     structures[name] = normalizeDecl(decl);
 
   const errors: ProtocolError[] = [];
+  // Element ids must be unique for the whole trace (ADR 0007), so an id
+  // removed earlier cannot be reused by a later insert.
+  const usedIds = new Map<string, Set<string>>();
+  for (const [name, decl] of Object.entries(structures))
+    usedIds.set(name, new Set(decl.initial.map((e) => e.id)));
   const sourceLines =
     doc.source === undefined ? undefined : doc.source.code.split('\n').length;
   const steps = doc.steps.map((step, s) => {
@@ -67,7 +74,22 @@ export function parseVisualization(
         errors.push(...result.error);
         return [];
       }
-      return [result.value];
+      const action = result.value;
+      if (action.type === 'insert') {
+        const ids = usedIds.get(action.target);
+        const id = action.element.id;
+        if (ids?.has(id)) {
+          errors.push({
+            code: 'DUPLICATE_ID',
+            path: formatPath([...path, 'element', 'id']),
+            message: `Element id "${id}" is already used in "${action.target}"`,
+            hint: 'Ids must be unique for the whole trace, even after removal; give the inserted element a new id.',
+          });
+          return [];
+        }
+        ids?.add(id);
+      }
+      return [action];
     });
     return step.meta === undefined ? { actions } : { actions, meta: step.meta };
   });
@@ -95,6 +117,41 @@ function checkVersion(input: unknown): ProtocolError | undefined {
   };
 }
 
+const isRecord = (x: unknown): x is Record<string, unknown> =>
+  typeof x === 'object' && x !== null && !Array.isArray(x);
+
+/**
+ * Reports `__proto__` keys where documents use names as keys. Zod silently
+ * drops such keys, which would turn a clear mistake into a confusing one
+ * (or lose data), so they are rejected up front.
+ */
+function checkProtoKeys(input: unknown): ProtocolError[] {
+  const errors: ProtocolError[] = [];
+  const check = (obj: unknown, path: PropertyKey[]) => {
+    if (isRecord(obj) && Object.hasOwn(obj, '__proto__'))
+      errors.push({
+        code: 'INVALID_SHAPE',
+        path: formatPath([...path, '__proto__']),
+        message: '"__proto__" cannot be used as a name',
+        hint: 'Choose another name.',
+      });
+  };
+  if (!isRecord(input)) return errors;
+  check(input['structures'], ['structures']);
+  const steps = input['steps'];
+  if (Array.isArray(steps))
+    steps.forEach((step: unknown, s) => {
+      const meta = isRecord(step) ? step['meta'] : undefined;
+      check(isRecord(meta) ? meta['vars'] : undefined, [
+        'steps',
+        s,
+        'meta',
+        'vars',
+      ]);
+    });
+  return errors;
+}
+
 function normalizeDecl(decl: StructureDeclInput): StructureDecl {
   switch (decl.kind) {
     case 'array':
@@ -112,7 +169,9 @@ function parseAction(
   path: readonly PropertyKey[],
 ): Result<TargetedAction, ProtocolError[]> {
   const { target, ...payload } = raw;
-  const decl = structures[target];
+  const decl = Object.hasOwn(structures, target)
+    ? structures[target]
+    : undefined;
   if (decl === undefined) {
     return fail(
       'UNKNOWN_TARGET',

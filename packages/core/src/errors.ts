@@ -9,7 +9,9 @@ export type EngineErrorCode =
   /** An index is outside the structure's current bounds. */
   | 'OUT_OF_RANGE'
   /** An inserted element reuses an id that is already present. */
-  | 'DUPLICATE_ID';
+  | 'DUPLICATE_ID'
+  /** An action would grow a structure past its size limit. */
+  | 'LIMIT_EXCEEDED';
 
 /** An error from a reducer, before the timeline adds its location. */
 export interface ReduceError {

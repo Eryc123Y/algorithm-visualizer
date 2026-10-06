@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import '../src/define.ts';
 import type { AlgoPlayer } from '../src/index.ts';
@@ -174,6 +174,41 @@ describe('<algo-player>', () => {
       expect(el.frame).toBe(2);
       await new Promise((resolve) => setTimeout(resolve, 200));
       expect(el.frame).toBe(2);
+    });
+
+    it('waits until it is on screen before playing', async () => {
+      let report: (visible: boolean) => void = () => {};
+      vi.stubGlobal(
+        'IntersectionObserver',
+        class {
+          constructor(
+            callback: (entries: { isIntersecting: boolean }[]) => void,
+          ) {
+            report = (visible) => callback([{ isIntersecting: visible }]);
+          }
+          observe() {}
+          disconnect() {}
+        },
+      );
+      try {
+        const el = await mount((e) => {
+          e.mode = 'display';
+        });
+        report(false);
+        el.visualization = doc;
+        await el.updateComplete;
+        expect(shadow(el).host.getAttribute('frame')).toBe('0');
+        const playing = () =>
+          (el as unknown as { playback: { playing: boolean } }).playback
+            .playing;
+        expect(playing()).toBe(false);
+        report(true);
+        expect(playing()).toBe(true);
+        report(false);
+        expect(playing()).toBe(false);
+      } finally {
+        vi.unstubAllGlobals();
+      }
     });
 
     it('becomes interactive again when the mode changes back', async () => {
