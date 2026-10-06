@@ -53,6 +53,12 @@ export interface SceneNode {
   readonly x: number;
   readonly y: number;
   readonly radius: number;
+  /**
+   * Total width when the text needs more room than the circle: the node is
+   * then a stadium (a rectangle with semicircular ends) of height
+   * `2 * radius`.
+   */
+  readonly width?: number;
   readonly role: ElementRole;
   readonly group?: GroupIndex;
   /** Red–black tree colour; part of the data, not decoration. */
@@ -65,9 +71,10 @@ export interface SceneNode {
 }
 
 /**
- * A straight connection between two points. Endpoints are already trimmed
- * to the shapes they connect. When both endpoints coincide the edge is a
- * self-loop drawn above that point.
+ * A connection between two points, straight or through `via`. Endpoints
+ * are already trimmed to the shapes they connect. When both endpoints
+ * coincide and there is no `via`, the edge is a self-loop drawn outward
+ * from that point (up, or rotated by `loopAngle`).
  */
 export interface SceneEdge {
   readonly type: 'edge';
@@ -78,8 +85,17 @@ export interface SceneEdge {
   readonly y2: number;
   readonly role: EdgeRole;
   readonly directed: boolean;
+  /** Bend points between the ends, for edges routed around nodes. */
+  readonly via?: readonly { readonly x: number; readonly y: number }[];
+  /** Self-loops: direction in degrees clockwise from up (default 0). */
+  readonly loopAngle?: number;
   /** Drawn beside the middle of the edge, e.g. a weight. */
   readonly label?: string;
+  /**
+   * Which side of the edge, facing from (x1, y1) to (x2, y2), the label
+   * goes on; painters choose (preferring above) when absent.
+   */
+  readonly labelSide?: 'left' | 'right';
   readonly fontSize: number;
 }
 

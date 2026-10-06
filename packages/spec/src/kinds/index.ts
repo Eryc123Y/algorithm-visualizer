@@ -3,6 +3,7 @@
  * writing its module and adding one entry here and in `visualization.ts`.
  */
 import { arraySpec } from './array.ts';
+import { graphSpec } from './graph.ts';
 import type { KindSpec, KindTypes } from './kind.ts';
 import { linkedListSpec } from './linked-list.ts';
 import { queueSpec } from './queue.ts';
@@ -10,6 +11,7 @@ import { stackSpec } from './stack.ts';
 import { treeSpec } from './tree.ts';
 
 export * from './array.ts';
+export * from './graph.ts';
 export * from './kind.ts';
 export * from './linked-list.ts';
 export * from './queue.ts';
@@ -22,6 +24,7 @@ const registry = {
   queue: queueSpec,
   linkedList: linkedListSpec,
   tree: treeSpec,
+  graph: graphSpec,
 };
 
 export type StructureKindName = keyof typeof registry;

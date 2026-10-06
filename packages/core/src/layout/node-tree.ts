@@ -19,9 +19,62 @@ export const NOTE_HEIGHT = 18;
 /** Length of the arrow from a pointer badge to its node. */
 const POINTER_ARROW = 12;
 
-/** Radius of a node that fits `count` value characters. */
-export const nodeRadius = (count: number, o: LayoutOptions): number =>
-  Math.max(20, Math.ceil((count * o.valueFontSize * o.charWidthRatio) / 2 + 8));
+/**
+ * Size of a node and of its text. Short values get a circle that fits them;
+ * longer ones first shrink the font a little, then stretch the circle into
+ * a stadium (`halfWidth > radius`).
+ */
+export interface NodeShape {
+  readonly radius: number;
+  /** Half the width; equal to `radius` for a circle. */
+  readonly halfWidth: number;
+  readonly fontSize: number;
+}
+
+const MIN_RADIUS = 20;
+const MAX_RADIUS = 26;
+const TEXT_INSET = 8;
+
+export function nodeShape(count: number, o: LayoutOptions): NodeShape {
+  const halfText = (font: number) => (count * font * o.charWidthRatio) / 2;
+  const natural = Math.ceil(halfText(o.valueFontSize) + TEXT_INSET);
+  if (natural <= MAX_RADIUS) {
+    const radius = Math.max(MIN_RADIUS, natural);
+    return { radius, halfWidth: radius, fontSize: o.valueFontSize };
+  }
+  const minFont = Math.min(o.valueFontSize, 13);
+  const fitted = Math.floor(
+    (2 * (MAX_RADIUS - TEXT_INSET)) / (count * o.charWidthRatio),
+  );
+  if (fitted >= minFont)
+    return { radius: MAX_RADIUS, halfWidth: MAX_RADIUS, fontSize: fitted };
+  return {
+    radius: MAX_RADIUS,
+    halfWidth: Math.ceil(halfText(minFont) + 12),
+    fontSize: minFont,
+  };
+}
+
+/**
+ * Distance from a node's centre to its outline along the unit direction
+ * `(ux, uy)`.
+ */
+export function outlineDistance(
+  shape: NodeShape,
+  ux: number,
+  uy: number,
+): number {
+  const { radius: r, halfWidth } = shape;
+  const straight = halfWidth - r;
+  if (straight <= 0) return r;
+  const ax = Math.abs(ux);
+  const ay = Math.abs(uy);
+  // Through the flat top or bottom…
+  if (ay > 0 && (ax * r) / ay <= straight) return r / ay;
+  // …or through an end cap: |t·u − (straight, 0)| = r.
+  const b = straight * ax;
+  return b + Math.sqrt(b * b - straight * straight + r * r);
+}
 
 export interface Placement {
   /** Column of each node; may be fractional for centred parents. */
@@ -97,11 +150,12 @@ export const sidePointerWidth = (
 export function sidePointerItems(
   name: string,
   pointers: readonly string[],
-  at: { readonly x: number; readonly y: number; readonly radius: number },
+  /** Centre and half width of the node. */
+  at: { readonly x: number; readonly y: number; readonly halfWidth: number },
   o: LayoutOptions,
 ): SceneItem[] {
   const items: SceneItem[] = [];
-  let right = at.x - at.radius - 2 - POINTER_ARROW;
+  let right = at.x - at.halfWidth - 2 - POINTER_ARROW;
   pointers.forEach((pointer, k) => {
     const width = badgeWidthFor(chars(pointer), o);
     if (k === 0)
@@ -110,7 +164,7 @@ export function sidePointerItems(
         key: `${name}/pointer-arrow/${pointer}`,
         x1: right,
         y1: at.y,
-        x2: at.x - at.radius - 3,
+        x2: at.x - at.halfWidth - 3,
         y2: at.y,
         role: 'pointer',
       });
@@ -130,12 +184,12 @@ export function sidePointerItems(
   return items;
 }
 
-/** A tree edge between two node circles, trimmed to their outlines. */
+/** A tree edge between two nodes, trimmed to their outlines. */
 export function treeEdge(
   key: string,
   from: { readonly x: number; readonly y: number },
   to: { readonly x: number; readonly y: number },
-  radius: number,
+  shape: NodeShape,
   o: LayoutOptions,
 ): SceneItem {
   const dx = to.x - from.x;
@@ -143,13 +197,14 @@ export function treeEdge(
   const length = Math.hypot(dx, dy) || 1;
   const ux = dx / length;
   const uy = dy / length;
+  const trim = outlineDistance(shape, ux, uy);
   return {
     type: 'edge',
     key,
-    x1: from.x + ux * radius,
-    y1: from.y + uy * radius,
-    x2: to.x - ux * radius,
-    y2: to.y - uy * radius,
+    x1: from.x + ux * trim,
+    y1: from.y + uy * trim,
+    x2: to.x - ux * trim,
+    y2: to.y - uy * trim,
     role: 'link',
     directed: false,
     fontSize: o.indexFontSize,

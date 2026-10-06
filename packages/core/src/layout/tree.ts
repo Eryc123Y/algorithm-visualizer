@@ -30,7 +30,7 @@ import {
   NODE_GAP_X,
   NODE_GAP_Y,
   NOTE_HEIGHT,
-  nodeRadius,
+  nodeShape,
   placeForest,
   sidePointerItems,
   sidePointerWidth,
@@ -100,7 +100,8 @@ export function layoutTree({
   origin,
   options: o,
 }: LayoutInput<TreeDecl, TreeState, TreeMetrics>): Block {
-  const radius = nodeRadius(metrics.maxChars, o);
+  const shape = nodeShape(metrics.maxChars, o);
+  const { radius, halfWidth } = shape;
   const pointerWidth = sidePointerWidth(
     metrics.pointerRows,
     metrics.maxPointerChars,
@@ -109,7 +110,7 @@ export function layoutTree({
   // Siblings share a level, so in non-binary trees each column also makes
   // room for the badges of the node right of it. In-order neighbours of a
   // binary tree are never on the same level.
-  const pitchX = 2 * radius + NODE_GAP_X + (state.binary ? 0 : pointerWidth);
+  const pitchX = 2 * halfWidth + NODE_GAP_X + (state.binary ? 0 : pointerWidth);
   const pitchY = 2 * radius + NODE_GAP_Y;
   const left = origin.x + pointerWidth;
   const top =
@@ -120,7 +121,7 @@ export function layoutTree({
     state.binary,
   );
   const centre = (id: string) => ({
-    x: left + radius + (column.get(id) ?? 0) * pitchX,
+    x: left + halfWidth + (column.get(id) ?? 0) * pitchX,
     y: top + radius + (depth.get(id) ?? 0) * pitchY,
   });
 
@@ -145,7 +146,7 @@ export function layoutTree({
             `${name}/edge/${child}`,
             centre(node.id),
             centre(child),
-            radius,
+            shape,
             o,
           ),
         );
@@ -159,24 +160,27 @@ export function layoutTree({
       key: `${name}/element/${node.id}`,
       ...centre(node.id),
       radius,
+      ...(halfWidth > radius ? { width: 2 * halfWidth } : {}),
       role: roleOf(state, node.id),
       ...(group === undefined ? {} : { group }),
       ...(node.color === null ? {} : { variant: node.color }),
       text: formatScalar(node.value),
-      fontSize: o.valueFontSize,
+      fontSize: shape.fontSize,
       ...(note === undefined ? {} : { label: note }),
     });
   }
 
   for (const [id, names] of groupPointers(Object.entries(pointers)))
-    items.push(...sidePointerItems(name, names, { ...centre(id), radius }, o));
+    items.push(
+      ...sidePointerItems(name, names, { ...centre(id), halfWidth }, o),
+    );
 
   const columns = Math.max(1, metrics.columns);
   const levels = Math.max(1, metrics.levels);
   return {
     items,
     width: Math.max(
-      pointerWidth + (columns - 1) * pitchX + 2 * radius,
+      pointerWidth + (columns - 1) * pitchX + 2 * halfWidth,
       titleWidth(title, o),
     ),
     height: top - origin.y + (levels - 1) * pitchY + 2 * radius + 4,

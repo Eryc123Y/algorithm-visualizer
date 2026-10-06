@@ -30,7 +30,7 @@ import {
 import {
   NODE_GAP_X,
   NODE_GAP_Y,
-  nodeRadius,
+  nodeShape,
   placeForest,
   sidePointerItems,
   sidePointerWidth,
@@ -55,13 +55,14 @@ export function layoutArrayHeap({
   origin,
   options: o,
 }: LayoutInput<ArrayDecl, ArrayState, ArrayMetrics>): Block {
-  const radius = nodeRadius(metrics.maxChars, o);
+  const shape = nodeShape(metrics.maxChars, o);
+  const { radius, halfWidth } = shape;
   const pointerWidth = sidePointerWidth(
     metrics.pointerRows,
     metrics.maxPointerChars,
     o,
   );
-  const pitchX = 2 * radius + NODE_GAP_X;
+  const pitchX = 2 * halfWidth + NODE_GAP_X;
   const pitchY = 2 * radius + NODE_GAP_Y;
   const left = origin.x + pointerWidth;
   const top = origin.y + titleRowHeight(o) + 4;
@@ -78,7 +79,7 @@ export function layoutArrayHeap({
     true,
   );
   const centre = (index: number) => ({
-    x: left + radius + column.get(String(index))! * pitchX,
+    x: left + halfWidth + column.get(String(index))! * pitchX,
     y: top + radius + depth.get(String(index))! * pitchY,
   });
 
@@ -100,7 +101,7 @@ export function layoutArrayHeap({
         `${name}/heap-edge/${i}`,
         centre((i - 1) >> 1),
         centre(i),
-        radius,
+        shape,
         o,
       ),
     );
@@ -111,9 +112,10 @@ export function layoutArrayHeap({
       key: `${name}/element/${element.id}`,
       ...at,
       radius,
+      ...(halfWidth > radius ? { width: 2 * halfWidth } : {}),
       role: roleOf(state, index, element.id),
       text: formatScalar(element.value),
-      fontSize: o.valueFontSize,
+      fontSize: shape.fontSize,
     });
     if (o.showIndices)
       items.push({
@@ -133,13 +135,13 @@ export function layoutArrayHeap({
   ))
     if (index < slots)
       items.push(
-        ...sidePointerItems(name, names, { ...centre(index), radius }, o),
+        ...sidePointerItems(name, names, { ...centre(index), halfWidth }, o),
       );
 
   return {
     items,
     width: Math.max(
-      pointerWidth + (columns - 1) * pitchX + 2 * radius + 16,
+      pointerWidth + (columns - 1) * pitchX + 2 * halfWidth + 16,
       titleWidth(title, o),
     ),
     height: top - origin.y + (levels - 1) * pitchY + 2 * radius + 12,

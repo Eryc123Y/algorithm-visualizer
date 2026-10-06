@@ -163,16 +163,37 @@ function paintBox(b: SceneBox, t: SvgTheme): SvgNode {
 
 function paintNode(n: SceneNode, t: SvgTheme): SvgNode {
   const c = elementStyle(t, n.role, n.group, n.variant);
+  const halfWidth = Math.max(n.radius, (n.width ?? 0) / 2);
+  // A circle, or a stadium when the node is wider than it is tall.
+  const outline = (inset: number, dy: number): SvgNode =>
+    halfWidth === n.radius
+      ? {
+          tag: 'circle',
+          attrs: {
+            ...(dy === 0 ? {} : { cy: num(dy) }),
+            r: num(n.radius - inset),
+          },
+        }
+      : {
+          tag: 'rect',
+          attrs: {
+            x: num(-halfWidth + inset),
+            y: num(-n.radius + inset + dy),
+            width: num(2 * (halfWidth - inset)),
+            height: num(2 * (n.radius - inset)),
+            rx: num(n.radius - inset),
+          },
+        };
   const children: SvgNode[] = [];
-  if (t.shadow !== null)
-    children.push({
-      tag: 'circle',
-      attrs: { cy: '2', r: num(n.radius), fill: t.shadow },
-    });
+  if (t.shadow !== null) {
+    const shadow = outline(0, 2);
+    children.push({ ...shadow, attrs: { ...shadow.attrs, fill: t.shadow } });
+  }
+  const body = outline(c.strokeWidth / 2, 0);
   children.push({
-    tag: 'circle',
+    ...body,
     attrs: {
-      r: num(n.radius - c.strokeWidth / 2),
+      ...body.attrs,
       fill: c.fill,
       stroke: c.stroke,
       'stroke-width': num(c.strokeWidth),
@@ -183,7 +204,7 @@ function paintNode(n: SceneNode, t: SvgTheme): SvgNode {
     children.push({
       tag: 'path',
       attrs: {
-        d: `M${num(n.radius * 0.45)} ${num(-n.radius * 0.75)}l3 3l5-6`,
+        d: `M${num(halfWidth - n.radius * 0.55)} ${num(-n.radius * 0.75)}l3 3l5-6`,
         fill: 'none',
         stroke: t.settledMark,
         'stroke-width': '1.75',
@@ -237,8 +258,61 @@ function paintEdge(e: SceneEdge, t: SvgTheme): PaintedItem[] {
   const length = Math.hypot(dx, dy);
   const items: PaintedItem[] = [];
 
+  if (e.via !== undefined && e.via.length > 0) {
+    // A routed edge: a polyline relative to its start, the head along the
+    // last segment, and the label beside the middle segment.
+    const points = [{ x: e.x1, y: e.y1 }, ...e.via, { x: e.x2, y: e.y2 }];
+    const last = points.at(-2)!;
+    const lastAngle = Math.atan2(e.y2 - last.y, e.x2 - last.x);
+    const lastLength = Math.hypot(e.x2 - last.x, e.y2 - last.y);
+    const head = e.directed ? Math.min(EDGE_HEAD_LENGTH, lastLength / 2) : 0;
+    const end = {
+      x: e.x2 - Math.cos(lastAngle) * head,
+      y: e.y2 - Math.sin(lastAngle) * head,
+    };
+    const d = [...points.slice(0, -1), end]
+      .map(
+        (p, k) => `${k === 0 ? 'M' : 'L'}${num(p.x - e.x1)} ${num(p.y - e.y1)}`,
+      )
+      .join('');
+    items.push({
+      key: e.key,
+      x: e.x1,
+      y: e.y1,
+      attrs: { 'data-edge': e.role },
+      node: {
+        tag: 'path',
+        attrs: {
+          d,
+          fill: 'none',
+          'stroke-linejoin': 'round',
+          ...stroke,
+          ...opacity,
+        },
+      },
+    });
+    if (e.directed)
+      items.push(
+        arrowHead(
+          e,
+          e.x2,
+          e.y2,
+          (lastAngle * 180) / Math.PI,
+          head,
+          style.stroke,
+          opacity,
+        ),
+      );
+    if (e.label !== undefined) {
+      const k = Math.floor((points.length - 1) / 2);
+      items.push(labelBeside(e, points[k]!, points[k + 1]!, t));
+    }
+    return items;
+  }
+
   if (length < 0.5) {
-    // Self-loop above the point.
+    // Self-loop outward from the point, drawn pointing up and rotated.
+    const loopAngle = e.loopAngle ?? 0;
     const loop: SvgNode = {
       tag: 'g',
       attrs: opacity,
@@ -261,17 +335,20 @@ function paintEdge(e: SceneEdge, t: SvgTheme): PaintedItem[] {
       key: e.key,
       x: e.x1,
       y: e.y1,
+      ...(loopAngle === 0 ? {} : { rotate: loopAngle }),
       attrs: { 'data-edge': e.role },
       node: loop,
     });
-    if (e.label !== undefined)
+    if (e.label !== undefined) {
+      const rad = (loopAngle * Math.PI) / 180;
       items.push({
         key: `${e.key}#label`,
-        x: e.x1,
-        y: e.y1 - 32,
+        x: e.x1 + Math.sin(rad) * 34,
+        y: e.y1 - Math.cos(rad) * 34,
         attrs: {},
         node: edgeLabel(e, t),
       });
+    }
     return items;
   }
 
@@ -287,34 +364,71 @@ function paintEdge(e: SceneEdge, t: SvgTheme): PaintedItem[] {
     node: { tag: 'line', attrs: { x2: '1', ...stroke, ...opacity } },
   });
   if (e.directed)
-    items.push({
-      key: `${e.key}#head`,
-      x: e.x2,
-      y: e.y2,
-      rotate: angle,
-      attrs: {},
-      node: {
-        tag: 'polygon',
-        attrs: {
-          points: `0,0 ${num(-head)},${num(-EDGE_HEAD_HALF_WIDTH)} ${num(-head)},${num(EDGE_HEAD_HALF_WIDTH)}`,
-          fill: style.stroke,
-          ...opacity,
-        },
-      },
-    });
-  if (e.label !== undefined) {
-    // Beside the midpoint, on the side the normal (-dy, dx) points to.
-    const [nx, ny] = [-dy / length, dx / length];
-    const side = ny > 0 || (ny === 0 && nx < 0) ? -1 : 1; // prefer above
-    items.push({
-      key: `${e.key}#label`,
-      x: (e.x1 + e.x2) / 2 + nx * 11 * side,
-      y: (e.y1 + e.y2) / 2 + ny * 11 * side,
-      attrs: {},
-      node: edgeLabel(e, t),
-    });
-  }
+    items.push(arrowHead(e, e.x2, e.y2, angle, head, style.stroke, opacity));
+  if (e.label !== undefined)
+    items.push(labelBeside(e, { x: e.x1, y: e.y1 }, { x: e.x2, y: e.y2 }, t));
   return items;
+}
+
+function arrowHead(
+  e: SceneEdge,
+  x: number,
+  y: number,
+  angle: number,
+  head: number,
+  fill: string,
+  opacity: Record<string, string>,
+): PaintedItem {
+  return {
+    key: `${e.key}#head`,
+    x,
+    y,
+    rotate: angle,
+    attrs: {},
+    node: {
+      tag: 'polygon',
+      attrs: {
+        points: `0,0 ${num(-head)},${num(-EDGE_HEAD_HALF_WIDTH)} ${num(-head)},${num(EDGE_HEAD_HALF_WIDTH)}`,
+        fill,
+        ...opacity,
+      },
+    },
+  };
+}
+
+/**
+ * The label beside the middle of the segment from `a` to `b`, on the side
+ * the normal (-dy, dx) points to (the right, facing along the edge), far
+ * enough that the text clears the line whatever its slope.
+ */
+function labelBeside(
+  e: SceneEdge,
+  a: { readonly x: number; readonly y: number },
+  b: { readonly x: number; readonly y: number },
+  t: SvgTheme,
+): PaintedItem {
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  const length = Math.hypot(dx, dy) || 1;
+  const [nx, ny] = [-dy / length, dx / length];
+  const side =
+    e.labelSide !== undefined
+      ? e.labelSide === 'right'
+        ? 1
+        : -1
+      : ny > 0 || (ny === 0 && nx < 0)
+        ? -1
+        : 1; // prefer above
+  const halfWidth = ([...(e.label ?? '')].length * e.fontSize * 0.6) / 2;
+  const clearance =
+    4 + Math.abs(nx) * halfWidth + Math.abs(ny) * (e.fontSize / 2);
+  return {
+    key: `${e.key}#label`,
+    x: (a.x + b.x) / 2 + nx * clearance * side,
+    y: (a.y + b.y) / 2 + ny * clearance * side,
+    attrs: {},
+    node: edgeLabel(e, t),
+  };
 }
 
 function edgeLabel(e: SceneEdge, t: SvgTheme): SvgNode {

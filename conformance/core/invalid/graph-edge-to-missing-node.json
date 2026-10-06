@@ -1,0 +1,38 @@
+{
+  "description": "An edge must join existing nodes, including ones removed earlier.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "g": {
+        "kind": "graph",
+        "nodes": ["A", "B"]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "g",
+            "type": "removeNode",
+            "node": "B"
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "g",
+            "type": "addEdge",
+            "edge": ["A", "B"]
+          }
+        ]
+      }
+    ]
+  },
+  "expectedErrors": [
+    {
+      "code": "NOT_FOUND",
+      "path": "$.steps[1].actions[0].edge.to"
+    }
+  ]
+}

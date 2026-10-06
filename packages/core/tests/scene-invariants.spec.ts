@@ -36,13 +36,15 @@ function extent(item: SceneItem): [number, number, number, number] {
   switch (item.type) {
     case 'box':
       return [item.x, item.y, item.x + item.width, item.y + item.height];
-    case 'node':
+    case 'node': {
+      const half = Math.max(item.radius, (item.width ?? 0) / 2);
       return [
-        item.x - item.radius,
+        item.x - half,
         item.y - item.radius - (item.label === undefined ? 0 : 18),
-        item.x + item.radius,
+        item.x + half,
         item.y + item.radius,
       ];
+    }
     case 'badge':
       return [
         item.x - item.width / 2,
@@ -51,12 +53,17 @@ function extent(item: SceneItem): [number, number, number, number] {
         item.y + item.height / 2,
       ];
     case 'edge': {
-      const loop = item.x1 === item.x2 && item.y1 === item.y2 ? 34 : 0;
+      const loop =
+        item.via === undefined && item.x1 === item.x2 && item.y1 === item.y2
+          ? 34
+          : 0;
+      const xs = [item.x1, item.x2, ...(item.via ?? []).map((p) => p.x)];
+      const ys = [item.y1, item.y2, ...(item.via ?? []).map((p) => p.y)];
       return [
-        Math.min(item.x1, item.x2) - (loop ? 22 : 0),
-        Math.min(item.y1, item.y2) - loop,
-        Math.max(item.x1, item.x2) + (loop ? 22 : 0),
-        Math.max(item.y1, item.y2),
+        Math.min(...xs) - loop,
+        Math.min(...ys) - loop,
+        Math.max(...xs) + loop,
+        Math.max(...ys) + loop,
       ];
     }
     case 'arrow':

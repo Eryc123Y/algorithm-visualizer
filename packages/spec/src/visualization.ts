@@ -36,6 +36,10 @@ import {
   TreeActionInput,
   TreeDecl,
   TreeDeclInput,
+  GraphAction,
+  GraphActionInput,
+  GraphDecl,
+  GraphDeclInput,
 } from './kinds/index.ts';
 
 const targetField = {
@@ -72,6 +76,7 @@ export const TargetedAction = z.union([
   z.discriminatedUnion('type', withTargets(QueueAction.options)),
   z.discriminatedUnion('type', withTargets(LinkedListAction.options)),
   z.discriminatedUnion('type', withTargets(TreeAction.options)),
+  z.discriminatedUnion('type', withTargets(GraphAction.options)),
 ]);
 export type TargetedAction = z.infer<typeof TargetedAction>;
 
@@ -82,6 +87,7 @@ export const TargetedActionInput = z.union([
   z.discriminatedUnion('type', withTargets(QueueActionInput.options)),
   z.discriminatedUnion('type', withTargets(LinkedListActionInput.options)),
   z.discriminatedUnion('type', withTargets(TreeActionInput.options)),
+  z.discriminatedUnion('type', withTargets(GraphActionInput.options)),
 ]);
 export type TargetedActionInput = z.infer<typeof TargetedActionInput>;
 
@@ -91,6 +97,7 @@ export const StructureDecl = z.discriminatedUnion('kind', [
   QueueDecl,
   LinkedListDecl,
   TreeDecl,
+  GraphDecl,
 ]);
 export type StructureDecl = z.infer<typeof StructureDecl>;
 
@@ -100,6 +107,7 @@ export const StructureDeclInput = z.discriminatedUnion('kind', [
   QueueDeclInput,
   LinkedListDeclInput,
   TreeDeclInput,
+  GraphDeclInput,
 ]);
 export type StructureDeclInput = z.infer<typeof StructureDeclInput>;
 

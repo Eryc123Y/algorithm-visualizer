@@ -1,0 +1,504 @@
+{
+  "description": "Shortest-path style marks on a directed graph; removing a node removes its edges and their marks, and resetMarks clears everything.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "g": {
+        "kind": "graph",
+        "directed": true,
+        "nodes": ["S", "A", "B"],
+        "edges": [
+          ["S", "A", 1],
+          ["S", "B", 4],
+          ["A", "B", 2]
+        ]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "g",
+            "type": "annotate",
+            "node": "S",
+            "text": "0"
+          },
+          {
+            "target": "g",
+            "type": "visit",
+            "node": "S"
+          },
+          {
+            "target": "g",
+            "type": "pointer",
+            "name": "u",
+            "node": "S"
+          },
+          {
+            "target": "g",
+            "type": "highlight",
+            "edges": ["S-A", "S-B"]
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "g",
+            "type": "annotate",
+            "node": "A",
+            "text": "1"
+          },
+          {
+            "target": "g",
+            "type": "annotate",
+            "node": "B",
+            "text": "4"
+          },
+          {
+            "target": "g",
+            "type": "markEdge",
+            "edge": "S-A",
+            "mark": "selected"
+          },
+          {
+            "target": "g",
+            "type": "markEdge",
+            "edge": "S-B",
+            "mark": "selected"
+          },
+          {
+            "target": "g",
+            "type": "settle",
+            "node": "S"
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "g",
+            "type": "highlight",
+            "nodes": ["B"],
+            "edges": ["A-B"]
+          },
+          {
+            "target": "g",
+            "type": "annotate",
+            "node": "B",
+            "text": "3"
+          },
+          {
+            "target": "g",
+            "type": "markEdge",
+            "edge": "S-B",
+            "mark": "rejected"
+          },
+          {
+            "target": "g",
+            "type": "markEdge",
+            "edge": "A-B",
+            "mark": "selected"
+          },
+          {
+            "target": "g",
+            "type": "addEdge",
+            "edge": ["B", "B"]
+          },
+          {
+            "target": "g",
+            "type": "group",
+            "node": "A",
+            "group": 0
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "g",
+            "type": "removeNode",
+            "node": "A"
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "g",
+            "type": "resetMarks"
+          }
+        ]
+      }
+    ]
+  },
+  "expectedLength": 5,
+  "expectedFrames": [
+    {
+      "index": 0,
+      "state": {
+        "g": {
+          "kind": "graph",
+          "state": {
+            "data": {
+              "nodes": [
+                {
+                  "id": "S",
+                  "value": "S"
+                },
+                {
+                  "id": "A",
+                  "value": "A"
+                },
+                {
+                  "id": "B",
+                  "value": "B"
+                }
+              ],
+              "edges": [
+                {
+                  "id": "S-A",
+                  "from": "S",
+                  "to": "A",
+                  "weight": 1
+                },
+                {
+                  "id": "S-B",
+                  "from": "S",
+                  "to": "B",
+                  "weight": 4
+                },
+                {
+                  "id": "A-B",
+                  "from": "A",
+                  "to": "B",
+                  "weight": 2
+                }
+              ]
+            },
+            "marks": {
+              "highlightNodes": [],
+              "highlightEdges": [],
+              "visited": [],
+              "settled": [],
+              "groups": {},
+              "pointers": {},
+              "notes": {},
+              "edgeMarks": {}
+            },
+            "directed": true,
+            "layout": "auto"
+          }
+        }
+      }
+    },
+    {
+      "index": 1,
+      "state": {
+        "g": {
+          "kind": "graph",
+          "state": {
+            "data": {
+              "nodes": [
+                {
+                  "id": "S",
+                  "value": "S"
+                },
+                {
+                  "id": "A",
+                  "value": "A"
+                },
+                {
+                  "id": "B",
+                  "value": "B"
+                }
+              ],
+              "edges": [
+                {
+                  "id": "S-A",
+                  "from": "S",
+                  "to": "A",
+                  "weight": 1
+                },
+                {
+                  "id": "S-B",
+                  "from": "S",
+                  "to": "B",
+                  "weight": 4
+                },
+                {
+                  "id": "A-B",
+                  "from": "A",
+                  "to": "B",
+                  "weight": 2
+                }
+              ]
+            },
+            "marks": {
+              "highlightNodes": [],
+              "highlightEdges": ["S-A", "S-B"],
+              "visited": ["S"],
+              "settled": [],
+              "groups": {},
+              "pointers": {
+                "u": "S"
+              },
+              "notes": {
+                "S": "0"
+              },
+              "edgeMarks": {}
+            },
+            "directed": true,
+            "layout": "auto"
+          }
+        }
+      }
+    },
+    {
+      "index": 2,
+      "state": {
+        "g": {
+          "kind": "graph",
+          "state": {
+            "data": {
+              "nodes": [
+                {
+                  "id": "S",
+                  "value": "S"
+                },
+                {
+                  "id": "A",
+                  "value": "A"
+                },
+                {
+                  "id": "B",
+                  "value": "B"
+                }
+              ],
+              "edges": [
+                {
+                  "id": "S-A",
+                  "from": "S",
+                  "to": "A",
+                  "weight": 1
+                },
+                {
+                  "id": "S-B",
+                  "from": "S",
+                  "to": "B",
+                  "weight": 4
+                },
+                {
+                  "id": "A-B",
+                  "from": "A",
+                  "to": "B",
+                  "weight": 2
+                }
+              ]
+            },
+            "marks": {
+              "highlightNodes": [],
+              "highlightEdges": [],
+              "visited": ["S"],
+              "settled": ["S"],
+              "groups": {},
+              "pointers": {
+                "u": "S"
+              },
+              "notes": {
+                "S": "0",
+                "A": "1",
+                "B": "4"
+              },
+              "edgeMarks": {
+                "S-A": "selected",
+                "S-B": "selected"
+              }
+            },
+            "directed": true,
+            "layout": "auto"
+          }
+        }
+      }
+    },
+    {
+      "index": 3,
+      "state": {
+        "g": {
+          "kind": "graph",
+          "state": {
+            "data": {
+              "nodes": [
+                {
+                  "id": "S",
+                  "value": "S"
+                },
+                {
+                  "id": "A",
+                  "value": "A"
+                },
+                {
+                  "id": "B",
+                  "value": "B"
+                }
+              ],
+              "edges": [
+                {
+                  "id": "S-A",
+                  "from": "S",
+                  "to": "A",
+                  "weight": 1
+                },
+                {
+                  "id": "S-B",
+                  "from": "S",
+                  "to": "B",
+                  "weight": 4
+                },
+                {
+                  "id": "A-B",
+                  "from": "A",
+                  "to": "B",
+                  "weight": 2
+                },
+                {
+                  "id": "B-B",
+                  "from": "B",
+                  "to": "B",
+                  "weight": null
+                }
+              ]
+            },
+            "marks": {
+              "highlightNodes": ["B"],
+              "highlightEdges": ["A-B"],
+              "visited": ["S"],
+              "settled": ["S"],
+              "groups": {
+                "A": 0
+              },
+              "pointers": {
+                "u": "S"
+              },
+              "notes": {
+                "S": "0",
+                "A": "1",
+                "B": "3"
+              },
+              "edgeMarks": {
+                "S-A": "selected",
+                "S-B": "rejected",
+                "A-B": "selected"
+              }
+            },
+            "directed": true,
+            "layout": "auto"
+          }
+        }
+      }
+    },
+    {
+      "index": 4,
+      "state": {
+        "g": {
+          "kind": "graph",
+          "state": {
+            "data": {
+              "nodes": [
+                {
+                  "id": "S",
+                  "value": "S"
+                },
+                {
+                  "id": "B",
+                  "value": "B"
+                }
+              ],
+              "edges": [
+                {
+                  "id": "S-B",
+                  "from": "S",
+                  "to": "B",
+                  "weight": 4
+                },
+                {
+                  "id": "B-B",
+                  "from": "B",
+                  "to": "B",
+                  "weight": null
+                }
+              ]
+            },
+            "marks": {
+              "highlightNodes": [],
+              "highlightEdges": [],
+              "visited": ["S"],
+              "settled": ["S"],
+              "groups": {},
+              "pointers": {
+                "u": "S"
+              },
+              "notes": {
+                "S": "0",
+                "B": "3"
+              },
+              "edgeMarks": {
+                "S-B": "rejected"
+              }
+            },
+            "directed": true,
+            "layout": "auto"
+          }
+        }
+      }
+    },
+    {
+      "index": 5,
+      "state": {
+        "g": {
+          "kind": "graph",
+          "state": {
+            "data": {
+              "nodes": [
+                {
+                  "id": "S",
+                  "value": "S"
+                },
+                {
+                  "id": "B",
+                  "value": "B"
+                }
+              ],
+              "edges": [
+                {
+                  "id": "S-B",
+                  "from": "S",
+                  "to": "B",
+                  "weight": 4
+                },
+                {
+                  "id": "B-B",
+                  "from": "B",
+                  "to": "B",
+                  "weight": null
+                }
+              ]
+            },
+            "marks": {
+              "highlightNodes": [],
+              "highlightEdges": [],
+              "visited": [],
+              "settled": [],
+              "groups": {},
+              "pointers": {},
+              "notes": {},
+              "edgeMarks": {}
+            },
+            "directed": true,
+            "layout": "auto"
+          }
+        }
+      }
+    }
+  ]
+}

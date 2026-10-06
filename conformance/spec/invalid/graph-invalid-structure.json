@@ -1,0 +1,44 @@
+{
+  "description": "Names that are not valid ids, an edge to a missing node, a repeated tuple edge, and a manual layout without coordinates.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "g": {
+        "kind": "graph",
+        "layout": "manual",
+        "nodes": [
+          "New York",
+          {
+            "id": "B",
+            "x": 0,
+            "y": 0
+          }
+        ],
+        "edges": [
+          ["B", "C"],
+          ["B", "B"],
+          ["B", "B"]
+        ]
+      }
+    },
+    "steps": []
+  },
+  "expectedErrors": [
+    {
+      "code": "DUPLICATE_ID",
+      "path": "$.structures.g.edges[2]"
+    },
+    {
+      "code": "INVALID_STRUCTURE",
+      "path": "$.structures.g.nodes[0]"
+    },
+    {
+      "code": "INVALID_STRUCTURE",
+      "path": "$.structures.g.edges[0].to"
+    },
+    {
+      "code": "INVALID_STRUCTURE",
+      "path": "$.structures.g.nodes[0]"
+    }
+  ]
+}
