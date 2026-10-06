@@ -48,7 +48,18 @@ export function parseVisualization(
     structures[name] = normalizeDecl(decl);
 
   const errors: ProtocolError[] = [];
+  const sourceLines =
+    doc.source === undefined ? undefined : doc.source.code.split('\n').length;
   const steps = doc.steps.map((step, s) => {
+    const line = step.meta?.line;
+    if (sourceLines !== undefined && line !== undefined && line > sourceLines) {
+      errors.push({
+        code: 'LINE_OUT_OF_RANGE',
+        path: formatPath(['steps', s, 'meta', 'line']),
+        message: `Line ${line} is past the end of the source code`,
+        hint: `The source code has ${sourceLines} lines.`,
+      });
+    }
     const actions = step.actions.flatMap((raw, a): TargetedAction[] => {
       const path = ['steps', s, 'actions', a];
       const result = parseAction(raw, structures, path);
@@ -65,6 +76,7 @@ export function parseVisualization(
   return ok({
     version: doc.version,
     ...(doc.title === undefined ? {} : { title: doc.title }),
+    ...(doc.source === undefined ? {} : { source: doc.source }),
     structures,
     steps,
   });

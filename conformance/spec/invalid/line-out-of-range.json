@@ -1,0 +1,59 @@
+{
+  "description": "A step line past the end of the source code is rejected.",
+  "input": {
+    "version": "0.1",
+    "source": {
+      "language": "python",
+      "code": "for i in range(n - 1):\n    for j in range(n - 1 - i):\n        if a[j] > a[j + 1]:\n            a[j], a[j + 1] = a[j + 1], a[j]"
+    },
+    "structures": {
+      "arr": {
+        "kind": "array",
+        "initial": [
+          {
+            "id": "a",
+            "value": 2
+          },
+          {
+            "id": "b",
+            "value": 1
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "arr",
+            "type": "compare",
+            "i": 0,
+            "j": 1
+          }
+        ],
+        "meta": {
+          "line": 3
+        }
+      },
+      {
+        "actions": [
+          {
+            "target": "arr",
+            "type": "swap",
+            "i": 0,
+            "j": 1
+          }
+        ],
+        "meta": {
+          "line": 5
+        }
+      }
+    ]
+  },
+  "expectedErrors": [
+    {
+      "code": "LINE_OUT_OF_RANGE",
+      "path": "$.steps[1].meta.line"
+    }
+  ]
+}

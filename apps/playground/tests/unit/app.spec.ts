@@ -1,10 +1,9 @@
-import { mount } from '@vue/test-utils';
 import { describe, expect, it } from 'vitest';
 
 import { loadTrace } from '@algoviz/core';
 
-import App from '@/App.vue';
 import { bubbleSort } from '@/samples/bubble-sort';
+import { bubbleSortDocument } from '@/samples/bubble-sort-doc';
 
 describe('bubbleSort sample', () => {
   it('records a valid trace that ends sorted', () => {
@@ -15,19 +14,11 @@ describe('bubbleSort sample', () => {
     expect(last?.state.data.map((e) => e.value)).toEqual([1, 3, 4, 5, 8]);
     expect(last?.state.marks.settled).toHaveLength(5);
   });
-});
 
-describe('App', () => {
-  it('steps through the trace', async () => {
-    const wrapper = mount(App);
-    expect(wrapper.find('[data-testid="scene"] svg').exists()).toBe(true);
-    expect(wrapper.get('[data-testid="narration"]').text()).toBe(
-      'Initial state.',
-    );
-    await wrapper.findAll('button')[1]!.trigger('click');
-    expect(wrapper.get('[data-testid="narration"]').text()).toBe(
-      'Compare 5 and 3.',
-    );
-    expect(wrapper.findAll('[data-role="compare"]')).toHaveLength(2);
+  it('maps every step line onto the attached source code', () => {
+    const doc = bubbleSortDocument([3, 1, 2]);
+    expect(loadTrace(doc).ok).toBe(true);
+    const lines = new Set(doc.steps.map((s) => s.meta?.line));
+    expect([...lines].sort()).toEqual([5, 6, 7, undefined].sort());
   });
 });

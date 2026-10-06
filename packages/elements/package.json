@@ -1,0 +1,36 @@
+{
+  "name": "@algoviz/elements",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Web Components for algoviz: the <algo-player> interactive player.",
+  "type": "module",
+  "sideEffects": [
+    "./src/define.ts",
+    "./dist/define.js",
+    "./dist/cdn/*"
+  ],
+  "exports": {
+    ".": {
+      "@algoviz/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./define": {
+      "@algoviz/source": "./src/define.ts",
+      "types": "./dist/define.d.ts",
+      "default": "./dist/define.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc --build tsconfig.lib.json && vite build --config vite.cdn.config.ts"
+  },
+  "dependencies": {
+    "@algoviz/core": "*",
+    "@algoviz/spec": "*",
+    "@algoviz/svg": "*",
+    "lit": "^3.3.1"
+  }
+}

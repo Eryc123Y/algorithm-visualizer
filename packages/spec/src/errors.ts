@@ -18,7 +18,9 @@ export type ProtocolErrorCode =
   /** An action's fields are missing or invalid. */
   | 'INVALID_ACTION'
   /** Two elements of one structure share an id. */
-  | 'DUPLICATE_ID';
+  | 'DUPLICATE_ID'
+  /** A step's `meta.line` is not a line of the document's source code. */
+  | 'LINE_OUT_OF_RANGE';
 
 /**
  * A located, actionable problem in a document. Generic over its code so that
