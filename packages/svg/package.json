@@ -1,0 +1,24 @@
+{
+  "name": "@algoviz/svg",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Renders algoviz scenes to standalone SVG strings, without a DOM.",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "@algoviz/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc --build tsconfig.lib.json"
+  },
+  "dependencies": {
+    "@algoviz/core": "*"
+  }
+}

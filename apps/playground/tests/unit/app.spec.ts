@@ -1,14 +1,33 @@
 import { mount } from '@vue/test-utils';
 import { describe, expect, it } from 'vitest';
 
-import { PROTOCOL_VERSION } from '@algoviz/spec';
+import { loadTrace } from '@algoviz/core';
 
 import App from '@/App.vue';
+import { bubbleSort } from '@/samples/bubble-sort';
+
+describe('bubbleSort sample', () => {
+  it('records a valid trace that ends sorted', () => {
+    const result = loadTrace(bubbleSort([5, 3, 8, 1, 4]));
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const last = result.value.frame(result.value.length).state['arr'];
+    expect(last?.state.data.map((e) => e.value)).toEqual([1, 3, 4, 5, 8]);
+    expect(last?.state.marks.settled).toHaveLength(5);
+  });
+});
 
 describe('App', () => {
-  it('shows the playground heading and protocol version', () => {
+  it('steps through the trace', async () => {
     const wrapper = mount(App);
-    expect(wrapper.get('h1').text()).toBe('algoviz playground');
-    expect(wrapper.text()).toContain(`Protocol version ${PROTOCOL_VERSION}`);
+    expect(wrapper.find('[data-testid="scene"] svg').exists()).toBe(true);
+    expect(wrapper.get('[data-testid="narration"]').text()).toBe(
+      'Initial state.',
+    );
+    await wrapper.findAll('button')[1]!.trigger('click');
+    expect(wrapper.get('[data-testid="narration"]').text()).toBe(
+      'Compare 5 and 3.',
+    );
+    expect(wrapper.findAll('[data-role="compare"]')).toHaveLength(2);
   });
 });

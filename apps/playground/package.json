@@ -10,7 +10,9 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@algoviz/core": "*",
     "@algoviz/spec": "*",
+    "@algoviz/svg": "*",
     "vue": "^3.5.43"
   }
 }
