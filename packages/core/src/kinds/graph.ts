@@ -111,6 +111,16 @@ function reduceGraph(s: GraphState, a: GraphAction): Reduced {
           path: ['node', 'id'],
           message: `The id "${a.node.id}" is already in use`,
         });
+      if (
+        s.layout === 'manual' &&
+        (a.node.x === undefined || a.node.y === undefined)
+      )
+        return err({
+          code: 'INVALID_OPERATION',
+          path: ['node'],
+          message: `Node "${a.node.id}" needs x and y: the graph uses the manual layout`,
+          hint: 'Give the node as { "id", "x", "y" }.',
+        });
       return result({ ...data, nodes: [...data.nodes, a.node] });
     }
     case 'removeNode': {

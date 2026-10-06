@@ -1,0 +1,193 @@
+{
+  "description": "Ten parallel edges routed around a row are spread apart and stay inside the scene.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "g": {
+        "kind": "graph",
+        "directed": true,
+        "nodes": ["a", "b", "c"],
+        "edges": [
+          ["a", "b"],
+          ["b", "c"],
+          {
+            "id": "p0",
+            "from": "a",
+            "to": "c",
+            "weight": 0
+          },
+          {
+            "id": "p1",
+            "from": "a",
+            "to": "c",
+            "weight": 1
+          },
+          {
+            "id": "p2",
+            "from": "a",
+            "to": "c",
+            "weight": 2
+          },
+          {
+            "id": "p3",
+            "from": "a",
+            "to": "c",
+            "weight": 3
+          },
+          {
+            "id": "p4",
+            "from": "a",
+            "to": "c",
+            "weight": 4
+          },
+          {
+            "id": "p5",
+            "from": "a",
+            "to": "c",
+            "weight": 5
+          },
+          {
+            "id": "p6",
+            "from": "a",
+            "to": "c",
+            "weight": 6
+          },
+          {
+            "id": "p7",
+            "from": "a",
+            "to": "c",
+            "weight": 7
+          },
+          {
+            "id": "p8",
+            "from": "a",
+            "to": "c",
+            "weight": 8
+          },
+          {
+            "id": "p9",
+            "from": "a",
+            "to": "c",
+            "weight": 9
+          }
+        ]
+      }
+    },
+    "steps": []
+  },
+  "expectedLength": 0,
+  "expectedFrames": [
+    {
+      "index": 0,
+      "state": {
+        "g": {
+          "kind": "graph",
+          "state": {
+            "data": {
+              "nodes": [
+                {
+                  "id": "a",
+                  "value": "a"
+                },
+                {
+                  "id": "b",
+                  "value": "b"
+                },
+                {
+                  "id": "c",
+                  "value": "c"
+                }
+              ],
+              "edges": [
+                {
+                  "id": "a-b",
+                  "from": "a",
+                  "to": "b",
+                  "weight": null
+                },
+                {
+                  "id": "b-c",
+                  "from": "b",
+                  "to": "c",
+                  "weight": null
+                },
+                {
+                  "id": "p0",
+                  "from": "a",
+                  "to": "c",
+                  "weight": 0
+                },
+                {
+                  "id": "p1",
+                  "from": "a",
+                  "to": "c",
+                  "weight": 1
+                },
+                {
+                  "id": "p2",
+                  "from": "a",
+                  "to": "c",
+                  "weight": 2
+                },
+                {
+                  "id": "p3",
+                  "from": "a",
+                  "to": "c",
+                  "weight": 3
+                },
+                {
+                  "id": "p4",
+                  "from": "a",
+                  "to": "c",
+                  "weight": 4
+                },
+                {
+                  "id": "p5",
+                  "from": "a",
+                  "to": "c",
+                  "weight": 5
+                },
+                {
+                  "id": "p6",
+                  "from": "a",
+                  "to": "c",
+                  "weight": 6
+                },
+                {
+                  "id": "p7",
+                  "from": "a",
+                  "to": "c",
+                  "weight": 7
+                },
+                {
+                  "id": "p8",
+                  "from": "a",
+                  "to": "c",
+                  "weight": 8
+                },
+                {
+                  "id": "p9",
+                  "from": "a",
+                  "to": "c",
+                  "weight": 9
+                }
+              ]
+            },
+            "marks": {
+              "highlightNodes": [],
+              "highlightEdges": [],
+              "visited": [],
+              "settled": [],
+              "groups": {},
+              "pointers": {},
+              "notes": {},
+              "edgeMarks": {}
+            },
+            "directed": true,
+            "layout": "auto"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -180,6 +180,49 @@ describe('graph layout', () => {
     expect(new Set(angles).size).toBe(2);
   });
 
+  it('keeps every self-loop distinct beyond the eight directions', () => {
+    const { layout: l } = layout({
+      version: '0.1',
+      structures: {
+        g: {
+          kind: 'graph',
+          nodes: ['A'],
+          edges: Array.from({ length: 11 }, (_, k) => ({
+            id: `l${k}`,
+            from: 'A',
+            to: 'A',
+          })),
+        },
+      },
+      steps: [
+        { actions: [{ target: 'g', type: 'annotate', node: 'A', text: 'x' }] },
+      ],
+    });
+    const angles = edges(l.sceneAt(1)).map((e) => e.loopAngle ?? 0);
+    expect(new Set(angles).size).toBe(11);
+  });
+
+  it('keeps many straight parallel edges distinct', () => {
+    const { layout: l } = layout({
+      version: '0.1',
+      structures: {
+        g: {
+          kind: 'graph',
+          layout: 'grid',
+          nodes: ['A', 'B'],
+          edges: Array.from({ length: 6 }, (_, k) => ({
+            id: `e${k}`,
+            from: 'A',
+            to: 'B',
+          })),
+        },
+      },
+      steps: [],
+    });
+    const starts = edges(l.sceneAt(0)).map((e) => Math.round(e.y1 * 100));
+    expect(new Set(starts).size).toBe(6);
+  });
+
   it('spreads parallel edges that are routed around rows', () => {
     const { layout: l } = layout({
       version: '0.1',

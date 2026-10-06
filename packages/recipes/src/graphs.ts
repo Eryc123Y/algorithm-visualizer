@@ -22,15 +22,17 @@ interface Arc {
 
 /**
  * The visualization id of each input edge: "from-to", with ".2", ".3", …
- * appended to repeats so that parallel edges stay distinct.
+ * appended when that id is taken by a node or an earlier edge.
  */
 function edgeIds(g: GraphInput): string[] {
-  const seen = new Map<string, number>();
+  // Nodes and edges share one id namespace.
+  const taken = new Set(g.nodes);
   return g.edges.map(([from, to]) => {
     const base = `${from}-${to}`;
-    const n = (seen.get(base) ?? 0) + 1;
-    seen.set(base, n);
-    return n === 1 ? base : `${base}.${n}`;
+    let id = base;
+    for (let n = 2; taken.has(id); n++) id = `${base}.${n}`;
+    taken.add(id);
+    return id;
   });
 }
 

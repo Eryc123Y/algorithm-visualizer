@@ -1,0 +1,36 @@
+{
+  "description": "Nodes added to a graph with the manual layout need coordinates, as declared ones do.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "g": {
+        "kind": "graph",
+        "layout": "manual",
+        "nodes": [
+          {
+            "id": "A",
+            "x": 0,
+            "y": 0
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "g",
+            "type": "addNode",
+            "node": "B"
+          }
+        ]
+      }
+    ]
+  },
+  "expectedErrors": [
+    {
+      "code": "INVALID_OPERATION",
+      "path": "$.steps[0].actions[0].node"
+    }
+  ]
+}

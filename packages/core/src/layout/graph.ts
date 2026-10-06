@@ -60,6 +60,8 @@ export interface GraphMetrics {
   readonly hasWeights: boolean;
   /** Longest edge label, in characters. */
   readonly maxWeightChars: number;
+  /** Most edges that ever join the same two nodes (either way). */
+  readonly maxParallel: number;
   /** Most self-loops each node ever has (nodes without any are absent). */
   readonly loops: Readonly<Record<string, number>>;
 }
@@ -93,6 +95,7 @@ export function measureGraph(state: GraphState): GraphMetrics {
       ),
     ),
     loops: countLoops(state),
+    maxParallel: maxParallel(state),
   };
 }
 
@@ -121,12 +124,23 @@ export const mergeGraphMetrics = (
   hasLoops: a.hasLoops || b.hasLoops,
   hasWeights: a.hasWeights || b.hasWeights,
   maxWeightChars: Math.max(a.maxWeightChars, b.maxWeightChars),
+  maxParallel: Math.max(a.maxParallel, b.maxParallel),
   loops: Object.fromEntries(
     [...new Set([...Object.keys(a.loops), ...Object.keys(b.loops)])].map(
       (id) => [id, Math.max(own(a.loops, id) ?? 0, own(b.loops, id) ?? 0)],
     ),
   ),
 });
+
+function maxParallel(state: GraphState): number {
+  const count = new Map<string, number>();
+  for (const { from, to } of state.data.edges)
+    if (from !== to) {
+      const key = from < to ? linkKey(from, to) : linkKey(to, from);
+      count.set(key, (count.get(key) ?? 0) + 1);
+    }
+  return Math.max(1, ...count.values());
+}
 
 function countLoops(state: GraphState): Record<string, number> {
   const count = new Map<string, number>();
@@ -461,21 +475,28 @@ export function layoutGraph({
   const weightWidth = metrics.hasWeights
     ? Math.ceil(metrics.maxWeightChars * o.indexFontSize * 0.6)
     : 0;
-  const pad = Math.max(
-    metrics.hasWeights ? Math.max(12, weightWidth + 6 - halfWidth) : 4,
-    metrics.hasLoops
-      ? metrics.hasWeights
-        ? Math.max(
-            SELF_LOOP_HEIGHT,
-            Math.ceil(36 + Math.max(o.indexFontSize, weightWidth) + 2),
-          )
-        : SELF_LOOP_HEIGHT
-      : 0,
-    // A note turned sideways extends its full width beyond the node.
-    metrics.hasNotes
-      ? Math.max(30, noteWidth(metrics.maxNoteChars, shape, o) + 8)
-      : 0,
-  );
+  // Routed parallel edges are shifted apart beyond their bend points.
+  const routeShift =
+    arrangement.bends === undefined || arrangement.bends.size === 0
+      ? 0
+      : ((metrics.maxParallel - 1) / 2) * PARALLEL_SPREAD;
+  const pad =
+    routeShift +
+    Math.max(
+      metrics.hasWeights ? Math.max(12, weightWidth + 6 - halfWidth) : 4,
+      metrics.hasLoops
+        ? metrics.hasWeights
+          ? Math.max(
+              SELF_LOOP_HEIGHT,
+              Math.ceil(36 + Math.max(o.indexFontSize, weightWidth) + 2),
+            )
+          : SELF_LOOP_HEIGHT
+        : 0,
+      // A note turned sideways extends its full width beyond the node.
+      metrics.hasNotes
+        ? Math.max(30, noteWidth(metrics.maxNoteChars, shape, o) + 8)
+        : 0,
+    );
   const above = Math.max(pad, metrics.hasNotes ? NOTE_HEIGHT : 0);
   const left = origin.x + pointerWidth + halfWidth + pad;
   const top = origin.y + titleRowHeight(o) + above + radius;
@@ -554,9 +575,12 @@ export function layoutGraph({
       away(id),
     );
     const count = own(metrics.loops, id) ?? 0;
+    if (count <= directions.length) return directions.slice(0, count);
+    // More loops than directions: spread them evenly from the best one, so
+    // that no two coincide.
     return Array.from(
       { length: count },
-      (_, k) => directions[k % directions.length]!,
+      (_, k) => (directions[0]! + (k * 360) / count) % 360,
     );
   };
   const loopsSeen = new Map<string, number>();
@@ -607,7 +631,13 @@ export function layoutGraph({
     const right = { x: -u.y, y: u.x };
     const sameWay = e.from < e.to ? 1 : -1;
     const shared = { x: right.x * sameWay, y: right.y * sameWay };
-    const d = Math.min(Math.abs(offset), radius * 0.7) * Math.sign(offset);
+    // Straight edges must leave through the node, so they share at most
+    // 1.6 r between them; the spacing shrinks so that none coincide.
+    const d =
+      group.length === 1
+        ? 0
+        : (group.indexOf(e.id) - (group.length - 1) / 2) *
+          Math.min(PARALLEL_SPREAD, (1.6 * radius) / (group.length - 1));
     const side =
       d === 0
         ? {}

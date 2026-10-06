@@ -235,6 +235,11 @@ describe('parallel edges', () => {
     expect(notes(g)['C']).toBe('3');
     expect(selected(g).sort()).toEqual(['A-B.2', 'B-C']);
   });
+  it('does not reuse a node name as an edge id', () => {
+    const named: GraphInput = { nodes: ['A', 'B', 'A-B'], edges: [['A', 'B']] };
+    const g = stateOf(replay(breadthFirstSearch(named, 'A')), 'g', 'graph');
+    expect(g.data.edges.map((e) => e.id)).toEqual(['A-B.2']);
+  });
   it('runs every graph recipe', () => {
     for (const doc of [
       breadthFirstSearch(multi, 'A'),
