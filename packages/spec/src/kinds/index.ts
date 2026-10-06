@@ -1,28 +1,50 @@
 /**
- * Registry of built-in structure kinds.
+ * Registry of built-in structure kinds (ADR 0012). Adding a kind means
+ * writing its module and adding one entry here and in `visualization.ts`.
  */
-import type { z } from 'zod';
-
-import { ArrayAction, ArrayDecl, ArrayDeclInput } from './array.ts';
+import { arraySpec } from './array.ts';
+import type { KindSpec, KindTypes } from './kind.ts';
+import { linkedListSpec } from './linked-list.ts';
+import { queueSpec } from './queue.ts';
+import { stackSpec } from './stack.ts';
 
 export * from './array.ts';
+export * from './kind.ts';
+export * from './linked-list.ts';
+export * from './queue.ts';
+export * from './stack.ts';
 
-/** Per-kind schemas the parser needs to look up by `kind`. */
-interface KindSchemas {
-  readonly decl: z.ZodType;
-  readonly declInput: z.ZodType;
-  readonly action: z.ZodDiscriminatedUnion<
-    readonly z.ZodObject<{ type: z.ZodLiteral<string> }>[]
-  >;
-}
+const registry = {
+  array: arraySpec,
+  stack: stackSpec,
+  queue: queueSpec,
+  linkedList: linkedListSpec,
+};
 
-export const kinds = {
-  array: { decl: ArrayDecl, declInput: ArrayDeclInput, action: ArrayAction },
-} as const satisfies Record<string, KindSchemas>;
+export type StructureKindName = keyof typeof registry;
 
-export type StructureKindName = keyof typeof kinds;
+/** The types of each kind, keyed by kind name. */
+export type KindTypeMap = {
+  [K in StructureKindName]: (typeof registry)[K] extends KindSpec<infer T>
+    ? T
+    : never;
+};
+
+/**
+ * The registry, typed so that `kinds[k]` for a generic `K` is
+ * `KindSpec<KindTypeMap[K]>`; that lets callers dispatch on a kind name
+ * without a switch (TypeScript's "correlated union" pattern).
+ */
+export const kinds: {
+  readonly [K in StructureKindName]: KindSpec<KindTypeMap[K]>;
+} = registry;
+
+export const kindNames = Object.keys(registry) as StructureKindName[];
 
 /** The action `type` values defined for a kind, e.g. `['set', 'swap', …]`. */
-export function actionTypesOf(kind: StructureKindName): string[] {
-  return kinds[kind].action.options.map((option) => option.shape.type.value);
-}
+export const actionTypesOf = (kind: StructureKindName): readonly string[] =>
+  kinds[kind].actionTypes;
+
+// Every entry must satisfy the generic contract.
+const _check: Record<string, KindSpec<KindTypes>> = registry;
+void _check;

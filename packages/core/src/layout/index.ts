@@ -5,61 +5,86 @@
  * whole trace (ADR 0008) so that sizes and positions do not jump between
  * frames.
  */
-import type { Visualization } from '@algoviz/spec';
+import type {
+  StructureDecl,
+  StructureKindName,
+  Visualization,
+} from '@algoviz/spec';
 
+import type { Block } from '../kind.ts';
 import type { KindedState, VisualizationState } from '../kinds/index.ts';
+import { runtimes, type CoreTypeMap } from '../registry.ts';
 import type { Trace } from '../trace.ts';
-import {
-  layoutArray,
-  measureArray,
-  mergeArrayMetrics,
-  type ArrayMetrics,
-} from './array.ts';
 import { defaultLayoutOptions, type LayoutOptions } from './options.ts';
 import type { Scene, SceneItem } from './scene.ts';
 
 export * from './array.ts';
+export * from './common.ts';
+export * from './linked-list.ts';
+export * from './queue.ts';
+export * from './stack.ts';
 export * from './options.ts';
 export * from './scene.ts';
 
 /** Metrics of one structure, tagged with its kind. */
-export type KindedMetrics = {
-  readonly kind: 'array';
-  readonly metrics: ArrayMetrics;
-};
+export type KindedMetrics<K extends StructureKindName = StructureKindName> = {
+  [P in K]: { readonly kind: P; readonly metrics: CoreTypeMap[P]['metrics'] };
+}[K];
 
 /** Metrics of every structure in a visualization, keyed by name. */
 export type SceneMetrics = Readonly<Record<string, KindedMetrics>>;
 
-function measureStructure(entry: KindedState): KindedMetrics {
-  switch (entry.kind) {
-    case 'array':
-      return { kind: 'array', metrics: measureArray(entry.state) };
-    default: {
-      const unreachable: never = entry.kind;
-      return unreachable;
-    }
-  }
+// Generic dispatch helpers; see kinds/index.ts for the pattern.
+
+function measureOf<K extends StructureKindName>(
+  kind: K,
+  state: CoreTypeMap[K]['state'],
+  decl: CoreTypeMap[K]['decl'],
+) {
+  return runtimes[kind].measure(state, decl);
+}
+
+function mergeOf<K extends StructureKindName>(
+  kind: K,
+  a: CoreTypeMap[K]['metrics'],
+  b: CoreTypeMap[K]['metrics'],
+) {
+  return runtimes[kind].mergeMetrics(a, b);
+}
+
+function layoutOf<K extends StructureKindName>(
+  kind: K,
+  input: Parameters<(typeof runtimes)[K]['layout']>[0],
+): Block {
+  return runtimes[kind].layout(input);
+}
+
+function measureStructure(
+  entry: KindedState,
+  decl: StructureDecl,
+): KindedMetrics {
+  return {
+    kind: entry.kind,
+    metrics: measureOf(entry.kind, entry.state, decl),
+  } as KindedMetrics;
 }
 
 function mergeStructure(a: KindedMetrics, b: KindedMetrics): KindedMetrics {
-  switch (a.kind) {
-    case 'array':
-      return {
-        kind: 'array',
-        metrics: mergeArrayMetrics(a.metrics, b.metrics),
-      };
-    default: {
-      const unreachable: never = a.kind;
-      return unreachable;
-    }
-  }
+  return {
+    kind: a.kind,
+    metrics: mergeOf(a.kind, a.metrics, b.metrics),
+  } as KindedMetrics;
 }
 
-export function measureState(state: VisualizationState): SceneMetrics {
+export function measureState(
+  vis: Visualization,
+  state: VisualizationState,
+): SceneMetrics {
   const out: Record<string, KindedMetrics> = {};
-  for (const [name, entry] of Object.entries(state))
-    out[name] = measureStructure(entry);
+  for (const [name, entry] of Object.entries(state)) {
+    const decl = vis.structures[name];
+    if (decl !== undefined) out[name] = measureStructure(entry, decl);
+  }
   return out;
 }
 
@@ -74,16 +99,17 @@ export function mergeMetrics(a: SceneMetrics, b: SceneMetrics): SceneMetrics {
 
 /** Measures every frame of a trace. */
 export function measureTrace(trace: Trace): SceneMetrics {
-  let metrics = measureState(trace.frame(0).state);
+  const vis = trace.visualization;
+  let metrics = measureState(vis, trace.frame(0).state);
   for (let i = 1; i <= trace.length; i++)
-    metrics = mergeMetrics(metrics, measureState(trace.frame(i).state));
+    metrics = mergeMetrics(metrics, measureState(vis, trace.frame(i).state));
   return metrics;
 }
 
 export function layoutState(
   vis: Visualization,
   state: VisualizationState,
-  metrics: SceneMetrics = measureState(state),
+  metrics: SceneMetrics = measureState(vis, state),
   options: LayoutOptions = defaultLayoutOptions,
 ): Scene {
   const o = options;
@@ -94,23 +120,22 @@ export function layoutState(
 
   for (const [name, decl] of Object.entries(vis.structures)) {
     const entry = state[name];
-    const m = metrics[name] ?? (entry && measureStructure(entry));
+    const m = metrics[name] ?? (entry && measureStructure(entry, decl));
     if (entry === undefined || m === undefined) continue;
     if (!first) y += o.structureGap;
     first = false;
 
     const title = decl.label ?? name;
     const origin = { x: o.padding, y };
-    let block;
-    switch (entry.kind) {
-      case 'array':
-        block = layoutArray(name, title, entry.state, m.metrics, origin, o);
-        break;
-      default: {
-        const unreachable: never = entry.kind;
-        return unreachable;
-      }
-    }
+    const block = layoutOf(entry.kind, {
+      name,
+      title,
+      decl,
+      state: entry.state,
+      metrics: m.metrics,
+      origin,
+      options: o,
+    } as Parameters<(typeof runtimes)[typeof entry.kind]['layout']>[0]);
     items.push(...block.items);
     width = Math.max(width, block.width);
     y += block.height;

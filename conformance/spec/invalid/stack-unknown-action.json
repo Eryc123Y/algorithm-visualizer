@@ -1,0 +1,28 @@
+{
+  "description": "Actions are checked against the target's kind: a stack has no dequeue.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "st": {
+        "kind": "stack",
+        "initial": [1]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "st",
+            "type": "dequeue"
+          }
+        ]
+      }
+    ]
+  },
+  "expectedErrors": [
+    {
+      "code": "UNKNOWN_ACTION",
+      "path": "$.steps[0].actions[0].type"
+    }
+  ]
+}

@@ -1,0 +1,150 @@
+{
+  "description": "Push appends on top, pop removes the top, peek highlights it for one step.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "st": {
+        "kind": "stack",
+        "initial": [1]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "st",
+            "type": "push",
+            "element": 2
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "st",
+            "type": "push",
+            "element": {
+              "id": "x",
+              "value": 3
+            }
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "st",
+            "type": "peek"
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "st",
+            "type": "pop"
+          }
+        ]
+      }
+    ]
+  },
+  "expectedLength": 4,
+  "expectedFrames": [
+    {
+      "index": 0,
+      "state": {
+        "st": {
+          "kind": "stack",
+          "state": {
+            "data": [
+              {
+                "id": "e0",
+                "value": 1
+              }
+            ],
+            "marks": {
+              "highlight": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 2,
+      "state": {
+        "st": {
+          "kind": "stack",
+          "state": {
+            "data": [
+              {
+                "id": "e0",
+                "value": 1
+              },
+              {
+                "id": "e1",
+                "value": 2
+              },
+              {
+                "id": "x",
+                "value": 3
+              }
+            ],
+            "marks": {
+              "highlight": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 3,
+      "state": {
+        "st": {
+          "kind": "stack",
+          "state": {
+            "data": [
+              {
+                "id": "e0",
+                "value": 1
+              },
+              {
+                "id": "e1",
+                "value": 2
+              },
+              {
+                "id": "x",
+                "value": 3
+              }
+            ],
+            "marks": {
+              "highlight": [2]
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 4,
+      "state": {
+        "st": {
+          "kind": "stack",
+          "state": {
+            "data": [
+              {
+                "id": "e0",
+                "value": 1
+              },
+              {
+                "id": "e1",
+                "value": 2
+              }
+            ],
+            "marks": {
+              "highlight": []
+            }
+          }
+        }
+      }
+    }
+  ]
+}

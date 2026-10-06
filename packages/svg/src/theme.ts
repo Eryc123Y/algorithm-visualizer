@@ -3,11 +3,11 @@
  * a theme turns them into colours, strokes and fonts.
  *
  * Every role is distinguishable without colour: compare has a heavy border,
- * swap a heavy dashed border, highlight a tinted fill, and settled a solid
- * fill with a check mark. This keeps figures readable in print, on
+ * swap a heavy dashed border, highlight a tinted fill, visited a dotted
+ * border, and settled a solid fill with a check mark. This keeps figures readable in print, on
  * projectors and for colour-blind learners.
  */
-import type { BoxRole } from '@algoviz/core';
+import type { EdgeRole, ElementRole } from '@algoviz/core';
 
 export interface CellStyle {
   readonly fill: string;
@@ -38,9 +38,36 @@ export interface SvgTheme {
     readonly fill: string;
     readonly text: string;
   };
-  readonly cell: Readonly<Record<BoxRole, CellStyle>>;
+  /** Cells and nodes, by role. */
+  readonly cell: Readonly<Record<ElementRole, CellStyle>>;
   /** Colour of the check mark on settled cells, or null to hide it. */
   readonly settledMark: string | null;
+  /** Fills for categorical groups 0–5; used when no stronger role applies. */
+  readonly groups: readonly [
+    GroupStyle,
+    GroupStyle,
+    GroupStyle,
+    GroupStyle,
+    GroupStyle,
+    GroupStyle,
+  ];
+  /** Red–black tree node colours. */
+  readonly rb: { readonly red: GroupStyle; readonly black: GroupStyle };
+  readonly edge: Readonly<Record<EdgeRole, EdgeStyle>>;
+  /** Outline drawn behind edge labels so they stay legible over lines. */
+  readonly labelHalo: string;
+}
+
+export interface GroupStyle {
+  readonly fill: string;
+  readonly stroke: string;
+  readonly text: string;
+}
+
+export interface EdgeStyle {
+  readonly stroke: string;
+  readonly width: number;
+  readonly opacity: number;
 }
 
 const fonts = {
@@ -59,6 +86,13 @@ export const lightTheme: SvgTheme = {
   index: '#8a9590',
   pointer: { line: '#0f7b6c', fill: '#0f7b6c', text: '#ffffff' },
   cell: {
+    visited: {
+      fill: '#f3f6f8',
+      stroke: '#7b8b94',
+      strokeWidth: 1.5,
+      dash: '2 2.5',
+      text: '#3d4a52',
+    },
     default: {
       fill: '#ffffff',
       stroke: '#c9d3cf',
@@ -96,6 +130,26 @@ export const lightTheme: SvgTheme = {
     },
   },
   settledMark: '#ffffff',
+  groups: [
+    { fill: '#dbeafe', stroke: '#3b82f6', text: '#1e3a8a' },
+    { fill: '#fce7f3', stroke: '#db2777', text: '#831843' },
+    { fill: '#dcfce7', stroke: '#16a34a', text: '#14532d' },
+    { fill: '#fef3c7', stroke: '#d97706', text: '#78350f' },
+    { fill: '#ede9fe', stroke: '#7c3aed', text: '#4c1d95' },
+    { fill: '#cffafe', stroke: '#0891b2', text: '#164e63' },
+  ],
+  rb: {
+    red: { fill: '#d63c3c', stroke: '#a82525', text: '#ffffff' },
+    black: { fill: '#2b2f2d', stroke: '#111312', text: '#ffffff' },
+  },
+  edge: {
+    default: { stroke: '#9aa7a2', width: 1.75, opacity: 1 },
+    link: { stroke: '#6b7772', width: 1.5, opacity: 1 },
+    highlight: { stroke: '#d08a18', width: 3, opacity: 1 },
+    selected: { stroke: '#0f7b6c', width: 3.5, opacity: 1 },
+    rejected: { stroke: '#c9d3cf', width: 1.25, opacity: 0.6 },
+  },
+  labelHalo: '#ffffff',
 };
 
 export const darkTheme: SvgTheme = {
@@ -107,6 +161,13 @@ export const darkTheme: SvgTheme = {
   index: '#7f8c87',
   pointer: { line: '#4fc4b0', fill: '#4fc4b0', text: '#0d1a17' },
   cell: {
+    visited: {
+      fill: '#1a2226',
+      stroke: '#7f939c',
+      strokeWidth: 1.5,
+      dash: '2 2.5',
+      text: '#cfd8dc',
+    },
     default: {
       fill: '#1c2522',
       stroke: '#34433e',
@@ -144,6 +205,26 @@ export const darkTheme: SvgTheme = {
     },
   },
   settledMark: '#0d1a13',
+  groups: [
+    { fill: '#1e3a5f', stroke: '#60a5fa', text: '#dbeafe' },
+    { fill: '#4a1d36', stroke: '#f472b6', text: '#fce7f3' },
+    { fill: '#173d26', stroke: '#4ade80', text: '#dcfce7' },
+    { fill: '#45330f', stroke: '#fbbf24', text: '#fef3c7' },
+    { fill: '#33215c', stroke: '#a78bfa', text: '#ede9fe' },
+    { fill: '#123d47', stroke: '#22d3ee', text: '#cffafe' },
+  ],
+  rb: {
+    red: { fill: '#c23535', stroke: '#ff8080', text: '#ffffff' },
+    black: { fill: '#0b0d0c', stroke: '#8a9590', text: '#ffffff' },
+  },
+  edge: {
+    default: { stroke: '#5f6f69', width: 1.75, opacity: 1 },
+    link: { stroke: '#8a9590', width: 1.5, opacity: 1 },
+    highlight: { stroke: '#e9a53a', width: 3, opacity: 1 },
+    selected: { stroke: '#4fc4b0', width: 3.5, opacity: 1 },
+    rejected: { stroke: '#34433e', width: 1.25, opacity: 0.7 },
+  },
+  labelHalo: '#151b19',
 };
 
 /** Greyscale theme for handouts, LaTeX and Typst documents. */
@@ -156,6 +237,13 @@ export const printTheme: SvgTheme = {
   index: '#555555',
   pointer: { line: '#000000', fill: '#000000', text: '#ffffff' },
   cell: {
+    visited: {
+      fill: '#ffffff',
+      stroke: '#000000',
+      strokeWidth: 1,
+      dash: '1.5 2',
+      text: '#000000',
+    },
     default: {
       fill: '#ffffff',
       stroke: '#555555',
@@ -193,6 +281,26 @@ export const printTheme: SvgTheme = {
     },
   },
   settledMark: '#ffffff',
+  groups: [
+    { fill: '#f2f2f2', stroke: '#555555', text: '#000000' },
+    { fill: '#d9d9d9', stroke: '#555555', text: '#000000' },
+    { fill: '#bfbfbf', stroke: '#555555', text: '#000000' },
+    { fill: '#a6a6a6', stroke: '#333333', text: '#000000' },
+    { fill: '#8c8c8c', stroke: '#333333', text: '#ffffff' },
+    { fill: '#737373', stroke: '#333333', text: '#ffffff' },
+  ],
+  rb: {
+    red: { fill: '#ffffff', stroke: '#000000', text: '#000000' },
+    black: { fill: '#222222', stroke: '#000000', text: '#ffffff' },
+  },
+  edge: {
+    default: { stroke: '#555555', width: 1.5, opacity: 1 },
+    link: { stroke: '#333333', width: 1.25, opacity: 1 },
+    highlight: { stroke: '#000000', width: 3, opacity: 1 },
+    selected: { stroke: '#000000', width: 4, opacity: 1 },
+    rejected: { stroke: '#bbbbbb', width: 1, opacity: 1 },
+  },
+  labelHalo: '#ffffff',
 };
 
 export const themes = {

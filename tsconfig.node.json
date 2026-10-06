@@ -4,7 +4,8 @@
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
     "lib": ["ES2023"],
     "types": ["node"],
-    "noEmit": true
+    "noEmit": true,
+    "customConditions": ["@algoviz/source"]
   },
-  "include": ["eslint.config.ts", "vitest.config.ts"]
+  "include": ["eslint.config.ts", "vitest.config.ts", "scripts"]
 }

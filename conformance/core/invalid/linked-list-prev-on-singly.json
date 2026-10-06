@@ -1,0 +1,31 @@
+{
+  "description": "A singly linked list has no prev pointers.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "ll": {
+        "kind": "linkedList",
+        "initial": [1, 2]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "ll",
+            "type": "link",
+            "from": 1,
+            "to": 0,
+            "field": "prev"
+          }
+        ]
+      }
+    ]
+  },
+  "expectedErrors": [
+    {
+      "code": "INVALID_OPERATION",
+      "path": "$.steps[0].actions[0].field"
+    }
+  ]
+}

@@ -4,7 +4,10 @@
  * 1. Reject unsupported versions with a dedicated error.
  * 2. Check the document's shape (actions only by `target` and `type`).
  * 3. Expand shorthands in structure declarations.
- * 4. Validate each action against the schema of its target's kind.
+ * 4. Validate each action against the schema of its target's kind, expand
+ *    its shorthands, and check that ids it introduces are new.
+ *
+ * Every kind-specific step goes through the kind registry (ADR 0012).
  *
  * Only static validity is checked here. Whether an action is valid at its
  * point in the timeline (e.g. an index within the current length) depends
@@ -18,9 +21,10 @@ import {
   type ProtocolErrorCode,
 } from './errors.ts';
 import {
-  actionTypesOf,
   kinds,
-  normalizeArrayDecl,
+  type ActionContext,
+  type IdRef,
+  type KindTypeMap,
   type StructureKindName,
 } from './kinds/index.ts';
 import { err, ok, type Result } from './result.ts';
@@ -45,16 +49,23 @@ export function parseVisualization(
     return err(fromZodIssues(envelope.error.issues, [], 'INVALID_SHAPE'));
   const doc = envelope.data;
 
-  const structures: Record<string, StructureDecl> = {};
-  for (const [name, decl] of Object.entries(doc.structures))
-    structures[name] = normalizeDecl(decl);
-
   const errors: ProtocolError[] = [];
-  // Element ids must be unique for the whole trace (ADR 0007), so an id
-  // removed earlier cannot be reused by a later insert.
+  const structures: Record<string, StructureDecl> = {};
+  // Ids are unique per structure for the whole trace (ADR 0007), so an id
+  // removed earlier cannot be reused by a later action.
   const usedIds = new Map<string, Set<string>>();
-  for (const [name, decl] of Object.entries(structures))
-    usedIds.set(name, new Set(decl.initial.map((e) => e.id)));
+  for (const [name, input] of Object.entries(doc.structures)) {
+    const decl = normalizeDecl(input);
+    structures[name] = decl;
+    const ids = new Set<string>();
+    for (const { id, path } of declIds(decl)) {
+      if (ids.has(id))
+        errors.push(duplicateId(id, name, ['structures', name, ...path]));
+      ids.add(id);
+    }
+    usedIds.set(name, ids);
+  }
+
   const sourceLines =
     doc.source === undefined ? undefined : doc.source.code.split('\n').length;
   const steps = doc.steps.map((step, s) => {
@@ -69,27 +80,12 @@ export function parseVisualization(
     }
     const actions = step.actions.flatMap((raw, a): TargetedAction[] => {
       const path = ['steps', s, 'actions', a];
-      const result = parseAction(raw, structures, path);
+      const result = parseAction(raw, structures, usedIds, path);
       if (!result.ok) {
         errors.push(...result.error);
         return [];
       }
-      const action = result.value;
-      if (action.type === 'insert') {
-        const ids = usedIds.get(action.target);
-        const id = action.element.id;
-        if (ids?.has(id)) {
-          errors.push({
-            code: 'DUPLICATE_ID',
-            path: formatPath([...path, 'element', 'id']),
-            message: `Element id "${id}" is already used in "${action.target}"`,
-            hint: 'Ids must be unique for the whole trace, even after removal; give the inserted element a new id.',
-          });
-          return [];
-        }
-        ids?.add(id);
-      }
-      return [action];
+      return [result.value];
     });
     return step.meta === undefined ? { actions } : { actions, meta: step.meta };
   });
@@ -152,20 +148,61 @@ function checkProtoKeys(input: unknown): ProtocolError[] {
   return errors;
 }
 
-function normalizeDecl(decl: StructureDeclInput): StructureDecl {
-  switch (decl.kind) {
-    case 'array':
-      return normalizeArrayDecl(decl);
-    default: {
-      const unreachable: never = decl.kind;
-      return unreachable;
-    }
-  }
+// Kind dispatch. Each helper is generic in the kind, so `kinds[kind]` has
+// the matching spec type; the casts restate what the discriminant guarantees.
+
+function normalizeDeclOf<K extends StructureKindName>(
+  kind: K,
+  input: KindTypeMap[K]['declInput'],
+): KindTypeMap[K]['decl'] {
+  return kinds[kind].normalizeDecl(input);
+}
+
+function declIdsOf<K extends StructureKindName>(
+  kind: K,
+  decl: KindTypeMap[K]['decl'],
+): readonly IdRef[] {
+  return kinds[kind].declIds(decl);
+}
+
+function normalizeActionOf<K extends StructureKindName>(
+  kind: K,
+  input: KindTypeMap[K]['actionInput'],
+  ctx: ActionContext,
+): KindTypeMap[K]['action'] {
+  return kinds[kind].normalizeAction(input, ctx);
+}
+
+function introducedIdsOf<K extends StructureKindName>(
+  kind: K,
+  action: KindTypeMap[K]['action'],
+): readonly IdRef[] {
+  return kinds[kind].introducedIds(action);
+}
+
+const normalizeDecl = (input: StructureDeclInput): StructureDecl =>
+  normalizeDeclOf(input.kind, input);
+
+const declIds = (decl: StructureDecl): readonly IdRef[] =>
+  declIdsOf(decl.kind, decl);
+
+function duplicateId(
+  id: string,
+  target: string,
+  path: readonly PropertyKey[],
+): ProtocolError {
+  return {
+    code: 'DUPLICATE_ID',
+    path: formatPath(path),
+    message: `Id "${id}" is already used in "${target}"`,
+    hint: 'Ids must be unique within a structure for the whole trace, even after removal; choose a new id.',
+  };
 }
 
 function parseAction(
   raw: { target: string; type: string; [key: string]: unknown },
   structures: Readonly<Record<string, StructureDecl>>,
+  usedIds: ReadonlyMap<string, Set<string>>,
   path: readonly PropertyKey[],
 ): Result<TargetedAction, ProtocolError[]> {
   const { target, ...payload } = raw;
@@ -182,20 +219,54 @@ function parseAction(
   }
 
   const kind: StructureKindName = decl.kind;
-  const types = actionTypesOf(kind);
-  if (!types.includes(raw.type)) {
+  const spec = kinds[kind];
+  if (!spec.actionTypes.includes(raw.type)) {
     return fail(
       'UNKNOWN_ACTION',
       [...path, 'type'],
       `"${raw.type}" is not an action of ${kind} "${target}"`,
-      `Valid actions for ${kind}: ${types.join(', ')}.`,
+      `Valid actions for ${kind}: ${spec.actionTypes.join(', ')}.`,
     );
   }
 
-  const parsed = kinds[kind].action.safeParse(payload);
+  const parsed = spec.actionInput.safeParse(payload);
   if (!parsed.success)
     return err(fromZodIssues(parsed.error.issues, path, 'INVALID_ACTION'));
-  return ok({ target, ...parsed.data });
+
+  const ids = usedIds.get(target) ?? new Set<string>();
+  // The payload was parsed with this kind's schema, so it is this kind's input.
+  const input = parsed.data;
+  const action = normalizeActionOf(kind, input, {
+    allocateId(prefix) {
+      let n = 0;
+      while (ids.has(`${prefix}${n}`)) n += 1;
+      const id = `${prefix}${n}`;
+      ids.add(id);
+      return id;
+    },
+  });
+  const errors: ProtocolError[] = [];
+  for (const ref of introducedIdsOf(kind, action)) {
+    if (ids.has(ref.id) && !wasAllocated(input, ref)) {
+      errors.push(duplicateId(ref.id, target, [...path, ...ref.path]));
+    }
+    ids.add(ref.id);
+  }
+  if (errors.length > 0) return err(errors);
+  return ok({ target, ...action });
+}
+
+/**
+ * Whether an introduced id was generated during normalisation (and so
+ * already reserved), rather than written in the input.
+ */
+function wasAllocated(input: unknown, ref: IdRef): boolean {
+  let node: unknown = input;
+  for (const key of ref.path) {
+    if (typeof node !== 'object' || node === null) return true;
+    node = (node as Record<PropertyKey, unknown>)[key];
+  }
+  return node === undefined;
 }
 
 function fail(

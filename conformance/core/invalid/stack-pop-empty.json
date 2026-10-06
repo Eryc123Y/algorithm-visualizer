@@ -1,0 +1,28 @@
+{
+  "description": "Popping an empty stack is an error.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "st": {
+        "kind": "stack",
+        "initial": []
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "st",
+            "type": "pop"
+          }
+        ]
+      }
+    ]
+  },
+  "expectedErrors": [
+    {
+      "code": "EMPTY",
+      "path": "$.steps[0].actions[0]"
+    }
+  ]
+}

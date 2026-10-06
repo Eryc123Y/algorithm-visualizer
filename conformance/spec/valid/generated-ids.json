@@ -1,0 +1,77 @@
+{
+  "description": "Bare values in push actions get the lowest unused id e0, e1, …, skipping ids already taken.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "st": {
+        "kind": "stack",
+        "initial": [
+          {
+            "id": "e1",
+            "value": 0
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "st",
+            "type": "push",
+            "element": 5
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "st",
+            "type": "push",
+            "element": 6
+          }
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "version": "0.1",
+    "structures": {
+      "st": {
+        "kind": "stack",
+        "initial": [
+          {
+            "id": "e1",
+            "value": 0
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "st",
+            "type": "push",
+            "element": {
+              "id": "e0",
+              "value": 5
+            }
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "st",
+            "type": "push",
+            "element": {
+              "id": "e2",
+              "value": 6
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

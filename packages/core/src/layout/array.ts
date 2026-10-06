@@ -12,10 +12,24 @@
  *   (lo)                         below the first, which alone has the arrow
  * ```
  */
-import type { Scalar } from '@algoviz/spec';
+import type { ArrayDecl } from '@algoviz/spec';
+
+import type { Block, LayoutInput } from '../kind.ts';
 
 import type { ArrayState } from '../kinds/array.ts';
-import type { LayoutOptions } from './options.ts';
+import {
+  badgeOverhang,
+  cellWidthFor,
+  formatScalar,
+  groupPointers,
+  indexRowHeight,
+  maxChars,
+  pointerAreaHeight,
+  pointerItems,
+  titleItems,
+  titleRowHeight,
+  titleWidth,
+} from './common.ts';
 import type { BoxRole, SceneItem } from './scene.ts';
 
 /** Sizes an array needs; merged over all frames so the layout stays stable. */
@@ -30,9 +44,6 @@ export interface ArrayMetrics {
   readonly maxPointerChars: number;
 }
 
-/** Text shown for a value: ECMAScript `String()` conversion. */
-export const formatScalar = (value: Scalar): string => String(value);
-
 export function measureArray(state: ArrayState): ArrayMetrics {
   const perIndex = new Map<number, number>();
   for (const index of Object.values(state.marks.pointers))
@@ -42,15 +53,9 @@ export function measureArray(state: ArrayState): ArrayMetrics {
       state.data.length,
       ...[...perIndex.keys()].map((i) => i + 1),
     ),
-    maxChars: Math.max(
-      0,
-      ...state.data.map((e) => [...formatScalar(e.value)].length),
-    ),
+    maxChars: maxChars(state.data.map((e) => formatScalar(e.value))),
     pointerRows: Math.max(0, ...perIndex.values()),
-    maxPointerChars: Math.max(
-      0,
-      ...Object.keys(state.marks.pointers).map((name) => [...name].length),
-    ),
+    maxPointerChars: maxChars(Object.keys(state.marks.pointers)),
   };
 }
 
@@ -73,69 +78,28 @@ function roleOf(state: ArrayState, index: number, id: string): BoxRole {
   return 'default';
 }
 
-export interface Block {
-  readonly items: readonly SceneItem[];
-  readonly width: number;
-  readonly height: number;
-}
-
-export function layoutArray(
-  name: string,
-  title: string,
-  state: ArrayState,
-  metrics: ArrayMetrics,
-  origin: { readonly x: number; readonly y: number },
-  o: LayoutOptions,
-): Block {
-  const cellWidth = Math.max(
-    o.minCellWidth,
-    Math.ceil(
-      metrics.maxChars * o.valueFontSize * o.charWidthRatio + 2 * o.cellPadding,
-    ),
-  );
+export function layoutArray({
+  name,
+  title,
+  state,
+  metrics,
+  origin,
+  options: o,
+}: LayoutInput<ArrayDecl, ArrayState, ArrayMetrics>): Block {
+  const cellWidth = cellWidthFor(metrics.maxChars, o);
   const pitch = cellWidth + o.cellGap;
-  const badgeHeight = o.pointerFontSize + 8;
-  const badgeWidth = (chars: number) =>
-    Math.max(
-      badgeHeight,
-      Math.ceil(chars * o.pointerFontSize * o.charWidthRatio + 12),
-    );
   // Pointer badges are centred under cells and may be wider than a cell, so
   // reserve room for the widest one on both sides of the cell row.
-  const overhang =
-    metrics.maxPointerChars === 0
-      ? 0
-      : Math.max(
-          0,
-          Math.ceil(badgeWidth(metrics.maxPointerChars) / 2 - cellWidth / 2),
-        );
+  const overhang = badgeOverhang(metrics.maxPointerChars, cellWidth, o);
   const cellsLeft = origin.x + overhang;
   const centerX = (index: number) => cellsLeft + index * pitch + cellWidth / 2;
 
-  const titleRow = o.showTitles ? o.titleFontSize + 11 : 0;
-  const indexRow = o.showIndices ? o.indexFontSize + 8 : 0;
+  const titleRow = titleRowHeight(o);
+  const indexRow = indexRowHeight(o);
   const cellsTop = origin.y + titleRow + indexRow;
   const cellsBottom = cellsTop + o.cellHeight;
-  // Pointer area: a 14-unit arrow, then badges stacked every `badgePitch`.
-  const badgePitch = badgeHeight + 4;
-  const badgeTop = cellsBottom + 20;
-  const pointerArea =
-    metrics.pointerRows === 0 ? 0 : 20 + metrics.pointerRows * badgePitch;
 
-  const items: SceneItem[] = [];
-  if (o.showTitles) {
-    items.push({
-      type: 'text',
-      key: `${name}/title`,
-      x: origin.x,
-      y: origin.y + titleRow / 2,
-      anchor: 'start',
-      role: 'title',
-      text: title,
-      fontSize: o.titleFontSize,
-    });
-  }
-
+  const items: SceneItem[] = titleItems(name, title, origin, o);
   state.data.forEach((element, index) => {
     if (o.showIndices) {
       items.push({
@@ -161,50 +125,25 @@ export function layoutArray(
       fontSize: o.valueFontSize,
     });
   });
-
-  // Group pointers by index, sorted by name so stacking is deterministic.
-  const byIndex = new Map<number, string[]>();
-  for (const [pointer, index] of Object.entries(state.marks.pointers).sort(
-    ([a], [b]) => (a < b ? -1 : a > b ? 1 : 0),
-  ))
-    byIndex.set(index, [...(byIndex.get(index) ?? []), pointer]);
-
-  for (const [index, names] of byIndex) {
-    const x = centerX(index);
-    names.forEach((pointer, depth) => {
-      if (depth === 0) {
-        items.push({
-          type: 'arrow',
-          key: `${name}/pointer-arrow/${pointer}`,
-          x1: x,
-          y1: cellsBottom + 18,
-          x2: x,
-          y2: cellsBottom + 4,
-          role: 'pointer',
-        });
-      }
-      items.push({
-        type: 'badge',
-        key: `${name}/pointer/${pointer}`,
-        x,
-        y: badgeTop + depth * badgePitch + badgeHeight / 2,
-        width: badgeWidth([...pointer].length),
-        height: badgeHeight,
-        role: 'pointer',
-        text: pointer,
-        fontSize: o.pointerFontSize,
-      });
-    });
-  }
+  items.push(
+    ...pointerItems(
+      name,
+      groupPointers(Object.entries(state.marks.pointers)),
+      centerX,
+      cellsBottom,
+      o,
+    ),
+  );
 
   const cellsWidth =
     metrics.slots === 0 ? 0 : metrics.slots * pitch - o.cellGap;
-  const titleWidth = o.showTitles
-    ? Math.ceil([...title].length * o.titleFontSize * o.charWidthRatio)
-    : 0;
   return {
     items,
-    width: Math.max(cellsWidth + 2 * overhang, titleWidth),
-    height: titleRow + indexRow + o.cellHeight + pointerArea,
+    width: Math.max(cellsWidth + 2 * overhang, titleWidth(title, o)),
+    height:
+      titleRow +
+      indexRow +
+      o.cellHeight +
+      pointerAreaHeight(metrics.pointerRows, o),
   };
 }

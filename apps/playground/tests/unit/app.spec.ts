@@ -11,6 +11,7 @@ describe('bubbleSort sample', () => {
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     const last = result.value.frame(result.value.length).state['arr'];
+    if (last?.kind !== 'array') throw new Error('expected an array');
     expect(last?.state.data.map((e) => e.value)).toEqual([1, 3, 4, 5, 8]);
     expect(last?.state.marks.settled).toHaveLength(5);
   });

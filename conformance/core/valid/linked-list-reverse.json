@@ -1,0 +1,203 @@
+{
+  "description": "Reversing a singly linked list one pointer at a time; links are independent of the row order.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "ll": {
+        "kind": "linkedList",
+        "initial": [1, 2, 3]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "ll",
+            "type": "link",
+            "from": 0,
+            "to": null
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "ll",
+            "type": "link",
+            "from": 1,
+            "to": 0
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "ll",
+            "type": "link",
+            "from": 2,
+            "to": 1
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "ll",
+            "type": "pointer",
+            "name": "head",
+            "index": 2
+          }
+        ]
+      }
+    ]
+  },
+  "expectedLength": 4,
+  "expectedFrames": [
+    {
+      "index": 0,
+      "state": {
+        "ll": {
+          "kind": "linkedList",
+          "state": {
+            "data": [
+              {
+                "id": "e0",
+                "value": 1,
+                "next": "e1",
+                "prev": null
+              },
+              {
+                "id": "e1",
+                "value": 2,
+                "next": "e2",
+                "prev": null
+              },
+              {
+                "id": "e2",
+                "value": 3,
+                "next": null,
+                "prev": null
+              }
+            ],
+            "marks": {
+              "highlight": [],
+              "visited": [],
+              "pointers": {}
+            },
+            "doubly": false
+          }
+        }
+      }
+    },
+    {
+      "index": 1,
+      "state": {
+        "ll": {
+          "kind": "linkedList",
+          "state": {
+            "data": [
+              {
+                "id": "e0",
+                "value": 1,
+                "next": null,
+                "prev": null
+              },
+              {
+                "id": "e1",
+                "value": 2,
+                "next": "e2",
+                "prev": null
+              },
+              {
+                "id": "e2",
+                "value": 3,
+                "next": null,
+                "prev": null
+              }
+            ],
+            "marks": {
+              "highlight": [],
+              "visited": [],
+              "pointers": {}
+            },
+            "doubly": false
+          }
+        }
+      }
+    },
+    {
+      "index": 3,
+      "state": {
+        "ll": {
+          "kind": "linkedList",
+          "state": {
+            "data": [
+              {
+                "id": "e0",
+                "value": 1,
+                "next": null,
+                "prev": null
+              },
+              {
+                "id": "e1",
+                "value": 2,
+                "next": "e0",
+                "prev": null
+              },
+              {
+                "id": "e2",
+                "value": 3,
+                "next": "e1",
+                "prev": null
+              }
+            ],
+            "marks": {
+              "highlight": [],
+              "visited": [],
+              "pointers": {}
+            },
+            "doubly": false
+          }
+        }
+      }
+    },
+    {
+      "index": 4,
+      "state": {
+        "ll": {
+          "kind": "linkedList",
+          "state": {
+            "data": [
+              {
+                "id": "e0",
+                "value": 1,
+                "next": null,
+                "prev": null
+              },
+              {
+                "id": "e1",
+                "value": 2,
+                "next": "e0",
+                "prev": null
+              },
+              {
+                "id": "e2",
+                "value": 3,
+                "next": "e1",
+                "prev": null
+              }
+            ],
+            "marks": {
+              "highlight": [],
+              "visited": [],
+              "pointers": {
+                "head": "e2"
+              }
+            },
+            "doubly": false
+          }
+        }
+      }
+    }
+  ]
+}

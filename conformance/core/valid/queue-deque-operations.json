@@ -1,0 +1,183 @@
+{
+  "description": "enqueue/dequeue work at opposite ends; pushFront/popBack give deque behaviour; peek can look at either end.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "q": {
+        "kind": "queue",
+        "initial": ["a", "b"]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "q",
+            "type": "enqueue",
+            "element": "c"
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "q",
+            "type": "dequeue"
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "q",
+            "type": "pushFront",
+            "element": "z"
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "q",
+            "type": "popBack"
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "q",
+            "type": "peek",
+            "end": "back"
+          }
+        ]
+      }
+    ]
+  },
+  "expectedLength": 5,
+  "expectedFrames": [
+    {
+      "index": 1,
+      "state": {
+        "q": {
+          "kind": "queue",
+          "state": {
+            "data": [
+              {
+                "id": "e0",
+                "value": "a"
+              },
+              {
+                "id": "e1",
+                "value": "b"
+              },
+              {
+                "id": "e2",
+                "value": "c"
+              }
+            ],
+            "marks": {
+              "highlight": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 2,
+      "state": {
+        "q": {
+          "kind": "queue",
+          "state": {
+            "data": [
+              {
+                "id": "e1",
+                "value": "b"
+              },
+              {
+                "id": "e2",
+                "value": "c"
+              }
+            ],
+            "marks": {
+              "highlight": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 3,
+      "state": {
+        "q": {
+          "kind": "queue",
+          "state": {
+            "data": [
+              {
+                "id": "e3",
+                "value": "z"
+              },
+              {
+                "id": "e1",
+                "value": "b"
+              },
+              {
+                "id": "e2",
+                "value": "c"
+              }
+            ],
+            "marks": {
+              "highlight": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 4,
+      "state": {
+        "q": {
+          "kind": "queue",
+          "state": {
+            "data": [
+              {
+                "id": "e3",
+                "value": "z"
+              },
+              {
+                "id": "e1",
+                "value": "b"
+              }
+            ],
+            "marks": {
+              "highlight": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 5,
+      "state": {
+        "q": {
+          "kind": "queue",
+          "state": {
+            "data": [
+              {
+                "id": "e3",
+                "value": "z"
+              },
+              {
+                "id": "e1",
+                "value": "b"
+              }
+            ],
+            "marks": {
+              "highlight": [1]
+            }
+          }
+        }
+      }
+    }
+  ]
+}

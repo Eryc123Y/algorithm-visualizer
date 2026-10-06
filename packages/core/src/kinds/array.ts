@@ -14,6 +14,7 @@ import {
 } from '@algoviz/spec';
 
 import type { ReduceError } from '../errors.ts';
+import { checkRange as checkLimit } from './common.ts';
 import type { StructureKind, StructureState } from '../kind.ts';
 
 export interface ArrayMarks {
@@ -33,31 +34,11 @@ export type ArrayState = StructureState<readonly ArrayElement[], ArrayMarks>;
 
 type Reduced = Result<ArrayState, ReduceError>;
 
-/** Checks that the index at each action path is below `limit`. */
-function checkRange(
-  state: ArrayState,
+const checkRange = (
+  s: ArrayState,
   limit: number,
   ...indices: readonly (readonly [readonly PropertyKey[], number])[]
-): ReduceError | undefined {
-  for (const [path, index] of indices) {
-    if (index >= limit) {
-      const n = state.data.length;
-      const field = path
-        .map((key) => (typeof key === 'number' ? `[${key}]` : String(key)))
-        .join('');
-      return {
-        code: 'OUT_OF_RANGE',
-        path,
-        message: `${field}=${index} is out of range for an array of length ${n}`,
-        hint:
-          limit === 0
-            ? 'The array is empty.'
-            : `Valid values are 0 to ${limit - 1}.`,
-      };
-    }
-  }
-  return undefined;
-}
+) => checkLimit('an array', s.data.length, limit, ...indices);
 
 const withData = (s: ArrayState, data: readonly ArrayElement[]): Reduced =>
   ok({ data, marks: s.marks });
@@ -164,13 +145,7 @@ function reduceArray(s: ArrayState, a: ArrayAction): Reduced {
   }
 }
 
-export const arrayKind: StructureKind<
-  ArrayDecl,
-  readonly ArrayElement[],
-  ArrayMarks,
-  ArrayAction
-> = {
-  kind: 'array',
+export const arrayKind: StructureKind<ArrayDecl, ArrayState, ArrayAction> = {
   init: (decl) => ({
     data: decl.initial,
     marks: {
