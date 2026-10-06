@@ -3,6 +3,7 @@
  */
 import type { VisualizationInput } from '@algoviz/spec';
 
+import { checkInteger, checkIntegers, checkLength } from './check.ts';
 import { Recorder } from './recorder.ts';
 import { python } from './source.ts';
 
@@ -12,6 +13,10 @@ export function hashChaining(
   size: number,
   search?: number,
 ): VisualizationInput {
+  checkInteger('The number of buckets', size, 1, 100);
+  checkIntegers('Keys', keys);
+  checkLength('Keys', keys, 1000);
+  if (search !== undefined) checkIntegers('The key searched for', [search]);
   const r = new Recorder({
     title: 'Hash table with chaining',
     source: python(`
@@ -68,6 +73,8 @@ export function linearProbing(
   keys: readonly number[],
   size: number,
 ): VisualizationInput {
+  checkInteger('The number of slots', size, 0, 1000);
+  checkIntegers('Keys', keys);
   if (keys.length > size) throw new RangeError('More keys than slots');
   const r = new Recorder({
     title: 'Hash table with linear probing',

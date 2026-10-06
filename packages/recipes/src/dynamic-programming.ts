@@ -5,6 +5,7 @@
  */
 import type { Cell, VisualizationInput } from '@algoviz/spec';
 
+import { checkLength } from './check.ts';
 import { Recorder } from './recorder.ts';
 import { python } from './source.ts';
 
@@ -15,6 +16,9 @@ export function longestCommonSubsequence(
 ): VisualizationInput {
   // Characters, not UTF-16 code units, so that "é" or "🙂" is one cell.
   const [a, b] = [[...first], [...second]];
+  // One row and one column per character, plus the empty prefix.
+  checkLength('Each string', a, 99);
+  checkLength('Each string', b, 99);
   const r = new Recorder({
     title: 'Longest common subsequence',
     source: python(`
@@ -95,6 +99,9 @@ export function editDistance(
   second: string,
 ): VisualizationInput {
   const [a, b] = [[...first], [...second]];
+  // One row and one column per character, plus the empty prefix.
+  checkLength('Each string', a, 99);
+  checkLength('Each string', b, 99);
   const r = new Recorder({
     title: 'Edit distance',
     source: python(`
@@ -179,6 +186,7 @@ export function knapsack(
     throw new RangeError('The capacity must be an integer from 0 to 40');
   if (items.some(({ weight }) => !Number.isInteger(weight) || weight < 1))
     throw new RangeError('Item weights must be positive integers');
+  checkLength('Items', items, 99);
   const r = new Recorder({
     title: '0/1 knapsack',
     source: python(`

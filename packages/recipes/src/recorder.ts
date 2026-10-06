@@ -14,6 +14,8 @@
  */
 import {
   actionTypesOf,
+  formatErrors,
+  parseVisualization,
   PROTOCOL_VERSION,
   type KindTypeMap,
   type Source,
@@ -112,7 +114,23 @@ export class Recorder {
     this.#steps.at(-1)!.actions.push(action);
   }
 
+  /**
+   * The document. It is checked against the protocol: an input too large
+   * or too unusual to show (more steps or elements than allowed, ids too
+   * long) throws a RangeError instead of giving a document that does not
+   * load.
+   */
   build(): VisualizationInput {
+    const doc = this.#document();
+    const parsed = parseVisualization(doc);
+    if (!parsed.ok)
+      throw new RangeError(
+        `This input cannot be shown:\n${formatErrors(parsed.error, { max: 3 })}`,
+      );
+    return doc;
+  }
+
+  #document(): VisualizationInput {
     const { title, source } = this.#options;
     return {
       version: PROTOCOL_VERSION,
