@@ -14,6 +14,8 @@ import { runtimes, type CoreTypeMap } from '../registry.ts';
 
 export * from './array.ts';
 export * from './graph.ts';
+export * from './hash-table.ts';
+export * from './table.ts';
 export * from './linked-list.ts';
 export * from './queue.ts';
 export * from './stack.ts';

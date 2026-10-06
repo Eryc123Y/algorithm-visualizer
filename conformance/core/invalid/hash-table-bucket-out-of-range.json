@@ -1,0 +1,30 @@
+{
+  "description": "Buckets are numbered from 0 to size − 1.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "h": {
+        "kind": "hashTable",
+        "size": 3
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "h",
+            "type": "insert",
+            "bucket": 3,
+            "element": 1
+          }
+        ]
+      }
+    ]
+  },
+  "expectedErrors": [
+    {
+      "code": "OUT_OF_RANGE",
+      "path": "$.steps[0].actions[0].bucket"
+    }
+  ]
+}

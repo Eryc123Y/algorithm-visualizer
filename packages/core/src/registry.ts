@@ -7,9 +7,11 @@ import type { KindTypeMap, StructureKindName } from '@algoviz/spec';
 import type { KindRuntime } from './kind.ts';
 import { arrayKind } from './kinds/array.ts';
 import { graphKind } from './kinds/graph.ts';
+import { hashTableKind } from './kinds/hash-table.ts';
 import { linkedListKind } from './kinds/linked-list.ts';
 import { queueKind } from './kinds/queue.ts';
 import { stackKind } from './kinds/stack.ts';
+import { tableKind } from './kinds/table.ts';
 import { treeKind } from './kinds/tree.ts';
 import {
   layoutArray,
@@ -36,6 +38,16 @@ import {
   measureGraph,
   mergeGraphMetrics,
 } from './layout/graph.ts';
+import {
+  layoutHashTable,
+  measureHashTable,
+  mergeHashTableMetrics,
+} from './layout/hash-table.ts';
+import {
+  layoutTable,
+  measureTable,
+  mergeTableMetrics,
+} from './layout/table.ts';
 import { layoutTree, measureTree, mergeTreeMetrics } from './layout/tree.ts';
 
 const registry = {
@@ -74,6 +86,18 @@ const registry = {
     measure: measureGraph,
     mergeMetrics: mergeGraphMetrics,
     layout: layoutGraph,
+  },
+  table: {
+    ...tableKind,
+    measure: measureTable,
+    mergeMetrics: mergeTableMetrics,
+    layout: layoutTable,
+  },
+  hashTable: {
+    ...hashTableKind,
+    measure: measureHashTable,
+    mergeMetrics: mergeHashTableMetrics,
+    layout: layoutHashTable,
   },
 } satisfies {
   // Fails to compile if the protocol has a kind without a runtime, or if a

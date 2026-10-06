@@ -1,0 +1,235 @@
+{
+  "description": "Filling an LCS-style table: dependency arrows and highlights last one step, settled cells persist (without duplicates) until resetMarks.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "dp": {
+        "kind": "table",
+        "rows": 2,
+        "columns": 3,
+        "rowLabels": ["", "a"],
+        "columnLabels": ["", "a", "b"]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "dp",
+            "type": "set",
+            "cell": [0, 0],
+            "value": 0
+          },
+          {
+            "target": "dp",
+            "type": "set",
+            "cell": [0, 1],
+            "value": 0
+          },
+          {
+            "target": "dp",
+            "type": "set",
+            "cell": [0, 2],
+            "value": 0
+          },
+          {
+            "target": "dp",
+            "type": "set",
+            "cell": [1, 0],
+            "value": 0
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "dp",
+            "type": "depend",
+            "cell": [1, 1],
+            "on": [[0, 0]]
+          },
+          {
+            "target": "dp",
+            "type": "set",
+            "cell": [1, 1],
+            "value": 1
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "dp",
+            "type": "depend",
+            "cell": [1, 2],
+            "on": [
+              [0, 2],
+              [1, 1]
+            ]
+          },
+          {
+            "target": "dp",
+            "type": "set",
+            "cell": [1, 2],
+            "value": 1
+          },
+          {
+            "target": "dp",
+            "type": "highlight",
+            "cells": [[1, 2]]
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "dp",
+            "type": "settle",
+            "cells": [
+              [1, 1],
+              [0, 0],
+              [1, 1]
+            ]
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "dp",
+            "type": "resetMarks"
+          }
+        ]
+      }
+    ]
+  },
+  "expectedLength": 5,
+  "expectedFrames": [
+    {
+      "index": 0,
+      "state": {
+        "dp": {
+          "kind": "table",
+          "state": {
+            "data": [
+              [null, null, null],
+              [null, null, null]
+            ],
+            "marks": {
+              "highlight": [],
+              "depend": null,
+              "settled": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 1,
+      "state": {
+        "dp": {
+          "kind": "table",
+          "state": {
+            "data": [
+              [0, 0, 0],
+              [0, null, null]
+            ],
+            "marks": {
+              "highlight": [],
+              "depend": null,
+              "settled": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 2,
+      "state": {
+        "dp": {
+          "kind": "table",
+          "state": {
+            "data": [
+              [0, 0, 0],
+              [0, 1, null]
+            ],
+            "marks": {
+              "highlight": [],
+              "depend": {
+                "cell": [1, 1],
+                "on": [[0, 0]]
+              },
+              "settled": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 3,
+      "state": {
+        "dp": {
+          "kind": "table",
+          "state": {
+            "data": [
+              [0, 0, 0],
+              [0, 1, 1]
+            ],
+            "marks": {
+              "highlight": [[1, 2]],
+              "depend": {
+                "cell": [1, 2],
+                "on": [
+                  [0, 2],
+                  [1, 1]
+                ]
+              },
+              "settled": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 4,
+      "state": {
+        "dp": {
+          "kind": "table",
+          "state": {
+            "data": [
+              [0, 0, 0],
+              [0, 1, 1]
+            ],
+            "marks": {
+              "highlight": [],
+              "depend": null,
+              "settled": [
+                [1, 1],
+                [0, 0]
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 5,
+      "state": {
+        "dp": {
+          "kind": "table",
+          "state": {
+            "data": [
+              [0, 0, 0],
+              [0, 1, 1]
+            ],
+            "marks": {
+              "highlight": [],
+              "depend": null,
+              "settled": []
+            }
+          }
+        }
+      }
+    }
+  ]
+}

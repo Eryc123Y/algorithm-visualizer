@@ -1,0 +1,26 @@
+{
+  "description": "There must be one label per row and per column.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "m": {
+        "kind": "table",
+        "rows": 2,
+        "columns": 2,
+        "rowLabels": ["a"],
+        "columnLabels": ["x", "y", "z"]
+      }
+    },
+    "steps": []
+  },
+  "expectedErrors": [
+    {
+      "code": "INVALID_STRUCTURE",
+      "path": "$.structures.m.rowLabels"
+    },
+    {
+      "code": "INVALID_STRUCTURE",
+      "path": "$.structures.m.columnLabels"
+    }
+  ]
+}

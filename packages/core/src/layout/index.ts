@@ -20,6 +20,8 @@ import type { Scene, SceneItem } from './scene.ts';
 
 export * from './array.ts';
 export * from './graph.ts';
+export * from './hash-table.ts';
+export * from './table.ts';
 export * from './array-heap.ts';
 export * from './common.ts';
 export * from './linked-list.ts';
