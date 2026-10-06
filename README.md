@@ -28,7 +28,7 @@ A visualization is a declarative JSON document: the structures involved and a ti
 | Package                          | Status    | Purpose                                               |
 | -------------------------------- | --------- | ----------------------------------------------------- |
 | [`@algoviz/spec`](packages/spec) | Available | Protocol schemas, types, validation and JSON Schema   |
-| `@algoviz/core`                  | Next      | Structure kinds, reducers, timeline and layout        |
+| [`@algoviz/core`](packages/core) | Available | Structure kinds, reducers and the timeline engine     |
 | `@algoviz/elements`              | Planned   | Interactive player as Web Components (Lit)            |
 | `@algoviz/mcp`                   | Planned   | MCP server and MCP App for Claude, ChatGPT and others |
 
