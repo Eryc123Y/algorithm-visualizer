@@ -4,7 +4,7 @@ An AI-native library for step-by-step visualizations of algorithms and data stru
 
 A visualization is a declarative JSON document: the structures involved and a timeline of steps, each applying actions such as `compare` or `swap`. People write it with code, LLMs write it directly, and the library validates it and renders it as an interactive player, a static image, or a figure in Typst or LaTeX.
 
-> Status: early development. Arrays work end to end: protocol, timeline engine, layout and static SVG. The interactive player and integrations are next.
+> Status: early development. Arrays work end to end: protocol, timeline engine, layout, static SVG and an interactive player. More structures and AI integrations (MCP) are next.
 
 ```json
 {
@@ -23,15 +23,31 @@ A visualization is a declarative JSON document: the structures involved and a ti
 }
 ```
 
+## Embedding
+
+Build the standalone bundle with `npm run build -w @algoviz/elements`, then:
+
+```html
+<script type="module" src="algoviz-player.js"></script>
+
+<algo-player theme="auto">
+  <script type="application/json">
+    { "version": "0.1", "structures": { … }, "steps": [ … ] }
+  </script>
+</algo-player>
+```
+
+Attributes: `src`, `frame`, `theme` (`auto` · `light` · `dark` · `print`), `speed` (ms per step), `autoplay`, `loop`, `hide-controls`, `hide-code`. Style the chrome with CSS custom properties such as `--algo-accent`, or pass a full scene theme as the `customTheme` property.
+
 ## Packages
 
-| Package                          | Status    | Purpose                                                         |
-| -------------------------------- | --------- | --------------------------------------------------------------- |
-| [`@algoviz/spec`](packages/spec) | Available | Protocol schemas, types, validation and JSON Schema             |
-| [`@algoviz/core`](packages/core) | Available | Structure kinds, reducers, timeline engine and layout to scenes |
-| [`@algoviz/svg`](packages/svg)   | Available | Renders scenes to standalone SVG (no DOM needed)                |
-| `@algoviz/elements`              | Planned   | Interactive player as Web Components (Lit)                      |
-| `@algoviz/mcp`                   | Planned   | MCP server and MCP App for Claude, ChatGPT and others           |
+| Package                                  | Status    | Purpose                                                           |
+| ---------------------------------------- | --------- | ----------------------------------------------------------------- |
+| [`@algoviz/spec`](packages/spec)         | Available | Protocol schemas, types, validation and JSON Schema               |
+| [`@algoviz/core`](packages/core)         | Available | Structure kinds, reducers, timeline engine and layout to scenes   |
+| [`@algoviz/svg`](packages/svg)           | Available | Renders scenes to standalone SVG (no DOM needed)                  |
+| [`@algoviz/elements`](packages/elements) | Available | `<algo-player>`: interactive, animated player (Lit Web Component) |
+| `@algoviz/mcp`                           | Planned   | MCP server and MCP App for Claude, ChatGPT and others             |
 
 ## Design
 

@@ -63,7 +63,7 @@ describe('renderSvg', () => {
     expect(parse(svg).querySelectorAll('text')[2]?.textContent).toBe('<b>');
   });
 
-  it('draws arrow heads that end exactly at the arrow tip', () => {
+  it('draws arrows around their tip, so they move with what they point at', () => {
     const scene: Scene = {
       width: 100,
       height: 100,
@@ -80,11 +80,18 @@ describe('renderSvg', () => {
         },
       ],
     };
-    const polygon = parse(renderSvg(scene)).querySelector('polygon');
-    expect(polygon?.getAttribute('points')).toBe('50,20 54,26 46,26');
-    expect(
-      parse(renderSvg(scene)).querySelector('line')?.getAttribute('y2'),
-    ).toBe('26');
+    const doc = parse(renderSvg(scene));
+    expect(doc.querySelector('[data-key="a"]')?.getAttribute('transform')).toBe(
+      'translate(50 20)',
+    );
+    expect(doc.querySelector('polygon')?.getAttribute('points')).toBe(
+      '0,0 4,6 -4,6',
+    );
+    const line = doc.querySelector('line');
+    expect([line?.getAttribute('y1'), line?.getAttribute('y2')]).toEqual([
+      '60',
+      '6',
+    ]);
   });
 
   it('applies theme, scale and key options', () => {

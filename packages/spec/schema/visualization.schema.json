@@ -11,6 +11,26 @@
       "type": "string",
       "maxLength": 2000
     },
+    "source": {
+      "type": "object",
+      "properties": {
+        "language": {
+          "description": "Language for syntax highlighting, e.g. \"python\" or \"c\".",
+          "type": "string",
+          "pattern": "^[a-z0-9+#-]{1,32}$"
+        },
+        "code": {
+          "type": "string",
+          "maxLength": 20000,
+          "description": "The source code."
+        }
+      },
+      "required": [
+        "code"
+      ],
+      "additionalProperties": false,
+      "description": "Source code of the algorithm. When present, each step's `meta.line` must be a line of this code."
+    },
     "structures": {
       "type": "object",
       "propertyNames": {

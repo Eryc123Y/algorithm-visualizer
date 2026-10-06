@@ -8,7 +8,13 @@
  */
 import { z } from 'zod';
 
-import { LIMITS, PROTOCOL_VERSION, StepMeta, StructureName } from './common.ts';
+import {
+  LIMITS,
+  PROTOCOL_VERSION,
+  Source,
+  StepMeta,
+  StructureName,
+} from './common.ts';
 import { ArrayAction, ArrayDecl, ArrayDeclInput } from './kinds/index.ts';
 
 const targetField = {
@@ -83,6 +89,7 @@ const document = <D extends z.ZodType, A extends z.ZodType>(
       .literal(PROTOCOL_VERSION)
       .describe(`Protocol version; must be "${PROTOCOL_VERSION}".`),
     title: z.string().max(LIMITS.textLength).optional(),
+    source: Source.optional(),
     structures: structures(decl),
     steps: steps(action),
   });

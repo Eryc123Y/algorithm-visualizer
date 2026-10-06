@@ -13,6 +13,7 @@ export const LIMITS = {
   steps: 10_000,
   actionsPerStep: 100,
   textLength: 2_000,
+  sourceLength: 20_000,
 } as const;
 
 /** Name of a structure in a visualization; actions refer to it as `target`. */
@@ -63,6 +64,21 @@ export const StepMeta = z
   })
   .describe('Teaching metadata for a step.');
 export type StepMeta = z.infer<typeof StepMeta>;
+
+/** Source code shown next to the visualization; steps refer to its lines. */
+export const Source = z
+  .strictObject({
+    language: z
+      .string()
+      .regex(/^[a-z0-9+#-]{1,32}$/)
+      .optional()
+      .describe('Language for syntax highlighting, e.g. "python" or "c".'),
+    code: z.string().max(LIMITS.sourceLength).describe('The source code.'),
+  })
+  .describe(
+    "Source code of the algorithm. When present, each step's `meta.line` must be a line of this code.",
+  );
+export type Source = z.infer<typeof Source>;
 
 /**
  * Custom issue parameter used to tag Zod issues with a protocol error code.
