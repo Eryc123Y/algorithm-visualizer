@@ -220,7 +220,32 @@ describe('topologicalSort', () => {
   });
 });
 
+describe('input checks', () => {
+  it('rejects a start node that is not in the graph', () => {
+    expect(() => breadthFirstSearch(withIsland, 'Z')).toThrow(RangeError);
+    expect(() => dijkstra(weighted, 'Z')).toThrow(RangeError);
+  });
+});
+
 describe('floydWarshall', () => {
+  it('shows a negative cycle on the diagonal', () => {
+    const graph: GraphInput = {
+      directed: true,
+      nodes: ['a', 'b', 'c'],
+      edges: [
+        ['a', 'b', 1],
+        ['b', 'c', -2],
+        ['c', 'a', -1],
+      ],
+    };
+    const trace = replay(floydWarshall(graph));
+    const table = stateOf(trace, 'dist', 'table');
+    expect(table.data.some((row, i) => (row[i] as number) < 0)).toBe(true);
+    expect(trace.visualization.steps.at(-1)?.meta?.narration).toContain(
+      'negative cycle',
+    );
+  });
+
   it('fills the table with all-pairs shortest distances', () => {
     const graph: GraphInput = {
       directed: true,

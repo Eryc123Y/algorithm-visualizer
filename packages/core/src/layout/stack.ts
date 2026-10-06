@@ -29,11 +29,14 @@ export interface StackMetrics {
   /** Most elements at any time. */
   readonly slots: number;
   readonly maxChars: number;
+  /** Whether the stack is ever empty (the label then needs more room). */
+  readonly empty: boolean;
 }
 
 export const measureStack = (s: StackState): StackMetrics => ({
   slots: s.data.length,
   maxChars: maxChars(s.data.map((e) => formatScalar(e.value))),
+  empty: s.data.length === 0,
 });
 
 export const mergeStackMetrics = (
@@ -42,6 +45,7 @@ export const mergeStackMetrics = (
 ): StackMetrics => ({
   slots: Math.max(a.slots, b.slots),
   maxChars: Math.max(a.maxChars, b.maxChars),
+  empty: a.empty || b.empty,
 });
 
 /** Space between the cells and the container walls. */
@@ -133,7 +137,7 @@ export function layoutStack({
   return {
     items,
     width: Math.max(
-      right - left + LABEL_WIDTH + (n === 0 ? 40 : 0),
+      right - left + LABEL_WIDTH + (metrics.empty ? 40 : 0),
       titleWidth(title, o),
     ),
     height: bottom - origin.y,

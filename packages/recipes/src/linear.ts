@@ -113,8 +113,9 @@ export function balancedBrackets(text: string): VisualizationInput {
       if (top !== OPENERS[ch]) {
         r.step({
           line: 8,
-          narration: `"${top}" does not match "${ch}": not balanced.`,
+          narration: `Pop "${top}": it does not match "${ch}", so not balanced.`,
         });
+        stack.pop();
         return r.build();
       }
       r.step({ line: 7, narration: `"${top}" matches "${ch}": pop it.` });

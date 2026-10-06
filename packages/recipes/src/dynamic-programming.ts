@@ -10,9 +10,11 @@ import { python } from './source.ts';
 
 /** Longest common subsequence of two strings. */
 export function longestCommonSubsequence(
-  a: string,
-  b: string,
+  first: string,
+  second: string,
 ): VisualizationInput {
+  // Characters, not UTF-16 code units, so that "é" or "🙂" is one cell.
+  const [a, b] = [[...first], [...second]];
   const r = new Recorder({
     title: 'Longest common subsequence',
     source: python(`
@@ -88,7 +90,11 @@ export function longestCommonSubsequence(
 }
 
 /** Levenshtein distance between two strings. */
-export function editDistance(a: string, b: string): VisualizationInput {
+export function editDistance(
+  first: string,
+  second: string,
+): VisualizationInput {
+  const [a, b] = [[...first], [...second]];
   const r = new Recorder({
     title: 'Edit distance',
     source: python(`
@@ -153,7 +159,7 @@ export function editDistance(a: string, b: string): VisualizationInput {
   }
   r.step({
     line: 12,
-    narration: `${D[m]![n]} edit(s) turn "${a}" into "${b}"; the settled cells show one way.`,
+    narration: `${D[m]![n]} edit(s) turn "${first}" into "${second}"; the settled cells show one way.`,
   });
   table.settle({ cells: path });
   return r.build();
@@ -171,6 +177,8 @@ export function knapsack(
 ): VisualizationInput {
   if (!Number.isInteger(capacity) || capacity < 0 || capacity > 40)
     throw new RangeError('The capacity must be an integer from 0 to 40');
+  if (items.some(({ weight }) => !Number.isInteger(weight) || weight < 1))
+    throw new RangeError('Item weights must be positive integers');
   const r = new Recorder({
     title: '0/1 knapsack',
     source: python(`

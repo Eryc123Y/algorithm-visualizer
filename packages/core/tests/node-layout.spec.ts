@@ -68,6 +68,8 @@ describe('nodeShape', () => {
     const [ux, uy] = [3 / Math.sqrt(10), 1 / Math.sqrt(10)];
     const t = outlineDistance(shape, ux, uy);
     expect(Math.hypot(t * ux - 20, t * uy)).toBeCloseTo(10);
+    // Coinciding centres give no direction: fall back to the radius.
+    expect(outlineDistance(shape, 0, 0)).toBe(10);
   });
 });
 
@@ -135,6 +137,28 @@ describe('graph layout', () => {
     expect(edges(scene).find((e) => e.key === 'g/edge/a-d')?.via).toHaveLength(
       2,
     );
+  });
+
+  it('stops routing through dummy nodes when there would be too many', () => {
+    // A path of 200 nodes, plus 100 edges that each span about 100 rows.
+    const ids = Array.from({ length: 200 }, (_, k) => `n${k}`);
+    const { layout: l } = layout({
+      version: '0.1',
+      structures: {
+        g: {
+          kind: 'graph',
+          directed: true,
+          nodes: ids,
+          edges: [
+            ...ids.slice(1).map((id, k): [string, string] => [ids[k]!, id]),
+            ...ids.slice(100).map((id): [string, string] => ['n0', id]),
+          ],
+        },
+      },
+      steps: [],
+    });
+    const long = edges(l.sceneAt(0)).find((e) => e.key === 'g/edge/n0-n150');
+    expect(long?.via).toBeUndefined();
   });
 
   it('spreads antiparallel edges and labels them on the outside', () => {

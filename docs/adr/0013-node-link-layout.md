@@ -20,7 +20,7 @@ Trees and graphs are drawn as nodes joined by edges. Teaching needs layouts that
 - `grid` and `manual` (each node's `x`, `y`);
 - `auto` (default): manual if every node has coordinates, layered for acyclic directed graphs, otherwise circle.
 
-**Edges.** In layered layouts, an edge spanning several rows passes through a dummy node in each row between (Sugiyama), and is drawn through those bend points (`SceneEdge.via`); an edge within a row that would cross nodes bows into the gap above. Parallel and antiparallel edges are spread perpendicular to their shared line, with labels on the outer side (`labelSide`). Edge labels sit beside the midpoint at a distance that clears the line for any slope.
+**Edges.** In layered layouts, an edge spanning several rows passes through a dummy node in each row between (Sugiyama), and is drawn through those bend points (`SceneEdge.via`); an edge within a row that would cross nodes bows into the gap above. To bound layout time on large inputs, routing is skipped (edges drawn straight) when it would need more than 3,000 dummy nodes. Parallel and antiparallel edges are spread perpendicular to their shared line, with labels on the outer side (`labelSide`). Edge labels sit beside the midpoint at a distance that clears the line for any slope.
 
 **Free directions.** Self-loops and node notes (e.g. distances) point in the first direction, in order of preference, that is at least 40° from every edge of that node in any frame; notes prefer up, the left is kept for pointer badges. These are `loopAngle` and `labelAngle` in the scene.
 

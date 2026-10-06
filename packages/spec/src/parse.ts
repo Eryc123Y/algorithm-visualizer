@@ -263,6 +263,11 @@ function parseAction(
       return id;
     },
   });
+  // Shorthands can produce values the canonical schema rejects, such as an
+  // id made from a node name with a space; check the result as well.
+  const canonical = spec.action.safeParse(action);
+  if (!canonical.success)
+    return err(fromZodIssues(canonical.error.issues, path, 'INVALID_ACTION'));
   const errors: ProtocolError[] = [];
   for (const ref of introducedIdsOf(kind, action)) {
     if (ids.has(ref.id) && !wasAllocated(input, ref)) {

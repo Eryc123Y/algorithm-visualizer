@@ -204,12 +204,8 @@ export function avlInsert(keys: readonly number[]): VisualizationInput {
     return node;
   };
   let root: BstNode | null = null;
-  const seen = new Set<number>();
-  for (const key of keys) {
-    if (seen.has(key)) continue;
-    seen.add(key);
-    root = insert(root, key, null, 'left');
-  }
+  // Equal keys go right, as in the code shown.
+  for (const key of keys) root = insert(root, key, null, 'left');
   r.step('Every node is balanced: heights differ by at most one.');
   return r.build();
 }

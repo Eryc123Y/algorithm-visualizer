@@ -7,6 +7,16 @@ import type { Scalar } from '@algoviz/spec';
 import type { LayoutOptions } from './options.ts';
 import type { SceneItem } from './scene.ts';
 
+/**
+ * The value at `key` if `record` has it as an own property. Ids are
+ * untrusted and may be names such as "constructor" or "__proto__", so
+ * id-keyed records are never read with plain indexing.
+ */
+export const own = <V>(
+  record: Readonly<Record<string, V>>,
+  key: string,
+): V | undefined => (Object.hasOwn(record, key) ? record[key] : undefined);
+
 /** Text shown for a value: ECMAScript `String()` conversion. */
 export const formatScalar = (value: Scalar): string => String(value);
 

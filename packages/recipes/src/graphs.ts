@@ -50,12 +50,19 @@ const declare = (
   ),
 });
 
+/** Rejects a start node that is not in the graph. */
+function checkNode(g: GraphInput, node: string): void {
+  if (!g.nodes.includes(node))
+    throw new RangeError(`"${node}" is not a node of the graph`);
+}
+
 const show = (d: number) => (d === Infinity ? '∞' : String(d));
 
 export function breadthFirstSearch(
   g: GraphInput,
   start: string,
 ): VisualizationInput {
+  checkNode(g, start);
   const r = new Recorder({
     title: 'Breadth-first search',
     source: python(`
@@ -113,6 +120,7 @@ export function depthFirstSearch(
   g: GraphInput,
   start: string,
 ): VisualizationInput {
+  checkNode(g, start);
   const r = new Recorder({
     title: 'Depth-first search',
     source: python(`
@@ -170,6 +178,7 @@ export function depthFirstSearch(
 }
 
 export function dijkstra(g: GraphInput, source: string): VisualizationInput {
+  checkNode(g, source);
   const r = new Recorder({
     title: 'Dijkstra’s algorithm',
     source: python(`
@@ -238,7 +247,9 @@ export function dijkstra(g: GraphInput, source: string): VisualizationInput {
   return r.build();
 }
 
+/** Edges are taken as directed, as Bellman–Ford is usually taught. */
 export function bellmanFord(g: GraphInput, source: string): VisualizationInput {
+  checkNode(g, source);
   const r = new Recorder({
     title: 'Bellman–Ford',
     source: python(`
@@ -318,6 +329,7 @@ export function bellmanFord(g: GraphInput, source: string): VisualizationInput {
 }
 
 export function prim(g: GraphInput, start: string): VisualizationInput {
+  checkNode(g, start);
   const r = new Recorder({
     title: 'Prim’s algorithm',
     source: python(`
@@ -326,6 +338,7 @@ export function prim(g: GraphInput, start: string): VisualizationInput {
           in_tree = set()
           while len(in_tree) < len(g):
               u = min((v for v in g if v not in in_tree), key=key.get)
+              if key[u] == inf: break  # the rest is not connected
               in_tree.add(u)
               for v, w in g.neighbors(u):
                   if v not in in_tree and w < key[v]:
@@ -344,12 +357,12 @@ export function prim(g: GraphInput, start: string): VisualizationInput {
       .filter((v) => !inTree.has(v))
       .reduce((a, b) => (key.get(b)! < key.get(a)! ? b : a));
     if (key.get(u) === Infinity) {
-      r.step({ line: 5, narration: 'The rest is not connected to the tree.' });
+      r.step({ line: 6, narration: 'The rest is not connected to the tree.' });
       break;
     }
     inTree.add(u);
     r.step({
-      line: 6,
+      line: 7,
       narration: via.has(u)
         ? `The cheapest edge into the tree reaches ${u} (weight ${key.get(u)}): add it.`
         : `Start the tree at ${u}.`,
@@ -359,7 +372,7 @@ export function prim(g: GraphInput, start: string): VisualizationInput {
     for (const { to: v, weight, edge } of adj.get(u)!) {
       if (inTree.has(v) || weight >= key.get(v)!) continue;
       r.step({
-        line: 9,
+        line: 10,
         narration: `${u}–${v} (weight ${weight}) is the cheapest way to ${v} so far.`,
       });
       graph
@@ -533,9 +546,12 @@ export function floydWarshall(g: GraphInput): VisualizationInput {
       vars: { k },
     });
     graph.pointer({ name: 'k', node: g.nodes[k]! });
+    // Paths starting or ending at k can only improve through a negative
+    // cycle at k, so those steps are shown only then.
+    const cycleAtK = d[k]![k]! < 0;
     for (let i = 0; i < n; i++)
       for (let j = 0; j < n; j++) {
-        if (i === k || j === k || i === j) continue;
+        if ((i === k || j === k) && !cycleAtK) continue;
         const through = d[i]![k]! + d[k]![j]!;
         if (through === Infinity) continue;
         const better = through < d[i]![j]!;
@@ -557,7 +573,16 @@ export function floydWarshall(g: GraphInput): VisualizationInput {
         }
       }
   }
-  r.step('Done: every entry is a shortest distance.');
+  const negative = g.nodes.filter((_, i) => d[i]![i]! < 0);
+  r.step(
+    negative.length === 0
+      ? 'Done: every entry is a shortest distance.'
+      : `Negative diagonal entries (${negative.join(', ')}) reveal a negative cycle: distances through it have no minimum.`,
+  );
+  if (negative.length > 0)
+    table.highlight({
+      cells: negative.map((v) => [g.nodes.indexOf(v), g.nodes.indexOf(v)]),
+    });
   graph.pointer({ name: 'k', node: null });
   return r.build();
 }

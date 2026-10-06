@@ -9,8 +9,9 @@ import {
 } from '../src/index.ts';
 import { replay, stateOf } from './helpers.ts';
 
-function lcsLength(a: string, b: string): number {
-  if (a === '' || b === '') return 0;
+/** LCS length over characters (code points). */
+function lcsLength(a: readonly string[], b: readonly string[]): number {
+  if (a.length === 0 || b.length === 0) return 0;
   return a[0] === b[0]
     ? 1 + lcsLength(a.slice(1), b.slice(1))
     : Math.max(lcsLength(a.slice(1), b), lcsLength(a, b.slice(1)));
@@ -32,11 +33,13 @@ describe('longestCommonSubsequence', () => {
     ['abc', 'abc'],
     ['abc', 'xyz'],
     ['', 'ab'],
+    ['a🙂b', '🙂b'],
   ])('%s and %s', (a, b) => {
     const trace = replay(longestCommonSubsequence(a, b));
     const table = stateOf(trace, 'L', 'table');
-    expect(table.data[a.length]![b.length]).toBe(lcsLength(a, b));
-    expect(table.marks.settled).toHaveLength(lcsLength(a, b));
+    const [x, y] = [[...a], [...b]];
+    expect(table.data[x.length]![y.length]).toBe(lcsLength(x, y));
+    expect(table.marks.settled).toHaveLength(lcsLength(x, y));
   });
 });
 

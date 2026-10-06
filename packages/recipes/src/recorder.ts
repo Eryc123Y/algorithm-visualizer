@@ -69,7 +69,14 @@ export class Recorder {
       throw new Error(`Structure "${name}" is already declared`);
     if (this.#steps.length > 0)
       throw new Error('Declare every structure before the first step');
-    this.#structures[name] = decl;
+    // defineProperty, not assignment: a name such as "__proto__" must
+    // become a key, not change the object's prototype.
+    Object.defineProperty(this.#structures, name, {
+      value: decl,
+      enumerable: true,
+      writable: true,
+      configurable: true,
+    });
     const methods = actionTypesOf(decl.kind).map((type) => [
       type,
       (fields: object = {}) => {

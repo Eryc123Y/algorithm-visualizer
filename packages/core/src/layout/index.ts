@@ -142,7 +142,8 @@ export function layoutState(
       origin,
       options: o,
     } as Parameters<(typeof runtimes)[typeof entry.kind]['layout']>[0]);
-    items.push(...block.items);
+    // A loop, not push(...items): spreading a large array overflows the stack.
+    for (const item of block.items) items.push(item);
     width = Math.max(width, block.width);
     y += block.height;
   }

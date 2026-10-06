@@ -1,0 +1,42 @@
+{
+  "description": "Ids made from node names in actions must be valid ids, as in declarations.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "g": {
+        "kind": "graph",
+        "nodes": ["A"]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "g",
+            "type": "addNode",
+            "node": "has space"
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "g",
+            "type": "addNode",
+            "node": ""
+          }
+        ]
+      }
+    ]
+  },
+  "expectedErrors": [
+    {
+      "code": "INVALID_ACTION",
+      "path": "$.steps[0].actions[0].node.id"
+    },
+    {
+      "code": "INVALID_ACTION",
+      "path": "$.steps[1].actions[0].node.id"
+    }
+  ]
+}

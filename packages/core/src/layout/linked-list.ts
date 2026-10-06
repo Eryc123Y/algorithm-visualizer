@@ -35,7 +35,10 @@ export interface LinkedListMetrics {
   readonly maxChars: number;
   readonly pointerRows: number;
   readonly maxPointerChars: number;
-  /** Whether any link ever skips over nodes (needs room above the row). */
+  /**
+   * Whether any link ever skips over nodes or points to its own node: both
+   * are drawn above the row, which then needs room.
+   */
   readonly skips: boolean;
 }
 
@@ -46,9 +49,9 @@ export function measureLinkedList(s: LinkedListState): LinkedListMetrics {
   const at = new Map(s.data.map((node, k) => [node.id, k]));
   const skips = s.data.some((node, k) =>
     [node.next, node.prev].some((target) => {
-      if (target === null) return false;
-      const j = at.get(target) ?? k;
-      return Math.abs(j - k) > 1;
+      const j = target === null ? undefined : at.get(target);
+      // Self-links loop above the node, so they need the room too.
+      return j !== undefined && (j === k || Math.abs(j - k) > 1);
     }),
   );
   return {

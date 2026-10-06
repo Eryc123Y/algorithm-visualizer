@@ -21,6 +21,7 @@ import {
   formatScalar,
   groupPointers,
   maxChars,
+  own,
   pointerRows,
   titleItems,
   titleRowHeight,
@@ -153,8 +154,8 @@ export function layoutTree({
 
   const { groups, notes, pointers } = state.marks;
   for (const node of state.data.nodes) {
-    const group = groups[node.id];
-    const note = notes[node.id];
+    const group = own(groups, node.id);
+    const note = own(notes, node.id);
     items.push({
       type: 'node',
       key: `${name}/element/${node.id}`,

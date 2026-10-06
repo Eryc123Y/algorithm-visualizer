@@ -66,7 +66,7 @@ export function outlineDistance(
 ): number {
   const { radius: r, halfWidth } = shape;
   const straight = halfWidth - r;
-  if (straight <= 0) return r;
+  if (straight <= 0 || (ux === 0 && uy === 0)) return r;
   const ax = Math.abs(ux);
   const ay = Math.abs(uy);
   // Through the flat top or bottom…

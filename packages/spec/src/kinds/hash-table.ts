@@ -18,7 +18,7 @@ import {
   LIMITS,
   Scalar,
 } from '../common.ts';
-import { typesOf, type IdRef, type KindSpec } from './kind.ts';
+import { typesOf, type DeclIssue, type IdRef, type KindSpec } from './kind.ts';
 
 const MAX_BUCKETS = 100;
 
@@ -131,8 +131,20 @@ export const hashTableSpec: KindSpec<{
   normalizeDecl: normalizeHashTableDecl,
   declIds: (decl) =>
     decl.buckets.flatMap((chain, b) =>
-      chain.map((e, k): IdRef => ({ id: e.id, path: ['buckets', b, k, 'id'] })),
+      // Reported against the authoring field, `initial`.
+      chain.map((e, k): IdRef => ({ id: e.id, path: ['initial', b, k, 'id'] })),
     ),
+  validateDecl: (decl): DeclIssue[] => {
+    const total = decl.buckets.reduce((n, chain) => n + chain.length, 0);
+    return total <= LIMITS.elementsPerStructure
+      ? []
+      : [
+          {
+            path: ['initial'],
+            message: `The table holds ${total} elements; at most ${LIMITS.elementsPerStructure} are allowed`,
+          },
+        ];
+  },
   normalizeAction: (input, ctx) =>
     input.type === 'insert' && !isElement(input.element)
       ? { ...input, element: { id: ctx.allocateId('e'), value: input.element } }

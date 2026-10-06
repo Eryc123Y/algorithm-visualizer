@@ -100,7 +100,8 @@ describe('avlInsert', () => {
   ])('stays balanced inserting %j', (keys) => {
     const trace = replay(avlInsert(keys));
     const tree = stateOf(trace, 'avl', 'tree');
-    expect(inorder(tree)).toEqual([...new Set(keys)].sort((a, b) => a - b));
+    // Duplicates are kept, going right as in the code shown.
+    expect(inorder(tree)).toEqual([...keys].sort((a, b) => a - b));
     const h = heights(tree);
     for (const node of tree.data.nodes) {
       const [l, r] = node.children.map((c) => (c === null ? 0 : h.get(c)!));
@@ -181,5 +182,37 @@ describe('unionFind', () => {
     expect([...sets.values()].map((s) => s.sort()).sort()).toEqual(
       [['0', '1', '2', '3'], ['4', '5'], ['6'], ['7']].sort(),
     );
+  });
+});
+
+describe('every recipe', () => {
+  it('keeps the same scene size in every frame', async () => {
+    const { layoutTrace } = await import('@algoviz/core');
+    const docs = [
+      balancedBrackets('(('),
+      balancedBrackets('(]'),
+      reverseLinkedList([1, 2, 3]),
+      avlInsert([3, 2, 1, 4, 5]),
+      binaryHeap([4, 1, 3]),
+      trieInsert(['ab', 'b']),
+      unionFind(4, [
+        [0, 1],
+        [2, 3],
+        [0, 2],
+      ]),
+      treeTraversal([1, 2, 3], 'postorder'),
+    ];
+    for (const doc of docs) {
+      const trace = replay(doc);
+      const layout = layoutTrace(trace);
+      const first = layout.sceneAt(0);
+      for (let i = 1; i <= trace.length; i++) {
+        const scene = layout.sceneAt(i);
+        expect([scene.width, scene.height], `${doc.title} frame ${i}`).toEqual([
+          first.width,
+          first.height,
+        ]);
+      }
+    }
   });
 });

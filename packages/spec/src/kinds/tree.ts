@@ -138,10 +138,16 @@ function normalizeTreeDecl(input: TreeDeclInput): TreeDecl {
   );
   const roots =
     givenRoots ?? nodes.filter((n) => !children.has(n.id)).map((n) => n.id);
+  // Binary nodes get both slots; extra children are kept so that
+  // validation can report them.
   const normalized = isBinary
     ? nodes.map((n) => ({
         ...n,
-        children: [n.children?.[0] ?? null, n.children?.[1] ?? null],
+        children: [
+          n.children?.[0] ?? null,
+          n.children?.[1] ?? null,
+          ...(n.children?.slice(2) ?? []),
+        ],
       }))
     : nodes;
   return { ...rest, binary: isBinary, nodes: normalized, roots };
@@ -176,7 +182,12 @@ export function validateTreeDecl(decl: TreeDecl): DeclIssue[] {
     });
   });
   decl.roots.forEach((root, r) => {
-    if (!index.has(root))
+    if (decl.roots.indexOf(root) !== r)
+      issues.push({
+        path: ['roots', r],
+        message: `Root "${root}" is listed twice`,
+      });
+    else if (!index.has(root))
       issues.push({
         path: ['roots', r],
         message: `Root "${root}" is not a node of this tree`,

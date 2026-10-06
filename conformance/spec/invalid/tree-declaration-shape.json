@@ -1,0 +1,52 @@
+{
+  "description": "A binary node with three children, and a root listed twice.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "t": {
+        "kind": "tree",
+        "binary": true,
+        "nodes": [
+          {
+            "id": "a",
+            "value": 1,
+            "children": ["b", "c", "d"]
+          },
+          {
+            "id": "b",
+            "value": 2
+          },
+          {
+            "id": "c",
+            "value": 3
+          },
+          {
+            "id": "d",
+            "value": 4
+          }
+        ]
+      },
+      "u": {
+        "kind": "tree",
+        "nodes": [
+          {
+            "id": "a",
+            "value": 1
+          }
+        ],
+        "roots": ["a", "a"]
+      }
+    },
+    "steps": []
+  },
+  "expectedErrors": [
+    {
+      "code": "INVALID_STRUCTURE",
+      "path": "$.structures.t.nodes[0].children"
+    },
+    {
+      "code": "INVALID_STRUCTURE",
+      "path": "$.structures.u.roots[1]"
+    }
+  ]
+}

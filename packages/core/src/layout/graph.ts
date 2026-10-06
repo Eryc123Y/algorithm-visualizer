@@ -25,6 +25,7 @@ import {
   formatScalar,
   groupPointers,
   maxChars,
+  own,
   pointerRows,
   titleItems,
   titleRowHeight,
@@ -59,10 +60,15 @@ export interface GraphMetrics {
 const linkKey = (from: string, to: string) => `${from}\u0000${to}`;
 
 export function measureGraph(state: GraphState): GraphMetrics {
-  const positions: Record<string, { x: number; y: number }> = {};
-  for (const n of state.data.nodes)
-    if (n.x !== undefined && n.y !== undefined)
-      positions[n.id] = { x: n.x, y: n.y };
+  // Built with fromEntries: assigning to an id such as "__proto__" would
+  // change the object's prototype instead.
+  const positions = Object.fromEntries(
+    state.data.nodes.flatMap((n) =>
+      n.x !== undefined && n.y !== undefined
+        ? [[n.id, { x: n.x, y: n.y }] as const]
+        : [],
+    ),
+  );
   return {
     nodes: state.data.nodes.map((n) => n.id),
     links: state.data.edges.map((e) => [e.from, e.to] as const),
@@ -187,8 +193,21 @@ function ranks(metrics: GraphMetrics, directed: boolean): Map<string, number> {
   return rank;
 }
 
+/**
+ * Most dummy nodes the layered layout creates. Beyond it, edges that span
+ * rows are drawn straight, so that a long trace cannot make layout slow.
+ */
+const MAX_DUMMIES = 3000;
+
 function layered(metrics: GraphMetrics, directed: boolean): Arrangement {
   const rank = ranks(metrics, directed);
+  const dummies = metrics.links.reduce(
+    (sum, [from, to]) =>
+      sum +
+      Math.max(0, Math.abs((rank.get(to) ?? 0) - (rank.get(from) ?? 0)) - 1),
+    0,
+  );
+  const route = dummies <= MAX_DUMMIES;
   // An edge spanning several rows passes through a dummy node in each row
   // between, so that it gets its own place in those rows (Sugiyama).
   const chains = new Map<string, string[]>();
@@ -203,7 +222,7 @@ function layered(metrics: GraphMetrics, directed: boolean): Arrangement {
     const rt = rank.get(to) ?? 0;
     const step = Math.sign(rt - rf);
     const chain = [from];
-    for (let r = rf + step; step !== 0 && r !== rt; r += step) {
+    for (let r = rf + step; route && step !== 0 && r !== rt; r += step) {
       const dummy = `\u0000${linkKey(from, to)}\u0000${r}`;
       rank.set(dummy, r);
       chain.push(dummy);
@@ -281,7 +300,8 @@ function arrange(metrics: GraphMetrics, decl: GraphDecl): Arrangement {
   let layout = decl.layout;
   if (layout === 'auto')
     layout =
-      nodes.length > 0 && nodes.every((id) => id in metrics.positions)
+      nodes.length > 0 &&
+      nodes.every((id) => Object.hasOwn(metrics.positions, id))
         ? 'manual'
         : decl.directed && isAcyclic(nodes, adjacency(metrics, true))
           ? 'layered'
@@ -291,7 +311,7 @@ function arrange(metrics: GraphMetrics, decl: GraphDecl): Arrangement {
     result = {
       kind: 'manual',
       at: new Map(
-        nodes.map((id) => [id, metrics.positions[id] ?? { x: 0, y: 0 }]),
+        nodes.map((id) => [id, own(metrics.positions, id) ?? { x: 0, y: 0 }]),
       ),
     };
   } else if (layout === 'layered') {
@@ -338,7 +358,7 @@ function nodeRole(state: GraphState, id: string): ElementRole {
 
 function edgeRole(state: GraphState, id: string): EdgeRole {
   if (state.marks.highlightEdges.includes(id)) return 'highlight';
-  return state.marks.edgeMarks[id] ?? 'default';
+  return own(state.marks.edgeMarks, id) ?? 'default';
 }
 
 export function layoutGraph({
@@ -579,8 +599,8 @@ export function layoutGraph({
 
   const { groups, notes, pointers } = state.marks;
   for (const node of state.data.nodes) {
-    const group = groups[node.id];
-    const note = notes[node.id];
+    const group = own(groups, node.id);
+    const note = own(notes, node.id);
     items.push({
       type: 'node',
       key: `${name}/element/${node.id}`,
