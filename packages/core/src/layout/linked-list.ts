@@ -97,13 +97,15 @@ export function layoutLinkedList({
   const at = new Map(state.data.map((node, k) => [node.id, k]));
 
   const items: SceneItem[] = titleItems(name, title, origin, o);
-  const { highlight, visited, pointers } = state.marks;
+  const { highlight, visited, settled, pointers } = state.marks;
   const role = (k: number, id: string): ElementRole =>
     highlight.includes(k)
       ? 'highlight'
-      : visited.includes(id)
-        ? 'visited'
-        : 'default';
+      : settled.includes(id)
+        ? 'settled'
+        : visited.includes(id)
+          ? 'visited'
+          : 'default';
 
   state.data.forEach((node, k) => {
     items.push({

@@ -13,6 +13,8 @@ import { tasks, type EvalTask } from './tasks.ts';
 
 export interface TaskSummary extends Grade {
   readonly calls: number;
+  /** Times a document was handed in; the last one is graded. */
+  readonly submissions: number;
   readonly validations: number;
   /** Whether the first validation found the document valid (null: none). */
   readonly firstValid: boolean | null;
@@ -52,6 +54,7 @@ function summarizeTask(run: string, task: EvalTask): TaskSummary {
   return {
     ...grade(task, doc),
     calls: log.filter((e) => e.tool.startsWith('algoviz_')).length,
+    submissions: log.filter((e) => e.tool === 'submit').length,
     validations: validations.length,
     firstValid: validations.length === 0 ? null : validations[0]!.ok,
     invalidValidations: firstOk === -1 ? validations.length : firstOk,
@@ -122,8 +125,8 @@ export function formatRun(summary: RunSummary): string {
     '',
     '## Tasks',
     '',
-    '| Task | Correct | Valid | First valid | Validations | Steps | Narrated | Problems |',
-    '| --- | --- | --- | --- | --- | --- | --- | --- |',
+    '| Task | Correct | Valid | First valid | Validations | Submissions | Steps | Narrated | Problems |',
+    '| --- | --- | --- | --- | --- | --- | --- | --- | --- |',
     ...summary.tasks.map((r) =>
       [
         r.task,
@@ -131,6 +134,7 @@ export function formatRun(summary: RunSummary): string {
         r.submitted ? (r.valid ? '✓' : '✗') : 'none',
         r.firstValid === null ? '–' : r.firstValid ? '✓' : '✗',
         r.validations,
+        r.submissions,
         r.steps,
         `${Math.round(r.narrated * 100)}%`,
         [

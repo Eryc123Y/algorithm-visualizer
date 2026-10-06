@@ -13,6 +13,7 @@ Declaration: `{ "kind": "linkedList", "initial": [1, 2, 3], "doubly"?: false, "c
 | `pointer`   | `name`, `index`        | Point a named arrow (`"head"`, `"prev"`, `"curr"`) at a node; `null` removes it. Persists. |
 | `highlight` | `indices`              | Highlight nodes (this step).                                                               |
 | `visit`     | `index`                | Mark a node as visited. Persists.                                                          |
+| `settle`    | `index`                | Mark a node as final or found. Persists.                                                   |
 
 Row positions shift when nodes are inserted or removed, like an array.
 
