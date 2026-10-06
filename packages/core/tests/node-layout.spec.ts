@@ -161,6 +161,33 @@ describe('graph layout', () => {
     expect(long?.via).toBeUndefined();
   });
 
+  it('spreads parallel edges that are routed around rows', () => {
+    const { layout: l } = layout({
+      version: '0.1',
+      structures: {
+        g: {
+          kind: 'graph',
+          directed: true,
+          nodes: ['a', 'b', 'c'],
+          edges: [
+            ['a', 'b'],
+            ['b', 'c'],
+            { id: 'one', from: 'a', to: 'c' },
+            { id: 'two', from: 'a', to: 'c' },
+          ],
+        },
+      },
+      steps: [],
+    });
+    const scene = edges(l.sceneAt(0));
+    const [one, two] = ['g/edge/one', 'g/edge/two'].map((key) =>
+      scene.find((e) => e.key === key)!,
+    );
+    expect(one!.via).toHaveLength(1);
+    expect(one!.via![0]!.x).not.toBeCloseTo(two!.via![0]!.x);
+    expect(one!.labelSide).toBeDefined();
+  });
+
   it('spreads antiparallel edges and labels them on the outside', () => {
     const { layout: l } = layout({
       version: '0.1',

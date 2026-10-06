@@ -38,15 +38,25 @@ function extent(item: SceneItem): [number, number, number, number] {
       return [item.x, item.y, item.x + item.width, item.y + item.height];
     case 'node': {
       const half = Math.max(item.radius, (item.width ?? 0) / 2);
-      // A label takes up to 18 units above, or 30 beside or below when
-      // turned.
-      const label = item.label === undefined ? 0 : 18;
-      const turned = (item.labelAngle ?? 0) === 0 ? 0 : 30;
+      if (item.label === undefined)
+        return [
+          item.x - half,
+          item.y - item.radius,
+          item.x + half,
+          item.y + item.radius,
+        ];
+      // Painters draw labels at 70% of the value size, at least 10 units:
+      // centred above, or turned and then reaching out by their width.
+      const font = Math.max(10, item.fontSize * 0.7);
+      const width = [...item.label].length * font * 0.6;
+      const turned = (item.labelAngle ?? 0) !== 0;
+      const dx = turned ? half + width + 4 : Math.max(half, width / 2);
+      const below = turned ? item.radius + font + 4 : item.radius;
       return [
-        item.x - half - turned,
-        item.y - item.radius - label,
-        item.x + half + turned,
-        item.y + item.radius + turned,
+        item.x - dx,
+        item.y - item.radius - font - 4,
+        item.x + dx,
+        item.y + below,
       ];
     }
     case 'badge':

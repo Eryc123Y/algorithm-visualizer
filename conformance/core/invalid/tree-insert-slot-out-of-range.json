@@ -1,0 +1,52 @@
+{
+  "description": "In a non-binary tree, a slot is an insertion position from 0 to the number of children; larger slots are errors, not appends.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "t": {
+        "kind": "tree",
+        "nodes": [
+          {
+            "id": "a",
+            "value": "a",
+            "children": ["b", "c"]
+          },
+          {
+            "id": "b",
+            "value": "b"
+          },
+          {
+            "id": "c",
+            "value": "c"
+          },
+          {
+            "id": "d",
+            "value": "d"
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "t",
+            "type": "addNode",
+            "node": {
+              "id": "x",
+              "value": 1
+            },
+            "parent": "a",
+            "slot": 5
+          }
+        ]
+      }
+    ]
+  },
+  "expectedErrors": [
+    {
+      "code": "OUT_OF_RANGE",
+      "path": "$.steps[0].actions[0].slot"
+    }
+  ]
+}

@@ -225,6 +225,18 @@ describe('input checks', () => {
     expect(() => breadthFirstSearch(withIsland, 'Z')).toThrow(RangeError);
     expect(() => dijkstra(weighted, 'Z')).toThrow(RangeError);
   });
+  it('rejects negative weights for Dijkstra', () => {
+    const graph: GraphInput = {
+      directed: true,
+      nodes: ['A', 'B', 'C'],
+      edges: [
+        ['A', 'B', 1],
+        ['A', 'C', 2],
+        ['C', 'B', -5],
+      ],
+    };
+    expect(() => dijkstra(graph, 'A')).toThrow(RangeError);
+  });
 });
 
 describe('floydWarshall', () => {

@@ -32,6 +32,7 @@ import {
   NODE_GAP_Y,
   NOTE_HEIGHT,
   nodeShape,
+  noteWidth,
   placeForest,
   sidePointerItems,
   sidePointerWidth,
@@ -49,6 +50,8 @@ export interface TreeMetrics {
   readonly maxPointerChars: number;
   /** Whether any node is ever annotated (needs room above the root). */
   readonly hasNotes: boolean;
+  /** Longest note, in characters. */
+  readonly maxNoteChars: number;
 }
 
 const childrenLookup = (state: TreeState) => {
@@ -69,6 +72,7 @@ export function measureTree(state: TreeState): TreeMetrics {
     pointerRows: pointerRows(Object.entries(state.marks.pointers)),
     maxPointerChars: maxChars(Object.keys(state.marks.pointers)),
     hasNotes: Object.keys(state.marks.notes).length > 0,
+    maxNoteChars: maxChars(Object.values(state.marks.notes)),
   };
 }
 
@@ -82,6 +86,7 @@ export const mergeTreeMetrics = (
   pointerRows: Math.max(a.pointerRows, b.pointerRows),
   maxPointerChars: Math.max(a.maxPointerChars, b.maxPointerChars),
   hasNotes: a.hasNotes || b.hasNotes,
+  maxNoteChars: Math.max(a.maxNoteChars, b.maxNoteChars),
 });
 
 function roleOf(state: TreeState, id: string): ElementRole {
@@ -113,7 +118,12 @@ export function layoutTree({
   // binary tree are never on the same level.
   const pitchX = 2 * halfWidth + NODE_GAP_X + (state.binary ? 0 : pointerWidth);
   const pitchY = 2 * radius + NODE_GAP_Y;
-  const left = origin.x + pointerWidth;
+  // Notes are centred above nodes and may be wider than them.
+  const noteOverhang = Math.max(
+    0,
+    Math.ceil(noteWidth(metrics.maxNoteChars, shape, o) / 2 - halfWidth),
+  );
+  const left = origin.x + Math.max(pointerWidth, noteOverhang);
   const top =
     origin.y + titleRowHeight(o) + (metrics.hasNotes ? NOTE_HEIGHT : 4);
   const { column, depth } = placeForest(
@@ -181,7 +191,10 @@ export function layoutTree({
   return {
     items,
     width: Math.max(
-      pointerWidth + (columns - 1) * pitchX + 2 * halfWidth,
+      Math.max(pointerWidth, noteOverhang) +
+        (columns - 1) * pitchX +
+        2 * halfWidth +
+        noteOverhang,
       titleWidth(title, o),
     ),
     height: top - origin.y + (levels - 1) * pitchY + 2 * radius + 4,

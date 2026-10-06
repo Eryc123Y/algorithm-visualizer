@@ -56,6 +56,17 @@ export function nodeShape(count: number, o: LayoutOptions): NodeShape {
 }
 
 /**
+ * Width of a note of `count` characters beside a node of `shape`; painters
+ * draw notes at 70% of the value size, at least 10.
+ */
+export const noteWidth = (
+  count: number,
+  shape: NodeShape,
+  o: LayoutOptions,
+): number =>
+  Math.ceil(count * Math.max(10, shape.fontSize * 0.7) * o.charWidthRatio);
+
+/**
  * Distance from a node's centre to its outline along the unit direction
  * `(ux, uy)`.
  */

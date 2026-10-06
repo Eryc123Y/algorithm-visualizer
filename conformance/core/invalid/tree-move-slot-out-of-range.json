@@ -1,0 +1,49 @@
+{
+  "description": "setChild checks the slot of a non-binary parent after the child has left its old place.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "t": {
+        "kind": "tree",
+        "nodes": [
+          {
+            "id": "a",
+            "value": "a",
+            "children": ["b", "c"]
+          },
+          {
+            "id": "b",
+            "value": "b"
+          },
+          {
+            "id": "c",
+            "value": "c"
+          },
+          {
+            "id": "d",
+            "value": "d"
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "t",
+            "type": "setChild",
+            "parent": "a",
+            "child": "d",
+            "slot": 3
+          }
+        ]
+      }
+    ]
+  },
+  "expectedErrors": [
+    {
+      "code": "OUT_OF_RANGE",
+      "path": "$.steps[0].actions[0].slot"
+    }
+  ]
+}

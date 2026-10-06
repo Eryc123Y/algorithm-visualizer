@@ -177,8 +177,13 @@ export function depthFirstSearch(
   return r.build();
 }
 
+/** Weights must be non-negative; use Bellman–Ford otherwise. */
 export function dijkstra(g: GraphInput, source: string): VisualizationInput {
   checkNode(g, source);
+  if (g.edges.some(([, , w = 1]) => w < 0))
+    throw new RangeError(
+      'Dijkstra needs non-negative weights; use bellmanFord for negative ones',
+    );
   const r = new Recorder({
     title: 'Dijkstra’s algorithm',
     source: python(`

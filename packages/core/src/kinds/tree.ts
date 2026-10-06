@@ -18,7 +18,7 @@ import {
 
 import type { ReduceError } from '../errors.ts';
 import type { StructureKind } from '../kind.ts';
-import { checkCapacity, notFound, without } from './common.ts';
+import { checkCapacity, checkRange, notFound, without } from './common.ts';
 
 export interface TreeNodeState {
   readonly id: string;
@@ -166,6 +166,20 @@ function subtree(data: TreeData, id: string): Set<string> {
   return out;
 }
 
+/** In non-binary trees a slot is an insertion position: 0 to the length. */
+const slotInRange = (
+  parent: TreeNodeState,
+  slot: number | undefined,
+): ReduceError | undefined =>
+  slot === undefined
+    ? undefined
+    : checkRange(
+        `the children of "${parent.id}"`,
+        parent.children.length,
+        parent.children.length + 1,
+        [['slot'], slot],
+      );
+
 const invalid = (
   path: readonly PropertyKey[],
   message: string,
@@ -217,7 +231,9 @@ function reduceTree(s: TreeState, a: TreeAction): Reduced {
       if (a.parent === null)
         return result({ ...added, roots: [...added.roots, fresh.id] });
       const parent = node(a.parent)!;
-      if (!binary)
+      if (!binary) {
+        const bad = slotInRange(parent, a.slot);
+        if (bad) return err(bad);
         return result(
           hook(
             added,
@@ -227,6 +243,7 @@ function reduceTree(s: TreeState, a: TreeAction): Reduced {
             false,
           ),
         );
+      }
       const slot = a.slot ?? parent.children.indexOf(null);
       if (slot < 0)
         return err(
@@ -314,6 +331,9 @@ function reduceTree(s: TreeState, a: TreeAction): Reduced {
         );
       const unhooked = unhook(data, a.child, binary);
       const target = unhooked.nodes.find((n) => n.id === a.parent)!;
+      // Slots count after `child` has left its old place.
+      const badSlot = binary ? undefined : slotInRange(target, a.slot);
+      if (badSlot) return err(badSlot);
       return result(
         hook(
           unhooked,

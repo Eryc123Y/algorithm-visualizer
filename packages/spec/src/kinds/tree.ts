@@ -83,6 +83,19 @@ export const TreeDeclInput = z
   .refine((d) => d.nodes === undefined || d.levelOrder === undefined, {
     message: 'Give either `nodes` or `levelOrder`, not both',
     path: ['levelOrder'],
+  })
+  .superRefine((d, ctx) => {
+    if (d.levelOrder === undefined) return;
+    const { consumed } = fromLevelOrder(d.levelOrder);
+    const orphan = d.levelOrder.findIndex(
+      (v, k) => k >= consumed && v !== null,
+    );
+    if (orphan >= 0)
+      ctx.addIssue({
+        code: 'custom',
+        path: ['levelOrder', orphan],
+        message: `Value ${JSON.stringify(d.levelOrder[orphan])} has no parent: every slot before it is taken or empty`,
+      });
   });
 export type TreeDeclInput = z.infer<typeof TreeDeclInput>;
 
@@ -90,11 +103,13 @@ export type TreeDeclInput = z.infer<typeof TreeDeclInput>;
 function fromLevelOrder(values: readonly z.infer<typeof Scalar>[]): {
   nodes: TreeNode[];
   roots: string[];
+  /** How many values were placed (or skipped as empty slots). */
+  consumed: number;
 } {
   const nodes: TreeNode[] = [];
   const first = values[0];
   if (values.length === 0 || first === null || first === undefined)
-    return { nodes, roots: [] };
+    return { nodes, roots: [], consumed: Math.min(1, values.length) };
   const queue: { id: string; children: (string | null)[] }[] = [];
   const make = (value: z.infer<typeof Scalar>) => {
     const node = {
@@ -116,7 +131,7 @@ function fromLevelOrder(values: readonly z.infer<typeof Scalar>[]): {
       if (value !== null) parent.children[slot] = make(value);
     }
   }
-  return { nodes, roots: ['e0'] };
+  return { nodes, roots: ['e0'], consumed: k };
 }
 
 function normalizeTreeDecl(input: TreeDeclInput): TreeDecl {

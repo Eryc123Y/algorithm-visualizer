@@ -34,6 +34,7 @@ import {
 import {
   NOTE_HEIGHT,
   nodeShape,
+  noteWidth,
   outlineDistance,
   sidePointerItems,
   sidePointerWidth,
@@ -53,6 +54,8 @@ export interface GraphMetrics {
   readonly pointerRows: number;
   readonly maxPointerChars: number;
   readonly hasNotes: boolean;
+  /** Longest note, in characters. */
+  readonly maxNoteChars: number;
   readonly hasLoops: boolean;
   readonly hasWeights: boolean;
 }
@@ -77,6 +80,7 @@ export function measureGraph(state: GraphState): GraphMetrics {
     pointerRows: pointerRows(Object.entries(state.marks.pointers)),
     maxPointerChars: maxChars(Object.keys(state.marks.pointers)),
     hasNotes: Object.keys(state.marks.notes).length > 0,
+    maxNoteChars: maxChars(Object.values(state.marks.notes)),
     hasLoops: state.data.edges.some((e) => e.from === e.to),
     hasWeights: state.data.edges.some((e) => e.weight !== null),
   };
@@ -103,6 +107,7 @@ export const mergeGraphMetrics = (
   pointerRows: Math.max(a.pointerRows, b.pointerRows),
   maxPointerChars: Math.max(a.maxPointerChars, b.maxPointerChars),
   hasNotes: a.hasNotes || b.hasNotes,
+  maxNoteChars: Math.max(a.maxNoteChars, b.maxNoteChars),
   hasLoops: a.hasLoops || b.hasLoops,
   hasWeights: a.hasWeights || b.hasWeights,
 });
@@ -427,13 +432,14 @@ export function layoutGraph({
     ) * scale.y;
   // Self-loops may point any way; notes sit above nodes.
   // Room around the nodes for self-loops, notes beside nodes and weights.
-  const pad = metrics.hasLoops
-    ? SELF_LOOP_HEIGHT
-    : metrics.hasNotes
-      ? 30
-      : metrics.hasWeights
-        ? 12
-        : 4;
+  const pad = Math.max(
+    metrics.hasWeights ? 12 : 4,
+    metrics.hasLoops ? SELF_LOOP_HEIGHT : 0,
+    // A note turned sideways extends its full width beyond the node.
+    metrics.hasNotes
+      ? Math.max(30, noteWidth(metrics.maxNoteChars, shape, o) + 8)
+      : 0,
+  );
   const above = Math.max(pad, metrics.hasNotes ? NOTE_HEIGHT : 0);
   const left = origin.x + pointerWidth + halfWidth + pad;
   const top = origin.y + titleRowHeight(o) + above + radius;
@@ -545,10 +551,31 @@ export function layoutGraph({
       });
       continue;
     }
+    const b = centre(e.to);
+    const group = pairs.get(pairKey(e))!;
+    const offset =
+      (group.indexOf(e.id) - (group.length - 1) / 2) * PARALLEL_SPREAD;
+    const length = Math.hypot(b.x - a.x, b.y - a.y) || 1;
+    const u = { x: (b.x - a.x) / length, y: (b.y - a.y) / length };
+    // The edge's right-hand normal, and the pair's shared one.
+    const right = { x: -u.y, y: u.x };
+    const sameWay = e.from < e.to ? 1 : -1;
+    const shared = { x: right.x * sameWay, y: right.y * sameWay };
+    const d = Math.min(Math.abs(offset), radius * 0.7) * Math.sign(offset);
+    const side =
+      d === 0
+        ? {}
+        : {
+            labelSide: d * sameWay > 0 ? ('right' as const) : ('left' as const),
+          };
+
     const bends = arrangement.bends?.get(linkKey(e.from, e.to));
     if (bends !== undefined) {
-      const via = bends.map(toPixel);
-      const b = centre(e.to);
+      // Parallel routed edges share their bends, so shift them apart too.
+      const via = bends.map(toPixel).map((p) => ({
+        x: p.x + shared.x * offset,
+        y: p.y + shared.y * offset,
+      }));
       const trim = (from: Point, toward: Point) => {
         const length = Math.hypot(toward.x - from.x, toward.y - from.y) || 1;
         const u = {
@@ -568,20 +595,10 @@ export function layoutGraph({
         y2: end.y,
         via,
         ...label,
+        ...side,
       });
       continue;
     }
-    const b = centre(e.to);
-    const group = pairs.get(pairKey(e))!;
-    const offset =
-      (group.indexOf(e.id) - (group.length - 1) / 2) * PARALLEL_SPREAD;
-    const length = Math.hypot(b.x - a.x, b.y - a.y) || 1;
-    const u = { x: (b.x - a.x) / length, y: (b.y - a.y) / length };
-    // The edge's right-hand normal, and the pair's shared one.
-    const right = { x: -u.y, y: u.x };
-    const sameWay = e.from < e.to ? 1 : -1;
-    const shared = { x: right.x * sameWay, y: right.y * sameWay };
-    const d = Math.min(Math.abs(offset), radius * 0.7) * Math.sign(offset);
     // Shifting sideways by d moves the outline closer by r − √(r² − d²).
     const along =
       outlineDistance(shape, u.x, u.y) -
@@ -593,7 +610,7 @@ export function layoutGraph({
       x2: b.x - u.x * along + shared.x * d,
       y2: b.y - u.y * along + shared.y * d,
       ...label,
-      ...(d === 0 ? {} : { labelSide: d * sameWay > 0 ? 'right' : 'left' }),
+      ...side,
     });
   }
 
