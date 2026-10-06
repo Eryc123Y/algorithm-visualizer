@@ -1,0 +1,30 @@
+{
+  "description": "An action must target a declared structure.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "arr": {
+        "kind": "array",
+        "initial": [1, 2]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "ar",
+            "type": "swap",
+            "i": 0,
+            "j": 1
+          }
+        ]
+      }
+    ]
+  },
+  "expectedErrors": [
+    {
+      "code": "UNKNOWN_TARGET",
+      "path": "$.steps[0].actions[0].target"
+    }
+  ]
+}

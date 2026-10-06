@@ -1,0 +1,30 @@
+{
+  "description": "An action type must exist for the target kind.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "arr": {
+        "kind": "array",
+        "initial": [1, 2]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "arr",
+            "type": "swop",
+            "i": 0,
+            "j": 1
+          }
+        ]
+      }
+    ]
+  },
+  "expectedErrors": [
+    {
+      "code": "UNKNOWN_ACTION",
+      "path": "$.steps[0].actions[0].type"
+    }
+  ]
+}

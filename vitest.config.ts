@@ -1,22 +1,12 @@
-import { fileURLToPath } from 'node:url';
+import { defineConfig } from 'vitest/config';
 
-import { configDefaults, defineConfig, mergeConfig } from 'vitest/config';
-
-import viteConfig from './vite.config';
-
-export default mergeConfig(
-  viteConfig,
-  defineConfig({
-    test: {
-      environment: 'happy-dom',
-      include: ['tests/unit/**/*.spec.ts', 'src/**/*.spec.ts'],
-      exclude: [...configDefaults.exclude, 'tests/e2e/**'],
-      root: fileURLToPath(new URL('./', import.meta.url)),
-      coverage: {
-        provider: 'v8',
-        include: ['src/**/*.{ts,vue}'],
-        exclude: ['src/main.ts', 'src/env.d.ts'],
-      },
+export default defineConfig({
+  test: {
+    projects: ['packages/*', 'apps/playground'],
+    coverage: {
+      provider: 'v8',
+      include: ['packages/*/src/**/*.ts', 'apps/playground/src/**/*.{ts,vue}'],
+      exclude: ['apps/playground/src/main.ts', '**/*.d.ts'],
     },
-  }),
-);
+  },
+});

@@ -1,0 +1,295 @@
+{
+  "description": "First pass of bubble sort on [5, 3, 8, 1] with explicit ids, source lines and narration.",
+  "input": {
+    "version": "0.1",
+    "title": "Bubble sort",
+    "structures": {
+      "arr": {
+        "kind": "array",
+        "label": "a",
+        "initial": [
+          {
+            "id": "a",
+            "value": 5
+          },
+          {
+            "id": "b",
+            "value": 3
+          },
+          {
+            "id": "c",
+            "value": 8
+          },
+          {
+            "id": "d",
+            "value": 1
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "arr",
+            "type": "pointer",
+            "name": "j",
+            "index": 0
+          }
+        ],
+        "meta": {
+          "line": 2,
+          "vars": {
+            "i": 0,
+            "j": 0
+          }
+        }
+      },
+      {
+        "actions": [
+          {
+            "target": "arr",
+            "type": "compare",
+            "i": 0,
+            "j": 1
+          }
+        ],
+        "meta": {
+          "line": 3,
+          "narration": "Compare 5 and 3."
+        }
+      },
+      {
+        "actions": [
+          {
+            "target": "arr",
+            "type": "swap",
+            "i": 0,
+            "j": 1
+          }
+        ],
+        "meta": {
+          "line": 4,
+          "narration": "5 > 3, so swap them."
+        }
+      },
+      {
+        "actions": [
+          {
+            "target": "arr",
+            "type": "pointer",
+            "name": "j",
+            "index": 1
+          },
+          {
+            "target": "arr",
+            "type": "compare",
+            "i": 1,
+            "j": 2
+          }
+        ],
+        "meta": {
+          "line": 3,
+          "narration": "Compare 5 and 8; no swap needed."
+        }
+      },
+      {
+        "actions": [
+          {
+            "target": "arr",
+            "type": "pointer",
+            "name": "j",
+            "index": 2
+          },
+          {
+            "target": "arr",
+            "type": "compare",
+            "i": 2,
+            "j": 3
+          }
+        ],
+        "meta": {
+          "line": 3
+        }
+      },
+      {
+        "actions": [
+          {
+            "target": "arr",
+            "type": "swap",
+            "i": 2,
+            "j": 3
+          }
+        ],
+        "meta": {
+          "line": 4
+        }
+      },
+      {
+        "actions": [
+          {
+            "target": "arr",
+            "type": "pointer",
+            "name": "j",
+            "index": null
+          },
+          {
+            "target": "arr",
+            "type": "settle",
+            "index": 3
+          }
+        ],
+        "meta": {
+          "line": 7,
+          "narration": "8 is now in its final position."
+        }
+      }
+    ]
+  },
+  "expected": {
+    "version": "0.1",
+    "title": "Bubble sort",
+    "structures": {
+      "arr": {
+        "kind": "array",
+        "label": "a",
+        "initial": [
+          {
+            "id": "a",
+            "value": 5
+          },
+          {
+            "id": "b",
+            "value": 3
+          },
+          {
+            "id": "c",
+            "value": 8
+          },
+          {
+            "id": "d",
+            "value": 1
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "arr",
+            "type": "pointer",
+            "name": "j",
+            "index": 0
+          }
+        ],
+        "meta": {
+          "line": 2,
+          "vars": {
+            "i": 0,
+            "j": 0
+          }
+        }
+      },
+      {
+        "actions": [
+          {
+            "target": "arr",
+            "type": "compare",
+            "i": 0,
+            "j": 1
+          }
+        ],
+        "meta": {
+          "line": 3,
+          "narration": "Compare 5 and 3."
+        }
+      },
+      {
+        "actions": [
+          {
+            "target": "arr",
+            "type": "swap",
+            "i": 0,
+            "j": 1
+          }
+        ],
+        "meta": {
+          "line": 4,
+          "narration": "5 > 3, so swap them."
+        }
+      },
+      {
+        "actions": [
+          {
+            "target": "arr",
+            "type": "pointer",
+            "name": "j",
+            "index": 1
+          },
+          {
+            "target": "arr",
+            "type": "compare",
+            "i": 1,
+            "j": 2
+          }
+        ],
+        "meta": {
+          "line": 3,
+          "narration": "Compare 5 and 8; no swap needed."
+        }
+      },
+      {
+        "actions": [
+          {
+            "target": "arr",
+            "type": "pointer",
+            "name": "j",
+            "index": 2
+          },
+          {
+            "target": "arr",
+            "type": "compare",
+            "i": 2,
+            "j": 3
+          }
+        ],
+        "meta": {
+          "line": 3
+        }
+      },
+      {
+        "actions": [
+          {
+            "target": "arr",
+            "type": "swap",
+            "i": 2,
+            "j": 3
+          }
+        ],
+        "meta": {
+          "line": 4
+        }
+      },
+      {
+        "actions": [
+          {
+            "target": "arr",
+            "type": "pointer",
+            "name": "j",
+            "index": null
+          },
+          {
+            "target": "arr",
+            "type": "settle",
+            "index": 3
+          }
+        ],
+        "meta": {
+          "line": 7,
+          "narration": "8 is now in its final position."
+        }
+      }
+    ]
+  }
+}
