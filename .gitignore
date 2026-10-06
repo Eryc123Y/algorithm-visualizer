@@ -1,0 +1,50 @@
+# macOS system files
+.DS_Store
+
+# Node.js dependencies
+node_modules
+
+# Build output
+/dist
+/output
+/build
+
+# Testing
+
+
+/coverage/
+/reports/
+
+# local env files
+.env.local
+.env.*.local
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Temporary files
+*.tmp
+*.temp
+
+# Other system files
+.AppleDouble
+.LSOverride
+# Playwright
+/test-results/
+/playwright-report/
+/playwright/.cache/
+
+# TypeScript incremental build info
+*.tsbuildinfo
