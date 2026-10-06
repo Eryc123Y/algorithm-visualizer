@@ -1,0 +1,52 @@
+{
+  "description": "All action errors are reported, not just the first.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "arr": {
+        "kind": "array",
+        "initial": [1, 2]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "nope",
+            "type": "swap",
+            "i": 0,
+            "j": 1
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "arr",
+            "type": "compare",
+            "i": 0,
+            "j": 1
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "arr",
+            "type": "settle"
+          }
+        ]
+      }
+    ]
+  },
+  "expectedErrors": [
+    {
+      "code": "UNKNOWN_TARGET",
+      "path": "$.steps[0].actions[0].target"
+    },
+    {
+      "code": "INVALID_ACTION",
+      "path": "$.steps[2].actions[0].index"
+    }
+  ]
+}

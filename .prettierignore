@@ -3,3 +3,5 @@ coverage
 playwright-report
 test-results
 package-lock.json
+packages/*/dist
+packages/*/schema

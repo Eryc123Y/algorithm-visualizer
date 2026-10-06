@@ -1,0 +1,497 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "0.1",
+      "description": "Protocol version; must be \"0.1\"."
+    },
+    "title": {
+      "type": "string",
+      "maxLength": 2000
+    },
+    "structures": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+        "description": "Identifier of a structure, e.g. \"arr\" or \"dist\". Letters, digits and underscores; must not start with a digit."
+      },
+      "additionalProperties": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "array"
+              },
+              "label": {
+                "type": "string",
+                "maxLength": 2000
+              },
+              "initial": {
+                "anyOf": [
+                  {
+                    "maxItems": 1000,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                          "description": "Identifier of an element, unique within its structure and stable for the whole trace."
+                        },
+                        "value": {
+                          "anyOf": [
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "string",
+                              "maxLength": 2000
+                            },
+                            {
+                              "type": "boolean"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "description": "A displayable value: number, string, boolean or null."
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "value"
+                      ],
+                      "additionalProperties": false,
+                      "description": "An element with an explicit id."
+                    }
+                  },
+                  {
+                    "maxItems": 1000,
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "maxLength": 2000
+                        },
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "A displayable value: number, string, boolean or null."
+                    }
+                  }
+                ],
+                "description": "Initial contents: either bare values like [5, 3, 8] (ids \"e0\", \"e1\", … are generated) or elements like [{ \"id\": \"a\", \"value\": 5 }]."
+              }
+            },
+            "required": [
+              "kind",
+              "initial"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "description": "Structures shown in the visualization, keyed by name."
+    },
+    "steps": {
+      "maxItems": 10000,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "actions": {
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "const": "set"
+                    },
+                    "index": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991,
+                      "description": "Zero-based position."
+                    },
+                    "value": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "maxLength": 2000
+                        },
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "A displayable value: number, string, boolean or null."
+                    },
+                    "target": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+                      "description": "Name of the structure this action applies to."
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "index",
+                    "value",
+                    "target"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "const": "swap"
+                    },
+                    "i": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991,
+                      "description": "Zero-based position."
+                    },
+                    "j": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991,
+                      "description": "Zero-based position."
+                    },
+                    "target": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+                      "description": "Name of the structure this action applies to."
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "i",
+                    "j",
+                    "target"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "const": "insert"
+                    },
+                    "index": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991,
+                      "description": "Zero-based position."
+                    },
+                    "element": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                          "description": "Identifier of an element, unique within its structure and stable for the whole trace."
+                        },
+                        "value": {
+                          "anyOf": [
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "string",
+                              "maxLength": 2000
+                            },
+                            {
+                              "type": "boolean"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "description": "A displayable value: number, string, boolean or null."
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "value"
+                      ],
+                      "additionalProperties": false,
+                      "description": "An element with an explicit id."
+                    },
+                    "target": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+                      "description": "Name of the structure this action applies to."
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "index",
+                    "element",
+                    "target"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "const": "remove"
+                    },
+                    "index": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991,
+                      "description": "Zero-based position."
+                    },
+                    "target": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+                      "description": "Name of the structure this action applies to."
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "index",
+                    "target"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "const": "compare"
+                    },
+                    "i": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991,
+                      "description": "Zero-based position."
+                    },
+                    "j": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991,
+                      "description": "Zero-based position."
+                    },
+                    "target": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+                      "description": "Name of the structure this action applies to."
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "i",
+                    "j",
+                    "target"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "const": "highlight"
+                    },
+                    "indices": {
+                      "minItems": 1,
+                      "maxItems": 1000,
+                      "type": "array",
+                      "items": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991,
+                        "description": "Zero-based position."
+                      }
+                    },
+                    "target": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+                      "description": "Name of the structure this action applies to."
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "indices",
+                    "target"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "const": "pointer"
+                    },
+                    "name": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,15}$"
+                    },
+                    "index": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991,
+                          "description": "Zero-based position."
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "target": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+                      "description": "Name of the structure this action applies to."
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "name",
+                    "index",
+                    "target"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "const": "settle"
+                    },
+                    "index": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991,
+                      "description": "Zero-based position."
+                    },
+                    "target": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+                      "description": "Name of the structure this action applies to."
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "index",
+                    "target"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "description": "Actions applied in order; a step may have none and only narrate."
+          },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "line": {
+                "description": "1-based source line this step corresponds to.",
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "narration": {
+                "description": "One or two sentences explaining the step to a learner.",
+                "type": "string",
+                "maxLength": 2000
+              },
+              "vars": {
+                "description": "Variable values to display, e.g. { \"i\": 0, \"j\": 1 }.",
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {
+                  "$ref": "#/$defs/__schema0"
+                }
+              }
+            },
+            "additionalProperties": false,
+            "description": "Teaching metadata for a step."
+          }
+        },
+        "required": [
+          "actions"
+        ],
+        "additionalProperties": false,
+        "description": "One point on the timeline the learner can step to."
+      }
+    }
+  },
+  "required": [
+    "version",
+    "structures",
+    "steps"
+  ],
+  "additionalProperties": false,
+  "description": "A step-by-step visualization: declared structures plus a timeline of steps, each applying actions to those structures.",
+  "$defs": {
+    "__schema0": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/__schema0"
+          }
+        },
+        {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/__schema0"
+          }
+        }
+      ]
+    }
+  },
+  "$id": "urn:algoviz:schema:visualization:0.1",
+  "title": "Visualization"
+}

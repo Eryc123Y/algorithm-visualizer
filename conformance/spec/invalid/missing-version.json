@@ -1,0 +1,18 @@
+{
+  "description": "`version` is required.",
+  "input": {
+    "structures": {
+      "arr": {
+        "kind": "array",
+        "initial": []
+      }
+    },
+    "steps": []
+  },
+  "expectedErrors": [
+    {
+      "code": "INVALID_SHAPE",
+      "path": "$.version"
+    }
+  ]
+}

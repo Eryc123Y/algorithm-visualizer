@@ -1,0 +1,23 @@
+{
+  "description": "Bare values in `initial` expand to elements with ids e0, e1, …",
+  "input": {
+    "version": "0.1",
+    "structures": { "arr": { "kind": "array", "initial": [5, 3, 8, 1] } },
+    "steps": []
+  },
+  "expected": {
+    "version": "0.1",
+    "structures": {
+      "arr": {
+        "kind": "array",
+        "initial": [
+          { "id": "e0", "value": 5 },
+          { "id": "e1", "value": 3 },
+          { "id": "e2", "value": 8 },
+          { "id": "e3", "value": 1 }
+        ]
+      }
+    },
+    "steps": []
+  }
+}

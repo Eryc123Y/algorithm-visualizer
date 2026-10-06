@@ -1,0 +1,20 @@
+{
+  "description": "Unknown keys are rejected so that typos are caught.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "arr": {
+        "kind": "array",
+        "initial": [1]
+      }
+    },
+    "steps": [],
+    "stpes": []
+  },
+  "expectedErrors": [
+    {
+      "code": "INVALID_SHAPE",
+      "path": "$"
+    }
+  ]
+}

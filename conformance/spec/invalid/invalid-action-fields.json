@@ -1,0 +1,38 @@
+{
+  "description": "Missing, mistyped and unknown action fields are all reported.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "arr": {
+        "kind": "array",
+        "initial": [1, 2]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "arr",
+            "type": "swap",
+            "i": -1,
+            "indx": 1
+          }
+        ]
+      }
+    ]
+  },
+  "expectedErrors": [
+    {
+      "code": "INVALID_ACTION",
+      "path": "$.steps[0].actions[0].i"
+    },
+    {
+      "code": "INVALID_ACTION",
+      "path": "$.steps[0].actions[0].j"
+    },
+    {
+      "code": "INVALID_ACTION",
+      "path": "$.steps[0].actions[0]"
+    }
+  ]
+}

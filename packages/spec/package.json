@@ -1,0 +1,26 @@
+{
+  "name": "@algoviz/spec",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Protocol schemas, types and validation for algoviz traces.",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./visualization.schema.json": "./schema/visualization.schema.json"
+  },
+  "files": [
+    "dist",
+    "schema"
+  ],
+  "scripts": {
+    "build": "tsc --build tsconfig.lib.json",
+    "generate:schema": "node scripts/generate-schema.ts"
+  },
+  "dependencies": {
+    "zod": "^4.6.5"
+  }
+}

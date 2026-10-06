@@ -1,0 +1,14 @@
+{
+  "description": "At least one structure must be declared.",
+  "input": {
+    "version": "0.1",
+    "structures": {},
+    "steps": []
+  },
+  "expectedErrors": [
+    {
+      "code": "INVALID_SHAPE",
+      "path": "$.structures"
+    }
+  ]
+}

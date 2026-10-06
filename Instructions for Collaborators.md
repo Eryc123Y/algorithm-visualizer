@@ -32,30 +32,26 @@ npm run dev
 
 ### 3.1 Key Directories
 
-- `src/`: Application source code.
+This is an npm workspaces monorepo.
 
-  - `components/`: Reusable Vue components.
-
-  - `views/`: Page-level components.
-
-  - `assets/`: Static assets like images and styles.
-
-  - `router/`: Vue Router configuration.
-
-- `public/`: Public static files.
-
-- `tests/`: Unit and end-to-end tests.
+- `packages/spec/` (`@algoviz/spec`): protocol schemas (Zod), inferred types, parsing and validation. No DOM or Node.js APIs (ADR 0005).
+  - `schema/visualization.schema.json`: generated JSON Schema; regenerate with `npm run generate:schema -w @algoviz/spec`.
+- `apps/playground/` (`@algoviz/playground`): Vite + Vue demo and documentation app.
+  - `src/`, `public/`, `tests/unit/`, `tests/e2e/`.
+- `conformance/`: language-agnostic JSON fixtures every implementation must pass (see its README).
+- `docs/adr/`: architecture decision records.
 
 ### 3.2 Key Configurations
 
-- `vite.config.ts`: Vite build/dev-server config (Vue and Tailwind plugins, `@` alias to `src/`).
-- `vitest.config.ts`: Unit test config (extends the Vite config, runs in `happy-dom`).
-- `playwright.config.ts`: E2E test config (runs against the production build).
-- `tsconfig.json`: Solution file referencing `tsconfig.app.json` (app code), `tsconfig.test.json` (tests) and `tsconfig.node.json` (config files).
-- `eslint.config.ts`: ESLint flat config (Vue + type-aware TypeScript rules).
+- `tsconfig.base.json`: strict compiler options shared by all packages.
+- `tsconfig.json`: solution file referencing every project; `npm run typecheck` builds them all.
+- `vitest.config.ts`: runs the unit tests of every workspace as Vitest projects.
+- `eslint.config.ts`: ESLint flat config (Vue + type-aware TypeScript rules) for the whole repo.
 - `.prettierrc.json`: Prettier rules.
-- `.lintstagedrc.json`: Checks run on staged files by the Husky pre-commit hook.
-- Tailwind CSS v4 needs no config file; it is loaded via `@import 'tailwindcss'` in `src/assets/css/tailwind.css`.
+- `.lintstagedrc.json`: checks run on staged files by the Husky pre-commit hook.
+- `apps/playground/vite.config.ts`, `playwright.config.ts`: app build and E2E test config.
+- `packages/spec/tsconfig.lib.json`: library build (ES2022 only, no DOM or Node types); `tsconfig.test.json`: tests and scripts.
+- Tailwind CSS v4 needs no config file; it is loaded via `@import 'tailwindcss'` in `apps/playground/src/assets/css/tailwind.css`.
 
 ---
 
@@ -137,8 +133,10 @@ async function getUserData(userId: string): Promise<UserData> {
 
 - Write unit tests for all components.
 - Test coverage should meet the project's minimum standard (e.g., 80%).
-- Unit tests (Vitest) live in `tests/unit/` or next to the source as `*.spec.ts`.
-- E2E tests (Playwright) live in `tests/e2e/` as `*.spec.ts`.
+- Unit tests (Vitest) live in each workspace's `tests/` directory as `*.spec.ts`.
+- Type-level behaviour is tested with `expectTypeOf`; these assertions are enforced by `npm run typecheck`.
+- Protocol behaviour that other implementations must match belongs in `conformance/` as JSON fixtures.
+- E2E tests (Playwright) live in `apps/playground/tests/e2e/`.
 
 ---
 

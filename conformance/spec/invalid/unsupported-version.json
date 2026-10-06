@@ -1,0 +1,14 @@
+{
+  "description": "A document for another protocol version is rejected before shape checks.",
+  "input": {
+    "version": "2.0",
+    "structures": {},
+    "steps": []
+  },
+  "expectedErrors": [
+    {
+      "code": "UNSUPPORTED_VERSION",
+      "path": "$.version"
+    }
+  ]
+}
