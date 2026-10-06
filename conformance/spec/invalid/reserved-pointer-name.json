@@ -1,0 +1,30 @@
+{
+  "description": "Pointer names follow the same rule.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "arr": {
+        "kind": "array",
+        "initial": [1, 2]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "arr",
+            "type": "pointer",
+            "name": "constructor",
+            "index": 0
+          }
+        ]
+      }
+    ]
+  },
+  "expectedErrors": [
+    {
+      "code": "INVALID_ACTION",
+      "path": "$.steps[0].actions[0].name"
+    }
+  ]
+}

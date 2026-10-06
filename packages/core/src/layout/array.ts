@@ -26,6 +26,8 @@ export interface ArrayMetrics {
   readonly maxChars: number;
   /** Most pointers sharing one index. */
   readonly pointerRows: number;
+  /** Longest pointer name, in characters. */
+  readonly maxPointerChars: number;
 }
 
 /** Text shown for a value: ECMAScript `String()` conversion. */
@@ -45,6 +47,10 @@ export function measureArray(state: ArrayState): ArrayMetrics {
       ...state.data.map((e) => [...formatScalar(e.value)].length),
     ),
     pointerRows: Math.max(0, ...perIndex.values()),
+    maxPointerChars: Math.max(
+      0,
+      ...Object.keys(state.marks.pointers).map((name) => [...name].length),
+    ),
   };
 }
 
@@ -55,6 +61,7 @@ export const mergeArrayMetrics = (
   slots: Math.max(a.slots, b.slots),
   maxChars: Math.max(a.maxChars, b.maxChars),
   pointerRows: Math.max(a.pointerRows, b.pointerRows),
+  maxPointerChars: Math.max(a.maxPointerChars, b.maxPointerChars),
 });
 
 function roleOf(state: ArrayState, index: number, id: string): BoxRole {
@@ -87,14 +94,29 @@ export function layoutArray(
     ),
   );
   const pitch = cellWidth + o.cellGap;
-  const centerX = (index: number) => origin.x + index * pitch + cellWidth / 2;
+  const badgeHeight = o.pointerFontSize + 8;
+  const badgeWidth = (chars: number) =>
+    Math.max(
+      badgeHeight,
+      Math.ceil(chars * o.pointerFontSize * o.charWidthRatio + 12),
+    );
+  // Pointer badges are centred under cells and may be wider than a cell, so
+  // reserve room for the widest one on both sides of the cell row.
+  const overhang =
+    metrics.maxPointerChars === 0
+      ? 0
+      : Math.max(
+          0,
+          Math.ceil(badgeWidth(metrics.maxPointerChars) / 2 - cellWidth / 2),
+        );
+  const cellsLeft = origin.x + overhang;
+  const centerX = (index: number) => cellsLeft + index * pitch + cellWidth / 2;
 
   const titleRow = o.showTitles ? o.titleFontSize + 11 : 0;
   const indexRow = o.showIndices ? o.indexFontSize + 8 : 0;
   const cellsTop = origin.y + titleRow + indexRow;
   const cellsBottom = cellsTop + o.cellHeight;
   // Pointer area: a 14-unit arrow, then badges stacked every `badgePitch`.
-  const badgeHeight = o.pointerFontSize + 8;
   const badgePitch = badgeHeight + 4;
   const badgeTop = cellsBottom + 20;
   const pointerArea =
@@ -130,7 +152,7 @@ export function layoutArray(
     items.push({
       type: 'box',
       key: `${name}/element/${element.id}`,
-      x: origin.x + index * pitch,
+      x: cellsLeft + index * pitch,
       y: cellsTop,
       width: cellWidth,
       height: o.cellHeight,
@@ -166,12 +188,7 @@ export function layoutArray(
         key: `${name}/pointer/${pointer}`,
         x,
         y: badgeTop + depth * badgePitch + badgeHeight / 2,
-        width: Math.max(
-          badgeHeight,
-          Math.ceil(
-            [...pointer].length * o.pointerFontSize * o.charWidthRatio + 12,
-          ),
-        ),
+        width: badgeWidth([...pointer].length),
         height: badgeHeight,
         role: 'pointer',
         text: pointer,
@@ -180,9 +197,14 @@ export function layoutArray(
     });
   }
 
+  const cellsWidth =
+    metrics.slots === 0 ? 0 : metrics.slots * pitch - o.cellGap;
+  const titleWidth = o.showTitles
+    ? Math.ceil([...title].length * o.titleFontSize * o.charWidthRatio)
+    : 0;
   return {
     items,
-    width: metrics.slots === 0 ? 0 : metrics.slots * pitch - o.cellGap,
+    width: Math.max(cellsWidth + 2 * overhang, titleWidth),
     height: titleRow + indexRow + o.cellHeight + pointerArea,
   };
 }

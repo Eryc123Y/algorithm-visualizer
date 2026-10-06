@@ -124,6 +124,8 @@ export class AlgoPlayer extends LitElement {
   readonly #reducedMotion = mediaQuery('(prefers-reduced-motion: reduce)');
   #visibility: IntersectionObserver | null = null;
   #pausedOffscreen = false;
+  /** Last visibility reported by the IntersectionObserver. */
+  #visible = true;
   #ownsTabIndex = false;
 
   constructor() {
@@ -214,7 +216,7 @@ export class AlgoPlayer extends LitElement {
       if (this.trace !== null && changed.get('mode') !== undefined) {
         this.#layout = layoutTrace(this.trace, this.#layoutOptions());
         this.#rendered = false;
-        if (this.#isDisplay) this.#controller.play();
+        if (this.#isDisplay) this.#startPlayback();
         else if (!this.autoplay) this.#controller.pause();
       }
     }
@@ -277,7 +279,7 @@ export class AlgoPlayer extends LitElement {
     this.dispatchEvent(
       new CustomEvent('algo-load', { detail: { length: result.value.length } }),
     );
-    if (this.autoplay || this.#isDisplay) this.#controller.play();
+    if (this.autoplay || this.#isDisplay) this.#startPlayback();
   }
 
   #fail(errors: readonly Diagnostic[]): void {
@@ -346,10 +348,20 @@ export class AlgoPlayer extends LitElement {
     action();
   };
 
+  /**
+   * Starts automatic playback, unless this is a display that is currently
+   * off screen: then it starts once the display becomes visible.
+   */
+  #startPlayback(): void {
+    if (this.#isDisplay && !this.#visible) this.#pausedOffscreen = true;
+    else this.#controller.play();
+  }
+
   /** Display mode pauses while off screen and resumes when visible again. */
   #onVisibility = (entries: IntersectionObserverEntry[]): void => {
-    if (!this.#isDisplay) return;
     const visible = entries.at(-1)?.isIntersecting ?? true;
+    this.#visible = visible;
+    if (!this.#isDisplay) return;
     if (!visible && this.playback.playing) {
       this.#pausedOffscreen = true;
       this.#controller.pause();

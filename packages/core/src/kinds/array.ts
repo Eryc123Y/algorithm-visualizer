@@ -9,6 +9,7 @@ import {
   type ArrayDecl,
   type ArrayElement,
   type ElementId,
+  LIMITS,
   type Result,
 } from '@algoviz/spec';
 
@@ -91,6 +92,14 @@ function reduceArray(s: ArrayState, a: ArrayAction): Reduced {
     case 'insert': {
       const bad = checkRange(s, n + 1, [['index'], a.index]);
       if (bad) return err(bad);
+      if (n >= LIMITS.elementsPerStructure) {
+        return err({
+          code: 'LIMIT_EXCEEDED',
+          path: [],
+          message: `An array may hold at most ${LIMITS.elementsPerStructure} elements`,
+          hint: 'Remove elements before inserting more, or visualize a smaller input.',
+        });
+      }
       if (s.data.some((e) => e.id === a.element.id)) {
         return err({
           code: 'DUPLICATE_ID',

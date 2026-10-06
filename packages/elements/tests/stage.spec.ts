@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { layoutTrace, loadTrace } from '@algoviz/core';
-import { paintScene } from '@algoviz/svg';
+import { createTheme, paintScene } from '@algoviz/svg';
 
 import { SceneStage } from '../src/stage.ts';
 
@@ -47,6 +47,22 @@ describe('SceneStage', () => {
     expect(el(svg, 'arr/element/e0')).toBe(first);
     expect(first?.style.transform).toBe('translate(80px, 64px)');
     expect(first?.getAttribute('data-role')).toBe('swap');
+  });
+
+  it('paints the theme background like renderSvg does', () => {
+    const { svg, stage } = mount();
+    const scene = layout.sceneAt(0);
+    stage.render(
+      paintScene(scene, createTheme('light', { background: '#fafafa' })),
+      {
+        duration: 0,
+      },
+    );
+    const rect = svg.querySelector(':scope > rect');
+    expect(rect?.getAttribute('fill')).toBe('#fafafa');
+    expect(rect?.getAttribute('width')).toBe(String(scene.width));
+    stage.render(paintScene(scene), { duration: 0 });
+    expect(rect?.getAttribute('display')).toBe('none');
   });
 
   it('adds and removes items as they appear and disappear', () => {

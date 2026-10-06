@@ -1,0 +1,30 @@
+{
+  "description": "Names inherited by every JavaScript object, such as \"constructor\", are rejected rather than resolving to inherited values.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "arr": {
+        "kind": "array",
+        "initial": [1, 2]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "constructor",
+            "type": "swap",
+            "i": 0,
+            "j": 1
+          }
+        ]
+      }
+    ]
+  },
+  "expectedErrors": [
+    {
+      "code": "INVALID_SHAPE",
+      "path": "$.steps[0].actions[0].target"
+    }
+  ]
+}
