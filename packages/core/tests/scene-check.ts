@@ -111,3 +111,76 @@ export function sceneProblems(scene: Scene): string[] {
   }
   return problems;
 }
+
+const structureOf = (key: string) => key.slice(0, key.indexOf('/'));
+
+/**
+ * Items that cover each other: nodes or cells of one structure that
+ * overlap, and structures whose items reach into each other's area.
+ * `allowNodeOverlap` lists structures placed by hand.
+ */
+export function overlapProblems(
+  scene: Scene,
+  allowNodeOverlap: ReadonlySet<string> = new Set(),
+): string[] {
+  const problems: string[] = [];
+  const nodes = scene.items.filter((i) => i.type === 'node');
+  for (let a = 0; a < nodes.length; a++)
+    for (let b = a + 1; b < nodes.length; b++) {
+      const [p, q] = [nodes[a]!, nodes[b]!];
+      if (structureOf(p.key) !== structureOf(q.key)) continue;
+      if (allowNodeOverlap.has(structureOf(p.key))) continue;
+      // Stadiums are wider than tall: compare as rectangles then.
+      const [pw, qw] = [p.width ?? 2 * p.radius, q.width ?? 2 * q.radius];
+      const apart =
+        Math.abs(p.x - q.x) >= (pw + qw) / 2 - 0.5 ||
+        Math.abs(p.y - q.y) >= p.radius + q.radius - 0.5;
+      const round = p.width === undefined && q.width === undefined;
+      const far = Math.hypot(p.x - q.x, p.y - q.y) >= p.radius + q.radius - 0.5;
+      if (round ? !far : !apart)
+        problems.push(`nodes ${p.key} and ${q.key} overlap`);
+    }
+  const boxes = scene.items.filter((i) => i.type === 'box');
+  for (let a = 0; a < boxes.length; a++)
+    for (let b = a + 1; b < boxes.length; b++) {
+      const [p, q] = [boxes[a]!, boxes[b]!];
+      if (
+        p.x < q.x + q.width - 0.5 &&
+        q.x < p.x + p.width - 0.5 &&
+        p.y < q.y + q.height - 0.5 &&
+        q.y < p.y + p.height - 0.5
+      )
+        problems.push(`boxes ${p.key} and ${q.key} overlap`);
+    }
+  // Each structure's extent must not reach into another's.
+  const areas = new Map<string, [number, number, number, number]>();
+  for (const item of scene.items) {
+    const name = structureOf(item.key);
+    const [x1, y1, x2, y2] = extent(item);
+    const area = areas.get(name);
+    areas.set(
+      name,
+      area === undefined
+        ? [x1, y1, x2, y2]
+        : [
+            Math.min(area[0], x1),
+            Math.min(area[1], y1),
+            Math.max(area[2], x2),
+            Math.max(area[3], y2),
+          ],
+    );
+  }
+  const list = [...areas];
+  for (let a = 0; a < list.length; a++)
+    for (let b = a + 1; b < list.length; b++) {
+      const [[n, p], [m, q]] = [list[a]!, list[b]!];
+      if (
+        p[1] < q[3] - 0.5 &&
+        q[1] < p[3] - 0.5 &&
+        p[0] < q[2] - 0.5 &&
+        q[0] < p[2] - 0.5
+      )
+        problems.push(`structures ${n} and ${m} overlap`);
+    }
+  return problems;
+}

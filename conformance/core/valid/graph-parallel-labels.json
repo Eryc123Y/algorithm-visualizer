@@ -1,0 +1,22 @@
+{
+  "description": "Five labelled parallel edges between two nodes: the outer labels sit beyond edges spread almost to the node's outline, and the scene leaves room for them even without padding.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "g": {
+        "kind": "graph",
+        "nodes": ["a", "b"],
+        "edges": [
+          { "id": "e1", "from": "b", "to": "a", "weight": "first" },
+          { "id": "e2", "from": "a", "to": "b" },
+          { "id": "e3", "from": "b", "to": "a" },
+          { "id": "e4", "from": "b", "to": "a" },
+          { "id": "e5", "from": "b", "to": "a", "weight": false }
+        ]
+      }
+    },
+    "steps": []
+  },
+  "expectedLength": 0,
+  "expectedFrames": []
+}
