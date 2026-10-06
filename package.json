@@ -23,6 +23,7 @@
     "gallery": "node --conditions=@algoviz/source scripts/gallery.ts"
   },
   "devDependencies": {
+    "@anthropic-ai/sdk": "^0.131.0",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "1.63",
     "@tailwindcss/vite": "^4.3.3",
@@ -53,6 +54,7 @@
     "packages/core",
     "packages/svg",
     "packages/recipes",
+    "packages/mcp",
     "packages/elements",
     "apps/playground"
   ]

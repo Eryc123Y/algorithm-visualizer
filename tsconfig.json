@@ -17,6 +17,9 @@
       "path": "./packages/recipes"
     },
     {
+      "path": "./packages/mcp"
+    },
+    {
       "path": "./packages/elements"
     },
     {

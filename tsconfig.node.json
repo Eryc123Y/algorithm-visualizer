@@ -7,5 +7,5 @@
     "noEmit": true,
     "customConditions": ["@algoviz/source"]
   },
-  "include": ["eslint.config.ts", "vitest.config.ts", "scripts"]
+  "include": ["eslint.config.ts", "vitest.config.ts", "scripts", "evals"]
 }
