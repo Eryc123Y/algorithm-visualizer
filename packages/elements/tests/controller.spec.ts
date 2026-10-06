@@ -72,6 +72,24 @@ describe('PlayerController', () => {
     expect(c.state.index).toBe(1);
   });
 
+  it('holds the last frame longer before looping when endHold is set', () => {
+    const clock = fakeClock();
+    const c = new PlayerController({
+      interval: 100,
+      loop: true,
+      endHold: 500,
+      scheduler: clock.scheduler,
+    });
+    c.reset(1);
+    c.play();
+    clock.advance(100);
+    expect(c.state.index).toBe(1);
+    clock.advance(500);
+    expect(c.state.index).toBe(1);
+    clock.advance(100);
+    expect(c.state).toEqual({ index: 0, length: 1, playing: true });
+  });
+
   it('restarts from the beginning when played at the end', () => {
     const { c } = setup(3);
     c.seek(3);

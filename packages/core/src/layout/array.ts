@@ -89,8 +89,8 @@ export function layoutArray(
   const pitch = cellWidth + o.cellGap;
   const centerX = (index: number) => origin.x + index * pitch + cellWidth / 2;
 
-  const titleRow = o.titleFontSize + 11;
-  const indexRow = o.indexFontSize + 8;
+  const titleRow = o.showTitles ? o.titleFontSize + 11 : 0;
+  const indexRow = o.showIndices ? o.indexFontSize + 8 : 0;
   const cellsTop = origin.y + titleRow + indexRow;
   const cellsBottom = cellsTop + o.cellHeight;
   // Pointer area: a 14-unit arrow, then badges stacked every `badgePitch`.
@@ -100,8 +100,9 @@ export function layoutArray(
   const pointerArea =
     metrics.pointerRows === 0 ? 0 : 20 + metrics.pointerRows * badgePitch;
 
-  const items: SceneItem[] = [
-    {
+  const items: SceneItem[] = [];
+  if (o.showTitles) {
+    items.push({
       type: 'text',
       key: `${name}/title`,
       x: origin.x,
@@ -110,20 +111,22 @@ export function layoutArray(
       role: 'title',
       text: title,
       fontSize: o.titleFontSize,
-    },
-  ];
+    });
+  }
 
   state.data.forEach((element, index) => {
-    items.push({
-      type: 'text',
-      key: `${name}/index/${index}`,
-      x: centerX(index),
-      y: origin.y + titleRow + indexRow / 2,
-      anchor: 'middle',
-      role: 'index',
-      text: String(index),
-      fontSize: o.indexFontSize,
-    });
+    if (o.showIndices) {
+      items.push({
+        type: 'text',
+        key: `${name}/index/${index}`,
+        x: centerX(index),
+        y: origin.y + titleRow + indexRow / 2,
+        anchor: 'middle',
+        role: 'index',
+        text: String(index),
+        fontSize: o.indexFontSize,
+      });
+    }
     items.push({
       type: 'box',
       key: `${name}/element/${element.id}`,

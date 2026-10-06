@@ -20,6 +20,10 @@ export interface LayoutOptions {
    * text without a DOM, so it estimates widths for a monospace font.
    */
   readonly charWidthRatio: number;
+  /** Draw each structure's title. */
+  readonly showTitles: boolean;
+  /** Draw index labels above array cells. */
+  readonly showIndices: boolean;
 }
 
 export const defaultLayoutOptions: LayoutOptions = {
@@ -34,4 +38,17 @@ export const defaultLayoutOptions: LayoutOptions = {
   indexFontSize: 12,
   pointerFontSize: 12,
   charWidthRatio: 0.6,
+  showTitles: true,
+  showIndices: true,
+};
+
+/**
+ * Geometry for showing only the structures themselves, without titles or
+ * indices, e.g. as a decorative animation.
+ */
+export const bareLayoutOptions: LayoutOptions = {
+  ...defaultLayoutOptions,
+  padding: 8,
+  showTitles: false,
+  showIndices: false,
 };

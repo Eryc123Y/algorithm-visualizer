@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import type { VisualizationInput } from '@algoviz/spec';
 
 import {
+  bareLayoutOptions,
   defaultLayoutOptions,
   layoutTrace,
   loadTrace,
@@ -193,5 +194,26 @@ describe('multiple structures', () => {
       boxes(scene)[0]!.y + boxes(scene)[0]!.height,
     );
     expect(scene.title).toBe('Two arrays');
+  });
+});
+
+describe('bare layout', () => {
+  it('draws only cells and pointers, starting right below the padding', () => {
+    const trace = mustLoad(
+      doc(
+        [4, 2],
+        [
+          {
+            actions: [{ target: 'arr', type: 'pointer', name: 'i', index: 1 }],
+          },
+        ],
+      ),
+    );
+    const scene = layoutTrace(trace, bareLayoutOptions).sceneAt(1);
+    expect(scene.items.some((i) => i.type === 'text')).toBe(false);
+    expect(boxes(scene).map((b) => b.y)).toEqual([8, 8]);
+    expect(scene.items.filter((i) => i.type === 'badge')).toHaveLength(1);
+    // padding + cells + pointer area (20 + one badge row of 24) + padding
+    expect(scene.height).toBe(8 + 52 + 44 + 8);
   });
 });

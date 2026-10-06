@@ -7,14 +7,26 @@
 import { computed, ref, watch } from 'vue';
 
 import '@algoviz/elements/define';
-import type { PlayerTheme } from '@algoviz/elements';
+import type { PlayerMode, PlayerTheme } from '@algoviz/elements';
 
+import { bubbleSort } from './samples/bubble-sort';
 import { bubbleSortDocument } from './samples/bubble-sort-doc';
+import { reverse } from './samples/reverse';
 
 const initial = JSON.stringify(bubbleSortDocument([5, 3, 8, 1, 4]), null, 2);
 const text = ref(initial);
 const theme = ref<PlayerTheme>('auto');
 const themes: PlayerTheme[] = ['auto', 'light', 'dark', 'print'];
+const mode = ref<PlayerMode>('interactive');
+const modes: PlayerMode[] = ['interactive', 'display'];
+
+const displays = [
+  { label: 'Bubble sort', doc: bubbleSort([6, 2, 8, 4, 1, 7, 3, 5]) },
+  {
+    label: 'Two-pointer reversal',
+    doc: reverse(['a', 'l', 'g', 'o', 'v', 'i', 'z']),
+  },
+];
 
 const parsed = computed<{ value: unknown; error: string | null }>(() => {
   try {
@@ -42,24 +54,39 @@ watch(parsed, ({ value, error }) => {
           Edit the document on the right, or paste one written by an LLM.
         </p>
       </div>
-      <label class="flex items-center gap-2 text-sm">
-        Theme
-        <select
-          v-model="theme"
-          class="rounded border px-2 py-1"
-          data-testid="theme"
-        >
-          <option v-for="name in themes" :key="name" :value="name">
-            {{ name }}
-          </option>
-        </select>
-      </label>
+      <div class="flex items-center gap-4 text-sm">
+        <label class="flex items-center gap-2">
+          Mode
+          <select
+            v-model="mode"
+            class="rounded border px-2 py-1"
+            data-testid="mode"
+          >
+            <option v-for="name in modes" :key="name" :value="name">
+              {{ name }}
+            </option>
+          </select>
+        </label>
+        <label class="flex items-center gap-2">
+          Theme
+          <select
+            v-model="theme"
+            class="rounded border px-2 py-1"
+            data-testid="theme"
+          >
+            <option v-for="name in themes" :key="name" :value="name">
+              {{ name }}
+            </option>
+          </select>
+        </label>
+      </div>
     </header>
 
     <div class="grid gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
       <algo-player
         :visualization="visualization"
         :theme="theme"
+        :mode="mode"
         data-testid="player"
       />
       <div class="flex min-w-0 flex-col gap-2">
@@ -79,5 +106,31 @@ watch(parsed, ({ value, error }) => {
         </p>
       </div>
     </div>
+
+    <section class="flex flex-col gap-3">
+      <h2 class="text-xl font-semibold">Display mode</h2>
+      <p class="text-slate-600">
+        <code>mode="display"</code> shows only the structures, playing and
+        looping on its own.
+      </p>
+      <div class="grid gap-6 sm:grid-cols-2">
+        <figure
+          v-for="item in displays"
+          :key="item.label"
+          class="flex flex-col gap-2"
+        >
+          <algo-player
+            mode="display"
+            speed="700"
+            :theme="theme"
+            :visualization="item.doc"
+            data-testid="display"
+          />
+          <figcaption class="text-sm text-slate-500">
+            {{ item.label }}
+          </figcaption>
+        </figure>
+      </div>
+    </section>
   </main>
 </template>

@@ -39,6 +39,14 @@ Build the standalone bundle with `npm run build -w @algoviz/elements`, then:
 
 Attributes: `src`, `frame`, `theme` (`auto` · `light` · `dark` · `print`), `speed` (ms per step), `autoplay`, `loop`, `hide-controls`, `hide-code`. Style the chrome with CSS custom properties such as `--algo-accent`, or pass a full scene theme as the `customTheme` property.
 
+For a purely visual animation without any teaching chrome, use display mode: it shows only the structures, plays and loops by itself, and pauses while off screen.
+
+```html
+<algo-player mode="display" speed="700" src="bubble-sort.json"></algo-player>
+```
+
+Display mode also accepts `once` (play a single time) and `motion` (`linear` · `arc`).
+
 ## Packages
 
 | Package                                  | Status    | Purpose                                                           |

@@ -35,3 +35,24 @@ test('shows protocol errors for an edited document', async ({ page }) => {
   await editor.fill('{ not json');
   await expect(page.getByTestId('json-error')).toBeVisible();
 });
+
+test('display mode shows only the animation and plays by itself', async ({
+  page,
+}) => {
+  await page.goto('/');
+  const display = page.getByTestId('display').first();
+  await display.scrollIntoViewIfNeeded();
+  await expect(display.locator('.controls')).toBeHidden();
+  await expect(display.locator('.caption')).toBeHidden();
+  await expect(display.locator('[data-key="arr/title"]')).toHaveCount(0);
+  await expect(display).not.toHaveAttribute('frame', '0', { timeout: 5000 });
+});
+
+test('switches the main player into display mode', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTestId('mode').selectOption('display');
+  const player = page.getByTestId('player');
+  await expect(player).toHaveAttribute('mode', 'display');
+  await expect(player.locator('.code')).toHaveCount(0);
+  await expect(player).not.toHaveAttribute('frame', '0', { timeout: 5000 });
+});
