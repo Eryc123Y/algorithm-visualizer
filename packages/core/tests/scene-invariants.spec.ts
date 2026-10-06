@@ -67,17 +67,32 @@ function extent(item: SceneItem): [number, number, number, number] {
         item.y + item.height / 2,
       ];
     case 'edge': {
-      const loop =
-        item.via === undefined && item.x1 === item.x2 && item.y1 === item.y2
-          ? 34
-          : 0;
+      const isLoop =
+        item.via === undefined && item.x1 === item.x2 && item.y1 === item.y2;
+      // Labels sit beside the edge (or beyond a loop) and reach out by their
+      // own size; see paintEdge.
+      const labelWidth =
+        item.label === undefined
+          ? 0
+          : [...item.label].length * item.fontSize * 0.6;
+      const [dx, dy] = isLoop
+        ? [34, 34].map(
+            (d) =>
+              d +
+              (item.label === undefined
+                ? 0
+                : Math.max(labelWidth, item.fontSize) + 2),
+          )
+        : item.label === undefined
+          ? [0, 0]
+          : [labelWidth + 4, item.fontSize + 4];
       const xs = [item.x1, item.x2, ...(item.via ?? []).map((p) => p.x)];
       const ys = [item.y1, item.y2, ...(item.via ?? []).map((p) => p.y)];
       return [
-        Math.min(...xs) - loop,
-        Math.min(...ys) - loop,
-        Math.max(...xs) + loop,
-        Math.max(...ys) + loop,
+        Math.min(...xs) - dx!,
+        Math.min(...ys) - dy!,
+        Math.max(...xs) + dx!,
+        Math.max(...ys) + dy!,
       ];
     }
     case 'arrow':

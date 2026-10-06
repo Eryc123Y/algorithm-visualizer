@@ -351,11 +351,16 @@ function paintEdge(e: SceneEdge, t: SvgTheme): PaintedItem[] {
       node: loop,
     });
     if (e.label !== undefined) {
+      // Beyond the loop, by half the label's extent in that direction.
       const rad = (loopAngle * Math.PI) / 180;
+      const [dx, dy] = [Math.sin(rad), -Math.cos(rad)];
+      const halfWidth = ([...e.label].length * e.fontSize * 0.6) / 2;
+      const reach =
+        34 + Math.abs(dx) * halfWidth + Math.abs(dy) * (e.fontSize / 2) + 2;
       items.push({
         key: `${e.key}#label`,
-        x: e.x1 + Math.sin(rad) * 34,
-        y: e.y1 - Math.cos(rad) * 34,
+        x: e.x1 + dx * reach,
+        y: e.y1 + dy * reach,
         attrs: {},
         node: edgeLabel(e, t),
       });

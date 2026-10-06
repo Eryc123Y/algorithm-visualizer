@@ -1,0 +1,99 @@
+{
+  "description": "Long edge labels and two labelled self-loops on one node stay inside the scene, and the loops point different ways.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "g": {
+        "kind": "graph",
+        "layout": "grid",
+        "nodes": ["A", "B"],
+        "edges": [
+          ["A", "B", "a long capacity label"],
+          {
+            "id": "l1",
+            "from": "A",
+            "to": "A",
+            "weight": "loop one"
+          },
+          {
+            "id": "l2",
+            "from": "A",
+            "to": "A",
+            "weight": "loop two"
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "g",
+            "type": "annotate",
+            "node": "A",
+            "text": "note"
+          }
+        ]
+      }
+    ]
+  },
+  "expectedLength": 1,
+  "expectedFrames": [
+    {
+      "index": 1,
+      "state": {
+        "g": {
+          "kind": "graph",
+          "state": {
+            "data": {
+              "nodes": [
+                {
+                  "id": "A",
+                  "value": "A"
+                },
+                {
+                  "id": "B",
+                  "value": "B"
+                }
+              ],
+              "edges": [
+                {
+                  "id": "A-B",
+                  "from": "A",
+                  "to": "B",
+                  "weight": "a long capacity label"
+                },
+                {
+                  "id": "l1",
+                  "from": "A",
+                  "to": "A",
+                  "weight": "loop one"
+                },
+                {
+                  "id": "l2",
+                  "from": "A",
+                  "to": "A",
+                  "weight": "loop two"
+                }
+              ]
+            },
+            "marks": {
+              "highlightNodes": [],
+              "highlightEdges": [],
+              "visited": [],
+              "settled": [],
+              "groups": {},
+              "pointers": {},
+              "notes": {
+                "A": "note"
+              },
+              "edgeMarks": {}
+            },
+            "directed": false,
+            "layout": "grid"
+          }
+        }
+      }
+    }
+  ]
+}

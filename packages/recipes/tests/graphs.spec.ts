@@ -220,6 +220,37 @@ describe('topologicalSort', () => {
   });
 });
 
+describe('parallel edges', () => {
+  const multi: GraphInput = {
+    nodes: ['A', 'B', 'C'],
+    edges: [
+      ['A', 'B', 5],
+      ['A', 'B', 2],
+      ['B', 'C', 1],
+    ],
+  };
+  it('keeps each edge distinct and uses the lighter one', () => {
+    const g = stateOf(replay(dijkstra(multi, 'A')), 'g', 'graph');
+    expect(g.data.edges.map((e) => e.id)).toEqual(['A-B', 'A-B.2', 'B-C']);
+    expect(notes(g)['C']).toBe('3');
+    expect(selected(g).sort()).toEqual(['A-B.2', 'B-C']);
+  });
+  it('runs every graph recipe', () => {
+    for (const doc of [
+      breadthFirstSearch(multi, 'A'),
+      depthFirstSearch(multi, 'A'),
+      bellmanFord(multi, 'A'),
+      prim(multi, 'A'),
+      kruskal(multi),
+      topologicalSort({ ...multi, directed: true }),
+      floydWarshall(multi),
+    ])
+      replay(doc);
+    const k = stateOf(replay(kruskal(multi)), 'g', 'graph');
+    expect(weightOf(k, selected(k))).toBe(3);
+  });
+});
+
 describe('input checks', () => {
   it('rejects a start node that is not in the graph', () => {
     expect(() => breadthFirstSearch(withIsland, 'Z')).toThrow(RangeError);

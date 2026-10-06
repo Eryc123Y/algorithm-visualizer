@@ -161,6 +161,25 @@ describe('graph layout', () => {
     expect(long?.via).toBeUndefined();
   });
 
+  it('points several self-loops of one node different ways', () => {
+    const { layout: l } = layout({
+      version: '0.1',
+      structures: {
+        g: {
+          kind: 'graph',
+          nodes: ['A'],
+          edges: [
+            { id: 'one', from: 'A', to: 'A' },
+            { id: 'two', from: 'A', to: 'A' },
+          ],
+        },
+      },
+      steps: [],
+    });
+    const angles = edges(l.sceneAt(0)).map((e) => e.loopAngle ?? 0);
+    expect(new Set(angles).size).toBe(2);
+  });
+
   it('spreads parallel edges that are routed around rows', () => {
     const { layout: l } = layout({
       version: '0.1',

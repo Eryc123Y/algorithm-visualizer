@@ -58,6 +58,10 @@ export interface GraphMetrics {
   readonly maxNoteChars: number;
   readonly hasLoops: boolean;
   readonly hasWeights: boolean;
+  /** Longest edge label, in characters. */
+  readonly maxWeightChars: number;
+  /** Most self-loops each node ever has (nodes without any are absent). */
+  readonly loops: Readonly<Record<string, number>>;
 }
 
 const linkKey = (from: string, to: string) => `${from}\u0000${to}`;
@@ -83,6 +87,12 @@ export function measureGraph(state: GraphState): GraphMetrics {
     maxNoteChars: maxChars(Object.values(state.marks.notes)),
     hasLoops: state.data.edges.some((e) => e.from === e.to),
     hasWeights: state.data.edges.some((e) => e.weight !== null),
+    maxWeightChars: maxChars(
+      state.data.edges.flatMap((e) =>
+        e.weight === null ? [] : [formatScalar(e.weight)],
+      ),
+    ),
+    loops: countLoops(state),
   };
 }
 
@@ -110,7 +120,21 @@ export const mergeGraphMetrics = (
   maxNoteChars: Math.max(a.maxNoteChars, b.maxNoteChars),
   hasLoops: a.hasLoops || b.hasLoops,
   hasWeights: a.hasWeights || b.hasWeights,
+  maxWeightChars: Math.max(a.maxWeightChars, b.maxWeightChars),
+  loops: Object.fromEntries(
+    [...new Set([...Object.keys(a.loops), ...Object.keys(b.loops)])].map(
+      (id) => [id, Math.max(own(a.loops, id) ?? 0, own(b.loops, id) ?? 0)],
+    ),
+  ),
 });
+
+function countLoops(state: GraphState): Record<string, number> {
+  const count = new Map<string, number>();
+  for (const e of state.data.edges)
+    if (e.from === e.to) count.set(e.from, (count.get(e.from) ?? 0) + 1);
+  // fromEntries: ids such as "__proto__" must become keys.
+  return Object.fromEntries(count);
+}
 
 type Point = { readonly x: number; readonly y: number };
 
@@ -432,9 +456,21 @@ export function layoutGraph({
     ) * scale.y;
   // Self-loops may point any way; notes sit above nodes.
   // Room around the nodes for self-loops, notes beside nodes and weights.
+  // Edge labels sit beside midpoints and reach out by their own width;
+  // loop labels sit beyond the loop.
+  const weightWidth = metrics.hasWeights
+    ? Math.ceil(metrics.maxWeightChars * o.indexFontSize * 0.6)
+    : 0;
   const pad = Math.max(
-    metrics.hasWeights ? 12 : 4,
-    metrics.hasLoops ? SELF_LOOP_HEIGHT : 0,
+    metrics.hasWeights ? Math.max(12, weightWidth + 6 - halfWidth) : 4,
+    metrics.hasLoops
+      ? metrics.hasWeights
+        ? Math.max(
+            SELF_LOOP_HEIGHT,
+            Math.ceil(36 + Math.max(o.indexFontSize, weightWidth) + 2),
+          )
+        : SELF_LOOP_HEIGHT
+      : 0,
     // A note turned sideways extends its full width beyond the node.
     metrics.hasNotes
       ? Math.max(30, noteWidth(metrics.maxNoteChars, shape, o) + 8)
@@ -500,28 +536,35 @@ export function layoutGraph({
         return Math.min(diff, 360 - diff);
       }),
     );
-  const freest = (candidates: readonly number[], taken: readonly number[]) =>
-    candidates.find((angle) => gap(angle, taken) >= 40) ??
-    candidates.reduce((best, angle) =>
-      gap(angle, taken) > gap(best, taken) + 1e-9 ? angle : best,
-    );
-  const hasLoop = new Set(
-    metrics.links.filter(([from, to]) => from === to).map(([id]) => id),
-  );
+  /** Candidates clear of `taken` in order of preference, then the rest by room. */
+  const ranked = (candidates: readonly number[], taken: readonly number[]) => [
+    ...candidates.filter((angle) => gap(angle, taken) >= 40),
+    ...candidates
+      .filter((angle) => gap(angle, taken) < 40)
+      .sort((a, b) => gap(b, taken) - gap(a, taken)),
+  ];
   const sides = (angles: number[]) =>
     angles.filter((angle) => !(angle === 270 && metrics.pointerRows > 0));
-  const loopAngle = (id: string): number =>
-    freest(
+  // Each self-loop of a node takes the next free direction.
+  const loopAngles = (id: string): number[] => {
+    const directions = ranked(
       sides([0, 90, 180, 270, 45, 315, 135, 225]).filter(
         (angle) => !(angle === 0 && metrics.hasNotes),
       ),
       away(id),
     );
+    const count = own(metrics.loops, id) ?? 0;
+    return Array.from(
+      { length: count },
+      (_, k) => directions[k % directions.length]!,
+    );
+  };
+  const loopsSeen = new Map<string, number>();
   const labelAngle = (id: string): number =>
-    freest(sides([0, 45, 315, 90, 270, 135, 225, 180]), [
+    ranked(sides([0, 45, 315, 90, 270, 135, 225, 180]), [
       ...away(id),
-      ...(hasLoop.has(id) ? [loopAngle(id)] : []),
-    ]);
+      ...loopAngles(id),
+    ])[0]!;
 
   for (const e of state.data.edges) {
     const key = `${name}/edge/${e.id}`;
@@ -535,7 +578,10 @@ export function layoutGraph({
     };
     const a = centre(e.from);
     if (e.from === e.to) {
-      const angle = loopAngle(e.from);
+      const k = loopsSeen.get(e.from) ?? 0;
+      loopsSeen.set(e.from, k + 1);
+      const angles = loopAngles(e.from);
+      const angle = angles[k % angles.length] ?? 0;
       const rad = (angle * Math.PI) / 180;
       const dir = { x: Math.sin(rad), y: -Math.cos(rad) };
       const reach = outlineDistance(shape, dir.x, dir.y);

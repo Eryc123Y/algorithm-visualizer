@@ -20,11 +20,26 @@ interface Arc {
   readonly edge: string;
 }
 
+/**
+ * The visualization id of each input edge: "from-to", with ".2", ".3", …
+ * appended to repeats so that parallel edges stay distinct.
+ */
+function edgeIds(g: GraphInput): string[] {
+  const seen = new Map<string, number>();
+  return g.edges.map(([from, to]) => {
+    const base = `${from}-${to}`;
+    const n = (seen.get(base) ?? 0) + 1;
+    seen.set(base, n);
+    return n === 1 ? base : `${base}.${n}`;
+  });
+}
+
 /** Adjacency lists, following edges both ways in undirected graphs. */
 function adjacency(g: GraphInput): Map<string, Arc[]> {
   const out = new Map<string, Arc[]>(g.nodes.map((v) => [v, []]));
-  for (const [from, to, weight = 1] of g.edges) {
-    const edge = `${from}-${to}`;
+  const ids = edgeIds(g);
+  for (const [k, [from, to, weight = 1]] of g.edges.entries()) {
+    const edge = ids[k]!;
     out.get(from)!.push({ to, weight, edge });
     if (!g.directed) out.get(to)!.push({ to: from, weight, edge });
   }
@@ -35,20 +50,27 @@ const declare = (
   g: GraphInput,
   weighted: boolean,
   layered?: { readonly from: string },
-): GraphDeclInput => ({
-  kind: 'graph',
-  directed: g.directed ?? false,
-  // Layers count from the first node, so it goes first.
-  ...(layered === undefined
-    ? { nodes: [...g.nodes] }
-    : {
-        layout: 'layered',
-        nodes: [layered.from, ...g.nodes.filter((v) => v !== layered.from)],
-      }),
-  edges: g.edges.map(([from, to, weight]) =>
-    weighted && weight !== undefined ? [from, to, weight] : [from, to],
-  ),
-});
+): GraphDeclInput => {
+  const ids = edgeIds(g);
+  return {
+    kind: 'graph',
+    directed: g.directed ?? false,
+    // Layers count from the first node, so it goes first.
+    ...(layered === undefined
+      ? { nodes: [...g.nodes] }
+      : {
+          layout: 'layered',
+          nodes: [layered.from, ...g.nodes.filter((v) => v !== layered.from)],
+        }),
+    // Shorthand tuples where the default id fits, objects for repeats.
+    edges: g.edges.map(([from, to, weight], k) => {
+      const shown = weighted && weight !== undefined;
+      if (ids[k] === `${from}-${to}`)
+        return shown ? [from, to, weight] : [from, to];
+      return { id: ids[k]!, from, to, ...(shown ? { weight } : {}) };
+    }),
+  };
+};
 
 /** Rejects a start node that is not in the graph. */
 function checkNode(g: GraphInput, node: string): void {
@@ -273,6 +295,7 @@ export function bellmanFord(g: GraphInput, source: string): VisualizationInput {
   const graph = r.add('g', declare({ ...g, directed: true }, true));
   const dist = new Map(g.nodes.map((v) => [v, v === source ? 0 : Infinity]));
   const via = new Map<string, string>();
+  const ids = edgeIds(g);
   r.step({
     line: 2,
     narration: `Every distance is ∞ except ${source}'s, which is 0.`,
@@ -286,8 +309,8 @@ export function bellmanFord(g: GraphInput, source: string): VisualizationInput {
       narration: `Round ${round}: relax every edge.`,
       vars: { round },
     });
-    for (const [u, v, w = 1] of g.edges) {
-      const edge = `${u}-${v}`;
+    for (const [k, [u, v, w = 1]] of g.edges.entries()) {
+      const edge = ids[k]!;
       if (dist.get(u)! + w < dist.get(v)!) {
         dist.set(v, dist.get(u)! + w);
         changed = true;
@@ -313,15 +336,15 @@ export function bellmanFord(g: GraphInput, source: string): VisualizationInput {
       break;
     }
   }
-  for (const [u, v, w = 1] of g.edges)
+  for (const [k, [u, v, w = 1]] of g.edges.entries())
     if (dist.get(u)! + w < dist.get(v)!) {
       r.step({
         line: 9,
         narration: `${u}→${v} can still be relaxed: there is a negative cycle.`,
       });
       graph
-        .highlight({ edges: [`${u}-${v}`] })
-        .markEdge({ edge: `${u}-${v}`, mark: 'rejected' });
+        .highlight({ edges: [ids[k]!] })
+        .markEdge({ edge: ids[k]!, mark: 'rejected' });
       return r.build();
     }
   r.step({
@@ -419,8 +442,9 @@ export function kruskal(g: GraphInput): VisualizationInput {
     line: 2,
     narration: 'Consider the edges from lightest to heaviest.',
   });
-  for (const { u, v, w } of sorted) {
-    const edge = `${u}-${v}`;
+  const ids = edgeIds(g);
+  for (const { u, v, w, k } of sorted) {
+    const edge = ids[k]!;
     const [ru, rv] = [find(u), find(v)];
     r.step({
       line: 3,
