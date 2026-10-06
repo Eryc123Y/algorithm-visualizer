@@ -4,7 +4,7 @@ An AI-native library for step-by-step visualizations of algorithms and data stru
 
 A visualization is a declarative JSON document: the structures involved and a timeline of steps, each applying actions such as `compare` or `swap`. People write it with code, LLMs write it directly, and the library validates it and renders it as an interactive player, a static image, or a figure in Typst or LaTeX.
 
-> Status: early development. The protocol and the timeline engine exist for arrays; layout, renderers and integrations are next.
+> Status: early development. Arrays work end to end: protocol, timeline engine, layout and static SVG. The interactive player and integrations are next.
 
 ```json
 {
@@ -25,12 +25,13 @@ A visualization is a declarative JSON document: the structures involved and a ti
 
 ## Packages
 
-| Package                          | Status    | Purpose                                               |
-| -------------------------------- | --------- | ----------------------------------------------------- |
-| [`@algoviz/spec`](packages/spec) | Available | Protocol schemas, types, validation and JSON Schema   |
-| [`@algoviz/core`](packages/core) | Available | Structure kinds, reducers and the timeline engine     |
-| `@algoviz/elements`              | Planned   | Interactive player as Web Components (Lit)            |
-| `@algoviz/mcp`                   | Planned   | MCP server and MCP App for Claude, ChatGPT and others |
+| Package                          | Status    | Purpose                                                         |
+| -------------------------------- | --------- | --------------------------------------------------------------- |
+| [`@algoviz/spec`](packages/spec) | Available | Protocol schemas, types, validation and JSON Schema             |
+| [`@algoviz/core`](packages/core) | Available | Structure kinds, reducers, timeline engine and layout to scenes |
+| [`@algoviz/svg`](packages/svg)   | Available | Renders scenes to standalone SVG (no DOM needed)                |
+| `@algoviz/elements`              | Planned   | Interactive player as Web Components (Lit)                      |
+| `@algoviz/mcp`                   | Planned   | MCP server and MCP App for Claude, ChatGPT and others           |
 
 ## Design
 

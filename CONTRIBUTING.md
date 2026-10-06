@@ -14,13 +14,14 @@ npm run dev                       # start the playground
 
 This is an npm workspaces monorepo.
 
-| Path               | Package               | Purpose                                                                                |
-| ------------------ | --------------------- | -------------------------------------------------------------------------------------- |
-| `packages/spec/`   | `@algoviz/spec`       | Protocol: Zod schemas, inferred types, parsing and validation. No DOM or Node.js APIs. |
-| `packages/core/`   | `@algoviz/core`       | Structure kinds, reducers and the timeline engine. No DOM or Node.js APIs.             |
-| `apps/playground/` | `@algoviz/playground` | Vite + Vue app for demos and, later, documentation.                                    |
-| `conformance/`     | —                     | Language-agnostic JSON fixtures every implementation must pass.                        |
-| `docs/adr/`        | —                     | Architecture decision records. Read these before changing the design.                  |
+| Path               | Package               | Purpose                                                                                      |
+| ------------------ | --------------------- | -------------------------------------------------------------------------------------------- |
+| `packages/spec/`   | `@algoviz/spec`       | Protocol: Zod schemas, inferred types, parsing and validation. No DOM or Node.js APIs.       |
+| `packages/core/`   | `@algoviz/core`       | Structure kinds, reducers, the timeline engine and layout to scenes. No DOM or Node.js APIs. |
+| `packages/svg/`    | `@algoviz/svg`        | Scene → standalone SVG string. No DOM or Node.js APIs.                                       |
+| `apps/playground/` | `@algoviz/playground` | Vite + Vue app for demos and, later, documentation.                                          |
+| `conformance/`     | —                     | Language-agnostic JSON fixtures every implementation must pass.                              |
+| `docs/adr/`        | —                     | Architecture decision records. Read these before changing the design.                        |
 
 Workspace packages expose their TypeScript sources through the `@algoviz/source` export condition. The playground, Vitest and the type checker use it, so nothing needs to be built before development or tests. Published consumers get `dist/`.
 

@@ -14,4 +14,6 @@ Language-agnostic test data for the protocol (ADR 0005). Every implementation, i
 
 A state maps each structure name to `{ "kind", "state": { "data", "marks" } }`.
 
-A later suite will add expected scenes (`layout/`).
+## `layout/`: scenes
+
+- `*.json`: `{ "description", "input", "frames" }`. With the default layout options and metrics measured over the whole trace, the scene of each listed frame `{ index, scene }` must equal the expected scene exactly, including item order. Coordinates are hand-computed from the rules in `packages/core/src/layout/`.
