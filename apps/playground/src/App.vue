@@ -11,6 +11,7 @@ import type { PlayerMode, PlayerTheme } from '@algoviz/elements';
 
 import { bubbleSort } from './samples/bubble-sort';
 import { bubbleSortDocument } from './samples/bubble-sort-doc';
+import { exampleGroups, examples } from './samples/examples';
 import { reverse } from './samples/reverse';
 
 const initial = JSON.stringify(bubbleSortDocument([5, 3, 8, 1, 4]), null, 2);
@@ -20,12 +21,22 @@ const themes: PlayerTheme[] = ['auto', 'light', 'dark', 'print'];
 const mode = ref<PlayerMode>('interactive');
 const modes: PlayerMode[] = ['interactive', 'display'];
 
+const example = ref('');
+watch(example, (label) => {
+  const found = examples.find((e) => e.label === label);
+  if (found) text.value = JSON.stringify(found.build(), null, 2);
+});
+
+const pick = (label: string) =>
+  examples.find((e) => e.label === label)!.build();
 const displays = [
   { label: 'Bubble sort', doc: bubbleSort([6, 2, 8, 4, 1, 7, 3, 5]) },
   {
     label: 'Two-pointer reversal',
     doc: reverse(['a', 'l', 'g', 'o', 'v', 'i', 'z']),
   },
+  { label: 'AVL tree', doc: pick('AVL tree') },
+  { label: 'Dijkstra', doc: pick('Dijkstra') },
 ];
 
 const parsed = computed<{ value: unknown; error: string | null }>(() => {
@@ -54,7 +65,30 @@ watch(parsed, ({ value, error }) => {
           Edit the document on the right, or paste one written by an LLM.
         </p>
       </div>
-      <div class="flex items-center gap-4 text-sm">
+      <div class="flex flex-wrap items-center gap-4 text-sm">
+        <label class="flex items-center gap-2">
+          Example
+          <select
+            v-model="example"
+            class="rounded border px-2 py-1"
+            data-testid="example"
+          >
+            <option value="" disabled>Choose…</option>
+            <optgroup
+              v-for="group in exampleGroups"
+              :key="group"
+              :label="group"
+            >
+              <option
+                v-for="item in examples.filter((e) => e.group === group)"
+                :key="item.label"
+                :value="item.label"
+              >
+                {{ item.label }}
+              </option>
+            </optgroup>
+          </select>
+        </label>
         <label class="flex items-center gap-2">
           Mode
           <select

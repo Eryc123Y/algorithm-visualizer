@@ -4,6 +4,7 @@ import { loadTrace } from '@algoviz/core';
 
 import { bubbleSort } from '@/samples/bubble-sort';
 import { bubbleSortDocument } from '@/samples/bubble-sort-doc';
+import { examples } from '@/samples/examples';
 
 describe('bubbleSort sample', () => {
   it('records a valid trace that ends sorted', () => {
@@ -21,5 +22,12 @@ describe('bubbleSort sample', () => {
     expect(loadTrace(doc).ok).toBe(true);
     const lines = new Set(doc.steps.map((s) => s.meta?.line));
     expect([...lines].sort()).toEqual([5, 6, 7, undefined].sort());
+  });
+});
+
+describe('examples', () => {
+  it.each(examples.map((e) => [e.label, e]))('%s loads', (_, example) => {
+    const result = loadTrace(example.build());
+    if (!result.ok) throw new Error(JSON.stringify(result.error));
   });
 });
