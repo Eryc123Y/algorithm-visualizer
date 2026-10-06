@@ -23,15 +23,15 @@ export interface LayoutOptions {
 }
 
 export const defaultLayoutOptions: LayoutOptions = {
-  padding: 16,
-  structureGap: 24,
-  cellHeight: 48,
-  minCellWidth: 48,
-  cellGap: 6,
-  cellPadding: 12,
-  valueFontSize: 18,
-  titleFontSize: 14,
+  padding: 20,
+  structureGap: 28,
+  cellHeight: 52,
+  minCellWidth: 52,
+  cellGap: 8,
+  cellPadding: 14,
+  valueFontSize: 20,
+  titleFontSize: 13,
   indexFontSize: 12,
-  pointerFontSize: 13,
+  pointerFontSize: 12,
   charWidthRatio: 0.6,
 };

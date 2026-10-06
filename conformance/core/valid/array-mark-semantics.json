@@ -99,6 +99,7 @@
             ],
             "marks": {
               "compare": null,
+              "swapped": null,
               "highlight": [1, 2],
               "pointers": {},
               "settled": ["e0"]
@@ -129,6 +130,7 @@
             ],
             "marks": {
               "compare": null,
+              "swapped": [0, 2],
               "highlight": [],
               "pointers": {},
               "settled": ["e0"]
@@ -163,6 +165,7 @@
             ],
             "marks": {
               "compare": null,
+              "swapped": null,
               "highlight": [],
               "pointers": {
                 "p": 4
@@ -195,6 +198,7 @@
             ],
             "marks": {
               "compare": null,
+              "swapped": null,
               "highlight": [],
               "pointers": {
                 "p": 4
@@ -227,6 +231,7 @@
             ],
             "marks": {
               "compare": null,
+              "swapped": null,
               "highlight": [],
               "pointers": {
                 "p": 4

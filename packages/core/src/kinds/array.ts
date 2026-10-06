@@ -18,6 +18,8 @@ import type { StructureKind, StructureState } from '../kind.ts';
 export interface ArrayMarks {
   /** Positions being compared in the current step. */
   readonly compare: readonly [number, number] | null;
+  /** Positions swapped in the current step. */
+  readonly swapped: readonly [number, number] | null;
   /** Positions highlighted in the current step. */
   readonly highlight: readonly number[];
   /** Named pointers such as `i` or `lo`; may point one past the end. */
@@ -84,7 +86,7 @@ function reduceArray(s: ArrayState, a: ArrayAction): Reduced {
       const data = s.data.slice();
       // Both indices were checked above.
       [data[a.i], data[a.j]] = [data[a.j]!, data[a.i]!];
-      return withData(s, data);
+      return ok({ data, marks: { ...s.marks, swapped: [a.i, a.j] } });
     }
     case 'insert': {
       const bad = checkRange(s, n + 1, [['index'], a.index]);
@@ -162,11 +164,22 @@ export const arrayKind: StructureKind<
   kind: 'array',
   init: (decl) => ({
     data: decl.initial,
-    marks: { compare: null, highlight: [], pointers: {}, settled: [] },
+    marks: {
+      compare: null,
+      swapped: null,
+      highlight: [],
+      pointers: {},
+      settled: [],
+    },
   }),
   beginStep: (s) =>
-    s.marks.compare === null && s.marks.highlight.length === 0
+    s.marks.compare === null &&
+    s.marks.swapped === null &&
+    s.marks.highlight.length === 0
       ? s
-      : { data: s.data, marks: { ...s.marks, compare: null, highlight: [] } },
+      : {
+          data: s.data,
+          marks: { ...s.marks, compare: null, swapped: null, highlight: [] },
+        },
   reduce: reduceArray,
 };
