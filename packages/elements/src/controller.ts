@@ -27,6 +27,8 @@ export interface ControllerOptions {
   /** Milliseconds per frame while playing. */
   readonly interval?: number;
   readonly loop?: boolean;
+  /** Extra milliseconds to hold the last frame before looping. */
+  readonly endHold?: number;
   readonly scheduler?: Scheduler;
   /** Called after every change, with the new state. */
   readonly onChange?: (state: PlaybackState) => void;
@@ -38,6 +40,7 @@ export class PlayerController {
   #playing = false;
   #interval: number;
   #loop: boolean;
+  #endHold: number;
   #timer: unknown = undefined;
   readonly #scheduler: Scheduler;
   readonly #onChange: (state: PlaybackState) => void;
@@ -45,6 +48,7 @@ export class PlayerController {
   constructor(options: ControllerOptions = {}) {
     this.#interval = options.interval ?? 900;
     this.#loop = options.loop ?? false;
+    this.#endHold = Math.max(0, options.endHold ?? 0);
     this.#scheduler = options.scheduler ?? defaultScheduler;
     this.#onChange = options.onChange ?? (() => {});
   }
@@ -68,6 +72,10 @@ export class PlayerController {
 
   set loop(value: boolean) {
     this.#loop = value;
+  }
+
+  set endHold(ms: number) {
+    this.#endHold = Math.max(0, ms);
   }
 
   /** Moves to a frame, clamped to the timeline. Does not change play state. */
@@ -122,13 +130,16 @@ export class PlayerController {
     }
     const atEnd = this.#index === this.#length;
     if (atEnd && !this.#loop) this.#playing = false;
-    else this.#schedule();
+    else this.#schedule(atEnd ? this.#endHold : 0);
     this.#emit();
   };
 
-  #schedule(): void {
+  #schedule(extra = 0): void {
     this.#stopTimer();
-    this.#timer = this.#scheduler.setTimeout(this.#tick, this.#interval);
+    this.#timer = this.#scheduler.setTimeout(
+      this.#tick,
+      this.#interval + extra,
+    );
   }
 
   #stopTimer(): void {

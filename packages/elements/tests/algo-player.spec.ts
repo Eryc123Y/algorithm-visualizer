@@ -124,4 +124,70 @@ describe('<algo-player>', () => {
     await el.updateComplete;
     expect(el.frame).toBe(1);
   });
+
+  describe('display mode', () => {
+    it('shows only the animation: no chrome, titles or indices', async () => {
+      const el = await mount((e) => {
+        e.mode = 'display';
+        e.visualization = doc;
+      });
+      expect(el.getAttribute('mode')).toBe('display');
+      for (const part of ['.caption', '.controls'])
+        expect(shadow(el).querySelector(part)?.hasAttribute('hidden')).toBe(
+          true,
+        );
+      expect(shadow(el).querySelector('.code')).toBeNull();
+      const keys = [...shadow(el).querySelectorAll('[data-key]')].map((n) =>
+        n.getAttribute('data-key'),
+      );
+      expect(
+        keys.some((k) => k?.includes('/title') || k?.includes('/index/')),
+      ).toBe(false);
+      expect(keys.filter((k) => k?.includes('/element/'))).toHaveLength(2);
+    });
+
+    it('plays and loops on its own, and ignores input', async () => {
+      const frames: number[] = [];
+      const el = await mount((e) => {
+        e.setAttribute('mode', 'display');
+        e.speed = 20;
+        e.addEventListener('algo-frame', (event) =>
+          frames.push(event.detail.index),
+        );
+        e.visualization = doc;
+      });
+      expect(el.hasAttribute('tabindex')).toBe(false);
+      el.dispatchEvent(new KeyboardEvent('keydown', { key: 'End' }));
+      // Starts playing at 0, two steps, a 1.5 s hold, then back to the start.
+      await new Promise((resolve) => setTimeout(resolve, 1700));
+      expect(frames.slice(0, 4)).toEqual([0, 1, 2, 0]);
+    });
+
+    it('can play once instead of looping', async () => {
+      const el = await mount((e) => {
+        e.mode = 'display';
+        e.once = true;
+        e.speed = 20;
+        e.visualization = doc;
+      });
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      expect(el.frame).toBe(2);
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      expect(el.frame).toBe(2);
+    });
+
+    it('becomes interactive again when the mode changes back', async () => {
+      const el = await mount((e) => {
+        e.mode = 'display';
+        e.visualization = doc;
+      });
+      el.mode = 'interactive';
+      await el.updateComplete;
+      expect(el.tabIndex).toBe(0);
+      expect(
+        shadow(el).querySelector('.controls')?.hasAttribute('hidden'),
+      ).toBe(false);
+      expect(shadow(el).querySelector('[data-key="arr/title"]')).not.toBeNull();
+    });
+  });
 });

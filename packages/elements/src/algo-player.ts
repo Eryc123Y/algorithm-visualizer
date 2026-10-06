@@ -1,6 +1,13 @@
 /**
- * <algo-player>: an interactive, embeddable player for algoviz documents
- * (ADR 0006, 0010).
+ * <algo-player>: an embeddable player for algoviz documents (ADR 0006, 0010,
+ * 0011).
+ *
+ * Modes:
+ * - `interactive` (default): a teaching element with controls, narration,
+ *   variables and source code.
+ * - `display`: a purely visual animation of the structures alone. It plays
+ *   and loops on its own, pauses while off screen, takes no input, and moves
+ *   cells in straight lines.
  *
  * Content, in order of precedence:
  * - the `visualization` property (a document object),
@@ -13,6 +20,8 @@
 import { html, LitElement, nothing, type PropertyValues } from 'lit';
 
 import {
+  bareLayoutOptions,
+  defaultLayoutOptions,
   layoutTrace,
   loadTrace,
   type Trace,
@@ -34,6 +43,10 @@ import { playerStyles } from './styles.ts';
 
 export type PlayerTheme = ThemeName | 'auto';
 
+export type PlayerMode = 'interactive' | 'display';
+
+export type PlayerMotion = 'arc' | 'linear';
+
 export interface AlgoFrameDetail {
   readonly index: number;
   readonly length: number;
@@ -41,6 +54,9 @@ export interface AlgoFrameDetail {
 }
 
 const MAX_ANIMATION_MS = 450;
+
+/** How long display mode holds the last frame before looping. */
+const DISPLAY_END_HOLD_MS = 1500;
 
 const mediaQuery = (query: string): MediaQueryList | undefined =>
   typeof matchMedia === 'function' ? matchMedia(query) : undefined;
@@ -50,6 +66,9 @@ export class AlgoPlayer extends LitElement {
 
   static override properties = {
     src: { type: String },
+    mode: { type: String, reflect: true },
+    once: { type: Boolean },
+    motion: { type: String },
     visualization: { attribute: false },
     frame: { type: Number, reflect: true },
     theme: { type: String },
@@ -69,6 +88,12 @@ export class AlgoPlayer extends LitElement {
   declare src: string | undefined;
   /** A document object; takes precedence over `src` and inline JSON. */
   declare visualization: unknown;
+  /** `interactive` (default) or `display`: animation only, no chrome. */
+  declare mode: PlayerMode;
+  /** In display mode, play once instead of looping. */
+  declare once: boolean;
+  /** Cell movement; defaults to `arc` when interactive, `linear` in display. */
+  declare motion: PlayerMotion | undefined;
   /** Current frame: 0 is the initial state, `length` the last. */
   declare frame: number;
   /** `light`, `dark`, `print`, or `auto` to follow the system. */
@@ -97,10 +122,16 @@ export class AlgoPlayer extends LitElement {
   readonly #controller: PlayerController;
   readonly #colorScheme = mediaQuery('(prefers-color-scheme: dark)');
   readonly #reducedMotion = mediaQuery('(prefers-reduced-motion: reduce)');
+  #visibility: IntersectionObserver | null = null;
+  #pausedOffscreen = false;
+  #ownsTabIndex = false;
 
   constructor() {
     super();
     this.src = undefined;
+    this.mode = 'interactive';
+    this.once = false;
+    this.motion = undefined;
     this.visualization = undefined;
     this.frame = 0;
     this.theme = 'auto';
@@ -151,21 +182,42 @@ export class AlgoPlayer extends LitElement {
 
   override connectedCallback(): void {
     super.connectedCallback();
-    if (!this.hasAttribute('tabindex')) this.tabIndex = 0;
     this.addEventListener('keydown', this.#onKeyDown);
     this.#colorScheme?.addEventListener('change', this.#onColorScheme);
+    if (typeof IntersectionObserver === 'function') {
+      this.#visibility = new IntersectionObserver(this.#onVisibility);
+      this.#visibility.observe(this);
+    }
   }
 
   override disconnectedCallback(): void {
     super.disconnectedCallback();
     this.removeEventListener('keydown', this.#onKeyDown);
     this.#colorScheme?.removeEventListener('change', this.#onColorScheme);
+    this.#visibility?.disconnect();
+    this.#visibility = null;
     this.#controller.dispose();
+  }
+
+  get #isDisplay(): boolean {
+    return this.mode === 'display';
   }
 
   protected override willUpdate(changed: PropertyValues<this>): void {
     if (changed.has('speed')) this.#controller.interval = this.speed;
-    if (changed.has('loop')) this.#controller.loop = this.loop;
+    if (changed.has('loop') || changed.has('mode') || changed.has('once')) {
+      this.#controller.loop = this.#isDisplay ? !this.once : this.loop;
+      this.#controller.endHold = this.#isDisplay ? DISPLAY_END_HOLD_MS : 0;
+    }
+    if (changed.has('mode')) {
+      this.#updateFocusability();
+      if (this.trace !== null && changed.get('mode') !== undefined) {
+        this.#layout = layoutTrace(this.trace, this.#layoutOptions());
+        this.#rendered = false;
+        if (this.#isDisplay) this.#controller.play();
+        else if (!this.autoplay) this.#controller.pause();
+      }
+    }
     if (changed.has('frame') && this.frame !== this.playback.index) {
       // Before a trace is loaded, remember the frame to show once it is.
       if (this.trace === null) this.#requestedFrame = this.frame;
@@ -217,7 +269,7 @@ export class AlgoPlayer extends LitElement {
     }
     this.errors = null;
     this.trace = result.value;
-    this.#layout = layoutTrace(result.value);
+    this.#layout = layoutTrace(result.value, this.#layoutOptions());
     this.#rendered = false;
     this.#controller.reset(result.value.length);
     if (this.#requestedFrame > 0) this.#controller.seek(this.#requestedFrame);
@@ -225,7 +277,7 @@ export class AlgoPlayer extends LitElement {
     this.dispatchEvent(
       new CustomEvent('algo-load', { detail: { length: result.value.length } }),
     );
-    if (this.autoplay) this.#controller.play();
+    if (this.autoplay || this.#isDisplay) this.#controller.play();
   }
 
   #fail(errors: readonly Diagnostic[]): void {
@@ -277,6 +329,7 @@ export class AlgoPlayer extends LitElement {
   }
 
   #onKeyDown = (event: KeyboardEvent): void => {
+    if (this.#isDisplay) return;
     // Let the timeline slider handle its own keys.
     if (event.composedPath()[0] instanceof HTMLInputElement) return;
     const actions: Record<string, () => void> = {
@@ -292,6 +345,34 @@ export class AlgoPlayer extends LitElement {
     event.preventDefault();
     action();
   };
+
+  /** Display mode pauses while off screen and resumes when visible again. */
+  #onVisibility = (entries: IntersectionObserverEntry[]): void => {
+    if (!this.#isDisplay) return;
+    const visible = entries.at(-1)?.isIntersecting ?? true;
+    if (!visible && this.playback.playing) {
+      this.#pausedOffscreen = true;
+      this.#controller.pause();
+    } else if (visible && this.#pausedOffscreen) {
+      this.#pausedOffscreen = false;
+      this.#controller.play();
+    }
+  };
+
+  /** Interactive players are focusable for keyboard control; displays are not. */
+  #updateFocusability(): void {
+    if (this.#isDisplay) {
+      if (this.#ownsTabIndex) this.removeAttribute('tabindex');
+      this.#ownsTabIndex = false;
+    } else if (!this.hasAttribute('tabindex')) {
+      this.tabIndex = 0;
+      this.#ownsTabIndex = true;
+    }
+  }
+
+  #layoutOptions() {
+    return this.#isDisplay ? bareLayoutOptions : defaultLayoutOptions;
+  }
 
   #onColorScheme = (event: MediaQueryListEvent): void => {
     this.darkScheme = event.matches;
@@ -314,6 +395,7 @@ export class AlgoPlayer extends LitElement {
     const animate = this.#rendered && !(this.#reducedMotion?.matches ?? false);
     this.#stage.render(painted, {
       duration: animate ? Math.min(MAX_ANIMATION_MS, this.speed * 0.55) : 0,
+      motion: this.motion ?? (this.#isDisplay ? 'linear' : 'arc'),
     });
     this.#rendered = true;
   }
@@ -331,7 +413,8 @@ export class AlgoPlayer extends LitElement {
     const { index, length, playing } = this.playback;
     const step = trace?.frame(index).step;
     const source = trace?.visualization.source;
-    const showCode = source !== undefined && !this.hideCode;
+    const display = this.#isDisplay;
+    const showCode = source !== undefined && !this.hideCode && !display;
     const vars = Object.entries(step?.meta?.vars ?? {});
 
     return html`
@@ -364,7 +447,11 @@ ${source.code
               : nothing
           }
         </div>
-        <div class="caption" part="caption" ?hidden=${trace === null}>
+        <div
+          class="caption"
+          part="caption"
+          ?hidden=${trace === null || display}
+        >
           <p class="narration" aria-live="polite">
             ${step?.meta?.narration ?? (index === 0 ? 'Initial state.' : '')}
           </p>
@@ -379,7 +466,7 @@ ${source.code
         <div
           class="controls"
           part="controls"
-          ?hidden=${this.hideControls || trace === null}
+          ?hidden=${this.hideControls || trace === null || display}
         >
           <button
             type="button"

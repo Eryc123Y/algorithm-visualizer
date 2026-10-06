@@ -14,5 +14,6 @@ Each file records one architectural decision: the context, what we decided, and 
 | [0008](0008-trace-wide-layout-metrics.md)           | Layout uses metrics measured over the whole trace                    | Accepted |
 | [0009](0009-accessible-themable-visual-encoding.md) | Visual encoding is redundant, and themes are partial overrides       | Accepted |
 | [0010](0010-player-architecture.md)                 | Player architecture: shared painting, keyed animation, no decorators | Accepted |
+| [0011](0011-display-mode.md)                        | Display mode: the player as a purely visual element                  | Accepted |
 
 Template: Status · Context · Decision · Consequences.

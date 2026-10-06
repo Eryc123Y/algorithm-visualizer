@@ -62,6 +62,14 @@ export const playerStyles = css`
     border: 1px solid var(--algo-border);
     border-radius: var(--algo-radius);
   }
+  :host([mode='display']) .player {
+    padding: 0;
+    gap: 0;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+  }
+
   .body {
     display: grid;
     grid-template-columns: minmax(0, 1fr);

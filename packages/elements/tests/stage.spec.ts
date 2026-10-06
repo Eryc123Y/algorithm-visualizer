@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { layoutTrace, loadTrace } from '@algoviz/core';
 import { paintScene } from '@algoviz/svg';
@@ -58,5 +58,50 @@ describe('SceneStage', () => {
     stage.render(painted(3), { duration: 0 });
     expect(el(svg, 'arr/pointer/i')).toBeNull();
     expect(stage.keys).not.toContain('arr/pointer/i');
+  });
+});
+
+describe('SceneStage motion', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  /** Records the transform keyframes of every animation the stage starts. */
+  function recordMoves() {
+    const moves: string[][] = [];
+    const proto = Element.prototype as unknown as { animate?: unknown };
+    proto.animate = function (keyframes: Keyframe[]) {
+      if (keyframes.some((k) => 'transform' in k))
+        moves.push(keyframes.map((k) => String(k.transform)));
+      return { cancel() {}, onfinish: null } as unknown as Animation;
+    };
+    return { moves, restore: () => delete proto.animate };
+  }
+
+  it('lifts swapped cells along arcs by default', () => {
+    const { moves, restore } = recordMoves();
+    const { stage } = mount();
+    stage.render(painted(1), { duration: 300 });
+    stage.render(painted(2), { duration: 300 });
+    restore();
+    const cells = moves.filter((m) => m.length === 3);
+    expect(cells).toHaveLength(2);
+    // The cell moving right rises, the one moving left dips.
+    expect(cells.map((m) => m[1])).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining('px, 43'),
+        expect.stringContaining('px, 85'),
+      ]),
+    );
+  });
+
+  it('moves in straight lines with linear motion', () => {
+    const { moves, restore } = recordMoves();
+    const { stage } = mount();
+    stage.render(painted(1), { duration: 300, motion: 'linear' });
+    stage.render(painted(2), { duration: 300, motion: 'linear' });
+    restore();
+    expect(moves.length).toBeGreaterThan(0);
+    expect(moves.every((m) => m.length === 2)).toBe(true);
   });
 });

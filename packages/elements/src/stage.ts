@@ -24,6 +24,12 @@ interface Entry {
 export interface RenderOptions {
   /** Animation length in ms; 0 jumps straight to the new frame. */
   readonly duration: number;
+  /**
+   * How cells travel: `arc` lifts cells that move sideways so swapped cells
+   * pass each other; `linear` moves everything in a straight line.
+   * Default `arc`.
+   */
+  readonly motion?: 'arc' | 'linear';
 }
 
 const translate = (x: number, y: number) =>
@@ -53,7 +59,10 @@ export class SceneStage {
     return [...this.#entries.keys()];
   }
 
-  render(scene: PaintedScene, { duration }: RenderOptions): void {
+  render(
+    scene: PaintedScene,
+    { duration, motion = 'arc' }: RenderOptions,
+  ): void {
     const svg = this.#svg;
     svg.setAttribute('viewBox', `0 0 ${num(scene.width)} ${num(scene.height)}`);
     svg.setAttribute('width', num(scene.width));
@@ -90,13 +99,8 @@ export class SceneStage {
         entry.markup = markup;
       }
       if (entry.x !== item.x || entry.y !== item.y) {
-        moveTo(
-          entry,
-          item.x,
-          item.y,
-          animate ? duration : 0,
-          item.attrs['data-role'] !== undefined,
-        );
+        const arc = motion === 'arc' && item.attrs['data-role'] !== undefined;
+        moveTo(entry, item.x, item.y, animate ? duration : 0, arc);
       }
     }
 
