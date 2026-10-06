@@ -1,0 +1,494 @@
+{
+  "version": "0.1",
+  "title": "Linear probing hash table with h(k) = k mod 13",
+  "source": {
+    "language": "python",
+    "code": "hash_table = [None] * 13\nfor key in keys:\n    hash_val = key % 13\n    while hash_table[hash_val] is not None:\n        hash_val = (hash_val + 1) % 13\n    hash_table[hash_val] = key"
+  },
+  "structures": {
+    "table": {
+      "kind": "array",
+      "initial": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "label": "hash table",
+      "view": "row"
+    }
+  },
+  "steps": [
+    {
+      "actions": [
+        {
+          "target": "table",
+          "type": "highlight",
+          "indices": [
+            5
+          ]
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Insert 18. h(18) = 18 mod 13 = 5. Slot 5 is empty.",
+        "vars": {
+          "key": 18,
+          "hash_val": 5
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "table",
+          "type": "set",
+          "index": 5,
+          "value": 18
+        }
+      ],
+      "meta": {
+        "line": 6,
+        "narration": "Insert 18 at slot 5."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "table",
+          "type": "highlight",
+          "indices": [
+            2
+          ]
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Insert 41. h(41) = 41 mod 13 = 2. Slot 2 is empty.",
+        "vars": {
+          "key": 41,
+          "hash_val": 2
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "table",
+          "type": "set",
+          "index": 2,
+          "value": 41
+        }
+      ],
+      "meta": {
+        "line": 6,
+        "narration": "Insert 41 at slot 2."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "table",
+          "type": "highlight",
+          "indices": [
+            9
+          ]
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Insert 22. h(22) = 22 mod 13 = 9. Slot 9 is empty.",
+        "vars": {
+          "key": 22,
+          "hash_val": 9
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "table",
+          "type": "set",
+          "index": 9,
+          "value": 22
+        }
+      ],
+      "meta": {
+        "line": 6,
+        "narration": "Insert 22 at slot 9."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "table",
+          "type": "highlight",
+          "indices": [
+            5
+          ]
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Insert 44. h(44) = 44 mod 13 = 5. Slot 5 is occupied by 18.",
+        "vars": {
+          "key": 44,
+          "hash_val": 5
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "table",
+          "type": "highlight",
+          "indices": [
+            6
+          ]
+        }
+      ],
+      "meta": {
+        "line": 4,
+        "narration": "Linear probe: try slot 6. Slot 6 is empty.",
+        "vars": {
+          "hash_val": 6
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "table",
+          "type": "set",
+          "index": 6,
+          "value": 44
+        }
+      ],
+      "meta": {
+        "line": 6,
+        "narration": "Insert 44 at slot 6."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "table",
+          "type": "highlight",
+          "indices": [
+            7
+          ]
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Insert 59. h(59) = 59 mod 13 = 7. Slot 7 is empty.",
+        "vars": {
+          "key": 59,
+          "hash_val": 7
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "table",
+          "type": "set",
+          "index": 7,
+          "value": 59
+        }
+      ],
+      "meta": {
+        "line": 6,
+        "narration": "Insert 59 at slot 7."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "table",
+          "type": "highlight",
+          "indices": [
+            6
+          ]
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Insert 32. h(32) = 32 mod 13 = 6. Slot 6 is occupied by 44.",
+        "vars": {
+          "key": 32,
+          "hash_val": 6
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "table",
+          "type": "highlight",
+          "indices": [
+            7
+          ]
+        }
+      ],
+      "meta": {
+        "line": 4,
+        "narration": "Linear probe: try slot 7. Slot 7 is occupied by 59.",
+        "vars": {
+          "hash_val": 7
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "table",
+          "type": "highlight",
+          "indices": [
+            8
+          ]
+        }
+      ],
+      "meta": {
+        "line": 4,
+        "narration": "Linear probe: try slot 8. Slot 8 is empty.",
+        "vars": {
+          "hash_val": 8
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "table",
+          "type": "set",
+          "index": 8,
+          "value": 32
+        }
+      ],
+      "meta": {
+        "line": 6,
+        "narration": "Insert 32 at slot 8."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "table",
+          "type": "highlight",
+          "indices": [
+            5
+          ]
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Insert 31. h(31) = 31 mod 13 = 5. Slot 5 is occupied by 18.",
+        "vars": {
+          "key": 31,
+          "hash_val": 5
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "table",
+          "type": "highlight",
+          "indices": [
+            6
+          ]
+        }
+      ],
+      "meta": {
+        "line": 4,
+        "narration": "Linear probe: try slot 6. Slot 6 is occupied by 44.",
+        "vars": {
+          "hash_val": 6
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "table",
+          "type": "highlight",
+          "indices": [
+            7
+          ]
+        }
+      ],
+      "meta": {
+        "line": 4,
+        "narration": "Try slot 7. Slot 7 is occupied by 59.",
+        "vars": {
+          "hash_val": 7
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "table",
+          "type": "highlight",
+          "indices": [
+            8
+          ]
+        }
+      ],
+      "meta": {
+        "line": 4,
+        "narration": "Try slot 8. Slot 8 is occupied by 32.",
+        "vars": {
+          "hash_val": 8
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "table",
+          "type": "highlight",
+          "indices": [
+            9
+          ]
+        }
+      ],
+      "meta": {
+        "line": 4,
+        "narration": "Try slot 9. Slot 9 is occupied by 22.",
+        "vars": {
+          "hash_val": 9
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "table",
+          "type": "highlight",
+          "indices": [
+            10
+          ]
+        }
+      ],
+      "meta": {
+        "line": 4,
+        "narration": "Try slot 10. Slot 10 is empty.",
+        "vars": {
+          "hash_val": 10
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "table",
+          "type": "set",
+          "index": 10,
+          "value": 31
+        }
+      ],
+      "meta": {
+        "line": 6,
+        "narration": "Insert 31 at slot 10."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "table",
+          "type": "highlight",
+          "indices": [
+            8
+          ]
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Insert 73. h(73) = 73 mod 13 = 8. Slot 8 is occupied by 32.",
+        "vars": {
+          "key": 73,
+          "hash_val": 8
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "table",
+          "type": "highlight",
+          "indices": [
+            9
+          ]
+        }
+      ],
+      "meta": {
+        "line": 4,
+        "narration": "Linear probe: try slot 9. Slot 9 is occupied by 22.",
+        "vars": {
+          "hash_val": 9
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "table",
+          "type": "highlight",
+          "indices": [
+            10
+          ]
+        }
+      ],
+      "meta": {
+        "line": 4,
+        "narration": "Try slot 10. Slot 10 is occupied by 31.",
+        "vars": {
+          "hash_val": 10
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "table",
+          "type": "highlight",
+          "indices": [
+            11
+          ]
+        }
+      ],
+      "meta": {
+        "line": 4,
+        "narration": "Try slot 11. Slot 11 is empty.",
+        "vars": {
+          "hash_val": 11
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "table",
+          "type": "set",
+          "index": 11,
+          "value": 73
+        }
+      ],
+      "meta": {
+        "line": 6,
+        "narration": "Insert 73 at slot 11. All keys inserted with linear probing."
+      }
+    }
+  ]
+}

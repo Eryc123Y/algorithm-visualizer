@@ -1,0 +1,129 @@
+{
+  "version": "0.1",
+  "title": "Delete node with value 3 from a singly linked list",
+  "source": {
+    "language": "python",
+    "code": "prev = None\ncurr = head\nwhile curr and curr.value != 3:\n    prev = curr\n    curr = curr.next\nif curr:\n    prev.next = curr.next"
+  },
+  "structures": {
+    "list": {
+      "kind": "linkedList",
+      "initial": [
+        1,
+        2,
+        3,
+        4
+      ]
+    }
+  },
+  "steps": [
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "curr",
+          "index": 0
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Start at the head (node 1). Check if it equals 3."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "prev",
+          "index": 0
+        },
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "curr",
+          "index": 1
+        }
+      ],
+      "meta": {
+        "line": 4,
+        "narration": "Node 1 is not 3. Move prev to 1 and curr to 2."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "prev",
+          "index": 1
+        },
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "curr",
+          "index": 2
+        }
+      ],
+      "meta": {
+        "line": 4,
+        "narration": "Node 2 is not 3. Move prev to 2 and curr to 3."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "highlight",
+          "indices": [
+            2
+          ]
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Node 3 equals 3. Stop traversal."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "link",
+          "from": 1,
+          "to": 3
+        }
+      ],
+      "meta": {
+        "line": 6,
+        "narration": "Update node 2's next pointer to point to node 4, skipping node 3."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "remove",
+          "index": 2
+        },
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "curr",
+          "index": null
+        },
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "prev",
+          "index": null
+        }
+      ],
+      "meta": {
+        "line": 6,
+        "narration": "Node 3 is removed. List now contains 1 → 2 → 4."
+      }
+    }
+  ]
+}

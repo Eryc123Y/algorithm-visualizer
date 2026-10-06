@@ -1,0 +1,137 @@
+{
+  "version": "0.1",
+  "title": "Hash table with separate chaining: h(k) = k mod 7",
+  "structures": {
+    "h": {
+      "kind": "hashTable",
+      "size": 7
+    }
+  },
+  "steps": [
+    {
+      "actions": [
+        {
+          "target": "h",
+          "type": "highlight",
+          "bucket": 1
+        }
+      ],
+      "meta": {
+        "narration": "Insert 15: h(15) = 15 mod 7 = 1. Go to bucket 1."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "h",
+          "type": "insert",
+          "bucket": 1,
+          "element": 15
+        }
+      ],
+      "meta": {
+        "narration": "Bucket 1 is empty, so add 15 to its chain."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "h",
+          "type": "highlight",
+          "bucket": 4
+        }
+      ],
+      "meta": {
+        "narration": "Insert 11: h(11) = 11 mod 7 = 4. Go to bucket 4."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "h",
+          "type": "insert",
+          "bucket": 4,
+          "element": 11
+        }
+      ],
+      "meta": {
+        "narration": "Bucket 4 is empty, so add 11 to its chain."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "h",
+          "type": "highlight",
+          "bucket": 6
+        }
+      ],
+      "meta": {
+        "narration": "Insert 27: h(27) = 27 mod 7 = 6. Go to bucket 6."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "h",
+          "type": "insert",
+          "bucket": 6,
+          "element": 27
+        }
+      ],
+      "meta": {
+        "narration": "Bucket 6 is empty, so add 27 to its chain."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "h",
+          "type": "highlight",
+          "bucket": 1
+        }
+      ],
+      "meta": {
+        "narration": "Insert 8: h(8) = 8 mod 7 = 1. Go to bucket 1."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "h",
+          "type": "insert",
+          "bucket": 1,
+          "element": 8
+        }
+      ],
+      "meta": {
+        "narration": "Bucket 1 already contains 15, so 8 joins the chain."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "h",
+          "type": "highlight",
+          "bucket": 5
+        }
+      ],
+      "meta": {
+        "narration": "Insert 12: h(12) = 12 mod 7 = 5. Go to bucket 5."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "h",
+          "type": "insert",
+          "bucket": 5,
+          "element": 12
+        }
+      ],
+      "meta": {
+        "narration": "Bucket 5 is empty, so add 12 to its chain. All insertions complete."
+      }
+    }
+  ]
+}

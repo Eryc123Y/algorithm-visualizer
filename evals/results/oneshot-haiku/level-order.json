@@ -1,0 +1,211 @@
+{
+  "version": "0.1",
+  "title": "Level-order traversal with a queue",
+  "structures": {
+    "tree": {
+      "kind": "tree",
+      "levelOrder": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        null,
+        6
+      ]
+    },
+    "q": {
+      "kind": "queue",
+      "initial": [],
+      "label": "queue"
+    },
+    "output": {
+      "kind": "array",
+      "initial": [],
+      "label": "result"
+    }
+  },
+  "steps": [
+    {
+      "actions": [
+        {
+          "target": "tree",
+          "type": "pointer",
+          "name": "curr",
+          "node": "e0"
+        },
+        {
+          "target": "q",
+          "type": "enqueue",
+          "element": 1
+        }
+      ],
+      "meta": {
+        "narration": "Start with the root (node 1). Add it to the queue."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "q",
+          "type": "dequeue"
+        },
+        {
+          "target": "tree",
+          "type": "visit",
+          "node": "e0"
+        },
+        {
+          "target": "output",
+          "type": "insert",
+          "index": 0,
+          "element": 1
+        },
+        {
+          "target": "q",
+          "type": "enqueue",
+          "element": 2
+        },
+        {
+          "target": "q",
+          "type": "enqueue",
+          "element": 3
+        }
+      ],
+      "meta": {
+        "narration": "Process node 1. Mark it visited, add to output, and enqueue its children 2 and 3."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "q",
+          "type": "dequeue"
+        },
+        {
+          "target": "tree",
+          "type": "visit",
+          "node": "e1"
+        },
+        {
+          "target": "output",
+          "type": "insert",
+          "index": 1,
+          "element": 2
+        },
+        {
+          "target": "q",
+          "type": "enqueue",
+          "element": 4
+        },
+        {
+          "target": "q",
+          "type": "enqueue",
+          "element": 5
+        }
+      ],
+      "meta": {
+        "narration": "Process node 2. Mark it visited, add to output, and enqueue its children 4 and 5."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "q",
+          "type": "dequeue"
+        },
+        {
+          "target": "tree",
+          "type": "visit",
+          "node": "e2"
+        },
+        {
+          "target": "output",
+          "type": "insert",
+          "index": 2,
+          "element": 3
+        },
+        {
+          "target": "q",
+          "type": "enqueue",
+          "element": 6
+        }
+      ],
+      "meta": {
+        "narration": "Process node 3. Mark it visited, add to output. Its left child is null, so only enqueue its right child 6."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "q",
+          "type": "dequeue"
+        },
+        {
+          "target": "tree",
+          "type": "visit",
+          "node": "e3"
+        },
+        {
+          "target": "output",
+          "type": "insert",
+          "index": 3,
+          "element": 4
+        }
+      ],
+      "meta": {
+        "narration": "Process node 4. Mark it visited, add to output. It has no children."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "q",
+          "type": "dequeue"
+        },
+        {
+          "target": "tree",
+          "type": "visit",
+          "node": "e4"
+        },
+        {
+          "target": "output",
+          "type": "insert",
+          "index": 4,
+          "element": 5
+        }
+      ],
+      "meta": {
+        "narration": "Process node 5. Mark it visited, add to output. It has no children."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "q",
+          "type": "dequeue"
+        },
+        {
+          "target": "tree",
+          "type": "visit",
+          "node": "e5"
+        },
+        {
+          "target": "output",
+          "type": "insert",
+          "index": 5,
+          "element": 6
+        }
+      ],
+      "meta": {
+        "narration": "Process node 6. Mark it visited, add to output. It has no children. The queue is empty."
+      }
+    },
+    {
+      "actions": [],
+      "meta": {
+        "narration": "Done. The level-order traversal of the tree is [1, 2, 3, 4, 5, 6]."
+      }
+    }
+  ]
+}

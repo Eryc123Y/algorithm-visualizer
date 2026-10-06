@@ -1,0 +1,303 @@
+{
+  "version": "0.1",
+  "title": "Insert words into a trie",
+  "source": {
+    "language": "python",
+    "code": "for word in words:\n    node = root\n    for char in word:\n        if char not in node.children:\n            node.children[char] = TrieNode()\n        node = node.children[char]\n    node.is_end_of_word = True"
+  },
+  "structures": {
+    "trie": {
+      "kind": "tree",
+      "binary": false,
+      "nodes": [
+        {
+          "id": "root",
+          "value": ""
+        }
+      ],
+      "roots": [
+        "root"
+      ]
+    }
+  },
+  "steps": [
+    {
+      "actions": [
+        {
+          "target": "trie",
+          "type": "pointer",
+          "name": "word",
+          "node": "root"
+        }
+      ],
+      "meta": {
+        "line": 2,
+        "narration": "Start with word 'to'. Initialize node to root."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "trie",
+          "type": "addNode",
+          "node": {
+            "id": "t1",
+            "value": "t"
+          },
+          "parent": "root"
+        }
+      ],
+      "meta": {
+        "line": 5,
+        "narration": "Character 't' not in root. Create node 't'."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "trie",
+          "type": "pointer",
+          "name": "word",
+          "node": "t1"
+        }
+      ],
+      "meta": {
+        "line": 6,
+        "narration": "Move to node 't'."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "trie",
+          "type": "addNode",
+          "node": {
+            "id": "o1",
+            "value": "o"
+          },
+          "parent": "t1"
+        }
+      ],
+      "meta": {
+        "line": 5,
+        "narration": "Character 'o' not in 't'. Create node 'o'."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "trie",
+          "type": "pointer",
+          "name": "word",
+          "node": "o1"
+        }
+      ],
+      "meta": {
+        "line": 6,
+        "narration": "Move to node 'o'."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "trie",
+          "type": "settle",
+          "node": "o1"
+        }
+      ],
+      "meta": {
+        "line": 7,
+        "narration": "Mark 'o' as end of word 'to'."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "trie",
+          "type": "pointer",
+          "name": "word",
+          "node": "root"
+        }
+      ],
+      "meta": {
+        "line": 2,
+        "narration": "Start with word 'tea'. Initialize node to root."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "trie",
+          "type": "pointer",
+          "name": "word",
+          "node": "t1"
+        }
+      ],
+      "meta": {
+        "line": 5,
+        "narration": "Character 't' already in root. Move to existing node 't'."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "trie",
+          "type": "addNode",
+          "node": {
+            "id": "e1",
+            "value": "e"
+          },
+          "parent": "t1"
+        }
+      ],
+      "meta": {
+        "line": 5,
+        "narration": "Character 'e' not in 't'. Create node 'e'."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "trie",
+          "type": "pointer",
+          "name": "word",
+          "node": "e1"
+        }
+      ],
+      "meta": {
+        "line": 6,
+        "narration": "Move to node 'e'."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "trie",
+          "type": "addNode",
+          "node": {
+            "id": "a1",
+            "value": "a"
+          },
+          "parent": "e1"
+        }
+      ],
+      "meta": {
+        "line": 5,
+        "narration": "Character 'a' not in 'e'. Create node 'a'."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "trie",
+          "type": "pointer",
+          "name": "word",
+          "node": "a1"
+        }
+      ],
+      "meta": {
+        "line": 6,
+        "narration": "Move to node 'a'."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "trie",
+          "type": "settle",
+          "node": "a1"
+        }
+      ],
+      "meta": {
+        "line": 7,
+        "narration": "Mark 'a' as end of word 'tea'."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "trie",
+          "type": "pointer",
+          "name": "word",
+          "node": "root"
+        }
+      ],
+      "meta": {
+        "line": 2,
+        "narration": "Start with word 'ten'. Initialize node to root."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "trie",
+          "type": "pointer",
+          "name": "word",
+          "node": "t1"
+        }
+      ],
+      "meta": {
+        "line": 5,
+        "narration": "Character 't' already in root. Move to existing node 't'."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "trie",
+          "type": "pointer",
+          "name": "word",
+          "node": "e1"
+        }
+      ],
+      "meta": {
+        "line": 5,
+        "narration": "Character 'e' already in 't'. Move to existing node 'e'."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "trie",
+          "type": "addNode",
+          "node": {
+            "id": "n1",
+            "value": "n"
+          },
+          "parent": "e1"
+        }
+      ],
+      "meta": {
+        "line": 5,
+        "narration": "Character 'n' not in 'e'. Create node 'n'."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "trie",
+          "type": "pointer",
+          "name": "word",
+          "node": "n1"
+        }
+      ],
+      "meta": {
+        "line": 6,
+        "narration": "Move to node 'n'."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "trie",
+          "type": "settle",
+          "node": "n1"
+        }
+      ],
+      "meta": {
+        "line": 7,
+        "narration": "Mark 'n' as end of word 'ten'. Trie complete."
+      }
+    }
+  ]
+}

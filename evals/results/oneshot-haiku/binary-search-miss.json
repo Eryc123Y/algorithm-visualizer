@@ -1,0 +1,129 @@
+{
+  "version": "0.1",
+  "title": "Binary search for 6",
+  "structures": {
+    "a": {
+      "kind": "array",
+      "initial": [
+        1,
+        3,
+        4,
+        7,
+        9,
+        11,
+        15
+      ]
+    }
+  },
+  "steps": [
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "pointer",
+          "name": "lo",
+          "index": 0
+        },
+        {
+          "target": "a",
+          "type": "pointer",
+          "name": "hi",
+          "index": 6
+        },
+        {
+          "target": "a",
+          "type": "pointer",
+          "name": "mid",
+          "index": 3
+        },
+        {
+          "target": "a",
+          "type": "highlight",
+          "indices": [
+            3
+          ]
+        }
+      ],
+      "meta": {
+        "narration": "mid = (0 + 6) // 2 = 3, and a[3] = 7 > 6, so search the left half."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "pointer",
+          "name": "hi",
+          "index": 2
+        },
+        {
+          "target": "a",
+          "type": "pointer",
+          "name": "mid",
+          "index": 1
+        },
+        {
+          "target": "a",
+          "type": "highlight",
+          "indices": [
+            1
+          ]
+        }
+      ],
+      "meta": {
+        "narration": "mid = (0 + 2) // 2 = 1, and a[1] = 3 < 6, so search the right half."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "pointer",
+          "name": "lo",
+          "index": 2
+        },
+        {
+          "target": "a",
+          "type": "pointer",
+          "name": "mid",
+          "index": 2
+        },
+        {
+          "target": "a",
+          "type": "highlight",
+          "indices": [
+            2
+          ]
+        }
+      ],
+      "meta": {
+        "narration": "mid = (2 + 2) // 2 = 2, and a[2] = 4 < 6, so search the right half."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "pointer",
+          "name": "lo",
+          "index": 3
+        },
+        {
+          "target": "a",
+          "type": "pointer",
+          "name": "hi",
+          "index": null
+        },
+        {
+          "target": "a",
+          "type": "pointer",
+          "name": "mid",
+          "index": null
+        }
+      ],
+      "meta": {
+        "narration": "lo > hi: the search space is empty. 6 is not in the array."
+      }
+    }
+  ]
+}

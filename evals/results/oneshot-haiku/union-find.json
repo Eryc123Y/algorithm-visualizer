@@ -1,0 +1,236 @@
+{
+  "version": "0.1",
+  "title": "Union-find over 0 to 4 with union by rank",
+  "source": {
+    "language": "python",
+    "code": "union(uf, 0, 1)\nunion(uf, 2, 3)\nunion(uf, 1, 3)"
+  },
+  "structures": {
+    "uf": {
+      "kind": "tree",
+      "binary": false,
+      "nodes": [
+        {
+          "id": "e0",
+          "value": 0
+        },
+        {
+          "id": "e1",
+          "value": 1
+        },
+        {
+          "id": "e2",
+          "value": 2
+        },
+        {
+          "id": "e3",
+          "value": 3
+        },
+        {
+          "id": "e4",
+          "value": 4
+        }
+      ],
+      "roots": [
+        "e0",
+        "e1",
+        "e2",
+        "e3",
+        "e4"
+      ]
+    }
+  },
+  "steps": [
+    {
+      "actions": [
+        {
+          "target": "uf",
+          "type": "annotate",
+          "node": "e0",
+          "text": "r=0"
+        },
+        {
+          "target": "uf",
+          "type": "annotate",
+          "node": "e1",
+          "text": "r=0"
+        },
+        {
+          "target": "uf",
+          "type": "annotate",
+          "node": "e2",
+          "text": "r=0"
+        },
+        {
+          "target": "uf",
+          "type": "annotate",
+          "node": "e3",
+          "text": "r=0"
+        },
+        {
+          "target": "uf",
+          "type": "annotate",
+          "node": "e4",
+          "text": "r=0"
+        }
+      ],
+      "meta": {
+        "line": 1,
+        "narration": "Initially, each element is its own root with rank 0."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "uf",
+          "type": "group",
+          "node": "e0",
+          "group": 0
+        },
+        {
+          "target": "uf",
+          "type": "group",
+          "node": "e1",
+          "group": 0
+        }
+      ],
+      "meta": {
+        "line": 1,
+        "narration": "union(0, 1): Both roots have rank 0. Merge 1 under 0 and increase 0's rank to 1."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "uf",
+          "type": "setChild",
+          "parent": "e0",
+          "child": "e1"
+        },
+        {
+          "target": "uf",
+          "type": "annotate",
+          "node": "e0",
+          "text": "r=1"
+        }
+      ],
+      "meta": {
+        "line": 1,
+        "narration": "After union: 0 is root with 1 as child. Sets are {0,1}, {2}, {3}, {4}."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "uf",
+          "type": "group",
+          "node": "e2",
+          "group": 1
+        },
+        {
+          "target": "uf",
+          "type": "group",
+          "node": "e3",
+          "group": 1
+        }
+      ],
+      "meta": {
+        "line": 2,
+        "narration": "union(2, 3): Both roots have rank 0. Merge 3 under 2 and increase 2's rank to 1."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "uf",
+          "type": "setChild",
+          "parent": "e2",
+          "child": "e3"
+        },
+        {
+          "target": "uf",
+          "type": "annotate",
+          "node": "e2",
+          "text": "r=1"
+        }
+      ],
+      "meta": {
+        "line": 2,
+        "narration": "After union: 2 is root with 3 as child. Sets are {0,1}, {2,3}, {4}."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "uf",
+          "type": "group",
+          "node": "e0",
+          "group": 2
+        },
+        {
+          "target": "uf",
+          "type": "group",
+          "node": "e2",
+          "group": 2
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "union(1, 3): Root of 1 is 0 (rank 1), root of 3 is 2 (rank 1). Ranks are equal, so merge 2 under 0 and increase 0's rank to 2."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "uf",
+          "type": "setChild",
+          "parent": "e0",
+          "child": "e2"
+        },
+        {
+          "target": "uf",
+          "type": "annotate",
+          "node": "e0",
+          "text": "r=2"
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "After union: 0 is root with children 1 and 2; 2 has child 3. All elements 0,1,2,3 are connected; 4 remains separate."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "uf",
+          "type": "settle",
+          "node": "e0"
+        },
+        {
+          "target": "uf",
+          "type": "settle",
+          "node": "e1"
+        },
+        {
+          "target": "uf",
+          "type": "settle",
+          "node": "e2"
+        },
+        {
+          "target": "uf",
+          "type": "settle",
+          "node": "e3"
+        },
+        {
+          "target": "uf",
+          "type": "settle",
+          "node": "e4"
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Union-find complete. Forest shows two components: {0,1,2,3} and {4}."
+      }
+    }
+  ]
+}

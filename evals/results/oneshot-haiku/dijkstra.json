@@ -1,0 +1,256 @@
+{
+  "version": "0.1",
+  "title": "Dijkstra's shortest paths from S",
+  "structures": {
+    "g": {
+      "kind": "graph",
+      "directed": false,
+      "nodes": [
+        "S",
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "edges": [
+        [
+          "S",
+          "A",
+          4
+        ],
+        [
+          "S",
+          "B",
+          1
+        ],
+        [
+          "B",
+          "A",
+          2
+        ],
+        [
+          "A",
+          "C",
+          1
+        ],
+        [
+          "B",
+          "C",
+          5
+        ],
+        [
+          "C",
+          "D",
+          3
+        ]
+      ]
+    }
+  },
+  "steps": [
+    {
+      "actions": [
+        {
+          "target": "g",
+          "type": "annotate",
+          "node": "S",
+          "text": "0"
+        },
+        {
+          "target": "g",
+          "type": "annotate",
+          "node": "A",
+          "text": "∞"
+        },
+        {
+          "target": "g",
+          "type": "annotate",
+          "node": "B",
+          "text": "∞"
+        },
+        {
+          "target": "g",
+          "type": "annotate",
+          "node": "C",
+          "text": "∞"
+        },
+        {
+          "target": "g",
+          "type": "annotate",
+          "node": "D",
+          "text": "∞"
+        }
+      ],
+      "meta": {
+        "narration": "Initialize S to 0 and all other distances to ∞."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "g",
+          "type": "settle",
+          "node": "S"
+        },
+        {
+          "target": "g",
+          "type": "highlight",
+          "edges": [
+            "S-A",
+            "S-B"
+          ]
+        },
+        {
+          "target": "g",
+          "type": "annotate",
+          "node": "A",
+          "text": "4"
+        },
+        {
+          "target": "g",
+          "type": "annotate",
+          "node": "B",
+          "text": "1"
+        },
+        {
+          "target": "g",
+          "type": "markEdge",
+          "edge": "S-A",
+          "mark": "selected"
+        },
+        {
+          "target": "g",
+          "type": "markEdge",
+          "edge": "S-B",
+          "mark": "selected"
+        }
+      ],
+      "meta": {
+        "narration": "Settle S and relax its edges: A gets 4, B gets 1."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "g",
+          "type": "settle",
+          "node": "B"
+        },
+        {
+          "target": "g",
+          "type": "highlight",
+          "edges": [
+            "B-A",
+            "B-C"
+          ]
+        },
+        {
+          "target": "g",
+          "type": "annotate",
+          "node": "A",
+          "text": "3"
+        },
+        {
+          "target": "g",
+          "type": "annotate",
+          "node": "C",
+          "text": "6"
+        },
+        {
+          "target": "g",
+          "type": "markEdge",
+          "edge": "B-A",
+          "mark": "selected"
+        },
+        {
+          "target": "g",
+          "type": "markEdge",
+          "edge": "S-A",
+          "mark": null
+        }
+      ],
+      "meta": {
+        "narration": "B is closest. Relax edges from B: A improves to 3, C gets 6."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "g",
+          "type": "settle",
+          "node": "A"
+        },
+        {
+          "target": "g",
+          "type": "highlight",
+          "edges": [
+            "A-C"
+          ]
+        },
+        {
+          "target": "g",
+          "type": "annotate",
+          "node": "C",
+          "text": "4"
+        },
+        {
+          "target": "g",
+          "type": "markEdge",
+          "edge": "A-C",
+          "mark": "selected"
+        },
+        {
+          "target": "g",
+          "type": "markEdge",
+          "edge": "B-C",
+          "mark": "rejected"
+        }
+      ],
+      "meta": {
+        "narration": "A is next. Through A, C costs 3 + 1 = 4, better than 6."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "g",
+          "type": "settle",
+          "node": "C"
+        },
+        {
+          "target": "g",
+          "type": "highlight",
+          "edges": [
+            "C-D"
+          ]
+        },
+        {
+          "target": "g",
+          "type": "annotate",
+          "node": "D",
+          "text": "7"
+        },
+        {
+          "target": "g",
+          "type": "markEdge",
+          "edge": "C-D",
+          "mark": "selected"
+        }
+      ],
+      "meta": {
+        "narration": "C is closest. Relax edge to D: it gets distance 7."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "g",
+          "type": "settle",
+          "node": "D"
+        }
+      ],
+      "meta": {
+        "narration": "D is the last node. Shortest path tree complete."
+      }
+    }
+  ]
+}

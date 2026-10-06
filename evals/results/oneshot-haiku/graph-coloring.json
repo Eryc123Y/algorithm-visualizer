@@ -1,0 +1,148 @@
+{
+  "version": "0.1",
+  "title": "Greedy graph coloring",
+  "structures": {
+    "g": {
+      "kind": "graph",
+      "directed": false,
+      "nodes": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "edges": [
+        [
+          "A",
+          "B"
+        ],
+        [
+          "B",
+          "C"
+        ],
+        [
+          "C",
+          "A"
+        ],
+        [
+          "C",
+          "D"
+        ],
+        [
+          "D",
+          "E"
+        ]
+      ]
+    }
+  },
+  "steps": [
+    {
+      "actions": [
+        {
+          "target": "g",
+          "type": "highlight",
+          "nodes": [
+            "A"
+          ]
+        }
+      ],
+      "meta": {
+        "narration": "Visit A: no neighbours are coloured, assign color 0."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "g",
+          "type": "group",
+          "node": "A",
+          "group": 0
+        },
+        {
+          "target": "g",
+          "type": "highlight",
+          "nodes": [
+            "B"
+          ]
+        }
+      ],
+      "meta": {
+        "narration": "Visit B: A is coloured 0, so assign the smallest available, color 1."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "g",
+          "type": "group",
+          "node": "B",
+          "group": 1
+        },
+        {
+          "target": "g",
+          "type": "highlight",
+          "nodes": [
+            "C"
+          ]
+        }
+      ],
+      "meta": {
+        "narration": "Visit C: neighbours A (0) and B (1) use colours 0 and 1, so assign color 2."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "g",
+          "type": "group",
+          "node": "C",
+          "group": 2
+        },
+        {
+          "target": "g",
+          "type": "highlight",
+          "nodes": [
+            "D"
+          ]
+        }
+      ],
+      "meta": {
+        "narration": "Visit D: neighbour C is coloured 2, so assign the smallest available, color 0."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "g",
+          "type": "group",
+          "node": "D",
+          "group": 0
+        },
+        {
+          "target": "g",
+          "type": "highlight",
+          "nodes": [
+            "E"
+          ]
+        }
+      ],
+      "meta": {
+        "narration": "Visit E: neighbour D is coloured 0, so assign the smallest available, color 1."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "g",
+          "type": "group",
+          "node": "E",
+          "group": 1
+        }
+      ],
+      "meta": {
+        "narration": "Colouring complete: 3 colours used. A and D share color 0, B and E share color 1, C has color 2."
+      }
+    }
+  ]
+}

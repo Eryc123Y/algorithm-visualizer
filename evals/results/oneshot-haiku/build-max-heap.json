@@ -1,0 +1,212 @@
+{
+  "version": "0.1",
+  "title": "Build a max-heap from [3, 9, 2, 1, 4, 5]",
+  "source": {
+    "language": "python",
+    "code": "for i in range((n - 1) // 2, -1, -1):\n    sift_down(a, i)"
+  },
+  "structures": {
+    "a": {
+      "kind": "array",
+      "initial": [
+        3,
+        9,
+        2,
+        1,
+        4,
+        5
+      ],
+      "view": "tree"
+    }
+  },
+  "steps": [
+    {
+      "actions": [],
+      "meta": {
+        "line": 1,
+        "narration": "Start with array [3, 9, 2, 1, 4, 5]. Sift down from the last parent (index 2) to the root."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "highlight",
+          "indices": [
+            2
+          ]
+        }
+      ],
+      "meta": {
+        "line": 2,
+        "narration": "Sift down from index 2 (value 2). Children are at indices 5 (value 5) and 6 (out of bounds)."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "compare",
+          "i": 2,
+          "j": 5
+        }
+      ],
+      "meta": {
+        "line": 2,
+        "narration": "Compare 2 and 5: 2 < 5, so swap them."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "swap",
+          "i": 2,
+          "j": 5
+        }
+      ],
+      "meta": {
+        "line": 2,
+        "narration": "After swap: [3, 9, 5, 1, 4, 2]."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "highlight",
+          "indices": [
+            1
+          ]
+        }
+      ],
+      "meta": {
+        "line": 2,
+        "narration": "Sift down from index 1 (value 9). Children are at indices 3 (value 1) and 4 (value 4)."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "compare",
+          "i": 1,
+          "j": 4
+        }
+      ],
+      "meta": {
+        "line": 2,
+        "narration": "Compare 9 and 4: 9 > 4, already in correct order. No swap needed."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "highlight",
+          "indices": [
+            0
+          ]
+        }
+      ],
+      "meta": {
+        "line": 2,
+        "narration": "Sift down from index 0 (value 3). Children are at indices 1 (value 9) and 2 (value 5)."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "compare",
+          "i": 0,
+          "j": 1
+        }
+      ],
+      "meta": {
+        "line": 2,
+        "narration": "Compare 3 and 9: 3 < 9, so swap them."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "swap",
+          "i": 0,
+          "j": 1
+        }
+      ],
+      "meta": {
+        "line": 2,
+        "narration": "After swap: [9, 3, 5, 1, 4, 2]. Now sift down 3 from index 1."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "compare",
+          "i": 1,
+          "j": 4
+        }
+      ],
+      "meta": {
+        "line": 2,
+        "narration": "Compare 3 and 4: 3 < 4, so swap them."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "swap",
+          "i": 1,
+          "j": 4
+        }
+      ],
+      "meta": {
+        "line": 2,
+        "narration": "After swap: [9, 4, 5, 1, 3, 2]. Now 3 is at index 4 with no children."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "settle",
+          "index": 0
+        },
+        {
+          "target": "a",
+          "type": "settle",
+          "index": 1
+        },
+        {
+          "target": "a",
+          "type": "settle",
+          "index": 2
+        },
+        {
+          "target": "a",
+          "type": "settle",
+          "index": 3
+        },
+        {
+          "target": "a",
+          "type": "settle",
+          "index": 4
+        },
+        {
+          "target": "a",
+          "type": "settle",
+          "index": 5
+        }
+      ],
+      "meta": {
+        "line": 1,
+        "narration": "Max-heap complete! Every parent is larger than its children."
+      }
+    }
+  ]
+}

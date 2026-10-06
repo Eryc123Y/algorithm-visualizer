@@ -1,0 +1,662 @@
+{
+  "version": "0.1",
+  "title": "Topological sort with Kahn's algorithm",
+  "source": {
+    "language": "python",
+    "code": "queue = [v for v in graph if in_degree[v] == 0]\nresult = []\nwhile queue:\n    u = queue.pop(0)\n    result.append(u)\n    for v in graph[u]:\n        in_degree[v] -= 1\n        if in_degree[v] == 0:\n            queue.append(v)"
+  },
+  "structures": {
+    "graph": {
+      "kind": "graph",
+      "directed": true,
+      "nodes": [
+        "undershorts",
+        "pants",
+        "shoes",
+        "belt",
+        "shirt",
+        "tie",
+        "jacket",
+        "socks"
+      ],
+      "edges": [
+        [
+          "undershorts",
+          "pants"
+        ],
+        [
+          "pants",
+          "shoes"
+        ],
+        [
+          "pants",
+          "belt"
+        ],
+        [
+          "shirt",
+          "belt"
+        ],
+        [
+          "shirt",
+          "tie"
+        ],
+        [
+          "tie",
+          "jacket"
+        ],
+        [
+          "belt",
+          "jacket"
+        ],
+        [
+          "socks",
+          "shoes"
+        ]
+      ],
+      "layout": "layered"
+    },
+    "queue": {
+      "kind": "queue",
+      "initial": [
+        "undershorts",
+        "shirt",
+        "socks"
+      ],
+      "label": "queue"
+    },
+    "result": {
+      "kind": "array",
+      "initial": [],
+      "label": "result"
+    }
+  },
+  "steps": [
+    {
+      "actions": [
+        {
+          "target": "graph",
+          "type": "annotate",
+          "node": "undershorts",
+          "text": "in=0"
+        },
+        {
+          "target": "graph",
+          "type": "annotate",
+          "node": "shirt",
+          "text": "in=0"
+        },
+        {
+          "target": "graph",
+          "type": "annotate",
+          "node": "socks",
+          "text": "in=0"
+        },
+        {
+          "target": "graph",
+          "type": "annotate",
+          "node": "pants",
+          "text": "in=1"
+        },
+        {
+          "target": "graph",
+          "type": "annotate",
+          "node": "belt",
+          "text": "in=2"
+        },
+        {
+          "target": "graph",
+          "type": "annotate",
+          "node": "shoes",
+          "text": "in=2"
+        },
+        {
+          "target": "graph",
+          "type": "annotate",
+          "node": "tie",
+          "text": "in=1"
+        },
+        {
+          "target": "graph",
+          "type": "annotate",
+          "node": "jacket",
+          "text": "in=2"
+        }
+      ],
+      "meta": {
+        "line": 1,
+        "narration": "Calculate in-degrees for all nodes. Start with undershorts, shirt, and socks (in-degree 0).",
+        "vars": {}
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "peek"
+        },
+        {
+          "target": "graph",
+          "type": "visit",
+          "node": "undershorts"
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Dequeue undershorts and add to result.",
+        "vars": {}
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "dequeue"
+        },
+        {
+          "target": "result",
+          "type": "insert",
+          "index": 0,
+          "element": "undershorts"
+        }
+      ],
+      "meta": {
+        "line": 5,
+        "narration": "Process undershorts, removing edge to pants."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "graph",
+          "type": "annotate",
+          "node": "pants",
+          "text": "in=0"
+        },
+        {
+          "target": "graph",
+          "type": "markEdge",
+          "edge": "undershorts-pants",
+          "mark": "selected"
+        }
+      ],
+      "meta": {
+        "line": 6,
+        "narration": "Pants now has in-degree 0, enqueue it."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "enqueue",
+          "element": "pants"
+        },
+        {
+          "target": "graph",
+          "type": "markEdge",
+          "edge": "undershorts-pants",
+          "mark": null
+        }
+      ],
+      "meta": {
+        "line": 2,
+        "narration": "Continue with shirt."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "peek"
+        },
+        {
+          "target": "graph",
+          "type": "visit",
+          "node": "shirt"
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Dequeue shirt and add to result."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "dequeue"
+        },
+        {
+          "target": "result",
+          "type": "insert",
+          "index": 1,
+          "element": "shirt"
+        }
+      ],
+      "meta": {
+        "line": 5,
+        "narration": "Process shirt, removing edges to belt and tie."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "graph",
+          "type": "annotate",
+          "node": "belt",
+          "text": "in=1"
+        },
+        {
+          "target": "graph",
+          "type": "annotate",
+          "node": "tie",
+          "text": "in=0"
+        },
+        {
+          "target": "graph",
+          "type": "markEdge",
+          "edge": "shirt-belt",
+          "mark": "selected"
+        },
+        {
+          "target": "graph",
+          "type": "markEdge",
+          "edge": "shirt-tie",
+          "mark": "selected"
+        }
+      ],
+      "meta": {
+        "line": 6,
+        "narration": "Tie now has in-degree 0, enqueue it."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "enqueue",
+          "element": "tie"
+        },
+        {
+          "target": "graph",
+          "type": "markEdge",
+          "edge": "shirt-belt",
+          "mark": null
+        },
+        {
+          "target": "graph",
+          "type": "markEdge",
+          "edge": "shirt-tie",
+          "mark": null
+        }
+      ],
+      "meta": {
+        "line": 2,
+        "narration": "Continue with socks."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "peek"
+        },
+        {
+          "target": "graph",
+          "type": "visit",
+          "node": "socks"
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Dequeue socks and add to result."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "dequeue"
+        },
+        {
+          "target": "result",
+          "type": "insert",
+          "index": 2,
+          "element": "socks"
+        }
+      ],
+      "meta": {
+        "line": 5,
+        "narration": "Process socks, removing edge to shoes."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "graph",
+          "type": "annotate",
+          "node": "shoes",
+          "text": "in=1"
+        },
+        {
+          "target": "graph",
+          "type": "markEdge",
+          "edge": "socks-shoes",
+          "mark": "selected"
+        }
+      ],
+      "meta": {
+        "line": 2,
+        "narration": "Continue with pants."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "graph",
+          "type": "markEdge",
+          "edge": "socks-shoes",
+          "mark": null
+        },
+        {
+          "target": "queue",
+          "type": "peek"
+        },
+        {
+          "target": "graph",
+          "type": "visit",
+          "node": "pants"
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Dequeue pants and add to result."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "dequeue"
+        },
+        {
+          "target": "result",
+          "type": "insert",
+          "index": 3,
+          "element": "pants"
+        }
+      ],
+      "meta": {
+        "line": 5,
+        "narration": "Process pants, removing edges to shoes and belt."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "graph",
+          "type": "annotate",
+          "node": "shoes",
+          "text": "in=0"
+        },
+        {
+          "target": "graph",
+          "type": "annotate",
+          "node": "belt",
+          "text": "in=0"
+        },
+        {
+          "target": "graph",
+          "type": "markEdge",
+          "edge": "pants-shoes",
+          "mark": "selected"
+        },
+        {
+          "target": "graph",
+          "type": "markEdge",
+          "edge": "pants-belt",
+          "mark": "selected"
+        }
+      ],
+      "meta": {
+        "line": 6,
+        "narration": "Both shoes and belt now have in-degree 0, enqueue them."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "enqueue",
+          "element": "shoes"
+        },
+        {
+          "target": "queue",
+          "type": "enqueue",
+          "element": "belt"
+        },
+        {
+          "target": "graph",
+          "type": "markEdge",
+          "edge": "pants-shoes",
+          "mark": null
+        },
+        {
+          "target": "graph",
+          "type": "markEdge",
+          "edge": "pants-belt",
+          "mark": null
+        }
+      ],
+      "meta": {
+        "line": 2,
+        "narration": "Continue with tie."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "peek"
+        },
+        {
+          "target": "graph",
+          "type": "visit",
+          "node": "tie"
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Dequeue tie and add to result."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "dequeue"
+        },
+        {
+          "target": "result",
+          "type": "insert",
+          "index": 4,
+          "element": "tie"
+        }
+      ],
+      "meta": {
+        "line": 5,
+        "narration": "Process tie, removing edge to jacket."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "graph",
+          "type": "annotate",
+          "node": "jacket",
+          "text": "in=1"
+        },
+        {
+          "target": "graph",
+          "type": "markEdge",
+          "edge": "tie-jacket",
+          "mark": "selected"
+        }
+      ],
+      "meta": {
+        "line": 2,
+        "narration": "Continue with shoes."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "graph",
+          "type": "markEdge",
+          "edge": "tie-jacket",
+          "mark": null
+        },
+        {
+          "target": "queue",
+          "type": "peek"
+        },
+        {
+          "target": "graph",
+          "type": "visit",
+          "node": "shoes"
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Dequeue shoes and add to result."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "dequeue"
+        },
+        {
+          "target": "result",
+          "type": "insert",
+          "index": 5,
+          "element": "shoes"
+        }
+      ],
+      "meta": {
+        "line": 2,
+        "narration": "Continue with belt."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "peek"
+        },
+        {
+          "target": "graph",
+          "type": "visit",
+          "node": "belt"
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Dequeue belt and add to result."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "dequeue"
+        },
+        {
+          "target": "result",
+          "type": "insert",
+          "index": 6,
+          "element": "belt"
+        }
+      ],
+      "meta": {
+        "line": 5,
+        "narration": "Process belt, removing edge to jacket."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "graph",
+          "type": "annotate",
+          "node": "jacket",
+          "text": "in=0"
+        },
+        {
+          "target": "graph",
+          "type": "markEdge",
+          "edge": "belt-jacket",
+          "mark": "selected"
+        }
+      ],
+      "meta": {
+        "line": 6,
+        "narration": "Jacket now has in-degree 0, enqueue it."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "enqueue",
+          "element": "jacket"
+        },
+        {
+          "target": "graph",
+          "type": "markEdge",
+          "edge": "belt-jacket",
+          "mark": null
+        }
+      ],
+      "meta": {
+        "line": 2,
+        "narration": "Continue with jacket."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "peek"
+        },
+        {
+          "target": "graph",
+          "type": "visit",
+          "node": "jacket"
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Dequeue jacket and add to result."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "dequeue"
+        },
+        {
+          "target": "result",
+          "type": "insert",
+          "index": 7,
+          "element": "jacket"
+        }
+      ],
+      "meta": {
+        "line": 2,
+        "narration": "Queue is empty. Topological sort complete."
+      }
+    }
+  ]
+}
