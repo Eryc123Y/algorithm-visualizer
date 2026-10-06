@@ -78,7 +78,9 @@ const structures = <D extends z.ZodType>(decl: D) =>
     .refine((r) => Object.keys(r).length <= LIMITS.structures, {
       message: `Declare at most ${LIMITS.structures} structures`,
     })
-    .describe('Structures shown in the visualization, keyed by name.');
+    .describe('Structures shown in the visualization, keyed by name.')
+    // The refinements above are invisible to JSON Schema; state them there too.
+    .meta({ minProperties: 1, maxProperties: LIMITS.structures });
 
 const document = <D extends z.ZodType, A extends z.ZodType>(
   decl: D,
