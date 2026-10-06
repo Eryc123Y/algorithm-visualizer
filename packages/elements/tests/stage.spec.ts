@@ -72,7 +72,7 @@ describe('SceneStage motion', () => {
     const proto = Element.prototype as unknown as { animate?: unknown };
     proto.animate = function (keyframes: Keyframe[]) {
       if (keyframes.some((k) => 'transform' in k))
-        moves.push(keyframes.map((k) => String(k.transform)));
+        moves.push(keyframes.map((k) => String(k['transform'])));
       return { cancel() {}, onfinish: null } as unknown as Animation;
     };
     return { moves, restore: () => delete proto.animate };
