@@ -1,30 +1,18 @@
+<!--
+  App.vue
+  Playground shell. Interactive demos are added here as the core and
+  element packages land.
+-->
+<script setup lang="ts">
+import { PROTOCOL_VERSION } from '@algoviz/spec';
+</script>
+
 <template>
-  <nav>
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
-  </nav>
-  <router-view />
+  <main class="mx-auto flex min-h-screen max-w-3xl flex-col gap-4 px-4 py-12">
+    <h1 class="text-3xl font-bold">algoviz playground</h1>
+    <p class="text-slate-600">
+      Protocol version {{ PROTOCOL_VERSION }}. Demos will appear here once the
+      core engine and the player elements are available.
+    </p>
+  </main>
 </template>
-
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
-
-nav {
-  padding: 30px;
-}
-
-nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-nav a.router-link-exact-active {
-  color: #42b983;
-}
-</style>
