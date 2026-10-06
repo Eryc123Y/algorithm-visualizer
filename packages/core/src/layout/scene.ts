@@ -66,8 +66,13 @@ export interface SceneNode {
   /** Centred inside the node. */
   readonly text: string;
   readonly fontSize: number;
-  /** Small annotation above the node, e.g. a distance. */
+  /** Small annotation outside the node, e.g. a distance. */
   readonly label?: string;
+  /**
+   * Where the label sits, in degrees clockwise from straight up (the
+   * default); layouts turn it away from edges.
+   */
+  readonly labelAngle?: number;
 }
 
 /**

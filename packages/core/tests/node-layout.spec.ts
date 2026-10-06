@@ -180,7 +180,10 @@ describe('graph layout', () => {
       ],
     });
     const loop = edges(l.sceneAt(1)).find((e) => e.key === 'g/edge/A-A')!;
-    // Up is kept for the note; left is furthest from the edge to B.
-    expect(loop.loopAngle).toBe(270);
+    // Up is kept for the note and right is taken by the edge to B, so the
+    // next preference, down, wins; the note then stays up.
+    expect(loop.loopAngle).toBe(180);
+    const a = l.sceneAt(1).items.find((i) => i.key === 'g/element/A');
+    expect(a?.type === 'node' && a.labelAngle).toBeFalsy();
   });
 });

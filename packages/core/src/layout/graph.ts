@@ -406,7 +406,14 @@ export function layoutGraph({
       raw.map((p) => p.y),
     ) * scale.y;
   // Self-loops may point any way; notes sit above nodes.
-  const pad = metrics.hasLoops ? SELF_LOOP_HEIGHT : metrics.hasWeights ? 12 : 4;
+  // Room around the nodes for self-loops, notes beside nodes and weights.
+  const pad = metrics.hasLoops
+    ? SELF_LOOP_HEIGHT
+    : metrics.hasNotes
+      ? 30
+      : metrics.hasWeights
+        ? 12
+        : 4;
   const above = Math.max(pad, metrics.hasNotes ? NOTE_HEIGHT : 0);
   const left = origin.x + pointerWidth + halfWidth + pad;
   const top = origin.y + titleRowHeight(o) + above + radius;
@@ -439,11 +446,15 @@ export function layoutGraph({
     if (e.from !== e.to)
       pairs.set(pairKey(e), [...(pairs.get(pairKey(e)) ?? []), e.id]);
 
-  // A self-loop points where no other edge of its node (in any frame)
-  // leaves; never up when there are notes, nor left when there are pointers.
-  const loopAngle = (id: string): number => {
+  // Self-loops and notes point where no other edge of their node, in any
+  // frame, leaves: so they stay put. Notes prefer up, loops any side; left
+  // is kept for pointer badges.
+  const awayCache = new Map<string, number[]>();
+  const away = (id: string): number[] => {
+    const cached = awayCache.get(id);
+    if (cached) return cached;
     const c = centre(id);
-    const away = metrics.links.flatMap(([from, to]) => {
+    const angles = metrics.links.flatMap(([from, to]) => {
       if (from === to || (from !== id && to !== id)) return [];
       const bends = arrangement.bends?.get(linkKey(from, to));
       const next =
@@ -452,23 +463,39 @@ export function layoutGraph({
           : toPixel(from === id ? bends[0]! : bends.at(-1)!);
       return [(Math.atan2(next.x - c.x, c.y - next.y) * 180) / Math.PI];
     });
-    const gap = (angle: number) =>
-      Math.min(
-        360,
-        ...away.map((d) => {
-          const diff = Math.abs(((angle - d) % 360) + 360) % 360;
-          return Math.min(diff, 360 - diff);
-        }),
-      );
-    const candidates = [0, 90, 180, 270, 45, 315, 135, 225].filter(
-      (angle) =>
-        !(angle === 0 && metrics.hasNotes) &&
-        !(angle === 270 && metrics.pointerRows > 0),
-    );
-    return candidates.reduce((best, angle) =>
-      gap(angle) > gap(best) + 1e-9 ? angle : best,
-    );
+    awayCache.set(id, angles);
+    return angles;
   };
+  const gap = (angle: number, taken: readonly number[]) =>
+    Math.min(
+      360,
+      ...taken.map((d) => {
+        const diff = Math.abs(((angle - d) % 360) + 360) % 360;
+        return Math.min(diff, 360 - diff);
+      }),
+    );
+  const freest = (candidates: readonly number[], taken: readonly number[]) =>
+    candidates.find((angle) => gap(angle, taken) >= 40) ??
+    candidates.reduce((best, angle) =>
+      gap(angle, taken) > gap(best, taken) + 1e-9 ? angle : best,
+    );
+  const hasLoop = new Set(
+    metrics.links.filter(([from, to]) => from === to).map(([id]) => id),
+  );
+  const sides = (angles: number[]) =>
+    angles.filter((angle) => !(angle === 270 && metrics.pointerRows > 0));
+  const loopAngle = (id: string): number =>
+    freest(
+      sides([0, 90, 180, 270, 45, 315, 135, 225]).filter(
+        (angle) => !(angle === 0 && metrics.hasNotes),
+      ),
+      away(id),
+    );
+  const labelAngle = (id: string): number =>
+    freest(sides([0, 45, 315, 90, 270, 135, 225, 180]), [
+      ...away(id),
+      ...(hasLoop.has(id) ? [loopAngle(id)] : []),
+    ]);
 
   for (const e of state.data.edges) {
     const key = `${name}/edge/${e.id}`;
@@ -565,6 +592,9 @@ export function layoutGraph({
       text: formatScalar(node.value),
       fontSize: shape.fontSize,
       ...(note === undefined ? {} : { label: note }),
+      ...(note === undefined || labelAngle(node.id) === 0
+        ? {}
+        : { labelAngle: labelAngle(node.id) }),
     });
   }
   for (const [id, names] of groupPointers(Object.entries(pointers)))

@@ -38,11 +38,15 @@ function extent(item: SceneItem): [number, number, number, number] {
       return [item.x, item.y, item.x + item.width, item.y + item.height];
     case 'node': {
       const half = Math.max(item.radius, (item.width ?? 0) / 2);
+      // A label takes up to 18 units above, or 30 beside or below when
+      // turned.
+      const label = item.label === undefined ? 0 : 18;
+      const turned = (item.labelAngle ?? 0) === 0 ? 0 : 30;
       return [
-        item.x - half,
-        item.y - item.radius - (item.label === undefined ? 0 : 18),
-        item.x + half,
-        item.y + item.radius,
+        item.x - half - turned,
+        item.y - item.radius - label,
+        item.x + half + turned,
+        item.y + item.radius + turned,
       ];
     }
     case 'badge':

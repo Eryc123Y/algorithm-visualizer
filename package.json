@@ -52,6 +52,7 @@
     "packages/spec",
     "packages/core",
     "packages/svg",
+    "packages/recipes",
     "packages/elements",
     "apps/playground"
   ]

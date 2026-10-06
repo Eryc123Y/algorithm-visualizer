@@ -41,7 +41,15 @@ const sections = documents.map(([name, doc]) => {
     return `<section><h2>${escape(name)}</h2><pre>${escape(formatErrors(result.error))}</pre></section>`;
   const trace = result.value;
   const layout = layoutTrace(trace);
-  const frames = Array.from({ length: trace.length + 1 }, (_, i) => i);
+  // Long traces are sampled evenly, always keeping the first and last frame.
+  const count = Math.min(trace.length + 1, 10);
+  const frames = [
+    ...new Set(
+      Array.from({ length: count }, (_, k) =>
+        Math.round((k * trace.length) / Math.max(1, count - 1)),
+      ),
+    ),
+  ];
   const figure = (i: number, theme: ThemeName) =>
     `<figure class="${theme}">${renderSvg(layout.sceneAt(i), { theme })}<figcaption>${i}${
       trace.frame(i).step?.meta?.narration

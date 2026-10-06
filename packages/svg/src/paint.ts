@@ -223,13 +223,23 @@ function paintNode(n: SceneNode, t: SvgTheme): SvgNode {
     },
     text: n.text,
   });
-  if (n.label !== undefined)
+  if (n.label !== undefined) {
+    // Centred just outside the outline in the direction of labelAngle.
+    const fontSize = Math.max(10, n.fontSize * 0.7);
+    const rad = ((n.labelAngle ?? 0) * Math.PI) / 180;
+    const [dx, dy] = [Math.sin(rad), -Math.cos(rad)];
+    const textHalfWidth = ([...n.label].length * fontSize * 0.6) / 2;
+    const reach =
+      Math.abs(dx) * (halfWidth + textHalfWidth) +
+      Math.abs(dy) * (n.radius + fontSize / 2) +
+      4;
     children.push({
       tag: 'text',
       attrs: {
-        y: num(-n.radius - 6),
+        ...(dx === 0 ? {} : { x: num(dx * reach) }),
+        y: num(dy * reach + baselineOffset(fontSize)),
         'text-anchor': 'middle',
-        'font-size': num(Math.max(10, n.fontSize * 0.7)),
+        'font-size': num(fontSize),
         'font-weight': '600',
         fill: t.index,
         stroke: t.labelHalo,
@@ -238,6 +248,7 @@ function paintNode(n: SceneNode, t: SvgTheme): SvgNode {
       },
       text: n.label,
     });
+  }
   return { tag: 'g', attrs: {}, children };
 }
 

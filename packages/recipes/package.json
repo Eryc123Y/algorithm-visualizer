@@ -1,0 +1,27 @@
+{
+  "name": "@algoviz/recipes",
+  "version": "0.0.0",
+  "private": true,
+  "description": "A typed recorder for algoviz traces, and ready-made visualizations of classic algorithms and data structures.",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "@algoviz/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc --build tsconfig.lib.json"
+  },
+  "dependencies": {
+    "@algoviz/spec": "*"
+  },
+  "devDependencies": {
+    "@algoviz/core": "*"
+  }
+}
