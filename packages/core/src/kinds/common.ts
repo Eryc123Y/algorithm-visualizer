@@ -85,3 +85,37 @@ export const without = <V>(
   key: string,
 ): Record<string, V> =>
   Object.fromEntries(Object.entries(record).filter(([k]) => k !== key));
+
+/**
+ * Where an element at position `k` is after a structure changes shape, or
+ * undefined if it was removed. Marks that name positions for one step
+ * (highlight, compare, swap) use it to stay on the elements they marked.
+ */
+export type Reindex = (k: number) => number | undefined;
+
+export const afterInsert =
+  (at: number): Reindex =>
+  (k) =>
+    k >= at ? k + 1 : k;
+
+export const afterRemove =
+  (at: number): Reindex =>
+  (k) =>
+    k === at ? undefined : k > at ? k - 1 : k;
+
+/** Moves positions with their elements, dropping those that are gone. */
+export const reindex = (positions: readonly number[], f: Reindex): number[] =>
+  positions.flatMap((k) => {
+    const moved = f(k);
+    return moved === undefined ? [] : [moved];
+  });
+
+/** Moves a pair of positions, or drops it if either element is gone. */
+export function reindexPair(
+  pair: readonly [number, number] | null,
+  f: Reindex,
+): [number, number] | null {
+  if (pair === null) return null;
+  const [a, b] = [f(pair[0]), f(pair[1])];
+  return a === undefined || b === undefined ? null : [a, b];
+}

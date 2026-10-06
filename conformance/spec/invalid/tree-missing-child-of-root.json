@@ -1,0 +1,19 @@
+{
+  "description": "A root whose child does not exist is reported, not followed.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "t": {
+        "kind": "tree",
+        "nodes": [{ "id": "a", "value": 1, "children": ["ghost"] }]
+      }
+    },
+    "steps": []
+  },
+  "expectedErrors": [
+    {
+      "code": "INVALID_STRUCTURE",
+      "path": "$.structures.t.nodes[0].children[0]"
+    }
+  ]
+}

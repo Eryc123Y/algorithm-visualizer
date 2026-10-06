@@ -100,7 +100,7 @@ export type GraphDeclInput = z.infer<typeof GraphDeclInput>;
 
 const normalizeNode = (input: NodeInput): GraphNode =>
   typeof input === 'object'
-    ? { ...input, value: input.value ?? input.id }
+    ? { ...input, value: input.value === undefined ? input.id : input.value }
     : { id: String(input), value: input };
 
 const normalizeEdge = (input: EdgeInput): GraphEdge => {

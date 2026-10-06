@@ -792,6 +792,33 @@
                   ],
                   "description": "A displayable value: number, string, boolean or null."
                 }
+              },
+              "cells": {
+                "description": "The canonical form of `initial`: every row, all of one length. Accepted so that parsed documents can be read again.",
+                "maxItems": 100,
+                "type": "array",
+                "items": {
+                  "maxItems": 100,
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "string",
+                        "maxLength": 2000
+                      },
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "description": "A displayable value: number, string, boolean or null."
+                  }
+                }
               }
             },
             "required": [
@@ -880,6 +907,50 @@
                       }
                     ],
                     "description": "An element `{ \"id\", \"value\" }`, or a bare value to get a generated id."
+                  }
+                }
+              },
+              "buckets": {
+                "description": "The canonical form: every bucket with explicit elements. Accepted so that parsed documents can be read again.",
+                "minItems": 1,
+                "maxItems": 100,
+                "type": "array",
+                "items": {
+                  "maxItems": 1000,
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                        "description": "Identifier of an element, unique within its structure and stable for the whole trace."
+                      },
+                      "value": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "string",
+                            "maxLength": 2000
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "description": "A displayable value: number, string, boolean or null."
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "value"
+                    ],
+                    "additionalProperties": false,
+                    "description": "An element with an explicit id."
                   }
                 }
               }

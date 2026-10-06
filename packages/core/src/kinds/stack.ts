@@ -12,7 +12,13 @@ import {
 
 import type { ReduceError } from '../errors.ts';
 import type { StructureKind, StructureState } from '../kind.ts';
-import { checkCapacity, checkRange, emptyError } from './common.ts';
+import {
+  afterRemove,
+  checkCapacity,
+  checkRange,
+  emptyError,
+  reindex,
+} from './common.ts';
 
 export interface StackMarks {
   /** Positions highlighted in the current step. */
@@ -34,7 +40,10 @@ function reduceStack(
     }
     case 'pop':
       if (n === 0) return err(emptyError('stack', 'pop'));
-      return ok({ data: s.data.slice(0, -1), marks: s.marks });
+      return ok({
+        data: s.data.slice(0, -1),
+        marks: { highlight: reindex(s.marks.highlight, afterRemove(n - 1)) },
+      });
     case 'peek':
       if (n === 0) return err(emptyError('stack', 'peek'));
       return ok({ data: s.data, marks: { highlight: [n - 1] } });

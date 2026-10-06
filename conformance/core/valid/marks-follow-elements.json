@@ -1,0 +1,195 @@
+{
+  "description": "Marks for one step (highlight, compare, peek) stay on the elements they marked when earlier elements are inserted or removed in the same step, and are dropped with their element.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "a": {
+        "kind": "array",
+        "initial": [10, 20, 30, 40]
+      },
+      "q": {
+        "kind": "queue",
+        "initial": [1, 2, 3]
+      },
+      "s": {
+        "kind": "stack",
+        "initial": [1, 2]
+      },
+      "l": {
+        "kind": "linkedList",
+        "initial": [1, 2, 3]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "a",
+            "type": "highlight",
+            "indices": [2, 3]
+          },
+          {
+            "target": "a",
+            "type": "compare",
+            "i": 0,
+            "j": 3
+          },
+          {
+            "target": "a",
+            "type": "remove",
+            "index": 0
+          },
+          {
+            "target": "a",
+            "type": "insert",
+            "index": 0,
+            "element": {
+              "id": "n",
+              "value": 5
+            }
+          },
+          {
+            "target": "q",
+            "type": "peek",
+            "end": "back"
+          },
+          {
+            "target": "q",
+            "type": "dequeue"
+          },
+          {
+            "target": "s",
+            "type": "highlight",
+            "indices": [0, 1]
+          },
+          {
+            "target": "s",
+            "type": "pop"
+          },
+          {
+            "target": "l",
+            "type": "highlight",
+            "indices": [0, 2]
+          },
+          {
+            "target": "l",
+            "type": "insert",
+            "index": 1,
+            "element": {
+              "id": "m",
+              "value": 9
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "expectedLength": 1,
+  "expectedFrames": [
+    {
+      "index": 1,
+      "state": {
+        "a": {
+          "kind": "array",
+          "state": {
+            "data": [
+              {
+                "id": "n",
+                "value": 5
+              },
+              {
+                "id": "e1",
+                "value": 20
+              },
+              {
+                "id": "e2",
+                "value": 30
+              },
+              {
+                "id": "e3",
+                "value": 40
+              }
+            ],
+            "marks": {
+              "compare": null,
+              "swapped": null,
+              "highlight": [2, 3],
+              "pointers": {},
+              "settled": []
+            }
+          }
+        },
+        "q": {
+          "kind": "queue",
+          "state": {
+            "data": [
+              {
+                "id": "e1",
+                "value": 2
+              },
+              {
+                "id": "e2",
+                "value": 3
+              }
+            ],
+            "marks": {
+              "highlight": [1]
+            }
+          }
+        },
+        "s": {
+          "kind": "stack",
+          "state": {
+            "data": [
+              {
+                "id": "e0",
+                "value": 1
+              }
+            ],
+            "marks": {
+              "highlight": [0]
+            }
+          }
+        },
+        "l": {
+          "kind": "linkedList",
+          "state": {
+            "data": [
+              {
+                "id": "e0",
+                "value": 1,
+                "next": "e1",
+                "prev": null
+              },
+              {
+                "id": "m",
+                "value": 9,
+                "next": null,
+                "prev": null
+              },
+              {
+                "id": "e1",
+                "value": 2,
+                "next": "e2",
+                "prev": null
+              },
+              {
+                "id": "e2",
+                "value": 3,
+                "next": null,
+                "prev": null
+              }
+            ],
+            "doubly": false,
+            "marks": {
+              "highlight": [0, 3],
+              "visited": [],
+              "settled": [],
+              "pointers": {}
+            }
+          }
+        }
+      }
+    }
+  ]
+}

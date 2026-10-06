@@ -14,7 +14,14 @@ import {
 } from '@algoviz/spec';
 
 import type { ReduceError } from '../errors.ts';
-import { checkRange as checkLimit } from './common.ts';
+import {
+  afterInsert,
+  afterRemove,
+  checkRange as checkLimit,
+  reindex,
+  reindexPair,
+  type Reindex,
+} from './common.ts';
 import type { StructureKind, StructureState } from '../kind.ts';
 
 export interface ArrayMarks {
@@ -45,6 +52,21 @@ const withData = (s: ArrayState, data: readonly ArrayElement[]): Reduced =>
 
 const withMarks = (s: ArrayState, marks: Partial<ArrayMarks>): Reduced =>
   ok({ data: s.data, marks: { ...s.marks, ...marks } });
+
+/**
+ * Marks after a change of shape: this step's marks follow their elements;
+ * pointers are positions, like the variables they show, so they stay but
+ * never point past one beyond the new end.
+ */
+const moveMarks = (m: ArrayMarks, f: Reindex, length: number): ArrayMarks => ({
+  ...m,
+  compare: reindexPair(m.compare, f),
+  swapped: reindexPair(m.swapped, f),
+  highlight: reindex(m.highlight, f),
+  pointers: Object.fromEntries(
+    Object.entries(m.pointers).map(([name, k]) => [name, Math.min(k, length)]),
+  ),
+});
 
 function reduceArray(s: ArrayState, a: ArrayAction): Reduced {
   const n = s.data.length;
@@ -89,11 +111,14 @@ function reduceArray(s: ArrayState, a: ArrayAction): Reduced {
           hint: 'Give the inserted element a new id.',
         });
       }
-      return withData(s, [
-        ...s.data.slice(0, a.index),
-        a.element,
-        ...s.data.slice(a.index),
-      ]);
+      return ok({
+        data: [
+          ...s.data.slice(0, a.index),
+          a.element,
+          ...s.data.slice(a.index),
+        ],
+        marks: moveMarks(s.marks, afterInsert(a.index), n + 1),
+      });
     }
     case 'remove': {
       const bad = checkRange(s, n, [['index'], a.index]);
@@ -102,7 +127,7 @@ function reduceArray(s: ArrayState, a: ArrayAction): Reduced {
       return ok({
         data: s.data.filter((_, k) => k !== a.index),
         marks: {
-          ...s.marks,
+          ...moveMarks(s.marks, afterRemove(a.index), n - 1),
           settled: s.marks.settled.filter((id) => id !== removed),
         },
       });

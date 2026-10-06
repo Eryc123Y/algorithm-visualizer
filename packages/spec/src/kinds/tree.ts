@@ -221,7 +221,8 @@ export function validateTreeDecl(decl: TreeDecl): DeclIssue[] {
     if (seen.has(id)) continue;
     seen.add(id);
     for (const child of decl.nodes[index.get(id)!]!.children ?? [])
-      if (child !== null) stack.push(child);
+      // Missing children are reported above.
+      if (child !== null && index.has(child)) stack.push(child);
   }
   decl.nodes.forEach((node, k) => {
     if (!seen.has(node.id))

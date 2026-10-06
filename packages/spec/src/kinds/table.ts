@@ -56,6 +56,13 @@ export const TableDeclInput = z
     columnLabels: Labels.optional().describe(
       'Shown above the columns; column numbers by default.',
     ),
+    cells: Grid.optional().describe(
+      'The canonical form of `initial`: every row, all of one length. Accepted so that parsed documents can be read again.',
+    ),
+  })
+  .refine((d) => d.cells === undefined || d.initial === undefined, {
+    message: 'Give either `initial` or `cells`, not both',
+    path: ['cells'],
   })
   .describe(
     'Give `rows` and `columns` for an empty table, `initial` for one with values, or both to pad `initial`.',
@@ -63,7 +70,8 @@ export const TableDeclInput = z
 export type TableDeclInput = z.infer<typeof TableDeclInput>;
 
 function normalizeTableDecl(input: TableDeclInput): TableDecl {
-  const { rows, columns, initial = [], ...rest } = input;
+  const { rows, columns, cells: given, ...others } = input;
+  const { initial = given ?? [], ...rest } = others;
   const height = Math.max(rows ?? 0, initial.length);
   const width = Math.max(columns ?? 0, ...initial.map((row) => row.length));
   const cells = Array.from({ length: height }, (_, r) =>
