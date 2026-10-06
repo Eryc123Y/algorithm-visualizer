@@ -2,7 +2,7 @@
  * Renders every frame of every valid conformance fixture (or the documents
  * given as arguments) to one HTML contact sheet, for visual review.
  *
- *   npm run gallery [-- out.html [document.json …]]
+ *   npm run gallery [-- out.html [document-or-fixture.json …]]
  */
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 
@@ -15,7 +15,11 @@ const root = new URL('../conformance/', import.meta.url);
 
 const documents: [string, unknown][] =
   files.length > 0
-    ? files.map((f) => [f, JSON.parse(readFileSync(f, 'utf8')) as unknown])
+    ? files.map((f) => {
+        // Accept conformance fixtures as well as bare documents.
+        const json = JSON.parse(readFileSync(f, 'utf8')) as { input?: unknown };
+        return [f, json.input ?? json];
+      })
     : ['core/valid', 'spec/valid'].flatMap((dir) =>
         readdirSync(new URL(`${dir}/`, root))
           .filter((f) => f.endsWith('.json'))

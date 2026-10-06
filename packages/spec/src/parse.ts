@@ -23,6 +23,7 @@ import {
 import {
   kinds,
   type ActionContext,
+  type DeclIssue,
   type IdRef,
   type KindTypeMap,
   type StructureKindName,
@@ -63,6 +64,13 @@ export function parseVisualization(
         errors.push(duplicateId(id, name, ['structures', name, ...path]));
       ids.add(id);
     }
+    for (const issue of validateDecl(decl))
+      errors.push({
+        code: 'INVALID_STRUCTURE',
+        path: formatPath(['structures', name, ...issue.path]),
+        message: issue.message,
+        ...(issue.hint === undefined ? {} : { hint: issue.hint }),
+      });
     usedIds.set(name, ids);
   }
 
@@ -182,6 +190,16 @@ function introducedIdsOf<K extends StructureKindName>(
 
 const normalizeDecl = (input: StructureDeclInput): StructureDecl =>
   normalizeDeclOf(input.kind, input);
+
+function validateDeclOf<K extends StructureKindName>(
+  kind: K,
+  decl: KindTypeMap[K]['decl'],
+): readonly DeclIssue[] {
+  return kinds[kind].validateDecl?.(decl) ?? [];
+}
+
+const validateDecl = (decl: StructureDecl): readonly DeclIssue[] =>
+  validateDeclOf(decl.kind, decl);
 
 const declIds = (decl: StructureDecl): readonly IdRef[] =>
   declIdsOf(decl.kind, decl);

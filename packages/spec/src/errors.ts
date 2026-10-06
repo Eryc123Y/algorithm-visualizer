@@ -19,6 +19,8 @@ export type ProtocolErrorCode =
   | 'INVALID_ACTION'
   /** Two elements of one structure share an id. */
   | 'DUPLICATE_ID'
+  /** A declaration breaks a structural rule, e.g. a tree with a cycle. */
+  | 'INVALID_STRUCTURE'
   /** A step's `meta.line` is not a line of the document's source code. */
   | 'LINE_OUT_OF_RANGE';
 

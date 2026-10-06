@@ -7,18 +7,21 @@ import type { KindSpec, KindTypes } from './kind.ts';
 import { linkedListSpec } from './linked-list.ts';
 import { queueSpec } from './queue.ts';
 import { stackSpec } from './stack.ts';
+import { treeSpec } from './tree.ts';
 
 export * from './array.ts';
 export * from './kind.ts';
 export * from './linked-list.ts';
 export * from './queue.ts';
 export * from './stack.ts';
+export * from './tree.ts';
 
 const registry = {
   array: arraySpec,
   stack: stackSpec,
   queue: queueSpec,
   linkedList: linkedListSpec,
+  tree: treeSpec,
 };
 
 export type StructureKindName = keyof typeof registry;

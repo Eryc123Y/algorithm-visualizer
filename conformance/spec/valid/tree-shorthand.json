@@ -1,0 +1,108 @@
+{
+  "description": "Trees from LeetCode-style level order, roots inferred from parentless nodes, and addNode with a bare value and a side.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "t": {
+        "kind": "tree",
+        "levelOrder": [3, 9, 20, null, null, 15, 7]
+      },
+      "n": {
+        "kind": "tree",
+        "nodes": [
+          {
+            "id": "r",
+            "value": "root",
+            "children": ["x"]
+          },
+          {
+            "id": "x",
+            "value": "x"
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "t",
+            "type": "addNode",
+            "node": 1,
+            "parent": "e1",
+            "slot": "left"
+          }
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "version": "0.1",
+    "structures": {
+      "t": {
+        "kind": "tree",
+        "binary": true,
+        "nodes": [
+          {
+            "id": "e0",
+            "value": 3,
+            "children": ["e1", "e2"]
+          },
+          {
+            "id": "e1",
+            "value": 9,
+            "children": [null, null]
+          },
+          {
+            "id": "e2",
+            "value": 20,
+            "children": ["e3", "e4"]
+          },
+          {
+            "id": "e3",
+            "value": 15,
+            "children": [null, null]
+          },
+          {
+            "id": "e4",
+            "value": 7,
+            "children": [null, null]
+          }
+        ],
+        "roots": ["e0"]
+      },
+      "n": {
+        "kind": "tree",
+        "binary": false,
+        "nodes": [
+          {
+            "id": "r",
+            "value": "root",
+            "children": ["x"]
+          },
+          {
+            "id": "x",
+            "value": "x"
+          }
+        ],
+        "roots": ["r"]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "t",
+            "type": "addNode",
+            "node": {
+              "id": "e5",
+              "value": 1
+            },
+            "parent": "e1",
+            "slot": 0
+          }
+        ]
+      }
+    ]
+  }
+}

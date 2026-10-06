@@ -19,10 +19,13 @@ import { defaultLayoutOptions, type LayoutOptions } from './options.ts';
 import type { Scene, SceneItem } from './scene.ts';
 
 export * from './array.ts';
+export * from './array-heap.ts';
 export * from './common.ts';
 export * from './linked-list.ts';
 export * from './queue.ts';
 export * from './stack.ts';
+export * from './tree.ts';
+export * from './node-tree.ts';
 export * from './options.ts';
 export * from './scene.ts';
 

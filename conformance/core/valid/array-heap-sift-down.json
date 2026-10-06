@@ -1,0 +1,247 @@
+{
+  "description": "Sifting down in an array drawn as a heap: the view changes only the layout, never the state.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "h": {
+        "kind": "array",
+        "view": "tree",
+        "initial": [1, 9, 8, 7, 3]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "h",
+            "type": "compare",
+            "i": 1,
+            "j": 2
+          },
+          {
+            "target": "h",
+            "type": "pointer",
+            "name": "i",
+            "index": 0
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "h",
+            "type": "swap",
+            "i": 0,
+            "j": 1
+          },
+          {
+            "target": "h",
+            "type": "pointer",
+            "name": "i",
+            "index": 1
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "h",
+            "type": "swap",
+            "i": 1,
+            "j": 3
+          },
+          {
+            "target": "h",
+            "type": "pointer",
+            "name": "i",
+            "index": 3
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "h",
+            "type": "remove",
+            "index": 4
+          },
+          {
+            "target": "h",
+            "type": "pointer",
+            "name": "n",
+            "index": 4
+          },
+          {
+            "target": "h",
+            "type": "settle",
+            "index": 0
+          }
+        ]
+      }
+    ]
+  },
+  "expectedLength": 4,
+  "expectedFrames": [
+    {
+      "index": 1,
+      "state": {
+        "h": {
+          "kind": "array",
+          "state": {
+            "data": [
+              {
+                "id": "e0",
+                "value": 1
+              },
+              {
+                "id": "e1",
+                "value": 9
+              },
+              {
+                "id": "e2",
+                "value": 8
+              },
+              {
+                "id": "e3",
+                "value": 7
+              },
+              {
+                "id": "e4",
+                "value": 3
+              }
+            ],
+            "marks": {
+              "compare": [1, 2],
+              "swapped": null,
+              "highlight": [],
+              "pointers": {
+                "i": 0
+              },
+              "settled": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 2,
+      "state": {
+        "h": {
+          "kind": "array",
+          "state": {
+            "data": [
+              {
+                "id": "e1",
+                "value": 9
+              },
+              {
+                "id": "e0",
+                "value": 1
+              },
+              {
+                "id": "e2",
+                "value": 8
+              },
+              {
+                "id": "e3",
+                "value": 7
+              },
+              {
+                "id": "e4",
+                "value": 3
+              }
+            ],
+            "marks": {
+              "compare": null,
+              "swapped": [0, 1],
+              "highlight": [],
+              "pointers": {
+                "i": 1
+              },
+              "settled": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 3,
+      "state": {
+        "h": {
+          "kind": "array",
+          "state": {
+            "data": [
+              {
+                "id": "e1",
+                "value": 9
+              },
+              {
+                "id": "e3",
+                "value": 7
+              },
+              {
+                "id": "e2",
+                "value": 8
+              },
+              {
+                "id": "e0",
+                "value": 1
+              },
+              {
+                "id": "e4",
+                "value": 3
+              }
+            ],
+            "marks": {
+              "compare": null,
+              "swapped": [1, 3],
+              "highlight": [],
+              "pointers": {
+                "i": 3
+              },
+              "settled": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 4,
+      "state": {
+        "h": {
+          "kind": "array",
+          "state": {
+            "data": [
+              {
+                "id": "e1",
+                "value": 9
+              },
+              {
+                "id": "e3",
+                "value": 7
+              },
+              {
+                "id": "e2",
+                "value": 8
+              },
+              {
+                "id": "e0",
+                "value": 1
+              }
+            ],
+            "marks": {
+              "compare": null,
+              "swapped": null,
+              "highlight": [],
+              "pointers": {
+                "i": 3,
+                "n": 4
+              },
+              "settled": ["e1"]
+            }
+          }
+        }
+      }
+    }
+  ]
+}

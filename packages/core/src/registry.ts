@@ -9,6 +9,7 @@ import { arrayKind } from './kinds/array.ts';
 import { linkedListKind } from './kinds/linked-list.ts';
 import { queueKind } from './kinds/queue.ts';
 import { stackKind } from './kinds/stack.ts';
+import { treeKind } from './kinds/tree.ts';
 import {
   layoutArray,
   measureArray,
@@ -29,6 +30,7 @@ import {
   measureStack,
   mergeStackMetrics,
 } from './layout/stack.ts';
+import { layoutTree, measureTree, mergeTreeMetrics } from './layout/tree.ts';
 
 const registry = {
   array: {
@@ -54,6 +56,12 @@ const registry = {
     measure: measureLinkedList,
     mergeMetrics: mergeLinkedListMetrics,
     layout: layoutLinkedList,
+  },
+  tree: {
+    ...treeKind,
+    measure: measureTree,
+    mergeMetrics: mergeTreeMetrics,
+    layout: layoutTree,
   },
 } satisfies {
   // Fails to compile if the protocol has a kind without a runtime, or if a

@@ -16,6 +16,7 @@ export * from './array.ts';
 export * from './linked-list.ts';
 export * from './queue.ts';
 export * from './stack.ts';
+export * from './tree.ts';
 
 /** A structure's state tagged with its kind, so renderers can switch on it. */
 export type KindedState<K extends StructureKindName = StructureKindName> = {

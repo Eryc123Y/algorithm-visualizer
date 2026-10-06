@@ -130,7 +130,10 @@ export const PointerName = z
  * colour class in graph colouring. Painters map groups to distinct tones.
  * null removes the group.
  */
-export const Group = z.int().min(0).max(5).nullable();
+export const Group = z.literal([0, 1, 2, 3, 4, 5]).nullable();
+
+/** A group index 0–5. */
+export type GroupIndexValue = 0 | 1 | 2 | 3 | 4 | 5;
 
 /**
  * Custom issue parameter used to tag Zod issues with a protocol error code.

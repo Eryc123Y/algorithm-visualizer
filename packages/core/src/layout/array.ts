@@ -17,6 +17,7 @@ import type { ArrayDecl } from '@algoviz/spec';
 import type { Block, LayoutInput } from '../kind.ts';
 
 import type { ArrayState } from '../kinds/array.ts';
+import { layoutArrayHeap } from './array-heap.ts';
 import {
   badgeOverhang,
   cellWidthFor,
@@ -78,14 +79,11 @@ function roleOf(state: ArrayState, index: number, id: string): BoxRole {
   return 'default';
 }
 
-export function layoutArray({
-  name,
-  title,
-  state,
-  metrics,
-  origin,
-  options: o,
-}: LayoutInput<ArrayDecl, ArrayState, ArrayMetrics>): Block {
+export function layoutArray(
+  input: LayoutInput<ArrayDecl, ArrayState, ArrayMetrics>,
+): Block {
+  if (input.decl.view === 'tree') return layoutArrayHeap(input);
+  const { name, title, state, metrics, origin, options: o } = input;
   const cellWidth = cellWidthFor(metrics.maxChars, o);
   const pitch = cellWidth + o.cellGap;
   // Pointer badges are centred under cells and may be wider than a cell, so

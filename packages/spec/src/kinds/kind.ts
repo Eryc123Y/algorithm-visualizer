@@ -12,6 +12,13 @@ export interface IdRef {
   readonly path: readonly PropertyKey[];
 }
 
+/** A structural problem in a declaration. */
+export interface DeclIssue {
+  readonly path: readonly PropertyKey[];
+  readonly message: string;
+  readonly hint?: string;
+}
+
 /** Services the parser offers while normalising an action. */
 export interface ActionContext {
   /**
@@ -45,6 +52,11 @@ export interface KindSpec<T extends KindTypes> {
   normalizeDecl(input: T['declInput']): T['decl'];
   /** Ids present in a declaration; they must be unique within it. */
   declIds(decl: T['decl']): readonly IdRef[];
+  /**
+   * Structural rules a schema cannot express, e.g. that a tree has no
+   * cycles. Returns problems with paths relative to the declaration.
+   */
+  validateDecl?(decl: T['decl']): readonly DeclIssue[];
   /** Expands action shorthands, allocating ids where needed. */
   normalizeAction(input: T['actionInput'], ctx: ActionContext): T['action'];
   /** Ids an action introduces; they must not have been used before. */

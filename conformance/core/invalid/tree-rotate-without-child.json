@@ -1,0 +1,30 @@
+{
+  "description": "A left rotation needs a right child.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "t": {
+        "kind": "tree",
+        "levelOrder": [1, 2]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "t",
+            "type": "rotate",
+            "node": "e0",
+            "direction": "left"
+          }
+        ]
+      }
+    ]
+  },
+  "expectedErrors": [
+    {
+      "code": "INVALID_OPERATION",
+      "path": "$.steps[0].actions[0].node"
+    }
+  ]
+}
