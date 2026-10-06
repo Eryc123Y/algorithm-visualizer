@@ -1,0 +1,57 @@
+{
+  "description": "A node with two parents, and a cycle that no root reaches.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "t": {
+        "kind": "tree",
+        "nodes": [
+          {
+            "id": "a",
+            "value": 1,
+            "children": ["b"]
+          },
+          {
+            "id": "b",
+            "value": 2
+          },
+          {
+            "id": "c",
+            "value": 3,
+            "children": ["b"]
+          }
+        ]
+      },
+      "u": {
+        "kind": "tree",
+        "nodes": [
+          {
+            "id": "x",
+            "value": 1,
+            "children": ["y"]
+          },
+          {
+            "id": "y",
+            "value": 2,
+            "children": ["x"]
+          }
+        ]
+      }
+    },
+    "steps": []
+  },
+  "expectedErrors": [
+    {
+      "code": "INVALID_STRUCTURE",
+      "path": "$.structures.t.nodes[2].children[0]"
+    },
+    {
+      "code": "INVALID_STRUCTURE",
+      "path": "$.structures.u.nodes[0]"
+    },
+    {
+      "code": "INVALID_STRUCTURE",
+      "path": "$.structures.u.nodes[1]"
+    }
+  ]
+}

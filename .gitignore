@@ -42,9 +42,10 @@ pnpm-debug.log*
 .AppleDouble
 .LSOverride
 # Playwright
-/test-results/
-/playwright-report/
+test-results/
+playwright-report/
 /playwright/.cache/
 
 # TypeScript incremental build info
 *.tsbuildinfo
+gallery.html

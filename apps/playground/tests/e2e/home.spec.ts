@@ -56,3 +56,16 @@ test('switches the main player into display mode', async ({ page }) => {
   await expect(player.locator('.code')).toHaveCount(0);
   await expect(player).not.toHaveAttribute('frame', '0', { timeout: 5000 });
 });
+
+test('loads an example into the editor and the player', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTestId('example').selectOption('Dijkstra');
+  await expect(page.getByTestId('editor')).toHaveValue(/"kind": "graph"/);
+  const player = page.getByTestId('player');
+  await expect(player.locator('[data-key="g/element/A"]')).toHaveCount(1);
+  await player.focus();
+  await page.keyboard.press('End');
+  await expect(player.locator('.narration')).toContainText(
+    'shortest-path tree',
+  );
+});

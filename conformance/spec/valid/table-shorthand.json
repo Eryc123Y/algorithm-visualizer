@@ -1,0 +1,29 @@
+{
+  "description": "A table from ragged initial rows, padded to the given size with empty (null) cells.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "m": {
+        "kind": "table",
+        "columns": 3,
+        "rows": 3,
+        "initial": [[0, 1], [1]]
+      }
+    },
+    "steps": []
+  },
+  "expected": {
+    "version": "0.1",
+    "structures": {
+      "m": {
+        "kind": "table",
+        "cells": [
+          [0, 1, null],
+          [1, null, null],
+          [null, null, null]
+        ]
+      }
+    },
+    "steps": []
+  }
+}

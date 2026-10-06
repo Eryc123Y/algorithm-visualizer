@@ -10,6 +10,9 @@ export const PROTOCOL_VERSION = '0.1';
 export const LIMITS = {
   structures: 16,
   elementsPerStructure: 1_000,
+  edgesPerStructure: 4_000,
+  tableRows: 100,
+  tableColumns: 100,
   steps: 10_000,
   actionsPerStep: 100,
   textLength: 2_000,
@@ -94,6 +97,43 @@ export const Source = z
     "Source code of the algorithm. When present, each step's `meta.line` must be a line of this code.",
   );
 export type Source = z.infer<typeof Source>;
+
+/** An element with an explicit id: a cell, a stack entry, a list node, … */
+export const Element = z
+  .strictObject({ id: ElementId, value: Scalar })
+  .describe('An element with an explicit id.');
+export type Element = z.infer<typeof Element>;
+
+/**
+ * Authoring form of an element: either explicit, or a bare value that the
+ * parser gives a generated id.
+ */
+export const ElementInput = z
+  .union([Element, Scalar])
+  .describe(
+    'An element `{ "id", "value" }`, or a bare value to get a generated id.',
+  );
+export type ElementInput = z.infer<typeof ElementInput>;
+
+export const isElement = (x: ElementInput): x is Element =>
+  typeof x === 'object' && x !== null;
+
+/** Name of a pointer or cursor, e.g. "i", "lo", "head". */
+export const PointerName = z
+  .string()
+  .regex(/^[A-Za-z_][A-Za-z0-9_]{0,15}$/)
+  .refine(isSafeKey, { message: `Pointer names ${RESERVED}` })
+  .describe('Pointer name, e.g. "i", "lo" or "head".');
+
+/**
+ * Categorical group of an element (0–5), e.g. a connected component or a
+ * colour class in graph colouring. Painters map groups to distinct tones.
+ * null removes the group.
+ */
+export const Group = z.literal([0, 1, 2, 3, 4, 5]).nullable();
+
+/** A group index 0–5. */
+export type GroupIndexValue = 0 | 1 | 2 | 3 | 4 | 5;
 
 /**
  * Custom issue parameter used to tag Zod issues with a protocol error code.

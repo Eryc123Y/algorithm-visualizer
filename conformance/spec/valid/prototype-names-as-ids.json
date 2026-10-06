@@ -1,0 +1,187 @@
+{
+  "description": "Ids may be names of Object.prototype properties; they must behave like any other id (no inherited values, no prototype changes).",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "t": {
+        "kind": "tree",
+        "nodes": [
+          {
+            "id": "constructor",
+            "value": 1,
+            "children": ["__proto__"]
+          },
+          {
+            "id": "__proto__",
+            "value": 2,
+            "children": ["toString"]
+          },
+          {
+            "id": "toString",
+            "value": 3
+          }
+        ]
+      },
+      "g": {
+        "kind": "graph",
+        "layout": "manual",
+        "nodes": [
+          {
+            "id": "constructor",
+            "x": 0,
+            "y": 0
+          },
+          {
+            "id": "__proto__",
+            "x": 80,
+            "y": 60
+          },
+          {
+            "id": "toString",
+            "x": 160,
+            "y": 0
+          },
+          {
+            "id": "hasOwnProperty",
+            "x": 240,
+            "y": 60
+          }
+        ],
+        "edges": [
+          ["constructor", "__proto__", 1],
+          ["__proto__", "toString"]
+        ]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "t",
+            "type": "annotate",
+            "node": "__proto__",
+            "text": "x"
+          },
+          {
+            "target": "g",
+            "type": "group",
+            "node": "constructor",
+            "group": 1
+          },
+          {
+            "target": "g",
+            "type": "markEdge",
+            "edge": "constructor-__proto__",
+            "mark": "selected"
+          },
+          {
+            "target": "g",
+            "type": "annotate",
+            "node": "hasOwnProperty",
+            "text": "0"
+          }
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "version": "0.1",
+    "structures": {
+      "t": {
+        "kind": "tree",
+        "binary": false,
+        "nodes": [
+          {
+            "id": "constructor",
+            "value": 1,
+            "children": ["__proto__"]
+          },
+          {
+            "id": "__proto__",
+            "value": 2,
+            "children": ["toString"]
+          },
+          {
+            "id": "toString",
+            "value": 3
+          }
+        ],
+        "roots": ["constructor"]
+      },
+      "g": {
+        "kind": "graph",
+        "directed": false,
+        "layout": "manual",
+        "nodes": [
+          {
+            "id": "constructor",
+            "value": "constructor",
+            "x": 0,
+            "y": 0
+          },
+          {
+            "id": "__proto__",
+            "value": "__proto__",
+            "x": 80,
+            "y": 60
+          },
+          {
+            "id": "toString",
+            "value": "toString",
+            "x": 160,
+            "y": 0
+          },
+          {
+            "id": "hasOwnProperty",
+            "value": "hasOwnProperty",
+            "x": 240,
+            "y": 60
+          }
+        ],
+        "edges": [
+          {
+            "id": "constructor-__proto__",
+            "from": "constructor",
+            "to": "__proto__",
+            "weight": 1
+          },
+          {
+            "id": "__proto__-toString",
+            "from": "__proto__",
+            "to": "toString"
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "t",
+            "type": "annotate",
+            "node": "__proto__",
+            "text": "x"
+          },
+          {
+            "target": "g",
+            "type": "group",
+            "node": "constructor",
+            "group": 1
+          },
+          {
+            "target": "g",
+            "type": "markEdge",
+            "edge": "constructor-__proto__",
+            "mark": "selected"
+          },
+          {
+            "target": "g",
+            "type": "annotate",
+            "node": "hasOwnProperty",
+            "text": "0"
+          }
+        ]
+      }
+    ]
+  }
+}

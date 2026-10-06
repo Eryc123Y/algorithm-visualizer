@@ -18,6 +18,9 @@ interface Entry {
   markup: string;
   x: number;
   y: number;
+  /** Degrees; accumulated so successive moves take the shortest turn. */
+  rotate: number | undefined;
+  scaleX: number | undefined;
   exiting: Animation | null;
 }
 
@@ -32,8 +35,19 @@ export interface RenderOptions {
   readonly motion?: 'arc' | 'linear';
 }
 
-const translate = (x: number, y: number) =>
-  `translate(${num(x)}px, ${num(y)}px)`;
+const transformOf = (
+  x: number,
+  y: number,
+  rotate: number | undefined,
+  scaleX: number | undefined,
+) =>
+  `translate(${num(x)}px, ${num(y)}px)` +
+  (rotate === undefined ? '' : ` rotate(${num(rotate)}deg)`) +
+  (scaleX === undefined ? '' : ` scale(${num(scaleX)}, 1)`);
+
+/** The angle equal to `target` (mod 360) that is closest to `from`. */
+const nearestAngle = (from: number, target: number) =>
+  from + ((((target - from) % 360) + 540) % 360) - 180;
 
 /** Height of the arc a moving cell follows, relative to its travel. */
 const ARC_RATIO = 0.35;
@@ -93,10 +107,23 @@ export class SceneStage {
       if (entry === undefined) {
         const el = svg.ownerDocument.createElementNS(SVG_NS, 'g');
         el.setAttribute('data-key', item.key);
-        entry = { el, markup: '', x: item.x, y: item.y, exiting: null };
+        entry = {
+          el,
+          markup: '',
+          x: item.x,
+          y: item.y,
+          rotate: item.rotate,
+          scaleX: item.scaleX,
+          exiting: null,
+        };
         this.#entries.set(item.key, entry);
         this.#root.append(el);
-        el.style.transform = translate(item.x, item.y);
+        el.style.transform = transformOf(
+          item.x,
+          item.y,
+          item.rotate,
+          item.scaleX,
+        );
         if (animate) fade(el, 0, 1, duration);
       } else if (entry.exiting !== null) {
         // Reappeared while fading out: keep the element.
@@ -110,9 +137,27 @@ export class SceneStage {
         entry.el.innerHTML = markup;
         entry.markup = markup;
       }
-      if (entry.x !== item.x || entry.y !== item.y) {
-        const arc = motion === 'arc' && item.attrs['data-role'] !== undefined;
-        moveTo(entry, item.x, item.y, animate ? duration : 0, arc);
+      const rotate =
+        item.rotate === undefined || entry.rotate === undefined
+          ? item.rotate
+          : nearestAngle(entry.rotate, item.rotate);
+      if (
+        entry.x !== item.x ||
+        entry.y !== item.y ||
+        entry.rotate !== rotate ||
+        entry.scaleX !== item.scaleX
+      ) {
+        // Lift only cells moving sideways within a row (e.g. a swap).
+        const arc =
+          motion === 'arc' &&
+          item.attrs['data-role'] !== undefined &&
+          entry.y === item.y;
+        moveTo(
+          entry,
+          { x: item.x, y: item.y, rotate, scaleX: item.scaleX },
+          animate ? duration : 0,
+          arc,
+        );
       }
     }
 
@@ -146,19 +191,27 @@ function fade(
   });
 }
 
+interface Placement {
+  readonly x: number;
+  readonly y: number;
+  readonly rotate: number | undefined;
+  readonly scaleX: number | undefined;
+}
+
 function moveTo(
   entry: Entry,
-  x: number,
-  y: number,
+  to: Placement,
   duration: number,
   arc: boolean,
 ): void {
-  const from = translate(entry.x, entry.y);
-  const to = translate(x, y);
-  const dx = x - entry.x;
-  entry.x = x;
-  entry.y = y;
-  entry.el.style.transform = to;
+  const from = transformOf(entry.x, entry.y, entry.rotate, entry.scaleX);
+  const target = transformOf(to.x, to.y, to.rotate, to.scaleX);
+  const dx = to.x - entry.x;
+  entry.x = to.x;
+  entry.y = to.y;
+  entry.rotate = to.rotate;
+  entry.scaleX = to.scaleX;
+  entry.el.style.transform = target;
   if (duration === 0 || typeof entry.el.animate !== 'function') return;
 
   const keyframes: Keyframe[] = [{ transform: from }];
@@ -166,9 +219,12 @@ function moveTo(
     // Rightward moves arc up, leftward moves arc down.
     const lift =
       Math.min(MAX_ARC, Math.abs(dx) * ARC_RATIO) * (dx > 0 ? -1 : 1);
-    keyframes.push({ transform: translate(x - dx / 2, y + lift), offset: 0.5 });
+    keyframes.push({
+      transform: transformOf(to.x - dx / 2, to.y + lift, to.rotate, to.scaleX),
+      offset: 0.5,
+    });
   }
-  keyframes.push({ transform: to });
+  keyframes.push({ transform: target });
   entry.el.animate(keyframes, {
     duration,
     easing: 'cubic-bezier(.45,.05,.25,1)',

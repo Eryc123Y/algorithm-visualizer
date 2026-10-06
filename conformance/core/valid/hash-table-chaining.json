@@ -1,0 +1,255 @@
+{
+  "description": "Separate chaining: inserting at the end or front of a chain, probing, finding, updating and removing.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "h": {
+        "kind": "hashTable",
+        "size": 3,
+        "initial": [[10], [], [5]]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "h",
+            "type": "highlight",
+            "bucket": 1
+          },
+          {
+            "target": "h",
+            "type": "insert",
+            "bucket": 1,
+            "element": 7
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "h",
+            "type": "insert",
+            "bucket": 0,
+            "element": 13,
+            "index": 0
+          },
+          {
+            "target": "h",
+            "type": "highlight",
+            "bucket": 0,
+            "indices": [1]
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "h",
+            "type": "settle",
+            "bucket": 0,
+            "index": 1
+          },
+          {
+            "target": "h",
+            "type": "set",
+            "bucket": 2,
+            "index": 0,
+            "value": 6
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "h",
+            "type": "remove",
+            "bucket": 0,
+            "index": 1
+          }
+        ]
+      }
+    ]
+  },
+  "expectedLength": 4,
+  "expectedFrames": [
+    {
+      "index": 0,
+      "state": {
+        "h": {
+          "kind": "hashTable",
+          "state": {
+            "data": [
+              [
+                {
+                  "id": "e0",
+                  "value": 10
+                }
+              ],
+              [],
+              [
+                {
+                  "id": "e1",
+                  "value": 5
+                }
+              ]
+            ],
+            "marks": {
+              "bucket": null,
+              "highlight": [],
+              "settled": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 1,
+      "state": {
+        "h": {
+          "kind": "hashTable",
+          "state": {
+            "data": [
+              [
+                {
+                  "id": "e0",
+                  "value": 10
+                }
+              ],
+              [
+                {
+                  "id": "e2",
+                  "value": 7
+                }
+              ],
+              [
+                {
+                  "id": "e1",
+                  "value": 5
+                }
+              ]
+            ],
+            "marks": {
+              "bucket": 1,
+              "highlight": [],
+              "settled": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 2,
+      "state": {
+        "h": {
+          "kind": "hashTable",
+          "state": {
+            "data": [
+              [
+                {
+                  "id": "e3",
+                  "value": 13
+                },
+                {
+                  "id": "e0",
+                  "value": 10
+                }
+              ],
+              [
+                {
+                  "id": "e2",
+                  "value": 7
+                }
+              ],
+              [
+                {
+                  "id": "e1",
+                  "value": 5
+                }
+              ]
+            ],
+            "marks": {
+              "bucket": 0,
+              "highlight": ["e0"],
+              "settled": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 3,
+      "state": {
+        "h": {
+          "kind": "hashTable",
+          "state": {
+            "data": [
+              [
+                {
+                  "id": "e3",
+                  "value": 13
+                },
+                {
+                  "id": "e0",
+                  "value": 10
+                }
+              ],
+              [
+                {
+                  "id": "e2",
+                  "value": 7
+                }
+              ],
+              [
+                {
+                  "id": "e1",
+                  "value": 6
+                }
+              ]
+            ],
+            "marks": {
+              "bucket": null,
+              "highlight": [],
+              "settled": ["e0"]
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 4,
+      "state": {
+        "h": {
+          "kind": "hashTable",
+          "state": {
+            "data": [
+              [
+                {
+                  "id": "e3",
+                  "value": 13
+                }
+              ],
+              [
+                {
+                  "id": "e2",
+                  "value": 7
+                }
+              ],
+              [
+                {
+                  "id": "e1",
+                  "value": 6
+                }
+              ]
+            ],
+            "marks": {
+              "bucket": null,
+              "highlight": [],
+              "settled": []
+            }
+          }
+        }
+      }
+    }
+  ]
+}

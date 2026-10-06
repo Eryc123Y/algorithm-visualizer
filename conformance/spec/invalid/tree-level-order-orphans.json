@@ -1,0 +1,27 @@
+{
+  "description": "Level-order values that no parent slot can take are rejected rather than dropped.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "t": {
+        "kind": "tree",
+        "levelOrder": [1, null, null, 2]
+      },
+      "u": {
+        "kind": "tree",
+        "levelOrder": [null, 1]
+      }
+    },
+    "steps": []
+  },
+  "expectedErrors": [
+    {
+      "code": "INVALID_SHAPE",
+      "path": "$.structures.t.levelOrder[3]"
+    },
+    {
+      "code": "INVALID_SHAPE",
+      "path": "$.structures.u.levelOrder[1]"
+    }
+  ]
+}

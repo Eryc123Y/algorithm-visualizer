@@ -1,0 +1,27 @@
+{
+  "description": "A generated id that collides with an explicit one is reported where the author wrote the element.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "h": {
+        "kind": "hashTable",
+        "initial": [
+          [
+            {
+              "id": "e0",
+              "value": 1
+            },
+            5
+          ]
+        ]
+      }
+    },
+    "steps": []
+  },
+  "expectedErrors": [
+    {
+      "code": "DUPLICATE_ID",
+      "path": "$.structures.h.initial[0][1].id"
+    }
+  ]
+}

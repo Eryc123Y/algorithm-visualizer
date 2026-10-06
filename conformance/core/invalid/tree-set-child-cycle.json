@@ -1,0 +1,31 @@
+{
+  "description": "Moving a node under its own descendant is an error.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "t": {
+        "kind": "tree",
+        "levelOrder": [1, 2]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "t",
+            "type": "setChild",
+            "parent": "e1",
+            "child": "e0",
+            "slot": "left"
+          }
+        ]
+      }
+    ]
+  },
+  "expectedErrors": [
+    {
+      "code": "INVALID_OPERATION",
+      "path": "$.steps[0].actions[0].child"
+    }
+  ]
+}

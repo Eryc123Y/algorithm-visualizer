@@ -1,0 +1,117 @@
+{
+  "description": "The longest allowed notes on a lone graph node and on tree nodes at the edges stay inside the scene.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "g": {
+        "kind": "graph",
+        "nodes": ["A"]
+      },
+      "t": {
+        "kind": "tree",
+        "levelOrder": [1, 2, 3]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "g",
+            "type": "annotate",
+            "node": "A",
+            "text": "a note of thirty-two characters!"
+          },
+          {
+            "target": "t",
+            "type": "annotate",
+            "node": "e1",
+            "text": "a note of thirty-two characters!"
+          },
+          {
+            "target": "t",
+            "type": "annotate",
+            "node": "e2",
+            "text": "a note of thirty-two characters!"
+          }
+        ]
+      }
+    ]
+  },
+  "expectedLength": 1,
+  "expectedFrames": [
+    {
+      "index": 1,
+      "state": {
+        "g": {
+          "kind": "graph",
+          "state": {
+            "data": {
+              "nodes": [
+                {
+                  "id": "A",
+                  "value": "A"
+                }
+              ],
+              "edges": []
+            },
+            "marks": {
+              "highlightNodes": [],
+              "highlightEdges": [],
+              "visited": [],
+              "settled": [],
+              "groups": {},
+              "pointers": {},
+              "notes": {
+                "A": "a note of thirty-two characters!"
+              },
+              "edgeMarks": {}
+            },
+            "directed": false,
+            "layout": "auto"
+          }
+        },
+        "t": {
+          "kind": "tree",
+          "state": {
+            "data": {
+              "nodes": [
+                {
+                  "id": "e0",
+                  "value": 1,
+                  "children": ["e1", "e2"],
+                  "color": null
+                },
+                {
+                  "id": "e1",
+                  "value": 2,
+                  "children": [null, null],
+                  "color": null
+                },
+                {
+                  "id": "e2",
+                  "value": 3,
+                  "children": [null, null],
+                  "color": null
+                }
+              ],
+              "roots": ["e0"]
+            },
+            "marks": {
+              "highlight": [],
+              "compare": null,
+              "visited": [],
+              "settled": [],
+              "groups": {},
+              "pointers": {},
+              "notes": {
+                "e1": "a note of thirty-two characters!",
+                "e2": "a note of thirty-two characters!"
+              }
+            },
+            "binary": true
+          }
+        }
+      }
+    }
+  ]
+}

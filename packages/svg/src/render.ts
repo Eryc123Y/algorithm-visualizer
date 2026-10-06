@@ -31,7 +31,11 @@ export function renderSvg(
       const attrs = Object.entries(item.attrs)
         .map(([name, value]) => ` ${name}="${escapeXml(value)}"`)
         .join('');
-      return `<g${key}${attrs} transform="translate(${num(item.x)} ${num(item.y)})">${serializeNode(item.node)}</g>`;
+      const rotate =
+        item.rotate === undefined ? '' : ` rotate(${num(item.rotate)})`;
+      const scale =
+        item.scaleX === undefined ? '' : ` scale(${num(item.scaleX)} 1)`;
+      return `<g${key}${attrs} transform="translate(${num(item.x)} ${num(item.y)})${rotate}${scale}">${serializeNode(item.node)}</g>`;
     })
     .join('');
   return (

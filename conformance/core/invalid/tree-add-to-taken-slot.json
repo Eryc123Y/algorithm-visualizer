@@ -1,0 +1,31 @@
+{
+  "description": "addNode into a binary slot that is taken is an error; setChild replaces children.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "t": {
+        "kind": "tree",
+        "levelOrder": [1, 2]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "t",
+            "type": "addNode",
+            "node": 3,
+            "parent": "e0",
+            "slot": "left"
+          }
+        ]
+      }
+    ]
+  },
+  "expectedErrors": [
+    {
+      "code": "INVALID_OPERATION",
+      "path": "$.steps[0].actions[0].slot"
+    }
+  ]
+}

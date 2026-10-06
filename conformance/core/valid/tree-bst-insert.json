@@ -1,0 +1,415 @@
+{
+  "description": "Building a binary search tree with generated ids, slots by side, and every kind of mark.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "t": {
+        "kind": "tree",
+        "binary": true
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "t",
+            "type": "addNode",
+            "node": 8,
+            "parent": null
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "t",
+            "type": "highlight",
+            "nodes": ["e0"]
+          },
+          {
+            "target": "t",
+            "type": "addNode",
+            "node": 3,
+            "parent": "e0",
+            "slot": "left"
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "t",
+            "type": "addNode",
+            "node": 10,
+            "parent": "e0",
+            "slot": "right"
+          },
+          {
+            "target": "t",
+            "type": "pointer",
+            "name": "curr",
+            "node": "e0"
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "t",
+            "type": "addNode",
+            "node": 6,
+            "parent": "e1",
+            "slot": "right"
+          },
+          {
+            "target": "t",
+            "type": "annotate",
+            "node": "e1",
+            "text": "h=2"
+          },
+          {
+            "target": "t",
+            "type": "visit",
+            "node": "e1"
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "t",
+            "type": "swapValues",
+            "a": "e1",
+            "b": "e3"
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "t",
+            "type": "setColor",
+            "node": "e0",
+            "color": "black"
+          },
+          {
+            "target": "t",
+            "type": "settle",
+            "node": "e3"
+          },
+          {
+            "target": "t",
+            "type": "group",
+            "node": "e2",
+            "group": 2
+          },
+          {
+            "target": "t",
+            "type": "pointer",
+            "name": "curr",
+            "node": null
+          }
+        ]
+      }
+    ]
+  },
+  "expectedLength": 6,
+  "expectedFrames": [
+    {
+      "index": 0,
+      "state": {
+        "t": {
+          "kind": "tree",
+          "state": {
+            "data": {
+              "nodes": [],
+              "roots": []
+            },
+            "marks": {
+              "highlight": [],
+              "compare": null,
+              "visited": [],
+              "settled": [],
+              "groups": {},
+              "pointers": {},
+              "notes": {}
+            },
+            "binary": true
+          }
+        }
+      }
+    },
+    {
+      "index": 1,
+      "state": {
+        "t": {
+          "kind": "tree",
+          "state": {
+            "data": {
+              "nodes": [
+                {
+                  "id": "e0",
+                  "value": 8,
+                  "children": [null, null],
+                  "color": null
+                }
+              ],
+              "roots": ["e0"]
+            },
+            "marks": {
+              "highlight": [],
+              "compare": null,
+              "visited": [],
+              "settled": [],
+              "groups": {},
+              "pointers": {},
+              "notes": {}
+            },
+            "binary": true
+          }
+        }
+      }
+    },
+    {
+      "index": 2,
+      "state": {
+        "t": {
+          "kind": "tree",
+          "state": {
+            "data": {
+              "nodes": [
+                {
+                  "id": "e0",
+                  "value": 8,
+                  "children": ["e1", null],
+                  "color": null
+                },
+                {
+                  "id": "e1",
+                  "value": 3,
+                  "children": [null, null],
+                  "color": null
+                }
+              ],
+              "roots": ["e0"]
+            },
+            "marks": {
+              "highlight": ["e0"],
+              "compare": null,
+              "visited": [],
+              "settled": [],
+              "groups": {},
+              "pointers": {},
+              "notes": {}
+            },
+            "binary": true
+          }
+        }
+      }
+    },
+    {
+      "index": 3,
+      "state": {
+        "t": {
+          "kind": "tree",
+          "state": {
+            "data": {
+              "nodes": [
+                {
+                  "id": "e0",
+                  "value": 8,
+                  "children": ["e1", "e2"],
+                  "color": null
+                },
+                {
+                  "id": "e1",
+                  "value": 3,
+                  "children": [null, null],
+                  "color": null
+                },
+                {
+                  "id": "e2",
+                  "value": 10,
+                  "children": [null, null],
+                  "color": null
+                }
+              ],
+              "roots": ["e0"]
+            },
+            "marks": {
+              "highlight": [],
+              "compare": null,
+              "visited": [],
+              "settled": [],
+              "groups": {},
+              "pointers": {
+                "curr": "e0"
+              },
+              "notes": {}
+            },
+            "binary": true
+          }
+        }
+      }
+    },
+    {
+      "index": 4,
+      "state": {
+        "t": {
+          "kind": "tree",
+          "state": {
+            "data": {
+              "nodes": [
+                {
+                  "id": "e0",
+                  "value": 8,
+                  "children": ["e1", "e2"],
+                  "color": null
+                },
+                {
+                  "id": "e1",
+                  "value": 3,
+                  "children": [null, "e3"],
+                  "color": null
+                },
+                {
+                  "id": "e2",
+                  "value": 10,
+                  "children": [null, null],
+                  "color": null
+                },
+                {
+                  "id": "e3",
+                  "value": 6,
+                  "children": [null, null],
+                  "color": null
+                }
+              ],
+              "roots": ["e0"]
+            },
+            "marks": {
+              "highlight": [],
+              "compare": null,
+              "visited": ["e1"],
+              "settled": [],
+              "groups": {},
+              "pointers": {
+                "curr": "e0"
+              },
+              "notes": {
+                "e1": "h=2"
+              }
+            },
+            "binary": true
+          }
+        }
+      }
+    },
+    {
+      "index": 5,
+      "state": {
+        "t": {
+          "kind": "tree",
+          "state": {
+            "data": {
+              "nodes": [
+                {
+                  "id": "e0",
+                  "value": 8,
+                  "children": ["e1", "e2"],
+                  "color": null
+                },
+                {
+                  "id": "e1",
+                  "value": 6,
+                  "children": [null, "e3"],
+                  "color": null
+                },
+                {
+                  "id": "e2",
+                  "value": 10,
+                  "children": [null, null],
+                  "color": null
+                },
+                {
+                  "id": "e3",
+                  "value": 3,
+                  "children": [null, null],
+                  "color": null
+                }
+              ],
+              "roots": ["e0"]
+            },
+            "marks": {
+              "highlight": [],
+              "compare": ["e1", "e3"],
+              "visited": ["e1"],
+              "settled": [],
+              "groups": {},
+              "pointers": {
+                "curr": "e0"
+              },
+              "notes": {
+                "e1": "h=2"
+              }
+            },
+            "binary": true
+          }
+        }
+      }
+    },
+    {
+      "index": 6,
+      "state": {
+        "t": {
+          "kind": "tree",
+          "state": {
+            "data": {
+              "nodes": [
+                {
+                  "id": "e0",
+                  "value": 8,
+                  "children": ["e1", "e2"],
+                  "color": "black"
+                },
+                {
+                  "id": "e1",
+                  "value": 6,
+                  "children": [null, "e3"],
+                  "color": null
+                },
+                {
+                  "id": "e2",
+                  "value": 10,
+                  "children": [null, null],
+                  "color": null
+                },
+                {
+                  "id": "e3",
+                  "value": 3,
+                  "children": [null, null],
+                  "color": null
+                }
+              ],
+              "roots": ["e0"]
+            },
+            "marks": {
+              "highlight": [],
+              "compare": null,
+              "visited": ["e1"],
+              "settled": ["e3"],
+              "groups": {
+                "e2": 2
+              },
+              "pointers": {},
+              "notes": {
+                "e1": "h=2"
+              }
+            },
+            "binary": true
+          }
+        }
+      }
+    }
+  ]
+}

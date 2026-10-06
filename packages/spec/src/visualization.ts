@@ -15,7 +15,39 @@ import {
   StepMeta,
   StructureName,
 } from './common.ts';
-import { ArrayAction, ArrayDecl, ArrayDeclInput } from './kinds/index.ts';
+import {
+  ArrayAction,
+  ArrayActionInput,
+  ArrayDecl,
+  ArrayDeclInput,
+  LinkedListAction,
+  LinkedListActionInput,
+  LinkedListDecl,
+  LinkedListDeclInput,
+  QueueAction,
+  QueueActionInput,
+  QueueDecl,
+  QueueDeclInput,
+  StackAction,
+  StackActionInput,
+  StackDecl,
+  StackDeclInput,
+  TreeAction,
+  TreeActionInput,
+  TreeDecl,
+  TreeDeclInput,
+  GraphAction,
+  GraphActionInput,
+  GraphDecl,
+  GraphDeclInput,
+  HashTableAction,
+  HashTableActionInput,
+  HashTableDecl,
+  HashTableDeclInput,
+  TableAction,
+  TableDecl,
+  TableDeclInput,
+} from './kinds/index.ts';
 
 const targetField = {
   target: StructureName.describe(
@@ -37,18 +69,60 @@ type WithTarget<T extends readonly z.ZodObject[]> = {
 const withTargets = <const T extends readonly z.ZodObject[]>(options: T) =>
   options.map((option) => option.extend(targetField)) as WithTarget<T>;
 
-/** Any built-in action, tagged with the structure it applies to. */
-export const TargetedAction = z.discriminatedUnion(
-  'type',
-  withTargets(ArrayAction.options),
-);
+/*
+ * One entry per kind (ADR 0012). Kinds may share action names (`highlight`
+ * exists for arrays and graphs with different fields), so the top level is a
+ * plain union of per-kind unions; the parser picks the right one by the
+ * target's kind.
+ */
+
+/** Any built-in action in canonical form, tagged with its structure. */
+export const TargetedAction = z.union([
+  z.discriminatedUnion('type', withTargets(ArrayAction.options)),
+  z.discriminatedUnion('type', withTargets(StackAction.options)),
+  z.discriminatedUnion('type', withTargets(QueueAction.options)),
+  z.discriminatedUnion('type', withTargets(LinkedListAction.options)),
+  z.discriminatedUnion('type', withTargets(TreeAction.options)),
+  z.discriminatedUnion('type', withTargets(GraphAction.options)),
+  z.discriminatedUnion('type', withTargets(TableAction.options)),
+  z.discriminatedUnion('type', withTargets(HashTableAction.options)),
+]);
 export type TargetedAction = z.infer<typeof TargetedAction>;
 
-export const StructureDecl = z.discriminatedUnion('kind', [ArrayDecl]);
+/** Any built-in action in authoring form, tagged with its structure. */
+export const TargetedActionInput = z.union([
+  z.discriminatedUnion('type', withTargets(ArrayActionInput.options)),
+  z.discriminatedUnion('type', withTargets(StackActionInput.options)),
+  z.discriminatedUnion('type', withTargets(QueueActionInput.options)),
+  z.discriminatedUnion('type', withTargets(LinkedListActionInput.options)),
+  z.discriminatedUnion('type', withTargets(TreeActionInput.options)),
+  z.discriminatedUnion('type', withTargets(GraphActionInput.options)),
+  z.discriminatedUnion('type', withTargets(TableAction.options)),
+  z.discriminatedUnion('type', withTargets(HashTableActionInput.options)),
+]);
+export type TargetedActionInput = z.infer<typeof TargetedActionInput>;
+
+export const StructureDecl = z.discriminatedUnion('kind', [
+  ArrayDecl,
+  StackDecl,
+  QueueDecl,
+  LinkedListDecl,
+  TreeDecl,
+  GraphDecl,
+  TableDecl,
+  HashTableDecl,
+]);
 export type StructureDecl = z.infer<typeof StructureDecl>;
 
 export const StructureDeclInput = z.discriminatedUnion('kind', [
   ArrayDeclInput,
+  StackDeclInput,
+  QueueDeclInput,
+  LinkedListDeclInput,
+  TreeDeclInput,
+  GraphDeclInput,
+  TableDeclInput,
+  HashTableDeclInput,
 ]);
 export type StructureDeclInput = z.infer<typeof StructureDeclInput>;
 
@@ -104,7 +178,7 @@ export type Step = Visualization['steps'][number];
 
 export const VisualizationInput = document(
   StructureDeclInput,
-  TargetedAction,
+  TargetedActionInput,
 ).describe(
   'A step-by-step visualization: declared structures plus a timeline of steps, each applying actions to those structures.',
 );

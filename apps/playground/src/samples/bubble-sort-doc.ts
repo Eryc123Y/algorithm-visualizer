@@ -26,7 +26,10 @@ export function bubbleSortDocument(
     steps: doc.steps.map((step) => {
       const line = step.meta?.line;
       const pointer = step.actions.find((a) => a.type === 'pointer');
-      const j = pointer?.type === 'pointer' ? pointer.index : undefined;
+      const j =
+        pointer?.type === 'pointer' && 'index' in pointer
+          ? pointer.index
+          : undefined;
       return {
         ...step,
         meta: {

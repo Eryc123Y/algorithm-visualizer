@@ -1,0 +1,36 @@
+{
+  "description": "Dequeuing an empty queue is an error.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "q": {
+        "kind": "queue",
+        "initial": ["a"]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "q",
+            "type": "dequeue"
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "q",
+            "type": "dequeue"
+          }
+        ]
+      }
+    ]
+  },
+  "expectedErrors": [
+    {
+      "code": "EMPTY",
+      "path": "$.steps[1].actions[0]"
+    }
+  ]
+}

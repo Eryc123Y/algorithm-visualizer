@@ -83,7 +83,7 @@ describe('layoutTrace', () => {
         if (next) expect(next[0]).toBeGreaterThan(right);
       });
       for (const item of scene.items) {
-        const x = item.type === 'arrow' ? item.x1 : item.x;
+        const x = 'x' in item ? item.x : item.x1;
         expect(x).toBeGreaterThanOrEqual(0);
         expect(x).toBeLessThanOrEqual(scene.width);
       }

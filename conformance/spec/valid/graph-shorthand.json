@@ -1,0 +1,137 @@
+{
+  "description": "Bare node names serve as id and value; tuple edges get the id \"from-to\"; a node object without a value shows its id.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "g": {
+        "kind": "graph",
+        "nodes": [
+          "A",
+          "B",
+          3,
+          {
+            "id": "D",
+            "x": 10,
+            "y": 20
+          }
+        ],
+        "edges": [
+          ["A", "B", 4],
+          ["B", "3"],
+          {
+            "from": "3",
+            "to": "D",
+            "weight": "2/5"
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "g",
+            "type": "addNode",
+            "node": "E"
+          },
+          {
+            "target": "g",
+            "type": "addEdge",
+            "edge": ["D", "E", 1]
+          },
+          {
+            "target": "g",
+            "type": "addEdge",
+            "edge": {
+              "id": "back",
+              "from": "E",
+              "to": "A"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "version": "0.1",
+    "structures": {
+      "g": {
+        "kind": "graph",
+        "directed": false,
+        "layout": "auto",
+        "nodes": [
+          {
+            "id": "A",
+            "value": "A"
+          },
+          {
+            "id": "B",
+            "value": "B"
+          },
+          {
+            "id": "3",
+            "value": 3
+          },
+          {
+            "id": "D",
+            "value": "D",
+            "x": 10,
+            "y": 20
+          }
+        ],
+        "edges": [
+          {
+            "id": "A-B",
+            "from": "A",
+            "to": "B",
+            "weight": 4
+          },
+          {
+            "id": "B-3",
+            "from": "B",
+            "to": "3"
+          },
+          {
+            "id": "3-D",
+            "from": "3",
+            "to": "D",
+            "weight": "2/5"
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "g",
+            "type": "addNode",
+            "node": {
+              "id": "E",
+              "value": "E"
+            }
+          },
+          {
+            "target": "g",
+            "type": "addEdge",
+            "edge": {
+              "id": "D-E",
+              "from": "D",
+              "to": "E",
+              "weight": 1
+            }
+          },
+          {
+            "target": "g",
+            "type": "addEdge",
+            "edge": {
+              "id": "back",
+              "from": "E",
+              "to": "A"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

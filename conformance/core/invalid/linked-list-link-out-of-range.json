@@ -1,0 +1,30 @@
+{
+  "description": "Link targets must exist.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "ll": {
+        "kind": "linkedList",
+        "initial": [1, 2]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "ll",
+            "type": "link",
+            "from": 0,
+            "to": 2
+          }
+        ]
+      }
+    ]
+  },
+  "expectedErrors": [
+    {
+      "code": "OUT_OF_RANGE",
+      "path": "$.steps[0].actions[0].to"
+    }
+  ]
+}

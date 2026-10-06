@@ -1,0 +1,32 @@
+{
+  "description": "An explicit id in a push must be new.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "st": {
+        "kind": "stack",
+        "initial": [1]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "st",
+            "type": "push",
+            "element": {
+              "id": "e0",
+              "value": 2
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "expectedErrors": [
+    {
+      "code": "DUPLICATE_ID",
+      "path": "$.steps[0].actions[0].element.id"
+    }
+  ]
+}

@@ -11,7 +11,13 @@ export type EngineErrorCode =
   /** An inserted element reuses an id that is already present. */
   | 'DUPLICATE_ID'
   /** An action would grow a structure past its size limit. */
-  | 'LIMIT_EXCEEDED';
+  | 'LIMIT_EXCEEDED'
+  /** An action needs an element but the structure is empty (e.g. pop). */
+  | 'EMPTY'
+  /** An action refers to a node or edge id that does not exist (now). */
+  | 'NOT_FOUND'
+  /** An action is well-formed but not allowed in the current state, e.g. one that would create a cycle in a tree. */
+  | 'INVALID_OPERATION';
 
 /** An error from a reducer, before the timeline adds its location. */
 export interface ReduceError {

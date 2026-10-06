@@ -22,7 +22,7 @@ describe('protocol types', () => {
 
   it('tags every targeted action with a target', () => {
     expectTypeOf<TargetedAction['target']>().toEqualTypeOf<string>();
-    expectTypeOf<TargetedAction['type']>().toEqualTypeOf<ArrayAction['type']>();
+    expectTypeOf<ArrayAction['type']>().toExtend<TargetedAction['type']>();
   });
 
   it('infers optional fields as `?: T | undefined` (Zod behaviour)', () => {

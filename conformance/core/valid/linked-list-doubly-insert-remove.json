@@ -1,0 +1,291 @@
+{
+  "description": "Doubly linked list: insert places an unlinked node, links wire it in, and removing a node nulls the links and pointers to it.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "ll": {
+        "kind": "linkedList",
+        "doubly": true,
+        "initial": [1, 2]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "ll",
+            "type": "insert",
+            "index": 1,
+            "element": 9
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "ll",
+            "type": "link",
+            "from": 0,
+            "to": 1
+          },
+          {
+            "target": "ll",
+            "type": "link",
+            "from": 1,
+            "to": 2
+          },
+          {
+            "target": "ll",
+            "type": "link",
+            "from": 1,
+            "to": 0,
+            "field": "prev"
+          },
+          {
+            "target": "ll",
+            "type": "link",
+            "from": 2,
+            "to": 1,
+            "field": "prev"
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "ll",
+            "type": "pointer",
+            "name": "head",
+            "index": 0
+          },
+          {
+            "target": "ll",
+            "type": "visit",
+            "index": 0
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "ll",
+            "type": "remove",
+            "index": 0
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "ll",
+            "type": "highlight",
+            "indices": [0, 1]
+          }
+        ]
+      }
+    ]
+  },
+  "expectedLength": 5,
+  "expectedFrames": [
+    {
+      "index": 0,
+      "state": {
+        "ll": {
+          "kind": "linkedList",
+          "state": {
+            "data": [
+              {
+                "id": "e0",
+                "value": 1,
+                "next": "e1",
+                "prev": null
+              },
+              {
+                "id": "e1",
+                "value": 2,
+                "next": null,
+                "prev": "e0"
+              }
+            ],
+            "marks": {
+              "highlight": [],
+              "visited": [],
+              "pointers": {}
+            },
+            "doubly": true
+          }
+        }
+      }
+    },
+    {
+      "index": 1,
+      "state": {
+        "ll": {
+          "kind": "linkedList",
+          "state": {
+            "data": [
+              {
+                "id": "e0",
+                "value": 1,
+                "next": "e1",
+                "prev": null
+              },
+              {
+                "id": "e2",
+                "value": 9,
+                "next": null,
+                "prev": null
+              },
+              {
+                "id": "e1",
+                "value": 2,
+                "next": null,
+                "prev": "e0"
+              }
+            ],
+            "marks": {
+              "highlight": [],
+              "visited": [],
+              "pointers": {}
+            },
+            "doubly": true
+          }
+        }
+      }
+    },
+    {
+      "index": 2,
+      "state": {
+        "ll": {
+          "kind": "linkedList",
+          "state": {
+            "data": [
+              {
+                "id": "e0",
+                "value": 1,
+                "next": "e2",
+                "prev": null
+              },
+              {
+                "id": "e2",
+                "value": 9,
+                "next": "e1",
+                "prev": "e0"
+              },
+              {
+                "id": "e1",
+                "value": 2,
+                "next": null,
+                "prev": "e2"
+              }
+            ],
+            "marks": {
+              "highlight": [],
+              "visited": [],
+              "pointers": {}
+            },
+            "doubly": true
+          }
+        }
+      }
+    },
+    {
+      "index": 3,
+      "state": {
+        "ll": {
+          "kind": "linkedList",
+          "state": {
+            "data": [
+              {
+                "id": "e0",
+                "value": 1,
+                "next": "e2",
+                "prev": null
+              },
+              {
+                "id": "e2",
+                "value": 9,
+                "next": "e1",
+                "prev": "e0"
+              },
+              {
+                "id": "e1",
+                "value": 2,
+                "next": null,
+                "prev": "e2"
+              }
+            ],
+            "marks": {
+              "highlight": [],
+              "visited": ["e0"],
+              "pointers": {
+                "head": "e0"
+              }
+            },
+            "doubly": true
+          }
+        }
+      }
+    },
+    {
+      "index": 4,
+      "state": {
+        "ll": {
+          "kind": "linkedList",
+          "state": {
+            "data": [
+              {
+                "id": "e2",
+                "value": 9,
+                "next": "e1",
+                "prev": null
+              },
+              {
+                "id": "e1",
+                "value": 2,
+                "next": null,
+                "prev": "e2"
+              }
+            ],
+            "marks": {
+              "highlight": [],
+              "visited": [],
+              "pointers": {}
+            },
+            "doubly": true
+          }
+        }
+      }
+    },
+    {
+      "index": 5,
+      "state": {
+        "ll": {
+          "kind": "linkedList",
+          "state": {
+            "data": [
+              {
+                "id": "e2",
+                "value": 9,
+                "next": "e1",
+                "prev": null
+              },
+              {
+                "id": "e1",
+                "value": 2,
+                "next": null,
+                "prev": "e2"
+              }
+            ],
+            "marks": {
+              "highlight": [0, 1],
+              "visited": [],
+              "pointers": {}
+            },
+            "doubly": true
+          }
+        }
+      }
+    }
+  ]
+}
