@@ -37,6 +37,7 @@ const graph = dijkstra(
 // Passed into the page as plain JSON; the full document type is too deep
 // for Playwright's argument types.
 const sortJson: unknown = sort;
+const graphJson: unknown = graph;
 
 /** Serves `body` as a page that loads the bundle, plus JSON files. */
 async function open(
@@ -317,6 +318,21 @@ test('setting the frame attribute seeks', async ({ page }) => {
     `4 / ${sort.steps.length}`,
   );
   await expectStageMatches(player, sort);
+});
+
+test('a new document and a frame set together open at that frame', async ({
+  page,
+}) => {
+  await open(page, inline(sort, 'frame="1"'));
+  const player = page.locator('#p');
+  await expect(player).toHaveAttribute('frame', '1');
+  await player.evaluate((el: AlgoPlayer, doc: unknown) => {
+    el.visualization = doc;
+    el.frame = 2;
+  }, graphJson);
+  await expect(player.locator('[data-key="g/element/A"]')).toHaveCount(1);
+  await expect(player).toHaveAttribute('frame', '2');
+  await expectStageMatches(player, graph);
 });
 
 test('a player moved in the page keeps its frame and resumes playing', async ({

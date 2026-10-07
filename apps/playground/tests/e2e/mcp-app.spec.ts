@@ -99,6 +99,21 @@ test('waits for the tool result, then plays the document at its frame', async ({
   await expectStageMatches(player, sort);
 });
 
+test('a second result replaces the document and opens at its frame', async ({
+  page,
+}) => {
+  const { player } = await openHost(page);
+  await host(page).result(await callShow({ document: sort, frame: 1 }));
+  await expect(player).toHaveAttribute('frame', '1');
+  const other = bubbleSort([5, 4, 3, 2, 1]);
+  await host(page).result(await callShow({ document: other, frame: 4 }));
+  await expect(player).toHaveAttribute('frame', '4');
+  await expect(player.locator('.counter')).toHaveText(
+    `4 / ${other.steps.length}`,
+  );
+  await expectStageMatches(player, other);
+});
+
 test('tells the model which frame the user stopped on', async ({ page }) => {
   const { player } = await openHost(page);
   await host(page).result(await callShow({ document: sort }));
