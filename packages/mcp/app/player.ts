@@ -61,8 +61,13 @@ app.ontoolresult = (result) => {
   shown = result.structuredContent;
   say('');
   player.hidden = false;
+  // Seek once the new document has loaded: setting frame to the value it
+  // already has would not register, and the load would reset it to 0.
+  const { frame } = shown;
+  player.addEventListener('algo-load', () => player.seek(frame), {
+    once: true,
+  });
   player.visualization = shown.document;
-  player.frame = shown.frame;
 };
 
 app.onhostcontextchanged = applyContext;

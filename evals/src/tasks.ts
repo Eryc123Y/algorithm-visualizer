@@ -55,6 +55,34 @@ const sortsArray =
       ),
     ]);
 
+/** The array after each outer pass of insertion sort. */
+function insertionPasses(input: readonly number[]): number[][] {
+  const xs = [...input];
+  return xs.slice(1).map((_, k) => {
+    const i = k + 1;
+    const x = xs[i]!;
+    let j = i - 1;
+    for (; j >= 0 && xs[j]! > x; j--) xs[j + 1] = xs[j]!;
+    xs[j + 1] = x;
+    return [...xs];
+  });
+}
+
+/** The array after each outer pass of selection sort. */
+function selectionPasses(input: readonly number[]): number[][] {
+  const xs = [...input];
+  return xs.slice(1).map((_, i) => {
+    let min = i;
+    for (let j = i + 1; j < xs.length; j++) if (xs[j]! < xs[min]!) min = j;
+    [xs[i], xs[min]] = [xs[min]!, xs[i]!];
+    return [...xs];
+  });
+}
+
+/** Passes of a sort that no frame of the array shows. */
+const missingPasses = (t: Track<'array'>, passes: readonly number[][]) =>
+  passes.filter((pass) => !t.states.some((s) => same(nums(values(s)), pass)));
+
 /** Whether any frame of an array has at least `n` pointers. */
 const hasPointers = (t: Track<'array'>, n: number) =>
   t.states.some((s) => Object.keys(s.marks.pointers).length >= n);
@@ -180,7 +208,16 @@ export const tasks: readonly EvalTask[] = [
     prompt:
       'Insertion sort on [5, 2, 4, 6, 1, 3]. Show each comparison and each move.',
     minSteps: 8,
-    check: sortsArray([5, 2, 4, 6, 1, 3]),
+    check: (trace) => [
+      ...sortsArray([5, 2, 4, 6, 1, 3])(trace),
+      ...anyTrack(trace, 'array', (t) => {
+        const missing = missingPasses(t, insertionPasses([5, 2, 4, 6, 1, 3]));
+        return expect(
+          missing.length === 0,
+          `never shows the array after each insertion pass, e.g. ${JSON.stringify(missing[0])}`,
+        );
+      }),
+    ],
   },
   {
     id: 'selection-sort',
@@ -188,7 +225,16 @@ export const tasks: readonly EvalTask[] = [
     prompt:
       'Selection sort on [29, 10, 14, 37, 13]: find the minimum of the unsorted part, swap it into place, and mark the sorted part.',
     minSteps: 6,
-    check: sortsArray([29, 10, 14, 37, 13]),
+    check: (trace) => [
+      ...sortsArray([29, 10, 14, 37, 13])(trace),
+      ...anyTrack(trace, 'array', (t) => {
+        const missing = missingPasses(t, selectionPasses([29, 10, 14, 37, 13]));
+        return expect(
+          missing.length === 0,
+          `never shows the array after each selection pass, e.g. ${JSON.stringify(missing[0])}`,
+        );
+      }),
+    ],
   },
   {
     id: 'binary-search-miss',

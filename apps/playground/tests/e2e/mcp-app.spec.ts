@@ -129,6 +129,20 @@ test('an error result replaces an earlier document', async ({ page }) => {
   expect((await host(page).read()).contexts).toEqual([]);
 });
 
+test('a second result at the same frame number opens there', async ({
+  page,
+}) => {
+  const { player } = await openHost(page);
+  await host(page).result(await callShow({ document: sort, frame: 2 }));
+  await expect(player).toHaveAttribute('frame', '2');
+  const other = bubbleSort([5, 4, 3, 2, 1]);
+  await host(page).result(await callShow({ document: other, frame: 2 }));
+  await expect(player.locator('.counter')).toHaveText(
+    `2 / ${other.steps.length}`,
+  );
+  await expectStageMatches(player, other);
+});
+
 test('a new result cancels a context update about the old document', async ({
   page,
 }) => {

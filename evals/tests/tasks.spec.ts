@@ -200,6 +200,32 @@ describe('eval tasks', () => {
     expect(result.problems.join()).toContain('rejected');
   });
 
+  it('reject a sort done in one step and padded', () => {
+    const task = tasks.find((t) => t.id === 'insertion-sort')!;
+    const pad = (k: number) => ({
+      actions: [{ target: 'a', type: 'highlight', indices: [0] }],
+      meta: { narration: `Look ${k}.` },
+    });
+    const result = grade(task, {
+      version: '0.1',
+      structures: { a: { kind: 'array', initial: [5, 2, 4, 6, 1, 3] } },
+      steps: [
+        {
+          actions: [1, 2, 3, 4, 5, 6].map((value, index) => ({
+            target: 'a',
+            type: 'set',
+            index,
+            value,
+          })),
+          meta: { narration: 'Sort.' },
+        },
+        ...[1, 2, 3, 4, 5, 6, 7].map(pad),
+      ],
+    });
+    expect(result.errors).toEqual([]);
+    expect(result.problems.join()).toContain('insertion pass');
+  });
+
   it('count a missing submission as a failure', () => {
     expect(grade(tasks[0]!, undefined)).toMatchObject({
       submitted: false,
