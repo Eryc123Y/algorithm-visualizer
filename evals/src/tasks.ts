@@ -82,6 +82,36 @@ const redRed = (s: Track<'tree'>['first']) =>
       n.children.some((c) => c !== null && treeNode(s, c)?.color === 'red'),
   );
 
+type GraphState = Track<'graph'>['first'];
+const selected = (s: GraphState) =>
+  s.data.edges.filter((e) => s.marks.edgeMarks[e.id] === 'selected');
+/** Weights of selected edges in the order they were first selected. */
+function selectionOrder(states: readonly GraphState[]): number[] {
+  const seen = new Set<string>();
+  return states.flatMap((s) =>
+    selected(s)
+      .filter((e) => !seen.has(e.id) && seen.add(e.id))
+      .map((e) => Number(e.weight)),
+  );
+}
+
+/** Whether a value is a drawn empty cell. */
+const blank = (v: Scalar) => v === null || v === '';
+
+/**
+ * Whether no cell starts at its final answer: a start filled with zeros or
+ * placeholders is fine, one with the answers already in place is not.
+ */
+const noneStartSolved = (
+  first: readonly Scalar[],
+  last: readonly Scalar[],
+  isAnswer = (v: Scalar) => !blank(v) && num(v) !== 0,
+) => last.every((v, k) => !isAnswer(v) || first[k] !== v);
+
+/** Most of `count(state)` gained in one step: 1 when added one at a time. */
+const maxGain = <S>(states: readonly S[], count: (s: S) => number) =>
+  Math.max(0, ...states.slice(1).map((s, i) => count(s) - count(states[i]!)));
+
 const isMaxHeap = (xs: readonly number[]) =>
   xs.every((x, i) => i === 0 || xs[Math.floor((i - 1) / 2)]! >= x);
 
@@ -189,6 +219,12 @@ export const tasks: readonly EvalTask[] = [
           (settled.length === 2 && settled);
         return [
           ...expect(same(xs, [1, 2, 4, 7, 11, 15]), 'wrong array'),
+          ...expect(
+            t.states.some((st) =>
+              same([...Object.values(st.marks.pointers)].sort(), [0, 5]),
+            ),
+            'never has the two pointers at both ends',
+          ),
           ...expect(
             pair !== false && same(sortedNumbers(pair), [4, 11]),
             'does not end with the pair 4 and 11 pointed at or settled',
@@ -464,6 +500,10 @@ export const tasks: readonly EvalTask[] = [
             letters === 5,
             `has ${letters} letter nodes, not 5 (shared prefixes)`,
           ),
+          ...expect(
+            t.first.data.nodes.every((n) => !isLetter(n.value)),
+            'does not start without words',
+          ),
         ];
       }),
   },
@@ -593,6 +633,14 @@ export const tasks: readonly EvalTask[] = [
               edges.every(([a, b]) => at(a) < at(b)),
               'output is not a topological order',
             ),
+            ...expect(
+              noneStartSolved(
+                values(t.first),
+                values(t.last),
+                (v) => !blank(v),
+              ),
+              'output starts with names already in place',
+            ),
           ];
         }),
       ];
@@ -629,6 +677,10 @@ export const tasks: readonly EvalTask[] = [
             wrong.length === 0,
             `final distances wrong at ${wrong.map(([n]) => n).join(', ')}`,
           ),
+          ...expect(
+            t.states.some((st) => noteNumbers(st).get('A') === 4),
+            'never shows A at 4 before relaxing it to 3 through B',
+          ),
         ];
       }),
   },
@@ -640,9 +692,7 @@ export const tasks: readonly EvalTask[] = [
     minSteps: 5,
     check: (trace) =>
       anyTrack(trace, 'graph', (t) => {
-        const taken = t.last.data.edges.filter(
-          (e) => t.last.marks.edgeMarks[e.id] === 'selected',
-        );
+        const taken = selected(t.last);
         const weight = taken.reduce((sum, e) => sum + Number(e.weight), 0);
         return [
           ...graphIs(
@@ -662,6 +712,14 @@ export const tasks: readonly EvalTask[] = [
           ...expect(
             taken.length === 4 && weight === 8,
             `selects ${taken.length} edges of weight ${weight}, not 4 of weight 8`,
+          ),
+          ...expect(
+            maxGain(t.states, (st) => selected(st).length) <= 1 &&
+              same(
+                selectionOrder(t.states),
+                [...selectionOrder(t.states)].sort((a, b) => a - b),
+              ),
+            'does not add edges one at a time by weight',
           ),
         ];
       }),
@@ -701,6 +759,10 @@ export const tasks: readonly EvalTask[] = [
             `neighbours share a colour: ${clash.map((e) => e.id).join(', ')}`,
           ),
           ...expect(colours.size === 3, `uses ${colours.size} colours, not 3`),
+          ...expect(
+            maxGain(t.states, (st) => Object.keys(st.marks.groups).length) <= 1,
+            'colours more than one node in a step',
+          ),
         ];
       }),
   },
@@ -732,6 +794,10 @@ export const tasks: readonly EvalTask[] = [
             wrong.length === 0,
             `${wrong.length} wrong cells: ${wrong.slice(0, 3).join('; ')}`,
           ),
+          ...expect(
+            t.first.data.every((row, r) => noneStartSolved(row, rows[r] ?? [])),
+            'starts with answers already in the table',
+          ),
         ];
       }),
   },
@@ -743,13 +809,22 @@ export const tasks: readonly EvalTask[] = [
     minSteps: 6,
     check: (trace) => {
       const want = [0, 1, 2, 1, 1, 2, 2];
+      // A row that ends as the answer, filled in rather than declared.
       const rows = [
-        ...tracks(trace, 'table').flatMap((t) => t.last.data),
-        ...tracks(trace, 'array').map((t) => values(t.last)),
+        ...tracks(trace, 'table').flatMap((t) =>
+          t.last.data.map((row, r) => [t.first.data[r] ?? [], row] as const),
+        ),
+        ...tracks(trace, 'array').map(
+          (t) => [values(t.first), values(t.last)] as const,
+        ),
       ];
       return expect(
-        rows.some((row) => same(nums(row), want)),
-        `no table row or array ends as ${JSON.stringify(want)}`,
+        rows.some(
+          ([first, last]) =>
+            same(nums(last), want) &&
+            noneStartSolved(first.slice(1), last.slice(1)),
+        ),
+        `no table row or array is filled in to ${JSON.stringify(want)}`,
       );
     },
   },
@@ -762,10 +837,16 @@ export const tasks: readonly EvalTask[] = [
     check: (trace) =>
       anyTrack(trace, 'hashTable', (t) => {
         const got = t.last.data.map((chain) => nums(chain.map((e) => e.value)));
-        return expect(
-          same(got, [[], [15, 8], [], [], [11], [12], [27]]),
-          `ends as ${JSON.stringify(got)}`,
-        );
+        return [
+          ...expect(
+            same(got, [[], [15, 8], [], [], [11], [12], [27]]),
+            `ends as ${JSON.stringify(got)}`,
+          ),
+          ...expect(
+            t.first.data.every((chain) => chain.length === 0),
+            'does not start empty',
+          ),
+        ];
       }),
   },
   {
@@ -776,9 +857,9 @@ export const tasks: readonly EvalTask[] = [
     minSteps: 8,
     check: (trace) =>
       anyTrack(trace, 'array', (t) => {
-        const got = values(t.last).map((v) =>
-          v === null || v === '' ? null : num(v),
-        );
+        const got = values(t.last).map((v) => (blank(v) ? null : num(v)));
+        if (!noneStartSolved(values(t.first), values(t.last)))
+          return ['starts with keys already in place'];
         return expect(
           same(got, [
             null,

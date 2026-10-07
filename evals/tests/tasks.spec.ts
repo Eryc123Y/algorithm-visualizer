@@ -1,8 +1,16 @@
 import { describe, expect, it } from 'vitest';
 
+import { loadTrace, type TreeData } from '@algoviz/core';
+
 import { grade } from '../src/grade.ts';
 import { tasks } from '../src/tasks.ts';
 import { references } from './references.ts';
+
+/** A tree's state as a declaration: uncoloured nodes have no colour. */
+const treeDecl = ({ nodes, roots }: TreeData) => ({
+  nodes: nodes.map(({ color, ...n }) => (color === null ? n : { ...n, color })),
+  roots,
+});
 
 describe('eval tasks', () => {
   it('have unique ids and a reference each', () => {
@@ -29,6 +37,45 @@ describe('eval tasks', () => {
         .filter(([, build]) => grade(task, build()).correct)
         .map(([other]) => other);
       expect(passing).toEqual([]);
+    },
+  );
+
+  // A document that declares the answer up front and then does nothing:
+  // each structure starts at the reference's final state, followed by
+  // empty narrated steps.
+  it.each(tasks.map((t) => [t.id, t] as const))(
+    'reject the answer declared up front for %s',
+    (id, task) => {
+      const loaded = loadTrace(references[id]!());
+      if (!loaded.ok) throw new Error(id);
+      const trace = loaded.value;
+      const last = trace.frame(trace.length).state;
+      const structures = Object.fromEntries(
+        Object.entries(trace.visualization.structures).map(([name, decl]) => {
+          const { data } = last[name]!.state as { data: unknown };
+          const solved =
+            decl.kind === 'hashTable'
+              ? { buckets: data }
+              : decl.kind === 'table'
+                ? { cells: data }
+                : decl.kind === 'tree'
+                  ? treeDecl(data as TreeData)
+                  : decl.kind === 'graph' || decl.kind === 'linkedList'
+                    ? {}
+                    : { initial: data };
+          return [name, { ...decl, ...solved }];
+        }),
+      );
+      const result = grade(task, {
+        version: '0.1',
+        structures,
+        steps: Array.from({ length: task.minSteps }, (_, k) => ({
+          actions: [],
+          meta: { narration: `Step ${k + 1}.` },
+        })),
+      });
+      expect(result.errors).toEqual([]);
+      expect(result.correct).toBe(false);
     },
   );
 
