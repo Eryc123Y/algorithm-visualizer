@@ -1,8 +1,7 @@
 /**
  * The server through a real MCP client, over an in-memory transport.
  */
-import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
+import { Client, InMemoryTransport } from '@modelcontextprotocol/client';
 import { kindNames } from '@algoviz/spec';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 

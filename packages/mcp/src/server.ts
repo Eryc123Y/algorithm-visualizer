@@ -2,7 +2,7 @@
  * The MCP server: the tools, the guide and schema as resources, and a
  * prompt that starts a visualization.
  */
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { McpServer } from '@modelcontextprotocol/server';
 import { kindNames, visualizationJsonSchema } from '@algoviz/spec';
 import { z } from 'zod';
 
