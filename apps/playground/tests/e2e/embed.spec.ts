@@ -219,6 +219,15 @@ test.describe('attributes', () => {
     await expect(player.locator('.code')).toHaveCount(0);
   });
 
+  test('hidden hides the player', async ({ page }) => {
+    await open(page, inline(sort, 'hidden'));
+    const player = page.locator('#p');
+    await expect(player).toBeHidden();
+    await player.evaluate((el: AlgoPlayer) => (el.hidden = false));
+    await expect(player).toBeVisible();
+    await expectStageMatches(player, sort);
+  });
+
   test('theme="dark" and the CSS custom properties', async ({ page }) => {
     await open(
       page,
