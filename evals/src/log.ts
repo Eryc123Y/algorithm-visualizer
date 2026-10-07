@@ -33,6 +33,11 @@ export interface RunMeta {
   readonly mode: string;
   readonly date: string;
   readonly notes?: string;
+  /**
+   * The tasks the run was asked to do. Each counts in the report, even
+   * one that failed before leaving a log or a document.
+   */
+  readonly tasks?: readonly string[];
 }
 
 export const logPath = (run: string, task: string) =>

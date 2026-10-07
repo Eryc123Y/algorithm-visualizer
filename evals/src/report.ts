@@ -73,8 +73,12 @@ export function summarizeRun(run: string): RunSummary {
   const meta = existsSync(join(run, 'meta.json'))
     ? (JSON.parse(readFileSync(join(run, 'meta.json'), 'utf8')) as RunMeta)
     : null;
-  const attempted = tasks.filter(
-    (t) => readLog(run, t.id).length > 0 || existsSync(documentPath(run, t.id)),
+  // Runs without a task list (e.g. from the CLI harness) count the tasks
+  // that left a log or a document.
+  const attempted = tasks.filter((t) =>
+    meta?.tasks
+      ? meta.tasks.includes(t.id)
+      : readLog(run, t.id).length > 0 || existsSync(documentPath(run, t.id)),
   );
   const rows = attempted.map((t) => summarizeTask(run, t));
   const validated = rows.filter((r) => r.firstValid !== null);

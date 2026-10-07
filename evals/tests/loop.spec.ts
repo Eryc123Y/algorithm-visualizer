@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import type Anthropic from '@anthropic-ai/sdk';
 import { describe, expect, it } from 'vitest';
 
-import { readLog } from '../src/log.ts';
+import { readLog, writeMeta } from '../src/log.ts';
 import {
   apiTools,
   attempt,
@@ -144,6 +144,27 @@ describe('attempt with tools', () => {
     });
     expect(result.stop).toBe('no_submission');
     expect(summarizeRun(run).tasks[0]!.submitted).toBe(false);
+  });
+
+  it('counts a task the run was given that left nothing behind', async () => {
+    const run = newRun();
+    const { create } = scripted([
+      [text(`\`\`\`json\n${JSON.stringify(good)}\n\`\`\``)],
+    ]);
+    writeMeta(run, {
+      model: 'm',
+      mode: 'tools',
+      date: '2026-01-01',
+      tasks: [task.id, 'dijkstra'],
+    });
+    await attempt(task, run, create, { model: 'm', mode: 'tools' });
+    // dijkstra failed before its first log entry, e.g. on an API error.
+    const { totals, tasks } = summarizeRun(run);
+    expect(Object.fromEntries(tasks.map((t) => [t.task, t.correct]))).toEqual({
+      'printer-queue': true,
+      dijkstra: false,
+    });
+    expect([totals.tasks, totals.correct]).toEqual([2, 1]);
   });
 
   it('stops after the turn limit', async () => {

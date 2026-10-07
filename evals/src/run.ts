@@ -43,8 +43,12 @@ const efforts = ['low', 'medium', 'high', 'xhigh', 'max'] as const;
 const effort = efforts.find((e) => e === values.effort);
 if (values.effort !== undefined && effort === undefined)
   throw new Error(`--effort must be one of ${efforts.join(', ')}`);
-const chosen = values.tasks
-  ? tasks.filter((t) => values.tasks!.split(',').includes(t.id))
+const requested = values.tasks?.split(',').map((id) => id.trim());
+const unknown = requested?.filter((id) => !tasks.some((t) => t.id === id));
+if (unknown !== undefined && unknown.length > 0)
+  throw new Error(`Unknown task ids: ${unknown.join(', ')}`);
+const chosen = requested
+  ? tasks.filter((t) => requested.includes(t.id))
   : tasks;
 const stamp = new Date().toISOString().replace(/[:.]/g, '-');
 const run =
@@ -69,6 +73,7 @@ writeMeta(run, {
   notes: [effort && `effort ${effort}`, values.recipes && 'with recipes']
     .filter(Boolean)
     .join(', '),
+  tasks: chosen.map((t) => t.id),
 });
 
 const queue = [...chosen];
