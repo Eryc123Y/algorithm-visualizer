@@ -463,7 +463,12 @@ export class AlgoPlayer extends LitElement {
           <div class="stage" part="stage"><svg class="scene"></svg></div>
           ${
             showCode
-              ? html`<pre class="code" part="code" aria-label="Source code">
+              ? html`<pre
+                  class="code"
+                  part="code"
+                  role="region"
+                  aria-label="Source code"
+                >
 ${source.code
                     .split('\n')
                     .map(

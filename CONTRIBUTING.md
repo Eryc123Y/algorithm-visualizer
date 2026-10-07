@@ -70,7 +70,7 @@ Kinds are plug-ins (ADR 0012). Use an existing kind of similar shape as the mode
 - Unit tests live in each workspace's `tests/` directory as `*.spec.ts`.
 - Type-level behaviour is tested with `expectTypeOf`; those assertions are enforced by `npm run typecheck`, not by Vitest.
 - Behaviour that other implementations must match belongs in `conformance/` as JSON fixtures (see its README).
-- E2E tests live in `apps/playground/tests/e2e/`.
+- E2E tests live in `apps/playground/tests/e2e/` and run against production builds: the playground, and the standalone `<algo-player>` bundle in a plain page. They check what the player draws against the engine's scene for each frame, fail on any console error, and scan for accessibility problems with axe. Run them with `npm run test:e2e`; to use a Chromium that is already installed, set `PLAYWRIGHT_CHROMIUM=/path/to/chromium`.
 - Generative (property-based) tests live in `packages/core/tests/properties/` and `packages/recipes/tests/properties.spec.ts`. They run a few dozen random cases by default; run them deeper before a release with `FUZZ_RUNS=5000 npx vitest run --project core --project recipes`, and replay a failure with the `FUZZ_SEED` it prints.
 
 ## Git workflow

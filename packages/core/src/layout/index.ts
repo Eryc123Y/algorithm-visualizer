@@ -24,6 +24,7 @@ export * from './hash-table.ts';
 export * from './table.ts';
 export * from './array-heap.ts';
 export * from './common.ts';
+export * from './edge-label.ts';
 export * from './linked-list.ts';
 export * from './queue.ts';
 export * from './stack.ts';

@@ -7,6 +7,7 @@ import {
   lightTheme,
   printTheme,
   renderSvg,
+  themes,
 } from '../src/index.ts';
 
 const cell = (role: 'compare' | 'swap' | 'settled' | 'default'): Scene => ({
@@ -77,4 +78,52 @@ describe('role cues that do not rely on colour', () => {
     );
     expect(renderSvg(cell('default'), { theme: 'light' })).toContain('rgba');
   });
+});
+
+describe('contrast', () => {
+  /** WCAG relative luminance of a #rrggbb colour. */
+  const luminance = (hex: string) => {
+    const [r, g, b] = [1, 3, 5].map((i) => {
+      const v = parseInt(hex.slice(i, i + 2), 16) / 255;
+      return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+    });
+    return 0.2126 * r! + 0.7152 * g! + 0.0722 * b!;
+  };
+  const ratio = (a: string, b: string) => {
+    const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+    return (hi! + 0.05) / (lo! + 0.05);
+  };
+  // Scenes are transparent; the player draws them on its own background.
+  const page = { light: '#ffffff', dark: '#151b19', print: '#ffffff' };
+
+  it.each(Object.entries(themes))(
+    'gives all %s text at least 4.5:1 against what it sits on (WCAG AA)',
+    (name, t) => {
+      const bg = t.background ?? page[name as keyof typeof page];
+      const pairs: [string, string, string][] = [
+        ['title', t.title, bg],
+        ['index', t.index, bg],
+        ['pointer', t.pointer.text, t.pointer.fill],
+        ...Object.entries(t.cell).map(([role, s]): [string, string, string] => [
+          `cell ${role}`,
+          s.text,
+          s.fill,
+        ]),
+        ...t.groups.map((g, k): [string, string, string] => [
+          `group ${k}`,
+          g.text,
+          g.fill,
+        ]),
+        ['red node', t.rb.red.text, t.rb.red.fill],
+        ['black node', t.rb.black.text, t.rb.black.fill],
+      ];
+      const low = pairs
+        .filter(([, fg, back]) => ratio(fg, back) < 4.5)
+        .map(
+          ([what, fg, back]) =>
+            `${what}: ${fg} on ${back} is ${ratio(fg, back).toFixed(2)}:1`,
+        );
+      expect(low).toEqual([]);
+    },
+  );
 });

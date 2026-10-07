@@ -39,6 +39,7 @@ import {
   sidePointerItems,
   sidePointerWidth,
 } from './node-tree.ts';
+import { separateEdgeLabels } from './edge-label.ts';
 import type { EdgeRole, ElementRole, SceneItem } from './scene.ts';
 
 export interface GraphMetrics {
@@ -727,7 +728,7 @@ export function layoutGraph({
     );
 
   return {
-    items,
+    items: separateEdgeLabels(items),
     width: Math.max(
       pointerWidth + maxX - minX + 2 * halfWidth + 2 * pad,
       titleWidth(title, o),
