@@ -128,7 +128,7 @@ describe('the MCP server over stdio', () => {
     });
     expect(result.isError).toBe(true);
     // The server is still there.
-    expect((await client.listTools()).tools.length).toBe(6);
+    expect((await client.listTools()).tools.length).toBe(7);
   });
 
   it('serves resources and the prompt', async () => {

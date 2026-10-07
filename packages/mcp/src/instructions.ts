@@ -14,3 +14,11 @@ To make one:
 /** The request a user makes, as the \`visualize\` prompt words it. */
 export const visualizeRequest = (request: string) =>
   `Make an algoviz visualization: ${request}`;
+
+/**
+ * The server's instructions: the above, plus algoviz_show, which only the
+ * server offers (it needs a client that displays MCP Apps).
+ */
+export const SERVER_INSTRUCTIONS = `${INSTRUCTIONS}
+
+Then show the document to the user with algoviz_show: clients that display MCP Apps open it as an interactive player in the conversation.`;

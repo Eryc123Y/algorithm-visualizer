@@ -14,10 +14,12 @@
   },
   "files": [
     "dist",
-    "guide"
+    "guide",
+    "ui"
   ],
   "scripts": {
-    "build": "tsc --build tsconfig.lib.json"
+    "build": "tsc --build tsconfig.lib.json && vite build --config vite.app.config.ts",
+    "build:app": "vite build --config vite.app.config.ts"
   },
   "dependencies": {
     "@algoviz/core": "*",
@@ -33,6 +35,7 @@
     "algoviz-mcp": "./dist/mcp-server.js"
   },
   "devDependencies": {
+    "@algoviz/elements": "^0.0.0",
     "@modelcontextprotocol/client": "^2.3.1"
   }
 }

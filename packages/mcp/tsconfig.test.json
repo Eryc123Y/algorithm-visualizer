@@ -7,5 +7,5 @@
     "noEmit": true,
     "customConditions": ["@algoviz/source"]
   },
-  "include": ["src", "tests", "vitest.config.ts"]
+  "include": ["src", "tests", "vitest.config.ts", "vite.app.config.ts"]
 }

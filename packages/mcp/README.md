@@ -12,8 +12,15 @@ An MCP server that lets models write, check and render algoviz visualizations, a
 | `algoviz_render`       | One frame as a standalone SVG                                                                     |
 | `algoviz_list_recipes` | Ready-made visualizations of classic algorithms and their arguments                               |
 | `algoviz_run_recipe`   | Builds a recipe's document for a given input                                                      |
+| `algoviz_show`         | Shows a valid document to the user as an interactive player, in clients that display MCP Apps     |
 
 The server also sends instructions for the workflow (recipe if one fits, otherwise guide → write → validate → inspect), serves the guide and the JSON Schema as resources (`algoviz://guide`, `algoviz://guide/<kind>`, `algoviz://schema`), and offers a `visualize` prompt.
+
+## The player in the conversation
+
+`algoviz_show` is an [MCP App](https://modelcontextprotocol.io/extensions/apps): its result links to `ui://algoviz/player.html`, a page the client draws in the conversation. The page is an `<algo-player>` that takes the document from the tool result, follows the client's light or dark theme, asks for the height it needs, and tells the model which frame the user stopped on and its narration, so the model can answer questions about what the user sees. Clients without MCP Apps get the text result only.
+
+The page is built into one self-contained HTML file (`ui/player.html`, by `npm run build`), since clients load it in a sandbox with no network. `apps/playground/tests/e2e/mcp-app.spec.ts` runs it in a browser inside a minimal host.
 
 ## Using it
 

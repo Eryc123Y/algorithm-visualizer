@@ -69,7 +69,7 @@ The playground's example menu shows every recipe.
 
 ## For models
 
-[`@algoviz/mcp`](packages/mcp) lets a model write documents: it reads a guide written for models, validates its document (every step is replayed, and each error says where and why), inspects the state at any frame to check the result, and renders frames to SVG. The same tools work as the `algoviz` command line. [`evals/`](evals) measures how well models do on 27 undergraduate tasks, each checked for what a correct visualization must show.
+[`@algoviz/mcp`](packages/mcp) lets a model write documents: it reads a guide written for models, validates its document (every step is replayed, and each error says where and why), inspects the state at any frame to check the result, and renders frames to SVG. In clients that display MCP Apps, `algoviz_show` then opens the interactive player right in the conversation. The same tools work as the `algoviz` command line. [`evals/`](evals) measures how well models do on 27 undergraduate tasks, each checked for what a correct visualization must show.
 
 ## Embedding
 
@@ -104,7 +104,7 @@ Display mode also accepts `once` (play a single time) and `motion` (`linear` · 
 | [`@algoviz/svg`](packages/svg)           | Available | Renders scenes to standalone SVG (no DOM needed)                  |
 | [`@algoviz/elements`](packages/elements) | Available | `<algo-player>`: interactive, animated player (Lit Web Component) |
 | [`@algoviz/recipes`](packages/recipes)   | Available | Typed recorder and visualizations of classic algorithms           |
-| [`@algoviz/mcp`](packages/mcp)           | Available | MCP server and CLI: authoring guide, validation, inspection, SVG  |
+| [`@algoviz/mcp`](packages/mcp)           | Available | MCP server, MCP App and CLI: guide, validation, inspection, SVG   |
 
 ## Design
 

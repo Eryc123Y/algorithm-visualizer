@@ -10,5 +10,6 @@ export default defineConfig({
     name: 'mcp',
     environment: 'node',
     include: ['tests/**/*.spec.ts'],
+    globalSetup: ['tests/build-app.ts'],
   },
 });

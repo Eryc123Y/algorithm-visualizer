@@ -5,5 +5,6 @@ export * from './instructions.ts';
 export * from './recipes.ts';
 export * from './render.ts';
 export * from './server.ts';
+export * from './show.ts';
 export * from './tools.ts';
 export * from './validate.ts';

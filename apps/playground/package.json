@@ -18,6 +18,9 @@
     "vue": "^3.5.43"
   },
   "devDependencies": {
-    "@axe-core/playwright": "^4.13.0"
+    "@algoviz/mcp": "^0.0.0",
+    "@axe-core/playwright": "^4.13.0",
+    "@modelcontextprotocol/client": "^2.3.1",
+    "@modelcontextprotocol/ext-apps": "^2.0.3"
   }
 }

@@ -33,7 +33,7 @@ const failure = (errors: readonly Diagnostic[]): ToolResult => ({
   isError: true,
 });
 
-const Document = z
+export const Document = z
   .union([z.record(z.string(), z.unknown()), z.string()])
   .describe(
     'The visualization document: a JSON object with version, structures and steps (or its JSON text).',
