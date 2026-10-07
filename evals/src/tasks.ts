@@ -74,6 +74,14 @@ function failedAt(t: Track<'array'>, at: number): boolean {
   return lo === at && (hi === undefined || hi <= at);
 }
 
+/** Whether a red node has a red child: the violation insertion repairs. */
+const redRed = (s: Track<'tree'>['first']) =>
+  s.data.nodes.some(
+    (n) =>
+      n.color === 'red' &&
+      n.children.some((c) => c !== null && treeNode(s, c)?.color === 'red'),
+  );
+
 const isMaxHeap = (xs: readonly number[]) =>
   xs.every((x, i) => i === 0 || xs[Math.floor((i - 1) / 2)]! >= x);
 
@@ -509,6 +517,8 @@ export const tasks: readonly EvalTask[] = [
               same(nums(kids.map((k) => k?.value ?? null)), [1, 3]),
             'children are not red 1 and red 3',
           ),
+          ...expect(t.first.data.nodes.length === 0, 'does not start empty'),
+          ...expect(t.states.some(redRed), 'never shows the red–red violation'),
         ];
       }),
   },

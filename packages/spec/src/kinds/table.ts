@@ -64,6 +64,8 @@ export const TableDeclInput = z
     message: 'Give either `initial` or `cells`, not both',
     path: ['cells'],
   })
+  // The same rule for JSON Schema validators, which cannot run the refinement.
+  .meta({ not: { required: ['initial', 'cells'] } })
   .describe(
     'Give `rows` and `columns` for an empty table, `initial` for one with values, or both to pad `initial`.',
   );

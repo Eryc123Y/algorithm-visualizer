@@ -825,6 +825,12 @@
               "kind"
             ],
             "additionalProperties": false,
+            "not": {
+              "required": [
+                "initial",
+                "cells"
+              ]
+            },
             "description": "Give `rows` and `columns` for an empty table, `initial` for one with values, or both to pad `initial`."
           },
           {
@@ -958,7 +964,13 @@
             "required": [
               "kind"
             ],
-            "additionalProperties": false
+            "additionalProperties": false,
+            "not": {
+              "required": [
+                "initial",
+                "buckets"
+              ]
+            }
           }
         ]
       },

@@ -69,7 +69,9 @@ export const HashTableDeclInput = z
   .refine((d) => d.buckets === undefined || d.initial === undefined, {
     message: 'Give either `initial` or `buckets`, not both',
     path: ['buckets'],
-  });
+  })
+  // The same rule for JSON Schema validators, which cannot run the refinement.
+  .meta({ not: { required: ['initial', 'buckets'] } });
 export type HashTableDeclInput = z.infer<typeof HashTableDeclInput>;
 
 function normalizeHashTableDecl(input: HashTableDeclInput): HashTableDecl {

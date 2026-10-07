@@ -79,6 +79,32 @@ describe('eval tasks', () => {
     expect(result.problems.join()).toContain('29 wrong cells');
   });
 
+  it('reject a red–black tree that starts already balanced', () => {
+    const task = tasks.find((t) => t.id === 'red-black-insert')!;
+    const wait = (narration: string) => ({
+      actions: [{ target: 't', type: 'highlight', nodes: ['n2'] }],
+      meta: { narration },
+    });
+    const result = grade(task, {
+      version: '0.1',
+      structures: {
+        t: {
+          kind: 'tree',
+          binary: true,
+          nodes: [
+            { id: 'n2', value: 2, color: 'black', children: ['n1', 'n3'] },
+            { id: 'n1', value: 1, color: 'red' },
+            { id: 'n3', value: 3, color: 'red' },
+          ],
+        },
+      },
+      steps: ['Insert 1.', 'Insert 2.', 'Insert 3.', 'Fix.'].map(wait),
+    });
+    expect(result.valid).toBe(true);
+    expect(result.correct).toBe(false);
+    expect(result.problems.join()).toContain('does not start empty');
+  });
+
   it('count a missing submission as a failure', () => {
     expect(grade(tasks[0]!, undefined)).toMatchObject({
       submitted: false,
