@@ -114,6 +114,21 @@ test('a second result replaces the document and opens at its frame', async ({
   await expectStageMatches(player, other);
 });
 
+test('an error result replaces an earlier document', async ({ page }) => {
+  const { view, player } = await openHost(page);
+  await host(page).result(await callShow({ document: sort }));
+  await expect(player).toBeVisible();
+  // A step, then an error before the context update is sent.
+  await player.getByRole('button', { name: 'Next step' }).click();
+  await host(page).result(
+    await callShow({ document: sort, frame: sort.steps.length + 1 }),
+  );
+  await expect(view.getByRole('alert')).toContainText('OUT_OF_RANGE');
+  await expect(player).toBeHidden();
+  await page.waitForTimeout(600);
+  expect((await host(page).read()).contexts).toEqual([]);
+});
+
 test('tells the model which frame the user stopped on', async ({ page }) => {
   const { player } = await openHost(page);
   await host(page).result(await callShow({ document: sort }));

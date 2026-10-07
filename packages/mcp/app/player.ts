@@ -32,19 +32,29 @@ function say(text: string, error = false): void {
 
 const app = new App({ name: 'algoviz player', version: '0.0.0' });
 let shown: Shown | null = null;
+/** A model context update waiting for the user to stay on a frame. */
+let pending: ReturnType<typeof setTimeout> | undefined;
 
 function applyContext(context: McpUiHostContext | undefined): void {
   if (context?.theme !== undefined) player.theme = context.theme;
 }
 
+/** Shows an error in place of any earlier document. */
+function fail(text: string): void {
+  clearTimeout(pending);
+  shown = null;
+  player.hidden = true;
+  say(text, true);
+}
+
 app.ontoolresult = (result) => {
   if (result.isError === true) {
     const [first] = result.content ?? [];
-    say(first?.type === 'text' ? first.text : 'The document is invalid.', true);
+    fail(first?.type === 'text' ? first.text : 'The document is invalid.');
     return;
   }
   if (!isShown(result.structuredContent)) {
-    say('The tool result has no document to show.', true);
+    fail('The tool result has no document to show.');
     return;
   }
   shown = result.structuredContent;
@@ -58,7 +68,6 @@ app.onhostcontextchanged = applyContext;
 
 // Keep the model's view of the conversation in step with the user's: the
 // frame on screen and its narration, once the user stops on it.
-let pending: ReturnType<typeof setTimeout> | undefined;
 player.addEventListener('algo-frame', (event) => {
   clearTimeout(pending);
   const { index, length, playing } = event.detail;
