@@ -172,6 +172,15 @@ export async function attempt(
     for (const use of uses) {
       const input = (use.input ?? {}) as Record<string, unknown>;
       if (use.name === SUBMIT) {
+        if (input['document'] === undefined) {
+          results.push({
+            type: 'tool_result',
+            tool_use_id: use.id,
+            content: `${SUBMIT} needs a document.`,
+            is_error: true,
+          });
+          continue;
+        }
         submit(run, task.id, input['document']);
         submitted = true;
         results.push({

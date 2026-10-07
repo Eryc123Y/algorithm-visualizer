@@ -167,6 +167,24 @@ describe('attempt with tools', () => {
     expect([totals.tasks, totals.correct]).toEqual([2, 1]);
   });
 
+  it('answers a submission without a document with an error', async () => {
+    const run = newRun();
+    const { create, requests } = scripted([
+      [use('1', 'submit_document', {})],
+      [use('2', 'submit_document', { document: good })],
+    ]);
+    const result = await attempt(task, run, create, {
+      model: 'm',
+      mode: 'tools',
+    });
+    expect(result.stop).toBe('submitted');
+    const reply = requests[1]!.messages.at(-1)!.content as {
+      is_error?: boolean;
+    }[];
+    expect(reply[0]!.is_error).toBe(true);
+    expect(summarizeRun(run).tasks[0]!.correct).toBe(true);
+  });
+
   it('stops after the turn limit', async () => {
     const run = newRun();
     const { create } = scripted(

@@ -85,6 +85,8 @@ const redRed = (s: Track<'tree'>['first']) =>
 type GraphState = Track<'graph'>['first'];
 const selected = (s: GraphState) =>
   s.data.edges.filter((e) => s.marks.edgeMarks[e.id] === 'selected');
+const rejected = (s: GraphState) =>
+  s.data.edges.filter((e) => s.marks.edgeMarks[e.id] === 'rejected');
 /** Weights of selected edges in the order they were first selected. */
 function selectionOrder(states: readonly GraphState[]): number[] {
   const seen = new Set<string>();
@@ -93,6 +95,17 @@ function selectionOrder(states: readonly GraphState[]): number[] {
       .filter((e) => !seen.has(e.id) && seen.add(e.id))
       .map((e) => Number(e.weight)),
   );
+}
+
+/** Nodes in the order they first get a colour, one per step. */
+function colouringOrder(states: readonly GraphState[]): string[] {
+  const order: string[] = [];
+  for (const s of states) {
+    const added = Object.keys(s.marks.groups).filter((n) => !order.includes(n));
+    if (added.length > 1) return [...order, `${added.join('+')} at once`];
+    order.push(...added);
+  }
+  return order;
 }
 
 /** Whether a value is a drawn empty cell. */
@@ -714,6 +727,15 @@ export const tasks: readonly EvalTask[] = [
             `selects ${taken.length} edges of weight ${weight}, not 4 of weight 8`,
           ),
           ...expect(
+            same(
+              rejected(t.last)
+                .map((e) => [e.from, e.to].sort().join('–'))
+                .sort(),
+              ['A–B', 'C–D', 'C–E'],
+            ),
+            'does not end with A–B, C–D and C–E rejected',
+          ),
+          ...expect(
             maxGain(t.states, (st) => selected(st).length) <= 1 &&
               same(
                 selectionOrder(t.states),
@@ -760,8 +782,17 @@ export const tasks: readonly EvalTask[] = [
           ),
           ...expect(colours.size === 3, `uses ${colours.size} colours, not 3`),
           ...expect(
-            maxGain(t.states, (st) => Object.keys(st.marks.groups).length) <= 1,
-            'colours more than one node in a step',
+            same(colouringOrder(t.states), ['A', 'B', 'C', 'D', 'E']),
+            `colours the nodes in the order ${colouringOrder(t.states).join(', ')}`,
+          ),
+          ...expect(
+            // Smallest colour first: A < B < C, then D takes A's and E B's,
+            // whether colours count from 0 or 1.
+            groups['A']! < groups['B']! &&
+              groups['B']! < groups['C']! &&
+              groups['D'] === groups['A'] &&
+              groups['E'] === groups['B'],
+            'colours are not the smallest free ones',
           ),
         ];
       }),

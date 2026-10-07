@@ -6,7 +6,7 @@
 import { readFileSync } from 'node:fs';
 
 import { createServer, PLAYER_URI } from '@algoviz/mcp';
-import { bubbleSort } from '@algoviz/recipes';
+import { bubbleSort, dijkstra } from '@algoviz/recipes';
 import { Client, InMemoryTransport } from '@modelcontextprotocol/client';
 import type { Page } from '@playwright/test';
 
@@ -127,6 +127,23 @@ test('an error result replaces an earlier document', async ({ page }) => {
   await expect(player).toBeHidden();
   await page.waitForTimeout(600);
   expect((await host(page).read()).contexts).toEqual([]);
+});
+
+test('a new result cancels a context update about the old document', async ({
+  page,
+}) => {
+  const { player } = await openHost(page);
+  await host(page).result(await callShow({ document: sort, frame: 1 }));
+  await expect(player).toHaveAttribute('frame', '1');
+  // The user goes back to frame 0, and within the update's delay another
+  // document arrives, also at frame 0.
+  await player.getByRole('button', { name: 'Previous step' }).click();
+  const other = dijkstra({ nodes: ['A', 'B'], edges: [['A', 'B', 1]] }, 'A');
+  await host(page).result(await callShow({ document: other }));
+  await expect(player.locator('[data-key="g/element/A"]')).toHaveCount(1);
+  await page.waitForTimeout(800);
+  const { contexts } = await host(page).read();
+  expect(contexts.filter((c) => c.includes(sort.title!))).toEqual([]);
 });
 
 test('tells the model which frame the user stopped on', async ({ page }) => {

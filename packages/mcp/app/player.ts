@@ -57,6 +57,7 @@ app.ontoolresult = (result) => {
     fail('The tool result has no document to show.');
     return;
   }
+  clearTimeout(pending);
   shown = result.structuredContent;
   say('');
   player.hidden = false;

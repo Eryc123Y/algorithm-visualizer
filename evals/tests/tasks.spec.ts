@@ -152,6 +152,54 @@ describe('eval tasks', () => {
     expect(result.problems.join()).toContain('does not start empty');
   });
 
+  it('reject a colouring out of order or not with the smallest colours', () => {
+    const task = tasks.find((t) => t.id === 'graph-coloring')!;
+    const colour = (node: string, group: number) => ({
+      actions: [{ target: 'g', type: 'group', node, group }],
+      meta: { narration: `Colour ${node}.` },
+    });
+    const result = grade(task, {
+      version: '0.1',
+      structures: {
+        g: {
+          kind: 'graph',
+          nodes: ['A', 'B', 'C', 'D', 'E'],
+          edges: [
+            ['A', 'B'],
+            ['B', 'C'],
+            ['C', 'A'],
+            ['C', 'D'],
+            ['D', 'E'],
+          ],
+        },
+      },
+      steps: [
+        colour('E', 2),
+        colour('D', 1),
+        colour('C', 0),
+        colour('B', 2),
+        colour('A', 1),
+      ],
+    });
+    expect(result.errors).toEqual([]);
+    expect(result.problems).toEqual([
+      'g: colours the nodes in the order E, D, C, B, A',
+      'g: colours are not the smallest free ones',
+    ]);
+  });
+
+  it('reject a Kruskal run that never marks rejected edges', () => {
+    const task = tasks.find((t) => t.id === 'kruskal')!;
+    const doc = JSON.parse(JSON.stringify(references['kruskal']!())) as {
+      steps: { actions: { type: string; mark?: string }[] }[];
+    };
+    for (const step of doc.steps)
+      step.actions = step.actions.filter((a) => a.mark !== 'rejected');
+    const result = grade(task, doc);
+    expect(result.errors).toEqual([]);
+    expect(result.problems.join()).toContain('rejected');
+  });
+
   it('count a missing submission as a failure', () => {
     expect(grade(tasks[0]!, undefined)).toMatchObject({
       submitted: false,
