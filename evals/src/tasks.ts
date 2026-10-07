@@ -59,6 +59,21 @@ const sortsArray =
 const hasPointers = (t: Track<'array'>, n: number) =>
   t.states.some((s) => Object.keys(s.marks.pointers).length >= n);
 
+/** The positions a pointer moves through, without repeats in a row. */
+const probes = (t: Track<'array'>, name: string) =>
+  t.states
+    .map((s) => s.marks.pointers[name])
+    .filter((k, i, ks) => k !== undefined && k !== ks[i - 1]);
+
+/**
+ * Whether a search ends failed with lo at `at`: in the last frame, lo is
+ * there and hi, if still shown, is at or below it (inclusive or exclusive).
+ */
+function failedAt(t: Track<'array'>, at: number): boolean {
+  const { lo, hi } = t.last.marks.pointers;
+  return lo === at && (hi === undefined || hi <= at);
+}
+
 const isMaxHeap = (xs: readonly number[]) =>
   xs.every((x, i) => i === 0 || xs[Math.floor((i - 1) / 2)]! >= x);
 
@@ -139,7 +154,11 @@ export const tasks: readonly EvalTask[] = [
           t.states.every((s) => same(values(s), values(t.first))),
           'changes the array',
         ),
-        ...expect(hasPointers(t, 2), 'never shows two pointers at once'),
+        ...expect(
+          same(probes(t, 'mid'), [3, 1, 2]),
+          `mid probes ${JSON.stringify(probes(t, 'mid'))}, not 7, 3 and 4 (indices 3, 1, 2)`,
+        ),
+        ...expect(failedAt(t, 3), 'does not end with lo at 3 and hi below it'),
       ]),
   },
   {

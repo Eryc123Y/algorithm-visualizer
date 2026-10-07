@@ -43,6 +43,9 @@ const efforts = ['low', 'medium', 'high', 'xhigh', 'max'] as const;
 const effort = efforts.find((e) => e === values.effort);
 if (values.effort !== undefined && effort === undefined)
   throw new Error(`--effort must be one of ${efforts.join(', ')}`);
+const concurrency = Number(values.concurrency);
+if (!Number.isInteger(concurrency) || concurrency < 1)
+  throw new Error('--concurrency must be a positive integer');
 const requested = values.tasks?.split(',').map((id) => id.trim());
 const unknown = requested?.filter((id) => !tasks.some((t) => t.id === id));
 if (unknown !== undefined && unknown.length > 0)
@@ -96,9 +99,7 @@ async function worker() {
     }
   }
 }
-await Promise.all(
-  Array.from({ length: Math.max(1, Number(values.concurrency)) }, worker),
-);
+await Promise.all(Array.from({ length: concurrency }, worker));
 
 const summary = writeReport(run);
 const usage = [...results.values()].reduce(

@@ -38,6 +38,31 @@ describe('eval tasks', () => {
     expect(grade(task, doc).correct).toBe(false);
   });
 
+  it('reject a binary search that never narrows the interval', () => {
+    const task = tasks.find((t) => t.id === 'binary-search-miss')!;
+    const still = (narration: string) => ({
+      actions: [{ target: 'a', type: 'highlight', indices: [3] }],
+      meta: { narration },
+    });
+    const result = grade(task, {
+      version: '0.1',
+      structures: { a: { kind: 'array', initial: [1, 3, 4, 7, 9, 11, 15] } },
+      steps: [
+        {
+          actions: [
+            { target: 'a', type: 'pointer', name: 'lo', index: 0 },
+            { target: 'a', type: 'pointer', name: 'mid', index: 3 },
+          ],
+          meta: { narration: 'Start.' },
+        },
+        still('Look.'),
+        still('Not found.'),
+      ],
+    });
+    expect(result.valid).toBe(true);
+    expect(result.correct).toBe(false);
+  });
+
   it('count a missing submission as a failure', () => {
     expect(grade(tasks[0]!, undefined)).toMatchObject({
       submitted: false,
