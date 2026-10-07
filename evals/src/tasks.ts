@@ -77,7 +77,8 @@ function failedAt(t: Track<'array'>, at: number): boolean {
 const isMaxHeap = (xs: readonly number[]) =>
   xs.every((x, i) => i === 0 || xs[Math.floor((i - 1) / 2)]! >= x);
 
-function lcsLength(a: string, b: string): number {
+/** The LCS table of a and b, with the empty-prefix row and column. */
+function lcsTable(a: string, b: string): number[][] {
   const L = Array.from({ length: a.length + 1 }, () =>
     Array<number>(b.length + 1).fill(0),
   );
@@ -87,7 +88,7 @@ function lcsLength(a: string, b: string): number {
         a[i - 1] === b[j - 1]
           ? L[i - 1]![j - 1]! + 1
           : Math.max(L[i - 1]![j]!, L[i]![j - 1]!);
-  return L[a.length]![b.length]!;
+  return L;
 }
 
 /** A graph whose nodes and edges are exactly these (by endpoints). */
@@ -701,16 +702,25 @@ export const tasks: readonly EvalTask[] = [
     minSteps: 6,
     check: (trace) =>
       anyTrack(trace, 'table', (t) => {
+        const want = lcsTable('ABCB', 'BDCAB');
         const rows = t.last.data;
-        const corner = rows.at(-1)?.at(-1) ?? null;
+        const wrong = want.flatMap((row, r) =>
+          row
+            .map((v, c) => [r, c, v] as const)
+            .filter(([, c, v]) => num(rows[r]?.[c] ?? null) !== v)
+            .map(
+              ([r, c, v]) =>
+                `(${r}, ${c}) is ${String(rows[r]?.[c] ?? null)}, not ${v}`,
+            ),
+        );
         return [
           ...expect(
             rows.length === 5 && rows[0]?.length === 6,
             `is ${rows.length}×${rows[0]?.length ?? 0}, not 5×6`,
           ),
           ...expect(
-            num(corner) === lcsLength('ABCB', 'BDCAB'),
-            `bottom-right cell is ${String(corner)}`,
+            wrong.length === 0,
+            `${wrong.length} wrong cells: ${wrong.slice(0, 3).join('; ')}`,
           ),
         ];
       }),

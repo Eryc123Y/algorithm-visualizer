@@ -15,7 +15,7 @@
  * Credentials come from the environment as for any Anthropic SDK client
  * (ANTHROPIC_API_KEY, or a profile from `ant auth login`).
  */
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseArgs } from 'node:util';
 
@@ -38,7 +38,10 @@ const { values } = parseArgs({
   },
 });
 
-const mode = values.mode === 'oneshot' ? 'oneshot' : 'tools';
+const modes = ['tools', 'oneshot'] as const;
+const mode = modes.find((m) => m === values.mode);
+if (mode === undefined)
+  throw new Error(`--mode must be one of ${modes.join(', ')}`);
 const efforts = ['low', 'medium', 'high', 'xhigh', 'max'] as const;
 const effort = efforts.find((e) => e === values.effort);
 if (values.effort !== undefined && effort === undefined)
@@ -56,6 +59,9 @@ const chosen = requested
 const stamp = new Date().toISOString().replace(/[:.]/g, '-');
 const run =
   values.out ?? join('evals', 'results', `${values.model}-${mode}-${stamp}`);
+// Logs are appended and documents kept, so a used directory would mix runs.
+if (existsSync(run) && readdirSync(run).length > 0)
+  throw new Error(`${run} is not empty; choose a new --out directory`);
 
 const options: AttemptOptions = {
   model: values.model,
