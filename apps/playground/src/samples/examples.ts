@@ -52,6 +52,7 @@ export interface Example {
 }
 
 const values = [5, 3, 8, 1, 9, 2, 7];
+const bstKeys = [8, 3, 10, 1, 6, 14, 4, 7, 13];
 
 export const examples: readonly Example[] = [
   {
@@ -231,6 +232,35 @@ export const examples: readonly Example[] = [
     group: 'Hashing',
     label: 'Linear probing',
     build: () => recipes.linearProbing([15, 11, 27, 8, 12], 7),
+  },
+  {
+    group: 'Operations',
+    label: 'BST: delete a node with two children',
+    build: () => recipes.ops.bst.delete({ from: bstKeys, key: 3 }).document,
+  },
+  {
+    group: 'Operations',
+    label: 'BST: insert, then search',
+    build: () =>
+      recipes.ops.bst.run({
+        from: bstKeys,
+        ops: [
+          { op: 'insert', key: 5 },
+          { op: 'search', key: 5 },
+        ],
+      }).document,
+  },
+  {
+    group: 'Operations',
+    label: 'Min-heap: pop',
+    build: () => recipes.ops.heap.pop({ from: values }).document,
+  },
+  {
+    group: 'Operations',
+    label: 'Min-heap: decrease key',
+    build: () =>
+      recipes.ops.heap.decreaseKey({ from: values, index: 5, value: 0 })
+        .document,
   },
 ];
 

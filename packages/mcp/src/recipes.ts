@@ -64,6 +64,47 @@ const Values = z
   .max(32)
   .describe('The numbers to work on, e.g. [5, 3, 8, 1].');
 
+const StartKeys = z.array(z.number()).max(recipes.MAX_SIZE);
+const Key = z.number();
+
+const OpList = <T extends z.ZodType>(op: T) =>
+  z
+    .array(op)
+    .min(1)
+    .max(recipes.MAX_OPS)
+    .describe('Operations, run in order on the starting structure.');
+
+const BstOp = z.discriminatedUnion('op', [
+  z.strictObject({ op: z.literal('search'), key: Key }),
+  z.strictObject({ op: z.literal('insert'), key: Key }),
+  z.strictObject({
+    op: z.literal('delete'),
+    key: Key,
+    replaceWith: z
+      .enum(['successor', 'predecessor'])
+      .optional()
+      .describe('For a node with two children; default "successor".'),
+  }),
+]);
+
+/** Drops an absent `replaceWith`, which exact optional types keep apart. */
+const bstCall = (op: z.output<typeof BstOp>): recipes.BstCall =>
+  op.op === 'delete' && op.replaceWith === undefined
+    ? { op: 'delete', key: op.key }
+    : (op as recipes.BstCall);
+
+const Index = z
+  .int()
+  .min(0)
+  .max(recipes.MAX_SIZE - 1)
+  .describe('Position in the heap array.');
+const HeapOp = z.discriminatedUnion('op', [
+  z.strictObject({ op: z.literal('push'), value: Key }),
+  z.strictObject({ op: z.literal('pop') }),
+  z.strictObject({ op: z.literal('decreaseKey'), index: Index, value: Key }),
+  z.strictObject({ op: z.literal('increaseKey'), index: Index, value: Key }),
+]);
+
 const Graph = z
   .strictObject({
     nodes: z
@@ -197,7 +238,7 @@ export const recipeCatalog: readonly RecipeEntry[] = [
   recipe(
     'trees',
     'binaryHeap',
-    'Pushing values onto a binary min-heap (sift up), as a tree and an array',
+    'Pushing values onto a binary min-heap (sift up), then popping them all (sift down), as a tree and an array',
     z.strictObject({ values: Values }),
     ({ values }) => recipes.binaryHeap(values),
   ),
@@ -222,6 +263,44 @@ export const recipeCatalog: readonly RecipeEntry[] = [
         .describe('Pairs to unite, e.g. [[0, 1], [2, 3]].'),
     }),
     ({ size, unions }) => recipes.unionFind(size, unions),
+  ),
+  recipe(
+    'operations',
+    'bstOps',
+    'Search, insert or delete in a binary search tree built from given keys; only the operations are animated',
+    z.strictObject({
+      from: StartKeys.describe(
+        'Keys in insertion order that build the starting tree, e.g. [8, 3, 10, 1, 6].',
+      ),
+      ops: OpList(BstOp),
+    }),
+    ({ from, ops }) =>
+      recipes.ops.bst.run({ from, ops: ops.map(bstCall) }).document,
+  ),
+  recipe(
+    'operations',
+    'heapOps',
+    'Push, pop, or decrease-key (min-heap) / increase-key (max-heap) on a binary heap; only the operations are animated',
+    z.strictObject({
+      from: z
+        .union([
+          StartKeys.describe('Values pushed one by one to build the heap.'),
+          z.strictObject({
+            array: StartKeys.describe('An array that already is a heap.'),
+          }),
+        ])
+        .describe(
+          'The starting heap: values to push, or { array } that already is a heap.',
+        ),
+      order: z.enum(['min', 'max']).optional().describe('Default "min".'),
+      ops: OpList(HeapOp),
+    }),
+    ({ from, order, ops }) =>
+      recipes.ops.heap.run({
+        from,
+        ...(order === undefined ? {} : { order }),
+        ops,
+      }).document,
   ),
   recipe(
     'graphs',

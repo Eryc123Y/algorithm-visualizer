@@ -29,3 +29,11 @@ export function randomInts(seed: number, count: number, max: number): number[] {
     return x % (max + 1);
   });
 }
+
+/** fast-check settings: deepen with FUZZ_RUNS, replay with FUZZ_SEED. */
+export const fuzz = {
+  numRuns: Number(process.env['FUZZ_RUNS'] ?? 60),
+  ...(process.env['FUZZ_SEED']
+    ? { seed: Number(process.env['FUZZ_SEED']) }
+    : {}),
+};

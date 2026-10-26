@@ -202,6 +202,41 @@ describe('recipes', () => {
     expect(!doc.ok && doc.error[0]!.code).toBe('INVALID_ARGUMENT');
   });
 
+  it('runs operations on a given BST or heap', () => {
+    const bst = runRecipe('bstOps', {
+      from: [8, 3, 10, 1, 6],
+      ops: [
+        { op: 'delete', key: 3 },
+        { op: 'search', key: 6 },
+      ],
+    });
+    expect(bst.ok && loadTrace(bst.value).ok).toBe(true);
+    expect(bst.ok && bst.value.title).toBe(
+      'Binary search tree: delete 3, search 6',
+    );
+    const heap = runRecipe('heapOps', {
+      from: { array: [9, 5, 7] },
+      order: 'max',
+      ops: [{ op: 'increaseKey', index: 2, value: 10 }, { op: 'pop' }],
+    });
+    expect(heap.ok && loadTrace(heap.value).ok).toBe(true);
+  });
+
+  it('rejects operations the schema or the state does not allow', () => {
+    const unknown = runRecipe('bstOps', { from: [1], ops: [{ op: 'rotate' }] });
+    expect(!unknown.ok && unknown.error[0]!.code).toBe('INVALID_SHAPE');
+    const tooMany = runRecipe('heapOps', {
+      from: [1],
+      ops: Array.from({ length: 9 }, () => ({ op: 'pop' })),
+    });
+    expect(!tooMany.ok && tooMany.error[0]!.path).toBe('$.args.ops');
+    const empty = runRecipe('heapOps', { from: [], ops: [{ op: 'pop' }] });
+    expect(!empty.ok && empty.error[0]).toMatchObject({
+      code: 'INVALID_ARGUMENT',
+      message: 'The heap is empty: there is nothing to pop',
+    });
+  });
+
   it('reports unknown recipes', () => {
     const doc = runRecipe('bogoSort', {});
     expect(!doc.ok && doc.error[0]!.code).toBe('UNKNOWN_RECIPE');
