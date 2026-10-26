@@ -72,6 +72,46 @@ describe('<algo-player>', () => {
     expect(frames).toEqual([1]);
   });
 
+  it('highlights Python source and keeps the current line', async () => {
+    const el = await mount((e) => {
+      e.visualization = {
+        ...doc,
+        source: {
+          language: 'python',
+          code: 'if a[0] > a[1]:  # out of order\n    swap(a, 0, 1)',
+        },
+      };
+    });
+    el.next();
+    await el.updateComplete;
+    const tokens = [...shadow(el).querySelectorAll('.line.current [class]')];
+    expect(tokens.map((t) => `${t.className}:${t.textContent}`)).toEqual([
+      'tok-keyword:if',
+      'tok-number:0',
+      'tok-number:1',
+      'tok-comment:# out of order',
+    ]);
+    expect(text(el, '.line.current')).toBe('if a[0] > a[1]: # out of order');
+    expect(shadow(el).querySelectorAll('.code .line')).toHaveLength(2);
+  });
+
+  it('leaves source in other languages unhighlighted', async () => {
+    const el = await mount((e) => {
+      e.visualization = {
+        ...doc,
+        source: { language: 'c', code: 'if (a > b) swap(a, b);\nreturn 0;' },
+      };
+    });
+    expect(shadow(el).querySelectorAll('.code [class^="tok-"]')).toHaveLength(
+      0,
+    );
+    const lines = [...shadow(el).querySelectorAll('.code .line')];
+    expect(lines.map((l) => l.textContent)).toEqual([
+      'if (a > b) swap(a, b);',
+      'return 0;',
+    ]);
+  });
+
   it('reads inline JSON from a script child', async () => {
     const el = await mount((e) => {
       const script = document.createElement('script');

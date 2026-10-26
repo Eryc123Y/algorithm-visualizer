@@ -30,6 +30,7 @@ import {
 import { formatErrors, type Diagnostic } from '@algoviz/spec';
 import { paintScene, type SvgTheme, type ThemeName } from '@algoviz/svg';
 
+import { codeLines } from './code-panel.ts';
 import { PlayerController, type PlaybackState } from './controller.ts';
 import {
   nextIcon,
@@ -472,15 +473,7 @@ export class AlgoPlayer extends LitElement {
                   role="region"
                   aria-label="Source code"
                 >
-${source.code
-                    .split('\n')
-                    .map(
-                      (text, k) =>
-                        html`<span
-                          class="line ${step?.meta?.line === k + 1 ? 'current' : ''}"
-                          >${text}</span
-                        >`,
-                    )}</pre>`
+${codeLines(source, step?.meta?.line)}</pre>`
               : nothing
           }
         </div>
