@@ -40,27 +40,43 @@ export const HashTableDecl = z
   .describe('A hash table with separate chaining.');
 export type HashTableDecl = z.infer<typeof HashTableDecl>;
 
-export const HashTableDeclInput = z.strictObject({
-  kind: z.literal('hashTable'),
-  label: z.string().max(LIMITS.textLength).optional(),
-  size: z
-    .int()
-    .min(1)
-    .max(MAX_BUCKETS)
-    .optional()
-    .describe('Number of buckets; at least the length of `initial`.'),
-  initial: z
-    .array(z.array(ElementInput).max(LIMITS.elementsPerStructure))
-    .max(MAX_BUCKETS)
-    .optional()
-    .describe(
-      'Chains per bucket, e.g. [[10, 20], [], [7]]; bare values get ids e0, e1, … in reading order.',
-    ),
-});
+export const HashTableDeclInput = z
+  .strictObject({
+    kind: z.literal('hashTable'),
+    label: z.string().max(LIMITS.textLength).optional(),
+    size: z
+      .int()
+      .min(1)
+      .max(MAX_BUCKETS)
+      .optional()
+      .describe('Number of buckets; at least the length of `initial`.'),
+    initial: z
+      .array(z.array(ElementInput).max(LIMITS.elementsPerStructure))
+      .max(MAX_BUCKETS)
+      .optional()
+      .describe(
+        'Chains per bucket, e.g. [[10, 20], [], [7]]; bare values get ids e0, e1, … in reading order.',
+      ),
+    buckets: z
+      .array(z.array(Element).max(LIMITS.elementsPerStructure))
+      .min(1)
+      .max(MAX_BUCKETS)
+      .optional()
+      .describe(
+        'The canonical form: every bucket with explicit elements. Accepted so that parsed documents can be read again.',
+      ),
+  })
+  .refine((d) => d.buckets === undefined || d.initial === undefined, {
+    message: 'Give either `initial` or `buckets`, not both',
+    path: ['buckets'],
+  })
+  // The same rule for JSON Schema validators, which cannot run the refinement.
+  .meta({ not: { required: ['initial', 'buckets'] } });
 export type HashTableDeclInput = z.infer<typeof HashTableDeclInput>;
 
 function normalizeHashTableDecl(input: HashTableDeclInput): HashTableDecl {
-  const { size, initial = [], ...rest } = input;
+  const { size, buckets: given, ...others } = input;
+  const { initial = given ?? [], ...rest } = others;
   let next = 0;
   const count = Math.max(size ?? 0, initial.length, 1);
   const buckets = Array.from({ length: count }, (_, b) =>

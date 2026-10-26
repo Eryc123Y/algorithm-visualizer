@@ -1,0 +1,73 @@
+{
+  "description": "addNode can give a red–black colour directly; without one the node has none.",
+  "input": {
+    "version": "0.1",
+    "structures": { "rb": { "kind": "tree", "binary": true } },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "rb",
+            "type": "addNode",
+            "node": { "id": "a", "value": 1, "color": "black" },
+            "parent": null
+          },
+          {
+            "target": "rb",
+            "type": "addNode",
+            "node": { "id": "b", "value": 2, "color": "red" },
+            "parent": "a",
+            "slot": "right"
+          },
+          { "target": "rb", "type": "addNode", "node": 0, "parent": "a" }
+        ]
+      }
+    ]
+  },
+  "expectedLength": 1,
+  "expectedFrames": [
+    {
+      "index": 1,
+      "state": {
+        "rb": {
+          "kind": "tree",
+          "state": {
+            "data": {
+              "nodes": [
+                {
+                  "id": "a",
+                  "value": 1,
+                  "children": ["e0", "b"],
+                  "color": "black"
+                },
+                {
+                  "id": "b",
+                  "value": 2,
+                  "children": [null, null],
+                  "color": "red"
+                },
+                {
+                  "id": "e0",
+                  "value": 0,
+                  "children": [null, null],
+                  "color": null
+                }
+              ],
+              "roots": ["a"]
+            },
+            "marks": {
+              "highlight": [],
+              "compare": null,
+              "visited": [],
+              "settled": [],
+              "groups": {},
+              "pointers": {},
+              "notes": {}
+            },
+            "binary": true
+          }
+        }
+      }
+    }
+  ]
+}

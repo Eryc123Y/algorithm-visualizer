@@ -1,0 +1,208 @@
+{
+  "version": "0.1",
+  "title": "Two sum with two pointers",
+  "source": {
+    "language": "python",
+    "code": "i, j = 0, n - 1\nwhile i < j:\n    s = a[i] + a[j]\n    if s == target:\n        return [i, j]\n    elif s < target:\n        i += 1\n    else:\n        j -= 1"
+  },
+  "structures": {
+    "a": {
+      "kind": "array",
+      "initial": [
+        1,
+        2,
+        4,
+        7,
+        11,
+        15
+      ]
+    }
+  },
+  "steps": [
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "pointer",
+          "name": "i",
+          "index": 0
+        },
+        {
+          "target": "a",
+          "type": "pointer",
+          "name": "j",
+          "index": 5
+        }
+      ],
+      "meta": {
+        "line": 1,
+        "narration": "Initialize pointers at left and right ends.",
+        "vars": {
+          "i": 0,
+          "j": 5,
+          "target": 15
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "compare",
+          "i": 0,
+          "j": 5
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "1 + 15 = 16 > 15, so move j left.",
+        "vars": {
+          "i": 0,
+          "j": 5,
+          "s": 16
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "pointer",
+          "name": "j",
+          "index": 4
+        }
+      ],
+      "meta": {
+        "line": 6,
+        "narration": "Move j from index 5 to 4.",
+        "vars": {
+          "i": 0,
+          "j": 4
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "compare",
+          "i": 0,
+          "j": 4
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "1 + 11 = 12 < 15, so move i right.",
+        "vars": {
+          "i": 0,
+          "j": 4,
+          "s": 12
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "pointer",
+          "name": "i",
+          "index": 1
+        }
+      ],
+      "meta": {
+        "line": 5,
+        "narration": "Move i from index 0 to 1.",
+        "vars": {
+          "i": 1,
+          "j": 4
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "compare",
+          "i": 1,
+          "j": 4
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "2 + 11 = 13 < 15, so move i right.",
+        "vars": {
+          "i": 1,
+          "j": 4,
+          "s": 13
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "pointer",
+          "name": "i",
+          "index": 2
+        }
+      ],
+      "meta": {
+        "line": 5,
+        "narration": "Move i from index 1 to 2.",
+        "vars": {
+          "i": 2,
+          "j": 4
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "compare",
+          "i": 2,
+          "j": 4
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "4 + 11 = 15: found the target sum!",
+        "vars": {
+          "i": 2,
+          "j": 4,
+          "s": 15
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "highlight",
+          "indices": [
+            2,
+            4
+          ]
+        },
+        {
+          "target": "a",
+          "type": "settle",
+          "index": 2
+        },
+        {
+          "target": "a",
+          "type": "settle",
+          "index": 4
+        }
+      ],
+      "meta": {
+        "line": 4,
+        "narration": "Return indices 2 and 4, with values 4 and 11.",
+        "vars": {
+          "i": 2,
+          "j": 4
+        }
+      }
+    }
+  ]
+}

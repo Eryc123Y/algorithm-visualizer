@@ -1,0 +1,22 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "tsBuildInfoFile": "./dist/.tsbuildinfo",
+    // A Node.js server and CLI.
+    "lib": ["ES2023"],
+    "types": ["node"],
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true
+  },
+  "include": ["src"],
+  // Resolves workspace packages to their built declarations, so build them first.
+  "references": [
+    { "path": "../spec/tsconfig.lib.json" },
+    { "path": "../core/tsconfig.lib.json" },
+    { "path": "../svg/tsconfig.lib.json" },
+    { "path": "../recipes/tsconfig.lib.json" }
+  ]
+}

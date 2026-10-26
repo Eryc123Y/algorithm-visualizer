@@ -49,3 +49,4 @@ playwright-report/
 # TypeScript incremental build info
 *.tsbuildinfo
 gallery.html
+packages/mcp/ui/

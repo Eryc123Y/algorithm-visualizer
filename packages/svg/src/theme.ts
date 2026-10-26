@@ -83,7 +83,7 @@ export const lightTheme: SvgTheme = {
   background: null,
   shadow: 'rgba(20, 45, 38, 0.10)',
   title: '#1f2a26',
-  index: '#8a9590',
+  index: '#66736d',
   pointer: { line: '#0f7b6c', fill: '#0f7b6c', text: '#ffffff' },
   cell: {
     visited: {
@@ -286,7 +286,7 @@ export const printTheme: SvgTheme = {
     { fill: '#d9d9d9', stroke: '#555555', text: '#000000' },
     { fill: '#bfbfbf', stroke: '#555555', text: '#000000' },
     { fill: '#a6a6a6', stroke: '#333333', text: '#000000' },
-    { fill: '#8c8c8c', stroke: '#333333', text: '#ffffff' },
+    { fill: '#8c8c8c', stroke: '#333333', text: '#000000' },
     { fill: '#737373', stroke: '#333333', text: '#ffffff' },
   ],
   rb: {

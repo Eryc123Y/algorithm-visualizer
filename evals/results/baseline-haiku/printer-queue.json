@@ -1,0 +1,111 @@
+{
+  "version": "0.1",
+  "title": "Printer queue with jobs A, B, C, D",
+  "structures": {
+    "queue": {
+      "kind": "queue",
+      "initial": [],
+      "label": "Printer Queue"
+    }
+  },
+  "steps": [
+    {
+      "actions": [],
+      "meta": {
+        "narration": "Start with an empty printer queue."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "enqueue",
+          "element": "A"
+        }
+      ],
+      "meta": {
+        "narration": "Job A arrives and enters the queue."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "enqueue",
+          "element": "B"
+        }
+      ],
+      "meta": {
+        "narration": "Job B arrives and enters the queue."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "enqueue",
+          "element": "C"
+        }
+      ],
+      "meta": {
+        "narration": "Job C arrives and enters the queue."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "peek"
+        }
+      ],
+      "meta": {
+        "narration": "The printer starts processing Job A."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "dequeue"
+        }
+      ],
+      "meta": {
+        "narration": "The printer finishes Job A, which leaves the queue."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "enqueue",
+          "element": "D"
+        }
+      ],
+      "meta": {
+        "narration": "Job D arrives and enters the queue."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "peek"
+        }
+      ],
+      "meta": {
+        "narration": "The printer is processing Job B."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "dequeue"
+        }
+      ],
+      "meta": {
+        "narration": "The printer finishes Job B, which leaves the queue. Jobs C and D remain."
+      }
+    }
+  ]
+}

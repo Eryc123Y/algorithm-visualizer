@@ -17,5 +17,7 @@ Each file records one architectural decision: the context, what we decided, and 
 | [0011](0011-display-mode.md)                        | Display mode: the player as a purely visual element                  | Accepted |
 | [0012](0012-kind-registry.md)                       | Structure kinds are plug-ins of one registry                         | Accepted |
 | [0013](0013-node-link-layout.md)                    | Node-link layout: stable positions, routed edges, free-space labels  | Accepted |
+| [0014](0014-mcp-and-evals.md)                       | Models write documents through MCP tools, and evals measure how well | Accepted |
+| [0015](0015-mcp-app-player.md)                      | The player opens in the conversation as an MCP App                   | Accepted |
 
 Template: Status · Context · Decision · Consequences.

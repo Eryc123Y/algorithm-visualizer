@@ -18,6 +18,7 @@ import type {
   SceneNode,
   SceneText,
 } from '@algoviz/core';
+import { edgeLabelBox, labelSegment } from '@algoviz/core';
 
 import {
   themes,
@@ -315,8 +316,8 @@ function paintEdge(e: SceneEdge, t: SvgTheme): PaintedItem[] {
         ),
       );
     if (e.label !== undefined) {
-      const k = Math.floor((points.length - 1) / 2);
-      items.push(labelBeside(e, points[k]!, points[k + 1]!, t));
+      const [a, b] = labelSegment(e);
+      items.push(labelBeside(e, a, b, t));
     }
     return items;
   }
@@ -423,25 +424,11 @@ function labelBeside(
   b: { readonly x: number; readonly y: number },
   t: SvgTheme,
 ): PaintedItem {
-  const dx = b.x - a.x;
-  const dy = b.y - a.y;
-  const length = Math.hypot(dx, dy) || 1;
-  const [nx, ny] = [-dy / length, dx / length];
-  const side =
-    e.labelSide !== undefined
-      ? e.labelSide === 'right'
-        ? 1
-        : -1
-      : ny > 0 || (ny === 0 && nx < 0)
-        ? -1
-        : 1; // prefer above
-  const halfWidth = ([...(e.label ?? '')].length * e.fontSize * 0.6) / 2;
-  const clearance =
-    4 + Math.abs(nx) * halfWidth + Math.abs(ny) * (e.fontSize / 2);
+  const box = edgeLabelBox(e, a, b);
   return {
     key: `${e.key}#label`,
-    x: (a.x + b.x) / 2 + nx * clearance * side,
-    y: (a.y + b.y) / 2 + ny * clearance * side,
+    x: box.x,
+    y: box.y,
     attrs: {},
     node: edgeLabel(e, t),
   };

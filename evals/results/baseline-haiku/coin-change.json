@@ -1,0 +1,362 @@
+{
+  "version": "0.1",
+  "title": "Coin change: minimum coins for amount 6",
+  "source": {
+    "language": "python",
+    "code": "dp = [float('inf')] * (amount + 1)\ndp[0] = 0\nfor i in range(1, amount + 1):\n    for coin in coins:\n        if i >= coin:\n            dp[i] = min(dp[i], dp[i - coin] + 1)"
+  },
+  "structures": {
+    "dp": {
+      "kind": "table",
+      "rows": 1,
+      "columns": 7,
+      "columnLabels": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ],
+      "rowLabels": [
+        "dp"
+      ],
+      "label": "Minimum coins for each amount"
+    }
+  },
+  "steps": [
+    {
+      "actions": [
+        {
+          "target": "dp",
+          "type": "set",
+          "cell": [
+            0,
+            0
+          ],
+          "value": 0
+        }
+      ],
+      "meta": {
+        "line": 2,
+        "narration": "Base case: 0 coins needed for amount 0."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "dp",
+          "type": "highlight",
+          "cells": [
+            [
+              0,
+              1
+            ]
+          ]
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Compute dp[1]. Try coins 1, 3, 4."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "dp",
+          "type": "set",
+          "cell": [
+            0,
+            1
+          ],
+          "value": 1
+        },
+        {
+          "target": "dp",
+          "type": "depend",
+          "cell": [
+            0,
+            1
+          ],
+          "on": [
+            [
+              0,
+              0
+            ]
+          ]
+        }
+      ],
+      "meta": {
+        "line": 5,
+        "narration": "dp[1] = dp[0] + 1 = 1 (using coin 1)."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "dp",
+          "type": "highlight",
+          "cells": [
+            [
+              0,
+              2
+            ]
+          ]
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Compute dp[2]."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "dp",
+          "type": "set",
+          "cell": [
+            0,
+            2
+          ],
+          "value": 2
+        },
+        {
+          "target": "dp",
+          "type": "depend",
+          "cell": [
+            0,
+            2
+          ],
+          "on": [
+            [
+              0,
+              1
+            ]
+          ]
+        }
+      ],
+      "meta": {
+        "line": 5,
+        "narration": "dp[2] = dp[1] + 1 = 2 (using coin 1)."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "dp",
+          "type": "highlight",
+          "cells": [
+            [
+              0,
+              3
+            ]
+          ]
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Compute dp[3]. Try coins 1, 3, 4."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "dp",
+          "type": "set",
+          "cell": [
+            0,
+            3
+          ],
+          "value": 1
+        },
+        {
+          "target": "dp",
+          "type": "depend",
+          "cell": [
+            0,
+            3
+          ],
+          "on": [
+            [
+              0,
+              0
+            ]
+          ]
+        }
+      ],
+      "meta": {
+        "line": 5,
+        "narration": "dp[3] = dp[0] + 1 = 1 (using coin 3)."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "dp",
+          "type": "highlight",
+          "cells": [
+            [
+              0,
+              4
+            ]
+          ]
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Compute dp[4]. Try coins 1, 3, 4."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "dp",
+          "type": "set",
+          "cell": [
+            0,
+            4
+          ],
+          "value": 1
+        },
+        {
+          "target": "dp",
+          "type": "depend",
+          "cell": [
+            0,
+            4
+          ],
+          "on": [
+            [
+              0,
+              0
+            ]
+          ]
+        }
+      ],
+      "meta": {
+        "line": 5,
+        "narration": "dp[4] = dp[0] + 1 = 1 (using coin 4)."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "dp",
+          "type": "highlight",
+          "cells": [
+            [
+              0,
+              5
+            ]
+          ]
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Compute dp[5]. Try coins 1, 3, 4."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "dp",
+          "type": "set",
+          "cell": [
+            0,
+            5
+          ],
+          "value": 2
+        },
+        {
+          "target": "dp",
+          "type": "depend",
+          "cell": [
+            0,
+            5
+          ],
+          "on": [
+            [
+              0,
+              4
+            ],
+            [
+              0,
+              2
+            ]
+          ]
+        }
+      ],
+      "meta": {
+        "line": 5,
+        "narration": "dp[5] = min(dp[4] + 1, dp[2] + 1) = 2 (using coins 4+1 or 1+1+1+1+1)."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "dp",
+          "type": "highlight",
+          "cells": [
+            [
+              0,
+              6
+            ]
+          ]
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Compute dp[6]. Try coins 1, 3, 4."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "dp",
+          "type": "set",
+          "cell": [
+            0,
+            6
+          ],
+          "value": 2
+        },
+        {
+          "target": "dp",
+          "type": "depend",
+          "cell": [
+            0,
+            6
+          ],
+          "on": [
+            [
+              0,
+              3
+            ]
+          ]
+        }
+      ],
+      "meta": {
+        "line": 5,
+        "narration": "dp[6] = dp[3] + 1 = 2 (using coins 3+3)."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "dp",
+          "type": "settle",
+          "cells": [
+            [
+              0,
+              6
+            ]
+          ]
+        }
+      ],
+      "meta": {
+        "narration": "Minimum coins for amount 6 is 2."
+      }
+    }
+  ]
+}

@@ -1,0 +1,203 @@
+{
+  "version": "0.1",
+  "title": "Kruskal's minimum spanning tree",
+  "structures": {
+    "g": {
+      "kind": "graph",
+      "directed": false,
+      "nodes": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "edges": [
+        [
+          "B",
+          "C",
+          1
+        ],
+        [
+          "B",
+          "D",
+          2
+        ],
+        [
+          "D",
+          "E",
+          2
+        ],
+        [
+          "A",
+          "C",
+          3
+        ],
+        [
+          "A",
+          "B",
+          4
+        ],
+        [
+          "C",
+          "D",
+          4
+        ],
+        [
+          "C",
+          "E",
+          5
+        ]
+      ]
+    }
+  },
+  "steps": [
+    {
+      "actions": [
+        {
+          "target": "g",
+          "type": "highlight",
+          "edges": [
+            "B-C"
+          ]
+        }
+      ],
+      "meta": {
+        "narration": "Consider edge B–C (weight 1): no cycle, add to MST."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "g",
+          "type": "markEdge",
+          "edge": "B-C",
+          "mark": "selected"
+        },
+        {
+          "target": "g",
+          "type": "highlight",
+          "edges": [
+            "B-D"
+          ]
+        }
+      ],
+      "meta": {
+        "narration": "Consider edge B–D (weight 2): no cycle, add to MST."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "g",
+          "type": "markEdge",
+          "edge": "B-D",
+          "mark": "selected"
+        },
+        {
+          "target": "g",
+          "type": "highlight",
+          "edges": [
+            "D-E"
+          ]
+        }
+      ],
+      "meta": {
+        "narration": "Consider edge D–E (weight 2): no cycle, add to MST."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "g",
+          "type": "markEdge",
+          "edge": "D-E",
+          "mark": "selected"
+        },
+        {
+          "target": "g",
+          "type": "highlight",
+          "edges": [
+            "A-C"
+          ]
+        }
+      ],
+      "meta": {
+        "narration": "Consider edge A–C (weight 3): no cycle, add to MST."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "g",
+          "type": "markEdge",
+          "edge": "A-C",
+          "mark": "selected"
+        },
+        {
+          "target": "g",
+          "type": "highlight",
+          "edges": [
+            "A-B"
+          ]
+        }
+      ],
+      "meta": {
+        "narration": "Consider edge A–B (weight 4): both ends are in the same component, would create a cycle, reject."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "g",
+          "type": "markEdge",
+          "edge": "A-B",
+          "mark": "rejected"
+        },
+        {
+          "target": "g",
+          "type": "highlight",
+          "edges": [
+            "C-D"
+          ]
+        }
+      ],
+      "meta": {
+        "narration": "Consider edge C–D (weight 4): both ends connected, would form a cycle, reject."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "g",
+          "type": "markEdge",
+          "edge": "C-D",
+          "mark": "rejected"
+        },
+        {
+          "target": "g",
+          "type": "highlight",
+          "edges": [
+            "C-E"
+          ]
+        }
+      ],
+      "meta": {
+        "narration": "Consider edge C–E (weight 5): both ends connected, would form a cycle, reject."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "g",
+          "type": "markEdge",
+          "edge": "C-E",
+          "mark": "rejected"
+        }
+      ],
+      "meta": {
+        "narration": "MST complete with 4 edges selected: total weight 1+2+2+3=8."
+      }
+    }
+  ]
+}

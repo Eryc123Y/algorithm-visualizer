@@ -39,6 +39,7 @@ import {
   sidePointerItems,
   sidePointerWidth,
 } from './node-tree.ts';
+import { separateEdgeLabels } from './edge-label.ts';
 import type { EdgeRole, ElementRole, SceneItem } from './scene.ts';
 
 export interface GraphMetrics {
@@ -480,10 +481,21 @@ export function layoutGraph({
     arrangement.bends === undefined || arrangement.bends.size === 0
       ? 0
       : ((metrics.maxParallel - 1) / 2) * PARALLEL_SPREAD;
+  // Straight parallel edges are spread up to 0.8 r from the centre line,
+  // and their labels sit beyond them.
+  const straightShift =
+    metrics.maxParallel > 1
+      ? Math.min(
+          ((metrics.maxParallel - 1) / 2) * PARALLEL_SPREAD,
+          0.8 * radius,
+        )
+      : 0;
   const pad =
     routeShift +
     Math.max(
-      metrics.hasWeights ? Math.max(12, weightWidth + 6 - halfWidth) : 4,
+      metrics.hasWeights
+        ? Math.max(12, weightWidth + 6 - halfWidth + straightShift)
+        : 4,
       metrics.hasLoops
         ? metrics.hasWeights
           ? Math.max(
@@ -716,7 +728,7 @@ export function layoutGraph({
     );
 
   return {
-    items,
+    items: separateEdgeLabels(items),
     width: Math.max(
       pointerWidth + maxX - minX + 2 * halfWidth + 2 * pad,
       titleWidth(title, o),

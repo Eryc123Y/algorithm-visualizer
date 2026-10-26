@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>algoviz player</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        background: transparent;
+      }
+      body {
+        font:
+          14px/1.4 system-ui,
+          sans-serif;
+        color: CanvasText;
+      }
+      #status {
+        margin: 0;
+        padding: 12px;
+        white-space: pre-wrap;
+      }
+      #status[role='alert'] {
+        font-family: ui-monospace, monospace;
+        font-size: 12px;
+      }
+      algo-player:not([hidden]) {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <p id="status" role="status"></p>
+    <algo-player hidden></algo-player>
+    <script type="module" src="./player.ts"></script>
+  </body>
+</html>

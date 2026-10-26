@@ -1,0 +1,60 @@
+# @algoviz/mcp
+
+An MCP server that lets models write, check and render algoviz visualizations, and the same tools as a command line.
+
+## Tools
+
+| Tool                   | What it does                                                                                      |
+| ---------------------- | ------------------------------------------------------------------------------------------------- |
+| `algoviz_guide`        | The authoring guide: the document format, and each structure kind with its actions and an example |
+| `algoviz_validate`     | Checks a document, replaying every step; errors have a code, a JSON path, a message and a hint    |
+| `algoviz_inspect`      | The state of every structure at chosen frames, to check that a document does what was meant       |
+| `algoviz_render`       | One frame as a standalone SVG                                                                     |
+| `algoviz_list_recipes` | Ready-made visualizations of classic algorithms and their arguments                               |
+| `algoviz_run_recipe`   | Builds a recipe's document for a given input                                                      |
+| `algoviz_show`         | Shows a valid document to the user as an interactive player, in clients that display MCP Apps     |
+
+The server also sends instructions for the workflow (recipe if one fits, otherwise guide → write → validate → inspect), serves the guide and the JSON Schema as resources (`algoviz://guide`, `algoviz://guide/<kind>`, `algoviz://schema`), and offers a `visualize` prompt.
+
+## The player in the conversation
+
+`algoviz_show` is an [MCP App](https://modelcontextprotocol.io/extensions/apps): its result links to `ui://algoviz/player.html`, a page the client draws in the conversation. The page is an `<algo-player>` that takes the document from the tool result, follows the client's light or dark theme, asks for the height it needs, and tells the model which frame the user stopped on and its narration, so the model can answer questions about what the user sees. Clients without MCP Apps get the text result only.
+
+The page is built into one self-contained HTML file (`ui/player.html`, by `npm run build`), since clients load it in a sandbox with no network. `apps/playground/tests/e2e/mcp-app.spec.ts` runs it in a browser inside a minimal host.
+
+## Using it
+
+Build the workspace (`npm run build`), then register the server with a client. For Claude Code:
+
+```sh
+claude mcp add algoviz -- node /path/to/algorithm-visualizer/packages/mcp/dist/mcp-server.js
+```
+
+For Claude Desktop, in `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "algoviz": {
+      "command": "node",
+      "args": ["/path/to/algorithm-visualizer/packages/mcp/dist/mcp-server.js"]
+    }
+  }
+}
+```
+
+The command line offers the same tools:
+
+```sh
+algoviz guide graph table
+algoviz validate doc.json
+algoviz inspect doc.json 0 -1
+algoviz render doc.json --frame -1 --theme dark --out last.svg
+algoviz recipe dijkstra '{"graph": {"nodes": ["A", "B"], "edges": [["A", "B", 3]]}, "source": "A"}'
+```
+
+From the repository without building, run `node --conditions=@algoviz/source packages/mcp/src/algoviz.ts …`.
+
+## The guide
+
+`guide/` holds the guide as Markdown: `overview.md` and one file per kind. Tests check that every action of every kind is listed and that every example validates without warnings, so the guide cannot drift from the protocol. `evals/` measures how well models write documents from it.

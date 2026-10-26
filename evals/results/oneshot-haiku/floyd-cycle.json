@@ -1,0 +1,268 @@
+{
+  "version": "0.1",
+  "title": "Floyd tortoise and hare cycle detection",
+  "source": {
+    "language": "python",
+    "code": "slow = fast = head\nwhile fast and fast.next:\n    slow = slow.next\n    fast = fast.next.next\n    if slow == fast:\n        return True  # Cycle detected"
+  },
+  "structures": {
+    "list": {
+      "kind": "linkedList",
+      "initial": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    }
+  },
+  "steps": [
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "link",
+          "from": 4,
+          "to": 2
+        }
+      ],
+      "meta": {
+        "narration": "Set up the list: 5's next points to 3, creating a cycle."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "slow",
+          "index": 0
+        },
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "fast",
+          "index": 0
+        }
+      ],
+      "meta": {
+        "line": 1,
+        "narration": "Initialize slow and fast pointers at the head (1)."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "slow",
+          "index": 1
+        },
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "fast",
+          "index": 2
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Slow moves 1 step to 2, fast moves 2 steps to 3."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "slow",
+          "index": 2
+        },
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "fast",
+          "index": 4
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Slow moves to 3, fast moves to 5."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "slow",
+          "index": 3
+        },
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "fast",
+          "index": 2
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Slow moves to 4, fast wraps around the cycle to 3."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "slow",
+          "index": 4
+        },
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "fast",
+          "index": 3
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Slow moves to 5, fast moves to 4."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "slow",
+          "index": 2
+        },
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "fast",
+          "index": 4
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Slow wraps to 3, fast moves to 5."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "slow",
+          "index": 3
+        },
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "fast",
+          "index": 2
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Slow moves to 4, fast wraps to 3."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "slow",
+          "index": 4
+        },
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "fast",
+          "index": 3
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Slow moves to 5, fast moves to 4."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "slow",
+          "index": 2
+        },
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "fast",
+          "index": 4
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Slow wraps to 3, fast moves to 5."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "slow",
+          "index": 3
+        },
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "fast",
+          "index": 2
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Slow moves to 4, fast wraps to 3."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "slow",
+          "index": 2
+        },
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "fast",
+          "index": 2
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Slow moves to 3, fast also moves to 3. They meet at node 3!"
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "settle",
+          "index": 2
+        }
+      ],
+      "meta": {
+        "line": 5,
+        "narration": "Cycle detected. Both pointers are at node 3."
+      }
+    }
+  ]
+}

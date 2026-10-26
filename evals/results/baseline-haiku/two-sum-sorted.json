@@ -1,0 +1,174 @@
+{
+  "version": "0.1",
+  "title": "Two Sum with Sorted Array",
+  "source": {
+    "language": "python",
+    "code": "i = 0\nj = n - 1\nwhile i < j:\n    s = a[i] + a[j]\n    if s == target:\n        return [i, j]\n    elif s < target:\n        i += 1\n    else:\n        j -= 1"
+  },
+  "structures": {
+    "a": {
+      "kind": "array",
+      "initial": [1, 2, 4, 7, 11, 15]
+    }
+  },
+  "steps": [
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "pointer",
+          "name": "i",
+          "index": 0
+        },
+        {
+          "target": "a",
+          "type": "pointer",
+          "name": "j",
+          "index": 5
+        }
+      ],
+      "meta": {
+        "line": 1,
+        "narration": "Initialize i at the start and j at the end of the array.",
+        "vars": {
+          "i": 0,
+          "j": 5,
+          "target": 15
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "highlight",
+          "indices": [0, 5]
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Check a[0] + a[5] = 1 + 15 = 16, which is greater than 15.",
+        "vars": {
+          "s": 16
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "pointer",
+          "name": "j",
+          "index": 4
+        }
+      ],
+      "meta": {
+        "line": 7,
+        "narration": "16 > 15, so move j left to decrease the sum.",
+        "vars": {
+          "j": 4
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "highlight",
+          "indices": [0, 4]
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Check a[0] + a[4] = 1 + 11 = 12, which is less than 15.",
+        "vars": {
+          "s": 12
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "pointer",
+          "name": "i",
+          "index": 1
+        }
+      ],
+      "meta": {
+        "line": 5,
+        "narration": "12 < 15, so move i right to increase the sum.",
+        "vars": {
+          "i": 1
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "highlight",
+          "indices": [1, 4]
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Check a[1] + a[4] = 2 + 11 = 13, still less than 15.",
+        "vars": {
+          "s": 13
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "pointer",
+          "name": "i",
+          "index": 2
+        }
+      ],
+      "meta": {
+        "line": 5,
+        "narration": "13 < 15, so move i right again.",
+        "vars": {
+          "i": 2
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "highlight",
+          "indices": [2, 4]
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Check a[2] + a[4] = 4 + 11 = 15: found!",
+        "vars": {
+          "s": 15
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "settle",
+          "index": 2
+        },
+        {
+          "target": "a",
+          "type": "settle",
+          "index": 4
+        }
+      ],
+      "meta": {
+        "line": 4,
+        "narration": "The two numbers 4 and 11 sum to 15. Return indices [2, 4]."
+      }
+    }
+  ]
+}

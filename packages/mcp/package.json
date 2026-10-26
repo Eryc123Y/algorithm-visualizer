@@ -1,0 +1,41 @@
+{
+  "name": "@algoviz/mcp",
+  "version": "0.0.0",
+  "private": true,
+  "description": "An MCP server and CLI that let LLMs write, check and render algoviz visualizations.",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "@algoviz/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "guide",
+    "ui"
+  ],
+  "scripts": {
+    "build": "tsc --build tsconfig.lib.json && vite build --config vite.app.config.ts",
+    "build:app": "vite build --config vite.app.config.ts"
+  },
+  "dependencies": {
+    "@algoviz/core": "*",
+    "@algoviz/recipes": "*",
+    "@algoviz/spec": "*",
+    "@algoviz/svg": "*",
+    "@modelcontextprotocol/ext-apps": "^2.0.3",
+    "@modelcontextprotocol/server": "^2.3.1",
+    "zod": "^4.6.7"
+  },
+  "bin": {
+    "algoviz": "./dist/algoviz.js",
+    "algoviz-mcp": "./dist/mcp-server.js"
+  },
+  "devDependencies": {
+    "@algoviz/elements": "^0.0.0",
+    "@modelcontextprotocol/client": "^2.3.1"
+  }
+}

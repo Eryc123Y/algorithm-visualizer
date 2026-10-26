@@ -221,7 +221,8 @@ export function validateTreeDecl(decl: TreeDecl): DeclIssue[] {
     if (seen.has(id)) continue;
     seen.add(id);
     for (const child of decl.nodes[index.get(id)!]!.children ?? [])
-      if (child !== null) stack.push(child);
+      // Missing children are reported above.
+      if (child !== null && index.has(child)) stack.push(child);
   }
   decl.nodes.forEach((node, k) => {
     if (!seen.has(node.id))
@@ -341,10 +342,16 @@ const actions = <N extends z.ZodType, S extends z.ZodType>(
   ]);
 };
 
-const NewNode = z.strictObject({ id: ElementId, value: Scalar });
+const NewNode = z.strictObject({
+  id: ElementId,
+  value: Scalar,
+  color: Color.optional(),
+});
 const NewNodeInput = z
   .union([NewNode, Scalar])
-  .describe('`{ "id", "value" }`, or a bare value to get a generated id.');
+  .describe(
+    '`{ "id", "value", "color"? }`, or a bare value to get a generated id.',
+  );
 
 export const TreeAction = actions(NewNode, Slot);
 export type TreeAction = z.infer<typeof TreeAction>;

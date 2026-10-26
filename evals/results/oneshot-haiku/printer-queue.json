@@ -1,0 +1,111 @@
+{
+  "version": "0.1",
+  "title": "Printer queue simulation",
+  "structures": {
+    "queue": {
+      "kind": "queue",
+      "initial": [],
+      "label": "printer queue"
+    }
+  },
+  "steps": [
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "enqueue",
+          "element": "A"
+        }
+      ],
+      "meta": {
+        "narration": "Job A arrives at the empty printer queue and joins it."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "enqueue",
+          "element": "B"
+        }
+      ],
+      "meta": {
+        "narration": "Job B arrives and joins the queue."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "enqueue",
+          "element": "C"
+        }
+      ],
+      "meta": {
+        "narration": "Job C arrives and joins the queue."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "peek"
+        }
+      ],
+      "meta": {
+        "narration": "The printer begins working on job A at the front of the queue."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "dequeue"
+        }
+      ],
+      "meta": {
+        "narration": "The printer finishes job A and removes it from the queue."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "enqueue",
+          "element": "D"
+        }
+      ],
+      "meta": {
+        "narration": "Job D arrives and joins the queue."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "peek"
+        }
+      ],
+      "meta": {
+        "narration": "Job B is now at the front of the queue, ready to be processed."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "queue",
+          "type": "dequeue"
+        }
+      ],
+      "meta": {
+        "narration": "The printer finishes job B and removes it from the queue."
+      }
+    },
+    {
+      "actions": [],
+      "meta": {
+        "narration": "Jobs C and D remain in the queue waiting to be printed."
+      }
+    }
+  ]
+}

@@ -1,0 +1,103 @@
+{
+  "version": "0.1",
+  "title": "Delete node with value 3 from linked list",
+  "source": {
+    "language": "python",
+    "code": "curr = head\nwhile curr.next:\n    if curr.next.value == 3:\n        curr.next = curr.next.next\n        break\n    curr = curr.next"
+  },
+  "structures": {
+    "list": {
+      "kind": "linkedList",
+      "initial": [
+        1,
+        2,
+        3,
+        4
+      ]
+    }
+  },
+  "steps": [
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "curr",
+          "index": 0
+        }
+      ],
+      "meta": {
+        "line": 1,
+        "narration": "Start at the head of the list, node with value 1."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "curr",
+          "index": 1
+        }
+      ],
+      "meta": {
+        "line": 5,
+        "narration": "Move to the next node with value 2."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "highlight",
+          "indices": [
+            2
+          ]
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Check if the next node has value 3: yes, node at index 2."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "link",
+          "from": 1,
+          "to": 3
+        }
+      ],
+      "meta": {
+        "line": 4,
+        "narration": "Unlink node 3: set node 2's next to point to node 4 (at index 3)."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "remove",
+          "index": 2
+        }
+      ],
+      "meta": {
+        "narration": "Remove node 3 from the list. The deletion is complete."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "curr",
+          "index": null
+        }
+      ],
+      "meta": {
+        "narration": "Final list: 1 → 2 → 4."
+      }
+    }
+  ]
+}

@@ -1,0 +1,114 @@
+{
+  "version": "0.1",
+  "title": "Insert 1, 2, 3 into red-black tree",
+  "source": {
+    "language": "python",
+    "code": "# Insert into red-black tree\n# New nodes are red; fix violations by rotating and recoloring"
+  },
+  "structures": {
+    "rbt": {
+      "kind": "tree",
+      "binary": true
+    }
+  },
+  "steps": [
+    {
+      "actions": [
+        {
+          "target": "rbt",
+          "type": "addNode",
+          "node": {
+            "id": "n1",
+            "value": 1,
+            "color": "black"
+          },
+          "parent": null
+        }
+      ],
+      "meta": {
+        "narration": "Insert 1 as the root, colored black."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "rbt",
+          "type": "addNode",
+          "node": {
+            "id": "n2",
+            "value": 2,
+            "color": "red"
+          },
+          "parent": "n1",
+          "slot": "right"
+        }
+      ],
+      "meta": {
+        "narration": "Insert 2 as the right child of 1, colored red. No violation."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "rbt",
+          "type": "addNode",
+          "node": {
+            "id": "n3",
+            "value": 3,
+            "color": "red"
+          },
+          "parent": "n2",
+          "slot": "right"
+        }
+      ],
+      "meta": {
+        "narration": "Insert 3 as the right child of 2, colored red."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "rbt",
+          "type": "compare",
+          "a": "n2",
+          "b": "n3"
+        }
+      ],
+      "meta": {
+        "narration": "Red-red violation: both 2 and 3 are red, parent and child."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "rbt",
+          "type": "rotate",
+          "node": "n1",
+          "direction": "left"
+        }
+      ],
+      "meta": {
+        "narration": "Rotate left at 1: node 2 moves up, node 1 moves down to the left."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "rbt",
+          "type": "setColor",
+          "node": "n2",
+          "color": "black"
+        },
+        {
+          "target": "rbt",
+          "type": "setColor",
+          "node": "n1",
+          "color": "red"
+        }
+      ],
+      "meta": {
+        "narration": "Recolor: 2 becomes black, 1 becomes red. The tree is now valid."
+      }
+    }
+  ]
+}

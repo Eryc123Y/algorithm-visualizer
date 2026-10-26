@@ -15,7 +15,15 @@ import {
 
 import type { ReduceError } from '../errors.ts';
 import type { StructureKind } from '../kind.ts';
-import { checkCapacity, checkRange, insertAt, without } from './common.ts';
+import {
+  afterInsert,
+  afterRemove,
+  checkCapacity,
+  checkRange,
+  insertAt,
+  reindex,
+  without,
+} from './common.ts';
 
 export interface ListNode {
   readonly id: string;
@@ -29,6 +37,8 @@ export interface LinkedListMarks {
   readonly highlight: readonly number[];
   /** Visited node ids. */
   readonly visited: readonly string[];
+  /** Settled (final or found) node ids. */
+  readonly settled: readonly string[];
   /** Named pointers to node ids. */
   readonly pointers: Readonly<Record<string, string>>;
 }
@@ -52,7 +62,11 @@ function init(decl: LinkedListDecl): LinkedListState {
     next: k + 1 < n ? idAt(k + 1) : circular ? idAt(0) : null,
     prev: !doubly ? null : k > 0 ? idAt(k - 1) : circular ? idAt(n - 1) : null,
   }));
-  return { data, doubly, marks: { highlight: [], visited: [], pointers: {} } };
+  return {
+    data,
+    doubly,
+    marks: { highlight: [], visited: [], settled: [], pointers: {} },
+  };
 }
 
 function reduceList(s: LinkedListState, a: LinkedListAction): Reduced {
@@ -84,7 +98,9 @@ function reduceList(s: LinkedListState, a: LinkedListAction): Reduced {
         next: null,
         prev: null,
       };
-      return next(insertAt(s.data, a.index, node));
+      return next(insertAt(s.data, a.index, node), {
+        highlight: reindex(s.marks.highlight, afterInsert(a.index)),
+      });
     }
     case 'remove': {
       const bad = range(n, [['index'], a.index]);
@@ -101,7 +117,9 @@ function reduceList(s: LinkedListState, a: LinkedListAction): Reduced {
         Object.entries(s.marks.pointers).filter(([, id]) => id !== gone),
       );
       return next(data, {
+        highlight: reindex(s.marks.highlight, afterRemove(a.index)),
         visited: s.marks.visited.filter((id) => id !== gone),
+        settled: s.marks.settled.filter((id) => id !== gone),
         pointers,
       });
     }
@@ -157,6 +175,13 @@ function reduceList(s: LinkedListState, a: LinkedListAction): Reduced {
       const id = s.data[a.index]!.id;
       if (s.marks.visited.includes(id)) return ok(s);
       return next(s.data, { visited: [...s.marks.visited, id] });
+    }
+    case 'settle': {
+      const bad = range(n, [['index'], a.index]);
+      if (bad) return err(bad);
+      const id = s.data[a.index]!.id;
+      if (s.marks.settled.includes(id)) return ok(s);
+      return next(s.data, { settled: [...s.marks.settled, id] });
     }
     default: {
       const unreachable: never = a;

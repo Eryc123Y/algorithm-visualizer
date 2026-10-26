@@ -1,0 +1,183 @@
+/**
+ * Helpers for checking what a document shows, independent of how its
+ * author named things: checks look for a structure of the right kind whose
+ * states match, not for a particular name.
+ */
+import type {
+  ArrayState,
+  GraphState,
+  HashTableState,
+  KindedState,
+  LinkedListState,
+  QueueState,
+  StackState,
+  TableState,
+  Trace,
+  TreeState,
+  VisualizationState,
+} from '@algoviz/core';
+import type { Scalar, StructureKindName } from '@algoviz/spec';
+
+type StateOf = {
+  array: ArrayState;
+  stack: StackState;
+  queue: QueueState;
+  linkedList: LinkedListState;
+  tree: TreeState;
+  graph: GraphState;
+  table: TableState;
+  hashTable: HashTableState;
+};
+
+/** A structure seen across the trace: its name and its states by frame. */
+export interface Track<K extends StructureKindName> {
+  readonly name: string;
+  readonly states: readonly StateOf[K][];
+  readonly first: StateOf[K];
+  readonly last: StateOf[K];
+}
+
+/** Every frame's state, in order. */
+export const frames = (trace: Trace): VisualizationState[] =>
+  Array.from({ length: trace.length + 1 }, (_, i) => trace.frame(i).state);
+
+/** Every structure of kind `kind`, with its state in each frame. */
+export function tracks<K extends StructureKindName>(
+  trace: Trace,
+  kind: K,
+): Track<K>[] {
+  const all = frames(trace);
+  return Object.entries(trace.visualization.structures)
+    .filter(([, decl]) => decl.kind === kind)
+    .map(([name]) => {
+      const states = all.map(
+        (state) => (state[name] as KindedState).state as StateOf[K],
+      );
+      return { name, states, first: states[0]!, last: states.at(-1)! };
+    });
+}
+
+/** Values of an array, stack or queue, in order. */
+export const values = (state: { data: readonly { value: Scalar }[] }) =>
+  state.data.map((e) => e.value);
+
+export const same = (a: unknown, b: unknown): boolean =>
+  JSON.stringify(a) === JSON.stringify(b);
+
+export const sortedNumbers = (xs: readonly number[]) =>
+  [...xs].sort((a, b) => a - b);
+
+/**
+ * The values of a linked list in link order. It starts from a node nothing
+ * points to (the longest chain, if a removed node still dangles), or from
+ * the first node if every node is pointed to. Stops at a repeat.
+ */
+export function listOrder(state: LinkedListState): Scalar[] {
+  const byId = new Map(state.data.map((n) => [n.id, n]));
+  const targets = new Set(state.data.map((n) => n.next));
+  const follow = (start: (typeof state.data)[number]) => {
+    const out: Scalar[] = [];
+    const seen = new Set<string>();
+    let node: typeof start | undefined = start;
+    while (node !== undefined && !seen.has(node.id)) {
+      seen.add(node.id);
+      out.push(node.value);
+      node = node.next === null ? undefined : byId.get(node.next);
+    }
+    return out;
+  };
+  const heads = state.data.filter((n) => !targets.has(n.id));
+  const starts = heads.length > 0 ? heads : state.data.slice(0, 1);
+  return starts
+    .map(follow)
+    .reduce<Scalar[]>((a, b) => (b.length > a.length ? b : a), []);
+}
+
+/** Whether following `next` from some node returns to a node seen before. */
+export function hasCycle(state: LinkedListState): boolean {
+  const byId = new Map(state.data.map((n) => [n.id, n]));
+  return state.data.some((start) => {
+    const seen = new Set<string>();
+    let node: typeof start | undefined = start;
+    while (node !== undefined) {
+      if (seen.has(node.id)) return true;
+      seen.add(node.id);
+      node = node.next === null ? undefined : byId.get(node.next);
+    }
+    return false;
+  });
+}
+
+export const treeNode = (state: TreeState, id: string | null) =>
+  id === null ? undefined : state.data.nodes.find((n) => n.id === id);
+
+/** In-order values of a binary tree rooted at `id`. */
+export function inorder(state: TreeState, id: string | null): Scalar[] {
+  const node = treeNode(state, id);
+  if (node === undefined) return [];
+  const [left = null, right = null] = node.children;
+  return [...inorder(state, left), node.value, ...inorder(state, right)];
+}
+
+/** The ids in the subtree rooted at `id`. */
+export function subtree(state: TreeState, id: string): string[] {
+  const node = treeNode(state, id);
+  if (node === undefined) return [];
+  return [
+    id,
+    ...node.children.flatMap((c) => (c === null ? [] : subtree(state, c))),
+  ];
+}
+
+/** Values on each path from `id` to a leaf. */
+export function paths(state: TreeState, id: string): Scalar[][] {
+  const node = treeNode(state, id);
+  if (node === undefined) return [];
+  const children = node.children.filter((c): c is string => c !== null);
+  if (children.length === 0) return [[node.value]];
+  return children.flatMap((c) =>
+    paths(state, c).map((p) => [node.value, ...p]),
+  );
+}
+
+/** Numbers in a short text, e.g. "d=4" → [4]. */
+export const numbersIn = (text: string): number[] =>
+  [...text.matchAll(/-?\d+(?:\.\d+)?/g)].map((m) => Number(m[0]));
+
+/** The value of each graph node's note, if it holds exactly one number. */
+export function noteNumbers(state: GraphState): Map<string, number> {
+  const out = new Map<string, number>();
+  for (const [node, text] of Object.entries(state.marks.notes)) {
+    const numbers = numbersIn(text);
+    if (numbers.length === 1) out.set(node, numbers[0]!);
+  }
+  return out;
+}
+
+/** The node set of a graph state. */
+export const nodeIds = (state: GraphState) => state.data.nodes.map((n) => n.id);
+
+/**
+ * Finds the first structure of `kind` for which `test` returns no
+ * problems, or reports the problems of the closest one.
+ */
+export function anyTrack<K extends StructureKindName>(
+  trace: Trace,
+  kind: K,
+  test: (track: Track<K>) => string[],
+): string[] {
+  const candidates = tracks(trace, kind);
+  if (candidates.length === 0) return [`no ${kind} structure`];
+  let best: string[] | undefined;
+  for (const track of candidates) {
+    const problems = test(track);
+    if (problems.length === 0) return [];
+    if (best === undefined || problems.length < best.length)
+      best = problems.map((p) => `${track.name}: ${p}`);
+  }
+  return best!;
+}
+
+/** Returns `[message]` unless `ok`. */
+export const expect = (ok: boolean, message: string): string[] =>
+  ok ? [] : [message];

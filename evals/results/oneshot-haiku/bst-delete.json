@@ -1,0 +1,235 @@
+{
+  "version": "0.1",
+  "title": "BST deletion with two children",
+  "structures": {
+    "bst": {
+      "kind": "tree",
+      "binary": true
+    }
+  },
+  "steps": [
+    {
+      "actions": [
+        {
+          "target": "bst",
+          "type": "addNode",
+          "node": {
+            "id": "n5",
+            "value": 5
+          },
+          "parent": null
+        }
+      ],
+      "meta": {
+        "narration": "Insert 5 as the root."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "bst",
+          "type": "addNode",
+          "node": {
+            "id": "n3",
+            "value": 3
+          },
+          "parent": "n5",
+          "slot": "left"
+        }
+      ],
+      "meta": {
+        "narration": "Insert 3: 3 < 5, so go left."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "bst",
+          "type": "addNode",
+          "node": {
+            "id": "n8",
+            "value": 8
+          },
+          "parent": "n5",
+          "slot": "right"
+        }
+      ],
+      "meta": {
+        "narration": "Insert 8: 8 > 5, so go right."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "bst",
+          "type": "addNode",
+          "node": {
+            "id": "n2",
+            "value": 2
+          },
+          "parent": "n3",
+          "slot": "left"
+        }
+      ],
+      "meta": {
+        "narration": "Insert 2: 2 < 5, then 2 < 3, so goes left of 3."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "bst",
+          "type": "addNode",
+          "node": {
+            "id": "n4",
+            "value": 4
+          },
+          "parent": "n3",
+          "slot": "right"
+        }
+      ],
+      "meta": {
+        "narration": "Insert 4: 4 < 5, then 4 > 3, so goes right of 3."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "bst",
+          "type": "addNode",
+          "node": {
+            "id": "n7",
+            "value": 7
+          },
+          "parent": "n8",
+          "slot": "left"
+        }
+      ],
+      "meta": {
+        "narration": "Insert 7: 7 > 5, then 7 < 8, so goes left of 8."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "bst",
+          "type": "addNode",
+          "node": {
+            "id": "n9",
+            "value": 9
+          },
+          "parent": "n8",
+          "slot": "right"
+        }
+      ],
+      "meta": {
+        "narration": "Insert 9: 9 > 5, then 9 > 8, so goes right of 8."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "bst",
+          "type": "highlight",
+          "nodes": [
+            "n3"
+          ]
+        }
+      ],
+      "meta": {
+        "narration": "Now delete 3, which has two children (2 and 4)."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "bst",
+          "type": "pointer",
+          "name": "curr",
+          "node": "n3"
+        },
+        {
+          "target": "bst",
+          "type": "highlight",
+          "nodes": [
+            "n4"
+          ]
+        }
+      ],
+      "meta": {
+        "narration": "Find the in-order successor: go right to 4."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "bst",
+          "type": "pointer",
+          "name": "curr",
+          "node": null
+        },
+        {
+          "target": "bst",
+          "type": "highlight",
+          "nodes": [
+            "n4"
+          ]
+        }
+      ],
+      "meta": {
+        "narration": "4 is the in-order successor (rightmost of left subtree). Replace 3's value with 4's value."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "bst",
+          "type": "setValue",
+          "node": "n3",
+          "value": 4
+        }
+      ],
+      "meta": {
+        "narration": "3 now has the value 4."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "bst",
+          "type": "highlight",
+          "nodes": [
+            "n4"
+          ]
+        }
+      ],
+      "meta": {
+        "narration": "Now remove the original node 4, which had no children."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "bst",
+          "type": "removeNode",
+          "node": "n4"
+        }
+      ],
+      "meta": {
+        "narration": "Delete 4 from the right child of the (now updated) root."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "bst",
+          "type": "settle",
+          "node": "n3"
+        }
+      ],
+      "meta": {
+        "narration": "Deletion complete. The tree still maintains BST property: left < parent < right."
+      }
+    }
+  ]
+}

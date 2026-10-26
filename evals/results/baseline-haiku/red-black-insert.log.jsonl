@@ -1,0 +1,4 @@
+{"tool":"algoviz_validate","ok":false,"codes":["INVALID_ACTION","INVALID_ACTION","INVALID_ACTION","INVALID_ACTION"],"errors":["INVALID_ACTION at $.steps[0].actions[0].node: Unrecognized key: \"color\"","INVALID_ACTION at $.steps[2].actions[0].node: Unrecognized key: \"color\"","INVALID_ACTION at $.steps[4].actions[0].node: Unrecognized key: \"color\"","INVALID_ACTION at $.steps[10].actions[0].nodes: Too small: expected array to have >=1 items"]}
+{"tool":"algoviz_validate","ok":true}
+{"tool":"algoviz_inspect","ok":true}
+{"tool":"submit","ok":true}

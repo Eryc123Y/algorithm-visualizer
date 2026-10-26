@@ -1,0 +1,469 @@
+{
+  "version": "0.1",
+  "title": "Insertion Sort",
+  "structures": {
+    "a": {
+      "kind": "array",
+      "initial": [
+        5,
+        2,
+        4,
+        6,
+        1,
+        3
+      ]
+    }
+  },
+  "steps": [
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "settle",
+          "index": 0
+        }
+      ],
+      "meta": {
+        "narration": "Index 0 is already sorted."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "pointer",
+          "name": "i",
+          "index": 1
+        },
+        {
+          "target": "a",
+          "type": "highlight",
+          "indices": [
+            1
+          ]
+        }
+      ],
+      "meta": {
+        "narration": "Start with key = 2 at index 1."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "compare",
+          "i": 0,
+          "j": 1
+        }
+      ],
+      "meta": {
+        "narration": "Compare 5 > 2, so we need to move 2."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "swap",
+          "i": 0,
+          "j": 1
+        }
+      ],
+      "meta": {
+        "narration": "Swap to get [2, 5, 4, 6, 1, 3]."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "settle",
+          "index": 0
+        },
+        {
+          "target": "a",
+          "type": "settle",
+          "index": 1
+        }
+      ],
+      "meta": {
+        "narration": "Positions 0 and 1 are now sorted."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "pointer",
+          "name": "i",
+          "index": 2
+        },
+        {
+          "target": "a",
+          "type": "highlight",
+          "indices": [
+            2
+          ]
+        }
+      ],
+      "meta": {
+        "narration": "Move to key = 4 at index 2."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "compare",
+          "i": 1,
+          "j": 2
+        }
+      ],
+      "meta": {
+        "narration": "Compare 5 > 4, so shift 5 right."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "swap",
+          "i": 1,
+          "j": 2
+        }
+      ],
+      "meta": {
+        "narration": "Swap to get [2, 4, 5, 6, 1, 3]."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "compare",
+          "i": 0,
+          "j": 1
+        }
+      ],
+      "meta": {
+        "narration": "Compare 2 < 4, so 4 is in position."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "settle",
+          "index": 2
+        }
+      ],
+      "meta": {
+        "narration": "Positions 0–2 are now sorted."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "pointer",
+          "name": "i",
+          "index": 3
+        },
+        {
+          "target": "a",
+          "type": "highlight",
+          "indices": [
+            3
+          ]
+        }
+      ],
+      "meta": {
+        "narration": "Move to key = 6 at index 3."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "compare",
+          "i": 2,
+          "j": 3
+        }
+      ],
+      "meta": {
+        "narration": "Compare 5 < 6, so 6 is already in position."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "settle",
+          "index": 3
+        }
+      ],
+      "meta": {
+        "narration": "Positions 0–3 are now sorted."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "pointer",
+          "name": "i",
+          "index": 4
+        },
+        {
+          "target": "a",
+          "type": "highlight",
+          "indices": [
+            4
+          ]
+        }
+      ],
+      "meta": {
+        "narration": "Move to key = 1 at index 4."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "compare",
+          "i": 3,
+          "j": 4
+        }
+      ],
+      "meta": {
+        "narration": "Compare 6 > 1, so shift 6 right."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "swap",
+          "i": 3,
+          "j": 4
+        }
+      ],
+      "meta": {
+        "narration": "Swap to get [2, 4, 5, 1, 6, 3]."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "compare",
+          "i": 2,
+          "j": 3
+        }
+      ],
+      "meta": {
+        "narration": "Compare 5 > 1, so shift 5 right."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "swap",
+          "i": 2,
+          "j": 3
+        }
+      ],
+      "meta": {
+        "narration": "Swap to get [2, 4, 1, 5, 6, 3]."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "compare",
+          "i": 1,
+          "j": 2
+        }
+      ],
+      "meta": {
+        "narration": "Compare 4 > 1, so shift 4 right."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "swap",
+          "i": 1,
+          "j": 2
+        }
+      ],
+      "meta": {
+        "narration": "Swap to get [2, 1, 4, 5, 6, 3]."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "compare",
+          "i": 0,
+          "j": 1
+        }
+      ],
+      "meta": {
+        "narration": "Compare 2 > 1, so shift 2 right."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "swap",
+          "i": 0,
+          "j": 1
+        }
+      ],
+      "meta": {
+        "narration": "Swap to get [1, 2, 4, 5, 6, 3]."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "settle",
+          "index": 4
+        }
+      ],
+      "meta": {
+        "narration": "Positions 0–4 are now sorted."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "pointer",
+          "name": "i",
+          "index": 5
+        },
+        {
+          "target": "a",
+          "type": "highlight",
+          "indices": [
+            5
+          ]
+        }
+      ],
+      "meta": {
+        "narration": "Move to key = 3 at index 5."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "compare",
+          "i": 4,
+          "j": 5
+        }
+      ],
+      "meta": {
+        "narration": "Compare 6 > 3, so shift 6 right."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "swap",
+          "i": 4,
+          "j": 5
+        }
+      ],
+      "meta": {
+        "narration": "Swap to get [1, 2, 4, 5, 3, 6]."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "compare",
+          "i": 3,
+          "j": 4
+        }
+      ],
+      "meta": {
+        "narration": "Compare 5 > 3, so shift 5 right."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "swap",
+          "i": 3,
+          "j": 4
+        }
+      ],
+      "meta": {
+        "narration": "Swap to get [1, 2, 4, 3, 5, 6]."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "compare",
+          "i": 2,
+          "j": 3
+        }
+      ],
+      "meta": {
+        "narration": "Compare 4 > 3, so shift 4 right."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "swap",
+          "i": 2,
+          "j": 3
+        }
+      ],
+      "meta": {
+        "narration": "Swap to get [1, 2, 3, 4, 5, 6]."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "compare",
+          "i": 1,
+          "j": 2
+        }
+      ],
+      "meta": {
+        "narration": "Compare 2 < 3, so 3 is in the correct position."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "settle",
+          "index": 5
+        }
+      ],
+      "meta": {
+        "narration": "The entire array is now sorted: [1, 2, 3, 4, 5, 6]."
+      }
+    }
+  ]
+}

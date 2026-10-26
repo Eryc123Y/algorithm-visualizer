@@ -4,6 +4,7 @@
  */
 import type { VisualizationInput } from '@algoviz/spec';
 
+import { checkInteger } from './check.ts';
 import { Recorder } from './recorder.ts';
 import { python } from './source.ts';
 
@@ -412,6 +413,10 @@ export function unionFind(
   size: number,
   unions: readonly (readonly [number, number])[],
 ): VisualizationInput {
+  checkInteger('The number of elements', size, 0, 1000);
+  for (const pair of unions)
+    for (const x of pair)
+      checkInteger('Each element of a union', x, 0, size - 1);
   const r = new Recorder({
     title: 'Union–find',
     source: python(`

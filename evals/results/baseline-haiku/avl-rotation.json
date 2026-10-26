@@ -1,0 +1,165 @@
+{
+  "version": "0.1",
+  "title": "AVL tree insertion and rotation for 10, 20, 30",
+  "structures": {
+    "tree": {
+      "kind": "tree",
+      "binary": true
+    }
+  },
+  "steps": [
+    {
+      "actions": [],
+      "meta": {
+        "narration": "Start with an empty AVL tree. We will insert 10, 20, and 30."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "tree",
+          "type": "addNode",
+          "node": {
+            "id": "n10",
+            "value": 10
+          },
+          "parent": null
+        }
+      ],
+      "meta": {
+        "narration": "Insert 10 as the root. Balance factor: 0."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "tree",
+          "type": "annotate",
+          "node": "n10",
+          "text": "bf=0"
+        }
+      ],
+      "meta": {
+        "narration": "Root 10 has balance factor 0."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "tree",
+          "type": "addNode",
+          "node": {
+            "id": "n20",
+            "value": 20
+          },
+          "parent": "n10",
+          "slot": "right"
+        }
+      ],
+      "meta": {
+        "narration": "Insert 20 as the right child of 10."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "tree",
+          "type": "annotate",
+          "node": "n10",
+          "text": "bf=-1"
+        }
+      ],
+      "meta": {
+        "narration": "Now 10 has balance factor -1 (right subtree is taller). Tree is still balanced."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "tree",
+          "type": "addNode",
+          "node": {
+            "id": "n30",
+            "value": 30
+          },
+          "parent": "n20",
+          "slot": "right"
+        }
+      ],
+      "meta": {
+        "narration": "Insert 30 as the right child of 20."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "tree",
+          "type": "annotate",
+          "node": "n10",
+          "text": "bf=-2"
+        },
+        {
+          "target": "tree",
+          "type": "highlight",
+          "nodes": [
+            "n10"
+          ]
+        }
+      ],
+      "meta": {
+        "narration": "Node 10 now has balance factor -2: the right subtree is too tall. This violates AVL balance!"
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "tree",
+          "type": "annotate",
+          "node": "n20",
+          "text": "bf=0"
+        }
+      ],
+      "meta": {
+        "narration": "Node 20 has balance factor 0. We need to rotate left around 10."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "tree",
+          "type": "rotate",
+          "node": "n10",
+          "direction": "left"
+        }
+      ],
+      "meta": {
+        "narration": "Perform a left rotation around 10. Node 20 becomes the new root, 10 becomes its left child, and 30 remains the right child."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "tree",
+          "type": "annotate",
+          "node": "n10",
+          "text": "bf=0"
+        },
+        {
+          "target": "tree",
+          "type": "annotate",
+          "node": "n20",
+          "text": "bf=0"
+        },
+        {
+          "target": "tree",
+          "type": "annotate",
+          "node": "n30",
+          "text": "bf=0"
+        }
+      ],
+      "meta": {
+        "narration": "After rotation, all nodes have balance factor 0. The tree is now balanced and the insertion is complete."
+      }
+    }
+  ]
+}

@@ -94,13 +94,19 @@ export interface SceneEdge {
   readonly via?: readonly { readonly x: number; readonly y: number }[];
   /** Self-loops: direction in degrees clockwise from up (default 0). */
   readonly loopAngle?: number;
-  /** Drawn beside the middle of the edge, e.g. a weight. */
+  /** Drawn beside the edge, e.g. a weight; see `labelAt`. */
   readonly label?: string;
   /**
    * Which side of the edge, facing from (x1, y1) to (x2, y2), the label
    * goes on; painters choose (preferring above) when absent.
    */
   readonly labelSide?: 'left' | 'right';
+  /**
+   * Where along the edge (or its middle segment, if routed) the label sits,
+   * from 0 at the start to 1 at the end. Default 0.5, the middle; layouts
+   * move it to keep labels apart.
+   */
+  readonly labelAt?: number;
   readonly fontSize: number;
 }
 

@@ -1,0 +1,264 @@
+{
+  "version": "0.1",
+  "title": "Reverse singly linked list in place",
+  "source": {
+    "language": "python",
+    "code": "prev, curr = None, head\nwhile curr:\n    next = curr.next\n    curr.next = prev\n    prev = curr\n    curr = next"
+  },
+  "structures": {
+    "list": {
+      "kind": "linkedList",
+      "initial": [
+        1,
+        2,
+        3,
+        4
+      ]
+    }
+  },
+  "steps": [
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "prev",
+          "index": null
+        },
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "curr",
+          "index": 0
+        }
+      ],
+      "meta": {
+        "line": 1,
+        "narration": "Initialize prev to null and curr to head (node 1)."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "highlight",
+          "indices": [
+            0
+          ]
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Save next pointer: next = curr.next (node 2)."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "link",
+          "from": 0,
+          "to": null
+        }
+      ],
+      "meta": {
+        "line": 4,
+        "narration": "Reverse the link: curr.next = prev (null)."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "prev",
+          "index": 0
+        },
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "curr",
+          "index": 1
+        }
+      ],
+      "meta": {
+        "line": 5,
+        "narration": "Move prev and curr forward: prev = curr, curr = next (node 2)."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "highlight",
+          "indices": [
+            1
+          ]
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Save next pointer: next = curr.next (node 3)."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "link",
+          "from": 1,
+          "to": 0
+        }
+      ],
+      "meta": {
+        "line": 4,
+        "narration": "Reverse the link: curr.next = prev (node 1)."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "prev",
+          "index": 1
+        },
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "curr",
+          "index": 2
+        }
+      ],
+      "meta": {
+        "line": 5,
+        "narration": "Move prev and curr forward: prev = curr, curr = next (node 3)."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "highlight",
+          "indices": [
+            2
+          ]
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Save next pointer: next = curr.next (node 4)."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "link",
+          "from": 2,
+          "to": 1
+        }
+      ],
+      "meta": {
+        "line": 4,
+        "narration": "Reverse the link: curr.next = prev (node 2)."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "prev",
+          "index": 2
+        },
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "curr",
+          "index": 3
+        }
+      ],
+      "meta": {
+        "line": 5,
+        "narration": "Move prev and curr forward: prev = curr, curr = next (node 4)."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "highlight",
+          "indices": [
+            3
+          ]
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Save next pointer: next = curr.next (null)."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "link",
+          "from": 3,
+          "to": 2
+        }
+      ],
+      "meta": {
+        "line": 4,
+        "narration": "Reverse the link: curr.next = prev (node 3)."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "prev",
+          "index": 3
+        },
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "curr",
+          "index": null
+        }
+      ],
+      "meta": {
+        "line": 5,
+        "narration": "Move pointers: prev = curr, curr = null. Loop ends."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "settle",
+          "index": 3
+        },
+        {
+          "target": "list",
+          "type": "settle",
+          "index": 2
+        },
+        {
+          "target": "list",
+          "type": "settle",
+          "index": 1
+        },
+        {
+          "target": "list",
+          "type": "settle",
+          "index": 0
+        }
+      ],
+      "meta": {
+        "narration": "List is reversed: 4 → 3 → 2 → 1."
+      }
+    }
+  ]
+}

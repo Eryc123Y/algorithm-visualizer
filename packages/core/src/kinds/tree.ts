@@ -225,7 +225,7 @@ function reduceTree(s: TreeState, a: TreeAction): Reduced {
         id: a.node.id,
         value: a.node.value,
         children: binary ? [null, null] : [],
-        color: null,
+        color: a.node.color ?? null,
       };
       const added = { ...data, nodes: [...data.nodes, fresh] };
       if (a.parent === null)

@@ -12,7 +12,15 @@ import {
 
 import type { ReduceError } from '../errors.ts';
 import type { StructureKind, StructureState } from '../kind.ts';
-import { checkCapacity, checkRange, emptyError } from './common.ts';
+import {
+  afterInsert,
+  afterRemove,
+  checkCapacity,
+  checkRange,
+  emptyError,
+  reindex,
+  type Reindex,
+} from './common.ts';
 
 export interface QueueMarks {
   /** Positions highlighted in the current step. */
@@ -26,22 +34,30 @@ function reduceQueue(
   a: QueueAction,
 ): Result<QueueState, ReduceError> {
   const n = s.data.length;
-  const withData = (data: readonly Element[]) => ok({ data, marks: s.marks });
+  // This step's highlights follow their elements as the ends change.
+  const withData = (data: readonly Element[], f?: Reindex) =>
+    ok({
+      data,
+      marks:
+        f === undefined
+          ? s.marks
+          : { highlight: reindex(s.marks.highlight, f) },
+    });
   switch (a.type) {
     case 'enqueue':
     case 'pushFront': {
       const full = checkCapacity('queue', n);
       if (full) return err(full);
-      return withData(
-        a.type === 'enqueue' ? [...s.data, a.element] : [a.element, ...s.data],
-      );
+      return a.type === 'enqueue'
+        ? withData([...s.data, a.element])
+        : withData([a.element, ...s.data], afterInsert(0));
     }
     case 'dequeue':
       if (n === 0) return err(emptyError('queue', 'dequeue'));
-      return withData(s.data.slice(1));
+      return withData(s.data.slice(1), afterRemove(0));
     case 'popBack':
       if (n === 0) return err(emptyError('queue', 'pop from the back of'));
-      return withData(s.data.slice(0, -1));
+      return withData(s.data.slice(0, -1), afterRemove(n - 1));
     case 'peek':
       if (n === 0) return err(emptyError('queue', 'peek'));
       return ok({

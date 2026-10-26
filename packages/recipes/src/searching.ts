@@ -3,6 +3,7 @@
  */
 import type { VisualizationInput } from '@algoviz/spec';
 
+import { checkFinite } from './check.ts';
 import { Recorder } from './recorder.ts';
 import { python } from './source.ts';
 
@@ -11,6 +12,7 @@ export function binarySearch(
   values: readonly number[],
   target: number,
 ): VisualizationInput {
+  checkFinite('The values and the target', [...values, target]);
   const r = new Recorder({
     title: `Binary search for ${target}`,
     source: python(`

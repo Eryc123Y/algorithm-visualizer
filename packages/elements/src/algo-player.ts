@@ -233,14 +233,17 @@ export class AlgoPlayer extends LitElement {
         else if (!this.autoplay) this.#controller.pause();
       }
     }
+    const reload = changed.has('visualization') || changed.has('src');
     if (changed.has('frame') && !Number.isFinite(this.frame)) {
       this.frame = this.playback.index;
+    } else if (changed.has('frame') && (this.trace === null || reload)) {
+      // Before a document is loaded, or with a new one, remember the frame
+      // to show once it is.
+      this.#requestedFrame = this.frame;
     } else if (changed.has('frame') && this.frame !== this.playback.index) {
-      // Before a trace is loaded, remember the frame to show once it is.
-      if (this.trace === null) this.#requestedFrame = this.frame;
-      else this.#controller.seek(this.frame);
+      this.#controller.seek(this.frame);
     }
-    if (changed.has('visualization') || changed.has('src')) void this.#load();
+    if (reload) void this.#load();
     const resolved = this.#resolvedTheme();
     if (this.dataset['resolvedTheme'] !== resolved)
       this.dataset['resolvedTheme'] = resolved;
@@ -463,7 +466,12 @@ export class AlgoPlayer extends LitElement {
           <div class="stage" part="stage"><svg class="scene"></svg></div>
           ${
             showCode
-              ? html`<pre class="code" part="code" aria-label="Source code">
+              ? html`<pre
+                  class="code"
+                  part="code"
+                  role="region"
+                  aria-label="Source code"
+                >
 ${source.code
                     .split('\n')
                     .map(

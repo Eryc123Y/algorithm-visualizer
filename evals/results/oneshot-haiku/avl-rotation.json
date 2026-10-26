@@ -1,0 +1,171 @@
+{
+  "version": "0.1",
+  "title": "AVL tree insertion and rotation",
+  "structures": {
+    "tree": {
+      "kind": "tree",
+      "binary": true
+    }
+  },
+  "steps": [
+    {
+      "actions": [
+        {
+          "target": "tree",
+          "type": "addNode",
+          "node": {
+            "id": "n10",
+            "value": 10
+          },
+          "parent": null
+        }
+      ],
+      "meta": {
+        "narration": "Insert 10 as the root of the AVL tree."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "tree",
+          "type": "annotate",
+          "node": "n10",
+          "text": "bf=0"
+        }
+      ],
+      "meta": {
+        "narration": "Balance factor of 10 is 0 (tree is balanced)."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "tree",
+          "type": "addNode",
+          "node": {
+            "id": "n20",
+            "value": 20
+          },
+          "parent": "n10",
+          "slot": "right"
+        }
+      ],
+      "meta": {
+        "narration": "Insert 20 as the right child of 10."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "tree",
+          "type": "annotate",
+          "node": "n10",
+          "text": "bf=-1"
+        },
+        {
+          "target": "tree",
+          "type": "annotate",
+          "node": "n20",
+          "text": "bf=0"
+        }
+      ],
+      "meta": {
+        "narration": "Balance factor of 10 is -1 (right-heavy by 1); balance factor of 20 is 0. Tree is still balanced."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "tree",
+          "type": "addNode",
+          "node": {
+            "id": "n30",
+            "value": 30
+          },
+          "parent": "n20",
+          "slot": "right"
+        }
+      ],
+      "meta": {
+        "narration": "Insert 30 as the right child of 20."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "tree",
+          "type": "annotate",
+          "node": "n10",
+          "text": "bf=-2"
+        },
+        {
+          "target": "tree",
+          "type": "annotate",
+          "node": "n20",
+          "text": "bf=-1"
+        },
+        {
+          "target": "tree",
+          "type": "annotate",
+          "node": "n30",
+          "text": "bf=0"
+        }
+      ],
+      "meta": {
+        "narration": "Balance factor of 10 is now -2: the tree is unbalanced! This violates the AVL property."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "tree",
+          "type": "highlight",
+          "nodes": [
+            "n10"
+          ]
+        }
+      ],
+      "meta": {
+        "narration": "The imbalance is at node 10 with a right-right pattern. Perform a left rotation at node 10."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "tree",
+          "type": "rotate",
+          "node": "n10",
+          "direction": "left"
+        }
+      ],
+      "meta": {
+        "narration": "After left rotation: node 20 becomes the new root, node 10 becomes its left child, and node 30 remains the right child."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "tree",
+          "type": "annotate",
+          "node": "n10",
+          "text": "bf=0"
+        },
+        {
+          "target": "tree",
+          "type": "annotate",
+          "node": "n20",
+          "text": "bf=0"
+        },
+        {
+          "target": "tree",
+          "type": "annotate",
+          "node": "n30",
+          "text": "bf=0"
+        }
+      ],
+      "meta": {
+        "narration": "After rotation, all balance factors are 0 and the tree is perfectly balanced."
+      }
+    }
+  ]
+}

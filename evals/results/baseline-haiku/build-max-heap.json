@@ -1,0 +1,190 @@
+{
+  "version": "0.1",
+  "title": "Build a max-heap from [3, 9, 2, 1, 4, 5]",
+  "source": {
+    "language": "python",
+    "code": "n = len(a)\nfor i in range((n - 1) // 2, -1, -1):\n    siftDown(i)"
+  },
+  "structures": {
+    "a": {
+      "kind": "array",
+      "initial": [3, 9, 2, 1, 4, 5],
+      "view": "tree"
+    }
+  },
+  "steps": [
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "pointer",
+          "name": "i",
+          "index": 2
+        }
+      ],
+      "meta": {
+        "line": 2,
+        "narration": "Start with the last parent at index (6-1)//2 = 2 with value 2.",
+        "vars": {
+          "i": 2
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "compare",
+          "i": 2,
+          "j": 5
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Sift down from index 2. Compare value 2 with its larger child 5 at index 5."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "swap",
+          "i": 2,
+          "j": 5
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "2 < 5, so swap them."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "pointer",
+          "name": "i",
+          "index": 1
+        }
+      ],
+      "meta": {
+        "line": 2,
+        "narration": "Move to the next parent at index 1 with value 9.",
+        "vars": {
+          "i": 1
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "compare",
+          "i": 1,
+          "j": 4
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Sift down from index 1. Compare value 9 with its larger child 4 at index 4."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "highlight",
+          "indices": [1]
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "9 > 4, so no swap needed. Node 9 is already in the correct position."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "pointer",
+          "name": "i",
+          "index": 0
+        }
+      ],
+      "meta": {
+        "line": 2,
+        "narration": "Move to the root at index 0 with value 3.",
+        "vars": {
+          "i": 0
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "compare",
+          "i": 0,
+          "j": 1
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Sift down from index 0. Compare value 3 with its larger child 9 at index 1."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "swap",
+          "i": 0,
+          "j": 1
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "3 < 9, so swap them."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "compare",
+          "i": 1,
+          "j": 4
+        }
+      ],
+      "meta": {
+        "narration": "After swap, 3 is at index 1. Compare 3 with its larger child 4 at index 4."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "swap",
+          "i": 1,
+          "j": 4
+        }
+      ],
+      "meta": {
+        "narration": "3 < 4, so swap them."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "pointer",
+          "name": "i",
+          "index": null
+        }
+      ],
+      "meta": {
+        "narration": "3 is now at index 4 with no children. Max-heap is complete: [9, 4, 5, 1, 3, 2]."
+      }
+    }
+  ]
+}

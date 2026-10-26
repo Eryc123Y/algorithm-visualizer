@@ -1,0 +1,306 @@
+{
+  "version": "0.1",
+  "title": "Selection sort on [29, 10, 14, 37, 13]",
+  "structures": {
+    "a": {
+      "kind": "array",
+      "initial": [
+        29,
+        10,
+        14,
+        37,
+        13
+      ]
+    }
+  },
+  "steps": [
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "highlight",
+          "indices": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ]
+        }
+      ],
+      "meta": {
+        "narration": "Find the minimum value in the entire unsorted array."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "compare",
+          "i": 0,
+          "j": 1
+        }
+      ],
+      "meta": {
+        "narration": "Compare 29 and 10: 10 is smaller."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "compare",
+          "i": 1,
+          "j": 2
+        }
+      ],
+      "meta": {
+        "narration": "Compare 10 and 14: 10 is still the minimum."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "compare",
+          "i": 1,
+          "j": 3
+        }
+      ],
+      "meta": {
+        "narration": "Compare 10 and 37: 10 is still the minimum."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "compare",
+          "i": 1,
+          "j": 4
+        }
+      ],
+      "meta": {
+        "narration": "Compare 10 and 13: 10 is the overall minimum."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "swap",
+          "i": 0,
+          "j": 1
+        }
+      ],
+      "meta": {
+        "narration": "Swap the minimum (10) into position 0."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "settle",
+          "index": 0
+        }
+      ],
+      "meta": {
+        "narration": "Position 0 is now in its final sorted position."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "highlight",
+          "indices": [
+            1,
+            2,
+            3,
+            4
+          ]
+        }
+      ],
+      "meta": {
+        "narration": "Find the minimum in the remaining unsorted part [29, 14, 37, 13]."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "compare",
+          "i": 1,
+          "j": 2
+        }
+      ],
+      "meta": {
+        "narration": "Compare 29 and 14: 14 is smaller."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "compare",
+          "i": 2,
+          "j": 3
+        }
+      ],
+      "meta": {
+        "narration": "Compare 14 and 37: 14 is still the minimum."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "compare",
+          "i": 2,
+          "j": 4
+        }
+      ],
+      "meta": {
+        "narration": "Compare 14 and 13: 13 is the new minimum."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "swap",
+          "i": 1,
+          "j": 4
+        }
+      ],
+      "meta": {
+        "narration": "Swap the minimum (13) into position 1."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "settle",
+          "index": 1
+        }
+      ],
+      "meta": {
+        "narration": "Position 1 is now in its final sorted position."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "highlight",
+          "indices": [
+            2,
+            3,
+            4
+          ]
+        }
+      ],
+      "meta": {
+        "narration": "Find the minimum in the remaining unsorted part [14, 37, 29]."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "compare",
+          "i": 2,
+          "j": 3
+        }
+      ],
+      "meta": {
+        "narration": "Compare 14 and 37: 14 is smaller."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "compare",
+          "i": 2,
+          "j": 4
+        }
+      ],
+      "meta": {
+        "narration": "Compare 14 and 29: 14 is the minimum."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "settle",
+          "index": 2
+        }
+      ],
+      "meta": {
+        "narration": "Position 2 is now in its final sorted position."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "highlight",
+          "indices": [
+            3,
+            4
+          ]
+        }
+      ],
+      "meta": {
+        "narration": "Find the minimum in the remaining unsorted part [37, 29]."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "compare",
+          "i": 3,
+          "j": 4
+        }
+      ],
+      "meta": {
+        "narration": "Compare 37 and 29: 29 is the minimum."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "swap",
+          "i": 3,
+          "j": 4
+        }
+      ],
+      "meta": {
+        "narration": "Swap the minimum (29) into position 3."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "settle",
+          "index": 3
+        },
+        {
+          "target": "a",
+          "type": "settle",
+          "index": 4
+        }
+      ],
+      "meta": {
+        "narration": "The array is now fully sorted: [10, 13, 14, 29, 37]."
+      }
+    }
+  ]
+}

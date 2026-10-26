@@ -62,14 +62,16 @@ Kinds are plug-ins (ADR 0012). Use an existing kind of similar shape as the mode
 1. **Protocol:** add `packages/spec/src/kinds/<kind>.ts` exporting a `KindSpec`, register it in `kinds/index.ts`, and add its schemas to `TargetedAction`, `TargetedActionInput`, `StructureDecl` and `StructureDeclInput` in `visualization.ts`. Regenerate the JSON Schema.
 2. **Engine:** add the reducer in `packages/core/src/kinds/` and the layout in `packages/core/src/layout/`, and register both in `packages/core/src/registry.ts`. The `satisfies` check there fails until the runtime matches the protocol.
 3. **Tests:** add conformance fixtures (valid replays with hand-computed states, invalid documents with expected error paths); scene invariants then run on them automatically. Check the result with `npm run gallery`.
-4. **Recipes:** the recorder picks up the new actions by itself; add a recipe if a classic algorithm uses the kind.
+4. **Guide:** add `packages/mcp/guide/kinds/<kind>.md` with the declaration, a table row for every action and a complete example. Tests fail until every action is listed and the example validates.
+5. **Recipes and evals:** the recorder picks up the new actions by itself; add a recipe if a classic algorithm uses the kind, and an eval task in `evals/` that needs it.
 
 ## Tests
 
 - Unit tests live in each workspace's `tests/` directory as `*.spec.ts`.
 - Type-level behaviour is tested with `expectTypeOf`; those assertions are enforced by `npm run typecheck`, not by Vitest.
 - Behaviour that other implementations must match belongs in `conformance/` as JSON fixtures (see its README).
-- E2E tests live in `apps/playground/tests/e2e/`.
+- E2E tests live in `apps/playground/tests/e2e/` and run against production builds: the playground, and the standalone `<algo-player>` bundle in a plain page. They check what the player draws against the engine's scene for each frame, fail on any console error, and scan for accessibility problems with axe. Run them with `npm run test:e2e`; to use a Chromium that is already installed, set `PLAYWRIGHT_CHROMIUM=/path/to/chromium`.
+- Generative (property-based) tests live in `packages/core/tests/properties/` and `packages/recipes/tests/properties.spec.ts`. They run a few dozen random cases by default; run them deeper before a release with `FUZZ_RUNS=5000 npx vitest run --project core --project recipes`, and replay a failure with the `FUZZ_SEED` it prints.
 
 ## Git workflow
 

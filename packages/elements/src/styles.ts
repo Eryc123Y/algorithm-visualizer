@@ -31,6 +31,9 @@ export const playerStyles = css`
     font-size: 14px;
     line-height: 1.5;
   }
+  :host([hidden]) {
+    display: none;
+  }
   :host([data-resolved-theme='dark']) {
     --algo-bg: #151b19;
     --algo-fg: #e4ebe8;

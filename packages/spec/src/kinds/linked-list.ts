@@ -6,7 +6,7 @@
  * the row, so a reversal can be shown one pointer at a time. `insert` only
  * places a node; wire it in with `link`, as the code being taught would.
  *
- * Marks: `highlight` lasts one step; `visit` and `pointer` persist.
+ * Marks: `highlight` lasts one step; `visit`, `settle` and `pointer` persist.
  */
 import { z } from 'zod';
 
@@ -100,6 +100,9 @@ const actions = <E extends z.ZodType>(element: E) =>
     z
       .strictObject({ type: z.literal('visit'), index: Index })
       .describe('Mark a node as visited (persists).'),
+    z
+      .strictObject({ type: z.literal('settle'), index: Index })
+      .describe('Mark a node as final or found (persists).'),
   ]);
 
 export const LinkedListAction = actions(Element);

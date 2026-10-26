@@ -4,6 +4,7 @@
  */
 import type { GraphDeclInput, VisualizationInput } from '@algoviz/spec';
 
+import { checkGraph } from './check.ts';
 import { Recorder } from './recorder.ts';
 import { python } from './source.ts';
 
@@ -25,6 +26,7 @@ interface Arc {
  * appended when that id is taken by a node or an earlier edge.
  */
 function edgeIds(g: GraphInput): string[] {
+  checkGraph(g);
   // Nodes and edges share one id namespace.
   const taken = new Set(g.nodes);
   return g.edges.map(([from, to]) => {

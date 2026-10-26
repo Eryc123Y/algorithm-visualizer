@@ -23,6 +23,7 @@
     "gallery": "node --conditions=@algoviz/source scripts/gallery.ts"
   },
   "devDependencies": {
+    "@anthropic-ai/sdk": "^0.131.0",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "1.63",
     "@tailwindcss/vite": "^4.3.3",
@@ -36,6 +37,7 @@
     "@vue/tsconfig": "^0.9.1",
     "eslint": "^10.12.0",
     "eslint-plugin-vue": "^10.11.1",
+    "fast-check": "^4.10.2",
     "globals": "^17.13.0",
     "happy-dom": "^20.14.5",
     "husky": "^9.1.7",
@@ -53,6 +55,7 @@
     "packages/core",
     "packages/svg",
     "packages/recipes",
+    "packages/mcp",
     "packages/elements",
     "apps/playground"
   ]

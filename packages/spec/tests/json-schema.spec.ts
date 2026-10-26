@@ -25,6 +25,12 @@ describe('visualizationJsonSchema', () => {
     expect(schema.properties.structures.maxProperties).toBe(16);
   });
 
+  it('forbids both forms of a table or hash table, as the parser does', () => {
+    const text = JSON.stringify(visualizationJsonSchema());
+    expect(text).toContain('"not":{"required":["initial","cells"]}');
+    expect(text).toContain('"not":{"required":["initial","buckets"]}');
+  });
+
   it('documents every array action for LLMs', () => {
     const text = JSON.stringify(visualizationJsonSchema());
     for (const type of [

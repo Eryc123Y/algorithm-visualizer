@@ -1,0 +1,279 @@
+{
+  "version": "0.1",
+  "title": "Floyd cycle detection",
+  "source": {
+    "language": "python",
+    "code": "slow = fast = head\nwhile slow != fast:\n    slow = slow.next\n    fast = fast.next.next\nreturn True  # Cycle detected"
+  },
+  "structures": {
+    "list": {
+      "kind": "linkedList",
+      "initial": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    }
+  },
+  "steps": [
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "link",
+          "from": 4,
+          "to": 2
+        }
+      ],
+      "meta": {
+        "narration": "Create cycle: node 5 (at index 4) points back to node 3 (at index 2)."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "slow",
+          "index": 0
+        },
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "fast",
+          "index": 0
+        }
+      ],
+      "meta": {
+        "line": 1,
+        "narration": "Initialize slow and fast pointers at head (node 1).",
+        "vars": {
+          "slow": "1",
+          "fast": "1"
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "highlight",
+          "indices": [
+            0
+          ]
+        }
+      ],
+      "meta": {
+        "line": 2,
+        "narration": "Check: slow == fast? Yes, both at node 1. But we need to move first.",
+        "vars": {
+          "slow": "1",
+          "fast": "1"
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "slow",
+          "index": 1
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Move slow one step: slow = slow.next = node 2.",
+        "vars": {
+          "slow": "2",
+          "fast": "1"
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "fast",
+          "index": 2
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Move fast two steps: fast = fast.next.next = node 3.",
+        "vars": {
+          "slow": "2",
+          "fast": "3"
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "highlight",
+          "indices": [
+            1,
+            2
+          ]
+        }
+      ],
+      "meta": {
+        "line": 2,
+        "narration": "Check: slow (node 2) == fast (node 3)? No.",
+        "vars": {
+          "slow": "2",
+          "fast": "3"
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "slow",
+          "index": 2
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Move slow one step: slow = slow.next = node 3.",
+        "vars": {
+          "slow": "3",
+          "fast": "3"
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "fast",
+          "index": 4
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Move fast two steps: node 3 → node 4, then node 4 → node 5.",
+        "vars": {
+          "slow": "3",
+          "fast": "5"
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "highlight",
+          "indices": [
+            2,
+            4
+          ]
+        }
+      ],
+      "meta": {
+        "line": 2,
+        "narration": "Check: slow (node 3) == fast (node 5)? No.",
+        "vars": {
+          "slow": "3",
+          "fast": "5"
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "slow",
+          "index": 3
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Move slow one step: slow = slow.next = node 4.",
+        "vars": {
+          "slow": "4",
+          "fast": "5"
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "fast",
+          "index": 3
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Move fast two steps: node 5 → node 3 (cycle), then node 3 → node 4.",
+        "vars": {
+          "slow": "4",
+          "fast": "4"
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "highlight",
+          "indices": [
+            3
+          ]
+        }
+      ],
+      "meta": {
+        "line": 2,
+        "narration": "Check: slow (node 4) == fast (node 4)? Yes! Cycle detected.",
+        "vars": {
+          "slow": "4",
+          "fast": "4"
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "visit",
+          "index": 2
+        },
+        {
+          "target": "list",
+          "type": "visit",
+          "index": 3
+        },
+        {
+          "target": "list",
+          "type": "visit",
+          "index": 4
+        },
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "slow",
+          "index": null
+        },
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "fast",
+          "index": null
+        }
+      ],
+      "meta": {
+        "narration": "The cycle is nodes 3, 4, 5 (indices 2, 3, 4). Pointers met at node 4."
+      }
+    }
+  ]
+}

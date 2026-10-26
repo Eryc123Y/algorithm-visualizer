@@ -43,6 +43,7 @@
             "marks": {
               "highlight": [],
               "visited": [],
+              "settled": [],
               "pointers": {}
             },
             "doubly": true

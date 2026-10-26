@@ -1,0 +1,55 @@
+## array
+
+A row of cells: sorting, searching, two pointers, sliding windows. With `"view": "tree"` it is drawn as a complete binary tree (index `i` has children `2i+1` and `2i+2`), for heaps.
+
+Declaration: `{ "kind": "array", "initial": [5, 3, 8], "label"?: "…", "view"?: "row" | "tree" }`. `initial` holds bare values (ids `e0`, `e1`, …) or `{ "id", "value" }` elements. Values are numbers, strings, booleans or null.
+
+| Action      | Fields             | Effect                                                                                                   |
+| ----------- | ------------------ | -------------------------------------------------------------------------------------------------------- |
+| `set`       | `index`, `value`   | Replace the value at `index`; the element keeps its id.                                                  |
+| `swap`      | `i`, `j`           | Swap two elements (marked as swapped for this step).                                                     |
+| `insert`    | `index`, `element` | Insert before `index`; `index` equal to the length appends. `element` is a value or `{ "id", "value" }`. |
+| `remove`    | `index`            | Remove an element.                                                                                       |
+| `compare`   | `i`, `j`           | Mark two positions as compared (this step).                                                              |
+| `highlight` | `indices`          | Highlight positions (this step), e.g. `[2, 3]`.                                                          |
+| `pointer`   | `name`, `index`    | Point a named arrow (`"i"`, `"lo"`, `"mid"`) at `index`; `null` removes it. Persists.                    |
+| `settle`    | `index`            | Mark an element as final, e.g. sorted or found. Persists.                                                |
+
+```json
+{
+  "version": "0.1",
+  "title": "Binary search for 7",
+  "structures": { "a": { "kind": "array", "initial": [1, 3, 5, 7, 9, 11] } },
+  "steps": [
+    {
+      "actions": [
+        { "target": "a", "type": "pointer", "name": "lo", "index": 0 },
+        { "target": "a", "type": "pointer", "name": "hi", "index": 5 },
+        { "target": "a", "type": "pointer", "name": "mid", "index": 2 },
+        { "target": "a", "type": "highlight", "indices": [2] }
+      ],
+      "meta": {
+        "narration": "mid = (0 + 5) // 2 = 2, and a[2] = 5 < 7, so search the right half."
+      }
+    },
+    {
+      "actions": [
+        { "target": "a", "type": "pointer", "name": "lo", "index": 3 },
+        { "target": "a", "type": "pointer", "name": "mid", "index": 4 },
+        { "target": "a", "type": "highlight", "indices": [4] }
+      ],
+      "meta": {
+        "narration": "mid = (3 + 5) // 2 = 4, and a[4] = 9 > 7, so search the left half."
+      }
+    },
+    {
+      "actions": [
+        { "target": "a", "type": "pointer", "name": "hi", "index": 3 },
+        { "target": "a", "type": "pointer", "name": "mid", "index": 3 },
+        { "target": "a", "type": "settle", "index": 3 }
+      ],
+      "meta": { "narration": "mid = 3 and a[3] = 7: found." }
+    }
+  ]
+}
+```

@@ -1,0 +1,309 @@
+{
+  "version": "0.1",
+  "title": "Reverse a Linked List",
+  "source": {
+    "language": "python",
+    "code": "prev = null\ncurr = head\nwhile curr:\n    next = curr.next\n    curr.next = prev\n    prev = curr\n    curr = next"
+  },
+  "structures": {
+    "list": {
+      "kind": "linkedList",
+      "initial": [
+        1,
+        2,
+        3,
+        4
+      ]
+    }
+  },
+  "steps": [
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "prev",
+          "index": null
+        },
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "curr",
+          "index": 0
+        }
+      ],
+      "meta": {
+        "line": 1,
+        "narration": "Initialize prev to null and curr to the head (node 1).",
+        "vars": {
+          "prev": null,
+          "curr": 0
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "next",
+          "index": 1
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Save next as node 2, the next node after curr.",
+        "vars": {
+          "next": 1
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "link",
+          "from": 0,
+          "to": null
+        }
+      ],
+      "meta": {
+        "line": 4,
+        "narration": "Reverse the link: node 1's next points to null (prev).",
+        "vars": {}
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "prev",
+          "index": 0
+        }
+      ],
+      "meta": {
+        "line": 5,
+        "narration": "Move prev to curr (node 1).",
+        "vars": {
+          "prev": 0
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "curr",
+          "index": 1
+        }
+      ],
+      "meta": {
+        "line": 6,
+        "narration": "Move curr to next (node 2).",
+        "vars": {
+          "curr": 1
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "next",
+          "index": 2
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Save next as node 3, the next node after curr.",
+        "vars": {
+          "next": 2
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "link",
+          "from": 1,
+          "to": 0
+        }
+      ],
+      "meta": {
+        "line": 4,
+        "narration": "Reverse the link: node 2's next points to node 1.",
+        "vars": {}
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "prev",
+          "index": 1
+        }
+      ],
+      "meta": {
+        "line": 5,
+        "narration": "Move prev to curr (node 2).",
+        "vars": {
+          "prev": 1
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "curr",
+          "index": 2
+        }
+      ],
+      "meta": {
+        "line": 6,
+        "narration": "Move curr to next (node 3).",
+        "vars": {
+          "curr": 2
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "next",
+          "index": 3
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Save next as node 4, the next node after curr.",
+        "vars": {
+          "next": 3
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "link",
+          "from": 2,
+          "to": 1
+        }
+      ],
+      "meta": {
+        "line": 4,
+        "narration": "Reverse the link: node 3's next points to node 2.",
+        "vars": {}
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "prev",
+          "index": 2
+        }
+      ],
+      "meta": {
+        "line": 5,
+        "narration": "Move prev to curr (node 3).",
+        "vars": {
+          "prev": 2
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "curr",
+          "index": 3
+        }
+      ],
+      "meta": {
+        "line": 6,
+        "narration": "Move curr to next (node 4).",
+        "vars": {
+          "curr": 3
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "next",
+          "index": null
+        }
+      ],
+      "meta": {
+        "line": 3,
+        "narration": "Save next as null, since node 4 has no next node.",
+        "vars": {
+          "next": null
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "link",
+          "from": 3,
+          "to": 2
+        }
+      ],
+      "meta": {
+        "line": 4,
+        "narration": "Reverse the link: node 4's next points to node 3.",
+        "vars": {}
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "prev",
+          "index": 3
+        }
+      ],
+      "meta": {
+        "line": 5,
+        "narration": "Move prev to curr (node 4).",
+        "vars": {
+          "prev": 3
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "list",
+          "type": "pointer",
+          "name": "curr",
+          "index": null
+        }
+      ],
+      "meta": {
+        "line": 6,
+        "narration": "Move curr to next (null). Loop ends. The list is reversed: 4 → 3 → 2 → 1.",
+        "vars": {
+          "curr": null
+        }
+      }
+    }
+  ]
+}

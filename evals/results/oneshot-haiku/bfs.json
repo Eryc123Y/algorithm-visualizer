@@ -1,0 +1,218 @@
+{
+  "version": "0.1",
+  "title": "Breadth-first search from A",
+  "structures": {
+    "g": {
+      "kind": "graph",
+      "directed": false,
+      "nodes": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "edges": [
+        [
+          "A",
+          "B"
+        ],
+        [
+          "A",
+          "C"
+        ],
+        [
+          "B",
+          "D"
+        ],
+        [
+          "C",
+          "D"
+        ],
+        [
+          "D",
+          "E"
+        ]
+      ]
+    },
+    "q": {
+      "kind": "queue",
+      "label": "queue",
+      "initial": []
+    }
+  },
+  "steps": [
+    {
+      "actions": [
+        {
+          "target": "q",
+          "type": "enqueue",
+          "element": "A"
+        },
+        {
+          "target": "g",
+          "type": "visit",
+          "node": "A"
+        },
+        {
+          "target": "g",
+          "type": "pointer",
+          "name": "current",
+          "node": "A"
+        }
+      ],
+      "meta": {
+        "narration": "Start BFS from A. Add A to the queue and mark it as visited."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "q",
+          "type": "peek"
+        },
+        {
+          "target": "q",
+          "type": "dequeue"
+        },
+        {
+          "target": "g",
+          "type": "highlight",
+          "edges": [
+            "A-B",
+            "A-C"
+          ]
+        }
+      ],
+      "meta": {
+        "narration": "Dequeue A. Its neighbors are B and C."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "q",
+          "type": "enqueue",
+          "element": "B"
+        },
+        {
+          "target": "g",
+          "type": "visit",
+          "node": "B"
+        },
+        {
+          "target": "q",
+          "type": "enqueue",
+          "element": "C"
+        },
+        {
+          "target": "g",
+          "type": "visit",
+          "node": "C"
+        }
+      ],
+      "meta": {
+        "narration": "Enqueue B and C, mark them as visited."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "q",
+          "type": "dequeue"
+        },
+        {
+          "target": "g",
+          "type": "highlight",
+          "edges": [
+            "B-D"
+          ]
+        }
+      ],
+      "meta": {
+        "narration": "Dequeue B. Its unvisited neighbor is D."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "q",
+          "type": "enqueue",
+          "element": "D"
+        },
+        {
+          "target": "g",
+          "type": "visit",
+          "node": "D"
+        }
+      ],
+      "meta": {
+        "narration": "Enqueue D and mark it as visited."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "q",
+          "type": "dequeue"
+        },
+        {
+          "target": "g",
+          "type": "highlight",
+          "edges": [
+            "C-D"
+          ]
+        }
+      ],
+      "meta": {
+        "narration": "Dequeue C. D is already visited, so no new nodes to enqueue."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "q",
+          "type": "dequeue"
+        },
+        {
+          "target": "g",
+          "type": "highlight",
+          "edges": [
+            "D-E"
+          ]
+        }
+      ],
+      "meta": {
+        "narration": "Dequeue D. Its unvisited neighbor is E."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "q",
+          "type": "enqueue",
+          "element": "E"
+        },
+        {
+          "target": "g",
+          "type": "visit",
+          "node": "E"
+        }
+      ],
+      "meta": {
+        "narration": "Enqueue E and mark it as visited."
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "q",
+          "type": "dequeue"
+        }
+      ],
+      "meta": {
+        "narration": "Dequeue E. All nodes have been visited and the queue is empty."
+      }
+    }
+  ]
+}
