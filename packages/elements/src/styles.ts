@@ -17,6 +17,12 @@ export const playerStyles = css`
     --algo-line-bg: #fff4dc;
     --algo-line-edge: #d08a18;
     --algo-error: #b42318;
+    --algo-code-keyword: #8a2f6b;
+    --algo-code-builtin: #0b6b5e;
+    --algo-code-function: #1f56a8;
+    --algo-code-string: #9a4a10;
+    --algo-code-number: #8a5a00;
+    --algo-code-comment: #5f6e68;
     --algo-radius: 14px;
     --algo-font:
       'Inter', 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -45,6 +51,21 @@ export const playerStyles = css`
     --algo-line-bg: #3b2c12;
     --algo-line-edge: #e9a53a;
     --algo-error: #ff8a7a;
+    --algo-code-keyword: #e7a0d4;
+    --algo-code-builtin: #5fd0bd;
+    --algo-code-function: #93b9ff;
+    --algo-code-string: #f2a874;
+    --algo-code-number: #e9c86f;
+    --algo-code-comment: #97a59f;
+  }
+  /* Print is greyscale: only keywords (bold) and comments (italic) stand out. */
+  :host([data-resolved-theme='print']) {
+    --algo-code-keyword: var(--algo-fg);
+    --algo-code-builtin: var(--algo-fg);
+    --algo-code-function: var(--algo-fg);
+    --algo-code-string: var(--algo-fg);
+    --algo-code-number: var(--algo-fg);
+    --algo-code-comment: var(--algo-muted);
   }
   :host(:focus-visible) {
     outline: none;
@@ -125,6 +146,26 @@ export const playerStyles = css`
   .code .line.current {
     background: var(--algo-line-bg);
     border-left-color: var(--algo-line-edge);
+  }
+  .tok-keyword {
+    color: var(--algo-code-keyword);
+    font-weight: 600;
+  }
+  .tok-builtin {
+    color: var(--algo-code-builtin);
+  }
+  .tok-function {
+    color: var(--algo-code-function);
+  }
+  .tok-string {
+    color: var(--algo-code-string);
+  }
+  .tok-number {
+    color: var(--algo-code-number);
+  }
+  .tok-comment {
+    color: var(--algo-code-comment);
+    font-style: italic;
   }
 
   .caption {

@@ -19,5 +19,8 @@ Each file records one architectural decision: the context, what we decided, and 
 | [0013](0013-node-link-layout.md)                    | Node-link layout: stable positions, routed edges, free-space labels  | Accepted |
 | [0014](0014-mcp-and-evals.md)                       | Models write documents through MCP tools, and evals measure how well | Accepted |
 | [0015](0015-mcp-app-player.md)                      | The player opens in the conversation as an MCP App                   | Accepted |
+| [0016](0016-code-highlighting.md)                   | Source code is highlighted by small, pure tokenizers                 | Accepted |
+| [0017](0017-multi-language-source.md)               | A document may carry its source in several languages                 | Proposed |
+| [0018](0018-operation-recipes.md)                   | Data-structure operations are recipes that start from a given state  | Accepted |
 
 Template: Status · Context · Decision · Consequences.
