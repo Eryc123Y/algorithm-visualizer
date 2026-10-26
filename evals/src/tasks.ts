@@ -914,9 +914,18 @@ export const tasks: readonly EvalTask[] = [
     check: (trace) =>
       anyTrack(trace, 'hashTable', (t) => {
         const got = t.last.data.map((chain) => nums(chain.map((e) => e.value)));
+        // Chain order is free: inserting at the head or the tail are both separate chaining.
         return [
           ...expect(
-            same(got, [[], [15, 8], [], [], [11], [12], [27]]),
+            same(got.map(sortedNumbers), [
+              [],
+              [8, 15],
+              [],
+              [],
+              [11],
+              [12],
+              [27],
+            ]),
             `ends as ${JSON.stringify(got)}`,
           ),
           ...expect(

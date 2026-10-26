@@ -200,6 +200,51 @@ describe('eval tasks', () => {
     expect(result.problems.join()).toContain('rejected');
   });
 
+  it('accept separate chaining that inserts at the head of a chain', () => {
+    const task = tasks.find((t) => t.id === 'hash-chaining')!;
+    const insert = (key: number) => ({
+      actions: [
+        {
+          target: 'h',
+          type: 'insert',
+          bucket: key % 7,
+          element: key,
+          index: 0,
+        },
+      ],
+      meta: { narration: `${key} mod 7 = ${key % 7}.` },
+    });
+    const result = grade(task, {
+      version: '0.1',
+      structures: { h: { kind: 'hashTable', size: 7 } },
+      steps: [15, 11, 27, 8, 12].map(insert),
+    });
+    expect(result.errors).toEqual([]);
+    expect(result.problems).toEqual([]);
+    expect(result.correct).toBe(true);
+  });
+
+  it('reject separate chaining that puts a key in the wrong bucket', () => {
+    const task = tasks.find((t) => t.id === 'hash-chaining')!;
+    const insert = (key: number, bucket: number) => ({
+      actions: [{ target: 'h', type: 'insert', bucket, element: key }],
+      meta: { narration: `Insert ${key}.` },
+    });
+    const result = grade(task, {
+      version: '0.1',
+      structures: { h: { kind: 'hashTable', size: 7 } },
+      steps: [
+        insert(15, 1),
+        insert(11, 4),
+        insert(27, 6),
+        insert(8, 2),
+        insert(12, 5),
+      ],
+    });
+    expect(result.errors).toEqual([]);
+    expect(result.correct).toBe(false);
+  });
+
   it('reject a sort done in one step and padded', () => {
     const task = tasks.find((t) => t.id === 'insertion-sort')!;
     const pad = (k: number) => ({
