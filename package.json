@@ -16,6 +16,7 @@
     "test:e2e": "npm run test:e2e -w @algoviz/playground",
     "test:typst": "npm run test:typst -w @algoviz/typst",
     "test:standalone": "npm run test:standalone -w @algoviz/mcp",
+    "test:latex": "npm run test:latex -w @algoviz/latex",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
@@ -63,6 +64,7 @@
     "packages/recipes",
     "packages/typst",
     "packages/mcp",
+    "packages/latex",
     "packages/elements",
     "apps/playground"
   ]

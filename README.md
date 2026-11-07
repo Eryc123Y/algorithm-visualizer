@@ -110,6 +110,17 @@ In Typst, [the algoviz package](packages/typst/package/README.md) draws the same
 
 The package is not on Typst Universe yet; its README says how to use it as a local package until it is.
 
+In LaTeX, [the algoviz package](packages/latex/package/README.md) draws them with TikZ, so their text is set in the document's own fonts ([ADR 0027](docs/adr/0027-latex-package.md)). It runs the `algoviz` command through shell escape, as `minted` does, and caches every figure, so later runs need no shell escape:
+
+```latex
+\usepackage{algoviz}
+
+\algoviz[step=relax#3]{dijkstra}{"graph": {...}, "source": "A"}
+\algovizfile[step=delete-3/copy, theme=print, width=0.6\linewidth]{bst-delete.json}
+```
+
+The package is not on CTAN yet; its README says how to use it, and how to build the standalone `algoviz` it calls, until it is.
+
 In code, `exportFigures(document, { steps, theme })` from `@algoviz/svg` returns the same figures as strings, and `selectSeries` from `@algoviz/core` the frames that selectors name. `prepareFigures(document, { theme })` loads a document once and then draws a figure of any frame, or any series, on demand.
 
 ## Embedding
@@ -148,10 +159,12 @@ Display mode also accepts `once` (play a single time) and `motion` (`linear` · 
 | [`@algoviz/fonts`](packages/fonts)       | Available | Metrics and outlines of the bundled fonts, and text measurement    |
 | [`@algoviz/core`](packages/core)         | Available | Structure kinds, reducers, timeline engine and layout to scenes    |
 | [`@algoviz/svg`](packages/svg)           | Available | Standalone SVG figures with text as glyph outlines (no DOM needed) |
+| [`@algoviz/tikz`](packages/tikz)         | Available | TikZ figures for the LaTeX package, from the SVG painter's shapes  |
 | [`@algoviz/elements`](packages/elements) | Available | `<algo-player>`: interactive, animated player (Lit Web Component)  |
 | [`@algoviz/recipes`](packages/recipes)   | Available | Typed recorder and visualizations of classic algorithms            |
 | [`@algoviz/mcp`](packages/mcp)           | Available | MCP server, MCP App and CLI: guide, validation, inspection, export |
 | [`algoviz` for Typst](packages/typst)    | Local     | Typst package: figures from inside a document, via a Wasm plugin   |
+| [`algoviz` for LaTeX](packages/latex)    | Local     | LaTeX package: TikZ figures in the document's fonts, via the CLI   |
 
 ## Design
 

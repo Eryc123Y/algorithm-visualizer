@@ -1,0 +1,11 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "../../node_modules/.tmp/latex.test.tsbuildinfo",
+    "lib": ["ES2023"],
+    "types": ["node"],
+    "noEmit": true,
+    "customConditions": ["@algoviz/source"]
+  },
+  "include": ["tests", "vitest.config.ts", "vitest.latex.config.ts"]
+}

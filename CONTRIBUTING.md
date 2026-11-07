@@ -14,19 +14,20 @@ npm run dev                       # start the playground
 
 This is an npm workspaces monorepo.
 
-| Path                 | Package               | Purpose                                                                                          |
-| -------------------- | --------------------- | ------------------------------------------------------------------------------------------------ |
-| `packages/spec/`     | `@algoviz/spec`       | Protocol: Zod schemas, inferred types, parsing and validation. No DOM or Node.js APIs.           |
-| `packages/fonts/`    | `@algoviz/fonts`      | Metrics and outlines of the bundled fonts (OFL), and text measurement. No DOM or Node.js APIs.   |
-| `packages/core/`     | `@algoviz/core`       | Structure kinds, reducers, the timeline engine and layout to scenes. No DOM or Node.js APIs.     |
-| `packages/svg/`      | `@algoviz/svg`        | Scene → standalone SVG string. No DOM or Node.js APIs.                                           |
-| `packages/tikz/`     | `@algoviz/tikz`       | Scene → TikZ for the LaTeX package, from the SVG painter's shapes (ADR 0027). No DOM or Node.js. |
-| `packages/elements/` | `@algoviz/elements`   | `<algo-player>` Web Component (Lit) and a standalone CDN bundle.                                 |
-| `packages/recipes/`  | `@algoviz/recipes`    | Typed recorder and classic algorithms, each tested against a reference implementation.           |
-| `packages/typst/`    | `@algoviz/typst`      | The Typst package: the engine in QuickJS-ng inside a WebAssembly plugin (ADR 0026).              |
-| `apps/playground/`   | `@algoviz/playground` | Vite + Vue app for demos and, later, documentation.                                              |
-| `conformance/`       | —                     | Language-agnostic JSON fixtures every implementation must pass.                                  |
-| `docs/adr/`          | —                     | Architecture decision records. Read these before changing the design.                            |
+| Path                 | Package               | Purpose                                                                                              |
+| -------------------- | --------------------- | ---------------------------------------------------------------------------------------------------- |
+| `packages/spec/`     | `@algoviz/spec`       | Protocol: Zod schemas, inferred types, parsing and validation. No DOM or Node.js APIs.               |
+| `packages/fonts/`    | `@algoviz/fonts`      | Metrics and outlines of the bundled fonts (OFL), and text measurement. No DOM or Node.js APIs.       |
+| `packages/core/`     | `@algoviz/core`       | Structure kinds, reducers, the timeline engine and layout to scenes. No DOM or Node.js APIs.         |
+| `packages/svg/`      | `@algoviz/svg`        | Scene → standalone SVG string. No DOM or Node.js APIs.                                               |
+| `packages/tikz/`     | `@algoviz/tikz`       | Scene → TikZ for the LaTeX package, from the SVG painter's shapes (ADR 0027). No DOM or Node.js.     |
+| `packages/elements/` | `@algoviz/elements`   | `<algo-player>` Web Component (Lit) and a standalone CDN bundle.                                     |
+| `packages/recipes/`  | `@algoviz/recipes`    | Typed recorder and classic algorithms, each tested against a reference implementation.               |
+| `packages/typst/`    | `@algoviz/typst`      | The Typst package: the engine in QuickJS-ng inside a WebAssembly plugin (ADR 0026).                  |
+| `packages/latex/`    | `@algoviz/latex`      | The LaTeX package: `algoviz.sty`, which draws TikZ figures made by the `algoviz` command (ADR 0027). |
+| `apps/playground/`   | `@algoviz/playground` | Vite + Vue app for demos and, later, documentation.                                                  |
+| `conformance/`       | —                     | Language-agnostic JSON fixtures every implementation must pass.                                      |
+| `docs/adr/`          | —                     | Architecture decision records. Read these before changing the design.                                |
 
 Workspace packages expose their TypeScript sources through the `@algoviz/source` export condition. The playground, Vitest and the type checker use it, so nothing needs to be built before development or tests. Published consumers get `dist/`.
 
@@ -45,6 +46,7 @@ Run from the repository root.
 | `npm run test:e2e`                          | Playwright tests against the playground's production build          |
 | `npm run test:typst`                        | The Typst package in the `typst` command (needs Typst 0.15)         |
 | `npm run test:standalone`                   | Build the standalone `algoviz` and compare it with the Node CLI     |
+| `npm run test:latex`                        | Compile the LaTeX package's examples and cases (needs TeX Live)     |
 | `npm run check`                             | Typecheck, lint, format check and unit tests (what CI runs first)   |
 | `npm run generate:schema -w @algoviz/spec`  | Regenerate `packages/spec/schema/visualization.schema.json`         |
 | `npm run gallery -- out.html [file.json …]` | Render every frame of fixtures or documents to one page, for review |
@@ -98,6 +100,7 @@ Every algorithm, and every operation of a data structure, is a module of the reg
 - E2E tests live in `apps/playground/tests/e2e/` and run against production builds: the playground, and the standalone `<algo-player>` bundle in a plain page. They check what the player draws against the engine's scene for each frame, fail on any console error, and scan for accessibility problems with axe. Run them with `npm run test:e2e`; to use a Chromium that is already installed, set `PLAYWRIGHT_CHROMIUM=/path/to/chromium`.
 - The Typst package's tests in `packages/typst/tests/typst/` compile its examples and call its functions with the `typst` command, so they run apart from `npm run check`: `npm run test:typst`. Run them when the package, its plugin or the engine's output changes.
 - The standalone executable's tests in `packages/mcp/tests/standalone/` build it with the Rust toolchain and compare every registry example's figures with the Node CLI's: `npm run test:standalone`. `npm run check` runs its JavaScript in a bare V8 context instead (`tests/standalone-bundle.spec.ts`). Run them when the CLI, the engine's output or `packages/mcp/standalone/` changes.
+- The LaTeX package's tests in `packages/latex/tests/latex/` compile its examples and error cases with pdfLaTeX, LuaLaTeX and XeLaTeX through `latexmk`, so they need TeX Live 2024 or later and run apart from `npm run check`: `npm run test:latex`. They call the Node CLI from source, or the executable that `ALGOVIZ_COMMAND` names. Run them when the package, the TikZ painter or the CLI changes.
 - Generative (property-based) tests live in `packages/core/tests/properties/` and `packages/recipes/tests/properties.spec.ts`. They run a few dozen random cases by default; run them deeper before a release with `FUZZ_RUNS=5000 npx vitest run --project core --project recipes`, and replay a failure with the `FUZZ_SEED` it prints.
 
 ## Git workflow
