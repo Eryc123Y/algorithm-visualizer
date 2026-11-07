@@ -26,5 +26,6 @@ Each file records one architectural decision: the context, what we decided, and 
 | [0020](0020-step-names-and-sections.md)             | Steps have names and documents have sections                         | Accepted                            |
 | [0021](0021-protocol-versioning.md)                 | The protocol version says what a reader must understand              | Accepted                            |
 | [0022](0022-registry-details.md)                    | Registry details: traces, structure modules, ids and sorting         | Accepted                            |
+| [0023](0023-remaining-modules.md)                   | The remaining recipes as registry modules: ids, inputs, procedures   | Accepted                            |
 
 Template: Status · Context · Decision · Consequences.
