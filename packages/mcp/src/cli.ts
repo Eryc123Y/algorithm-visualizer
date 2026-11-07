@@ -7,10 +7,12 @@
  *   algoviz inspect <file> [frame …]
  *   algoviz render <file> [--frame f] [--theme dark] [--out frame.svg]
  *
- * A frame is a number (negative counts from the end) or a selector such as
- * "relax#2", "insert-5/go" or "insert-5" (ADR 0020).
  *   algoviz recipes
- *   algoviz recipe <name> <args-json> [--out doc.json]
+ *   algoviz run <id> <input-json> [--out doc.json]
+ *
+ * A frame is a number (negative counts from the end) or a selector such as
+ * "relax#2", "insert-5/go" or "insert-5" (ADR 0020). `algoviz recipe` is
+ * another name for `run` until roadmap 0.5 removes it (ADR 0022).
  *
  * A file of "-" is read from standard input. Exits with 1 on an error.
  */
@@ -24,7 +26,9 @@ const USAGE = `Usage:
   algoviz inspect <file> [frame …]       State at frames (default: the last)
   algoviz render <file> [--frame f] [--theme light|dark] [--out file.svg]
   algoviz recipes                        List ready-made visualizations
-  algoviz recipe <name> <args-json> [--out file.json]
+  algoviz run <id> <input-json> [--out file.json]
+                                         Run one, e.g. run bst.delete
+                                         '{"from": [8, 3, 10], "key": 3}'
 
 A frame is a number (0 the start, -1 the last), a step such as "relax#2"
 or "insert-5/relax", a section such as "insert-5", or a range "a..b".
@@ -116,12 +120,15 @@ function dispatch(
       });
     case 'recipes':
       return callTool('algoviz_list_recipes', {});
+    // `recipe` is the old name of `run`, kept until roadmap 0.5.
+    case 'run':
     case 'recipe': {
-      const [name, args = '{}'] = rest;
-      if (name === undefined) throw new UsageError('recipe needs a name');
+      const [id, input] = rest;
+      if (id === undefined || input === undefined)
+        throw new UsageError(`${command} needs an id and an input`);
       return callTool('algoviz_run_recipe', {
-        name,
-        args: JSON.parse(args) as unknown,
+        id,
+        input: JSON.parse(input) as unknown,
       });
     }
     default:
@@ -142,7 +149,7 @@ export function main(
   try {
     ran = run(argv);
   } catch (e) {
-    // SyntaxError: recipe arguments that are not JSON.
+    // SyntaxError: an input that is not JSON.
     if (!(e instanceof UsageError || e instanceof SyntaxError)) throw e;
     err(`${e.message}\n\n${USAGE}`);
     return 2;

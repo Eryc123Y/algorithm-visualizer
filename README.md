@@ -40,22 +40,17 @@ Shorthands keep documents short: `"initial": [5, 3, 8]` generates element ids, a
 
 ## Recipes
 
-`@algoviz/recipes` has a typed recorder for producing documents from running code, and ready-made visualizations of 29 algorithms: seven sorts, binary search, list reversal, bracket matching, BST, AVL, traversals, binary heap, trie, union–find, BFS, DFS, Dijkstra, Bellman–Ford, Prim, Kruskal, topological sort, Floyd–Warshall, LCS, edit distance, 0/1 knapsack and two hashing schemes.
+`@algoviz/recipes` holds ready-made visualizations of classic algorithms and data structures, and a typed recorder for producing documents from running code.
+
+Every algorithm, and every operation of a data structure, is a module of one registry ([ADR 0019](docs/adr/0019-algorithm-registry.md)) with a stable id, a Zod input schema, examples, and its code in pseudocode and Python. `runAlgorithm(id, input)` checks the input, records the run and validates the document:
 
 ```ts
-import { dijkstra, Recorder } from '@algoviz/recipes';
+import { runAlgorithm, Recorder } from '@algoviz/recipes';
 
-const doc = dijkstra(
-  {
-    nodes: ['A', 'B', 'C'],
-    edges: [
-      ['A', 'B', 4],
-      ['B', 'C', 1],
-      ['A', 'C', 7],
-    ],
-  },
-  'A',
-);
+// Delete 3 from the tree that inserting these keys builds.
+const run = runAlgorithm('bst.delete', { from: [8, 3, 10, 1, 6], key: 3 });
+if (run.ok) console.log(run.value.document, run.value.after);
+else console.error(run.error); // e.g. INVALID_SHAPE at $.input.key
 
 // Or record your own: every handle method is typed from the protocol.
 const r = new Recorder({ title: 'Swap' });
@@ -65,7 +60,9 @@ a.swap({ i: 0, j: 1 });
 const mine = r.build();
 ```
 
-The playground's example menu shows every recipe.
+The registry has binary search trees (`bst`, `bst.search`, `bst.insert`, `bst.delete`) and binary heaps (`min-heap` and `max-heap`, with push, pop and decrease- or increase-key). Each operation starts from a structure the caller describes, and a structure's sequence runs up to 8 operations. `algorithms` lists every module. The other recipes are being moved into the registry (roadmap 0.4 and 0.5): seven sorts, binary search, list reversal, bracket matching, AVL, traversals, trie, union–find, BFS, DFS, Dijkstra, Bellman–Ford, Prim, Kruskal, topological sort, Floyd–Warshall, LCS, edit distance, 0/1 knapsack and two hashing schemes. Until then, they are functions such as `dijkstra(graph, source)`.
+
+MCP, the `algoviz` command line and the playground's example menu read the registry, grouped by topic.
 
 ## For models
 

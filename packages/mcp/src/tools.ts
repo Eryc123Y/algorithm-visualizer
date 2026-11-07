@@ -2,6 +2,7 @@
  * The tools an MCP client sees, independent of any transport: the MCP
  * server registers them, and the evaluation harness calls them directly.
  */
+import { TOPICS } from '@algoviz/recipes';
 import { formatErrors, type Diagnostic } from '@algoviz/spec';
 import { z } from 'zod';
 
@@ -119,7 +120,7 @@ export const tools: readonly ToolDefinition[] = [
   tool({
     name: 'algoviz_list_recipes',
     title: 'List recipes',
-    description: `Lists ready-made visualizations of classic algorithms (${recipeCatalog.length}: sorting, searching, lists, trees, graphs, dynamic programming, hashing) with the arguments each takes. A recipe produces a complete, narrated document for your own input; prefer one when it matches what is asked.`,
+    description: `Lists ready-made visualizations (${recipeCatalog.length}): classic algorithms, and single operations on data structures such as "bst.delete" or "min-heap.pop". Each has an id, a title, a topic (${TOPICS.join(', ')}), a one-sentence summary and the JSON Schema of its input. A recipe produces a complete, narrated document for your own input; prefer one when it matches what is asked. Recipes with a kebab-case id also show their code in pseudocode and Python.`,
     input: z.strictObject({}),
     run() {
       return { text: JSON.stringify(listRecipes()) };
@@ -129,15 +130,16 @@ export const tools: readonly ToolDefinition[] = [
     name: 'algoviz_run_recipe',
     title: 'Run a recipe',
     description:
-      'Builds the document for a recipe from algoviz_list_recipes with the given arguments, e.g. name "dijkstra" with args { "graph": { "nodes": ["A", "B"], "edges": [["A", "B", 3]] }, "source": "A" }. Returns the document as JSON, already validated.',
+      'Builds the document of a recipe from algoviz_list_recipes for the given input, e.g. id "bst.delete" with input { "from": [8, 3, 10, 1, 6], "key": 3 }. Returns the document as JSON, already validated.',
     input: z.strictObject({
-      name: z.string().describe('Recipe name, e.g. "bubbleSort".'),
-      args: z
-        .record(z.string(), z.unknown())
-        .describe('Arguments as listed for the recipe.'),
+      id: z.string().describe('Recipe id, e.g. "bst.delete" or "dijkstra".'),
+      // Any JSON: the recipe's own schema checks it, at paths under $.input.
+      input: z
+        .unknown()
+        .describe('The input, as its JSON Schema in the list describes it.'),
     }),
-    run({ name, args }) {
-      const doc = runRecipe(name, args);
+    run({ id, input }) {
+      const doc = runRecipe(id, input);
       return doc.ok ? { text: JSON.stringify(doc.value) } : failure(doc.error);
     },
   }),

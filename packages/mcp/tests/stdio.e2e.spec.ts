@@ -96,13 +96,14 @@ describe('the MCP server over stdio', () => {
       textOf(
         await client.callTool({ name: 'algoviz_list_recipes', arguments: {} }),
       ),
-    ) as { name: string }[];
-    expect(listed.map((r) => r.name)).toContain('kruskal');
+    ) as { id: string }[];
+    expect(listed.map((r) => r.id)).toContain('kruskal');
+    expect(listed.map((r) => r.id)).toContain('bst.delete');
     const doc = await client.callTool({
       name: 'algoviz_run_recipe',
       arguments: {
-        name: 'kruskal',
-        args: {
+        id: 'kruskal',
+        input: {
           graph: {
             nodes: ['A', 'B', 'C'],
             edges: [
@@ -124,7 +125,7 @@ describe('the MCP server over stdio', () => {
   it('reports bad recipe arguments without crashing', async () => {
     const result = await client.callTool({
       name: 'algoviz_run_recipe',
-      arguments: { name: 'linearProbing', args: { keys: [1.5], size: 3 } },
+      arguments: { id: 'linearProbing', input: { keys: [1.5], size: 3 } },
     });
     expect(result.isError).toBe(true);
     // The server is still there.
@@ -178,9 +179,9 @@ describe('the CLI as a command', () => {
 
   it('prints a recipe that renders', () => {
     const recipe = run([
-      'recipe',
-      'binarySearch',
-      '{"values": [1, 2, 3], "target": 3}',
+      'run',
+      'min-heap.push',
+      '{"from": [5, 3, 8], "value": 1}',
     ]);
     expect(recipe.status).toBe(0);
     const svg = run(['render', '-', '--frame', '-1'], recipe.stdout);

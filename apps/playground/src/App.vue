@@ -66,21 +66,22 @@ watch(parsed, ({ value, error }) => {
         </p>
       </div>
       <div class="flex flex-wrap items-center gap-4 text-sm">
-        <label class="flex items-center gap-2">
+        <label class="flex max-w-full min-w-0 items-center gap-2">
           Example
+          <!-- min-w-0 lets a long entry shrink on a phone. -->
           <select
             v-model="example"
-            class="rounded border px-2 py-1"
+            class="min-w-0 rounded border px-2 py-1"
             data-testid="example"
           >
             <option value="" disabled>Choose…</option>
             <optgroup
               v-for="group in exampleGroups"
-              :key="group"
-              :label="group"
+              :key="group.topic"
+              :label="group.title"
             >
               <option
-                v-for="item in examples.filter((e) => e.group === group)"
+                v-for="item in examples.filter((e) => e.topic === group.topic)"
                 :key="item.label"
                 :value="item.label"
               >
