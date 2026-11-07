@@ -1,0 +1,22 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "tsBuildInfoFile": "./dist/.tsbuildinfo",
+    // No DOM and no Node.js types: the painter must run anywhere, including CLIs and WASM hosts (ADR 0005).
+    "lib": ["ES2022"],
+    "types": [],
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true
+  },
+  "include": ["src"],
+  // Resolves @algoviz/core, @algoviz/spec and @algoviz/svg to their built
+  // declarations, so build them first.
+  "references": [
+    { "path": "../core/tsconfig.lib.json" },
+    { "path": "../spec/tsconfig.lib.json" },
+    { "path": "../svg/tsconfig.lib.json" }
+  ]
+}

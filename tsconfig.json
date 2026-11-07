@@ -17,6 +17,9 @@
       "path": "./packages/svg"
     },
     {
+      "path": "./packages/tikz"
+    },
+    {
       "path": "./packages/recipes"
     },
     {

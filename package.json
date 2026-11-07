@@ -58,6 +58,7 @@
     "packages/fonts",
     "packages/core",
     "packages/svg",
+    "packages/tikz",
     "packages/recipes",
     "packages/typst",
     "packages/mcp",

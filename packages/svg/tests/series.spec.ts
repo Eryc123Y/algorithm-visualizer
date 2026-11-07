@@ -6,9 +6,11 @@ import { layoutTrace, loadTrace, type Trace } from '@algoviz/core';
 
 import {
   createTheme,
+  darkTheme,
   exportFigures,
   lightTheme,
   prepareFigures,
+  prepareScenes,
   renderSeries,
   renderSvg,
   type Figure,
@@ -251,6 +253,63 @@ describe('prepareFigures', () => {
     const invalid = prepareFigures({ version: '0.2', structures: {} });
     expect(invalid.ok).toBe(false);
     if (!invalid.ok) expect(invalid.error[0]!.code).toBe('INVALID_SHAPE');
+  });
+});
+
+describe('prepareScenes', () => {
+  function prepared(input: unknown = doc, theme?: 'dark') {
+    const result = prepareScenes(input, theme === undefined ? {} : { theme });
+    if (!result.ok) throw new Error(JSON.stringify(result.error));
+    return result.value;
+  }
+
+  it('lays out the frames that the figures draw', () => {
+    const p = prepared();
+    const scenes = p.scenes();
+    if (!scenes.ok) throw new Error('scenes');
+    expect(p.frames).toBe(5);
+    expect(p.theme).toBe(lightTheme);
+    const figures = figuresOf(doc);
+    scenes.value.forEach((frame, k) => {
+      const { svg, ...rest } = figures[k]!;
+      const { scene, ...meta } = frame;
+      expect(meta).toEqual(rest);
+      expect([scene.width, scene.height]).toEqual([frame.width, frame.height]);
+      expect(
+        renderSvg(scene, {
+          keys: false,
+          ...(frame.narration === undefined
+            ? {}
+            : { description: frame.narration }),
+        }),
+      ).toBe(svg);
+    });
+  });
+
+  it('selects one frame or a series, as the figures do', () => {
+    const p = prepared();
+    expect(p.scene('pass-1/swap')).toMatchObject({
+      ok: true,
+      value: {
+        frame: 2,
+        selector: 'pass-1/swap',
+        narration: 'Swap them, since 1 < 3.',
+      },
+    });
+    expect(p.scene('pass-2')).toMatchObject({
+      ok: false,
+      error: [{ code: 'INVALID_SELECTOR' }],
+    });
+    const series = p.scenes(['pass-2', 0]);
+    expect(series.ok && series.value.map((f) => f.frame)).toEqual([0, 2, 3, 4]);
+  });
+
+  it('resolves the theme and reports an unknown one', () => {
+    expect(prepared(doc, 'dark').theme).toBe(darkTheme);
+    expect(prepareScenes(doc, { theme: 'neon' as never })).toMatchObject({
+      ok: false,
+      error: [{ code: 'UNKNOWN_THEME', path: '$.theme' }],
+    });
   });
 });
 
