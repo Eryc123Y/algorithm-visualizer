@@ -1,6 +1,6 @@
 /**
  * The example picker's entries: the first example of every module in the
- * registry (ADR 0019), and the recipes not migrated yet, grouped by topic.
+ * registry (ADR 0019), grouped by topic.
  */
 import {
   algorithms,
@@ -11,8 +11,6 @@ import {
   type Topic,
 } from '@algoviz/recipes';
 import type { VisualizationInput } from '@algoviz/spec';
-
-import { legacyExamples } from './legacy';
 
 export interface Example {
   readonly topic: Topic;
@@ -35,13 +33,8 @@ function exampleOf(algorithm: Algorithm): Example {
   };
 }
 
-const topicOrder = (e: Example) => TOPICS.indexOf(e.topic);
-
-/** Every entry, grouped by topic in menu order. */
-export const examples: readonly Example[] = [
-  ...algorithms.map(exampleOf),
-  ...legacyExamples,
-].sort((a, b) => topicOrder(a) - topicOrder(b));
+/** Every entry, grouped by topic in menu order, as the registry lists them. */
+export const examples: readonly Example[] = algorithms.map(exampleOf);
 
 /** The menu's groups: the topics that have entries, with their headings. */
 export const exampleGroups = TOPICS.filter((topic) =>

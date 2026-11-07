@@ -22,8 +22,6 @@ The recipes are the modules of the algorithm registry in `@algoviz/recipes` ([AD
 
 Errors name the place in the input: `INVALID_SHAPE` at a path under `$.input`, `INVALID_ARGUMENT` for an input the recipe cannot show, such as a pop from an empty heap, and `UNKNOWN_RECIPE` at `$.id`.
 
-Recipes not yet migrated to the registry keep their camelCase ids, such as `dijkstra`, until roadmap 0.5 (`src/legacy-recipes.ts`).
-
 The server also sends instructions for the workflow (recipe if one fits, otherwise guide → write → validate → inspect), serves the guide and the JSON Schema as resources (`algoviz://guide`, `algoviz://guide/<kind>`, `algoviz://schema`), and offers a `visualize` prompt.
 
 ## The player in the conversation

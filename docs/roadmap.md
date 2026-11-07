@@ -27,11 +27,12 @@ Everything later builds on these, so they come first. The ADRs are accepted (#13
   - `Algorithm<I>`, `Trace` (merging `Recorder` and `Tape`), `defineStructure`, `runModule`, `runAlgorithm` and the generic test suite, proven by moving `ops.bst` and `ops.heap` onto `defineStructure` as `bst`, `min-heap` and `max-heap` (#20).
   - MCP, the CLI (`algoviz run <id> <input>`) and the playground read the registry; recipes not migrated yet stay reachable through a marked legacy path (#21).
   - The seven sorting algorithms as modules in both languages, following the CLRS procedures; their old recipe functions go (#22).
-- [~] **0.5 Migrate the remaining recipes** into the registry, in both languages, with ids, inputs and procedures from [ADR 0023](adr/0023-remaining-modules.md): the other 22 recipes, with `bstInsert` and `binaryHeap` as examples of the `bst` and `min-heap` sequences. Then the legacy path is removed: the old recipe functions, `packages/mcp/src/legacy-recipes.ts`, `apps/playground/src/samples/legacy.ts` and the CLI's `recipe` command. One PR per topic, then one for the removal:
+- [x] **0.5 Migrate the remaining recipes** into the registry, in both languages, with ids, inputs and procedures from [ADR 0023](adr/0023-remaining-modules.md): the other 22 recipes, with `bstInsert` and `binaryHeap` as examples of the `bst` and `min-heap` sequences. Then the legacy path is removed: the old recipe functions, `packages/mcp/src/legacy-recipes.ts`, `apps/playground/src/samples/legacy.ts` and the CLI's `recipe` command. ADR 0023 (#23), one PR per topic, then one for the removal:
   - searching, lists and hashing: `binary-search`, `reverse-linked-list`, `balanced-brackets`, `hash-chaining` and `linear-probing` (#24).
   - trees: `avl`, `inorder-tree-walk`, `preorder-tree-walk`, `postorder-tree-walk`, `trie` and `disjoint-set`, and the whole-life examples of `bst` and `min-heap` (#25).
   - graphs: `bfs`, `dfs`, `topological-sort`, `dijkstra`, `bellman-ford`, `prim`, `kruskal` and `floyd-warshall` (#26).
   - dynamic programming: `lcs`, `edit-distance` and `knapsack` (#27).
+  - the legacy path removed: the old functions went with each topic; then `legacy-recipes.ts`, the playground's `legacy.ts` and the CLI's `recipe` command (#28).
 
 ## Phase 1: static output and packages
 

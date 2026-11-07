@@ -47,4 +47,4 @@ node --conditions=@algoviz/source evals/src/report.ts <run-dir>
 
 ## Adding a task
 
-Add it to `src/tasks.ts` with a check, and a reference solution to `tests/references.ts` (a recipe call, or a document recorded with `Recorder`). Run `npx vitest run --project evals`: the reference must pass its check and fail every other.
+Add it to `src/tasks.ts` with a check, and a reference solution to `tests/references.ts` (a registry module's run, or a document recorded with `Recorder`). Run `npx vitest run --project evals`: the reference must pass its check and fail every other.
