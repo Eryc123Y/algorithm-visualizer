@@ -76,12 +76,14 @@ describe('role cues that do not rely on colour', () => {
   });
 
   it('draws a check mark on settled cells unless the theme hides it', () => {
-    expect(renderSvg(cell('settled'))).toContain('<path');
-    expect(renderSvg(cell('default'))).not.toContain('<path');
+    // Text stays text here, so the only path is the check mark.
+    const asText = { outlineText: false };
+    expect(renderSvg(cell('settled'), asText)).toContain('<path');
+    expect(renderSvg(cell('default'), asText)).not.toContain('<path');
     const hidden = createTheme('light', { settledMark: null });
-    expect(renderSvg(cell('settled'), { theme: hidden })).not.toContain(
-      '<path',
-    );
+    expect(
+      renderSvg(cell('settled'), { ...asText, theme: hidden }),
+    ).not.toContain('<path');
   });
 
   it('keeps every role distinct in the greyscale print theme', () => {

@@ -1,10 +1,14 @@
 /**
  * Scene → standalone SVG string. Uses only basic SVG features (no CSS, no
  * filters, no markers, no `dominant-baseline`) so the output renders the same
- * in browsers, Typst, Inkscape and converters for LaTeX.
+ * in browsers, Typst, Inkscape and converters for LaTeX. Text is drawn as
+ * glyph outlines of the bundled fonts, so it looks the same without them
+ * (ADR 0024).
  */
 import type { Scene } from '@algoviz/core';
+import type { FontOutlines } from '@algoviz/fonts';
 
+import { bundledOutlines, glyphLookup, type GlyphLookup } from './outline.ts';
 import { escapeXml, num, paintScene, serializeNode } from './paint.ts';
 import type { SvgTheme, ThemeName } from './theme.ts';
 
@@ -15,14 +19,34 @@ export interface RenderSvgOptions {
   readonly scale?: number;
   /** Emit `data-key` attributes, used to animate between frames. Default true. */
   readonly keys?: boolean;
+  /**
+   * Draw text as glyph outlines (default), or as text elements naming the
+   * theme's fonts: a smaller file with selectable text, for renderers that
+   * have the fonts. Text with a character the face has no outline for
+   * (such as CJK or emoji) stays text either way.
+   */
+  readonly outlineText?: boolean;
+  /** Outlines to draw text with, by face id. Default: the bundled faces. */
+  readonly outlines?: readonly FontOutlines[];
 }
+
+// Built on first use, not at import: a module-level call could keep the
+// outlines in bundles that never render standalone SVG, such as the player.
+let bundledGlyphs: GlyphLookup | undefined;
 
 export function renderSvg(
   scene: Scene,
   options: RenderSvgOptions = {},
 ): string {
-  const { scale = 1, keys = true } = options;
-  const painted = paintScene(scene, options.theme);
+  const { scale = 1, keys = true, outlineText = true, outlines } = options;
+  const glyphs = !outlineText
+    ? undefined
+    : outlines === undefined
+      ? (bundledGlyphs ??= glyphLookup(bundledOutlines))
+      : glyphLookup(outlines);
+  const painted = paintScene(scene, options.theme, {
+    ...(glyphs === undefined ? {} : { glyphs }),
+  });
   const w = num(painted.width);
   const h = num(painted.height);
   const body = painted.items

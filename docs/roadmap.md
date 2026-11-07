@@ -36,10 +36,10 @@ Everything later builds on these, so they come first. The ADRs are accepted (#13
 
 ## Phase 1: static output and packages
 
-- [~] **1.1 Text measurement and fonts** _ADR_ [ADR 0024](adr/0024-text-measurement-and-fonts.md). Layout measures text with real glyph widths from a bundled font instead of an average character width (`charWidthRatio`). SVG output embeds or outlines that font, so figures look the same in any document. ADR 0024, then three PRs:
-  - `@algoviz/fonts`: the generator, metrics and outlines of JetBrains Mono SemiBold and Inter SemiBold, and `textWidth`.
-  - layout measures with the theme's font metrics; painters place labels with them; fixtures with wide values.
-  - standalone SVG draws text as outlines.
+- [x] **1.1 Text measurement and fonts** _ADR_ [ADR 0024](adr/0024-text-measurement-and-fonts.md). Layout measures text with real glyph widths from a bundled font instead of an average character width (`charWidthRatio`). SVG output embeds or outlines that font, so figures look the same in any document. ADR 0024 (#29), then three PRs:
+  - `@algoviz/fonts`: the generator, metrics and outlines of JetBrains Mono SemiBold and Inter SemiBold, and `textWidth` (#30).
+  - layout measures with the theme's font metrics; painters place labels with them; fixtures with wide values (#31).
+  - standalone SVG draws text as outlines; the MCP render tool keeps text (#32).
 - [ ] **1.2 `algoviz export`.**
   - Select steps by "section / step id", by a range, or all of them.
   - Write SVG files.

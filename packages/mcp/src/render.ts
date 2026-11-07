@@ -43,6 +43,8 @@ export function render(
     frames: trace.length + 1,
     width: scene.width,
     height: scene.height,
-    svg: renderSvg(scene, { theme, keys: false }),
+    // Text elements, not outlines: a model reads this SVG as text, and
+    // outlines would multiply its size (ADR 0024).
+    svg: renderSvg(scene, { theme, keys: false, outlineText: false }),
   });
 }
