@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed
+Accepted
 
 ## Context
 
@@ -22,7 +22,7 @@ A document must say `"version": "0.1"`, and the parser accepts that exact string
 - **Before 1.0.** Nothing is published yet, so `0.x` versions make no promise.
   - Each protocol change in Phases 0 to 2 bumps the minor version (`0.2`, `0.3`, …), and the parser still reads older `0.x` documents, which is cheap while changes only add.
   - The fixtures, the MCP guide and the evals move to the newest `0.x` with each change.
-- **Freezing 1.0.** The protocol becomes `1.0` after the structure additions of Phase 2. Only then is anything published (roadmap 4.2), so 1.0 does not need a breaking change soon after release.
+- **Freezing 1.0.** The protocol becomes `1.0` after the structure additions of Phase 2. Only then is anything published (roadmap 4.3), so 1.0 does not need a breaking change soon after release.
 - **Package versions.** Package versions follow semver on their own. Each package's README says which protocol versions it reads and writes, and a major protocol version means a major release of every package.
 
 ## Consequences

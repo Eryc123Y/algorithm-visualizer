@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed
+Accepted
 
 ## Context
 
@@ -74,7 +74,7 @@ interface Algorithm<I> {
 - **Layout of the package.**
   - Algorithms live in `src/algorithms/<topic>/<id>.ts`, and data structures in `src/structures/<name>/`.
   - Each module file exports its module, so a site that needs one algorithm imports only that one.
-  - The recipe functions with positional arguments are removed after the migration (roadmap 0.2).
+  - The recipe functions with positional arguments are removed after the migration (roadmap 0.4 and 0.5).
 - **Dependencies.** `@algoviz/recipes` gains `zod` and `@algoviz/core`. Zod is needed for the schemas; core is needed to replay documents in `runAlgorithm`. Neither has DOM or Node.js dependencies, so the registry still runs in browsers, Workers and the Typst plugin. When this ADR is accepted, ADR 0018's note that the schemas stay in `packages/mcp` is superseded.
 
 ## Consequences
@@ -82,5 +82,5 @@ interface Algorithm<I> {
 - Adding an algorithm is one file plus one line in the registry. MCP, the CLI, the playground, the documentation and the packages pick it up, and the generic tests check it.
 - Callers that have only an id and JSON, such as the Typst plugin, the LaTeX package, MCP and share links, all call one function.
 - Code is written with anchors in every language, so line numbers are never written by hand, and the current-line marker cannot point at the wrong line in one language and not another.
-- The migration (roadmap 0.2) rewrites 29 recipes and the MCP catalogue. Their existing reference tests check that the documents keep the same structures and steps.
+- The migration (roadmap 0.4 and 0.5) rewrites 29 recipes and the MCP catalogue. Their existing reference tests check that the documents keep the same structures and steps.
 - Ids become part of the public interface, so renaming one later needs an alias.

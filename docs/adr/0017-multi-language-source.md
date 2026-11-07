@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed (revised 2026-11-07 for the 1.0 requirements: pseudocode and Python, with the open questions answered)
+Accepted (revised 2026-11-07 for the 1.0 requirements: pseudocode and Python, with the open questions answered)
 
 ## Context
 

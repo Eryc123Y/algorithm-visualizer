@@ -11,11 +11,11 @@ The owner (Eric) hands this project to Claude to iterate on unattended, one road
 
 ## One iteration
 
-1. **Pick** the first unchecked roadmap item whose prerequisites are done, unless the owner named one. Skip items waiting on the owner (marked _owner_, or an ADR still `Proposed`), and say which ones they are.
+1. **Pick** the first unchecked roadmap item whose prerequisites are done, unless the owner named one. Skip items waiting on the owner (marked _owner_), and say which ones they are.
 2. **Branch** from an up-to-date `main`: `feat/…`, `fix/…` or `docs/…`.
 3. **ADR first** when the item is marked _ADR_ or changes the protocol, adds a kind, or changes a public API or package interface.
-   - Write the ADR as `Proposed`, open a PR with only the ADR, and stop.
-   - Code starts after the owner approves it.
+   - Write the ADR, review it yourself against the requirements and the code, mark it `Accepted`, and merge it in a PR of its own (documentation PRs skip CI).
+   - Don't wait for the owner's approval; the owner said so on 2026-11-07. Put the decisions that matter in the report, so the owner can overrule them with a new ADR.
 4. **Test first**: write failing tests, then the implementation, then refactor. New recipes test against an independent reference implementation and run property tests.
 5. **Verify**:
    - `npm run check` for every change.
@@ -24,13 +24,13 @@ The owner (Eric) hands this project to Claude to iterate on unattended, one road
    - A visual check in the browser or with `npm run gallery` for anything drawn. Look at it yourself; don't ask the owner to.
 6. **Review**: run the code-reviewer agent once on the finished diff, check each finding against the code, and fix the real ones. Don't wait for or act on the Codex bot's PR reviews.
 7. **Record**: mark the item `[x]` with the PR number in `docs/roadmap.md` in the same PR, and update the README or the MCP guide if what users see changed.
-8. **Ship**: open a PR and turn on Auto-fix. Merge it (merge commit, like the earlier PRs) once CI is green and no review finding is open. Then sync local `main`.
+8. **Ship**: open a PR and turn on Auto-fix. Merge it yourself, without asking (merge commit, like the earlier PRs), once CI is green and no review finding is open. If GitHub Actions cannot run (quota or billing), merge after the full local verification of step 5, and say so in the PR and the report. Then sync local `main`.
 9. **Report** to the owner in a few lines: what changed, how it was verified, the PR link, and the next item.
 
 ## Ask the owner first
 
-- Approving any ADR.
-- Visual style: themes, colours, fonts, layout of the player chrome.
+Only these wait for the owner; everything else, including ADRs and merges, goes ahead.
+
 - Names, publishing (npm, Typst Universe, CTAN, the docs site) and anything that needs the owner's accounts, such as Cloudflare.
 - Deleting or renaming something users already depend on.
 - Changing scope: adding to or dropping from the requirements or the coverage list.
@@ -52,6 +52,10 @@ The repository is private on GitHub Free: 2,000 Actions minutes a month, and one
 - Changes to root Markdown files and `docs/` skip CI (`paths-ignore` in `.github/workflows/ci.yml`). Keep pure documentation PRs free of code, so they stay free.
 - Merges to `main` do not run CI again. Use the manual "Run workflow" button if `main` ever needs a check.
 - If minutes run low, tell the owner rather than cutting checks. The owner can see usage under GitHub Settings → Billing.
+
+## Visual changes
+
+Changes to themes, colours, fonts or the player chrome go ahead like any other item, with before-and-after screenshots in the PR and the report.
 
 ## Size of an iteration
 

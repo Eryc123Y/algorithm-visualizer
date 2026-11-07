@@ -2,34 +2,31 @@
 
 How the [requirements](requirements.md) get built, in order. Each item is one pull request unless it says otherwise. Mark an item `[x]` with its PR in the same pull request that finishes it, and `[~]` while it is in progress.
 
-- **ADR first.** Items marked _ADR_ start with a decision record in `Proposed` status, and the owner approves it before any code. This applies to every protocol change, new kind, public API and package interface.
-- **Owner decides.** Items marked _owner_ wait for a choice only the owner makes (visual style, names, publishing).
+- **ADR first.** Items marked _ADR_ start with a decision record, which Claude reviews, accepts and merges on its own before any code (the owner waived approval on 2026-11-07). This applies to every protocol change, new kind, public API and package interface.
+- **Owner decides.** Items marked _owner_ wait for something only the owner does: names, publishing, accounts.
 
 ## Phase 0: foundations
 
-Everything later builds on these, so they come first.
+Everything later builds on these, so they come first. The ADRs are accepted (#13). The protocol changes come before the registry, so each recipe is rewritten only once, straight into its final form: a registry module with anchors, step names and code in both languages.
 
-- [ ] **0.1 Algorithm registry** _ADR_ [0019](adr/0019-algorithm-registry.md). One module type for every algorithm and every data-structure operation. A module has:
-  - a stable id;
-  - a Zod input schema, the only definition of its input;
-  - example inputs;
-  - code per language, with shared `# @anchor` markers;
-  - `run(input, tape)`.
-
-  The MCP catalogue, the CLI, the playground menu, the documentation and the tests derive from the registry. The Zod input schemas move from `packages/mcp` to the modules.
-
-- [ ] **0.2 Migrate existing recipes** to the registry: the 29 recipes and `ops.bst` and `ops.heap`. Documents stay the same apart from what 0.3 adds; the existing reference tests prove it.
-- [ ] **0.3 Named steps and sections** _ADR_ [0020](adr/0020-step-names-and-sections.md) (protocol).
-  - Each step has an optional stable `id`, for example `fixup-case-3`, and each operation forms a section.
-  - The player, the CLI and MCP select frames by "section / step id".
-  - Recipes emit ids for the steps a learner would point at.
-- [ ] **0.4 Protocol versioning** _ADR_ [0021](adr/0021-protocol-versioning.md). Rules for minor (additive) and major (breaking) versions, an `upgrade(document)` function, and when the format freezes as 1.0. It freezes after Phase 2's structure additions, so 1.0 does not need a break soon after.
-- [ ] **0.5 Sources in two languages** _ADR_ [0017](adr/0017-multi-language-source.md) (revised; protocol).
-  - `sources` with anchors, and `meta.at`.
-  - Pseudocode in CLRS conventions with 0-based indices, and its highlighter.
-  - A language switch in the player.
-  - Both languages for every migrated recipe.
-  - Tests that every anchor exists in every language, and that the tokens of every module's code join back into the code.
+- [ ] **0.1 Protocol versioning** [ADR 0021](adr/0021-protocol-versioning.md).
+  - `version` becomes `"major.minor"`; the parser reads every `0.x` up to the current one and rejects newer ones with a hint.
+  - The JSON Schema and fixtures follow.
+  - Writers record the oldest version that holds what the document uses.
+- [ ] **0.2 Step names and sections** [ADR 0020](adr/0020-step-names-and-sections.md) (protocol `0.2`).
+  - `meta.id` and `sections` in the spec, with validation.
+  - Selectors in core, used by the player's `frame` attribute and by `algoviz_inspect` and `algoviz_render`.
+  - Section marks on the player's timeline, and the guide and fixtures.
+- [ ] **0.3 Sources in two languages** [ADR 0017](adr/0017-multi-language-source.md) (protocol `0.3`).
+  - `sources` with anchors, and `meta.at`, with validation.
+  - The pseudocode highlighter (CLRS conventions, 0-based indices).
+  - The language switch in the player.
+  - The guide and fixtures.
+- [ ] **0.4 Algorithm registry** [ADR 0019](adr/0019-algorithm-registry.md).
+  - `Algorithm<I>`, `Trace` (merging `Recorder` and `Tape`), `defineStructure`, `runAlgorithm` and the generic test suite.
+  - MCP, the CLI and the playground read the registry.
+  - The first modules are the sorting algorithms, in both languages.
+- [ ] **0.5 Migrate the remaining recipes** into the registry, in both languages: `ops.bst`, `ops.heap` and the rest of the 29 recipes. Then the old recipe functions and the MCP catalogue are removed. This may take several PRs, one per topic.
 
 ## Phase 1: static output and packages
 
@@ -53,7 +50,7 @@ Everything later builds on these, so they come first.
   - Every theme is tested on every kind and output (contrast, print, the Typst and LaTeX packages).
   - The README and the docs site show how to switch themes.
   - Delete the lab.
-  - The owner sees before-and-after screenshots before it merges.
+  - Before-and-after screenshots go in the PR and the report.
 - [ ] **1.7 Painter fixes** found during theme work:
   - check marks on graph and tree nodes stick out of the circle;
   - radii in the code panel and buttons are hard-coded instead of theme tokens.

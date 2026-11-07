@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted
+Accepted. Where the argument schemas live (`packages/mcp`) is superseded by ADR 0019, which moves them into the recipe modules.
 
 ## Context
 
