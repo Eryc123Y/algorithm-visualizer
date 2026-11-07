@@ -20,7 +20,7 @@ import {
   cellWidthFor,
   formatScalar,
   groupPointers,
-  maxChars,
+  maxWidth,
   pointerAreaHeight,
   pointerRows,
   pointerItems,
@@ -28,13 +28,16 @@ import {
   titleRowHeight,
   titleWidth,
 } from './common.ts';
+import type { LayoutFonts } from './options.ts';
 import type { ElementRole, SceneItem } from './scene.ts';
 
 export interface LinkedListMetrics {
   readonly slots: number;
-  readonly maxChars: number;
+  /** Widest value, in em of the value font. */
+  readonly valueWidth: number;
   readonly pointerRows: number;
-  readonly maxPointerChars: number;
+  /** Widest pointer name, in em of the value font. */
+  readonly pointerWidth: number;
   /**
    * Whether any link ever skips over nodes or points to its own node: both
    * are drawn above the row, which then needs room.
@@ -45,7 +48,11 @@ export interface LinkedListMetrics {
 const LINK_GAP = 40;
 const LIFT = 26;
 
-export function measureLinkedList(s: LinkedListState): LinkedListMetrics {
+export function measureLinkedList(
+  s: LinkedListState,
+  _decl: LinkedListDecl,
+  fonts: LayoutFonts,
+): LinkedListMetrics {
   const at = new Map(s.data.map((node, k) => [node.id, k]));
   const skips = s.data.some((node, k) =>
     [node.next, node.prev].some((target) => {
@@ -56,9 +63,12 @@ export function measureLinkedList(s: LinkedListState): LinkedListMetrics {
   );
   return {
     slots: s.data.length,
-    maxChars: maxChars(s.data.map((node) => formatScalar(node.value))),
+    valueWidth: maxWidth(
+      s.data.map((node) => formatScalar(node.value)),
+      fonts.value,
+    ),
     pointerRows: pointerRows(Object.entries(s.marks.pointers)),
-    maxPointerChars: maxChars(Object.keys(s.marks.pointers)),
+    pointerWidth: maxWidth(Object.keys(s.marks.pointers), fonts.value),
     skips,
   };
 }
@@ -68,9 +78,9 @@ export const mergeLinkedListMetrics = (
   b: LinkedListMetrics,
 ): LinkedListMetrics => ({
   slots: Math.max(a.slots, b.slots),
-  maxChars: Math.max(a.maxChars, b.maxChars),
+  valueWidth: Math.max(a.valueWidth, b.valueWidth),
   pointerRows: Math.max(a.pointerRows, b.pointerRows),
-  maxPointerChars: Math.max(a.maxPointerChars, b.maxPointerChars),
+  pointerWidth: Math.max(a.pointerWidth, b.pointerWidth),
   skips: a.skips || b.skips,
 });
 
@@ -82,13 +92,10 @@ export function layoutLinkedList({
   origin,
   options: o,
 }: LayoutInput<LinkedListDecl, LinkedListState, LinkedListMetrics>): Block {
-  const width = cellWidthFor(metrics.maxChars, o);
+  const width = cellWidthFor(metrics.valueWidth, o);
   const height = o.cellHeight;
   const pitch = width + LINK_GAP;
-  const overhang = Math.max(
-    18,
-    badgeOverhang(metrics.maxPointerChars, width, o),
-  );
+  const overhang = Math.max(18, badgeOverhang(metrics.pointerWidth, width, o));
   const left = origin.x + overhang;
   const top = origin.y + titleRowHeight(o) + (metrics.skips ? LIFT + 14 : 0);
   const bottom = top + height;

@@ -1,3 +1,27 @@
+import {
+  interSemiBold,
+  jetbrainsMonoSemiBold,
+  type FontMetrics,
+} from '@algoviz/fonts';
+
+/**
+ * Metrics of the two fonts a scene's text is set in (ADR 0024). Painters
+ * must draw with the faces whose metrics laid the scene out; an SVG
+ * theme's `fontMetrics` names them.
+ */
+export interface LayoutFonts {
+  /** Values, indices, pointer names, notes and edge labels. */
+  readonly value: FontMetrics;
+  /** Titles, and labels such as "top" or "null". */
+  readonly label: FontMetrics;
+}
+
+/** JetBrains Mono SemiBold for values, Inter SemiBold for titles. */
+export const defaultFonts: LayoutFonts = {
+  value: jetbrainsMonoSemiBold,
+  label: interSemiBold,
+};
+
 /**
  * Geometry settings shared by all kinds' layouts.
  */
@@ -16,10 +40,11 @@ export interface LayoutOptions {
   readonly indexFontSize: number;
   readonly pointerFontSize: number;
   /**
-   * Average glyph width as a fraction of the font size. Layout cannot measure
-   * text without a DOM, so it estimates widths for a monospace font.
+   * Metrics that text is measured with. Trace-wide metrics are measured
+   * with them too, so a scene must be laid out with the fonts its metrics
+   * were measured with.
    */
-  readonly charWidthRatio: number;
+  readonly fonts: LayoutFonts;
   /** Draw each structure's title. */
   readonly showTitles: boolean;
   /** Draw index labels above array cells. */
@@ -37,7 +62,7 @@ export const defaultLayoutOptions: LayoutOptions = {
   titleFontSize: 13,
   indexFontSize: 12,
   pointerFontSize: 12,
-  charWidthRatio: 0.6,
+  fonts: defaultFonts,
   showTitles: true,
   showIndices: true,
 };

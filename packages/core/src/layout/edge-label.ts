@@ -3,6 +3,8 @@
  * `labelSide` names (else above), far enough out to clear the line. Layouts
  * use it to keep labels apart; painters use it to draw them, so both agree.
  */
+import { textWidth, type FontMetrics } from '@algoviz/fonts';
+
 import type { SceneEdge, SceneItem } from './scene.ts';
 
 export interface Point {
@@ -18,9 +20,12 @@ export interface LabelBox {
   readonly halfHeight: number;
 }
 
-/** Characters are drawn about 0.6 em wide. */
-export const labelHalfWidth = (text: string, fontSize: number) =>
-  ([...text].length * fontSize * 0.6) / 2;
+/** Half the width of `text` set in `font` at `fontSize`. */
+export const labelHalfWidth = (
+  text: string,
+  fontSize: number,
+  font: FontMetrics,
+): number => (textWidth(text, font) * fontSize) / 2;
 
 /** The segment a label sits beside: the middle one of a routed edge. */
 export function labelSegment(e: SceneEdge): [Point, Point] {
@@ -29,10 +34,15 @@ export function labelSegment(e: SceneEdge): [Point, Point] {
   return [points[k]!, points[k + 1]!];
 }
 
+/**
+ * The box of an edge's label, set in `font` (the value font of the layout
+ * or theme), at `at` along the segment from `a` to `b`.
+ */
 export function edgeLabelBox(
   e: SceneEdge,
   a: Point,
   b: Point,
+  font: FontMetrics,
   at = e.labelAt ?? 0.5,
 ): LabelBox {
   const dx = b.x - a.x;
@@ -47,7 +57,7 @@ export function edgeLabelBox(
       : ny > 0 || (ny === 0 && nx < 0)
         ? -1
         : 1; // prefer above
-  const halfWidth = labelHalfWidth(e.label ?? '', e.fontSize);
+  const halfWidth = labelHalfWidth(e.label ?? '', e.fontSize, font);
   const clearance =
     4 + Math.abs(nx) * halfWidth + Math.abs(ny) * (e.fontSize / 2);
   return {
@@ -70,7 +80,10 @@ const overlaps = (p: LabelBox, q: LabelBox) =>
  * or a node, where a nearby position is free. Labels that cannot move stay
  * in the middle. Self-loops keep their labels beyond the loop.
  */
-export function separateEdgeLabels(items: readonly SceneItem[]): SceneItem[] {
+export function separateEdgeLabels(
+  items: readonly SceneItem[],
+  font: FontMetrics,
+): SceneItem[] {
   const placed: LabelBox[] = items.flatMap((i) =>
     i.type === 'node'
       ? [
@@ -88,12 +101,12 @@ export function separateEdgeLabels(items: readonly SceneItem[]): SceneItem[] {
     const [a, b] = labelSegment(item);
     if (Math.hypot(b.x - a.x, b.y - a.y) < 0.5) return item;
     for (const at of CANDIDATES) {
-      const box = edgeLabelBox(item, a, b, at);
+      const box = edgeLabelBox(item, a, b, font, at);
       if (placed.some((p) => overlaps(p, box))) continue;
       placed.push(box);
       return at === 0.5 ? item : { ...item, labelAt: at };
     }
-    placed.push(edgeLabelBox(item, a, b, 0.5));
+    placed.push(edgeLabelBox(item, a, b, font, 0.5));
     return item;
   });
 }

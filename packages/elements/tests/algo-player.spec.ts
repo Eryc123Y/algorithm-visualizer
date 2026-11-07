@@ -1,5 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { createTheme } from '@algoviz/svg';
+
 import '../src/define.ts';
 import type { AlgoPlayer } from '../src/index.ts';
 
@@ -140,6 +142,37 @@ describe('<algo-player>', () => {
     await el.updateComplete;
     expect(text(el, '.line.current')).toBe('exchange a[0] with a[1]');
     expect(text(el, '.code .tok-procedure')).toBe('SORT-TWO');
+  });
+
+  it('lays the scene out again for a theme with other fonts', async () => {
+    const width = (el: AlgoPlayer) =>
+      Number(shadow(el).querySelector('svg.scene')?.getAttribute('width'));
+    const el = await mount((e) => {
+      e.visualization = {
+        ...doc,
+        structures: { arr: { kind: 'array', initial: ['abcdef', 1] } },
+      };
+    });
+    const before = width(el);
+    // A face twice as wide as JetBrains Mono needs wider cells.
+    const wide = {
+      id: 'wide',
+      family: 'Wide',
+      weight: 600,
+      unitsPerEm: 1000,
+      advances: [],
+      defaultAdvance: 1200,
+    };
+    el.customTheme = createTheme('light', { fontMetrics: { value: wide } });
+    await el.updateComplete;
+    expect(width(el)).toBeGreaterThan(before);
+    // Light and dark share fonts: switching keeps the layout.
+    el.customTheme = undefined;
+    await el.updateComplete;
+    expect(width(el)).toBe(before);
+    el.theme = 'dark';
+    await el.updateComplete;
+    expect(width(el)).toBe(before);
   });
 
   it('reads inline JSON from a script child', async () => {

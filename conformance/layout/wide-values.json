@@ -1,0 +1,108 @@
+{
+  "description": "Hand-computed layout of an array holding a CJK string and a long number, using the default options and the bundled metrics (ADR 0024). \"数组\" is 2 em (East Asian wide) and \"123456789012\" is 12 × 0.6 em in JetBrains Mono, so both cells are ceil(7.2 × 20 + 2 × 14) = 172 wide, and the row is 2 × 172 + 8 = 352. The badge is the 20 minimum because \"i\" needs ceil(0.6 × 12 + 12) = 20.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "arr": {
+        "kind": "array",
+        "initial": ["数组", 123456789012]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "arr",
+            "type": "pointer",
+            "name": "i",
+            "index": 0
+          }
+        ]
+      }
+    ]
+  },
+  "frames": [
+    {
+      "index": 1,
+      "scene": {
+        "width": 392,
+        "height": 180,
+        "title": "Visualization",
+        "items": [
+          {
+            "type": "text",
+            "key": "arr/title",
+            "x": 20,
+            "y": 32,
+            "anchor": "start",
+            "role": "title",
+            "text": "arr",
+            "fontSize": 13
+          },
+          {
+            "type": "text",
+            "key": "arr/index/0",
+            "x": 106,
+            "y": 54,
+            "anchor": "middle",
+            "role": "index",
+            "text": "0",
+            "fontSize": 12
+          },
+          {
+            "type": "box",
+            "key": "arr/element/e0",
+            "x": 20,
+            "y": 64,
+            "width": 172,
+            "height": 52,
+            "role": "default",
+            "text": "数组",
+            "fontSize": 20
+          },
+          {
+            "type": "text",
+            "key": "arr/index/1",
+            "x": 286,
+            "y": 54,
+            "anchor": "middle",
+            "role": "index",
+            "text": "1",
+            "fontSize": 12
+          },
+          {
+            "type": "box",
+            "key": "arr/element/e1",
+            "x": 200,
+            "y": 64,
+            "width": 172,
+            "height": 52,
+            "role": "default",
+            "text": "123456789012",
+            "fontSize": 20
+          },
+          {
+            "type": "arrow",
+            "key": "arr/pointer-arrow/i",
+            "x1": 106,
+            "y1": 134,
+            "x2": 106,
+            "y2": 120,
+            "role": "pointer"
+          },
+          {
+            "type": "badge",
+            "key": "arr/pointer/i",
+            "x": 106,
+            "y": 146,
+            "width": 20,
+            "height": 20,
+            "role": "pointer",
+            "text": "i",
+            "fontSize": 12
+          }
+        ]
+      }
+    }
+  ]
+}

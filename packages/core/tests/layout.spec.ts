@@ -7,6 +7,7 @@ import {
   defaultLayoutOptions,
   layoutTrace,
   loadTrace,
+  titleWidth,
   type Scene,
   type SceneBox,
   type Trace,
@@ -62,9 +63,10 @@ describe('layoutTrace', () => {
 
   it('sizes cells for the longest value in any frame', () => {
     // "12345" only appears from frame 2, but frame 0 already reserves room.
+    // Five characters of JetBrains Mono, 0.6 em each, plus padding.
     const o = defaultLayoutOptions;
     expect(boxes(scenes[0]!)[0]!.width).toBe(
-      Math.ceil(5 * o.valueFontSize * o.charWidthRatio + 2 * o.cellPadding),
+      5 * 0.6 * o.valueFontSize + 2 * o.cellPadding,
     );
   });
 
@@ -258,7 +260,7 @@ describe('scene bounds', () => {
             : item.type === 'box'
               ? [item.x, item.x + item.width]
               : item.type === 'text' && item.role === 'title'
-                ? [item.x, item.x + item.text.length * item.fontSize * 0.6]
+                ? [item.x, item.x + titleWidth(item.text, defaultLayoutOptions)]
                 : [0, 0];
         expect(left, item.key).toBeGreaterThanOrEqual(0);
         expect(right, item.key).toBeLessThanOrEqual(scene.width);

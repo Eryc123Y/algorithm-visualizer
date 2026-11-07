@@ -1,5 +1,5 @@
 {
-  "description": "Hand-computed layout of a two-element array with one pointer, using the default options. Cell width is the 52 minimum because \"42\" needs ceil(2 \u00d7 20 \u00d7 0.6 + 2 \u00d7 14) = 52; the badge is the 20 minimum because \"i\" needs ceil(1 \u00d7 12 \u00d7 0.6 + 12) = 20.",
+  "description": "Hand-computed layout of a two-element array with one pointer, using the default options. Cell width is the 52 minimum because \"42\" needs ceil(2 × 0.6 × 20 + 2 × 14) = 52, JetBrains Mono's glyphs being 0.6 em wide; the badge is the 20 minimum because \"i\" needs ceil(0.6 × 12 + 12) = 20.",
   "input": {
     "version": "0.1",
     "structures": {

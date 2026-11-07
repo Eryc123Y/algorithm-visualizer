@@ -7,7 +7,12 @@
  * border, and settled a solid fill with a check mark. This keeps figures readable in print, on
  * projectors and for colour-blind learners.
  */
-import type { EdgeRole, ElementRole } from '@algoviz/core';
+import {
+  defaultFonts,
+  type EdgeRole,
+  type ElementRole,
+  type LayoutFonts,
+} from '@algoviz/core';
 
 export interface CellStyle {
   readonly fill: string;
@@ -19,12 +24,21 @@ export interface CellStyle {
 }
 
 export interface SvgTheme {
+  /**
+   * CSS font families, for text drawn as text. Each list starts with the
+   * family of the matching face in `fontMetrics`.
+   */
   readonly fonts: {
-    /** Cell values, indices and pointer names; should be monospace. */
+    /** Values, indices, pointer names, notes and edge labels. */
     readonly value: string;
-    /** Titles. */
+    /** Titles and labels. */
     readonly label: string;
   };
+  /**
+   * The faces the painter draws with. Lay scenes out with the same metrics
+   * (`LayoutOptions.fonts`), so text fits what layout measured (ADR 0024).
+   */
+  readonly fontMetrics: LayoutFonts;
   /** Corner radius of cells. */
   readonly radius: number;
   /** Fill behind the whole scene, or null for transparent. */
@@ -79,6 +93,7 @@ const fonts = {
 
 export const lightTheme: SvgTheme = {
   fonts,
+  fontMetrics: defaultFonts,
   radius: 8,
   background: null,
   shadow: 'rgba(20, 45, 38, 0.10)',
@@ -154,6 +169,7 @@ export const lightTheme: SvgTheme = {
 
 export const darkTheme: SvgTheme = {
   fonts,
+  fontMetrics: defaultFonts,
   radius: 8,
   background: null,
   shadow: 'rgba(0, 0, 0, 0.35)',
@@ -230,6 +246,7 @@ export const darkTheme: SvgTheme = {
 /** Greyscale theme for handouts, LaTeX and Typst documents. */
 export const printTheme: SvgTheme = {
   fonts,
+  fontMetrics: defaultFonts,
   radius: 4,
   background: null,
   shadow: null,
@@ -319,17 +336,27 @@ export type DeepPartial<T> = T extends object
   ? { readonly [K in keyof T]?: DeepPartial<T[K]> }
   : T;
 
-export type ThemeOverrides = DeepPartial<SvgTheme>;
+/**
+ * Partial overrides of a theme. Font metrics are replaced whole, never
+ * merged field by field.
+ */
+export type ThemeOverrides = DeepPartial<Omit<SvgTheme, 'fontMetrics'>> & {
+  readonly fontMetrics?: Partial<LayoutFonts>;
+};
 
+/** A plain object to merge into, other than a face's metrics. */
 const isPlainObject = (x: unknown): x is Record<string, unknown> =>
-  typeof x === 'object' && x !== null && !Array.isArray(x);
+  typeof x === 'object' &&
+  x !== null &&
+  !Array.isArray(x) &&
+  !('advances' in x);
 
-function deepMerge<T>(base: T, overrides: DeepPartial<T>): T {
+function deepMerge<T>(base: T, overrides: ThemeOverrides | DeepPartial<T>): T {
   if (!isPlainObject(base) || !isPlainObject(overrides)) return overrides as T;
   const out: Record<string, unknown> = { ...base };
   for (const [key, value] of Object.entries(overrides)) {
     if (value === undefined) continue;
-    out[key] = key in base ? deepMerge(base[key], value) : value;
+    out[key] = key in base ? deepMerge(base[key], value as never) : value;
   }
   return out as T;
 }

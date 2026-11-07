@@ -3,7 +3,7 @@
  *
  * Layout is pure and DOM-free (ADR 0003). It takes metrics measured over the
  * whole trace (ADR 0008) so that sizes and positions do not jump between
- * frames.
+ * frames, with text measured in the fonts of the layout options (ADR 0024).
  */
 import type {
   StructureDecl,
@@ -15,7 +15,12 @@ import type { Block } from '../kind.ts';
 import type { KindedState, VisualizationState } from '../kinds/index.ts';
 import { runtimes, type CoreTypeMap } from '../registry.ts';
 import type { Trace } from '../trace.ts';
-import { defaultLayoutOptions, type LayoutOptions } from './options.ts';
+import {
+  defaultFonts,
+  defaultLayoutOptions,
+  type LayoutFonts,
+  type LayoutOptions,
+} from './options.ts';
 import type { Scene, SceneItem } from './scene.ts';
 
 export * from './array.ts';
@@ -47,8 +52,9 @@ function measureOf<K extends StructureKindName>(
   kind: K,
   state: CoreTypeMap[K]['state'],
   decl: CoreTypeMap[K]['decl'],
+  fonts: LayoutFonts,
 ) {
-  return runtimes[kind].measure(state, decl);
+  return runtimes[kind].measure(state, decl, fonts);
 }
 
 function mergeOf<K extends StructureKindName>(
@@ -69,10 +75,11 @@ function layoutOf<K extends StructureKindName>(
 function measureStructure(
   entry: KindedState,
   decl: StructureDecl,
+  fonts: LayoutFonts,
 ): KindedMetrics {
   return {
     kind: entry.kind,
-    metrics: measureOf(entry.kind, entry.state, decl),
+    metrics: measureOf(entry.kind, entry.state, decl, fonts),
   } as KindedMetrics;
 }
 
@@ -83,14 +90,16 @@ function mergeStructure(a: KindedMetrics, b: KindedMetrics): KindedMetrics {
   } as KindedMetrics;
 }
 
+/** Metrics of one state, with text measured in `fonts`. */
 export function measureState(
   vis: Visualization,
   state: VisualizationState,
+  fonts: LayoutFonts = defaultFonts,
 ): SceneMetrics {
   const out: Record<string, KindedMetrics> = {};
   for (const [name, entry] of Object.entries(state)) {
     const decl = vis.structures[name];
-    if (decl !== undefined) out[name] = measureStructure(entry, decl);
+    if (decl !== undefined) out[name] = measureStructure(entry, decl, fonts);
   }
   return out;
 }
@@ -104,22 +113,33 @@ export function mergeMetrics(a: SceneMetrics, b: SceneMetrics): SceneMetrics {
   return out;
 }
 
-/** Measures every frame of a trace. */
-export function measureTrace(trace: Trace): SceneMetrics {
+/** Measures every frame of a trace, with text measured in `fonts`. */
+export function measureTrace(
+  trace: Trace,
+  fonts: LayoutFonts = defaultFonts,
+): SceneMetrics {
   const vis = trace.visualization;
-  let metrics = measureState(vis, trace.frame(0).state);
+  let metrics = measureState(vis, trace.frame(0).state, fonts);
   for (let i = 1; i <= trace.length; i++)
-    metrics = mergeMetrics(metrics, measureState(vis, trace.frame(i).state));
+    metrics = mergeMetrics(
+      metrics,
+      measureState(vis, trace.frame(i).state, fonts),
+    );
   return metrics;
 }
 
+/**
+ * Lays out one state. `metrics` default to the state's own; metrics passed
+ * in must have been measured with `options.fonts`.
+ */
 export function layoutState(
   vis: Visualization,
   state: VisualizationState,
-  metrics: SceneMetrics = measureState(vis, state),
+  metrics?: SceneMetrics,
   options: LayoutOptions = defaultLayoutOptions,
 ): Scene {
   const o = options;
+  const measured = metrics ?? measureState(vis, state, o.fonts);
   const items: SceneItem[] = [];
   let y = o.padding;
   let width = 0;
@@ -127,7 +147,8 @@ export function layoutState(
 
   for (const [name, decl] of Object.entries(vis.structures)) {
     const entry = state[name];
-    const m = metrics[name] ?? (entry && measureStructure(entry, decl));
+    const m =
+      measured[name] ?? (entry && measureStructure(entry, decl, o.fonts));
     if (entry === undefined || m === undefined) continue;
     if (!first) y += o.structureGap;
     first = false;
@@ -168,7 +189,7 @@ export function layoutTrace(
   options: Partial<LayoutOptions> = {},
 ): TraceLayout {
   const o: LayoutOptions = { ...defaultLayoutOptions, ...options };
-  const metrics = measureTrace(trace);
+  const metrics = measureTrace(trace, o.fonts);
   return {
     metrics,
     sceneAt: (index) =>

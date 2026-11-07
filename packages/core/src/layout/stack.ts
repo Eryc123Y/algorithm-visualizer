@@ -18,24 +18,33 @@ import type { StackState } from '../kinds/stack.ts';
 import {
   cellWidthFor,
   formatScalar,
-  maxChars,
+  maxWidth,
   titleItems,
   titleRowHeight,
   titleWidth,
 } from './common.ts';
+import type { LayoutFonts } from './options.ts';
 import type { SceneItem } from './scene.ts';
 
 export interface StackMetrics {
   /** Most elements at any time. */
   readonly slots: number;
-  readonly maxChars: number;
+  /** Widest value, in em of the value font. */
+  readonly valueWidth: number;
   /** Whether the stack is ever empty (the label then needs more room). */
   readonly empty: boolean;
 }
 
-export const measureStack = (s: StackState): StackMetrics => ({
+export const measureStack = (
+  s: StackState,
+  _decl: StackDecl,
+  fonts: LayoutFonts,
+): StackMetrics => ({
   slots: s.data.length,
-  maxChars: maxChars(s.data.map((e) => formatScalar(e.value))),
+  valueWidth: maxWidth(
+    s.data.map((e) => formatScalar(e.value)),
+    fonts.value,
+  ),
   empty: s.data.length === 0,
 });
 
@@ -44,7 +53,7 @@ export const mergeStackMetrics = (
   b: StackMetrics,
 ): StackMetrics => ({
   slots: Math.max(a.slots, b.slots),
-  maxChars: Math.max(a.maxChars, b.maxChars),
+  valueWidth: Math.max(a.valueWidth, b.valueWidth),
   empty: a.empty || b.empty,
 });
 
@@ -61,7 +70,7 @@ export function layoutStack({
   origin,
   options: o,
 }: LayoutInput<StackDecl, StackState, StackMetrics>): Block {
-  const cellWidth = cellWidthFor(metrics.maxChars, o);
+  const cellWidth = cellWidthFor(metrics.valueWidth, o);
   const cellHeight = Math.round(o.cellHeight * 0.77);
   const slots = Math.max(1, metrics.slots);
   const top = origin.y + titleRowHeight(o);

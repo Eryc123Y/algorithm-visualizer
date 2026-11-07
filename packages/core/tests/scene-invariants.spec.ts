@@ -1,14 +1,15 @@
 /**
  * Properties every layout must have, checked on every frame of every valid
  * conformance fixture (all kinds): unique keys, finite coordinates, items
- * inside the scene, and a scene size that never changes during a trace.
+ * inside the scene, text that fits its cell, node or badge, and a scene
+ * size that never changes during a trace.
  */
 import { readdirSync, readFileSync } from 'node:fs';
 
 import { describe, expect, it } from 'vitest';
 
 import { bareLayoutOptions, layoutTrace, loadTrace } from '../src/index.ts';
-import { sceneProblems } from './scene-check.ts';
+import { fitProblems, sceneProblems } from './scene-check.ts';
 
 const root = new URL('../../../conformance/', import.meta.url);
 
@@ -42,6 +43,7 @@ describe.each([
         first.height,
       ]);
       expect(sceneProblems(scene), `${name} frame ${i}`).toEqual([]);
+      expect(fitProblems(scene), `${name} frame ${i}`).toEqual([]);
     }
   });
 });

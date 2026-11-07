@@ -36,11 +36,18 @@ import {
   loadTrace,
   sectionAt,
   stepNameAt,
+  type LayoutFonts,
+  type LayoutOptions,
   type Trace,
   type TraceLayout,
 } from '@algoviz/core';
 import { formatErrors, ok, type Diagnostic, type Section } from '@algoviz/spec';
-import { paintScene, type SvgTheme, type ThemeName } from '@algoviz/svg';
+import {
+  paintScene,
+  resolveTheme,
+  type SvgTheme,
+  type ThemeName,
+} from '@algoviz/svg';
 
 import { codeLines } from './code-panel.ts';
 import { PlayerController, type PlaybackState } from './controller.ts';
@@ -164,6 +171,8 @@ export class AlgoPlayer extends LitElement {
   declare protected darkScheme: boolean;
 
   #layout: TraceLayout | null = null;
+  /** The fonts `#layout` measured text with. */
+  #layoutFonts: LayoutFonts | null = null;
   #stage: SceneStage | null = null;
   #inline: unknown = undefined;
   #inlineText: string | null = null;
@@ -304,12 +313,18 @@ export class AlgoPlayer extends LitElement {
     if (changed.has('mode')) {
       this.#updateFocusability();
       if (this.trace !== null && changed.get('mode') !== undefined) {
-        this.#layout = layoutTrace(this.trace, this.#layoutOptions());
-        this.#rendered = false;
+        this.#relayout();
         if (this.#isDisplay) this.#startPlayback();
         else if (!this.autoplay) this.#controller.pause();
       }
     }
+    // A theme with other fonts needs room for its own text (ADR 0024).
+    if (
+      this.trace !== null &&
+      this.#layout !== null &&
+      this.#layoutFonts !== this.#sceneTheme().fontMetrics
+    )
+      this.#relayout();
     const reload = changed.has('visualization') || changed.has('src');
     if (changed.has('frame')) this.#onFrame(reload);
     if (reload) void this.#load();
@@ -394,8 +409,7 @@ export class AlgoPlayer extends LitElement {
     this.errors = null;
     this.frameError = null;
     this.trace = result.value;
-    this.#layout = layoutTrace(result.value, this.#layoutOptions());
-    this.#rendered = false;
+    this.#relayout();
     this.#controller.reset(result.value.length);
     if (this.#requestedFrame !== 0) this.#goTo(this.#requestedFrame);
     this.#requestedFrame = 0;
@@ -554,8 +568,20 @@ export class AlgoPlayer extends LitElement {
     }
   }
 
-  #layoutOptions() {
-    return this.#isDisplay ? bareLayoutOptions : defaultLayoutOptions;
+  #layoutOptions(): LayoutOptions {
+    return {
+      ...(this.#isDisplay ? bareLayoutOptions : defaultLayoutOptions),
+      fonts: this.#sceneTheme().fontMetrics,
+    };
+  }
+
+  /** Lays the trace out again, measuring text in the theme's fonts. */
+  #relayout(): void {
+    if (this.trace === null) return;
+    const options = this.#layoutOptions();
+    this.#layout = layoutTrace(this.trace, options);
+    this.#layoutFonts = options.fonts;
+    this.#rendered = false;
   }
 
   #onColorScheme = (event: MediaQueryListEvent): void => {
@@ -590,6 +616,11 @@ export class AlgoPlayer extends LitElement {
     chooseLanguage(language);
   }
 
+  /** The theme the scene is painted with. */
+  #sceneTheme(): SvgTheme {
+    return this.customTheme ?? resolveTheme(this.#resolvedTheme());
+  }
+
   #resolvedTheme(): ThemeName {
     if (this.theme === 'auto') return this.darkScheme ? 'dark' : 'light';
     return this.theme;
@@ -600,10 +631,7 @@ export class AlgoPlayer extends LitElement {
   #drawScene(): void {
     if (this.#stage === null || this.#layout === null) return;
     const scene = this.#layout.sceneAt(this.playback.index);
-    const painted = paintScene(
-      scene,
-      this.customTheme ?? this.#resolvedTheme(),
-    );
+    const painted = paintScene(scene, this.#sceneTheme());
     const animate = this.#rendered && !(this.#reducedMotion?.matches ?? false);
     this.#stage.render(painted, {
       duration: animate ? Math.min(MAX_ANIMATION_MS, this.speed * 0.55) : 0,

@@ -22,9 +22,10 @@ import type { GraphDecl } from '@algoviz/spec';
 import type { Block, LayoutInput } from '../kind.ts';
 import type { GraphEdgeState, GraphState } from '../kinds/graph.ts';
 import {
+  ceilWidth,
   formatScalar,
   groupPointers,
-  maxChars,
+  maxWidth,
   own,
   pointerRows,
   titleItems,
@@ -34,12 +35,13 @@ import {
 import {
   NOTE_HEIGHT,
   nodeShape,
-  noteWidth,
+  noteTextWidth,
   outlineDistance,
   sidePointerItems,
   sidePointerWidth,
 } from './node-tree.ts';
 import { separateEdgeLabels } from './edge-label.ts';
+import type { LayoutFonts } from './options.ts';
 import type { EdgeRole, ElementRole, SceneItem } from './scene.ts';
 
 export interface GraphMetrics {
@@ -51,16 +53,18 @@ export interface GraphMetrics {
   readonly positions: Readonly<
     Record<string, { readonly x: number; readonly y: number }>
   >;
-  readonly maxChars: number;
+  /** Widest value, in em of the value font. */
+  readonly valueWidth: number;
   readonly pointerRows: number;
-  readonly maxPointerChars: number;
+  /** Widest pointer name, in em of the value font. */
+  readonly pointerWidth: number;
   readonly hasNotes: boolean;
-  /** Longest note, in characters. */
-  readonly maxNoteChars: number;
+  /** Widest note, in em of the value font. */
+  readonly noteWidth: number;
   readonly hasLoops: boolean;
   readonly hasWeights: boolean;
-  /** Longest edge label, in characters. */
-  readonly maxWeightChars: number;
+  /** Widest edge label, in em of the value font. */
+  readonly weightWidth: number;
   /** Most edges that ever join the same two nodes (either way). */
   readonly maxParallel: number;
   /** Most self-loops each node ever has (nodes without any are absent). */
@@ -69,7 +73,11 @@ export interface GraphMetrics {
 
 const linkKey = (from: string, to: string) => `${from}\u0000${to}`;
 
-export function measureGraph(state: GraphState): GraphMetrics {
+export function measureGraph(
+  state: GraphState,
+  _decl: GraphDecl,
+  fonts: LayoutFonts,
+): GraphMetrics {
   // Built with fromEntries: assigning to an id such as "__proto__" would
   // change the object's prototype instead.
   const positions = Object.fromEntries(
@@ -83,17 +91,21 @@ export function measureGraph(state: GraphState): GraphMetrics {
     nodes: state.data.nodes.map((n) => n.id),
     links: state.data.edges.map((e) => [e.from, e.to] as const),
     positions,
-    maxChars: maxChars(state.data.nodes.map((n) => formatScalar(n.value))),
+    valueWidth: maxWidth(
+      state.data.nodes.map((n) => formatScalar(n.value)),
+      fonts.value,
+    ),
     pointerRows: pointerRows(Object.entries(state.marks.pointers)),
-    maxPointerChars: maxChars(Object.keys(state.marks.pointers)),
+    pointerWidth: maxWidth(Object.keys(state.marks.pointers), fonts.value),
     hasNotes: Object.keys(state.marks.notes).length > 0,
-    maxNoteChars: maxChars(Object.values(state.marks.notes)),
+    noteWidth: maxWidth(Object.values(state.marks.notes), fonts.value),
     hasLoops: state.data.edges.some((e) => e.from === e.to),
     hasWeights: state.data.edges.some((e) => e.weight !== null),
-    maxWeightChars: maxChars(
+    weightWidth: maxWidth(
       state.data.edges.flatMap((e) =>
         e.weight === null ? [] : [formatScalar(e.weight)],
       ),
+      fonts.value,
     ),
     loops: countLoops(state),
     maxParallel: maxParallel(state),
@@ -117,14 +129,14 @@ export const mergeGraphMetrics = (
   nodes: union(a.nodes, b.nodes, (id) => id),
   links: union(a.links, b.links, ([from, to]) => linkKey(from, to)),
   positions: { ...b.positions, ...a.positions },
-  maxChars: Math.max(a.maxChars, b.maxChars),
+  valueWidth: Math.max(a.valueWidth, b.valueWidth),
   pointerRows: Math.max(a.pointerRows, b.pointerRows),
-  maxPointerChars: Math.max(a.maxPointerChars, b.maxPointerChars),
+  pointerWidth: Math.max(a.pointerWidth, b.pointerWidth),
   hasNotes: a.hasNotes || b.hasNotes,
-  maxNoteChars: Math.max(a.maxNoteChars, b.maxNoteChars),
+  noteWidth: Math.max(a.noteWidth, b.noteWidth),
   hasLoops: a.hasLoops || b.hasLoops,
   hasWeights: a.hasWeights || b.hasWeights,
-  maxWeightChars: Math.max(a.maxWeightChars, b.maxWeightChars),
+  weightWidth: Math.max(a.weightWidth, b.weightWidth),
   maxParallel: Math.max(a.maxParallel, b.maxParallel),
   loops: Object.fromEntries(
     [...new Set([...Object.keys(a.loops), ...Object.keys(b.loops)])].map(
@@ -414,11 +426,11 @@ export function layoutGraph({
   origin,
   options: o,
 }: LayoutInput<GraphDecl, GraphState, GraphMetrics>): Block {
-  const shape = nodeShape(metrics.maxChars, o);
+  const shape = nodeShape(metrics.valueWidth, o);
   const { radius, halfWidth } = shape;
   const pointerWidth = sidePointerWidth(
     metrics.pointerRows,
-    metrics.maxPointerChars,
+    metrics.pointerWidth,
     o,
   );
   const pitch = 2 * halfWidth + GAP + pointerWidth;
@@ -474,7 +486,7 @@ export function layoutGraph({
   // Edge labels sit beside midpoints and reach out by their own width;
   // loop labels sit beyond the loop.
   const weightWidth = metrics.hasWeights
-    ? Math.ceil(metrics.maxWeightChars * o.indexFontSize * 0.6)
+    ? ceilWidth(metrics.weightWidth * o.indexFontSize)
     : 0;
   // Routed parallel edges are shifted apart beyond their bend points.
   const routeShift =
@@ -506,7 +518,7 @@ export function layoutGraph({
         : 0,
       // A note turned sideways extends its full width beyond the node.
       metrics.hasNotes
-        ? Math.max(30, noteWidth(metrics.maxNoteChars, shape, o) + 8)
+        ? Math.max(30, noteTextWidth(metrics.noteWidth, shape) + 8)
         : 0,
     );
   const above = Math.max(pad, metrics.hasNotes ? NOTE_HEIGHT : 0);
@@ -728,7 +740,7 @@ export function layoutGraph({
     );
 
   return {
-    items: separateEdgeLabels(items),
+    items: separateEdgeLabels(items, o.fonts.value),
     width: Math.max(
       pointerWidth + maxX - minX + 2 * halfWidth + 2 * pad,
       titleWidth(title, o),

@@ -18,7 +18,8 @@ import type {
   SceneNode,
   SceneText,
 } from '@algoviz/core';
-import { edgeLabelBox, labelSegment } from '@algoviz/core';
+import { TITLE_TRACKING, edgeLabelBox, labelSegment } from '@algoviz/core';
+import { textWidth } from '@algoviz/fonts';
 
 import {
   themes,
@@ -229,7 +230,8 @@ function paintNode(n: SceneNode, t: SvgTheme): SvgNode {
     const fontSize = Math.max(10, n.fontSize * 0.7);
     const rad = ((n.labelAngle ?? 0) * Math.PI) / 180;
     const [dx, dy] = [Math.sin(rad), -Math.cos(rad)];
-    const textHalfWidth = ([...n.label].length * fontSize * 0.6) / 2;
+    const textHalfWidth =
+      (textWidth(n.label, t.fontMetrics.value) * fontSize) / 2;
     const reach =
       Math.abs(dx) * (halfWidth + textHalfWidth) +
       Math.abs(dy) * (n.radius + fontSize / 2) +
@@ -355,7 +357,8 @@ function paintEdge(e: SceneEdge, t: SvgTheme): PaintedItem[] {
       // Beyond the loop, by half the label's extent in that direction.
       const rad = (loopAngle * Math.PI) / 180;
       const [dx, dy] = [Math.sin(rad), -Math.cos(rad)];
-      const halfWidth = ([...e.label].length * e.fontSize * 0.6) / 2;
+      const halfWidth =
+        (textWidth(e.label, t.fontMetrics.value) * e.fontSize) / 2;
       const reach =
         34 + Math.abs(dx) * halfWidth + Math.abs(dy) * (e.fontSize / 2) + 2;
       items.push({
@@ -424,7 +427,7 @@ function labelBeside(
   b: { readonly x: number; readonly y: number },
   t: SvgTheme,
 ): PaintedItem {
-  const box = edgeLabelBox(e, a, b);
+  const box = edgeLabelBox(e, a, b, t.fontMetrics.value);
   return {
     key: `${e.key}#label`,
     x: box.x,
@@ -458,12 +461,13 @@ function paintText(x: SceneText, t: SvgTheme): SvgNode {
       ? {
           'font-family': t.fonts.label,
           'font-weight': '600',
-          'letter-spacing': '0.02em',
+          'letter-spacing': `${TITLE_TRACKING}em`,
           fill: t.title,
         }
       : x.role === 'label'
         ? { 'font-family': t.fonts.label, 'font-weight': '600', fill: t.index }
-        : { 'font-weight': '500', fill: t.index };
+        : // One weight per font role, as the bundled faces have (ADR 0024).
+          { 'font-weight': '600', fill: t.index };
   return {
     tag: 'text',
     attrs: {

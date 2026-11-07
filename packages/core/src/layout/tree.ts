@@ -20,7 +20,7 @@ import type { TreeState } from '../kinds/tree.ts';
 import {
   formatScalar,
   groupPointers,
-  maxChars,
+  maxWidth,
   own,
   pointerRows,
   titleItems,
@@ -32,26 +32,29 @@ import {
   NODE_GAP_Y,
   NOTE_HEIGHT,
   nodeShape,
-  noteWidth,
+  noteTextWidth,
   placeForest,
   sidePointerItems,
   sidePointerWidth,
   treeEdge,
 } from './node-tree.ts';
+import type { LayoutFonts } from './options.ts';
 import type { ElementRole, SceneItem } from './scene.ts';
 
 export interface TreeMetrics {
   /** Columns the widest frame spans. */
   readonly columns: number;
   readonly levels: number;
-  readonly maxChars: number;
+  /** Widest value, in em of the value font. */
+  readonly valueWidth: number;
   /** Most pointers at one node. */
   readonly pointerRows: number;
-  readonly maxPointerChars: number;
+  /** Widest pointer name, in em of the value font. */
+  readonly pointerWidth: number;
   /** Whether any node is ever annotated (needs room above the root). */
   readonly hasNotes: boolean;
-  /** Longest note, in characters. */
-  readonly maxNoteChars: number;
+  /** Widest note, in em of the value font. */
+  readonly noteWidth: number;
 }
 
 const childrenLookup = (state: TreeState) => {
@@ -59,7 +62,11 @@ const childrenLookup = (state: TreeState) => {
   return (id: string) => byId.get(id) ?? [];
 };
 
-export function measureTree(state: TreeState): TreeMetrics {
+export function measureTree(
+  state: TreeState,
+  _decl: TreeDecl,
+  fonts: LayoutFonts,
+): TreeMetrics {
   const placement = placeForest(
     state.data.roots,
     childrenLookup(state),
@@ -68,11 +75,14 @@ export function measureTree(state: TreeState): TreeMetrics {
   return {
     columns: placement.columns,
     levels: placement.levels,
-    maxChars: maxChars(state.data.nodes.map((n) => formatScalar(n.value))),
+    valueWidth: maxWidth(
+      state.data.nodes.map((n) => formatScalar(n.value)),
+      fonts.value,
+    ),
     pointerRows: pointerRows(Object.entries(state.marks.pointers)),
-    maxPointerChars: maxChars(Object.keys(state.marks.pointers)),
+    pointerWidth: maxWidth(Object.keys(state.marks.pointers), fonts.value),
     hasNotes: Object.keys(state.marks.notes).length > 0,
-    maxNoteChars: maxChars(Object.values(state.marks.notes)),
+    noteWidth: maxWidth(Object.values(state.marks.notes), fonts.value),
   };
 }
 
@@ -82,11 +92,11 @@ export const mergeTreeMetrics = (
 ): TreeMetrics => ({
   columns: Math.max(a.columns, b.columns),
   levels: Math.max(a.levels, b.levels),
-  maxChars: Math.max(a.maxChars, b.maxChars),
+  valueWidth: Math.max(a.valueWidth, b.valueWidth),
   pointerRows: Math.max(a.pointerRows, b.pointerRows),
-  maxPointerChars: Math.max(a.maxPointerChars, b.maxPointerChars),
+  pointerWidth: Math.max(a.pointerWidth, b.pointerWidth),
   hasNotes: a.hasNotes || b.hasNotes,
-  maxNoteChars: Math.max(a.maxNoteChars, b.maxNoteChars),
+  noteWidth: Math.max(a.noteWidth, b.noteWidth),
 });
 
 function roleOf(state: TreeState, id: string): ElementRole {
@@ -106,11 +116,11 @@ export function layoutTree({
   origin,
   options: o,
 }: LayoutInput<TreeDecl, TreeState, TreeMetrics>): Block {
-  const shape = nodeShape(metrics.maxChars, o);
+  const shape = nodeShape(metrics.valueWidth, o);
   const { radius, halfWidth } = shape;
   const pointerWidth = sidePointerWidth(
     metrics.pointerRows,
-    metrics.maxPointerChars,
+    metrics.pointerWidth,
     o,
   );
   // Siblings share a level, so in non-binary trees each column also makes
@@ -121,7 +131,7 @@ export function layoutTree({
   // Notes are centred above nodes and may be wider than them.
   const noteOverhang = Math.max(
     0,
-    Math.ceil(noteWidth(metrics.maxNoteChars, shape, o) / 2 - halfWidth),
+    Math.ceil(noteTextWidth(metrics.noteWidth, shape) / 2 - halfWidth),
   );
   const left = origin.x + Math.max(pointerWidth, noteOverhang);
   const top =

@@ -12,31 +12,42 @@
  * Elements are keyed by id and the link into each element by its id too,
  * so an element moved to another bucket glides there with its arrow.
  */
+import { textWidth } from '@algoviz/fonts';
 import type { HashTableDecl } from '@algoviz/spec';
 
 import type { Block, LayoutInput } from '../kind.ts';
 import type { HashTableState } from '../kinds/hash-table.ts';
 import {
+  ceilWidth,
   cellWidthFor,
   formatScalar,
-  maxChars,
+  maxWidth,
   titleItems,
   titleRowHeight,
   titleWidth,
 } from './common.ts';
+import type { LayoutFonts } from './options.ts';
 import type { ElementRole, SceneItem } from './scene.ts';
 
 export interface HashTableMetrics {
   readonly buckets: number;
   /** Longest chain. */
   readonly maxChain: number;
-  readonly maxChars: number;
+  /** Widest value, in em of the value font. */
+  readonly valueWidth: number;
 }
 
-export const measureHashTable = (s: HashTableState): HashTableMetrics => ({
+export const measureHashTable = (
+  s: HashTableState,
+  _decl: HashTableDecl,
+  fonts: LayoutFonts,
+): HashTableMetrics => ({
   buckets: s.data.length,
   maxChain: Math.max(0, ...s.data.map((chain) => chain.length)),
-  maxChars: maxChars(s.data.flat().map((e) => formatScalar(e.value))),
+  valueWidth: maxWidth(
+    s.data.flat().map((e) => formatScalar(e.value)),
+    fonts.value,
+  ),
 });
 
 export const mergeHashTableMetrics = (
@@ -45,7 +56,7 @@ export const mergeHashTableMetrics = (
 ): HashTableMetrics => ({
   buckets: Math.max(a.buckets, b.buckets),
   maxChain: Math.max(a.maxChain, b.maxChain),
-  maxChars: Math.max(a.maxChars, b.maxChars),
+  valueWidth: Math.max(a.valueWidth, b.valueWidth),
 });
 
 const LINK = 28;
@@ -63,9 +74,12 @@ export function layoutHashTable({
   const fontSize = Math.round(o.valueFontSize * 0.8);
   const bucketWidth = Math.max(
     height,
-    Math.ceil(String(metrics.buckets - 1).length * o.indexFontSize * 0.6 + 16),
+    ceilWidth(
+      textWidth(String(metrics.buckets - 1), o.fonts.value) * o.indexFontSize +
+        16,
+    ),
   );
-  const width = cellWidthFor(metrics.maxChars, {
+  const width = cellWidthFor(metrics.valueWidth, {
     ...o,
     valueFontSize: fontSize,
   });

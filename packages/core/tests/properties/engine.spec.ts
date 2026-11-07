@@ -14,7 +14,7 @@ import {
   layoutTrace,
   loadTrace,
 } from '../../src/index.ts';
-import { overlapProblems, sceneProblems } from '../scene-check.ts';
+import { fitProblems, overlapProblems, sceneProblems } from '../scene-check.ts';
 import { build } from './build.ts';
 import { stateProblems } from './invariants.ts';
 import { Dice, RUNS } from './random.ts';
@@ -90,6 +90,7 @@ describe.each(['all', ...kindNames])('generated documents (%s)', (kind) => {
             ]);
             expect(sceneProblems(scene), `frame ${i}`).toEqual([]);
             expect(overlapProblems(scene, manual), `frame ${i}`).toEqual([]);
+            expect(fitProblems(scene), `frame ${i}`).toEqual([]);
             const svg = renderSvg(scene, { theme: i % 2 ? 'dark' : 'light' });
             expect(svg, `frame ${i} svg`).not.toMatch(/NaN|undefined|Infinity/);
           }

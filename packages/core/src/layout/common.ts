@@ -2,6 +2,7 @@
  * Geometry helpers shared by the layouts of all kinds, so that titles,
  * cells and pointer badges look the same everywhere.
  */
+import { textWidth, type FontMetrics } from '@algoviz/fonts';
 import type { Scalar } from '@algoviz/spec';
 
 import type { LayoutOptions } from './options.ts';
@@ -20,21 +21,25 @@ export const own = <V>(
 /** Text shown for a value: ECMAScript `String()` conversion. */
 export const formatScalar = (value: Scalar): string => String(value);
 
-/** Length in characters (code points), for width estimates. */
-export const chars = (text: string): number => [...text].length;
+/**
+ * Rounds a width up to whole units, ignoring the floating-point noise of
+ * em widths times font sizes.
+ */
+export const ceilWidth = (width: number): number => Math.ceil(width - 1e-9);
 
-export const maxChars = (texts: Iterable<string>): number => {
+/** Widest of `texts` set in `font`, in em (ADR 0024). */
+export const maxWidth = (
+  texts: Iterable<string>,
+  font: FontMetrics,
+): number => {
   let max = 0;
-  for (const text of texts) max = Math.max(max, chars(text));
+  for (const text of texts) max = Math.max(max, textWidth(text, font));
   return max;
 };
 
-/** Width of a cell that fits `count` value characters. */
-export const cellWidthFor = (count: number, o: LayoutOptions): number =>
-  Math.max(
-    o.minCellWidth,
-    Math.ceil(count * o.valueFontSize * o.charWidthRatio + 2 * o.cellPadding),
-  );
+/** Width of a cell that fits a value `em` wide in the value font. */
+export const cellWidthFor = (em: number, o: LayoutOptions): number =>
+  Math.max(o.minCellWidth, ceilWidth(em * o.valueFontSize + 2 * o.cellPadding));
 
 export const titleRowHeight = (o: LayoutOptions): number =>
   o.showTitles ? o.titleFontSize + 11 : 0;
@@ -42,9 +47,15 @@ export const titleRowHeight = (o: LayoutOptions): number =>
 export const indexRowHeight = (o: LayoutOptions): number =>
   o.showIndices ? o.indexFontSize + 8 : 0;
 
+/** Letter spacing of titles, in em; painters draw titles with it. */
+export const TITLE_TRACKING = 0.02;
+
 export const titleWidth = (title: string, o: LayoutOptions): number =>
   o.showTitles
-    ? Math.ceil(chars(title) * o.titleFontSize * o.charWidthRatio)
+    ? ceilWidth(
+        (textWidth(title, o.fonts.label) + TITLE_TRACKING * [...title].length) *
+          o.titleFontSize,
+      )
     : 0;
 
 export function titleItems(
@@ -70,27 +81,22 @@ export function titleItems(
 
 export const badgeHeight = (o: LayoutOptions): number => o.pointerFontSize + 8;
 
-export const badgeWidthFor = (count: number, o: LayoutOptions): number =>
-  Math.max(
-    badgeHeight(o),
-    Math.ceil(count * o.pointerFontSize * o.charWidthRatio + 12),
-  );
+/** Width of a pointer badge whose name is `em` wide in the value font. */
+export const badgeWidthFor = (em: number, o: LayoutOptions): number =>
+  Math.max(badgeHeight(o), ceilWidth(em * o.pointerFontSize + 12));
 
 /**
- * How far the widest pointer badge, centred under a slot of width
- * `slotWidth`, sticks out on each side.
+ * How far the widest pointer badge, for a name `pointerEm` wide, centred
+ * under a slot of width `slotWidth`, sticks out on each side.
  */
 export const badgeOverhang = (
-  maxPointerChars: number,
+  pointerEm: number,
   slotWidth: number,
   o: LayoutOptions,
 ): number =>
-  maxPointerChars === 0
+  pointerEm === 0
     ? 0
-    : Math.max(
-        0,
-        Math.ceil(badgeWidthFor(maxPointerChars, o) / 2 - slotWidth / 2),
-      );
+    : Math.max(0, Math.ceil(badgeWidthFor(pointerEm, o) / 2 - slotWidth / 2));
 
 /** Height of the area below a row that holds `rows` stacked pointer badges. */
 export const pointerAreaHeight = (rows: number, o: LayoutOptions): number =>
@@ -147,7 +153,7 @@ export function pointerItems<S>(
         key: `${name}/pointer/${pointer}`,
         x,
         y: rowBottom + 20 + depth * (height + 4) + height / 2,
-        width: badgeWidthFor(chars(pointer), o),
+        width: badgeWidthFor(textWidth(pointer, o.fonts.value), o),
         height,
         role: 'pointer',
         text: pointer,

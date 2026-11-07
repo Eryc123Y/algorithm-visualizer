@@ -55,11 +55,11 @@ export function layoutArrayHeap({
   origin,
   options: o,
 }: LayoutInput<ArrayDecl, ArrayState, ArrayMetrics>): Block {
-  const shape = nodeShape(metrics.maxChars, o);
+  const shape = nodeShape(metrics.valueWidth, o);
   const { radius, halfWidth } = shape;
   const pointerWidth = sidePointerWidth(
     metrics.pointerRows,
-    metrics.maxPointerChars,
+    metrics.pointerWidth,
     o,
   );
   const pitchX = 2 * halfWidth + NODE_GAP_X;
