@@ -23,11 +23,11 @@ Everything later builds on these, so they come first. The ADRs are accepted (#13
   - The pseudocode highlighter (CLRS conventions, 0-based indices).
   - The language switch in the player.
   - The guide and fixtures.
-- [ ] **0.4 Algorithm registry** [ADR 0019](adr/0019-algorithm-registry.md).
-  - `Algorithm<I>`, `Trace` (merging `Recorder` and `Tape`), `defineStructure`, `runAlgorithm` and the generic test suite.
-  - MCP, the CLI and the playground read the registry.
-  - The first modules are the sorting algorithms, in both languages.
-- [ ] **0.5 Migrate the remaining recipes** into the registry, in both languages: `ops.bst`, `ops.heap` and the rest of the 29 recipes. Then the old recipe functions and the MCP catalogue are removed. This may take several PRs, one per topic.
+- [~] **0.4 Algorithm registry** [ADR 0019](adr/0019-algorithm-registry.md), refined by [ADR 0022](adr/0022-registry-details.md) (#19). Split in three PRs:
+  - `Algorithm<I>`, `Trace` (merging `Recorder` and `Tape`), `defineStructure`, `runModule`, `runAlgorithm` and the generic test suite, proven by moving `ops.bst` and `ops.heap` onto `defineStructure` as `bst`, `min-heap` and `max-heap`.
+  - MCP, the CLI and the playground read the registry; recipes not migrated yet stay reachable through a marked legacy path.
+  - The seven sorting algorithms as modules in both languages, following the CLRS procedures; their old recipe functions go.
+- [ ] **0.5 Migrate the remaining recipes** into the registry, in both languages: the other 22 recipes, including `bstInsert` and `binaryHeap` as sequences or modules of their own. Then the legacy path is removed: the old recipe functions, `packages/mcp/src/legacy-recipes.ts`, `apps/playground/src/samples/legacy.ts` and the CLI's `recipe` command. This may take several PRs, one per topic.
 
 ## Phase 1: static output and packages
 
@@ -71,7 +71,7 @@ Each entry is one registry module, or one per operation for data structures. Eac
 **II Sorting and order statistics**
 
 - [x] heapsort
-- [x] max-heap operations (`ops.heap`)
+- [x] max-heap operations (`max-heap`, and `min-heap`)
 - [x] quicksort
 - [x] counting sort
 - [ ] randomized quicksort
@@ -87,7 +87,7 @@ Each entry is one registry module, or one per operation for data structures. Eac
 - [x] linear probing
 - [ ] quadratic probing
 - [ ] double hashing
-- [x] BST operations (`ops.bst`)
+- [x] BST operations (`bst`)
 - [x] tree walks
 - [ ] red–black tree: insert (S2), delete (S2)
 

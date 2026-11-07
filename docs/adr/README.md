@@ -22,8 +22,9 @@ Each file records one architectural decision: the context, what we decided, and 
 | [0016](0016-code-highlighting.md)                   | Source code is highlighted by small, pure tokenizers                 | Accepted                            |
 | [0017](0017-multi-language-source.md)               | A document may carry its source in several languages                 | Accepted                            |
 | [0018](0018-operation-recipes.md)                   | Data-structure operations are recipes that start from a given state  | Accepted, partly superseded by 0019 |
-| [0019](0019-algorithm-registry.md)                  | Every algorithm is a module in one registry                          | Accepted                            |
+| [0019](0019-algorithm-registry.md)                  | Every algorithm is a module in one registry                          | Accepted, refined by 0022           |
 | [0020](0020-step-names-and-sections.md)             | Steps have names and documents have sections                         | Accepted                            |
 | [0021](0021-protocol-versioning.md)                 | The protocol version says what a reader must understand              | Accepted                            |
+| [0022](0022-registry-details.md)                    | Registry details: traces, structure modules, ids and sorting         | Accepted                            |
 
 Template: Status · Context · Decision · Consequences.
