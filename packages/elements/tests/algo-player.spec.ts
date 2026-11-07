@@ -139,7 +139,7 @@ describe('<algo-player>', () => {
     el.next();
     await el.updateComplete;
     expect(text(el, '.line.current')).toBe('exchange a[0] with a[1]');
-    expect(text(el, '.code [class="tok-function"]')).toBe('SORT-TWO');
+    expect(text(el, '.code .tok-procedure')).toBe('SORT-TWO');
   });
 
   it('reads inline JSON from a script child', async () => {

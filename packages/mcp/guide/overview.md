@@ -102,7 +102,7 @@ A selector names frames, in `algoviz_inspect`, `algoviz_render` and `algoviz_sho
 
 ## Code in two languages
 
-To give the code in pseudocode and in Python, use `sources` instead of `source`: a list of `{ "language", "code", "anchors" }`, one per language. This needs `"version": "0.3"`.
+Readers choose between pseudocode and Python in the player, which keeps the frame when they switch. To offer both, give `sources` instead of `source`: a list of `{ "language", "code", "anchors" }`, one per language. This needs `"version": "0.3"`.
 
 - Give `"pseudocode"` first, then `"python"`. Write the pseudocode in the conventions of CLRS, in your own words: `for i = 0 to n - 1` (and `downto`), `while`, `repeat … until`, `if`, `elseif`, `else`, `return`, `error "…"`; `=` assigns and `==` compares; `and`, `or`, `not`; `NIL`, `TRUE` and `FALSE`; procedure names in capitals joined by hyphens, such as `LINEAR-SEARCH`; `//` comments; indentation for blocks.
 - Count indices from 0 in both languages, and give variables the same names, so that narrations, `vars` and the cell numbers in the picture fit both.
