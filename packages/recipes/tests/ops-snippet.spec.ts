@@ -33,6 +33,12 @@ describe('snippet', () => {
     expect(() => snippet('x = 1  # @a').line('b')).toThrow(/@b/);
     expect(() => snippet('x = 1  # @a\ny = 2  # @a')).toThrow(/twice/);
   });
+
+  it('rejects markers too long to name a step', () => {
+    expect(() => snippet(`x = 1  # @${'a'.repeat(41)}`)).toThrow(
+      /longer than 40 characters/,
+    );
+  });
 });
 
 describe('joinSnippets', () => {

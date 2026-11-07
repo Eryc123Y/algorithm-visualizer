@@ -8,7 +8,7 @@
  */
 import { z } from 'zod';
 
-import { LIMITS, Source, StepMeta, StructureName } from './common.ts';
+import { LIMITS, Section, Source, StepMeta, StructureName } from './common.ts';
 import {
   ArrayAction,
   ArrayActionInput,
@@ -165,6 +165,13 @@ const document = <D extends z.ZodType, A extends z.ZodType>(
     source: Source.optional(),
     structures: structures(decl),
     steps: steps(action),
+    sections: z
+      .array(Section)
+      .max(LIMITS.sections)
+      .optional()
+      .describe(
+        'Sections in order of their first step, e.g. one per operation. Steps before the first section belong to none.',
+      ),
   });
 
 export const Visualization = document(StructureDecl, TargetedAction).describe(

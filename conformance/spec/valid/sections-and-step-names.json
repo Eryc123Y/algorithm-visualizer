@@ -1,0 +1,70 @@
+{
+  "description": "Protocol 0.2: steps may have names, which repeat, and the document may group steps into sections; steps before the first section belong to none.",
+  "input": {
+    "version": "0.2",
+    "title": "Two operations",
+    "structures": {
+      "s": { "kind": "stack", "initial": [1] }
+    },
+    "steps": [
+      { "actions": [], "meta": { "narration": "Start." } },
+      {
+        "actions": [{ "target": "s", "type": "push", "element": 2 }],
+        "meta": { "id": "push" }
+      },
+      {
+        "actions": [{ "target": "s", "type": "push", "element": 3 }],
+        "meta": { "id": "push" }
+      },
+      {
+        "actions": [{ "target": "s", "type": "pop" }],
+        "meta": { "id": "pop", "narration": "Pop 3." }
+      }
+    ],
+    "sections": [
+      { "id": "push-twice", "title": "Push twice", "start": 1 },
+      { "id": "pop", "title": "Pop", "start": 3 }
+    ]
+  },
+  "expected": {
+    "version": "0.2",
+    "title": "Two operations",
+    "structures": {
+      "s": {
+        "kind": "stack",
+        "initial": [{ "id": "e0", "value": 1 }]
+      }
+    },
+    "steps": [
+      { "actions": [], "meta": { "narration": "Start." } },
+      {
+        "actions": [
+          {
+            "target": "s",
+            "type": "push",
+            "element": { "id": "e1", "value": 2 }
+          }
+        ],
+        "meta": { "id": "push" }
+      },
+      {
+        "actions": [
+          {
+            "target": "s",
+            "type": "push",
+            "element": { "id": "e2", "value": 3 }
+          }
+        ],
+        "meta": { "id": "push" }
+      },
+      {
+        "actions": [{ "target": "s", "type": "pop" }],
+        "meta": { "id": "pop", "narration": "Pop 3." }
+      }
+    ],
+    "sections": [
+      { "id": "push-twice", "title": "Push twice", "start": 1 },
+      { "id": "pop", "title": "Pop", "start": 3 }
+    ]
+  }
+}

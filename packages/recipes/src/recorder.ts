@@ -9,15 +9,21 @@
  * const doc = r.build();
  * ```
  *
+ * Steps may be named (`r.step({ id: 'swap' })`), and `r.section(id,
+ * title)` starts a titled section at the next step (ADR 0020).
+ *
  * Each structure handle has one method per action of its kind, typed from
  * the protocol registry, so new kinds get handles without any code here.
  */
 import {
   actionTypesOf,
   formatErrors,
+  LIMITS,
   minimumVersion,
   parseVisualization,
+  SectionId,
   type KindTypeMap,
+  type Section,
   type Source,
   type StepMeta,
   type StructureDeclInput,
@@ -57,6 +63,7 @@ export class Recorder {
   readonly #options: RecorderOptions;
   readonly #structures: Record<string, StructureDeclInput> = {};
   readonly #steps: Step[] = [];
+  readonly #sections: Section[] = [];
 
   constructor(options: RecorderOptions = {}) {
     this.#options = options;
@@ -93,8 +100,29 @@ export class Recorder {
   }
 
   /**
+   * Starts a section at the next step: it holds the steps recorded until
+   * the next section. Throws for an id that is used already or is not a
+   * section id, and when the section before has no steps.
+   */
+  section(id: string, title: string): this {
+    if (!SectionId.safeParse(id).success)
+      throw new Error(
+        `${JSON.stringify(id)} is not a section id: use lower-case kebab-case, e.g. "insert-5"`,
+      );
+    if (this.#sections.some((s) => s.id === id))
+      throw new Error(`Section "${id}" is already used`);
+    if (title === '' || title.length > LIMITS.textLength)
+      throw new Error(
+        `Section "${id}" needs a title of 1 to ${LIMITS.textLength} characters`,
+      );
+    this.#checkLastSection();
+    this.#sections.push({ id, title, start: this.#steps.length });
+    return this;
+  }
+
+  /**
    * Starts a new step; actions recorded until the next call belong to it.
-   * A string is shorthand for the narration.
+   * A string is shorthand for the narration; `id` names the step.
    */
   step(meta: StepMeta | string = {}): this {
     const m = typeof meta === 'string' ? { narration: meta } : meta;
@@ -110,8 +138,19 @@ export class Recorder {
   }
 
   #push(action: Action): void {
-    if (this.#steps.length === 0) this.step();
+    // Actions before any step, or right after `section`, start a step.
+    if (this.#steps.length === 0 || this.#sectionPending()) this.step();
     this.#steps.at(-1)!.actions.push(action);
+  }
+
+  /** Whether the last section is still waiting for its first step. */
+  #sectionPending(): boolean {
+    return this.#sections.at(-1)?.start === this.#steps.length;
+  }
+
+  #checkLastSection(): void {
+    if (this.#sectionPending())
+      throw new Error(`Section "${this.#sections.at(-1)!.id}" has no steps`);
   }
 
   /**
@@ -131,12 +170,14 @@ export class Recorder {
   }
 
   #document(): VisualizationInput {
+    this.#checkLastSection();
     const { title, source } = this.#options;
     const content = {
       ...(title === undefined ? {} : { title }),
       ...(source === undefined ? {} : { source }),
       structures: { ...this.#structures },
       steps: [...this.#steps],
+      ...(this.#sections.length === 0 ? {} : { sections: [...this.#sections] }),
     };
     // The oldest version that has what this document uses (ADR 0021), so
     // older players can show it too.

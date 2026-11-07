@@ -5,7 +5,10 @@
  *   algoviz guide [kind …]
  *   algoviz validate <file>
  *   algoviz inspect <file> [frame …]
- *   algoviz render <file> [--frame n] [--theme dark] [--out frame.svg]
+ *   algoviz render <file> [--frame f] [--theme dark] [--out frame.svg]
+ *
+ * A frame is a number (negative counts from the end) or a selector such as
+ * "relax#2", "insert-5/go" or "insert-5" (ADR 0020).
  *   algoviz recipes
  *   algoviz recipe <name> <args-json> [--out doc.json]
  *
@@ -18,10 +21,14 @@ import { callTool, type ToolResult } from './tools.ts';
 const USAGE = `Usage:
   algoviz guide [kind …]                 Authoring guide (all kinds by default)
   algoviz validate <file>                Check a document
-  algoviz inspect <file> [frame …]       State at frames (default: the last; -1 counts from the end)
-  algoviz render <file> [--frame n] [--theme light|dark] [--out file.svg]
+  algoviz inspect <file> [frame …]       State at frames (default: the last)
+  algoviz render <file> [--frame f] [--theme light|dark] [--out file.svg]
   algoviz recipes                        List ready-made visualizations
-  algoviz recipe <name> <args-json> [--out file.json]`;
+  algoviz recipe <name> <args-json> [--out file.json]
+
+A frame is a number (0 the start, -1 the last), a step such as "relax#2"
+or "insert-5/relax", a section such as "insert-5", or a range "a..b".
+Render takes one frame.`;
 
 class UsageError extends Error {}
 
@@ -94,7 +101,8 @@ function dispatch(
     case 'validate':
       return callTool('algoviz_validate', { document: needFile() });
     case 'inspect': {
-      const frames = rest.slice(1).map(Number);
+      // Numbers stay text: selectors read "-1" as well as "relax#2".
+      const frames = rest.slice(1);
       return callTool('algoviz_inspect', {
         document: needFile(),
         ...(frames.length > 0 ? { frames } : {}),
@@ -103,7 +111,7 @@ function dispatch(
     case 'render':
       return callTool('algoviz_render', {
         document: needFile(),
-        ...(values.frame === undefined ? {} : { frame: Number(values.frame) }),
+        ...(values.frame === undefined ? {} : { frame: values.frame }),
         ...(values.theme === undefined ? {} : { theme: values.theme }),
       });
     case 'recipes':

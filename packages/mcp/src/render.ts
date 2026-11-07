@@ -5,11 +5,14 @@ import { layoutTrace } from '@algoviz/core';
 import { ok, type Diagnostic, type Result } from '@algoviz/spec';
 import { renderSvg, type ThemeName } from '@algoviz/svg';
 
-import { loadDocument, resolveFrame } from './document.ts';
+import { loadDocument, resolveFrame, type FrameSelector } from './document.ts';
 
 export interface RenderOptions {
-  /** Default -1, the last frame; negative numbers count from the end. */
-  readonly frame?: number;
+  /**
+   * The frame: a number, negative from the end, or a selector of one frame
+   * such as "relax#2" (ADR 0020). Default -1, the last frame.
+   */
+  readonly frame?: FrameSelector;
   readonly theme?: ThemeName;
 }
 

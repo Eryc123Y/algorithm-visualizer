@@ -14,6 +14,8 @@ An MCP server that lets models write, check and render algoviz visualizations, a
 | `algoviz_run_recipe`   | Builds a recipe's document for a given input                                                      |
 | `algoviz_show`         | Shows a valid document to the user as an interactive player, in clients that display MCP Apps     |
 
+Tools that take frames accept a frame number (negative counts from the end) or a selector: a step name such as `relax#2`, a step in a section such as `insert-5/relax`, a section such as `insert-5`, or a range `a..b` ([ADR 0020](../../docs/adr/0020-step-names-and-sections.md)). `algoviz_render` and `algoviz_show` take one frame; `algoviz_inspect` reports each frame's step name, section and selector.
+
 The server also sends instructions for the workflow (recipe if one fits, otherwise guide → write → validate → inspect), serves the guide and the JSON Schema as resources (`algoviz://guide`, `algoviz://guide/<kind>`, `algoviz://schema`), and offers a `visualize` prompt.
 
 ## The player in the conversation
@@ -48,8 +50,8 @@ The command line offers the same tools:
 ```sh
 algoviz guide graph table
 algoviz validate doc.json
-algoviz inspect doc.json 0 -1
-algoviz render doc.json --frame -1 --theme dark --out last.svg
+algoviz inspect doc.json 0 relax#2 -1
+algoviz render doc.json --frame insert-5/relax --theme dark --out relax.svg
 algoviz recipe dijkstra '{"graph": {"nodes": ["A", "B"], "edges": [["A", "B", 3]]}, "source": "A"}'
 ```
 

@@ -22,7 +22,15 @@ export type ProtocolErrorCode =
   /** A declaration breaks a structural rule, e.g. a tree with a cycle. */
   | 'INVALID_STRUCTURE'
   /** A step's `meta.line` is not a line of the document's source code. */
-  | 'LINE_OUT_OF_RANGE';
+  | 'LINE_OUT_OF_RANGE'
+  /** The document uses a feature added after its `version`. */
+  | 'VERSION_TOO_OLD'
+  /** A section starts past the last step. */
+  | 'SECTION_OUT_OF_RANGE'
+  /** A section does not start after the section before it. */
+  | 'SECTION_OUT_OF_ORDER'
+  /** Two sections share an id. */
+  | 'DUPLICATE_SECTION';
 
 /**
  * A located, actionable problem in a document. Generic over its code so that

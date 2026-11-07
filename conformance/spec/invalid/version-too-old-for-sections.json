@@ -1,0 +1,19 @@
+{
+  "description": "A document must say the version that added each feature it uses: a 0.1 reader cannot show step names or sections.",
+  "input": {
+    "version": "0.1",
+    "structures": { "a": { "kind": "array", "initial": [1, 2] } },
+    "steps": [
+      {
+        "actions": [{ "target": "a", "type": "compare", "i": 0, "j": 1 }],
+        "meta": { "id": "compare" }
+      },
+      {
+        "actions": [{ "target": "a", "type": "swap", "i": 0, "j": 1 }],
+        "meta": { "id": "swap" }
+      }
+    ],
+    "sections": [{ "id": "all", "title": "All", "start": 0 }]
+  },
+  "expectedErrors": [{ "code": "VERSION_TOO_OLD", "path": "$.version" }]
+}

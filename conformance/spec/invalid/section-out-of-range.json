@@ -1,0 +1,24 @@
+{
+  "description": "A section must start at a step of the document: steps are numbered from 0, so a start equal to the number of steps is past the end.",
+  "input": {
+    "version": "0.2",
+    "structures": { "a": { "kind": "array", "initial": [1, 2] } },
+    "steps": [
+      {
+        "actions": [{ "target": "a", "type": "compare", "i": 0, "j": 1 }],
+        "meta": { "id": "compare" }
+      },
+      {
+        "actions": [{ "target": "a", "type": "swap", "i": 0, "j": 1 }],
+        "meta": { "id": "swap" }
+      }
+    ],
+    "sections": [
+      { "id": "compare", "title": "Compare", "start": 0 },
+      { "id": "after", "title": "After", "start": 2 }
+    ]
+  },
+  "expectedErrors": [
+    { "code": "SECTION_OUT_OF_RANGE", "path": "$.sections[1].start" }
+  ]
+}

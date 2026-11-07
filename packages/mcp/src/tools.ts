@@ -33,6 +33,12 @@ const failure = (errors: readonly Diagnostic[]): ToolResult => ({
   isError: true,
 });
 
+/** A frame number or a selector (ADR 0020), as tools take them. */
+export const FrameSelectorArg = z.union([z.int(), z.string().max(200)]);
+
+const SELECTORS =
+  'A frame is a number (0 is the initial state, n the state after step n, -1 the last) or a selector: a step name such as "relax" or "relax#2" (the second step named relax), a step in a section such as "insert-5/relax#2", a section such as "insert-5" (all its frames), or a range "a..b".';
+
 export const Document = z
   .union([z.record(z.string(), z.unknown()), z.string()])
   .describe(
@@ -72,15 +78,17 @@ export const tools: readonly ToolDefinition[] = [
   tool({
     name: 'algoviz_inspect',
     title: 'Inspect frames',
-    description: `Shows the state of every structure at chosen frames: data, marks such as pointers or visited nodes, and the step's narration and line. Frame 0 is the initial state and frame n the state after step n; negative numbers count from the end (-1 is the last). Use it to check that a valid document does what you meant, e.g. that an array ends up sorted. At most ${MAX_FRAMES} frames per call.`,
+    description: `Shows the state of every structure at chosen frames: data, marks such as pointers or visited nodes, and the step's narration, line, name and section. ${SELECTORS} A section's frames run from the frame before its first step, which still shows the step before it, to the frame after its last. Use it to check that a valid document does what you meant, e.g. that an array ends up sorted. At most ${MAX_FRAMES} frames per call.`,
     input: z.strictObject({
       document: Document,
       frames: z
-        .array(z.int())
+        .array(FrameSelectorArg)
         .min(1)
         .max(MAX_FRAMES)
         .optional()
-        .describe('Frame numbers, e.g. [0, 5, -1]. Default [-1].'),
+        .describe(
+          'Frames or selectors, e.g. [0, "relax#2", "insert-5", -1]. Default [-1].',
+        ),
     }),
     run({ document, frames }) {
       const report = inspect(document, frames);
@@ -92,14 +100,12 @@ export const tools: readonly ToolDefinition[] = [
   tool({
     name: 'algoviz_render',
     title: 'Render a frame',
-    description:
-      'Draws one frame of a valid document as a standalone SVG image, as the player would show it.',
+    description: `Draws one frame of a valid document as a standalone SVG image, as the player would show it. ${SELECTORS} A section or range is several frames, so name one of its steps instead.`,
     input: z.strictObject({
       document: Document,
-      frame: z
-        .int()
-        .optional()
-        .describe('Frame number; negative counts from the end. Default -1.'),
+      frame: FrameSelectorArg.optional().describe(
+        'Frame number (negative counts from the end) or a selector of one frame, e.g. "relax#2". Default -1.',
+      ),
       theme: z.enum(['light', 'dark']).optional().describe('Default "light".'),
     }),
     run({ document, frame, theme }) {

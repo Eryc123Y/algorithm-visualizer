@@ -5,7 +5,8 @@
     "version": {
       "type": "string",
       "enum": [
-        "0.1"
+        "0.1",
+        "0.2"
       ],
       "description": "Protocol version, \"major.minor\": the oldest version that has every feature the document uses."
     },
@@ -3771,6 +3772,12 @@
           "meta": {
             "type": "object",
             "properties": {
+              "id": {
+                "type": "string",
+                "maxLength": 40,
+                "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+                "description": "Name of the kind of step, e.g. \"compare\", \"relax\" or \"fixup-case-3\": lower-case kebab-case starting with a letter, at most 40 characters. Names repeat; selectors such as \"relax#3\" refer to them."
+              },
               "line": {
                 "description": "1-based source line this step corresponds to.",
                 "type": "integer",
@@ -3802,6 +3809,41 @@
         ],
         "additionalProperties": false,
         "description": "One point on the timeline the learner can step to."
+      }
+    },
+    "sections": {
+      "description": "Sections in order of their first step, e.g. one per operation. Steps before the first section belong to none.",
+      "maxItems": 1000,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 40,
+            "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+            "description": "Id of a section, unique within the document, e.g. \"insert-5\": lower-case kebab-case starting with a letter, at most 40 characters."
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000,
+            "description": "Title shown to learners, e.g. \"Insert 5\"."
+          },
+          "start": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "0-based index of the section's first step. Each section starts after the one before."
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "start"
+        ],
+        "additionalProperties": false,
+        "description": "A titled run of consecutive steps, such as one operation of a sequence. It lasts until the next section starts, or to the end of the document."
       }
     }
   },
@@ -3845,6 +3887,6 @@
       ]
     }
   },
-  "$id": "urn:algoviz:schema:visualization:0.1",
+  "$id": "urn:algoviz:schema:visualization:0.2",
   "title": "Visualization"
 }

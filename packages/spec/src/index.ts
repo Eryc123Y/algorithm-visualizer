@@ -5,6 +5,7 @@ export * from './kinds/index.ts';
 export * from './parse.ts';
 export * from './result.ts';
 export {
+  checkFeatures,
   minimumVersion,
   PROTOCOL_FEATURES,
   PROTOCOL_VERSION,

@@ -7,6 +7,8 @@
  * 3. Expand shorthands in structure declarations.
  * 4. Validate each action against the schema of its target's kind, expand
  *    its shorthands, and check that ids it introduces are new.
+ * 5. Check sections against the steps (ADR 0020), and that `version` holds
+ *    every feature the document uses (ADR 0021).
  *
  * Every kind-specific step goes through the kind registry (ADR 0012).
  *
@@ -28,8 +30,14 @@ import {
   type KindTypeMap,
   type StructureKindName,
 } from './kinds/index.ts';
+import type { Section } from './common.ts';
 import { err, ok, type Result } from './result.ts';
-import { checkVersion } from './version.ts';
+import {
+  checkFeatures,
+  checkVersion,
+  PROTOCOL_FEATURES,
+  type ProtocolVersion,
+} from './version.ts';
 import {
   Envelope,
   type StructureDecl,
@@ -98,15 +106,66 @@ export function parseVisualization(
     });
     return step.meta === undefined ? { actions } : { actions, meta: step.meta };
   });
+  if (doc.sections !== undefined)
+    errors.push(...checkSections(doc.sections, steps.length));
 
-  if (errors.length > 0) return err(errors);
-  return ok({
+  const vis: Visualization = {
     version: doc.version,
     ...(doc.title === undefined ? {} : { title: doc.title }),
     ...(doc.source === undefined ? {} : { source: doc.source }),
     structures,
     steps,
+    ...(doc.sections === undefined ? {} : { sections: doc.sections }),
+  };
+  // The version is the first thing to fix, so it is reported first.
+  const tooOld = checkFeatures<ProtocolVersion>(
+    vis,
+    doc.version,
+    PROTOCOL_FEATURES,
+  );
+  if (tooOld !== undefined) errors.unshift(tooOld);
+  return errors.length > 0 ? err(errors) : ok(vis);
+}
+
+/**
+ * Sections start at a step, each after the one before, and have distinct
+ * ids. Starting after the previous one also keeps every section non-empty.
+ */
+function checkSections(
+  sections: readonly Section[],
+  stepCount: number,
+): ProtocolError[] {
+  const errors: ProtocolError[] = [];
+  const ids = new Set<string>();
+  sections.forEach(({ id, start }, k) => {
+    if (ids.has(id))
+      errors.push({
+        code: 'DUPLICATE_SECTION',
+        path: formatPath(['sections', k, 'id']),
+        message: `Section id "${id}" is already used`,
+        hint: 'Section ids must be unique within a document.',
+      });
+    ids.add(id);
+    const previous = sections[k - 1];
+    if (start >= stepCount)
+      errors.push({
+        code: 'SECTION_OUT_OF_RANGE',
+        path: formatPath(['sections', k, 'start']),
+        message: `Section "${id}" starts at step ${start}, past the last step`,
+        hint:
+          stepCount === 0
+            ? 'The document has no steps, so it can have no sections.'
+            : `Steps are numbered 0 to ${stepCount - 1}.`,
+      });
+    else if (previous !== undefined && start <= previous.start)
+      errors.push({
+        code: 'SECTION_OUT_OF_ORDER',
+        path: formatPath(['sections', k, 'start']),
+        message: `Section "${id}" starts at step ${start}, but must start after section "${previous.id}" (step ${previous.start})`,
+        hint: 'List sections in the order of their steps; each has at least one step.',
+      });
   });
+  return errors;
 }
 
 /** A missing `version` is left to the shape check, which reports it. */

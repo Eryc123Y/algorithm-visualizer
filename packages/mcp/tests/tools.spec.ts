@@ -35,6 +35,7 @@ describe('validate', () => {
         structures: [{ name: 'a', kind: 'array' }],
         steps: 2,
         frames: 3,
+        sections: [],
       },
       warnings: [],
     });

@@ -89,14 +89,15 @@ describe('ops.bst', () => {
   it('starts from the tree the keys build, without animating it', () => {
     const { document } = ops.bst.search({ from, key: 7 });
     expect(shapeAt(document, 0)).toEqual(build(from));
-    expect(narrations(document)[0]).toBe('Search 7.');
+    expect(document.sections).toEqual([
+      { id: 'search-7', title: 'Search 7', start: 0 },
+    ]);
   });
 
   it('searches, pointing at each node on the path', () => {
     const found = ops.bst.search({ from, key: 7 });
     expect(found.results).toEqual([true]);
     expect(narrations(found.document)).toEqual([
-      'Search 7.',
       '7 < 8: go left.',
       '7 > 3: go right.',
       '7 > 6: go right.',
@@ -116,7 +117,7 @@ describe('ops.bst', () => {
     expect(narrations(run.document).at(-1)).toBe(
       'Empty spot: insert 5 as the right child of 4.',
     );
-    expect(ops.bst.insert({ from: [], key: 5 }).document.steps).toHaveLength(2);
+    expect(ops.bst.insert({ from: [], key: 5 }).document.steps).toHaveLength(1);
   });
 
   it.each([
@@ -179,6 +180,9 @@ describe('ops.bst', () => {
           const ref = reference(keys, calls);
           expect(shapeAt(run.document)).toEqual(ref.shape);
           expect(run.results).toEqual(ref.results);
+          // One section per call, and every step named (ADR 0020).
+          expect(run.document.sections).toHaveLength(calls.length);
+          expect(run.document.steps.every((s) => s.meta?.id)).toBe(true);
           // `after` rebuilds the same tree.
           expect(build(run.after)).toEqual(ref.shape);
           // Two calls chained through `after` end where one call ends.

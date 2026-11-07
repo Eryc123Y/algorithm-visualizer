@@ -4,7 +4,7 @@
  * are never written by hand (the mechanism ADR 0017 proposes for other
  * languages).
  */
-import type { Source } from '@algoviz/spec';
+import { LIMITS, type Source } from '@algoviz/spec';
 
 import { python } from '../source.ts';
 
@@ -15,7 +15,8 @@ export interface Snippet {
   line(anchor: string): number;
 }
 
-const MARKER = /\s*#\s*@([a-z][a-z-]*)\s*$/;
+// Markers name steps too, so they are step names: lower-case kebab-case.
+const MARKER = /\s*#\s*@([a-z][a-z0-9]*(?:-[a-z0-9]+)*)\s*$/;
 
 /** Dedents `code` like `python()` and reads its markers. */
 export function snippet(code: string): Snippet {
@@ -27,6 +28,10 @@ export function snippet(code: string): Snippet {
       if (match === null) return text;
       const name = match[1]!;
       if (anchors.has(name)) throw new Error(`Marker @${name} is used twice`);
+      if (name.length > LIMITS.nameLength)
+        throw new Error(
+          `Marker @${name} is longer than ${LIMITS.nameLength} characters`,
+        );
       anchors.set(name, k + 1);
       return text.slice(0, match.index);
     });

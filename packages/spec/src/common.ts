@@ -14,6 +14,9 @@ export const LIMITS = {
   actionsPerStep: 100,
   textLength: 2_000,
   sourceLength: 20_000,
+  sections: 1_000,
+  /** Longest step name or section id (ADR 0020). */
+  nameLength: 40,
 } as const;
 
 /**
@@ -56,9 +59,61 @@ export const Scalar = z
   .describe('A displayable value: number, string, boolean or null.');
 export type Scalar = z.infer<typeof Scalar>;
 
+/**
+ * Lower-case kebab-case that starts with a letter, so that a selector can
+ * tell a name from a frame number (ADR 0020).
+ */
+const kebabName = (what: string) =>
+  z
+    .string()
+    .max(LIMITS.nameLength)
+    .regex(/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/, {
+      message: `${what} must be lower-case kebab-case that starts with a letter, e.g. "fixup-case-3"`,
+    });
+
+/**
+ * Name of a step, saying what kind of step it is, such as `compare` or
+ * `relax`. Names repeat: every relaxation in Dijkstra is named `relax`.
+ */
+export const StepName = kebabName('A step name').describe(
+  `Name of the kind of step, e.g. "compare", "relax" or "fixup-case-3": lower-case kebab-case starting with a letter, at most ${LIMITS.nameLength} characters. Names repeat; selectors such as "relax#3" refer to them.`,
+);
+export type StepName = z.infer<typeof StepName>;
+
+/** Id of a section, unique within a document. */
+export const SectionId = kebabName('A section id').describe(
+  `Id of a section, unique within the document, e.g. "insert-5": lower-case kebab-case starting with a letter, at most ${LIMITS.nameLength} characters.`,
+);
+export type SectionId = z.infer<typeof SectionId>;
+
+/**
+ * A run of consecutive steps with a title, such as one operation of a
+ * sequence. It lasts until the next section starts, or to the end.
+ */
+export const Section = z
+  .strictObject({
+    id: SectionId,
+    title: z
+      .string()
+      .min(1)
+      .max(LIMITS.textLength)
+      .describe('Title shown to learners, e.g. "Insert 5".'),
+    start: z
+      .int()
+      .nonnegative()
+      .describe(
+        "0-based index of the section's first step. Each section starts after the one before.",
+      ),
+  })
+  .describe(
+    'A titled run of consecutive steps, such as one operation of a sequence. It lasts until the next section starts, or to the end of the document.',
+  );
+export type Section = z.infer<typeof Section>;
+
 /** Teaching metadata attached to a step; it never affects structure state. */
 export const StepMeta = z
   .strictObject({
+    id: StepName.optional(),
     line: z
       .int()
       .positive()

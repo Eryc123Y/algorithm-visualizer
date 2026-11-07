@@ -7,7 +7,7 @@ import { readFileSync } from 'node:fs';
 
 import { formatErrors } from '@algoviz/spec';
 
-import { loadDocument, resolveFrame } from './document.ts';
+import { loadDocument, resolveFrame, type FrameSelector } from './document.ts';
 import { formatReport, validate } from './validate.ts';
 
 export const PLAYER_URI = 'ui://algoviz/player.html';
@@ -23,7 +23,8 @@ export type ShowResult =
   | { readonly ok: true; readonly text: string; readonly content: ShowContent }
   | { readonly ok: false; readonly text: string };
 
-export function show(input: unknown, frame = 0): ShowResult {
+/** Checks a document and opens it at `frame`, a number or a selector. */
+export function show(input: unknown, frame: FrameSelector = 0): ShowResult {
   const report = validate(input);
   if (!report.valid) return { ok: false, text: formatReport(report) };
   const loaded = loadDocument(input);
