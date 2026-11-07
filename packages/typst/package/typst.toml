@@ -1,0 +1,14 @@
+[package]
+# "algoviz" is a working name: the owner picks the final one (roadmap 4.1).
+name = "algoviz"
+version = "0.1.0"
+entrypoint = "lib.typ"
+compiler = "0.15.0"
+authors = ["Eryc123Y <https://github.com/Eryc123Y>"]
+description = "Step-by-step figures of algorithms and data structures, from an algorithm and its input or from a document."
+keywords = ["algorithm", "data structure", "visualization", "CLRS", "graph", "tree", "sorting", "figure"]
+categories = ["visualization"]
+disciplines = ["computer-science", "education"]
+# The licence is the owner's choice when the package is published
+# (roadmap 4.3). OFL.txt covers the outlines of the bundled fonts, which the
+# engine draws text with.
