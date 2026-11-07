@@ -65,7 +65,7 @@ watch(parsed, ({ value, error }) => {
           Edit the document on the right, or paste one written by an LLM.
         </p>
       </div>
-      <div class="flex flex-wrap items-center gap-4 text-sm">
+      <div class="flex max-w-full min-w-0 flex-wrap items-center gap-4 text-sm">
         <label class="flex max-w-full min-w-0 items-center gap-2">
           Example
           <!-- min-w-0 lets a long entry shrink on a phone. -->

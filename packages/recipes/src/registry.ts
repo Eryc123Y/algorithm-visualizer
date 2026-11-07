@@ -7,6 +7,9 @@
 import { err, type Diagnostic, type Result } from '@algoviz/spec';
 
 import type { Algorithm } from './algorithm.ts';
+import { balancedBrackets } from './algorithms/lists/balanced-brackets.ts';
+import { reverseLinkedList } from './algorithms/lists/reverse-linked-list.ts';
+import { binarySearch } from './algorithms/searching/binary-search.ts';
 import { bubbleSort } from './algorithms/sorting/bubble-sort.ts';
 import { countingSort } from './algorithms/sorting/counting-sort.ts';
 import { heapsort } from './algorithms/sorting/heapsort.ts';
@@ -16,6 +19,8 @@ import { quicksort } from './algorithms/sorting/quicksort.ts';
 import { selectionSort } from './algorithms/sorting/selection-sort.ts';
 import { runModule, type AlgorithmRun } from './run-module.ts';
 import { bst } from './structures/bst/index.ts';
+import { hashChaining } from './structures/hashing/chaining.ts';
+import { linearProbing } from './structures/hashing/linear-probing.ts';
 import { maxHeap, minHeap } from './structures/heap/index.ts';
 
 /** Every module, grouped by topic in menu order. */
@@ -27,9 +32,14 @@ export const algorithms: readonly Algorithm[] = [
   countingSort,
   bubbleSort,
   selectionSort,
+  binarySearch,
+  reverseLinkedList,
+  balancedBrackets,
   ...bst.modules,
   ...minHeap.modules,
   ...maxHeap.modules,
+  ...hashChaining.modules,
+  ...linearProbing.modules,
 ];
 
 /** The module with `id`, if there is one. */

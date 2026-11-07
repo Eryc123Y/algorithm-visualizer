@@ -14,9 +14,6 @@ import type { CatalogEntry } from './recipes.ts';
 
 /** Short titles, as the playground's menu shows them. */
 const TITLES: Readonly<Record<string, string>> = {
-  binarySearch: 'Binary search',
-  reverseLinkedList: 'Reverse a linked list',
-  balancedBrackets: 'Balanced brackets',
   bstInsert: 'BST: insert keys, then search',
   avlInsert: 'AVL tree',
   treeTraversal: 'Tree traversal',
@@ -34,8 +31,6 @@ const TITLES: Readonly<Record<string, string>> = {
   longestCommonSubsequence: 'Longest common subsequence',
   editDistance: 'Edit distance',
   knapsack: '0/1 knapsack',
-  hashChaining: 'Separate chaining',
-  linearProbing: 'Linear probing',
 };
 
 function recipe<S extends z.ZodObject>(
@@ -116,36 +111,6 @@ const Text = (description: string) =>
 
 /** The recipes not in the registry yet, in the order a course might meet them. */
 export const legacyRecipes: readonly CatalogEntry[] = [
-  recipe(
-    'searching',
-    'binarySearch',
-    'Binary search in a sorted array',
-    z.strictObject({
-      values: Values.describe('Sorted numbers.'),
-      target: z.number().describe('The value to find.'),
-    }),
-    ({ values, target }) => recipes.binarySearch(values, target),
-  ),
-  recipe(
-    'lists',
-    'reverseLinkedList',
-    'Reversing a singly linked list in place, one pointer at a time',
-    z.strictObject({ values: Values.max(12) }),
-    ({ values }) => recipes.reverseLinkedList(values),
-  ),
-  recipe(
-    'lists',
-    'balancedBrackets',
-    'Checking balanced brackets with a stack',
-    z.strictObject({
-      text: z
-        .string()
-        .min(1)
-        .max(32)
-        .describe('Text with brackets, e.g. "{[()]}".'),
-    }),
-    ({ text }) => recipes.balancedBrackets(text),
-  ),
   recipe(
     'trees',
     'bstInsert',
@@ -296,26 +261,5 @@ export const legacyRecipes: readonly CatalogEntry[] = [
       capacity: z.int().min(0).max(40),
     }),
     ({ items, capacity }) => recipes.knapsack(items, capacity),
-  ),
-  recipe(
-    'hashing',
-    'hashChaining',
-    'Hash table with separate chaining (h(k) = k mod size)',
-    z.strictObject({
-      keys: z.array(z.int()).min(1).max(24),
-      size: z.int().min(1).max(16),
-      search: z.int().optional().describe('A key to look up afterwards.'),
-    }),
-    ({ keys, size, search }) => recipes.hashChaining(keys, size, search),
-  ),
-  recipe(
-    'hashing',
-    'linearProbing',
-    'Hash table with linear probing (h(k) = k mod size)',
-    z.strictObject({
-      keys: z.array(z.int()).min(1).max(16),
-      size: z.int().min(1).max(16),
-    }),
-    ({ keys, size }) => recipes.linearProbing(keys, size),
   ),
 ];

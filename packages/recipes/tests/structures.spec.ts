@@ -4,10 +4,8 @@ import type { TreeState } from '@algoviz/core';
 
 import {
   avlInsert,
-  balancedBrackets,
   binaryHeap,
   bstInsert,
-  reverseLinkedList,
   treeTraversal,
   trieInsert,
   unionFind,
@@ -44,37 +42,6 @@ function heights(tree: TreeState): Map<string, number> {
   tree.data.roots.forEach(of);
   return h;
 }
-
-describe('reverseLinkedList', () => {
-  it.each([[[]], [[1]], [[1, 2, 3, 4]]])('reverses %j', (values) => {
-    const trace = replay(reverseLinkedList(values));
-    const list = stateOf(trace, 'list', 'linkedList');
-    list.data.forEach((node, k) =>
-      expect(node.next).toBe(k === 0 ? null : list.data[k - 1]!.id),
-    );
-    if (values.length > 0)
-      expect(list.marks.pointers['head']).toBe(list.data.at(-1)!.id);
-  });
-});
-
-describe('balancedBrackets', () => {
-  const balanced = (s: string) => {
-    const stack: string[] = [];
-    const open: Record<string, string> = { ')': '(', ']': '[', '}': '{' };
-    for (const ch of s)
-      if ('([{'.includes(ch)) stack.push(ch);
-      else if (ch in open && stack.pop() !== open[ch]) return false;
-    return stack.length === 0;
-  };
-  it.each(['', '()', '([]{})', '(]', '(()', '())', 'a(b)c', '{[()()]}'])(
-    'decides %j',
-    (text) => {
-      const trace = replay(balancedBrackets(text));
-      const last = trace.visualization.steps.at(-1)?.meta?.narration ?? '';
-      expect(last.endsWith(': balanced.')).toBe(balanced(text));
-    },
-  );
-});
 
 describe('bstInsert', () => {
   it('keeps keys in order and finds what was inserted', () => {
@@ -189,9 +156,6 @@ describe('every recipe', () => {
   it('keeps the same scene size in every frame', async () => {
     const { layoutTrace } = await import('@algoviz/core');
     const docs = [
-      balancedBrackets('(('),
-      balancedBrackets('(]'),
-      reverseLinkedList([1, 2, 3]),
       avlInsert([3, 2, 1, 4, 5]),
       binaryHeap([4, 1, 3]),
       trieInsert(['ab', 'b']),

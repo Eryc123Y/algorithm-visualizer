@@ -315,26 +315,32 @@ function linearSearchTwoLanguages(): VisualizationInput {
   return r.build();
 }
 
-/** A sorting module's document from the registry. */
-function moduleDocument(id: string, values: number[]): VisualizationInput {
-  const run = recipes.runAlgorithm(id, { values });
+/** A module's document from the registry. */
+function moduleDocument(id: string, input: unknown): VisualizationInput {
+  const run = recipes.runAlgorithm(id, input);
   if (!run.ok) throw new Error(run.error.map((e) => e.message).join('; '));
   return run.value.document;
 }
 
 export const references: Readonly<Record<string, () => VisualizationInput>> = {
   'linear-search-two-languages': linearSearchTwoLanguages,
-  'insertion-sort': () => moduleDocument('insertion-sort', [5, 2, 4, 6, 1, 3]),
+  'insertion-sort': () =>
+    moduleDocument('insertion-sort', { values: [5, 2, 4, 6, 1, 3] }),
   'selection-sort': () =>
-    moduleDocument('selection-sort', [29, 10, 14, 37, 13]),
-  'binary-search-miss': () => recipes.binarySearch([1, 3, 4, 7, 9, 11, 15], 6),
+    moduleDocument('selection-sort', { values: [29, 10, 14, 37, 13] }),
+  'binary-search-miss': () =>
+    moduleDocument('binary-search', {
+      values: [1, 3, 4, 7, 9, 11, 15],
+      target: 6,
+    }),
   'two-sum-sorted': twoSum,
   'build-max-heap': buildMaxHeap,
   'dutch-flag': dutchFlag,
   'postfix-eval': postfix,
   'printer-queue': printerQueue,
   'sliding-window-max': slidingWindowMax,
-  'reverse-list': () => recipes.reverseLinkedList([1, 2, 3, 4]),
+  'reverse-list': () =>
+    moduleDocument('reverse-linked-list', { values: [1, 2, 3, 4] }),
   'delete-list-node': deleteNode,
   'floyd-cycle': floyd,
   'bst-delete': bstDelete,
@@ -400,7 +406,17 @@ export const references: Readonly<Record<string, () => VisualizationInput>> = {
   'graph-coloring': colouring,
   lcs: () => recipes.longestCommonSubsequence('ABCB', 'BDCAB'),
   'coin-change': coinChange,
-  'hash-chaining': () => recipes.hashChaining([15, 11, 27, 8, 12], 7),
+  'hash-chaining': () =>
+    moduleDocument('hash-chaining', {
+      from: { size: 7, keys: [] },
+      ops: [15, 11, 27, 8, 12].map((key) => ({ op: 'insert', key })),
+    }),
   'linear-probing': () =>
-    recipes.linearProbing([18, 41, 22, 44, 59, 32, 31, 73], 13),
+    moduleDocument('linear-probing', {
+      from: { size: 13, keys: [] },
+      ops: [18, 41, 22, 44, 59, 32, 31, 73].map((key) => ({
+        op: 'insert',
+        key,
+      })),
+    }),
 };

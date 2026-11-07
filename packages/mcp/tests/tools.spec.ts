@@ -211,7 +211,7 @@ describe('recipes', () => {
   it('checks inputs against the schema, at paths under $.input', () => {
     for (const [id, input, path] of [
       ['bubble-sort', { values: 'nope' }, '$.input.values'],
-      ['binarySearch', { values: 'nope', target: 1 }, '$.input.values'],
+      ['binary-search', { values: 'nope', target: 1 }, '$.input.values'],
       ['bst.search', { from: [1], key: 'x' }, '$.input.key'],
     ] as const) {
       const doc = runRecipe(id, input);
@@ -305,7 +305,7 @@ describe('tools', () => {
 
   it('return recipe documents as JSON', () => {
     const result = callTool('algoviz_run_recipe', {
-      id: 'binarySearch',
+      id: 'binary-search',
       input: { values: [1, 3, 5], target: 3 },
     });
     expect(validate(result.text).valid).toBe(true);
