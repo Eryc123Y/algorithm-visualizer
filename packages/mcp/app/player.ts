@@ -1,7 +1,8 @@
 /**
  * The page algoviz_show opens in an MCP Apps host: an <algo-player> that
  * takes its document from the tool result, follows the host's theme, and
- * tells the model which frame the user is looking at.
+ * tells the model which frame the user is looking at: its number, its
+ * step's name and section (ADR 0020), and its narration.
  */
 import '@algoviz/elements/define';
 import type { AlgoPlayer } from '@algoviz/elements';
@@ -11,8 +12,23 @@ interface Shown {
   readonly document: {
     readonly title?: string;
     readonly steps: readonly { readonly meta?: { narration?: string } }[];
+    readonly sections?: readonly { readonly id: string; title: string }[];
   };
   readonly frame: number;
+}
+
+/** ', step "go" in section "Insert 5"', or nothing for unnamed steps. */
+function placeOf(
+  doc: Shown['document'],
+  stepName: string | undefined,
+  section: string | undefined,
+): string {
+  const title = doc.sections?.find((s) => s.id === section)?.title;
+  const parts = [
+    stepName === undefined ? '' : `step ${JSON.stringify(stepName)}`,
+    title === undefined ? '' : `in section ${JSON.stringify(title)}`,
+  ].filter((part) => part !== '');
+  return parts.length === 0 ? '' : `, ${parts.join(' ')}`;
 }
 
 const player = document.querySelector<AlgoPlayer>('algo-player')!;
@@ -73,10 +89,11 @@ app.ontoolresult = (result) => {
 app.onhostcontextchanged = applyContext;
 
 // Keep the model's view of the conversation in step with the user's: the
-// frame on screen and its narration, once the user stops on it.
+// frame on screen, its step and section, and its narration, once the user
+// stops on it.
 player.addEventListener('algo-frame', (event) => {
   clearTimeout(pending);
-  const { index, length, playing } = event.detail;
+  const { index, length, playing, stepName, sectionId } = event.detail;
   if (playing || shown === null) return;
   const doc = shown.document;
   pending = setTimeout(() => {
@@ -85,12 +102,13 @@ player.addEventListener('algo-frame', (event) => {
         ? 'the initial state'
         : (doc.steps[index - 1]?.meta?.narration ?? '(no narration)');
     const title = doc.title === undefined ? '' : ` of "${doc.title}"`;
+    const place = placeOf(doc, stepName, sectionId);
     void app
       .updateModelContext({
         content: [
           {
             type: 'text',
-            text: `The user is looking at frame ${index} of ${length}${title}: ${narration}`,
+            text: `The user is looking at frame ${index} of ${length}${title}${place}: ${narration}`,
           },
         ],
       })

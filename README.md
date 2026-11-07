@@ -87,6 +87,8 @@ Build the standalone bundle with `npm run build -w @algoviz/elements`, then:
 
 Attributes: `src`, `frame`, `theme` (`auto` · `light` · `dark` · `print`), `speed` (ms per step), `autoplay`, `loop`, `hide-controls`, `hide-code`. Style the chrome with CSS custom properties such as `--algo-accent`, or pass a full scene theme as the `customTheme` property.
 
+`frame` takes a frame number or a selector that names a step by meaning, so a link or a page keeps showing the same step when a document gains steps elsewhere: `frame="relax#3"` (the third step named `relax`), `frame="insert-5/fixup-case-3"` (counting inside section `insert-5`), `frame="insert-5"` (that section, from its first step) or `frame="-1"` (the last frame). Documents give steps names with `meta.id` and group them into `sections` ([ADR 0020](docs/adr/0020-step-names-and-sections.md)); the timeline shows the sections, and Page Up and Page Down move between them. Page scripts read `player.stepName` and `player.section` (the section's id, title and start), and the `algo-frame` event carries `stepName` and `sectionId`. The `frame` property reads back as a number once the document has loaded.
+
 For a purely visual animation without any teaching chrome, use display mode: it shows only the structures, plays and loops by itself, and pauses while off screen.
 
 ```html

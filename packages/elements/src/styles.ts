@@ -196,10 +196,12 @@ export const playerStyles = css`
     font-size: 12px;
   }
 
+  /* Buttons, slider and counter; sections sit under the slider. */
   .controls {
-    display: flex;
+    display: grid;
+    grid-template-columns: auto auto auto minmax(92px, 1fr) auto;
     align-items: center;
-    gap: 6px;
+    gap: 2px 6px;
   }
   button {
     display: inline-grid;
@@ -233,15 +235,75 @@ export const playerStyles = css`
     filter: brightness(1.08);
   }
   button:focus-visible,
-  input:focus-visible {
+  input:focus-visible,
+  .code:focus-visible {
     outline: 2px solid var(--algo-accent);
     outline-offset: 2px;
   }
   input[type='range'] {
-    flex: 1;
-    min-width: 80px;
+    width: calc(100% - 12px);
+    min-width: 0;
     margin: 0 6px;
     accent-color: var(--algo-accent);
+  }
+
+  .sections {
+    grid-column: 4;
+    grid-row: 2;
+    margin: 0 6px;
+    font-size: 11px;
+    line-height: 16px;
+    color: var(--algo-muted);
+    user-select: none;
+  }
+  /*
+   * Inset by the radius of the default slider thumb (16px wide in Chromium
+   * and Firefox), so a section starts under the thumb at its first frame.
+   */
+  .sections .track {
+    position: relative;
+    height: 20px;
+    margin: 0 8px;
+  }
+  .sections .section {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    box-sizing: border-box;
+    padding: 2px 4px 0;
+    border-left: 1px solid var(--algo-border);
+    border-top: 2px solid transparent;
+    cursor: pointer;
+    container-type: inline-size;
+  }
+  .sections .label {
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  /* A title that cannot show a few letters is left to the caption. */
+  @container (max-width: 44px) {
+    .sections .label {
+      visibility: hidden;
+    }
+  }
+  .sections .section:hover {
+    color: var(--algo-fg);
+  }
+  .sections .section.current {
+    color: var(--algo-fg);
+    font-weight: 600;
+    border-left-color: var(--algo-accent);
+    border-top-color: var(--algo-accent);
+  }
+  .section-title {
+    flex-basis: 100%;
+    min-height: 1.4em;
+    margin: 0;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--algo-muted);
   }
   .counter {
     min-width: 7ch;
@@ -257,6 +319,10 @@ export const playerStyles = css`
     border: 1px solid var(--algo-error);
     border-radius: 10px;
     color: var(--algo-error);
+  }
+  .errors p {
+    margin: 6px 0 0;
+    color: var(--algo-fg);
   }
   .errors pre {
     margin: 6px 0 0;
