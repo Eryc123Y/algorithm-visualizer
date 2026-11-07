@@ -14,16 +14,17 @@ npm run dev                       # start the playground
 
 This is an npm workspaces monorepo.
 
-| Path                 | Package               | Purpose                                                                                      |
-| -------------------- | --------------------- | -------------------------------------------------------------------------------------------- |
-| `packages/spec/`     | `@algoviz/spec`       | Protocol: Zod schemas, inferred types, parsing and validation. No DOM or Node.js APIs.       |
-| `packages/core/`     | `@algoviz/core`       | Structure kinds, reducers, the timeline engine and layout to scenes. No DOM or Node.js APIs. |
-| `packages/svg/`      | `@algoviz/svg`        | Scene → standalone SVG string. No DOM or Node.js APIs.                                       |
-| `packages/elements/` | `@algoviz/elements`   | `<algo-player>` Web Component (Lit) and a standalone CDN bundle.                             |
-| `packages/recipes/`  | `@algoviz/recipes`    | Typed recorder and classic algorithms, each tested against a reference implementation.       |
-| `apps/playground/`   | `@algoviz/playground` | Vite + Vue app for demos and, later, documentation.                                          |
-| `conformance/`       | —                     | Language-agnostic JSON fixtures every implementation must pass.                              |
-| `docs/adr/`          | —                     | Architecture decision records. Read these before changing the design.                        |
+| Path                 | Package               | Purpose                                                                                        |
+| -------------------- | --------------------- | ---------------------------------------------------------------------------------------------- |
+| `packages/spec/`     | `@algoviz/spec`       | Protocol: Zod schemas, inferred types, parsing and validation. No DOM or Node.js APIs.         |
+| `packages/fonts/`    | `@algoviz/fonts`      | Metrics and outlines of the bundled fonts (OFL), and text measurement. No DOM or Node.js APIs. |
+| `packages/core/`     | `@algoviz/core`       | Structure kinds, reducers, the timeline engine and layout to scenes. No DOM or Node.js APIs.   |
+| `packages/svg/`      | `@algoviz/svg`        | Scene → standalone SVG string. No DOM or Node.js APIs.                                         |
+| `packages/elements/` | `@algoviz/elements`   | `<algo-player>` Web Component (Lit) and a standalone CDN bundle.                               |
+| `packages/recipes/`  | `@algoviz/recipes`    | Typed recorder and classic algorithms, each tested against a reference implementation.         |
+| `apps/playground/`   | `@algoviz/playground` | Vite + Vue app for demos and, later, documentation.                                            |
+| `conformance/`       | —                     | Language-agnostic JSON fixtures every implementation must pass.                                |
+| `docs/adr/`          | —                     | Architecture decision records. Read these before changing the design.                          |
 
 Workspace packages expose their TypeScript sources through the `@algoviz/source` export condition. The playground, Vitest and the type checker use it, so nothing needs to be built before development or tests. Published consumers get `dist/`.
 
@@ -43,6 +44,7 @@ Run from the repository root.
 | `npm run check`                             | Typecheck, lint, format check and unit tests (what CI runs first)   |
 | `npm run generate:schema -w @algoviz/spec`  | Regenerate `packages/spec/schema/visualization.schema.json`         |
 | `npm run gallery -- out.html [file.json …]` | Render every frame of fixtures or documents to one page, for review |
+| `npm run generate:fonts`                    | Regenerate the bundled fonts' metrics and outlines (ADR 0024)       |
 
 The pre-commit hook runs ESLint and Prettier on staged files. Run `npm run check` before pushing.
 
