@@ -2,7 +2,8 @@
  * Binary search tree operations (ADR 0018): search, insert and delete, each
  * from a tree given as keys in insertion order. Equal keys go right, as in
  * `bstInsert`; deleting a node with two children copies its successor (as
- * in CLRS) or, on request, its predecessor.
+ * in CLRS) or, on request, its predecessor. The code is in pseudocode and
+ * Python (ADR 0017).
  */
 import type { TreeNode } from '@algoviz/spec';
 
@@ -15,7 +16,7 @@ import {
   type OpRun,
   type StructureDef,
 } from './run.ts';
-import { snippet } from './snippet.ts';
+import { listing } from './snippet.ts';
 import { silentTape, type Tape } from './tape.ts';
 
 export type BstCall =
@@ -53,14 +54,26 @@ const withNode = (s: BstState, id: string, n: BstNode): BstState => ({
 const point = (tape: T, id: string | null) =>
   tape.on.pointer({ name: 'curr', node: id });
 
-const SEARCH = snippet(`
-  def search(node, key):
-      while node is not None:
-          if key == node.key:
-              return node  # @found
-          node = node.left if key < node.key else node.right  # @go
-      return None  # @missing
-`);
+const SEARCH = listing('search', {
+  pseudocode: `
+    TREE-SEARCH(node, key)
+        while node ≠ NIL
+            if key == node.key
+                return node  // @found
+            elseif key < node.key  // @go
+                node = node.left
+            else node = node.right
+        return NIL  // @missing
+  `,
+  python: `
+    def search(node, key):
+        while node is not None:
+            if key == node.key:
+                return node  # @found
+            node = node.left if key < node.key else node.right  # @go
+        return None  # @missing
+  `,
+});
 
 function search(s: BstState, key: number, tape: T): Applied<BstState> {
   for (let at = s.root; at !== null;) {
@@ -83,23 +96,43 @@ function search(s: BstState, key: number, tape: T): Applied<BstState> {
   return { state: s, result: false };
 }
 
-const INSERT = snippet(`
-  def insert(root, key):
-      if root is None:
-          return Node(key)  # @root
-      node = root
-      while True:
-          if key < node.key:  # @go
-              if node.left is None:
-                  node.left = Node(key)  # @left
-                  return root
-              node = node.left
-          else:
-              if node.right is None:
-                  node.right = Node(key)  # @right
-                  return root
-              node = node.right
-`);
+// Equal keys go right.
+const INSERT = listing('insert', {
+  pseudocode: `
+    TREE-INSERT(root, key)
+        if root == NIL
+            return NEW-NODE(key)  // @root
+        node = root
+        while TRUE
+            if key < node.key  // @go
+                if node.left == NIL
+                    node.left = NEW-NODE(key)  // @left
+                    return root
+                node = node.left
+            else
+                if node.right == NIL
+                    node.right = NEW-NODE(key)  // @right
+                    return root
+                node = node.right
+  `,
+  python: `
+    def insert(root, key):
+        if root is None:
+            return Node(key)  # @root
+        node = root
+        while True:
+            if key < node.key:  # @go
+                if node.left is None:
+                    node.left = Node(key)  # @left
+                    return root
+                node = node.left
+            else:
+                if node.right is None:
+                    node.right = Node(key)  # @right
+                    return root
+                node = node.right
+  `,
+});
 
 function insert(s: BstState, key: number, tape: T): Applied<BstState> {
   if (s.nodes.size >= MAX_SIZE)
@@ -140,26 +173,48 @@ function insert(s: BstState, key: number, tape: T): Applied<BstState> {
 const deleteCode = (by: 'successor' | 'predecessor') => {
   const [near, far, name] =
     by === 'successor' ? ['right', 'left', 'succ'] : ['left', 'right', 'pred'];
-  return snippet(`
-    def delete(node, key):
-        if node is None:
-            return None  # @missing
-        if key < node.key:
-            node.left = delete(node.left, key)  # @left
-        elif key > node.key:
-            node.right = delete(node.right, key)  # @right
-        elif node.left is None:
-            return node.right  # @no-left
-        elif node.right is None:
-            return node.left  # @no-right
-        else:
-            ${name} = node.${near}  # @replacement
-            while ${name}.${far} is not None:
-                ${name} = ${name}.${far}
-            node.key = ${name}.key  # @copy
-            node.${near} = delete(node.${near}, ${name}.key)  # @remove
-        return node
-  `);
+  return listing(by === 'successor' ? 'delete' : 'delete-by-predecessor', {
+    pseudocode: `
+      TREE-DELETE(node, key)
+          if node == NIL
+              return NIL  // @missing
+          if key < node.key
+              node.left = TREE-DELETE(node.left, key)  // @left
+          elseif key > node.key
+              node.right = TREE-DELETE(node.right, key)  // @right
+          elseif node.left == NIL
+              return node.right  // @no-left
+          elseif node.right == NIL
+              return node.left  // @no-right
+          else
+              ${name} = node.${near}  // @replacement
+              while ${name}.${far} ≠ NIL
+                  ${name} = ${name}.${far}
+              node.key = ${name}.key  // @copy
+              node.${near} = TREE-DELETE(node.${near}, ${name}.key)  // @remove
+          return node
+    `,
+    python: `
+      def delete(node, key):
+          if node is None:
+              return None  # @missing
+          if key < node.key:
+              node.left = delete(node.left, key)  # @left
+          elif key > node.key:
+              node.right = delete(node.right, key)  # @right
+          elif node.left is None:
+              return node.right  # @no-left
+          elif node.right is None:
+              return node.left  # @no-right
+          else:
+              ${name} = node.${near}  # @replacement
+              while ${name}.${far} is not None:
+                  ${name} = ${name}.${far}
+              node.key = ${name}.key  # @copy
+              node.${near} = delete(node.${near}, ${name}.key)  # @remove
+          return node
+    `,
+  });
 };
 const DELETE = {
   successor: deleteCode('successor'),

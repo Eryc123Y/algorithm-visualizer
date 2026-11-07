@@ -10,14 +10,15 @@ import {
 } from '@algoviz/spec';
 
 import type { Handle, Recorder } from '../recorder.ts';
-import type { JoinedSnippets, Snippet } from './snippet.ts';
+import type { JoinedCode, Listing } from './snippet.ts';
 
 export interface Tape<K extends StructureKindName> {
   /** Records actions on the structure. */
   readonly on: Handle<K>;
   /**
-   * Starts a step at a marker of the operation's code; the step is named
-   * after the marker (ADR 0020).
+   * Starts a step at a marker of the operation's code, which is its anchor
+   * in every language (ADR 0017); the step is named after the marker
+   * (ADR 0020).
    */
   step(anchor: string, narration: string, vars?: StepMeta['vars']): void;
 }
@@ -41,17 +42,17 @@ export function silentTape<K extends StructureKindName>(kind: K): Tape<K> {
 export function recordingTape<K extends StructureKindName>(
   recorder: Recorder,
   on: Handle<K>,
-  code: JoinedSnippets,
-  snippet: Snippet,
+  code: JoinedCode,
+  listing: Listing,
   first?: (tape: Tape<K>) => void,
 ): Tape<K> {
   let pending = first;
   const tape: Tape<K> = {
     on,
-    step(anchor, narration, vars) {
+    step(marker, narration, vars) {
       recorder.step({
-        id: anchor,
-        line: code.line(snippet, anchor),
+        id: marker,
+        at: code.anchor(listing, marker),
         narration,
         ...(vars === undefined ? {} : { vars }),
       });

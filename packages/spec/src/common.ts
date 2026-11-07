@@ -15,8 +15,12 @@ export const LIMITS = {
   textLength: 2_000,
   sourceLength: 20_000,
   sections: 1_000,
-  /** Longest step name or section id (ADR 0020). */
+  /** Longest step name, section id or anchor name (ADR 0020, 0017). */
   nameLength: 40,
+  /** Languages in `sources` (ADR 0017). */
+  sources: 8,
+  /** Anchors in one source. */
+  anchors: 1_000,
 } as const;
 
 /**
@@ -80,6 +84,19 @@ export const StepName = kebabName('A step name').describe(
 );
 export type StepName = z.infer<typeof StepName>;
 
+/**
+ * Name of a point in an algorithm's code, such as `swap`, that every
+ * language of `sources` maps to its own line (ADR 0017). Anchors are keys
+ * of an object, so a name that every object inherits, such as
+ * `constructor`, is not allowed.
+ */
+export const AnchorName = kebabName('An anchor name')
+  .refine(isSafeKey, { message: `Anchor names ${RESERVED}` })
+  .describe(
+    `Name of a point in the code, e.g. "swap" or "relax": lower-case kebab-case starting with a letter, at most ${LIMITS.nameLength} characters.`,
+  );
+export type AnchorName = z.infer<typeof AnchorName>;
+
 /** Id of a section, unique within a document. */
 export const SectionId = kebabName('A section id').describe(
   `Id of a section, unique within the document, e.g. "insert-5": lower-case kebab-case starting with a letter, at most ${LIMITS.nameLength} characters.`,
@@ -114,11 +131,16 @@ export type Section = z.infer<typeof Section>;
 export const StepMeta = z
   .strictObject({
     id: StepName.optional(),
+    at: AnchorName.optional().describe(
+      'With `sources`: the anchor of the code this step corresponds to, which every source maps to a line.',
+    ),
     line: z
       .int()
       .positive()
       .optional()
-      .describe('1-based source line this step corresponds to.'),
+      .describe(
+        'With `source`: the 1-based line this step corresponds to. With `sources`, use `at`.',
+      ),
     narration: z
       .string()
       .max(LIMITS.textLength)
@@ -135,20 +157,47 @@ export const StepMeta = z
   .describe('Teaching metadata for a step.');
 export type StepMeta = z.infer<typeof StepMeta>;
 
+const Language = z
+  .string()
+  .regex(/^[a-z0-9+#-]{1,32}$/)
+  .describe(
+    'Language of the code, for highlighting and the language switcher, e.g. "pseudocode" or "python".',
+  );
+
+const Code = z.string().max(LIMITS.sourceLength).describe('The source code.');
+
 /** Source code shown next to the visualization; steps refer to its lines. */
 export const Source = z
   .strictObject({
-    language: z
-      .string()
-      .regex(/^[a-z0-9+#-]{1,32}$/)
-      .optional()
-      .describe('Language for syntax highlighting, e.g. "python" or "c".'),
-    code: z.string().max(LIMITS.sourceLength).describe('The source code.'),
+    language: Language.optional(),
+    code: Code,
   })
   .describe(
-    "Source code of the algorithm. When present, each step's `meta.line` must be a line of this code.",
+    "Source code of the algorithm in one language. When present, each step's `meta.line` must be a line of this code.",
   );
 export type Source = z.infer<typeof Source>;
+
+/**
+ * The code of the algorithm in one language of `sources` (ADR 0017), with
+ * the line of each anchor that steps name in `meta.at`.
+ */
+export const AnchoredSource = z
+  .strictObject({
+    language: Language,
+    code: Code,
+    anchors: z
+      .record(AnchorName, z.int().positive())
+      .refine((a) => Object.keys(a).length <= LIMITS.anchors, {
+        message: `Give at most ${LIMITS.anchors} anchors`,
+      })
+      .describe(
+        'The 1-based line of each anchor in this code, e.g. { "swap": 6 }. Every anchor a step names must be here.',
+      )
+      // The refinement above is invisible to JSON Schema; state it there too.
+      .meta({ maxProperties: LIMITS.anchors }),
+  })
+  .describe('The code of the algorithm in one language, with its anchors.');
+export type AnchoredSource = z.infer<typeof AnchoredSource>;
 
 /** An element with an explicit id: a cell, a stack entry, a list node, … */
 export const Element = z

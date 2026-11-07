@@ -2,7 +2,8 @@
  * Binary heap operations (ADR 0018): push, pop, and decrease-key (or, on a
  * max-heap, increase-key), each from a heap given as values to push or as
  * an array that already is a heap. The heap is an array shown as a tree,
- * as in `binaryHeap`.
+ * as in `binaryHeap`. The code is in pseudocode and Python (ADR 0017),
+ * both with indices from 0.
  */
 import { checkFinite, checkInteger, checkLength } from '../check.ts';
 import {
@@ -13,7 +14,7 @@ import {
   type OpRun,
   type StructureDef,
 } from './run.ts';
-import { snippet, type Snippet } from './snippet.ts';
+import { listing, type Listing } from './snippet.ts';
 import { silentTape, type Tape } from './tape.ts';
 
 export type HeapOrder = 'min' | 'max';
@@ -58,8 +59,14 @@ function orderOf(order: HeapOrder) {
     notLess: min ? '≥' : '≤',
     more: min ? '>' : '<',
     notMore: min ? '≤' : '≥',
-    /** `a not below b` in Python. */
+    /** `a not below b` in Python and in pseudocode. */
     lessEq: min ? '<=' : '>=',
+    notAbove: min ? '≤' : '≥',
+    /**
+     * `x wrongWay h[i]`: a key change in the direction this heap does not
+     * allow, larger in a min-heap and smaller in a max-heap.
+     */
+    wrongWay: min ? '>' : '<',
     extreme: min ? 'minimum' : 'maximum',
     child: min ? 'smaller' : 'larger',
     change: min ? ('decreaseKey' as const) : ('increaseKey' as const),
@@ -113,41 +120,90 @@ function siftDown(items: readonly Item[], o: Order, tape: T) {
   return h;
 }
 
-// Indented as the body of the functions it ends.
-const SIFT_UP = (o: Order) => `
-        while i > 0:
-            p = (i - 1) // 2
-            if h[p] ${o.lessEq} h[i]:  # @compare
-                break
-            h[i], h[p] = h[p], h[i]  # @swap
-            i = p`;
+// Sifting up, indented as the body of the functions it ends.
+const SIFT_UP = {
+  pseudocode: (o: Order) => `
+            while i > 0
+                p = ⌊(i - 1) / 2⌋  // the parent of i, counting from 0
+                if h[p] ${o.notAbove} h[i]  // @compare
+                    return
+                exchange h[i] with h[p]  // @swap
+                i = p`,
+  python: (o: Order) => `
+            while i > 0:
+                p = (i - 1) // 2
+                if h[p] ${o.lessEq} h[i]:  # @compare
+                    break
+                h[i], h[p] = h[p], h[i]  # @swap
+                i = p`,
+};
 
-const codes = (o: Order) => ({
-  push: snippet(`
-    def push(h, x):
-        h.append(x)  # @append
-        i = len(h) - 1${SIFT_UP(o)}
-  `),
-  pop: snippet(`
-    def pop(h):
-        h[0], h[-1] = h[-1], h[0]  # @swap-last
-        top = h.pop()  # @remove
-        i = 0
-        while 2 * i + 1 < len(h):
-            c = 2 * i + 1
-            if c + 1 < len(h) and h[c + 1] ${o.less} h[c]:
-                c += 1
-            if h[i] ${o.lessEq} h[c]:  # @compare
-                break
-            h[i], h[c] = h[c], h[i]  # @swap
-            i = c
-        return top
-  `),
-  change: snippet(`
-    def ${o.order === 'min' ? 'decrease' : 'increase'}_key(h, i, x):
-        h[i] = x  # @set${SIFT_UP(o)}
-  `),
-});
+const codes = (o: Order) => {
+  const change = o.order === 'min' ? 'decrease' : 'increase';
+  const way = o.order === 'min' ? 'larger' : 'smaller';
+  return {
+    push: listing('push', {
+      pseudocode: `
+        HEAP-PUSH(h, x)
+            h.size = h.size + 1
+            h[h.size - 1] = x  // @append
+            i = h.size - 1${SIFT_UP.pseudocode(o)}
+      `,
+      python: `
+        def push(h, x):
+            h.append(x)  # @append
+            i = len(h) - 1${SIFT_UP.python(o)}
+      `,
+    }),
+    pop: listing('pop', {
+      pseudocode: `
+        HEAP-POP(h)
+            exchange h[0] with h[h.size - 1]  // @swap-last
+            top = h[h.size - 1]
+            h.size = h.size - 1  // @remove
+            i = 0
+            while 2i + 1 < h.size
+                c = 2i + 1  // the left child of i, counting from 0
+                if c + 1 < h.size and h[c + 1] ${o.less} h[c]
+                    c = c + 1
+                if h[i] ${o.notAbove} h[c]  // @compare
+                    return top
+                exchange h[i] with h[c]  // @swap
+                i = c
+            return top
+      `,
+      python: `
+        def pop(h):
+            h[0], h[-1] = h[-1], h[0]  # @swap-last
+            top = h.pop()  # @remove
+            i = 0
+            while 2 * i + 1 < len(h):
+                c = 2 * i + 1
+                if c + 1 < len(h) and h[c + 1] ${o.less} h[c]:
+                    c += 1
+                if h[i] ${o.lessEq} h[c]:  # @compare
+                    break
+                h[i], h[c] = h[c], h[i]  # @swap
+                i = c
+            return top
+      `,
+    }),
+    change: listing(`${change}-key`, {
+      pseudocode: `
+        HEAP-${change.toUpperCase()}-KEY(h, i, x)
+            if x ${o.wrongWay} h[i]
+                error "x is ${way} than h[i]"
+            h[i] = x  // @set${SIFT_UP.pseudocode(o)}
+      `,
+      python: `
+        def ${change}_key(h, i, x):
+            if x ${o.wrongWay} h[i]:
+                raise ValueError("x is ${way} than h[i]")
+            h[i] = x  # @set${SIFT_UP.python(o)}
+      `,
+    }),
+  };
+};
 
 function push(
   s: HeapState,
@@ -257,7 +313,7 @@ function heapDef(
   order: HeapOrder,
 ): StructureDef<HeapState, HeapFrom, 'array', HeapCall> {
   const o = orderOf(order);
-  const code: Record<'push' | 'pop' | 'change', Snippet> = codes(o);
+  const code: Record<'push' | 'pop' | 'change', Listing> = codes(o);
   return {
     name: 'heap',
     kind: 'array',

@@ -6,7 +6,8 @@
       "type": "string",
       "enum": [
         "0.1",
-        "0.2"
+        "0.2",
+        "0.3"
       ],
       "description": "Protocol version, \"major.minor\": the oldest version that has every feature the document uses."
     },
@@ -18,9 +19,9 @@
       "type": "object",
       "properties": {
         "language": {
-          "description": "Language for syntax highlighting, e.g. \"python\" or \"c\".",
           "type": "string",
-          "pattern": "^[a-z0-9+#-]{1,32}$"
+          "pattern": "^[a-z0-9+#-]{1,32}$",
+          "description": "Language of the code, for highlighting and the language switcher, e.g. \"pseudocode\" or \"python\"."
         },
         "code": {
           "type": "string",
@@ -32,7 +33,51 @@
         "code"
       ],
       "additionalProperties": false,
-      "description": "Source code of the algorithm. When present, each step's `meta.line` must be a line of this code."
+      "description": "Source code of the algorithm in one language. When present, each step's `meta.line` must be a line of this code."
+    },
+    "sources": {
+      "description": "The code in one or more languages, one entry per language, instead of `source`. Steps point into every language at once with `meta.at`.",
+      "minItems": 1,
+      "maxItems": 8,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "language": {
+            "type": "string",
+            "pattern": "^[a-z0-9+#-]{1,32}$",
+            "description": "Language of the code, for highlighting and the language switcher, e.g. \"pseudocode\" or \"python\"."
+          },
+          "code": {
+            "type": "string",
+            "maxLength": 20000,
+            "description": "The source code."
+          },
+          "anchors": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "maxLength": 40,
+              "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+              "description": "Name of a point in the code, e.g. \"swap\" or \"relax\": lower-case kebab-case starting with a letter, at most 40 characters."
+            },
+            "additionalProperties": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            },
+            "description": "The 1-based line of each anchor in this code, e.g. { \"swap\": 6 }. Every anchor a step names must be here.",
+            "maxProperties": 1000
+          }
+        },
+        "required": [
+          "language",
+          "code",
+          "anchors"
+        ],
+        "additionalProperties": false,
+        "description": "The code of the algorithm in one language, with its anchors."
+      }
     },
     "structures": {
       "type": "object",
@@ -3778,8 +3823,14 @@
                 "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
                 "description": "Name of the kind of step, e.g. \"compare\", \"relax\" or \"fixup-case-3\": lower-case kebab-case starting with a letter, at most 40 characters. Names repeat; selectors such as \"relax#3\" refer to them."
               },
+              "at": {
+                "description": "With `sources`: the anchor of the code this step corresponds to, which every source maps to a line.",
+                "type": "string",
+                "maxLength": 40,
+                "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+              },
               "line": {
-                "description": "1-based source line this step corresponds to.",
+                "description": "With `source`: the 1-based line this step corresponds to. With `sources`, use `at`.",
                 "type": "integer",
                 "exclusiveMinimum": 0,
                 "maximum": 9007199254740991
@@ -3853,6 +3904,12 @@
     "steps"
   ],
   "additionalProperties": false,
+  "not": {
+    "required": [
+      "source",
+      "sources"
+    ]
+  },
   "description": "A step-by-step visualization: declared structures plus a timeline of steps, each applying actions to those structures.",
   "$defs": {
     "__schema0": {
@@ -3887,6 +3944,6 @@
       ]
     }
   },
-  "$id": "urn:algoviz:schema:visualization:0.2",
+  "$id": "urn:algoviz:schema:visualization:0.3",
   "title": "Visualization"
 }

@@ -8,7 +8,14 @@
  */
 import { z } from 'zod';
 
-import { LIMITS, Section, Source, StepMeta, StructureName } from './common.ts';
+import {
+  AnchoredSource,
+  LIMITS,
+  Section,
+  Source,
+  StepMeta,
+  StructureName,
+} from './common.ts';
 import {
   ArrayAction,
   ArrayActionInput,
@@ -155,24 +162,36 @@ const document = <D extends z.ZodType, A extends z.ZodType>(
   decl: D,
   action: A,
 ) =>
-  z.strictObject({
-    version: z
-      .enum(PROTOCOL_VERSIONS)
-      .describe(
-        'Protocol version, "major.minor": the oldest version that has every feature the document uses.',
-      ),
-    title: z.string().max(LIMITS.textLength).optional(),
-    source: Source.optional(),
-    structures: structures(decl),
-    steps: steps(action),
-    sections: z
-      .array(Section)
-      .max(LIMITS.sections)
-      .optional()
-      .describe(
-        'Sections in order of their first step, e.g. one per operation. Steps before the first section belong to none.',
-      ),
-  });
+  z
+    .strictObject({
+      version: z
+        .enum(PROTOCOL_VERSIONS)
+        .describe(
+          'Protocol version, "major.minor": the oldest version that has every feature the document uses.',
+        ),
+      title: z.string().max(LIMITS.textLength).optional(),
+      source: Source.optional(),
+      sources: z
+        .array(AnchoredSource)
+        .min(1)
+        .max(LIMITS.sources)
+        .optional()
+        .describe(
+          'The code in one or more languages, one entry per language, instead of `source`. Steps point into every language at once with `meta.at`.',
+        ),
+      structures: structures(decl),
+      steps: steps(action),
+      sections: z
+        .array(Section)
+        .max(LIMITS.sections)
+        .optional()
+        .describe(
+          'Sections in order of their first step, e.g. one per operation. Steps before the first section belong to none.',
+        ),
+    })
+    // The parser reports both with its own error; state the rule for JSON
+    // Schema validators too.
+    .meta({ not: { required: ['source', 'sources'] } });
 
 export const Visualization = document(StructureDecl, TargetedAction).describe(
   'A step-by-step visualization in canonical form.',

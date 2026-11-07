@@ -36,12 +36,13 @@ An algoviz document is JSON that describes a step-by-step visualization of an al
 }
 ```
 
-- `version` is the protocol version, `"major.minor"`. Write the oldest version that has every feature you use: `"0.2"` if any step has a name or the document has sections (below), and `"0.1"` otherwise.
-- `title` and `source` are optional. `source.code` is the code being taught; `meta.line` (1-based) highlights a line of it. Without `source`, leave out `line`.
+- `version` is the protocol version, `"major.minor"`. Write the oldest version that has every feature you use: `"0.3"` if the document has `sources` (code in several languages, below), `"0.2"` if any step has a name or the document has sections, and `"0.1"` otherwise.
+- `title` and `source` are optional. `source.code` is the code being taught; `meta.line` (1-based) highlights a line of it. Without `source`, leave out `line`. To show the code in pseudocode and Python, give `sources` instead (below).
 - `structures` maps names to declarations (at most 16). Names are identifiers: letters, digits and `_`, not starting with a digit, e.g. `arr`, `dist`, `call_stack`.
 - `steps` is the timeline. Each step has `actions` (applied in order, possibly none) and optional `meta`:
   - `narration`: one or two sentences for a learner, saying what happens and why.
   - `line`: the source line, if there is `source`.
+  - `at`: the anchor of the code line, if there is `sources`.
   - `vars`: variable values to display, e.g. `{ "i": 2, "min": 3 }`.
   - `id`: the step's name, such as `compare` or `relax` (see below).
 - Each action names its structure in `target` and its operation in `type`; the other fields depend on the structure's kind.
@@ -98,6 +99,109 @@ A selector names frames, in `algoviz_inspect`, `algoviz_render` and `algoviz_sho
 | `push-2-and-3/push#2` | The same, counting only inside that section.                                                                            |
 | `pop-3`               | A section: from the frame before its first step to the one after its last. A bare name is a section if one has that id. |
 | `push..-1`            | The range between two selectors, both included.                                                                         |
+
+## Code in two languages
+
+To give the code in pseudocode and in Python, use `sources` instead of `source`: a list of `{ "language", "code", "anchors" }`, one per language. This needs `"version": "0.3"`.
+
+- Give `"pseudocode"` first, then `"python"`. Write the pseudocode in the conventions of CLRS, in your own words: `for i = 0 to n - 1` (and `downto`), `while`, `repeat … until`, `if`, `elseif`, `else`, `return`, `error "…"`; `=` assigns and `==` compares; `and`, `or`, `not`; `NIL`, `TRUE` and `FALSE`; procedure names in capitals joined by hyphens, such as `LINEAR-SEARCH`; `//` comments; indentation for blocks.
+- Count indices from 0 in both languages, and give variables the same names, so that narrations, `vars` and the cell numbers in the picture fit both.
+- An anchor names a point in the algorithm, such as `"compare"` or `"swap"`, in the same lower-case kebab-case as step names. Each source's `anchors` maps every anchor to its 1-based line in that code, so the same point can sit on different lines.
+- A step names its point with `meta.at`, and every source must have that anchor. Don't use `meta.line` with `sources`. A step may have no `at`, such as a closing summary.
+- Narrations talk about values and ideas ("4 is not 7"), never the syntax of one language (`len(a)`, `NIL`).
+
+```json
+{
+  "version": "0.3",
+  "title": "Linear search for 7",
+  "sources": [
+    {
+      "language": "pseudocode",
+      "code": "LINEAR-SEARCH(a, n, x)\n    for i = 0 to n - 1\n        if a[i] == x\n            return i\n    return NIL",
+      "anchors": {
+        "compare": 3,
+        "found": 4
+      }
+    },
+    {
+      "language": "python",
+      "code": "def linear_search(a, x):\n    n = len(a)\n    for i in range(n):\n        if a[i] == x:\n            return i\n    return None",
+      "anchors": {
+        "compare": 4,
+        "found": 5
+      }
+    }
+  ],
+  "structures": {
+    "a": {
+      "kind": "array",
+      "initial": [4, 7, 1]
+    }
+  },
+  "steps": [
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "pointer",
+          "name": "i",
+          "index": 0
+        },
+        {
+          "target": "a",
+          "type": "highlight",
+          "indices": [0]
+        }
+      ],
+      "meta": {
+        "id": "compare",
+        "at": "compare",
+        "narration": "4 is not 7: move on.",
+        "vars": {
+          "i": 0
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "pointer",
+          "name": "i",
+          "index": 1
+        },
+        {
+          "target": "a",
+          "type": "highlight",
+          "indices": [1]
+        }
+      ],
+      "meta": {
+        "id": "compare",
+        "at": "compare",
+        "narration": "7 is the value we want.",
+        "vars": {
+          "i": 1
+        }
+      }
+    },
+    {
+      "actions": [
+        {
+          "target": "a",
+          "type": "settle",
+          "index": 1
+        }
+      ],
+      "meta": {
+        "id": "found",
+        "at": "found",
+        "narration": "Found 7 at index 1."
+      }
+    }
+  ]
+}
+```
 
 ## Marks
 

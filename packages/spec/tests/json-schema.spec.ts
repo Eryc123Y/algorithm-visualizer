@@ -51,6 +51,21 @@ describe('visualizationJsonSchema', () => {
     expect(text).toContain('"maxLength":40');
   });
 
+  it('describes sources, anchors and meta.at for LLMs (ADR 0017)', () => {
+    const schema = visualizationJsonSchema() as {
+      not?: unknown;
+      properties: { sources: { minItems: number; maxItems: number } };
+    };
+    expect(schema.properties.sources).toMatchObject({
+      minItems: 1,
+      maxItems: 8,
+    });
+    expect(schema.not).toEqual({ required: ['source', 'sources'] });
+    const text = JSON.stringify(schema);
+    expect(text).toContain('"required":["language","code","anchors"]');
+    expect(text).toContain('"at":{');
+  });
+
   it('is identified by the newest protocol version', () => {
     expect(SCHEMA_ID).toBe(
       `urn:algoviz:schema:visualization:${PROTOCOL_VERSION}`,

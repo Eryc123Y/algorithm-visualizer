@@ -12,7 +12,7 @@ import type {
 import { checkLength } from '../check.ts';
 import { Recorder } from '../recorder.ts';
 import { sectionIds } from './section-id.ts';
-import { joinSnippets, type Snippet } from './snippet.ts';
+import { joinListings, type Listing } from './snippet.ts';
 import { recordingTape, type Tape } from './tape.ts';
 
 /** What an operation returns: found or not, a popped value, or nothing. */
@@ -49,7 +49,8 @@ export interface StructureDef<
   check(call: Call): void;
   /** Lower-case title of a call, e.g. "delete 3". */
   titleOf(call: Call): string;
-  code(call: Call): Snippet;
+  /** The code of a call, in every language. */
+  code(call: Call): Listing;
   apply(state: S, call: Call, tape: Tape<K>): Applied<S>;
 }
 
@@ -89,13 +90,13 @@ export function runOps<
   checkLength('ops', calls, MAX_OPS);
   calls.forEach((call) => def.check(call));
   let state = def.start(from);
-  const snippets = calls.map((call) => def.code(call));
-  const code = joinSnippets(snippets);
+  const listings = calls.map((call) => def.code(call));
+  const code = joinListings(listings);
   const titles = calls.map((call) => def.titleOf(call));
   const ids = sectionIds(titles);
   const recorder = new Recorder({
     title: `${def.title}: ${titles.join(', ')}`,
-    source: code.source,
+    sources: code.sources,
   });
   const on = recorder.add(def.name, def.declare(state));
   const results = calls.map((call, k) => {
@@ -105,7 +106,7 @@ export function runOps<
       recorder,
       on,
       code,
-      snippets[k]!,
+      listings[k]!,
       k > 0 ? (t) => def.clear(t) : undefined,
     );
     const applied = def.apply(state, call, tape);

@@ -130,17 +130,14 @@ describe('sections', () => {
 });
 
 describe('protocol version 0.2', () => {
-  it('is the newest version', () => {
-    expect(PROTOCOL_VERSIONS).toEqual(['0.1', '0.2']);
+  it('is a version this package reads', () => {
+    expect(PROTOCOL_VERSIONS).toContain('0.2');
   });
 
   it('dates step names and sections to 0.2', () => {
     expect(
-      PROTOCOL_FEATURES.map(({ name, since }) => ({ name, since })),
-    ).toEqual([
-      { name: 'step names', since: '0.2' },
-      { name: 'sections', since: '0.2' },
-    ]);
+      PROTOCOL_FEATURES.filter((f) => f.since === '0.2').map((f) => f.name),
+    ).toEqual(['step names', 'sections']);
   });
 
   it('is what writers record for a document with step names or sections', () => {

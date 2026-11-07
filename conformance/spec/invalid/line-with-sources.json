@@ -1,0 +1,23 @@
+{
+  "description": "With sources, steps name anchors in meta.at; meta.line would mean a different line in each language.",
+  "input": {
+    "version": "0.3",
+    "sources": [
+      {
+        "language": "pseudocode",
+        "code": "SORT-TWO(a)\n    if a[0] > a[1]\n        exchange a[0] with a[1]",
+        "anchors": { "compare": 2, "swap": 3 }
+      },
+      {
+        "language": "python",
+        "code": "def sort_two(a):\n    if a[0] > a[1]:\n        # put them in order\n        a[0], a[1] = a[1], a[0]",
+        "anchors": { "compare": 2, "swap": 4 }
+      }
+    ],
+    "structures": { "a": { "kind": "array", "initial": [2, 1] } },
+    "steps": [{ "actions": [], "meta": { "line": 2 } }]
+  },
+  "expectedErrors": [
+    { "code": "MIXED_SOURCES", "path": "$.steps[0].meta.line" }
+  ]
+}

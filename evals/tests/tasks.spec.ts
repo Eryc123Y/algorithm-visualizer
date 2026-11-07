@@ -79,6 +79,55 @@ describe('eval tasks', () => {
     },
   );
 
+  describe('code in two languages', () => {
+    const task = tasks.find((t) => t.id === 'linear-search-two-languages')!;
+    const reference = references['linear-search-two-languages']!();
+    const problems = (doc: object) => {
+      const result = grade(task, doc);
+      expect(result.errors).toEqual([]);
+      return result.problems;
+    };
+
+    it('reject code in one language', () => {
+      const [, python] = reference.sources!;
+      expect(problems({ ...reference, sources: [python] })).toEqual([
+        'does not give the code in both pseudocode and Python (`sources`)',
+      ]);
+    });
+
+    it('reject steps that point at no line', () => {
+      const steps = reference.steps.map(({ actions, meta }) => ({
+        actions,
+        meta: { narration: meta?.narration ?? '' },
+      }));
+      expect(problems({ ...reference, steps })[0]).toMatch(
+        /point at no code line/,
+      );
+    });
+
+    it('reject anchors on blank or comment lines', () => {
+      const sources = reference.sources!.map((s) => ({
+        ...s,
+        code: `${s.code}\n`,
+        anchors: {
+          compare: s.anchors['compare']!,
+          found: s.code.split('\n').length + 1,
+        },
+      }));
+      expect(problems({ ...reference, sources })).toEqual([
+        'anchors on blank or comment lines: pseudocode @found, python @found',
+      ]);
+    });
+
+    it('reject pseudocode that is only Python again', () => {
+      const [, python] = reference.sources!;
+      const sources = [{ ...python!, language: 'pseudocode' }, python!];
+      expect(problems({ ...reference, sources })).toEqual([
+        'the pseudocode names no procedure in capitals, as CLRS does',
+      ]);
+    });
+  });
+
   it('reject a solution without its steps', () => {
     const task = tasks.find((t) => t.id === 'insertion-sort')!;
     const doc = { ...references['insertion-sort']!(), steps: [] };

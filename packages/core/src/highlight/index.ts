@@ -6,6 +6,7 @@
  * theme decides how each class looks. Languages without a tokenizer stay
  * plain.
  */
+import { tokenizePseudocode } from './pseudocode.ts';
 import { tokenizePython } from './python.ts';
 
 /** What a token is, for colouring. Anything unclassified is `plain`. */
@@ -31,6 +32,7 @@ export type Tokenizer = (code: string) => readonly CodeToken[];
 
 // A Map, so that names such as `constructor` never reach Object.prototype.
 const tokenizers = new Map<string, Tokenizer>([
+  ['pseudocode', tokenizePseudocode],
   ['python', tokenizePython],
   ['py', tokenizePython],
 ]);
@@ -51,6 +53,17 @@ export function highlightCode(code: string, language?: string): CodeLine[] {
     ? tokenize(code)
     : [{ kind: 'plain' as const, text: code }];
   return splitLines(tokens);
+}
+
+/**
+ * Whether one line holds code: something besides spaces and comments. The
+ * line is highlighted on its own, so a line inside a string that spans
+ * lines counts as code.
+ */
+export function isCodeLine(line: string, language?: string): boolean {
+  return highlightCode(line, language).some((tokens) =>
+    tokens.some((t) => t.kind !== 'comment' && t.text.trim() !== ''),
+  );
 }
 
 /** Cuts tokens at line breaks, dropping the breaks and empty pieces. */

@@ -14,7 +14,7 @@ import type { VisualizationInput } from './visualization.ts';
  * change appends a version here and adds its features to
  * `PROTOCOL_FEATURES`.
  */
-export const PROTOCOL_VERSIONS = ['0.1', '0.2'] as const;
+export const PROTOCOL_VERSIONS = ['0.1', '0.2', '0.3'] as const;
 
 /** A protocol version this package reads. */
 export type ProtocolVersion = (typeof PROTOCOL_VERSIONS)[number];
@@ -149,8 +149,7 @@ export interface ProtocolFeature<V extends string = ProtocolVersion> {
 
 /**
  * Features added after the first protocol version, with the version that
- * added each. A protocol change adds its entries here. The next are
- * sources in several languages (0.3, ADR 0017).
+ * added each. A protocol change adds its entries here.
  */
 export const PROTOCOL_FEATURES: readonly ProtocolFeature[] = [
   {
@@ -162,6 +161,16 @@ export const PROTOCOL_FEATURES: readonly ProtocolFeature[] = [
     name: 'sections',
     since: '0.2',
     usedBy: (d) => d.sections !== undefined,
+  },
+  {
+    name: 'sources',
+    since: '0.3',
+    usedBy: (d) => d.sources !== undefined,
+  },
+  {
+    name: 'anchors',
+    since: '0.3',
+    usedBy: (d) => d.steps.some((step) => step.meta?.at !== undefined),
   },
 ];
 
@@ -191,7 +200,7 @@ export function minimumVersion(document: Content): ProtocolVersion {
 }
 
 /** "a", "a and b", "a, b and c". */
-function listOf(names: readonly string[]): string {
+export function listOf(names: readonly string[]): string {
   return names.length < 2
     ? names.join('')
     : `${names.slice(0, -1).join(', ')} and ${names.at(-1)!}`;

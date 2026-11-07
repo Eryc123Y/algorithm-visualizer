@@ -2,8 +2,13 @@
  * Checks a document the way a player would load it, and reports what an
  * author needs to fix or improve.
  */
-import type { Trace } from '@algoviz/core';
-import { formatErrors, type Diagnostic } from '@algoviz/spec';
+import { isCodeLine, type Trace } from '@algoviz/core';
+import {
+  formatErrors,
+  formatPath,
+  type Diagnostic,
+  type Visualization,
+} from '@algoviz/spec';
 
 import { loadDocument } from './document.ts';
 
@@ -50,7 +55,7 @@ export function summarize(trace: Trace): DocumentSummary {
 
 /** Advice for documents that are valid but teach less than they could. */
 export function lint(trace: Trace): Diagnostic[] {
-  const { steps, source } = trace.visualization;
+  const { steps } = trace.visualization;
   const warnings: Diagnostic[] = [];
   if (steps.length === 0)
     warnings.push({
@@ -66,17 +71,7 @@ export function lint(trace: Trace): Diagnostic[] {
       message: 'No step has a narration',
       hint: 'Give each step `meta.narration`: one or two sentences saying what happens and why.',
     });
-  if (
-    source !== undefined &&
-    steps.length > 0 &&
-    steps.every((s) => s.meta?.line === undefined)
-  )
-    warnings.push({
-      code: 'UNUSED_SOURCE',
-      path: '$.source',
-      message: 'The document has source code, but no step points at a line',
-      hint: 'Set `meta.line` on steps to highlight the line being executed.',
-    });
+  warnings.push(...codeWarnings(trace.visualization));
   const names = new Set(steps.map((step) => step.meta?.id));
   (trace.visualization.sections ?? []).forEach(({ id }, k) => {
     if (names.has(id))
@@ -97,6 +92,48 @@ export function lint(trace: Trace): Diagnostic[] {
       });
   });
   return warnings;
+}
+
+/**
+ * Advice on the source code: steps that point at no line, and anchors that
+ * steps use on a line without code (ADR 0017).
+ */
+function codeWarnings({ steps, source, sources }: Visualization): Diagnostic[] {
+  if (steps.length === 0) return [];
+  if (source !== undefined && steps.every((s) => s.meta?.line === undefined))
+    return [
+      {
+        code: 'UNUSED_SOURCE',
+        path: '$.source',
+        message: 'The document has source code, but no step points at a line',
+        hint: 'Set `meta.line` on steps to highlight the line being executed.',
+      },
+    ];
+  if (sources === undefined) return [];
+  const used = new Set(steps.map((s) => s.meta?.at));
+  if (used.size === 1 && used.has(undefined))
+    return [
+      {
+        code: 'UNUSED_SOURCE',
+        path: '$.sources',
+        message: 'The document has source code, but no step points at it',
+        hint: "Set `meta.at` on steps to the anchor of the line being executed, and give the anchor's line in each source's `anchors`.",
+      },
+    ];
+  return sources.flatMap(({ language, code, anchors }, k) => {
+    const lines = code.split('\n');
+    return Object.entries(anchors)
+      .filter(
+        ([name, line]) =>
+          used.has(name) && !isCodeLine(lines[line - 1] ?? '', language),
+      )
+      .map(([name, line]) => ({
+        code: 'ANCHOR_NOT_ON_CODE',
+        path: formatPath(['sources', k, 'anchors', name]),
+        message: `Anchor "${name}" is on line ${line} of the ${language} code, which is blank or only a comment`,
+        hint: 'Put the anchor on the line that does what the step shows, so the reader sees it marked.',
+      }));
+  });
 }
 
 export function validate(input: unknown): ValidationReport {

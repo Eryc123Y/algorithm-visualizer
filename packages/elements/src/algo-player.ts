@@ -25,6 +25,7 @@ import { html, LitElement, nothing, type PropertyValues } from 'lit';
 
 import {
   bareLayoutOptions,
+  codeListings,
   defaultLayoutOptions,
   layoutTrace,
   loadTrace,
@@ -550,9 +551,9 @@ export class AlgoPlayer extends LitElement {
     const trace = this.trace;
     const { index, length, playing } = this.playback;
     const step = trace?.frame(index).step;
-    const source = trace?.visualization.source;
+    const listing = trace ? codeListings(trace.visualization)[0] : undefined;
     const display = this.#isDisplay;
-    const showCode = source !== undefined && !this.hideCode && !display;
+    const showCode = listing !== undefined && !this.hideCode && !display;
     const vars = Object.entries(step?.meta?.vars ?? {});
     const sections = trace?.visualization.sections ?? [];
     const section = this.section;
@@ -595,7 +596,7 @@ export class AlgoPlayer extends LitElement {
                   aria-label="Source code"
                   tabindex="0"
                 >
-${codeLines(source, step?.meta?.line)}</pre>`
+${codeLines(listing.source, listing.lineOf(step))}</pre>`
               : nothing
           }
         </div>

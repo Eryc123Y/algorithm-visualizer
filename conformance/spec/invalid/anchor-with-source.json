@@ -1,0 +1,13 @@
+{
+  "description": "meta.at needs sources: a single source has no anchors.",
+  "input": {
+    "version": "0.3",
+    "source": {
+      "language": "python",
+      "code": "def sort_two(a):\n    if a[0] > a[1]:\n        # put them in order\n        a[0], a[1] = a[1], a[0]"
+    },
+    "structures": { "a": { "kind": "array", "initial": [2, 1] } },
+    "steps": [{ "actions": [], "meta": { "at": "compare" } }]
+  },
+  "expectedErrors": [{ "code": "MIXED_SOURCES", "path": "$.steps[0].meta.at" }]
+}

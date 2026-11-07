@@ -1,0 +1,35 @@
+{
+  "description": "sources may hold a single language, and anchors may be empty when no step names one.",
+  "input": {
+    "version": "0.3",
+    "sources": [
+      {
+        "language": "python",
+        "code": "def sort_two(a):\n    if a[0] > a[1]:\n        # put them in order\n        a[0], a[1] = a[1], a[0]",
+        "anchors": {}
+      }
+    ],
+    "structures": { "a": { "kind": "array", "initial": [2, 1] } },
+    "steps": [{ "actions": [], "meta": { "narration": "Nothing to do." } }]
+  },
+  "expected": {
+    "version": "0.3",
+    "sources": [
+      {
+        "language": "python",
+        "code": "def sort_two(a):\n    if a[0] > a[1]:\n        # put them in order\n        a[0], a[1] = a[1], a[0]",
+        "anchors": {}
+      }
+    ],
+    "structures": {
+      "a": {
+        "kind": "array",
+        "initial": [
+          { "id": "e0", "value": 2 },
+          { "id": "e1", "value": 1 }
+        ]
+      }
+    },
+    "steps": [{ "actions": [], "meta": { "narration": "Nothing to do." } }]
+  }
+}

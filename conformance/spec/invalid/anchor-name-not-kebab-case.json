@@ -1,0 +1,33 @@
+{
+  "description": "Anchor names are lower-case kebab-case, like step names.",
+  "input": {
+    "version": "0.3",
+    "sources": [
+      {
+        "language": "pseudocode",
+        "code": "SORT-TWO(a)\n    if a[0] > a[1]\n        exchange a[0] with a[1]",
+        "anchors": { "Swap": 3, "compare": 2 }
+      },
+      {
+        "language": "python",
+        "code": "def sort_two(a):\n    if a[0] > a[1]:\n        # put them in order\n        a[0], a[1] = a[1], a[0]",
+        "anchors": { "Swap": 4, "compare": 2 }
+      }
+    ],
+    "structures": { "a": { "kind": "array", "initial": [2, 1] } },
+    "steps": [
+      {
+        "actions": [{ "target": "a", "type": "compare", "i": 0, "j": 1 }],
+        "meta": {
+          "id": "compare",
+          "at": "compare",
+          "narration": "Compare 2 and 1."
+        }
+      }
+    ]
+  },
+  "expectedErrors": [
+    { "code": "INVALID_SHAPE", "path": "$.sources[0].anchors.Swap" },
+    { "code": "INVALID_SHAPE", "path": "$.sources[1].anchors.Swap" }
+  ]
+}
