@@ -3,7 +3,7 @@
  * decrease-key or, on a max-heap, increase-key, each from a heap given as
  * values to push or as an array that already is a heap, and a sequence of
  * them. A min-heap and a max-heap are two structures, `min-heap` and
- * `max-heap`. The heap is an array shown as a tree, as in `binaryHeap`.
+ * `max-heap`. The heap is an array shown as a tree.
  * The code is in pseudocode and Python (ADR 0017), both with indices from
  * 0.
  */
@@ -370,6 +370,14 @@ function heapStructure(order: HeapOrder): Structure {
           { op: 'push', value: order === 'min' ? 0 : 10 },
           { op: 'pop' },
           { op: `${change}-key`, index: 4, value: order === 'min' ? 2 : 7 },
+        ],
+      },
+      {
+        // A whole life: push four values, then pop them all in order.
+        from: [],
+        ops: [
+          ...[5, 3, 8, 1].map((value) => ({ op: 'push', value })),
+          ...[1, 2, 3, 4].map(() => ({ op: 'pop' })),
         ],
       },
     ],

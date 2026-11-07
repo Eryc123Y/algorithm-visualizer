@@ -344,15 +344,26 @@ export const references: Readonly<Record<string, () => VisualizationInput>> = {
   'delete-list-node': deleteNode,
   'floyd-cycle': floyd,
   'bst-delete': bstDelete,
-  'avl-rotation': () => recipes.avlInsert([10, 20, 30]),
+  'avl-rotation': () =>
+    moduleDocument('avl', {
+      from: [],
+      ops: [10, 20, 30].map((key) => ({ op: 'insert', key })),
+    }),
   'level-order': levelOrder,
-  'trie-insert': () => recipes.trieInsert(['to', 'tea', 'ten']),
+  'trie-insert': () =>
+    moduleDocument('trie', {
+      from: [],
+      ops: ['to', 'tea', 'ten'].map((word) => ({ op: 'insert', word })),
+    }),
   'union-find': () =>
-    recipes.unionFind(5, [
-      [0, 1],
-      [2, 3],
-      [1, 3],
-    ]),
+    moduleDocument('disjoint-set', {
+      from: { size: 5 },
+      ops: [
+        [0, 1],
+        [2, 3],
+        [1, 3],
+      ].map(([x, y]) => ({ op: 'union', x, y })),
+    }),
   'red-black-insert': redBlack,
   bfs: () =>
     recipes.breadthFirstSearch(

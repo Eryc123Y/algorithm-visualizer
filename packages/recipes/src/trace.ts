@@ -116,3 +116,23 @@ export function listingTrace(
     section: (id, title) => trace.section(id, title),
   };
 }
+
+/**
+ * A trace that runs `first` right after its first step starts. Structures
+ * use it to show what their declaration cannot, such as the heights of an
+ * AVL tree, so the marks are there from the first step of an operation.
+ */
+export function afterFirstStep(trace: Trace, first: () => void): Trace {
+  let pending: (() => void) | undefined = first;
+  return {
+    add: <const D extends StructureDeclInput>(name: string, decl: D) =>
+      trace.add(name, decl),
+    step(anchor, narration, options) {
+      trace.step(anchor, narration, options);
+      const run = pending;
+      pending = undefined;
+      run?.();
+    },
+    section: (id, title) => trace.section(id, title),
+  };
+}

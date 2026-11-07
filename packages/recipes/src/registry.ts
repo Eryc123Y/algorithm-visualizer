@@ -17,11 +17,19 @@ import { insertionSort } from './algorithms/sorting/insertion-sort.ts';
 import { mergeSort } from './algorithms/sorting/merge-sort.ts';
 import { quicksort } from './algorithms/sorting/quicksort.ts';
 import { selectionSort } from './algorithms/sorting/selection-sort.ts';
+import {
+  inorderTreeWalk,
+  postorderTreeWalk,
+  preorderTreeWalk,
+} from './algorithms/trees/tree-walks.ts';
 import { runModule, type AlgorithmRun } from './run-module.ts';
+import { avl } from './structures/avl/index.ts';
 import { bst } from './structures/bst/index.ts';
+import { disjointSet } from './structures/disjoint-set/index.ts';
 import { hashChaining } from './structures/hashing/chaining.ts';
 import { linearProbing } from './structures/hashing/linear-probing.ts';
 import { maxHeap, minHeap } from './structures/heap/index.ts';
+import { trie } from './structures/trie/index.ts';
 
 /** Every module, grouped by topic in menu order. */
 export const algorithms: readonly Algorithm[] = [
@@ -36,6 +44,12 @@ export const algorithms: readonly Algorithm[] = [
   reverseLinkedList,
   balancedBrackets,
   ...bst.modules,
+  ...avl.modules,
+  inorderTreeWalk,
+  preorderTreeWalk,
+  postorderTreeWalk,
+  ...trie.modules,
+  ...disjointSet.modules,
   ...minHeap.modules,
   ...maxHeap.modules,
   ...hashChaining.modules,
