@@ -82,8 +82,15 @@ function reference(from: readonly number[], calls: readonly BstCall[]) {
 const from = [8, 3, 10, 1, 6, 14, 4, 7, 13];
 const narrations = (doc: VisualizationInput) =>
   doc.steps.map((s) => s.meta?.narration ?? '');
-const codeAt = (doc: VisualizationInput, line: number | undefined) =>
-  doc.source!.code.split('\n')[line! - 1];
+/** The line a step's anchor names in one language of the document. */
+const codeAt = (
+  doc: VisualizationInput,
+  at: string | undefined,
+  language: string,
+) => {
+  const source = doc.sources!.find((s) => s.language === language)!;
+  return source.code.split('\n')[source.anchors[at!]! - 1];
+};
 
 describe('ops.bst', () => {
   it('starts from the tree the keys build, without animating it', () => {
@@ -141,7 +148,10 @@ describe('ops.bst', () => {
       s.meta?.narration?.startsWith('Copy'),
     )!;
     expect(copy.meta!.narration).toBe('Copy 4 into the node.');
-    expect(codeAt(document, copy.meta!.line)).toContain('node.key = succ.key');
+    for (const language of ['pseudocode', 'python'])
+      expect(codeAt(document, copy.meta!.at, language)).toContain(
+        'node.key = succ.key',
+      );
   });
 
   it('shows the code of each operation it runs, once', () => {
@@ -153,15 +163,21 @@ describe('ops.bst', () => {
         { op: 'search', key: 5 },
       ],
     });
-    const code = document.source!.code;
-    expect(code.match(/^def search/gm)).toHaveLength(1);
-    expect(code.match(/^def insert/gm)).toHaveLength(1);
-    expect(code).not.toContain('def delete');
+    const [pseudocode, python] = document.sources!.map((s) => s.code);
+    expect(python!.match(/^def search/gm)).toHaveLength(1);
+    expect(python!.match(/^def insert/gm)).toHaveLength(1);
+    expect(python).not.toContain('def delete');
+    expect(pseudocode!.match(/^TREE-SEARCH/gm)).toHaveLength(1);
+    expect(pseudocode!.match(/^TREE-INSERT/gm)).toHaveLength(1);
+    expect(pseudocode).not.toContain('TREE-DELETE');
     expect(document.title).toBe(
       'Binary search tree: search 6, insert 5, search 5',
     );
+    // Anchors carry the operation's name, as several are joined.
+    expect(document.steps.map((s) => s.meta?.at)).toContain('insert-go');
     for (const step of document.steps)
-      expect(codeAt(document, step.meta?.line)).toBeDefined();
+      for (const language of ['pseudocode', 'python'])
+        expect(codeAt(document, step.meta?.at, language)).toBeDefined();
   });
 
   it('matches the reference on random operations, composed or chained', () => {

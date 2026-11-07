@@ -79,4 +79,22 @@ describe('guide', () => {
     const named = blocks.find((doc) => doc.sections !== undefined);
     expect(named?.version).toBe('0.2');
   });
+
+  it('shows code in pseudocode and Python with anchors, as version 0.3', () => {
+    const blocks = jsonBlocks(guideOverview()).map(
+      (block) =>
+        JSON.parse(block) as {
+          version: string;
+          sources?: { language: string }[];
+          steps: { meta?: { at?: string } }[];
+        },
+    );
+    const anchored = blocks.find((doc) => doc.sources !== undefined);
+    expect(anchored?.version).toBe('0.3');
+    expect(anchored?.sources?.map((s) => s.language)).toEqual([
+      'pseudocode',
+      'python',
+    ]);
+    expect(anchored?.steps.every((s) => s.meta?.at !== undefined)).toBe(true);
+  });
 });

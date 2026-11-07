@@ -3,6 +3,7 @@
  * a document does what they meant without looking at pictures.
  */
 import {
+  frameLines,
   sectionAt,
   selectorOf,
   stepNameAt,
@@ -25,7 +26,12 @@ export interface FrameReport {
   readonly sectionTitle?: string;
   /** The most specific selector of the frame, e.g. "insert-5/go#2". */
   readonly selector?: string;
+  /** The line of `source` that the step points at (`meta.line`). */
   readonly line?: number;
+  /** The anchor of `sources` that the step points at (`meta.at`, ADR 0017). */
+  readonly at?: string;
+  /** The anchor's line in each language. */
+  readonly lines?: Readonly<Record<string, number>>;
   readonly narration?: string;
   readonly vars?: Readonly<Record<string, unknown>>;
   /** Each structure's state: its data, its marks, and settings. */
@@ -71,6 +77,9 @@ export function describeFrame(trace: Trace, index: number): FrameReport {
       : { section: section.id, sectionTitle: section.title }),
     ...(selector === String(index) ? {} : { selector }),
     ...(meta?.line === undefined ? {} : { line: meta.line }),
+    ...(meta?.at === undefined
+      ? {}
+      : { at: meta.at, lines: frameLines(vis, index) }),
     ...(meta?.narration === undefined ? {} : { narration: meta.narration }),
     ...(meta?.vars === undefined ? {} : { vars: meta.vars }),
     structures: Object.fromEntries(
@@ -134,6 +143,12 @@ export function formatInspect(report: InspectReport): string {
       if (f.sectionTitle !== undefined)
         head.push(`section ${JSON.stringify(f.sectionTitle)}`);
       if (f.line !== undefined) head.push(`line ${f.line}`);
+      if (f.at !== undefined) {
+        const where = Object.entries(f.lines ?? {}).map(
+          ([language, line]) => `${language} line ${line}`,
+        );
+        head.push(`at ${f.at} (${where.join(', ')})`);
+      }
       const lines = [head.join(' · ')];
       if (f.narration !== undefined) lines.push(`narration: ${f.narration}`);
       if (f.vars !== undefined) lines.push(`vars: ${JSON.stringify(f.vars)}`);

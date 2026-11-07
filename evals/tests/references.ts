@@ -286,7 +286,37 @@ const cities = (edges: [string, string, number?][]) => ({
   edges,
 });
 
+function linearSearchTwoLanguages(): VisualizationInput {
+  const sources = [
+    {
+      language: 'pseudocode',
+      code: 'LINEAR-SEARCH(a, n, x)\n    for i = 0 to n - 1\n        if a[i] == x\n            return i\n    return NIL',
+      anchors: { compare: 3, found: 4 },
+    },
+    {
+      language: 'python',
+      code: 'def linear_search(a, x):\n    n = len(a)\n    for i in range(n):\n        if a[i] == x:\n            return i\n    return None',
+      anchors: { compare: 4, found: 5 },
+    },
+  ];
+  const xs = [4, 2, 7, 9, 1];
+  const r = new Recorder({ title: 'Linear search for 9', sources });
+  const a = r.add('a', { kind: 'array', initial: xs });
+  for (let i = 0; xs[i - 1] !== 9; i++) {
+    r.step({
+      at: 'compare',
+      narration: xs[i] === 9 ? '9 is the value we want.' : `${xs[i]} is not 9.`,
+      vars: { i },
+    });
+    a.pointer({ name: 'i', index: i }).highlight({ indices: [i] });
+  }
+  r.step({ at: 'found', narration: 'Found 9 at index 3.' });
+  a.settle({ index: 3 });
+  return r.build();
+}
+
 export const references: Readonly<Record<string, () => VisualizationInput>> = {
+  'linear-search-two-languages': linearSearchTwoLanguages,
   'insertion-sort': () => recipes.insertionSort([5, 2, 4, 6, 1, 3]),
   'selection-sort': () => recipes.selectionSort([29, 10, 14, 37, 13]),
   'binary-search-miss': () => recipes.binarySearch([1, 3, 4, 7, 9, 11, 15], 6),

@@ -21,8 +21,21 @@ export type ProtocolErrorCode =
   | 'DUPLICATE_ID'
   /** A declaration breaks a structural rule, e.g. a tree with a cycle. */
   | 'INVALID_STRUCTURE'
-  /** A step's `meta.line` is not a line of the document's source code. */
+  /**
+   * A step's `meta.line`, or an anchor of `sources`, is not a line of its
+   * source code.
+   */
   | 'LINE_OUT_OF_RANGE'
+  /**
+   * The document mixes the two forms of source code: `source` and
+   * `sources` together, `meta.line` with `sources`, or `meta.at` with
+   * `source` (ADR 0017).
+   */
+  | 'MIXED_SOURCES'
+  /** Two entries of `sources` have the same language. */
+  | 'DUPLICATE_LANGUAGE'
+  /** A step's `meta.at` is not an anchor of every source. */
+  | 'UNKNOWN_ANCHOR'
   /** The document uses a feature added after its `version`. */
   | 'VERSION_TOO_OLD'
   /** A section starts past the last step. */

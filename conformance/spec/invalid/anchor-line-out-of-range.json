@@ -1,0 +1,37 @@
+{
+  "description": "An anchor must be on a line of its own code: the python code has 4 lines.",
+  "input": {
+    "version": "0.3",
+    "sources": [
+      {
+        "language": "pseudocode",
+        "code": "SORT-TWO(a)\n    if a[0] > a[1]\n        exchange a[0] with a[1]",
+        "anchors": { "compare": 2, "swap": 3 }
+      },
+      {
+        "language": "python",
+        "code": "def sort_two(a):\n    if a[0] > a[1]:\n        # put them in order\n        a[0], a[1] = a[1], a[0]",
+        "anchors": { "compare": 2, "swap": 5 }
+      }
+    ],
+    "structures": { "a": { "kind": "array", "initial": [2, 1] } },
+    "steps": [
+      {
+        "actions": [{ "target": "a", "type": "compare", "i": 0, "j": 1 }],
+        "meta": {
+          "id": "compare",
+          "at": "compare",
+          "narration": "Compare 2 and 1."
+        }
+      },
+      {
+        "actions": [{ "target": "a", "type": "swap", "i": 0, "j": 1 }],
+        "meta": { "id": "swap", "at": "swap", "narration": "2 > 1: swap them." }
+      },
+      { "actions": [], "meta": { "narration": "The two values are in order." } }
+    ]
+  },
+  "expectedErrors": [
+    { "code": "LINE_OUT_OF_RANGE", "path": "$.sources[1].anchors.swap" }
+  ]
+}

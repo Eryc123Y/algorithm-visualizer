@@ -3,18 +3,20 @@
  * author named things: checks look for a structure of the right kind whose
  * states match, not for a particular name.
  */
-import type {
-  ArrayState,
-  GraphState,
-  HashTableState,
-  KindedState,
-  LinkedListState,
-  QueueState,
-  StackState,
-  TableState,
-  Trace,
-  TreeState,
-  VisualizationState,
+import {
+  highlightCode,
+  isCodeLine,
+  type ArrayState,
+  type GraphState,
+  type HashTableState,
+  type KindedState,
+  type LinkedListState,
+  type QueueState,
+  type StackState,
+  type TableState,
+  type Trace,
+  type TreeState,
+  type VisualizationState,
 } from '@algoviz/core';
 import type { Scalar, StructureKindName } from '@algoviz/spec';
 
@@ -181,3 +183,54 @@ export function anyTrack<K extends StructureKindName>(
 /** Returns `[message]` unless `ok`. */
 export const expect = (ok: boolean, message: string): string[] =>
   ok ? [] : [message];
+
+/**
+ * Problems with code shown in pseudocode and Python (ADR 0017): both
+ * languages in `sources`, every step with actions pointing at an anchor,
+ * at least `minAnchors` distinct anchors, each on a line of code in every
+ * language, and a procedure named in capitals in the pseudocode.
+ */
+export function twoLanguages(trace: Trace, minAnchors = 2): string[] {
+  const { sources, steps } = trace.visualization;
+  const languages = (sources ?? []).map((s) => s.language);
+  if (!languages.includes('pseudocode') || !languages.includes('python'))
+    return ['does not give the code in both pseudocode and Python (`sources`)'];
+  const unanchored = steps.filter(
+    (s) => s.actions.length > 0 && s.meta?.at === undefined,
+  ).length;
+  const used = [
+    ...new Set(
+      steps.flatMap((s) => (s.meta?.at === undefined ? [] : [s.meta.at])),
+    ),
+  ];
+  const offCode = sources!.flatMap(({ language, code, anchors }) => {
+    const lines = code.split('\n');
+    return used
+      .filter(
+        (at) => !isCodeLine(lines[(anchors[at] ?? 0) - 1] ?? '', language),
+      )
+      .map((at) => `${language} @${at}`);
+  });
+  const pseudocode = sources!.find((s) => s.language === 'pseudocode')!;
+  const procedure = highlightCode(pseudocode.code, 'pseudocode').some((line) =>
+    line.some((t) => t.kind === 'function'),
+  );
+  return [
+    ...expect(
+      unanchored === 0,
+      `${unanchored} steps with actions point at no code line (\`meta.at\`)`,
+    ),
+    ...expect(
+      used.length >= minAnchors,
+      `points at ${used.length} anchors, fewer than ${minAnchors}`,
+    ),
+    ...expect(
+      offCode.length === 0,
+      `anchors on blank or comment lines: ${offCode.join(', ')}`,
+    ),
+    ...expect(
+      procedure,
+      'the pseudocode names no procedure in capitals, as CLRS does',
+    ),
+  ];
+}

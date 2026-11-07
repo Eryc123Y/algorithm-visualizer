@@ -20,6 +20,7 @@ import {
   subtree,
   tracks,
   treeNode,
+  twoLanguages,
   values,
   type Track,
 } from './checks.ts';
@@ -92,6 +93,27 @@ const probes = (t: Track<'array'>, name: string) =>
   t.states
     .map((s) => s.marks.pointers[name])
     .filter((k, i, ks) => k !== undefined && k !== ks[i - 1]);
+
+/** Positions an array frame looks at: pointers, highlights, comparisons. */
+const lookedAt = (s: Track<'array'>['first']) => [
+  ...Object.values(s.marks.pointers),
+  ...s.marks.highlight,
+  ...(s.marks.compare ?? []),
+];
+
+/**
+ * Whether a scan looks at positions 0 to `last` in this order, each first
+ * in a later frame than the one before, and never beyond `last`.
+ */
+function scansTo(t: Track<'array'>, last: number): boolean {
+  const first = (k: number) =>
+    t.states.findIndex((s) => lookedAt(s).includes(k));
+  const firsts = Array.from({ length: last + 1 }, (_, k) => first(k));
+  return (
+    firsts.every((f, k) => f !== -1 && (k === 0 || f > firsts[k - 1]!)) &&
+    t.states.every((s) => lookedAt(s).every((k) => k <= last))
+  );
+}
 
 /**
  * Whether a search ends failed with lo at `at`: in the last frame, lo is
@@ -234,6 +256,27 @@ export const tasks: readonly EvalTask[] = [
           `never shows the array after each selection pass, e.g. ${JSON.stringify(missing[0])}`,
         );
       }),
+    ],
+  },
+  {
+    id: 'linear-search-two-languages',
+    kinds: ['array'],
+    prompt:
+      'Linear search for 9 in [4, 2, 7, 9, 1]. Give the code in pseudocode and in Python, so the reader can switch between them, with the current line marked in both.',
+    minSteps: 4,
+    check: (trace) => [
+      ...twoLanguages(trace),
+      ...anyTrack(trace, 'array', (t) => [
+        ...expect(same(nums(values(t.first)), [4, 2, 7, 9, 1]), 'wrong input'),
+        ...expect(
+          t.states.every((s) => same(values(s), values(t.first))),
+          'changes the array',
+        ),
+        ...expect(
+          scansTo(t, 3),
+          'does not look at indices 0 to 3 in order and stop at 9',
+        ),
+      ]),
     ],
   },
   {

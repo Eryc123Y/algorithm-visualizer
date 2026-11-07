@@ -112,6 +112,36 @@ describe('<algo-player>', () => {
     ]);
   });
 
+  it('shows the first of several sources, marking the line of the step anchor', async () => {
+    const el = await mount((e) => {
+      e.visualization = {
+        ...doc,
+        version: '0.3',
+        source: undefined,
+        sources: [
+          {
+            language: 'pseudocode',
+            code: 'SORT-TWO(a)\n    exchange a[0] with a[1]',
+            anchors: { swap: 2 },
+          },
+          {
+            language: 'python',
+            code: 'def sort_two(a):\n    a[0], a[1] = a[1], a[0]',
+            anchors: { swap: 2 },
+          },
+        ],
+        steps: doc.steps.map(({ actions, meta: { narration } }) => ({
+          actions,
+          meta: { at: 'swap', narration },
+        })),
+      };
+    });
+    el.next();
+    await el.updateComplete;
+    expect(text(el, '.line.current')).toBe('exchange a[0] with a[1]');
+    expect(text(el, '.code [class="tok-function"]')).toBe('SORT-TWO');
+  });
+
   it('reads inline JSON from a script child', async () => {
     const el = await mount((e) => {
       const script = document.createElement('script');

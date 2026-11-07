@@ -7,7 +7,10 @@
  * 3. Expand shorthands in structure declarations.
  * 4. Validate each action against the schema of its target's kind, expand
  *    its shorthands, and check that ids it introduces are new.
- * 5. Check sections against the steps (ADR 0020), and that `version` holds
+ * 5. Check that steps point into the source code: `meta.line` into
+ *    `source`, or `meta.at` at an anchor of every entry of `sources`
+ *    (ADR 0017).
+ * 6. Check sections against the steps (ADR 0020), and that `version` holds
  *    every feature the document uses (ADR 0021).
  *
  * Every kind-specific step goes through the kind registry (ADR 0012).
@@ -30,11 +33,12 @@ import {
   type KindTypeMap,
   type StructureKindName,
 } from './kinds/index.ts';
-import type { Section } from './common.ts';
+import type { AnchoredSource, Section, Source, StepMeta } from './common.ts';
 import { err, ok, type Result } from './result.ts';
 import {
   checkFeatures,
   checkVersion,
+  listOf,
   PROTOCOL_FEATURES,
   type ProtocolVersion,
 } from './version.ts';
@@ -59,7 +63,7 @@ export function parseVisualization(
     return err(fromZodIssues(envelope.error.issues, [], 'INVALID_SHAPE'));
   const doc = envelope.data;
 
-  const errors: ProtocolError[] = [];
+  const errors: ProtocolError[] = checkSources(doc.source, doc.sources);
   const structures: Record<string, StructureDecl> = {};
   // Ids are unique per structure for the whole trace (ADR 0007), so an id
   // removed earlier cannot be reused by a later action.
@@ -83,18 +87,10 @@ export function parseVisualization(
     usedIds.set(name, ids);
   }
 
-  const sourceLines =
-    doc.source === undefined ? undefined : doc.source.code.split('\n').length;
+  const code = codeOf(doc.source, doc.sources);
   const steps = doc.steps.map((step, s) => {
-    const line = step.meta?.line;
-    if (sourceLines !== undefined && line !== undefined && line > sourceLines) {
-      errors.push({
-        code: 'LINE_OUT_OF_RANGE',
-        path: formatPath(['steps', s, 'meta', 'line']),
-        message: `Line ${line} is past the end of the source code`,
-        hint: `The source code has ${sourceLines} lines.`,
-      });
-    }
+    if (step.meta !== undefined)
+      errors.push(...checkStepCode(step.meta, ['steps', s, 'meta'], code));
     const actions = step.actions.flatMap((raw, a): TargetedAction[] => {
       const path = ['steps', s, 'actions', a];
       const result = parseAction(raw, structures, usedIds, path);
@@ -113,6 +109,7 @@ export function parseVisualization(
     version: doc.version,
     ...(doc.title === undefined ? {} : { title: doc.title }),
     ...(doc.source === undefined ? {} : { source: doc.source }),
+    ...(doc.sources === undefined ? {} : { sources: doc.sources }),
     structures,
     steps,
     ...(doc.sections === undefined ? {} : { sections: doc.sections }),
@@ -125,6 +122,144 @@ export function parseVisualization(
   );
   if (tooOld !== undefined) errors.unshift(tooOld);
   return errors.length > 0 ? err(errors) : ok(vis);
+}
+
+const lineCount = (code: string) => code.split('\n').length;
+
+/**
+ * Checks the source code itself: not both forms, one entry per language,
+ * and every anchor on a line of its code.
+ */
+function checkSources(
+  source: Source | undefined,
+  sources: readonly AnchoredSource[] | undefined,
+): ProtocolError[] {
+  if (sources === undefined) return [];
+  const errors: ProtocolError[] = [];
+  if (source !== undefined)
+    errors.push({
+      code: 'MIXED_SOURCES',
+      path: '$.sources',
+      message: 'The document gives both `source` and `sources`',
+      hint: 'Keep only `sources`, with the code of `source` as one of its languages, or only `source`.',
+    });
+  const languages = new Map<string, number>();
+  sources.forEach(({ language, code, anchors }, k) => {
+    const first = languages.get(language);
+    if (first !== undefined)
+      errors.push({
+        code: 'DUPLICATE_LANGUAGE',
+        path: formatPath(['sources', k, 'language']),
+        message: `Language "${language}" is already used by sources[${first}]`,
+        hint: 'Give each language once in `sources`.',
+      });
+    else languages.set(language, k);
+    const lines = lineCount(code);
+    for (const [name, line] of Object.entries(anchors))
+      if (line > lines)
+        errors.push({
+          code: 'LINE_OUT_OF_RANGE',
+          path: formatPath(['sources', k, 'anchors', name]),
+          message: `Anchor "${name}" is on line ${line}, past the end of the ${language} code`,
+          hint: `The ${language} code has ${lines} lines.`,
+        });
+  });
+  return errors;
+}
+
+/** What steps can point at: lines of `source`, or anchors of `sources`. */
+type CodeContext =
+  | { readonly form: 'none' }
+  | { readonly form: 'source'; readonly lines: number }
+  | { readonly form: 'sources'; readonly sources: readonly AnchoredSource[] };
+
+function codeOf(
+  source: Source | undefined,
+  sources: readonly AnchoredSource[] | undefined,
+): CodeContext {
+  // With both, `checkSources` reports the mix once; steps are checked
+  // against `sources`, which is what a reader shows.
+  if (sources !== undefined) return { form: 'sources', sources };
+  if (source !== undefined)
+    return { form: 'source', lines: lineCount(source.code) };
+  return { form: 'none' };
+}
+
+/** At most this many names in a hint. */
+const HINT_NAMES = 12;
+
+const quoted = (names: readonly string[]) =>
+  names.length === 0
+    ? ''
+    : `${names
+        .slice(0, HINT_NAMES)
+        .map((n) => `"${n}"`)
+        .join(', ')}${names.length > HINT_NAMES ? ', …' : ''}`;
+
+/** Checks a step's `meta.line` or `meta.at` against the document's code. */
+function checkStepCode(
+  { line, at }: StepMeta,
+  path: readonly PropertyKey[],
+  code: CodeContext,
+): ProtocolError[] {
+  const errors: ProtocolError[] = [];
+  if (line !== undefined) {
+    if (code.form === 'sources')
+      errors.push({
+        code: 'MIXED_SOURCES',
+        path: formatPath([...path, 'line']),
+        message:
+          '`meta.line` cannot be used with `sources`, whose languages put the step on different lines',
+        hint: "Name the step's point in the code in `meta.at`, and give its line in each source's `anchors`.",
+      });
+    else if (code.form === 'source' && line > code.lines)
+      errors.push({
+        code: 'LINE_OUT_OF_RANGE',
+        path: formatPath([...path, 'line']),
+        message: `Line ${line} is past the end of the source code`,
+        hint: `The source code has ${code.lines} lines.`,
+      });
+  }
+  if (at !== undefined) {
+    const error = anchorError(at, code);
+    if (error !== undefined)
+      errors.push({ ...error, path: formatPath([...path, 'at']) });
+  }
+  return errors;
+}
+
+function anchorError(
+  at: string,
+  code: CodeContext,
+): Omit<ProtocolError, 'path'> | undefined {
+  if (code.form === 'source')
+    return {
+      code: 'MIXED_SOURCES',
+      message: `\`meta.at\` ("${at}") needs \`sources\`, but the document gives \`source\``,
+      hint: 'Replace `source` with `sources`: [{ "language", "code", "anchors" }], or point at a line with `meta.line`.',
+    };
+  if (code.form === 'none')
+    return {
+      code: 'UNKNOWN_ANCHOR',
+      message: `Anchor "${at}" needs code in \`sources\`, but the document has none`,
+      hint: 'Give the code in `sources`, each language with an `anchors` map, or remove `meta.at`.',
+    };
+  const missing = code.sources.filter((s) => !Object.hasOwn(s.anchors, at));
+  if (missing.length === 0) return undefined;
+  // Anchors that every source has, which `meta.at` could name instead.
+  const shared = Object.keys(code.sources[0]!.anchors).filter((name) =>
+    code.sources.every((s) => Object.hasOwn(s.anchors, name)),
+  );
+  const languages = listOf(missing.map((s) => s.language));
+  return {
+    code: 'UNKNOWN_ANCHOR',
+    message: `Anchor "${at}" is not in the ${languages} source${missing.length > 1 ? 's' : ''}`,
+    hint: `Every source must map "${at}" to a line in \`anchors\`. ${
+      shared.length === 0
+        ? 'No anchor is in every source yet.'
+        : `Anchors in every source: ${quoted(shared)}.`
+    }`,
+  };
 }
 
 /**
@@ -196,6 +331,15 @@ function checkProtoKeys(input: unknown): ProtocolError[] {
   };
   if (!isRecord(input)) return errors;
   check(input['structures'], ['structures']);
+  const sources = input['sources'];
+  if (Array.isArray(sources))
+    sources.forEach((source: unknown, k) => {
+      check(isRecord(source) ? source['anchors'] : undefined, [
+        'sources',
+        k,
+        'anchors',
+      ]);
+    });
   const steps = input['steps'];
   if (Array.isArray(steps))
     steps.forEach((step: unknown, s) => {

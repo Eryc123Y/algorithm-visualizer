@@ -1,0 +1,37 @@
+{
+  "description": "Each language appears once in sources.",
+  "input": {
+    "version": "0.3",
+    "sources": [
+      {
+        "language": "python",
+        "code": "def sort_two(a):\n    if a[0] > a[1]:\n        # put them in order\n        a[0], a[1] = a[1], a[0]",
+        "anchors": { "compare": 2, "swap": 4 }
+      },
+      {
+        "language": "python",
+        "code": "def sort_two(a):\n    if a[0] > a[1]:\n        # put them in order\n        a[0], a[1] = a[1], a[0]",
+        "anchors": { "compare": 2, "swap": 4 }
+      }
+    ],
+    "structures": { "a": { "kind": "array", "initial": [2, 1] } },
+    "steps": [
+      {
+        "actions": [{ "target": "a", "type": "compare", "i": 0, "j": 1 }],
+        "meta": {
+          "id": "compare",
+          "at": "compare",
+          "narration": "Compare 2 and 1."
+        }
+      },
+      {
+        "actions": [{ "target": "a", "type": "swap", "i": 0, "j": 1 }],
+        "meta": { "id": "swap", "at": "swap", "narration": "2 > 1: swap them." }
+      },
+      { "actions": [], "meta": { "narration": "The two values are in order." } }
+    ]
+  },
+  "expectedErrors": [
+    { "code": "DUPLICATE_LANGUAGE", "path": "$.sources[1].language" }
+  ]
+}

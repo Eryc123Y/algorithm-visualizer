@@ -1,0 +1,9 @@
+{
+  "description": "meta.at in a document without source code names no anchor.",
+  "input": {
+    "version": "0.3",
+    "structures": { "a": { "kind": "array", "initial": [2, 1] } },
+    "steps": [{ "actions": [], "meta": { "at": "compare" } }]
+  },
+  "expectedErrors": [{ "code": "UNKNOWN_ANCHOR", "path": "$.steps[0].meta.at" }]
+}

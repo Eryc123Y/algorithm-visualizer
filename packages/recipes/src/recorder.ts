@@ -10,7 +10,9 @@
  * ```
  *
  * Steps may be named (`r.step({ id: 'swap' })`), and `r.section(id,
- * title)` starts a titled section at the next step (ADR 0020).
+ * title)` starts a titled section at the next step (ADR 0020). With code in
+ * several languages (`sources`), steps point at an anchor with `at`
+ * (ADR 0017).
  *
  * Each structure handle has one method per action of its kind, typed from
  * the protocol registry, so new kinds get handles without any code here.
@@ -22,6 +24,7 @@ import {
   minimumVersion,
   parseVisualization,
   SectionId,
+  type AnchoredSource,
   type KindTypeMap,
   type Section,
   type Source,
@@ -57,6 +60,11 @@ export interface RecorderOptions {
   readonly title?: string;
   /** Source code whose lines steps refer to with `line`. */
   readonly source?: Source;
+  /**
+   * The code in several languages, instead of `source`; steps refer to
+   * its anchors with `at` (ADR 0017).
+   */
+  readonly sources?: readonly AnchoredSource[];
 }
 
 export class Recorder {
@@ -171,10 +179,11 @@ export class Recorder {
 
   #document(): VisualizationInput {
     this.#checkLastSection();
-    const { title, source } = this.#options;
+    const { title, source, sources } = this.#options;
     const content = {
       ...(title === undefined ? {} : { title }),
       ...(source === undefined ? {} : { source }),
+      ...(sources === undefined ? {} : { sources: [...sources] }),
       structures: { ...this.#structures },
       steps: [...this.#steps],
       ...(this.#sections.length === 0 ? {} : { sections: [...this.#sections] }),
