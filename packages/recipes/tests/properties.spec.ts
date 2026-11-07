@@ -31,24 +31,17 @@ import {
   binarySearch,
   breadthFirstSearch,
   bstInsert,
-  bubbleSort,
-  countingSort,
   depthFirstSearch,
   dijkstra,
   editDistance,
   floydWarshall,
   hashChaining,
-  heapSort,
-  insertionSort,
   knapsack,
   kruskal,
   linearProbing,
   longestCommonSubsequence,
-  mergeSort,
   prim,
-  quickSort,
   reverseLinkedList,
-  selectionSort,
   topologicalSort,
   treeTraversal,
   trieInsert,
@@ -57,7 +50,7 @@ import {
   type KnapsackItem,
   type TraversalOrder,
 } from '../src/index.ts';
-import { stateOf } from './helpers.ts';
+import { runError, runOk, stateOf } from './helpers.ts';
 
 const runs = Number(process.env['FUZZ_RUNS'] ?? 40);
 
@@ -277,69 +270,88 @@ function parents(tree: TreeState): Map<string, string> {
 // ---------------------------------------------------------------------------
 // Sorting
 
-const sorts = {
-  bubbleSort,
-  insertionSort,
-  selectionSort,
-  mergeSort,
-  quickSort,
-  heapSort,
-};
+/** The document of a sorting module's run. */
+const sorted = (id: string) => (values: readonly number[]) =>
+  runOk(id, { values }).document;
 
-function checkSorted(trace: Trace, input: readonly number[]): void {
-  const a = stateOf(trace, 'a', 'array');
+function checkSorted(trace: Trace, input: readonly number[], name = 'a'): void {
+  const a = stateOf(trace, name, 'array');
   expect(a.data.map((e) => e.value)).toEqual(ascending(input));
   expect([...a.marks.settled].sort()).toEqual(a.data.map((e) => e.id).sort());
 }
 
-for (const [name, sort] of Object.entries(sorts))
-  recipe(name, numberArrays(24), sort, (trace, input) => {
+const sortable = numberArrays(24).filter((a) => a.length > 0);
+
+for (const id of [
+  'insertion-sort',
+  'merge-sort',
+  'heapsort',
+  'quicksort',
+  'bubble-sort',
+  'selection-sort',
+])
+  recipe(id, sortable, sorted(id), (trace, input) => {
     checkSorted(trace, input);
-    if (name === 'heapSort' && input.length > 1) {
+    const ids = trace.visualization.steps.map((step) => step.meta?.id);
+    if (id === 'heapsort' && input.length > 1) {
       // Before the first maximum moves to the end, the array is a max-heap.
-      const s = trace.visualization.steps.findIndex((step) =>
-        step.meta?.narration?.startsWith('Move the maximum'),
-      );
-      const heap = stateOf(trace, 'a', 'array', s).data.map(
-        (e) => e.value as number,
-      );
+      const heap = stateOf(
+        trace,
+        'a',
+        'array',
+        ids.indexOf('extract'),
+      ).data.map((e) => e.value as number);
       heap.forEach((x, i) =>
         expect(i === 0 || heap[(i - 1) >> 1]! >= x).toBe(true),
       );
     }
-    if (name === 'mergeSort')
+    if (id === 'merge-sort')
       expect(valuesOf(trace, 'aux')).toEqual(input.map(() => ''));
+    if (id === 'insertion-sort') expect(valuesOf(trace, 'key')).toEqual(['']);
   });
 
 const countable = fc.oneof(
-  fc.array(fc.integer({ min: 0, max: 99 }), { maxLength: 30 }),
-  fc.array(fc.integer({ min: 0, max: 4 }), { maxLength: 16 }),
-  fc.array(fc.constantFrom(0, 99), { maxLength: 6 }),
+  fc.array(fc.integer({ min: 0, max: 99 }), { minLength: 1, maxLength: 32 }),
+  fc.array(fc.integer({ min: 0, max: 4 }), { minLength: 1, maxLength: 16 }),
+  fc.array(fc.constantFrom(0, 99), { minLength: 1, maxLength: 6 }),
 );
-recipe('countingSort', countable, countingSort, (trace, input) => {
-  checkSorted(trace, input);
-  const count = valuesOf(trace, 'count');
-  expect(count).toHaveLength(Math.max(0, ...input) + 1);
-  count.forEach((c, v) => expect(c).toBe(input.filter((x) => x === v).length));
+recipe('counting-sort', countable, sorted('counting-sort'), (trace, input) => {
+  checkSorted(trace, input, 'b');
+  expect(valuesOf(trace, 'a')).toEqual(input);
+  const count = valuesOf(trace, 'c');
+  expect(count).toHaveLength(Math.max(...input) + 1);
+  // After placing, c[v] is how many values are smaller than v.
+  count.forEach((c, v) => expect(c).toBe(input.filter((x) => x < v).length));
 });
 
-describe('countingSort input checks', () => {
+describe('counting-sort input checks', () => {
   const bad = fc.oneof(
     fc.integer({ min: 100, max: 10_000 }),
     fc.integer({ min: -10_000, max: -1 }),
     fc.double({ min: 0, max: 99 }).filter((x) => !Number.isInteger(x)),
     fc.constantFrom(NaN, Infinity, -Infinity, 99.5, -0.5),
   );
-  rejects(
-    'rejects values outside the integers 0..99',
-    fc
-      .tuple(
-        fc.array(fc.integer({ min: 0, max: 99 }), { maxLength: 6 }),
-        bad,
-        fc.nat(),
-      )
-      .map(([good, x, at]) => good.toSpliced(at % (good.length + 1), 0, x)),
-    countingSort,
+  it(
+    'rejects values outside the integers 0..99, at their index',
+    () => {
+      fc.assert(
+        fc.property(
+          fc.array(fc.integer({ min: 0, max: 99 }), { maxLength: 6 }),
+          bad,
+          fc.nat(),
+          (good, x, at) => {
+            const k = at % (good.length + 1);
+            const values = good.toSpliced(k, 0, x);
+            expect(runError('counting-sort', { values })).toMatchObject({
+              code: 'INVALID_SHAPE',
+              path: `$.input.values[${k}]`,
+            });
+          },
+        ),
+        { numRuns: runs },
+      );
+    },
+    TIMEOUT,
   );
 });
 

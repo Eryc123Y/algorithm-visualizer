@@ -6,7 +6,7 @@
 import { readFileSync } from 'node:fs';
 
 import { createServer, PLAYER_URI } from '@algoviz/mcp';
-import { bubbleSort, dijkstra, runAlgorithm } from '@algoviz/recipes';
+import { dijkstra, runAlgorithm } from '@algoviz/recipes';
 import { Client, InMemoryTransport } from '@modelcontextprotocol/client';
 import type { Page } from '@playwright/test';
 
@@ -22,7 +22,7 @@ function documentOf(id: string, input: unknown) {
 }
 
 const ORIGIN = 'http://host.test';
-const sort = bubbleSort([3, 1, 2]);
+const sort = documentOf('bubble-sort', { values: [3, 1, 2] });
 
 const client = new Client({ name: 'e2e host', version: '0.0.0' });
 let html = '';
@@ -112,7 +112,7 @@ test('a second result replaces the document and opens at its frame', async ({
   const { player } = await openHost(page);
   await host(page).result(await callShow({ document: sort, frame: 1 }));
   await expect(player).toHaveAttribute('frame', '1');
-  const other = bubbleSort([5, 4, 3, 2, 1]);
+  const other = documentOf('bubble-sort', { values: [5, 4, 3, 2, 1] });
   await host(page).result(await callShow({ document: other, frame: 4 }));
   await expect(player).toHaveAttribute('frame', '4');
   await expect(player.locator('.counter')).toHaveText(
@@ -142,7 +142,7 @@ test('a second result at the same frame number opens there', async ({
   const { player } = await openHost(page);
   await host(page).result(await callShow({ document: sort, frame: 2 }));
   await expect(player).toHaveAttribute('frame', '2');
-  const other = bubbleSort([5, 4, 3, 2, 1]);
+  const other = documentOf('bubble-sort', { values: [5, 4, 3, 2, 1] });
   await host(page).result(await callShow({ document: other, frame: 2 }));
   await expect(player.locator('.counter')).toHaveText(
     `2 / ${other.steps.length}`,
@@ -176,7 +176,8 @@ test('tells the model which frame the user stopped on', async ({ page }) => {
   await expect
     .poll(async () => (await host(page).read()).contexts.at(-1))
     .toBe(
-      `The user is looking at frame 1 of ${n} of "${sort.title}": ${narration}`,
+      // Registry modules name every step (ADR 0020, 0022).
+      `The user is looking at frame 1 of ${n} of "${sort.title}", step "compare": ${narration}`,
     );
 });
 

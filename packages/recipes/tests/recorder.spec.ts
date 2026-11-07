@@ -1,7 +1,7 @@
 import * as spec from '@algoviz/spec';
 import { describe, expect, it, vi } from 'vitest';
 
-import { bubbleSort, Recorder } from '../src/index.ts';
+import { binarySearch, Recorder } from '../src/index.ts';
 
 // Watch the version helper without changing what it returns.
 vi.mock('@algoviz/spec', async (importOriginal) => {
@@ -23,7 +23,7 @@ describe('Recorder versions', () => {
     expect(version).toBe(spec.minimumVersion(content));
   });
 
-  it('writes 0.1 while no recipe uses a later feature', () => {
-    expect(bubbleSort([3, 1, 2]).version).toBe('0.1');
+  it('writes 0.1 for a document that uses no later feature', () => {
+    expect(binarySearch([1, 2, 3], 2).version).toBe('0.1');
   });
 });
