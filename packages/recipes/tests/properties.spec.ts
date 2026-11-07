@@ -22,11 +22,8 @@ import { formatErrors, type VisualizationInput } from '@algoviz/spec';
 import { renderSvg } from '@algoviz/svg';
 
 import {
-  avlInsert,
   bellmanFord,
-  binaryHeap,
   breadthFirstSearch,
-  bstInsert,
   depthFirstSearch,
   dijkstra,
   editDistance,
@@ -37,12 +34,8 @@ import {
   prim,
   runAlgorithm,
   topologicalSort,
-  treeTraversal,
-  trieInsert,
-  unionFind,
   type GraphInput,
   type KnapsackItem,
-  type TraversalOrder,
 } from '../src/index.ts';
 import { runError, runOk, stateOf } from './helpers.ts';
 
@@ -456,94 +449,69 @@ const keys = (maxLength: number) =>
     fc.array(smallInt, { maxLength }).map((a) => ascending(a).reverse()),
   );
 
+/** Keys to start from and up to 8 keys to insert, at most 32 in all. */
+const avlRuns = fc
+  .tuple(
+    keys(24),
+    keys(8).filter((ks) => ks.length > 0),
+  )
+  .map(([from, more]) => ({
+    from,
+    ops: more.map((key) => ({ op: 'insert', key })),
+  }));
+
 recipe(
-  'bstInsert',
-  keys(30).chain((ks) =>
-    fc.tuple(
-      fc.constant(ks),
-      fc.option(
-        ks.length === 0 ? smallInt : fc.oneof(fc.constantFrom(...ks), smallInt),
-        {
-          nil: undefined,
-        },
-      ),
-    ),
-  ),
-  ([ks, search]) => bstInsert(ks, search),
-  (trace, [ks, search]) => {
-    const tree = stateOf(trace, 'bst', 'tree');
-    expect(inorder(tree)).toEqual(ascending(ks));
-    // Smaller keys go left, the rest right.
-    const byId = new Map(tree.data.nodes.map((n) => [n.id, n]));
-    const within = (id: string | null, lo: number, hi: number): void => {
-      if (id === null) return;
-      const node = byId.get(id)!;
-      const key = node.value as number;
-      expect(key >= lo && key < hi).toBe(true);
-      within(node.children[0] ?? null, lo, key);
-      within(node.children[1] ?? null, key, hi);
-    };
-    tree.data.roots.forEach((r) => within(r, -Infinity, Infinity));
-    const settled = tree.marks.settled;
-    if (search !== undefined && ks.includes(search)) {
-      expect(settled).toHaveLength(1);
-      expect(byId.get(settled[0]!)?.value).toBe(search);
-    } else expect(settled).toEqual([]);
+  'avl',
+  avlRuns,
+  (input) => runOk('avl', input).document,
+  (trace, { from, ops }) => {
+    const tree = stateOf(trace, 'avl', 'tree');
+    const all = [...from, ...ops.map((o) => o.key)];
+    expect(inorder(tree)).toEqual(ascending([...new Set(all)]));
+    expect(tree.data.roots).toHaveLength(1);
+    const h = heights(tree);
+    for (const node of tree.data.nodes) {
+      const [l, r] = [0, 1].map((k) => {
+        const c = node.children[k] ?? null;
+        return c === null ? 0 : h.get(c)!;
+      });
+      expect(Math.abs(l! - r!)).toBeLessThanOrEqual(1);
+      expect(tree.marks.notes[node.id]).toBe(`h=${h.get(node.id)}`);
+    }
   },
 );
 
-recipe('avlInsert', keys(40), avlInsert, (trace, ks) => {
-  const tree = stateOf(trace, 'avl', 'tree');
-  expect(inorder(tree)).toEqual(ascending(ks));
-  expect(tree.data.roots.length).toBe(ks.length === 0 ? 0 : 1);
-  const h = heights(tree);
-  for (const node of tree.data.nodes) {
-    const [l, r] = [0, 1].map((k) => {
-      const c = node.children[k] ?? null;
-      return c === null ? 0 : h.get(c)!;
-    });
-    expect(Math.abs(l! - r!)).toBeLessThanOrEqual(1);
-    expect(tree.marks.notes[node.id]).toBe(`h=${h.get(node.id)}`);
-  }
-});
-
 /**
- * A valid LeetCode level order: the root (or nothing), then for every node
- * in order its two slots, then possibly a few trailing nulls.
+ * A valid LeetCode level order: the root, then for every node in order
+ * its two slots, then possibly a few trailing nulls.
  */
-const levelOrders: fc.Arbitrary<(number | null)[]> = fc.oneof(
-  fc.constantFrom<(number | null)[]>([], [null], [null, null]),
-  fc
-    .tuple(
-      smallInt,
-      fc.array(fc.option(smallInt, { nil: null, freq: 3 }), { maxLength: 40 }),
-      fc.nat({ max: 3 }),
-    )
-    .map(([root, slots, trailing]) => {
-      const out: (number | null)[] = [root];
-      let open = 2;
-      for (const v of slots) {
-        if (open === 0) break;
-        out.push(v);
-        open += v === null ? -1 : 1;
-      }
-      return [...out, ...Array<null>(trailing).fill(null)];
-    }),
-);
+const levelOrders: fc.Arbitrary<(number | null)[]> = fc
+  .tuple(
+    smallInt,
+    fc.array(fc.option(smallInt, { nil: null, freq: 3 }), { maxLength: 30 }),
+    fc.nat({ max: 3 }),
+  )
+  .map(([root, slots, trailing]) => {
+    const out: (number | null)[] = [root];
+    let open = 2;
+    for (const v of slots) {
+      if (open === 0) break;
+      out.push(v);
+      open += v === null ? -1 : 1;
+    }
+    return [...out, ...Array<null>(trailing).fill(null)].slice(0, 31);
+  });
 
-/** Reference traversal of a level order, built independently. */
-function traverse(
-  levelOrder: readonly (number | null)[],
-  order: TraversalOrder,
-): number[] {
+type Order = 'preorder' | 'inorder' | 'postorder';
+
+/** Reference walk of a level order, built independently. */
+function traverse(levelOrder: readonly (number | null)[], order: Order) {
   interface Node {
     value: number;
     left: Node | null;
     right: Node | null;
   }
-  const first = levelOrder[0];
-  if (first === undefined || first === null) return [];
-  const root: Node = { value: first, left: null, right: null };
+  const root: Node = { value: levelOrder[0]!, left: null, right: null };
   const queue = [root];
   let k = 1;
   while (queue.length > 0 && k < levelOrder.length) {
@@ -569,66 +537,65 @@ function traverse(
   return out;
 }
 
-recipe(
-  'treeTraversal',
-  fc.tuple(
+for (const order of ['preorder', 'inorder', 'postorder'] as const)
+  recipe(
+    `${order}-tree-walk`,
     levelOrders,
-    fc.constantFrom<TraversalOrder>('preorder', 'inorder', 'postorder'),
-  ),
-  ([levelOrder, order]) => treeTraversal(levelOrder, order),
-  (trace, [levelOrder, order]) => {
-    const expected = traverse(levelOrder, order);
-    expect(valuesOf(trace, 'out')).toEqual(expected);
-    const tree = stateOf(trace, 'tree', 'tree');
-    expect(tree.marks.visited).toHaveLength(expected.length);
-    // The protocol's tree has the same shape as the recipe's.
-    const byId = new Map(tree.data.nodes.map((n) => [n.id, n]));
-    const fromState: unknown[] = [];
-    const walk = (id: string | null): void => {
-      if (id === null) return;
-      const n = byId.get(id)!;
-      if (order === 'preorder') fromState.push(n.value);
-      walk(n.children[0] ?? null);
-      if (order === 'inorder') fromState.push(n.value);
-      walk(n.children[1] ?? null);
-      if (order === 'postorder') fromState.push(n.value);
-    };
-    tree.data.roots.forEach(walk);
-    expect(fromState).toEqual(expected);
-  },
-);
+    (levelOrder) => runOk(`${order}-tree-walk`, { levelOrder }).document,
+    (trace, levelOrder) => {
+      const expected = traverse(levelOrder, order);
+      expect(valuesOf(trace, 'out')).toEqual(expected);
+      const tree = stateOf(trace, 'tree', 'tree');
+      expect(tree.marks.visited).toHaveLength(expected.length);
+      expect(tree.marks.pointers).toEqual({});
+    },
+  );
 
-const isMinHeap = (h: readonly unknown[]) =>
-  h.every((x, i) => i === 0 || (h[(i - 1) >> 1] as number) <= (x as number));
+type TrieCall = { op: 'insert' | 'search'; word: string };
 
-recipe('binaryHeap', numberArrays(20), binaryHeap, (trace, values) => {
-  expect(valuesOf(trace, 'out')).toEqual(ascending(values));
-  expect(valuesOf(trace, 'heap')).toEqual([]);
-  // Before every pop, the array is a min-heap of what is left.
-  const steps = trace.visualization.steps;
-  let popped = 0;
-  steps.forEach((step, s) => {
-    if (!step.meta?.narration?.startsWith('Pop the minimum')) return;
-    // Frame s is the state before step s.
-    const before = stateOf(trace, 'heap', 'array', s).data.map((e) => e.value);
-    expect(isMinHeap(before)).toBe(true);
-    expect(ascending(before as number[])).toEqual(
-      ascending(values).slice(popped),
-    );
-    popped++;
-  });
-  expect(popped).toBe(values.length);
-});
+/** Words to start from and up to 8 calls, with at most 8 words in all. */
+const trieRuns = fc
+  .tuple(
+    fc.array(
+      strings('abc', 6).filter((w) => w.length > 0),
+      { maxLength: 8 },
+    ),
+    fc.array(
+      fc.record({
+        op: fc.constantFrom<'insert' | 'search'>('insert', 'search'),
+        word: strings('abc', 6).filter((w) => w.length > 0),
+      }),
+      { minLength: 1, maxLength: 8 },
+    ),
+  )
+  .map(([words, picks]) => {
+    const from = [...new Set(words)].slice(0, 4);
+    const held = new Set(from);
+    const ops: TrieCall[] = picks.map((c) => {
+      if (c.op === 'search' || held.has(c.word)) return c;
+      if (held.size >= 8) return { ...c, op: 'search' };
+      held.add(c.word);
+      return c;
+    });
+    return { from, ops };
+  })
+  .filter(({ from, ops }) =>
+    [...from, ...ops.map((o) => o.word)].every(
+      (w) => w.length <= 16 && [...w].length > 0,
+    ),
+  );
 
 recipe(
-  'trieInsert',
-  fc.array(strings('abc', 6), { maxLength: 12 }),
-  trieInsert,
-  (trace, words) => {
+  'trie',
+  trieRuns,
+  (input) => runOk('trie', input).document,
+  (trace, { from, ops }) => {
+    const words = new Set(from);
+    for (const { op, word } of ops) if (op === 'insert') words.add(word);
     const trie = stateOf(trace, 'trie', 'tree');
     const byId = new Map(trie.data.nodes.map((n) => [n.id, n]));
     const prefixes = new Set(
-      words.flatMap((w) =>
+      [...words].flatMap((w) =>
         [...w].map((_, k) => [...w].slice(0, k + 1).join('\u0000')),
       ),
     );
@@ -654,31 +621,49 @@ recipe(
   },
 );
 
-const unionInput = fc.integer({ min: 0, max: 30 }).chain((size) =>
-  fc.tuple(
-    fc.constant(size),
-    size === 0
-      ? fc.constant<[number, number][]>([])
-      : fc.array(fc.tuple(fc.nat(size - 1), fc.nat(size - 1)), {
-          maxLength: 40,
+const disjointRuns = fc.integer({ min: 1, max: 16 }).chain((size) =>
+  fc.record({
+    from: fc.record({
+      size: fc.constant(size),
+      unions: fc.array(fc.tuple(fc.nat(size - 1), fc.nat(size - 1)), {
+        maxLength: 20,
+      }),
+    }),
+    ops: fc.array(
+      fc.oneof(
+        fc.record({
+          op: fc.constant('union' as const),
+          x: fc.nat(size - 1),
+          y: fc.nat(size - 1),
         }),
-  ),
+        fc.record({
+          op: fc.constant('find-set' as const),
+          x: fc.nat(size - 1),
+        }),
+      ),
+      { minLength: 1, maxLength: 8 },
+    ),
+  }),
 );
 
 recipe(
-  'unionFind',
-  unionInput,
-  ([size, unions]) => unionFind(size, unions),
-  (trace, [size, unions]) => {
+  'disjoint-set',
+  disjointRuns,
+  (input) => runOk('disjoint-set', input).document,
+  (trace, { from: { size, unions }, ops }) => {
     const forest = stateOf(trace, 'sets', 'tree');
     const parent = parents(forest);
     const root = (id: string): string =>
       parent.has(id) ? root(parent.get(id)!) : id;
     // Reference: label propagation until nothing changes.
+    const pairs = [
+      ...unions,
+      ...ops.flatMap((o) => (o.op === 'union' ? [[o.x, o.y] as const] : [])),
+    ];
     const label = Array.from({ length: size }, (_, k) => k);
     for (let changed = true; changed;) {
       changed = false;
-      for (const [a, b] of unions) {
+      for (const [a, b] of pairs) {
         const m = Math.min(label[a]!, label[b]!);
         for (const x of [a, b])
           if (label[x] !== m) {

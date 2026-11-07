@@ -332,7 +332,7 @@ test.describe('display mode', () => {
 
   test('draws its frames with the bare layout', async ({ page }) => {
     await page.goto('/');
-    await page.getByTestId('example').selectOption('Union–find');
+    await page.getByTestId('example').selectOption('Disjoint-set forest');
     await page.getByTestId('mode').selectOption('display');
     const player = page.getByTestId('player');
     await player.evaluate((el: AlgoPlayer) => el.pause());

@@ -14,12 +14,6 @@ import type { CatalogEntry } from './recipes.ts';
 
 /** Short titles, as the playground's menu shows them. */
 const TITLES: Readonly<Record<string, string>> = {
-  bstInsert: 'BST: insert keys, then search',
-  avlInsert: 'AVL tree',
-  treeTraversal: 'Tree traversal',
-  binaryHeap: 'Binary heap: push all, then pop all',
-  trieInsert: 'Trie',
-  unionFind: 'Union–find',
   breadthFirstSearch: 'Breadth-first search',
   depthFirstSearch: 'Depth-first search',
   dijkstra: 'Dijkstra',
@@ -69,12 +63,6 @@ function recipe<S extends z.ZodObject>(
   };
 }
 
-const Values = z
-  .array(z.number())
-  .min(1)
-  .max(32)
-  .describe('The numbers to work on, e.g. [5, 3, 8, 1].');
-
 const Graph = z
   .strictObject({
     nodes: z
@@ -111,68 +99,6 @@ const Text = (description: string) =>
 
 /** The recipes not in the registry yet, in the order a course might meet them. */
 export const legacyRecipes: readonly CatalogEntry[] = [
-  recipe(
-    'trees',
-    'bstInsert',
-    'Inserting keys into a binary search tree, then optionally searching',
-    z.strictObject({
-      keys: Values.describe('Keys in insertion order.'),
-      search: z.number().optional().describe('A key to search for afterwards.'),
-    }),
-    ({ keys, search }) => recipes.bstInsert(keys, search),
-  ),
-  recipe(
-    'trees',
-    'avlInsert',
-    'Inserting keys into an AVL tree, with heights and rotations',
-    z.strictObject({ keys: Values.describe('Keys in insertion order.') }),
-    ({ keys }) => recipes.avlInsert(keys),
-  ),
-  recipe(
-    'trees',
-    'treeTraversal',
-    'Pre-, in- or post-order traversal of a binary tree',
-    z.strictObject({
-      levelOrder: z
-        .array(z.number().nullable())
-        .min(1)
-        .max(31)
-        .describe(
-          'The tree in level order, null for gaps, e.g. [4, 2, 6, 1, 3, null, 7].',
-        ),
-      order: z.enum(['preorder', 'inorder', 'postorder']),
-    }),
-    ({ levelOrder, order }) => recipes.treeTraversal(levelOrder, order),
-  ),
-  recipe(
-    'heaps',
-    'binaryHeap',
-    'Pushing values onto a binary min-heap (sift up), then popping them all (sift down), as a tree and an array',
-    z.strictObject({ values: Values }),
-    ({ values }) => recipes.binaryHeap(values),
-  ),
-  recipe(
-    'trees',
-    'trieInsert',
-    'Inserting words into a trie',
-    z.strictObject({
-      words: z.array(Text('A word.')).min(1).max(8),
-    }),
-    ({ words }) => recipes.trieInsert(words),
-  ),
-  recipe(
-    'trees',
-    'unionFind',
-    'Union–find with union by rank and path compression',
-    z.strictObject({
-      size: z.int().min(1).max(16).describe('Elements 0 to size − 1.'),
-      unions: z
-        .array(z.tuple([z.int().min(0), z.int().min(0)]))
-        .max(32)
-        .describe('Pairs to unite, e.g. [[0, 1], [2, 3]].'),
-    }),
-    ({ size, unions }) => recipes.unionFind(size, unions),
-  ),
   recipe(
     'graphs',
     'breadthFirstSearch',

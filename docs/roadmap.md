@@ -29,6 +29,7 @@ Everything later builds on these, so they come first. The ADRs are accepted (#13
   - The seven sorting algorithms as modules in both languages, following the CLRS procedures; their old recipe functions go (#22).
 - [~] **0.5 Migrate the remaining recipes** into the registry, in both languages, with ids, inputs and procedures from [ADR 0023](adr/0023-remaining-modules.md): the other 22 recipes, with `bstInsert` and `binaryHeap` as examples of the `bst` and `min-heap` sequences. Then the legacy path is removed: the old recipe functions, `packages/mcp/src/legacy-recipes.ts`, `apps/playground/src/samples/legacy.ts` and the CLI's `recipe` command. One PR per topic, then one for the removal:
   - searching, lists and hashing: `binary-search`, `reverse-linked-list`, `balanced-brackets`, `hash-chaining` and `linear-probing` (#24).
+  - trees: `avl`, `inorder-tree-walk`, `preorder-tree-walk`, `postorder-tree-walk`, `trie` and `disjoint-set`, and the whole-life examples of `bst` and `min-heap` (#25).
 
 ## Phase 1: static output and packages
 

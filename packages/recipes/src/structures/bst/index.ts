@@ -1,10 +1,10 @@
 /**
  * Binary search tree operations (ADR 0018, 0019): `bst.search`,
  * `bst.insert` and `bst.delete`, each from a tree given as keys in
- * insertion order, and the sequence `bst`. Equal keys go right, as in
- * `bstInsert`; deleting a node with two children copies its successor (as
- * in CLRS) or, on request, its predecessor. The code is in pseudocode and
- * Python (ADR 0017).
+ * insertion order, and the sequence `bst`, whose examples include a whole
+ * life from an empty tree. Equal keys go right; deleting a node with two
+ * children copies its successor (as in CLRS) or, on request, its
+ * predecessor. The code is in pseudocode and Python (ADR 0017).
  */
 import type { TreeNode } from '@algoviz/spec';
 import { z } from 'zod';
@@ -440,8 +440,12 @@ export const bst = defineStructure<BstState, From, 'tree'>({
       ],
     },
     {
+      // A whole life: insert the keys one by one, then search.
       from: [],
-      ops: [5, 3, 8, 1, 4, 9, 7].map((key) => ({ op: 'insert', key })),
+      ops: [
+        ...[5, 3, 8, 1, 4, 9, 7].map((key) => ({ op: 'insert', key })),
+        { op: 'search', key: 4 },
+      ],
     },
   ],
   start(from) {

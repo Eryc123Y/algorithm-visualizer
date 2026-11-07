@@ -51,45 +51,6 @@ const clothes: GraphInput = {
 
 export const legacyExamples: readonly Example[] = [
   {
-    topic: 'trees',
-    label: 'BST: insert keys, then search',
-    build: () => recipes.bstInsert([8, 3, 10, 1, 6, 14, 4, 7, 13], 7),
-  },
-  {
-    topic: 'trees',
-    label: 'AVL tree',
-    build: () => recipes.avlInsert([10, 20, 30, 40, 50, 25]),
-  },
-  {
-    topic: 'trees',
-    label: 'Inorder traversal',
-    build: () => recipes.treeTraversal([1, 2, 3, 4, 5, null, 6], 'inorder'),
-  },
-  {
-    topic: 'heaps',
-    label: 'Binary heap',
-    build: () => recipes.binaryHeap([5, 3, 8, 1, 9, 2]),
-  },
-  {
-    topic: 'trees',
-    label: 'Trie',
-    build: () => recipes.trieInsert(['tea', 'ten', 'to', 'inn', 'in']),
-  },
-  {
-    topic: 'trees',
-    label: 'Union–find',
-    build: () =>
-      recipes.unionFind(8, [
-        [0, 1],
-        [2, 3],
-        [1, 3],
-        [4, 5],
-        [0, 2],
-        [6, 7],
-        [5, 7],
-      ]),
-  },
-  {
     topic: 'graphs',
     label: 'Breadth-first search',
     build: () => recipes.breadthFirstSearch(cities, 'A'),
