@@ -11,6 +11,11 @@
       "@algoviz/source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./encode": {
+      "@algoviz/source": "./src/encode.ts",
+      "types": "./dist/encode.d.ts",
+      "default": "./dist/encode.js"
     }
   },
   "files": [

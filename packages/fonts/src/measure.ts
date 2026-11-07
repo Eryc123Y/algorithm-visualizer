@@ -3,32 +3,41 @@
  * scale with any font size. For each code point, the first rule that
  * applies decides its width:
  *
- * 1. no width: combining marks, default-ignorable code points (joiners,
- *    variation selectors, soft hyphens, tags), emoji skin-tone modifiers,
- *    and whatever follows a zero-width joiner (the rest of a joined emoji);
+ * 1. no width: combining marks and default-ignorable code points (joiners,
+ *    variation selectors, soft hyphens, tags), except the Hangul fillers,
+ *    which are drawn blank but wide; and the parts of an emoji that join
+ *    the one before it (an emoji after a zero-width joiner, a skin tone);
  * 2. emoji presentation: a code point followed by U+FE0F is an emoji;
  * 3. the face's table;
  * 4. `defaultAdvance`, if the face has one;
- * 5. emoji: 1.25 em, and 0.625 em for each half of a flag;
- * 6. East Asian wide and fullwidth: 1 em;
- * 7. anything else: 1 em.
+ * 5. emoji: 1.25 em, also for a flag (two regional indicators) or a lone
+ *    regional indicator or skin tone;
+ * 6. a few glyphs known to be wider than 1 em, such as U+FDFD;
+ * 7. East Asian wide and fullwidth: 1 em;
+ * 8. anything else: 1 em.
  *
- * Kerning and ligatures are ignored: they rarely widen text.
+ * Emoji joined into one picture count once, as browsers and colour emoji
+ * fonts draw them; a renderer without colour emoji draws the parts side by
+ * side, wider than measured. Kerning and ligatures are ignored: they rarely
+ * widen text.
  */
 import type { FontMetrics } from './types.ts';
 
-const ZERO_WIDTH = /[\p{Mn}\p{Me}\p{Default_Ignorable_Code_Point}]/u;
+const IGNORABLE = /[\p{Mn}\p{Me}\p{Default_Ignorable_Code_Point}]/u;
 const PICTOGRAPHIC = /\p{Extended_Pictographic}/u;
 
 const ZWJ = 0x200d;
 const EMOJI_SELECTOR = 0xfe0f;
+/** Default-ignorable, but drawn as blanks of a letter's width. */
+const HANGUL_FILLERS: ReadonlySet<number> = new Set([0x115f, 0x3164, 0xffa0]);
 const EMOJI = 1.25;
-const FLAG_HALF = 0.625;
 const WIDE = 1;
 const OTHER = 1;
 
-/** East Asian wide and fullwidth blocks, as `[first, last]` pairs. */
-const WIDE_RANGES: readonly (readonly [number, number])[] = [
+type Range = readonly [first: number, last: number];
+
+/** East Asian wide and fullwidth blocks. */
+const WIDE_RANGES: readonly Range[] = [
   [0x1100, 0x115f], // Hangul Jamo initials
   [0x2e80, 0x303e], // CJK radicals, Kangxi, CJK symbols and punctuation
   [0x3041, 0x33ff], // kana, Bopomofo, Hangul compatibility Jamo, CJK compatibility
@@ -48,17 +57,58 @@ const WIDE_RANGES: readonly (readonly [number, number])[] = [
   [0x20000, 0x3fffd], // CJK extensions B and later
 ];
 
-const isWide = (cp: number): boolean =>
-  WIDE_RANGES.some(([first, last]) => cp >= first && cp <= last);
+/** Glyphs wider than 1 em in common fonts, with an upper bound in em. */
+const EXTRA_WIDE: readonly (readonly [
+  first: number,
+  last: number,
+  em: number,
+])[] = [
+  [0x0bf0, 0x0bfa, 2], // Tamil numbers and signs
+  [0x2e3a, 0x2e3a, 2], // two-em dash
+  [0x2e3b, 0x2e3b, 3], // three-em dash
+  [0xa9c1, 0xa9cd, 2], // Javanese punctuation
+  [0xfdf0, 0xfdfc, 2], // Arabic ligatures of words
+  [0xfdfd, 0xfdfd, 7], // bismillah
+  [0x12000, 0x1254f, 3], // cuneiform
+];
 
-const isRegionalIndicator = (cp: number): boolean =>
-  cp >= 0x1f1e6 && cp <= 0x1f1ff;
+const within = (ranges: readonly Range[], cp: number): boolean =>
+  ranges.some(([first, last]) => cp >= first && cp <= last);
 
-const isSkinTone = (cp: number): boolean => cp >= 0x1f3fb && cp <= 0x1f3ff;
+const isRegionalIndicator = (cp: number | undefined): boolean =>
+  cp !== undefined && cp >= 0x1f1e6 && cp <= 0x1f1ff;
+
+const isSkinTone = (cp: number | undefined): boolean =>
+  cp !== undefined && cp >= 0x1f3fb && cp <= 0x1f3ff;
+
+const isPictographic = (cp: number | undefined): boolean =>
+  cp !== undefined && PICTOGRAPHIC.test(String.fromCodePoint(cp));
+
+const isIgnorable = (cp: number): boolean =>
+  IGNORABLE.test(String.fromCodePoint(cp)) && !HANGUL_FILLERS.has(cp);
+
+/** Part of an emoji that a joined sequence or a skin tone can follow. */
+const endsEmoji = (cp: number | undefined): boolean =>
+  isPictographic(cp) || isSkinTone(cp) || cp === EMOJI_SELECTOR;
+
+/**
+ * Whether the code point at `k` joins the emoji before it: an emoji after
+ * a zero-width joiner, or a skin tone after an emoji.
+ */
+function joinsPrevious(points: readonly number[], k: number): boolean {
+  const cp = points[k];
+  if (isSkinTone(cp)) return isPictographic(points[k - 1]);
+  return (
+    points[k - 1] === ZWJ && isPictographic(cp) && endsEmoji(points[k - 2])
+  );
+}
 
 const tables = new WeakMap<FontMetrics, ReadonlyMap<number, number>>();
 
-/** The face's advances by code point, decoded once per face. */
+/**
+ * The face's advances by code point, decoded once per face object; keep
+ * passing the same object rather than copies.
+ */
 function tableOf(font: FontMetrics): ReadonlyMap<number, number> {
   const cached = tables.get(font);
   if (cached !== undefined) return cached;
@@ -76,36 +126,36 @@ function tableOf(font: FontMetrics): ReadonlyMap<number, number> {
   return table;
 }
 
-function fallbackWidth(cp: number, char: string): number {
-  if (isRegionalIndicator(cp)) return FLAG_HALF;
-  if (PICTOGRAPHIC.test(char)) return EMOJI;
-  if (isWide(cp)) return WIDE;
-  return OTHER;
+/** Width of a code point the face does not have, in em. */
+function fallbackWidth(cp: number): number {
+  if (isPictographic(cp) || isSkinTone(cp)) return EMOJI;
+  const extra = EXTRA_WIDE.find(([first, last]) => cp >= first && cp <= last);
+  if (extra !== undefined) return extra[2];
+  return within(WIDE_RANGES, cp) ? WIDE : OTHER;
 }
 
 /** Width of `text` set in `font`, in em. */
 export function textWidth(text: string, font: FontMetrics): number {
   const table = tableOf(font);
-  const points = [...text];
+  const points = Array.from(text, (char) => char.codePointAt(0)!);
   // Font units and em are summed apart, so table widths stay exact.
   let units = 0;
   let em = 0;
-  points.forEach((char, k) => {
-    const cp = char.codePointAt(0)!;
-    if (
-      ZERO_WIDTH.test(char) ||
-      isSkinTone(cp) ||
-      (k > 0 && points[k - 1]!.codePointAt(0) === ZWJ)
-    )
-      return;
-    if (points[k + 1]?.codePointAt(0) === EMOJI_SELECTOR) {
+  for (let k = 0; k < points.length; k++) {
+    const cp = points[k]!;
+    if (isIgnorable(cp) || joinsPrevious(points, k)) continue;
+    if (points[k + 1] === EMOJI_SELECTOR) {
       em += EMOJI;
-      return;
+      continue;
     }
     const advance = table.get(cp) ?? font.defaultAdvance;
     if (advance !== undefined) units += advance;
-    else em += fallbackWidth(cp, char);
-  });
+    else if (isRegionalIndicator(cp)) {
+      // A flag is a pair; a lone indicator is drawn as a boxed letter.
+      em += EMOJI;
+      if (isRegionalIndicator(points[k + 1])) k++;
+    } else em += fallbackWidth(cp);
+  }
   return units / font.unitsPerEm + em;
 }
 
