@@ -254,6 +254,98 @@ describe('the package', () => {
     expect(pdfText(join(dir, 'input.pdf'))).toContain('%');
   });
 
+  it('passes JSON escapes in strings through TeX', () => {
+    const dir = workspace();
+    const file = document(
+      dir,
+      'escapes',
+      [
+        '\\algoviz{balanced-brackets}{"text": "(\\u0041[\\n])"}',
+        '\\algoviz{balanced-brackets}{"text": "(A[\\n])"}',
+      ].join('\n\n'),
+    );
+    expect(errors(tex(dir, file, 'unrestricted'))).toEqual([]);
+    // The escape of A is A: two calls, one drawing.
+    const figures = cached(dir).map((f) =>
+      readFileSync(join(dir, '_algoviz', f), 'utf8'),
+    );
+    expect(figures).toHaveLength(2);
+    expect(figures[0]).toBe(figures[1]);
+  });
+
+  it('sizes figures by width, height or scale', () => {
+    const dir = workspace();
+    const fig = (keys: string) =>
+      `\\algoviz[${keys}]{bubble-sort}{"values": [3, 1, 2]}`;
+    const file = document(
+      dir,
+      'sizes',
+      [
+        `\\sbox0{${fig('width=5cm')}}\\typeout{SIZE width \\the\\wd0}`,
+        `\\sbox0{${fig('height=2cm')}}\\typeout{SIZE height \\the\\dimexpr\\ht0+\\dp0\\relax}`,
+        `\\sbox0{${fig('')}}\\typeout{SIZE natural \\the\\wd0}`,
+        `\\sbox0{${fig('scale=0.5')}}\\typeout{SIZE half \\the\\wd0}`,
+      ].join('\n'),
+    );
+    const text = tex(dir, file, 'unrestricted');
+    expect(errors(text)).toEqual([]);
+    const size = (name: string) =>
+      Number(new RegExp(`SIZE ${name} ([\\d.]+)pt`).exec(text)?.[1]);
+    expect(size('width')).toBeCloseTo(142.26, 0);
+    expect(size('height')).toBeCloseTo(56.91, 0);
+    expect(size('half') / size('natural')).toBeCloseTo(0.5, 2);
+    // One run, one call: sizes are applied when a figure is drawn.
+    expect(calls(dir)).toHaveLength(1);
+  });
+
+  it('reads a file whose name starts with -', () => {
+    const dir = workspace();
+    copyFileSync(join(dir, 'bst-delete.json'), join(dir, '-bst.json'));
+    const file = document(dir, 'dash', '\\algovizfile[step=0]{-bst.json}');
+    expect(errors(tex(dir, file, 'unrestricted'))).toEqual([]);
+    expect(calls(dir)).toEqual([
+      expect.stringMatching(/^export \.\/-bst\.json /),
+    ]);
+  });
+
+  it('refuses a file name or cache directory the shell would read', () => {
+    const dir = workspace();
+    copyFileSync(join(dir, 'graph.json'), join(dir, 'a!b.json'));
+    const name = document(
+      dir,
+      'name',
+      '\\algovizfile[algorithm=dijkstra]{a!b.json}',
+    );
+    expect(tex(dir, name, 'unrestricted')).toContain(
+      "The file name 'a!b.json' has characters that it cannot have.",
+    );
+    const cache = document(
+      dir,
+      'cache',
+      '\\algoviz{bubble-sort}{"values": [2, 1]}',
+    );
+    writeFileSync(
+      join(dir, cache),
+      readFileSync(join(dir, cache), 'utf8').replace(
+        '\\usepackage{algoviz}',
+        '\\usepackage[cachedir={a;b}]{algoviz}',
+      ),
+    );
+    spawnSync(
+      'pdflatex',
+      ['-shell-escape', '-interaction=nonstopmode', cache],
+      {
+        cwd: dir,
+        env,
+        encoding: 'utf8',
+      },
+    );
+    expect(log(dir, cache)).toContain(
+      "The cache directory 'a;b' has characters that it cannot have.",
+    );
+    expect(calls(dir)).toEqual([]);
+  });
+
   it('draws figures that algoviz export made by hand', () => {
     const dir = workspace();
     spawnSync(

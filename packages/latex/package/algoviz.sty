@@ -57,6 +57,13 @@
     algorithm=,~and~\iow_char:N\\algovizinput~a~figure~made~by~
     'algoviz~export~--format~tikz'.
   }
+\msg_new:nnnn { algoviz } { long-input }
+  { The~input~of~#1~is~too~long~for~a~command~line. }
+  {
+    Windows~limits~a~command~line~to~8191~characters,~and~the~input~goes~
+    there~in~hexadecimal.~Put~the~input~in~a~JSON~file~and~use~
+    \iow_char:N\\algovizfile[algorithm=#1]{file.json}.
+  }
 \msg_new:nnnn { algoviz } { format }
   { The~figure~'#1'~has~format~#2,~but~this~package~reads~format~#3. }
   {
@@ -172,11 +179,15 @@
       }
       {
         \fp_set:Nn \l__algoviz_unit_fp
+          { \l__algoviz_scale_fp * \f@size / \c__algoviz_units_per_size_fp }
+        % Never wider than the line, where there is one.
+        \dim_compare:nNnT \linewidth > \c_zero_dim
           {
-            min (
-              \l__algoviz_scale_fp * \f@size / \c__algoviz_units_per_size_fp ,
-              \dim_to_fp:n { \linewidth } / (#1)
-            )
+            \fp_set:Nn \l__algoviz_unit_fp
+              {
+                min ( \l__algoviz_unit_fp ,
+                  \dim_to_fp:n { \linewidth } / (#1) )
+              }
           }
       }
     \dim_set:Nn \algoviz@u { \fp_to_dim:n { \l__algoviz_unit_fp } }
@@ -332,13 +343,18 @@
 \str_new:N \l__algoviz_call_str
 
 % TeX's tokens as the characters they stand for: escaped specials (\# \%
-% \{ \} \& \$ \_) become the characters, and a doubled # becomes one, as
-% TeX doubles every parameter character it turns into a string.
+% \{ \} \& \$ \_) become the characters; a doubled # becomes one, as TeX
+% doubles every parameter character it turns into a string; and the space
+% TeX writes after a control word goes, so JSON escapes such as \n and
+% \u00e9 come through.
 \cs_new_protected:Npn \__algoviz_to_str:Nn #1#2
   {
     \str_set:Ne #1 { \tl_to_str:n {#2} }
     \regex_replace_all:nnN
-      { (\\\\) | \\ ([\#\%\{\}\&\$\_]) | (\#)\# } { \1\2\3 } #1
+      {
+        (\\\\) | (\\[A-Za-z]+)\ ? | \\ ([\#\%\{\}\&\$\_]) | (\#)\#
+      }
+      { \1\2\3\4 } #1
     \tl_trim_spaces:N #1
   }
 \cs_generate_variant:Nn \__algoviz_to_str:Nn { NV }
@@ -484,6 +500,17 @@
 \cs_generate_variant:Nn \sys_shell_now:n { e }
 \cs_generate_variant:Nn \msg_error:nnn { nnV }
 
+% The longest input, in hexadecimal digits, that goes on a command line:
+% within cmd.exe's 8191 characters with the rest of the call on Windows,
+% and well within TeX's own buffers elsewhere.
+\int_const:Nn \c__algoviz_hex_limit_int
+  { \sys_if_platform_windows:TF { 7000 } { 100000 } }
+
+% A file name that starts with - would read as an option: ./ goes before.
+\cs_new:Npn \__algoviz_not_option:n #1
+  { \str_if_eq:eeT { \str_head:n {#1} } { - } { ./ } #1 }
+\cs_generate_variant:Nn \__algoviz_not_option:n { V }
+
 % The input as hexadecimal UTF-8: pdfTeX's strings are bytes already;
 % LuaTeX's and XeTeX's are characters, encoded first.
 \cs_new_protected:Npn \__algoviz_hex:NN #1#2
@@ -512,10 +539,19 @@
             { algorithm~id }
             {
               \__algoviz_hex:NN \l__algoviz_hex_str \l__algoviz_input_str
-              \__algoviz_make:nnn
-                { \l__algoviz_id_str \c_space_tl --input-hex= \l__algoviz_hex_str }
-                { algorithm ; \l__algoviz_id_str ; \l__algoviz_input_str }
-                { \l__algoviz_id_str }
+              \int_compare:nNnTF
+                { \str_count:N \l__algoviz_hex_str } > { \c__algoviz_hex_limit_int }
+                {
+                  \msg_error:nne { algoviz } { long-input } { \l__algoviz_id_str }
+                  \__algoviz_fail:nn { the~input~is~too~long~for~a~command~line. }
+                    { Put~it~in~a~file~and~use~\iow_char:N\\algovizfile[algorithm=\l__algoviz_id_str]. }
+                }
+                {
+                  \__algoviz_make:nnn
+                    { \l__algoviz_id_str \c_space_tl --input-hex= \l__algoviz_hex_str }
+                    { algorithm ; \l__algoviz_id_str ; \l__algoviz_input_str }
+                    { \l__algoviz_id_str }
+                }
             }
         }
     \group_end:
@@ -537,7 +573,7 @@
                   \str_if_empty:NTF \l__algoviz_id_str
                     {
                       \__algoviz_make:nnn
-                        { " \l__algoviz_file_str " }
+                        { " \__algoviz_not_option:V \l__algoviz_file_str " }
                         { document ; \file_mdfive_hash:V \l__algoviz_file_str }
                         { \l__algoviz_file_str }
                     }

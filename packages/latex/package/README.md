@@ -84,7 +84,7 @@ The input of `\algoviz` is JSON, as TeX reads it:
 - The outer braces of an object may be left out: `{"source": "A", ...}` and `"source": "A", ...` are the same.
 - Line breaks and repeated spaces are fine.
 - Write `%` as `\%`, which TeX would otherwise read as the start of a comment. `\#`, `\{`, `\}`, `\&`, `\$` and `\_` also stand for the characters.
-- TeX reads other backslash escapes inside JSON strings, such as `\n` or `é`, as commands. Put such input in a file and use `\algovizfile[algorithm=...]`. Do the same with long inputs on Windows, where a command line holds at most 8,191 characters.
+- Backslash escapes in JSON strings, such as `\n` and `\u00e9`, work as in JSON, except that TeX drops a space right after a letter escape such as `\n`: write `\u0020` for such a space. On Windows, where a command line holds at most 8,191 characters, inputs over about 3,500 characters are refused with a message; put them in a file and use `\algovizfile[algorithm=...]`, as for any input you would rather keep apart.
 
 ## The cache
 

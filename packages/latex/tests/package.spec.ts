@@ -85,7 +85,19 @@ describe('algoviz.sty', () => {
     const path = pattern('path');
     for (const name of ['heap.json', 'notes/my graph.json', 'C:/x/a-b_c.json'])
       expect(name).toMatch(path);
-    for (const name of ['a"b', 'a$b', 'a`b', 'a\\b', 'a%b', 'a!b', 'a;b'])
+    for (const name of [
+      'a"b',
+      'a$b',
+      'a`b',
+      'a\\b',
+      'a%b',
+      'a!b',
+      'a;b',
+      'a\nb',
+      'a\tb',
+      '',
+      'a\u0000b',
+    ])
       expect(name).not.toMatch(path);
   });
 });
