@@ -366,33 +366,35 @@ export const references: Readonly<Record<string, () => VisualizationInput>> = {
     }),
   'red-black-insert': redBlack,
   bfs: () =>
-    recipes.breadthFirstSearch(
-      cities([
+    moduleDocument('bfs', {
+      graph: cities([
         ['A', 'B'],
         ['A', 'C'],
         ['B', 'D'],
         ['C', 'D'],
         ['D', 'E'],
       ]),
-      'A',
-    ),
+      source: 'A',
+    }),
   'topological-sort': () =>
-    recipes.topologicalSort({
-      directed: true,
-      ...cities([
-        ['undershorts', 'pants'],
-        ['pants', 'shoes'],
-        ['pants', 'belt'],
-        ['shirt', 'belt'],
-        ['shirt', 'tie'],
-        ['tie', 'jacket'],
-        ['belt', 'jacket'],
-        ['socks', 'shoes'],
-      ]),
+    moduleDocument('topological-sort', {
+      graph: {
+        directed: true,
+        ...cities([
+          ['undershorts', 'pants'],
+          ['pants', 'shoes'],
+          ['pants', 'belt'],
+          ['shirt', 'belt'],
+          ['shirt', 'tie'],
+          ['tie', 'jacket'],
+          ['belt', 'jacket'],
+          ['socks', 'shoes'],
+        ]),
+      },
     }),
   dijkstra: () =>
-    recipes.dijkstra(
-      cities([
+    moduleDocument('dijkstra', {
+      graph: cities([
         ['S', 'A', 4],
         ['S', 'B', 1],
         ['B', 'A', 2],
@@ -400,11 +402,11 @@ export const references: Readonly<Record<string, () => VisualizationInput>> = {
         ['B', 'C', 5],
         ['C', 'D', 3],
       ]),
-      'S',
-    ),
+      source: 'S',
+    }),
   kruskal: () =>
-    recipes.kruskal(
-      cities([
+    moduleDocument('kruskal', {
+      graph: cities([
         ['A', 'B', 4],
         ['A', 'C', 3],
         ['B', 'C', 1],
@@ -413,7 +415,7 @@ export const references: Readonly<Record<string, () => VisualizationInput>> = {
         ['D', 'E', 2],
         ['C', 'E', 5],
       ]),
-    ),
+    }),
   'graph-coloring': colouring,
   lcs: () => recipes.longestCommonSubsequence('ABCB', 'BDCAB'),
   'coin-change': coinChange,

@@ -7,6 +7,14 @@
 import { err, type Diagnostic, type Result } from '@algoviz/spec';
 
 import type { Algorithm } from './algorithm.ts';
+import { bellmanFord } from './algorithms/graphs/bellman-ford.ts';
+import { bfs } from './algorithms/graphs/bfs.ts';
+import { dfs } from './algorithms/graphs/dfs.ts';
+import { dijkstra } from './algorithms/graphs/dijkstra.ts';
+import { floydWarshall } from './algorithms/graphs/floyd-warshall.ts';
+import { kruskal } from './algorithms/graphs/kruskal.ts';
+import { prim } from './algorithms/graphs/prim.ts';
+import { topologicalSort } from './algorithms/graphs/topological-sort.ts';
 import { balancedBrackets } from './algorithms/lists/balanced-brackets.ts';
 import { reverseLinkedList } from './algorithms/lists/reverse-linked-list.ts';
 import { binarySearch } from './algorithms/searching/binary-search.ts';
@@ -54,6 +62,14 @@ export const algorithms: readonly Algorithm[] = [
   ...maxHeap.modules,
   ...hashChaining.modules,
   ...linearProbing.modules,
+  bfs,
+  dfs,
+  topologicalSort,
+  dijkstra,
+  bellmanFord,
+  prim,
+  kruskal,
+  floydWarshall,
 ];
 
 /** The module with `id`, if there is one. */

@@ -36,7 +36,7 @@ const displays = [
     doc: reverse(['a', 'l', 'g', 'o', 'v', 'i', 'z']),
   },
   { label: 'AVL tree', doc: pick('AVL tree') },
-  { label: 'Dijkstra', doc: pick('Dijkstra') },
+  { label: 'Dijkstra', doc: pick('Dijkstra’s algorithm') },
 ];
 
 const parsed = computed<{ value: unknown; error: string | null }>(() => {

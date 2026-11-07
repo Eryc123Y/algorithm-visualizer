@@ -6,7 +6,7 @@
 import { readFileSync } from 'node:fs';
 
 import { createServer, PLAYER_URI } from '@algoviz/mcp';
-import { dijkstra, runAlgorithm } from '@algoviz/recipes';
+import { runAlgorithm } from '@algoviz/recipes';
 import { Client, InMemoryTransport } from '@modelcontextprotocol/client';
 import type { Page } from '@playwright/test';
 
@@ -159,7 +159,10 @@ test('a new result cancels a context update about the old document', async ({
   // The user goes back to frame 0, and within the update's delay another
   // document arrives, also at frame 0.
   await player.getByRole('button', { name: 'Previous step' }).click();
-  const other = dijkstra({ nodes: ['A', 'B'], edges: [['A', 'B', 1]] }, 'A');
+  const other = documentOf('dijkstra', {
+    graph: { nodes: ['A', 'B'], edges: [['A', 'B', 1]] },
+    source: 'A',
+  });
   await host(page).result(await callShow({ document: other }));
   await expect(player.locator('[data-key="g/element/A"]')).toHaveCount(1);
   await page.waitForTimeout(800);

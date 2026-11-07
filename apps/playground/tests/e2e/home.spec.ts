@@ -59,7 +59,7 @@ test('switches the main player into display mode', async ({ page }) => {
 
 test('loads an example into the editor and the player', async ({ page }) => {
   await page.goto('/');
-  await page.getByTestId('example').selectOption('Dijkstra');
+  await page.getByTestId('example').selectOption('Dijkstra’s algorithm');
   await expect(page.getByTestId('editor')).toHaveValue(/"kind": "graph"/);
   const player = page.getByTestId('player');
   await expect(player.locator('[data-key="g/element/A"]')).toHaveCount(1);

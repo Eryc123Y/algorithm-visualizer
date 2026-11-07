@@ -1,19 +1,20 @@
+/**
+ * The graph modules against independent references: shortest distances
+ * by repeated relaxation, a minimum spanning forest by a plain greedy
+ * pass, and the order constraints of a topological sort.
+ * `properties.spec.ts` runs them on random graphs.
+ */
 import { describe, expect, it } from 'vitest';
 
 import type { GraphState } from '@algoviz/core';
+import type { VisualizationInput } from '@algoviz/spec';
 
-import {
-  bellmanFord,
-  breadthFirstSearch,
-  depthFirstSearch,
-  dijkstra,
-  floydWarshall,
-  kruskal,
-  prim,
-  topologicalSort,
-  type GraphInput,
-} from '../src/index.ts';
-import { replay, stateOf } from './helpers.ts';
+import type { GraphInput } from '../src/index.ts';
+import { replay, runError, runOk, stateOf } from './helpers.ts';
+
+const doc = (id: string, input: object): VisualizationInput =>
+  runOk(id, input).document;
+const ids = (d: VisualizationInput) => d.steps.map((s) => s.meta?.id);
 
 const weighted: GraphInput = {
   nodes: ['A', 'B', 'C', 'D', 'E', 'F'],
@@ -80,7 +81,7 @@ function mstWeight(g: GraphInput): number {
 
 describe('breadthFirstSearch', () => {
   it('labels every reachable node with its hop distance', () => {
-    const trace = replay(breadthFirstSearch(withIsland, '1'));
+    const trace = replay(doc('bfs', { graph: withIsland, source: '1' }));
     const g = stateOf(trace, 'g', 'graph');
     const d = reference(withIsland, '1');
     for (const v of withIsland.nodes)
@@ -94,18 +95,26 @@ describe('breadthFirstSearch', () => {
 
 describe('depthFirstSearch', () => {
   it('nests discovery and finishing times', () => {
-    const trace = replay(depthFirstSearch(withIsland, '1'));
+    const trace = replay(doc('dfs', { graph: withIsland }));
     const g = stateOf(trace, 'g', 'graph');
     const times = Object.entries(notes(g)).map(([v, t]) => {
       const [d, f] = t.split('/').map(Number);
       return { v, d: d!, f: f! };
     });
-    expect(times.map((t) => t.v).sort()).toEqual(['1', '2', '3', '4']);
+    // Every vertex, in a forest of two trees.
+    expect(times.map((t) => t.v).sort()).toEqual([
+      '1',
+      '2',
+      '3',
+      '4',
+      '5',
+      '6',
+    ]);
     for (const a of times)
       for (const b of times)
         // Intervals are either disjoint or nested (parenthesis theorem).
         expect(a.f < b.d || b.f < a.d || a.d < b.d === b.f < a.f).toBe(true);
-    expect(selected(g)).toHaveLength(3);
+    expect(selected(g)).toHaveLength(4);
     expect(stateOf(trace, 'calls', 'stack').data).toEqual([]);
   });
 });
@@ -115,7 +124,7 @@ describe('dijkstra', () => {
     ['undirected', weighted],
     ['directed', { ...weighted, directed: true }],
   ])('finds shortest distances (%s)', (_, graph) => {
-    const trace = replay(dijkstra(graph, 'A'));
+    const trace = replay(doc('dijkstra', { graph, source: 'A' }));
     const g = stateOf(trace, 'g', 'graph');
     const d = reference(graph, 'A');
     for (const v of graph.nodes)
@@ -138,7 +147,7 @@ describe('bellmanFord', () => {
     ],
   };
   it('handles negative weights', () => {
-    const trace = replay(bellmanFord(negative, 's'));
+    const trace = replay(doc('bellman-ford', { graph: negative, source: 's' }));
     const g = stateOf(trace, 'g', 'graph');
     const d = reference(negative, 's');
     for (const v of negative.nodes) expect(notes(g)[v]).toBe(String(d.get(v)));
@@ -149,7 +158,7 @@ describe('bellmanFord', () => {
       ...negative,
       edges: [...negative.edges, ['c', 'b', -1] as const],
     };
-    const trace = replay(bellmanFord(cycle, 's'));
+    const trace = replay(doc('bellman-ford', { graph: cycle, source: 's' }));
     const g = stateOf(trace, 'g', 'graph');
     expect(Object.values(g.marks.edgeMarks)).toContain('rejected');
   });
@@ -157,8 +166,8 @@ describe('bellmanFord', () => {
 
 describe('minimum spanning trees', () => {
   it.each([
-    ['prim', (g: GraphInput) => prim(g, 'A')],
-    ['kruskal', kruskal],
+    ['prim', (graph: GraphInput) => doc('prim', { graph, root: 'A' })],
+    ['kruskal', (graph: GraphInput) => doc('kruskal', { graph })],
   ])('%s selects a tree of minimum weight', (_, run) => {
     const trace = replay(run(weighted));
     const g = stateOf(trace, 'g', 'graph');
@@ -194,7 +203,7 @@ describe('topologicalSort', () => {
     ],
   };
   it('orders every node after its predecessors', () => {
-    const trace = replay(topologicalSort(dag));
+    const trace = replay(doc('topological-sort', { graph: dag }));
     const order = stateOf(trace, 'order', 'array').data.map((e) =>
       String(e.value),
     );
@@ -202,21 +211,35 @@ describe('topologicalSort', () => {
     for (const [u, v] of dag.edges)
       expect(order.indexOf(u)).toBeLessThan(order.indexOf(v));
   });
-  it('stops short on a cycle', () => {
-    const trace = replay(
-      topologicalSort({
-        directed: true,
-        nodes: ['a', 'b', 'c'],
-        edges: [
-          ['a', 'b'],
-          ['b', 'c'],
-          ['c', 'b'],
-        ],
+  it('refuses a graph with a cycle, naming it', () => {
+    expect(
+      runError('topological-sort', {
+        graph: {
+          directed: true,
+          nodes: ['a', 'b', 'c'],
+          edges: [
+            ['a', 'b'],
+            ['b', 'c'],
+            ['c', 'b'],
+          ],
+        },
       }),
-    );
-    expect(stateOf(trace, 'order', 'array').data.map((e) => e.value)).toEqual([
-      'a',
-    ]);
+    ).toEqual({
+      code: 'INVALID_ARGUMENT',
+      path: '$.input',
+      message:
+        'The graph has a cycle, b → c → b, so it has no topological order',
+    });
+  });
+
+  it('puts each vertex at the front of the list as it finishes', () => {
+    const d = doc('topological-sort', { graph: dag });
+    const finishes = d.steps.filter((s) => s.meta?.id === 'finish').length;
+    expect(finishes).toBe(dag.nodes.length);
+    const order = stateOf(replay(d), 'order', 'array').data.map((e) => e.value);
+    // The first vertex to finish ends up last.
+    const first = d.steps.find((s) => s.meta?.id === 'finish')!;
+    expect(first.meta!.narration).toContain(`put ${String(order.at(-1))} at`);
   });
 });
 
@@ -230,37 +253,54 @@ describe('parallel edges', () => {
     ],
   };
   it('keeps each edge distinct and uses the lighter one', () => {
-    const g = stateOf(replay(dijkstra(multi, 'A')), 'g', 'graph');
+    const g = stateOf(
+      replay(doc('dijkstra', { graph: multi, source: 'A' })),
+      'g',
+      'graph',
+    );
     expect(g.data.edges.map((e) => e.id)).toEqual(['A-B', 'A-B.2', 'B-C']);
     expect(notes(g)['C']).toBe('3');
     expect(selected(g).sort()).toEqual(['A-B.2', 'B-C']);
   });
   it('does not reuse a node name as an edge id', () => {
     const named: GraphInput = { nodes: ['A', 'B', 'A-B'], edges: [['A', 'B']] };
-    const g = stateOf(replay(breadthFirstSearch(named, 'A')), 'g', 'graph');
+    const g = stateOf(
+      replay(doc('bfs', { graph: named, source: 'A' })),
+      'g',
+      'graph',
+    );
     expect(g.data.edges.map((e) => e.id)).toEqual(['A-B.2']);
   });
-  it('runs every graph recipe', () => {
-    for (const doc of [
-      breadthFirstSearch(multi, 'A'),
-      depthFirstSearch(multi, 'A'),
-      bellmanFord(multi, 'A'),
-      prim(multi, 'A'),
-      kruskal(multi),
-      topologicalSort({ ...multi, directed: true }),
-      floydWarshall(multi),
-    ])
-      replay(doc);
-    const k = stateOf(replay(kruskal(multi)), 'g', 'graph');
+  it('runs every graph module', () => {
+    for (const [id, input] of [
+      ['bfs', { graph: multi, source: 'A' }],
+      ['dfs', { graph: multi }],
+      ['bellman-ford', { graph: multi, source: 'A' }],
+      ['prim', { graph: multi, root: 'A' }],
+      ['kruskal', { graph: multi }],
+      ['topological-sort', { graph: { ...multi, directed: true } }],
+      ['floyd-warshall', { graph: multi }],
+    ] as const)
+      replay(doc(id, input));
+    const k = stateOf(replay(doc('kruskal', { graph: multi })), 'g', 'graph');
     expect(weightOf(k, selected(k))).toBe(3);
   });
 });
 
 describe('input checks', () => {
   it('rejects a start node that is not in the graph', () => {
-    expect(() => breadthFirstSearch(withIsland, 'Z')).toThrow(RangeError);
-    expect(() => dijkstra(weighted, 'Z')).toThrow(RangeError);
+    for (const [id, input] of [
+      ['bfs', { graph: withIsland, source: 'Z' }],
+      ['dijkstra', { graph: weighted, source: 'Z' }],
+      ['prim', { graph: weighted, root: 'Z' }],
+    ] as const)
+      expect(runError(id, input)).toEqual({
+        code: 'INVALID_ARGUMENT',
+        path: '$.input',
+        message: '"Z" is not a node of the graph',
+      });
   });
+
   it('rejects negative weights for Dijkstra', () => {
     const graph: GraphInput = {
       directed: true,
@@ -271,7 +311,101 @@ describe('input checks', () => {
         ['C', 'B', -5],
       ],
     };
-    expect(() => dijkstra(graph, 'A')).toThrow(RangeError);
+    expect(runError('dijkstra', { graph, source: 'A' }).message).toBe(
+      'Dijkstra’s algorithm needs non-negative weights; use bellman-ford for negative ones',
+    );
+  });
+
+  it('rejects node names that cannot be ids, repeated nodes and stray edges', () => {
+    for (const [graph, message] of [
+      [
+        { nodes: ['a b'], edges: [] },
+        'Node name "a b" must be 1 to 24 letters, digits or _ . : -',
+      ],
+      [{ nodes: ['a', 'a'], edges: [] }, 'Node "a" is listed twice'],
+      [
+        { nodes: ['a'], edges: [['a', 'z']] },
+        'Edge a–z ends at "z", which is not a node',
+      ],
+    ] as const)
+      expect(runError('dfs', { graph }).message).toBe(message);
+    expect(runError('dfs', { graph: { nodes: [], edges: [] } }).path).toBe(
+      '$.input.graph.nodes',
+    );
+  });
+});
+
+describe('weights', () => {
+  it('narrates a negative self-loop with the distance before it improves', () => {
+    const d = doc('bellman-ford', {
+      graph: {
+        directed: true,
+        nodes: ['A', 'B'],
+        edges: [
+          ['A', 'A', -1],
+          ['A', 'B', 2],
+        ],
+      },
+      source: 'A',
+    });
+    const first = d.steps.find((s) => s.meta?.id === 'improve')!;
+    expect(first.meta!.narration).toBe(
+      '0 − 1 = -1 improves A to -1, through A.',
+    );
+  });
+
+  it('takes weights up to 1e9 either way, so sums stay finite', () => {
+    const cycle = {
+      directed: true,
+      nodes: ['A', 'B'],
+      edges: [
+        ['A', 'B', -1e9],
+        ['B', 'A', -1e9],
+      ],
+    };
+    expect(runOk('floyd-warshall', { graph: cycle }).document).toBeDefined();
+    expect(
+      runError('floyd-warshall', {
+        graph: { ...cycle, edges: [['A', 'B', -1e308]] },
+      }).path,
+    ).toBe('$.input.graph.edges[0][2]');
+  });
+});
+
+describe('procedures of CLRS', () => {
+  it('dijkstra extracts an unreachable vertex with ∞ and relaxes nothing from it', () => {
+    const d = doc('dijkstra', { graph: withIsland, source: '1' });
+    const extracted = d.steps.filter((s) => s.meta?.id === 'extract');
+    expect(extracted).toHaveLength(6);
+    expect(extracted.at(-1)!.meta!.narration).toContain('∞');
+    expect(ids(d).at(-1)).toBe('done');
+  });
+
+  it('bellman-ford runs all |V| - 1 rounds', () => {
+    const d = doc('bellman-ford', { graph: weighted, source: 'A' });
+    expect(ids(d).filter((x) => x === 'round')).toHaveLength(5);
+    expect(ids(d).slice(-2)).toEqual(['check', 'done']);
+  });
+
+  it('prim starts a new tree for an unreachable vertex, giving a forest', () => {
+    const d = doc('prim', { graph: withIsland, root: '1' });
+    const g = stateOf(replay(d), 'g', 'graph');
+    expect(selected(g)).toHaveLength(4);
+    expect(g.marks.settled).toHaveLength(6);
+  });
+
+  it('kruskal unites by rank in a forest beside the graph', () => {
+    const d = doc('kruskal', { graph: weighted });
+    const sets = stateOf(replay(d), 'sets', 'tree');
+    expect(sets.data.roots).toHaveLength(1);
+    expect(Object.values(sets.marks.notes)).toContain('rank 2');
+    expect(ids(d).filter((x) => x === 'take')).toHaveLength(5);
+    expect(ids(d).filter((x) => x === 'skip')).toHaveLength(4);
+  });
+
+  it('dfs starts a tree at each vertex not reached yet', () => {
+    const d = doc('dfs', { graph: withIsland });
+    expect(ids(d).filter((x) => x === 'root')).toHaveLength(2);
   });
 });
 
@@ -286,11 +420,11 @@ describe('floydWarshall', () => {
         ['c', 'a', -1],
       ],
     };
-    const trace = replay(floydWarshall(graph));
+    const trace = replay(doc('floyd-warshall', { graph }));
     const table = stateOf(trace, 'dist', 'table');
     expect(table.data.some((row, i) => (row[i] as number) < 0)).toBe(true);
     expect(trace.visualization.steps.at(-1)?.meta?.narration).toContain(
-      'negative cycle',
+      'negative-weight cycle',
     );
   });
 
@@ -306,7 +440,7 @@ describe('floydWarshall', () => {
         ['2', '3', 3],
       ],
     };
-    const trace = replay(floydWarshall(graph));
+    const trace = replay(doc('floyd-warshall', { graph }));
     const table = stateOf(trace, 'dist', 'table');
     graph.nodes.forEach((s, i) => {
       const d = reference(graph, s);
