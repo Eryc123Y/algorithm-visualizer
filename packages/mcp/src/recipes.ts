@@ -1,12 +1,10 @@
 /**
  * The ready-made visualizations a model can run: every module of the
- * registry of @algoviz/recipes (ADR 0019), and the recipes not migrated
- * yet (ADR 0022), in one list with one shape.
+ * registry of @algoviz/recipes (ADR 0019), in one list with one shape.
  */
 import {
   algorithms,
   runModule,
-  TOPICS,
   type Algorithm,
   type Topic,
 } from '@algoviz/recipes';
@@ -19,11 +17,9 @@ import {
 } from '@algoviz/spec';
 import { z } from 'zod';
 
-import { legacyRecipes } from './legacy-recipes.ts';
-
 /** One entry of the catalogue, as MCP and the CLI show it. */
 export interface CatalogEntry {
-  /** The registry id, e.g. `bst.delete`; camelCase for legacy recipes. */
+  /** The registry id, e.g. `bst.delete`. */
   readonly id: string;
   readonly title: string;
   readonly topic: Topic;
@@ -48,13 +44,9 @@ function fromModule(algorithm: Algorithm): CatalogEntry {
   };
 }
 
-const topicOrder = (e: CatalogEntry) => TOPICS.indexOf(e.topic);
-
-/** Every entry, grouped by topic in menu order. */
-export const recipeCatalog: readonly CatalogEntry[] = [
-  ...algorithms.map(fromModule),
-  ...legacyRecipes,
-].sort((a, b) => topicOrder(a) - topicOrder(b));
+/** Every entry, grouped by topic in menu order, as the registry lists them. */
+export const recipeCatalog: readonly CatalogEntry[] =
+  algorithms.map(fromModule);
 
 export const findRecipe = (id: string): CatalogEntry | undefined =>
   recipeCatalog.find((r) => r.id === id);

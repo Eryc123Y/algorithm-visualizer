@@ -68,19 +68,20 @@ describe('algoviz CLI', () => {
     });
   });
 
-  it('runs a module, also by the old command', () => {
-    for (const command of ['run', 'recipe']) {
-      const { code, out } = run(
-        command,
-        'edit-distance',
-        '{"first":"ab","second":"b"}',
-      );
-      expect(code).toBe(0);
-      expect(JSON.parse(out)).toMatchObject({
-        version: '0.3',
-        title: 'Edit distance',
-      });
-    }
+  it('runs a module, and no longer knows the old recipe command', () => {
+    const { code, out } = run(
+      'run',
+      'edit-distance',
+      '{"first":"ab","second":"b"}',
+    );
+    expect(code).toBe(0);
+    expect(JSON.parse(out)).toMatchObject({
+      version: '0.3',
+      title: 'Edit distance',
+    });
+    const old = run('recipe', 'edit-distance', '{"first":"ab","second":"b"}');
+    expect(old.code).toBe(2);
+    expect(old.err).toContain('Unknown command "recipe"');
   });
 
   it('lists the recipes', () => {

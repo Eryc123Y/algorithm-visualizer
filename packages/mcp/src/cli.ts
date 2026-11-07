@@ -11,8 +11,7 @@
  *   algoviz run <id> <input-json> [--out doc.json]
  *
  * A frame is a number (negative counts from the end) or a selector such as
- * "relax#2", "insert-5/go" or "insert-5" (ADR 0020). `algoviz recipe` is
- * another name for `run` until roadmap 0.5 removes it (ADR 0022).
+ * "relax#2", "insert-5/go" or "insert-5" (ADR 0020).
  *
  * A file of "-" is read from standard input. Exits with 1 on an error.
  */
@@ -120,9 +119,7 @@ function dispatch(
       });
     case 'recipes':
       return callTool('algoviz_list_recipes', {});
-    // `recipe` is the old name of `run`, kept until roadmap 0.5.
-    case 'run':
-    case 'recipe': {
+    case 'run': {
       const [id, input] = rest;
       if (id === undefined || input === undefined)
         throw new UsageError(`${command} needs an id and an input`);

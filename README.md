@@ -60,7 +60,18 @@ a.swap({ i: 0, j: 1 });
 const mine = r.build();
 ```
 
-The registry has the seven sorting algorithms (`insertion-sort`, `merge-sort`, `heapsort`, `quicksort`, `counting-sort`, `bubble-sort` and `selection-sort`, following the procedures of CLRS), `binary-search`, `reverse-linked-list` and `balanced-brackets`, binary search trees (`bst`, `bst.search`, `bst.insert`, `bst.delete`), AVL trees (`avl.insert`), the inorder, preorder and postorder tree walks, tries (`trie.insert`, `trie.search`), disjoint-set forests (`disjoint-set.union`, `disjoint-set.find-set`), binary heaps (`min-heap` and `max-heap`, with push, pop and decrease- or increase-key), hash tables with chaining (`hash-chaining`) or linear probing (`linear-probing`), each with insert and search, the graph algorithms of CLRS (`bfs`, `dfs`, `topological-sort`, `dijkstra`, `bellman-ford`, `prim`, `kruskal` and `floyd-warshall`), and three dynamic programs (`lcs`, `edit-distance` and `knapsack`). Each operation starts from a structure the caller describes, and a structure's sequence runs up to 8 operations. `algorithms` lists every module.
+The registry holds these modules, by topic ([ADR 0022](docs/adr/0022-registry-details.md), [ADR 0023](docs/adr/0023-remaining-modules.md)). They follow the procedures of CLRS where CLRS has them.
+
+- **Sorting:** `insertion-sort`, `merge-sort`, `heapsort`, `quicksort`, `counting-sort`, `bubble-sort`, `selection-sort`.
+- **Searching:** `binary-search`.
+- **Lists:** `reverse-linked-list`, `balanced-brackets`.
+- **Trees:** `bst` (search, insert, delete), `avl` (insert), `inorder-tree-walk`, `preorder-tree-walk`, `postorder-tree-walk`, `trie` (insert, search), `disjoint-set` (union, find-set).
+- **Heaps:** `min-heap` (push, pop, decrease-key), `max-heap` (push, pop, increase-key).
+- **Hashing:** `hash-chaining` and `linear-probing`, each with insert and search.
+- **Graphs:** `bfs`, `dfs`, `topological-sort`, `dijkstra`, `bellman-ford`, `prim`, `kruskal`, `floyd-warshall`.
+- **Dynamic programming:** `lcs`, `edit-distance`, `knapsack`.
+
+A data structure has one module per operation, such as `bst.delete`, which starts from a structure the caller describes, and one for its sequence, such as `bst`, which runs up to 8 operations. `algorithms` lists every module.
 
 MCP, the `algoviz` command line and the playground's example menu read the registry, grouped by topic.
 
