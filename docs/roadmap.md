@@ -9,7 +9,7 @@ How the [requirements](requirements.md) get built, in order. Each item is one pu
 
 Everything later builds on these, so they come first.
 
-- [ ] **0.1 Algorithm registry** _ADR_. One module type for every algorithm and every data-structure operation. A module has:
+- [ ] **0.1 Algorithm registry** _ADR_ [0019](adr/0019-algorithm-registry.md). One module type for every algorithm and every data-structure operation. A module has:
   - a stable id;
   - a Zod input schema, the only definition of its input;
   - example inputs;
@@ -19,23 +19,17 @@ Everything later builds on these, so they come first.
   The MCP catalogue, the CLI, the playground menu, the documentation and the tests derive from the registry. The Zod input schemas move from `packages/mcp` to the modules.
 
 - [ ] **0.2 Migrate existing recipes** to the registry: the 29 recipes and `ops.bst` and `ops.heap`. Documents stay the same apart from what 0.3 adds; the existing reference tests prove it.
-- [ ] **0.3 Named steps and sections** _ADR_ (protocol).
+- [ ] **0.3 Named steps and sections** _ADR_ [0020](adr/0020-step-names-and-sections.md) (protocol).
   - Each step has an optional stable `id`, for example `fixup-case-3`, and each operation forms a section.
   - The player, the CLI and MCP select frames by "section / step id".
   - Recipes emit ids for the steps a learner would point at.
-- [ ] **0.4 Protocol versioning** _ADR_. Rules for minor (additive) and major (breaking) versions, an `upgrade(document)` function, and when the format freezes as 1.0. It freezes after Phase 2's structure additions, so 1.0 does not need a break soon after.
-- [ ] **0.5 Pseudocode as a language.** CLRS conventions:
-  - `for … to`, `downto`;
-  - `=` for assignment;
-  - `//` comments;
-  - `NIL`, `TRUE`, `FALSE`;
-  - 1-based arrays where the book uses them.
-
-  The work has four parts:
-  - a highlighter;
-  - a language switch in the player;
-  - anchors shared with Python;
-  - a test that every anchor a recipe uses exists in every language, and that every step's line is valid in each.
+- [ ] **0.4 Protocol versioning** _ADR_ [0021](adr/0021-protocol-versioning.md). Rules for minor (additive) and major (breaking) versions, an `upgrade(document)` function, and when the format freezes as 1.0. It freezes after Phase 2's structure additions, so 1.0 does not need a break soon after.
+- [ ] **0.5 Sources in two languages** _ADR_ [0017](adr/0017-multi-language-source.md) (revised; protocol).
+  - `sources` with anchors, and `meta.at`.
+  - Pseudocode in CLRS conventions with 0-based indices, and its highlighter.
+  - A language switch in the player.
+  - Both languages for every migrated recipe.
+  - Tests that every anchor exists in every language, and that the tokens of every module's code join back into the code.
 
 ## Phase 1: static output and packages
 
