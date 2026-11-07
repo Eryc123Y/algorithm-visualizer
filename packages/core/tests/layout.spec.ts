@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { uniformFont } from '@algoviz/fonts';
 import type { VisualizationInput } from '@algoviz/spec';
 
 import {
@@ -12,6 +13,7 @@ import {
   type SceneBox,
   type Trace,
 } from '../src/index.ts';
+import { sceneProblems } from './scene-check.ts';
 
 function mustLoad(input: VisualizationInput): Trace {
   const result = loadTrace(input);
@@ -266,5 +268,31 @@ describe('scene bounds', () => {
         expect(right, item.key).toBeLessThanOrEqual(scene.width);
       }
     }
+  });
+});
+
+describe('layout with other fonts', () => {
+  it('reserves room for queue markers in the font they are set in', () => {
+    // A face of 2 em per character: "front" is 10 em wide.
+    const wide = uniformFont(2);
+    const trace = mustLoad({
+      version: '0.1',
+      structures: { q: { kind: 'queue', initial: [1] } },
+      steps: [],
+    });
+    const scene = layoutTrace(trace, {
+      ...bareLayoutOptions,
+      fonts: { value: wide, label: wide },
+    }).sceneAt(0);
+    const badges = scene.items.filter((i) => i.type === 'badge');
+    expect(badges.map((b) => b.text).sort()).toEqual(['back', 'front']);
+    for (const b of badges) {
+      expect(b.x - b.width / 2, b.key).toBeGreaterThanOrEqual(0);
+      expect(b.x + b.width / 2, b.key).toBeLessThanOrEqual(scene.width);
+    }
+    // Text is measured in the default fonts there, so only check placement.
+    expect(sceneProblems(scene).filter((p) => p.includes('pointer'))).toEqual(
+      [],
+    );
   });
 });

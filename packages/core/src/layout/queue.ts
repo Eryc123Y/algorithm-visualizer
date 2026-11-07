@@ -54,6 +54,7 @@ export const mergeQueueMetrics = (
 
 /** Gap between the cells and the pipe walls. */
 const PIPE = 6;
+const MARKERS = ['front', 'back'] as const;
 
 export function layoutQueue({
   name,
@@ -65,7 +66,11 @@ export function layoutQueue({
 }: LayoutInput<QueueDecl, QueueState, QueueMetrics>): Block {
   const cellWidth = cellWidthFor(metrics.valueWidth, o);
   const pitch = cellWidth + o.cellGap;
-  const overhang = Math.max(PIPE * 2, badgeOverhang(5, cellWidth, o));
+  // Room for the "front" and "back" badges, in the font they are set in.
+  const overhang = Math.max(
+    PIPE * 2,
+    badgeOverhang(maxWidth(MARKERS, o.fonts.value), cellWidth, o),
+  );
   const cellsLeft = origin.x + overhang;
   const centerX = (k: number) => cellsLeft + k * pitch + cellWidth / 2;
   const titleRow = titleRowHeight(o);
