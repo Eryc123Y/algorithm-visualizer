@@ -31,6 +31,7 @@ Everything later builds on these, so they come first. The ADRs are accepted (#13
   - searching, lists and hashing: `binary-search`, `reverse-linked-list`, `balanced-brackets`, `hash-chaining` and `linear-probing` (#24).
   - trees: `avl`, `inorder-tree-walk`, `preorder-tree-walk`, `postorder-tree-walk`, `trie` and `disjoint-set`, and the whole-life examples of `bst` and `min-heap` (#25).
   - graphs: `bfs`, `dfs`, `topological-sort`, `dijkstra`, `bellman-ford`, `prim`, `kruskal` and `floyd-warshall` (#26).
+  - dynamic programming: `lcs`, `edit-distance` and `knapsack` (#27).
 
 ## Phase 1: static output and packages
 

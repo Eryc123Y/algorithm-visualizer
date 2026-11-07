@@ -30,7 +30,7 @@ export interface Snippet {
   line(anchor: string): number;
 }
 
-/** Dedents `code` like `python()` and reads its markers. */
+/** Dedents `code` and reads its markers. */
 export function snippet(language: Language, code: string): Snippet {
   const anchors = new Map<string, number>();
   const lines = dedent(code)

@@ -22,9 +22,6 @@ import { formatErrors, type VisualizationInput } from '@algoviz/spec';
 import { renderSvg } from '@algoviz/svg';
 
 import {
-  editDistance,
-  knapsack,
-  longestCommonSubsequence,
   runAlgorithm,
   type GraphInput,
   type KnapsackItem,
@@ -139,26 +136,6 @@ function recipe<T>(
     );
     it('renders the last frame to clean SVG', property(checkRender), TIMEOUT);
   });
-}
-
-/** Inputs a recipe deliberately rejects must throw a RangeError. */
-function rejects<T>(
-  name: string,
-  arb: fc.Arbitrary<T>,
-  build: (input: T) => unknown,
-): void {
-  it(
-    `${name} with a RangeError`,
-    () => {
-      fc.assert(
-        fc.property(arb, (input) => {
-          expect(() => build(input)).toThrow(RangeError);
-        }),
-        { numRuns: runs },
-      );
-    },
-    TIMEOUT,
-  );
 }
 
 // ---------------------------------------------------------------------------
@@ -821,15 +798,18 @@ function levenshtein(a: readonly string[], b: readonly string[]): number {
   return row[b.length]!;
 }
 
-const stringPairs = fc.tuple(strings('abN', 24), strings('abN', 24));
+/** Two strings of 1 to 16 characters, as the string tables take them. */
+const stringPairs = fc
+  .tuple(strings('abN', 16), strings('abN', 16))
+  .filter(([a, b]) => [a, b].every((s) => s.length >= 1 && s.length <= 16));
 
 recipe(
-  'longestCommonSubsequence',
+  'lcs',
   stringPairs,
-  ([a, b]) => longestCommonSubsequence(a, b),
+  ([first, second]) => runOk('lcs', { first, second }).document,
   (trace, [first, second]) => {
     const [a, b] = [[...first], [...second]];
-    const table = stateOf(trace, 'L', 'table');
+    const table = stateOf(trace, 'c', 'table');
     const length = lcsLength(a, b);
     expect(table.data[a.length]![b.length]).toBe(length);
     // Settled cells are matches, strictly increasing in both strings.
@@ -846,9 +826,9 @@ recipe(
 );
 
 recipe(
-  'editDistance',
+  'edit-distance',
   stringPairs,
-  ([a, b]) => editDistance(a, b),
+  ([first, second]) => runOk('edit-distance', { first, second }).document,
   (trace, [first, second]) => {
     const [a, b] = [[...first], [...second]];
     const table = stateOf(trace, 'D', 'table');
@@ -881,7 +861,7 @@ const knapsackInput = fc.tuple(
         fc.integer({ min: -1e6, max: 1e6 }),
       ),
     }),
-    { maxLength: 8 },
+    { minLength: 1, maxLength: 8 },
   ),
   fc.integer({ min: 0, max: 40 }),
 );
@@ -902,7 +882,7 @@ function bestValue(items: readonly KnapsackItem[], capacity: number): number {
 recipe(
   'knapsack',
   knapsackInput,
-  ([items, capacity]) => knapsack(items, capacity),
+  ([items, capacity]) => runOk('knapsack', { items, capacity }).document,
   (trace, [items, capacity]) => {
     const table = stateOf(trace, 'K', 'table');
     const best = bestValue(items, capacity);
@@ -929,19 +909,45 @@ describe('knapsack input checks', () => {
     fc.double({ min: -10, max: 10 }).filter((x) => !Number.isInteger(x)),
     fc.constantFrom(NaN, Infinity, -Infinity),
   );
-  rejects(
+  it(
     'rejects a capacity that is not an integer from 0 to 40',
-    fc.tuple(knapsackInput, badCapacity),
-    ([[items], capacity]) => knapsack(items, capacity),
+    () => {
+      fc.assert(
+        fc.property(knapsackInput, badCapacity, ([items], capacity) => {
+          expect(runError('knapsack', { items, capacity })).toMatchObject({
+            code: 'INVALID_SHAPE',
+            path: '$.input.capacity',
+          });
+        }),
+        { numRuns: runs },
+      );
+    },
+    TIMEOUT,
   );
-  rejects(
-    'rejects an item weight that is not a positive integer',
-    fc.tuple(knapsackInput, badWeight, fc.nat(), smallInt),
-    ([[items, capacity], weight, at, value]) =>
-      knapsack(
-        items.toSpliced(at % (items.length + 1), 0, { weight, value }),
-        capacity,
-      ),
+  it(
+    'rejects an item weight that is not a positive integer, at its index',
+    () => {
+      fc.assert(
+        fc.property(
+          knapsackInput.filter(([items]) => items.length < 8),
+          badWeight,
+          fc.nat(),
+          smallInt,
+          ([items, capacity], weight, at, value) => {
+            const k = at % (items.length + 1);
+            const bad = items.toSpliced(k, 0, { weight, value });
+            expect(
+              runError('knapsack', { items: bad, capacity }),
+            ).toMatchObject({
+              code: 'INVALID_SHAPE',
+              path: `$.input.items[${k}].weight`,
+            });
+          },
+        ),
+        { numRuns: runs },
+      );
+    },
+    TIMEOUT,
   );
 });
 
@@ -1542,30 +1548,33 @@ describe('inputs outside the checked domain', () => {
     allGraphModules,
   );
 
-  // Tables have at most 100 rows and 100 columns; knapsack checks its
-  // capacity (the columns) but not its items (the rows).
-  const longString = fc.string({
-    unit: fc.constantFrom('a', 'b'),
-    minLength: 100,
-    maxLength: 140,
-  });
-  total(
-    'longestCommonSubsequence and editDistance with 100 or more characters',
-    fc.tuple(longString, fc.string({ maxLength: 3 }).filter(clean)),
-    ([a, b]) => [longestCommonSubsequence(a, b), editDistance(b, a)],
-  );
-  total(
-    'knapsack with 100 or more items',
-    fc.tuple(
-      fc.array(
-        fc.record({
-          weight: fc.integer({ min: 1, max: 5 }),
-          value: fc.integer({ min: 0, max: 9 }),
-        }),
-        { minLength: 100, maxLength: 120 },
-      ),
-      fc.integer({ min: 0, max: 3 }),
-    ),
-    ([items, capacity]) => knapsack(items, capacity),
+  // Strings longer than 16 characters and more than 8 items are refused
+  // at their paths rather than drawn as huge tables.
+  it(
+    'string tables and knapsack refuse inputs over their limits',
+    () => {
+      fc.assert(
+        fc.property(
+          fc.string({
+            unit: fc.constantFrom('a', 'b'),
+            minLength: 17,
+            maxLength: 140,
+          }),
+          fc.string({ minLength: 1, maxLength: 3 }).filter(clean),
+          (long, short) => {
+            for (const id of ['lcs', 'edit-distance'])
+              expect(runError(id, { first: long, second: short }).path).toBe(
+                '$.input.first',
+              );
+          },
+        ),
+        { numRuns: runs },
+      );
+      const items = Array.from({ length: 9 }, () => ({ weight: 1, value: 1 }));
+      expect(runError('knapsack', { items, capacity: 3 }).path).toBe(
+        '$.input.items',
+      );
+    },
+    TIMEOUT,
   );
 });

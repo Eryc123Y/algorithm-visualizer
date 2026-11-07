@@ -68,15 +68,18 @@ describe('algoviz CLI', () => {
     });
   });
 
-  it('runs a legacy recipe, also by its old command', () => {
+  it('runs a module, also by the old command', () => {
     for (const command of ['run', 'recipe']) {
       const { code, out } = run(
         command,
-        'editDistance',
+        'edit-distance',
         '{"first":"ab","second":"b"}',
       );
       expect(code).toBe(0);
-      expect(JSON.parse(out)).toHaveProperty('version', '0.1');
+      expect(JSON.parse(out)).toMatchObject({
+        version: '0.3',
+        title: 'Edit distance',
+      });
     }
   });
 

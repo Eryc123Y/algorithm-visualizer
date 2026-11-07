@@ -7,6 +7,9 @@
 import { err, type Diagnostic, type Result } from '@algoviz/spec';
 
 import type { Algorithm } from './algorithm.ts';
+import { editDistance } from './algorithms/dynamic-programming/edit-distance.ts';
+import { knapsack } from './algorithms/dynamic-programming/knapsack.ts';
+import { lcs } from './algorithms/dynamic-programming/lcs.ts';
 import { bellmanFord } from './algorithms/graphs/bellman-ford.ts';
 import { bfs } from './algorithms/graphs/bfs.ts';
 import { dfs } from './algorithms/graphs/dfs.ts';
@@ -70,6 +73,9 @@ export const algorithms: readonly Algorithm[] = [
   prim,
   kruskal,
   floydWarshall,
+  lcs,
+  editDistance,
+  knapsack,
 ];
 
 /** The module with `id`, if there is one. */
