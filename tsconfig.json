@@ -8,6 +8,9 @@
       "path": "./packages/spec"
     },
     {
+      "path": "./packages/fonts"
+    },
+    {
       "path": "./packages/core"
     },
     {

@@ -20,7 +20,8 @@
     "format:check": "prettier --check .",
     "check": "npm run typecheck && npm run lint && npm run format:check && npm run test",
     "prepare": "husky",
-    "gallery": "node --conditions=@algoviz/source scripts/gallery.ts"
+    "gallery": "node --conditions=@algoviz/source scripts/gallery.ts",
+    "generate:fonts": "node --conditions=@algoviz/source scripts/fonts.ts"
   },
   "devDependencies": {
     "@anthropic-ai/sdk": "^0.131.0",
@@ -42,6 +43,7 @@
     "happy-dom": "^20.14.5",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
+    "opentype.js": "^2.0.0",
     "prettier": "^3.9.9",
     "tailwindcss": "^4.3.3",
     "typescript": "~6.0",
@@ -52,6 +54,7 @@
   },
   "workspaces": [
     "packages/spec",
+    "packages/fonts",
     "packages/core",
     "packages/svg",
     "packages/recipes",

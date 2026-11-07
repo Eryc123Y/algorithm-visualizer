@@ -6,3 +6,4 @@ package-lock.json
 packages/*/dist
 packages/*/schema
 evals/results
+packages/fonts/src/faces
