@@ -34,7 +34,7 @@ for (const colorScheme of ['light', 'dark'] as const)
   test(`a player with sections (${colorScheme})`, async ({ page }) => {
     await page.emulateMedia({ colorScheme, reducedMotion: 'reduce' });
     await page.goto('/');
-    await page.getByTestId('example').selectOption('BST: insert, then search');
+    await page.getByTestId('example').selectOption('Binary search tree');
     const player = page.getByTestId('player');
     await player.getByRole('button', { name: 'Next step' }).click();
     await expect(player.locator('.sections .current')).toHaveCount(1);

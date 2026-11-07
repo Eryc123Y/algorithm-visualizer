@@ -4,7 +4,9 @@ import { loadTrace } from '@algoviz/core';
 
 import { bubbleSort } from '@/samples/bubble-sort';
 import { bubbleSortDocument } from '@/samples/bubble-sort-doc';
-import { examples } from '@/samples/examples';
+import { algorithms, TOPICS } from '@algoviz/recipes';
+
+import { exampleGroups, examples } from '@/samples/examples';
 
 describe('bubbleSort sample', () => {
   it('records a valid trace that ends sorted', () => {
@@ -26,6 +28,21 @@ describe('bubbleSort sample', () => {
 });
 
 describe('examples', () => {
+  it('has one entry per registry module, with unique labels', () => {
+    const labels = examples.map((e) => e.label);
+    expect(new Set(labels).size).toBe(labels.length);
+    for (const { title } of algorithms) expect(labels).toContain(title);
+  });
+
+  it('is grouped by topic, in menu order', () => {
+    const order = examples.map((e) => TOPICS.indexOf(e.topic));
+    expect(order).toEqual([...order].sort((x, y) => x - y));
+    expect(exampleGroups.map((g) => g.topic)).toEqual([
+      ...new Set(examples.map((e) => e.topic)),
+    ]);
+    expect(exampleGroups[0]).toEqual({ topic: 'sorting', title: 'Sorting' });
+  });
+
   it.each(examples.map((e) => [e.label, e]))('%s loads', (_, example) => {
     const result = loadTrace(example.build());
     if (!result.ok) throw new Error(JSON.stringify(result.error));

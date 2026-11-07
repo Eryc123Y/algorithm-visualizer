@@ -1,8 +1,9 @@
 import { loadTrace } from '@algoviz/core';
+import { algorithms, TOPICS } from '@algoviz/recipes';
 import { describe, expect, it } from 'vitest';
 
 import { inspect, formatInspect } from '../src/inspect.ts';
-import { recipeCatalog, runRecipe } from '../src/recipes.ts';
+import { listRecipes, recipeCatalog, runRecipe } from '../src/recipes.ts';
 import { render } from '../src/render.ts';
 import { callTool, tools } from '../src/tools.ts';
 import { formatReport, validate } from '../src/validate.ts';
@@ -169,9 +170,28 @@ describe('render', () => {
 });
 
 describe('recipes', () => {
-  it('has unique names', () => {
-    const names = recipeCatalog.map((r) => r.name);
-    expect(new Set(names).size).toBe(names.length);
+  it('has unique ids, grouped by topic', () => {
+    const ids = recipeCatalog.map((r) => r.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    const topics = recipeCatalog.map((r) => TOPICS.indexOf(r.topic));
+    expect(topics).toEqual([...topics].sort((x, y) => x - y));
+  });
+
+  it('lists every registry module with its input as JSON Schema', () => {
+    const listed = listRecipes();
+    for (const { id } of algorithms)
+      expect(listed.map((r) => r.id)).toContain(id);
+    const remove = listed.find((r) => r.id === 'bst.delete')!;
+    expect(remove).toMatchObject({
+      title: 'Binary search tree: delete',
+      topic: 'trees',
+      input: {
+        type: 'object',
+        required: ['from', 'key'],
+        properties: { replaceWith: { enum: ['successor', 'predecessor'] } },
+      },
+    });
+    expect(remove.summary).toMatch(/\.$/);
   });
 
   it('builds valid documents', () => {
@@ -188,11 +208,17 @@ describe('recipes', () => {
     expect(doc.ok && loadTrace(doc.value).ok).toBe(true);
   });
 
-  it('checks arguments against the schema', () => {
-    const doc = runRecipe('bubbleSort', { values: 'nope' });
-    expect(doc.ok).toBe(false);
-    if (doc.ok) return;
-    expect(doc.error[0]!.path).toBe('$.args.values');
+  it('checks inputs against the schema, at paths under $.input', () => {
+    for (const [id, input, path] of [
+      ['bubbleSort', { values: 'nope' }, '$.input.values'],
+      ['bst.search', { from: [1], key: 'x' }, '$.input.key'],
+    ] as const) {
+      const doc = runRecipe(id, input);
+      expect(!doc.ok && doc.error[0]).toMatchObject({
+        code: 'INVALID_SHAPE',
+        path,
+      });
+    }
   });
 
   it('reports inputs the recipe cannot show', () => {
@@ -200,11 +226,14 @@ describe('recipes', () => {
       graph: { nodes: ['A', 'B'], edges: [['A', 'B', -1]] },
       source: 'A',
     });
-    expect(!doc.ok && doc.error[0]!.code).toBe('INVALID_ARGUMENT');
+    expect(!doc.ok && doc.error[0]).toMatchObject({
+      code: 'INVALID_ARGUMENT',
+      path: '$.input',
+    });
   });
 
   it('runs operations on a given BST or heap', () => {
-    const bst = runRecipe('bstOps', {
+    const bst = runRecipe('bst', {
       from: [8, 3, 10, 1, 6],
       ops: [
         { op: 'delete', key: 3 },
@@ -215,23 +244,28 @@ describe('recipes', () => {
     expect(bst.ok && bst.value.title).toBe(
       'Binary search tree: delete 3, search 6',
     );
-    const heap = runRecipe('heapOps', {
+    const heap = runRecipe('max-heap', {
       from: { array: [9, 5, 7] },
-      order: 'max',
-      ops: [{ op: 'increaseKey', index: 2, value: 10 }, { op: 'pop' }],
+      ops: [{ op: 'increase-key', index: 2, value: 10 }, { op: 'pop' }],
     });
     expect(heap.ok && loadTrace(heap.value).ok).toBe(true);
+    const one = runRecipe('min-heap.pop', { from: [3, 1, 2] });
+    expect(one.ok && one.value.title).toBe('Binary min-heap: pop');
   });
 
   it('rejects operations the schema or the state does not allow', () => {
-    const unknown = runRecipe('bstOps', { from: [1], ops: [{ op: 'rotate' }] });
-    expect(!unknown.ok && unknown.error[0]!.code).toBe('INVALID_SHAPE');
-    const tooMany = runRecipe('heapOps', {
+    const unknown = runRecipe('bst', { from: [1], ops: [{ op: 'rotate' }] });
+    expect(!unknown.ok && unknown.error[0]).toMatchObject({
+      code: 'INVALID_SHAPE',
+      path: '$.input.ops[0].op',
+      message: 'Unknown operation; use search, insert or delete',
+    });
+    const tooMany = runRecipe('min-heap', {
       from: [1],
       ops: Array.from({ length: 9 }, () => ({ op: 'pop' })),
     });
-    expect(!tooMany.ok && tooMany.error[0]!.path).toBe('$.args.ops');
-    const empty = runRecipe('heapOps', { from: [], ops: [{ op: 'pop' }] });
+    expect(!tooMany.ok && tooMany.error[0]!.path).toBe('$.input.ops');
+    const empty = runRecipe('min-heap.pop', { from: [] });
     expect(!empty.ok && empty.error[0]).toMatchObject({
       code: 'INVALID_ARGUMENT',
       message: 'The heap is empty: there is nothing to pop',
@@ -239,8 +273,11 @@ describe('recipes', () => {
   });
 
   it('reports unknown recipes', () => {
-    const doc = runRecipe('bogoSort', {});
-    expect(!doc.ok && doc.error[0]!.code).toBe('UNKNOWN_RECIPE');
+    const doc = runRecipe('bogosort', {});
+    expect(!doc.ok && doc.error[0]).toMatchObject({
+      code: 'UNKNOWN_RECIPE',
+      path: '$.id',
+    });
   });
 });
 
@@ -267,10 +304,18 @@ describe('tools', () => {
 
   it('return recipe documents as JSON', () => {
     const result = callTool('algoviz_run_recipe', {
-      name: 'binarySearch',
-      args: { values: [1, 3, 5], target: 3 },
+      id: 'binarySearch',
+      input: { values: [1, 3, 5], target: 3 },
     });
     expect(validate(result.text).valid).toBe(true);
+  });
+
+  it('let the recipe check its input, whatever JSON it is', () => {
+    for (const input of [[1, 2], 3, undefined]) {
+      const result = callTool('algoviz_run_recipe', { id: 'bst', input });
+      expect(result.isError).toBe(true);
+      expect(result.text).toMatch(/^INVALID_SHAPE at \$\.input/);
+    }
   });
 
   it('reject unknown tools', () => {

@@ -55,10 +55,40 @@ describe('algoviz CLI', () => {
     expect(readFileSync(svg, 'utf8')).toMatch(/^<svg/);
   });
 
-  it('runs a recipe', () => {
-    const { code, out } = run('recipe', 'bubbleSort', '{"values":[2,1]}');
+  it('runs a registry module by id', () => {
+    const { code, out } = run(
+      'run',
+      'bst.delete',
+      '{"from": [8, 3, 10, 1, 6], "key": 3}',
+    );
     expect(code).toBe(0);
-    expect(JSON.parse(out)).toHaveProperty('version', '0.1');
+    expect(JSON.parse(out)).toMatchObject({
+      version: '0.3',
+      title: 'Binary search tree: delete 3',
+    });
+  });
+
+  it('runs a legacy recipe, also by its old command', () => {
+    for (const command of ['run', 'recipe']) {
+      const { code, out } = run(
+        command,
+        'binarySearch',
+        '{"values":[1,2],"target":2}',
+      );
+      expect(code).toBe(0);
+      expect(JSON.parse(out)).toHaveProperty('version', '0.1');
+    }
+  });
+
+  it('lists the recipes', () => {
+    const listed = JSON.parse(run('recipes').out) as { id: string }[];
+    expect(listed.map((r) => r.id)).toContain('min-heap.decrease-key');
+  });
+
+  it('reports a bad input with its path', () => {
+    const { code, err } = run('run', 'bst.search', '{"from": [1], "key": "x"}');
+    expect(code).toBe(1);
+    expect(err).toContain('INVALID_SHAPE at $.input.key');
   });
 
   it('exits with 1 on an invalid document', () => {
@@ -72,7 +102,9 @@ describe('algoviz CLI', () => {
     expect(run('validate').code).toBe(2);
     expect(run('frobnicate').code).toBe(2);
     expect(run('render', file, '--zoom', '2').code).toBe(2);
-    expect(run('recipe', 'bubbleSort', '{oops').code).toBe(2);
+    expect(run('run', 'bst', '{oops').code).toBe(2);
+    expect(run('run').code).toBe(2);
+    expect(run('run', 'bst').code).toBe(2);
   });
 
   it('prints usage without a command', () => {

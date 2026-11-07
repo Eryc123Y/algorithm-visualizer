@@ -147,7 +147,7 @@ test('switches the code between pseudocode and Python, keeping the frame', async
   page,
 }) => {
   await page.goto('/');
-  await page.getByTestId('example').selectOption('BST: insert, then search');
+  await page.getByTestId('example').selectOption('Binary search tree');
   const player = page.getByTestId('player');
   const next = player.getByRole('button', { name: 'Next step' });
   await next.click();
@@ -180,7 +180,7 @@ test('switches the code between pseudocode and Python, keeping the frame', async
 
   // Remembered on this site.
   await page.reload();
-  await page.getByTestId('example').selectOption('BST: insert, then search');
+  await page.getByTestId('example').selectOption('Binary search tree');
   await expect(
     page.getByTestId('player').getByRole('button', { name: 'Python' }),
   ).toHaveAttribute('aria-pressed', 'true');
@@ -188,7 +188,7 @@ test('switches the code between pseudocode and Python, keeping the frame', async
 
 test('keeps the current line in view of the code panel', async ({ page }) => {
   await page.goto('/');
-  await page.getByTestId('example').selectOption('BST: insert, then search');
+  await page.getByTestId('example').selectOption('Binary search tree');
   const player = page.getByTestId('player');
   for (const frame of [1, 4, 7]) {
     await player.evaluate((el: AlgoPlayer, f) => el.seek(f), frame);
