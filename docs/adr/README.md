@@ -28,5 +28,6 @@ Each file records one architectural decision: the context, what we decided, and 
 | [0022](0022-registry-details.md)                    | Registry details: traces, structure modules, ids and sorting         | Accepted                            |
 | [0023](0023-remaining-modules.md)                   | The remaining recipes as registry modules: ids, inputs, procedures   | Accepted                            |
 | [0024](0024-text-measurement-and-fonts.md)          | Text is measured with bundled font metrics and outlined in SVG       | Accepted                            |
+| [0025](0025-exporting-figures.md)                   | Figures are exported as a series of SVG files that share one canvas  | Accepted                            |
 
 Template: Status · Context · Decision · Consequences.
