@@ -1,0 +1,27 @@
+[package]
+name = "algoviz-standalone"
+version = "0.1.0"
+edition = "2024"
+description = "The algoviz command without Node.js: the CLI's JavaScript in QuickJS-ng (ADR 0027)."
+publish = false
+
+[[bin]]
+name = "algoviz"
+path = "src/main.rs"
+
+[dependencies]
+rquickjs = { version = "=0.14.0", default-features = false, features = ["std"] }
+
+# The build script compiles the CLI bundle to QuickJS bytecode with the
+# same QuickJS, so the binary loads it without parsing.
+[build-dependencies]
+rquickjs = { version = "=0.14.0", default-features = false, features = ["std"] }
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+# The minimal toolchain cannot strip; the build script strips with the
+# system's `strip` instead.
+strip = false

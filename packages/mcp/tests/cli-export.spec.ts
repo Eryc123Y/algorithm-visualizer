@@ -1,5 +1,6 @@
 import {
   existsSync,
+  mkdirSync,
   mkdtempSync,
   readdirSync,
   readFileSync,
@@ -283,5 +284,243 @@ describe('algoviz export errors', () => {
 
   it('lists export in the usage', () => {
     expect(run().out).toContain('algoviz export');
+  });
+});
+
+const hex = (text: string) => Buffer.from(text, 'utf8').toString('hex');
+
+describe('algoviz export --format tikz', () => {
+  it('writes .tex figures for the LaTeX package', () => {
+    const out = outDir();
+    const result = run(
+      'export',
+      'dijkstra',
+      '--input',
+      inputFile,
+      '--step=relax#3',
+      '--format=tikz',
+      '--out',
+      out,
+    );
+    expect(result).toMatchObject({ code: 0, err: '' });
+    expect(files(out)).toEqual(['dijkstra-11.tex']);
+    expect(result.out).toBe(`${join(out, 'dijkstra-11.tex')}  relax#3`);
+    const tikz = readFileSync(join(out, 'dijkstra-11.tex'), 'utf8');
+    expect(tikz).toMatch(/^% algoviz figure for LaTeX, format 1: /);
+    expect(tikz).toContain('% Frame 11, relax#3.\n');
+    expect(tikz).toMatch(/^\\algoviz@figure\{1\}\{[\d.]+\}\{[\d.]+\}\{%$/m);
+    expect(tikz.endsWith('}%\n')).toBe(true);
+  });
+
+  it('names files as SVG figures are named, with .tex', () => {
+    const [svgOut, tikzOut] = [outDir(), outDir()];
+    const name = ['--step', 'search-6', '--name', '{step}'];
+    run('export', bstFile, ...name, '--out', svgOut);
+    run('export', bstFile, ...name, '--format', 'tikz', '--out', tikzOut);
+    expect(files(tikzOut)).toEqual(
+      files(svgOut).map((f) => f.replace(/\.svg$/, '.tex')),
+    );
+    expect(files(tikzOut)).toContain('search-6_go.tex');
+    // A pattern may end in the format's extension, which is not repeated.
+    const ending = outDir();
+    run(
+      'export',
+      bstFile,
+      '--step',
+      '0',
+      '--format',
+      'tikz',
+      '--out',
+      ending,
+      '--name',
+      'first.tex',
+    );
+    expect(files(ending)).toEqual(['first.tex']);
+  });
+
+  it('draws the frames the SVG figures draw, on the same canvas', () => {
+    const [svgOut, tikzOut] = [outDir(), outDir()];
+    run('export', bstFile, '--out', svgOut);
+    run('export', bstFile, '--format', 'tikz', '--out', tikzOut);
+    const svg = files(svgOut);
+    expect(files(tikzOut)).toEqual(svg.map((f) => f.replace(/\.svg$/, '.tex')));
+    for (const file of svg) {
+      const [w, h] = sizeOf(readFileSync(join(svgOut, file), 'utf8'));
+      const tikz = readFileSync(
+        join(tikzOut, file.replace(/\.svg$/, '.tex')),
+        'utf8',
+      );
+      expect(tikz).toContain(`\\algoviz@figure{1}{${w}}{${h}}{%`);
+    }
+  });
+
+  it('rejects other formats and a .tex file for --out', () => {
+    expect(run('export', bstFile, '--format', 'png')).toMatchObject({
+      code: 2,
+    });
+    expect(run('export', bstFile, '--format', 'png').err).toContain(
+      'svg or tikz',
+    );
+    expect(
+      run('export', bstFile, '--format', 'tikz', '--out', join(dir, 'a.tex'))
+        .err,
+    ).toContain('--name');
+  });
+});
+
+describe('algoviz export --input-hex', () => {
+  it('takes the input as hexadecimal UTF-8', () => {
+    const [plain, encoded] = [outDir(), outDir()];
+    const input = JSON.stringify(dijkstraInput);
+    run('export', 'dijkstra', '--input', input, '--step', '-1', '--out', plain);
+    const result = run(
+      'export',
+      'dijkstra',
+      `--input-hex=${hex(input)}`,
+      '--step',
+      '-1',
+      '--out',
+      encoded,
+    );
+    expect(result.code).toBe(0);
+    expect(files(encoded)).toEqual(files(plain));
+    expect(readFileSync(join(encoded, files(encoded)[0]!), 'utf8')).toBe(
+      readFileSync(join(plain, files(plain)[0]!), 'utf8'),
+    );
+  });
+
+  it('decodes characters outside ASCII', () => {
+    const out = outDir();
+    // Bracket matching shows every character of its text.
+    const input = { text: '(Äβ中)' };
+    const result = run(
+      'export',
+      'balanced-brackets',
+      `--input-hex=${hex(JSON.stringify(input))}`,
+      '--step=-1',
+      '--format=tikz',
+      '--out',
+      out,
+    );
+    expect(result.code).toBe(0);
+    const tikz = readFileSync(join(out, files(out)[0]!), 'utf8');
+    expect(tikz).toContain('{Ä}');
+    expect(tikz).toContain('\\ensuremath{\\beta}');
+    expect(tikz).toContain('{中}');
+  });
+
+  it('rejects odd digits, other characters, bytes that are not UTF-8, and --input with it', () => {
+    const usage = (...argv: string[]) => {
+      const result = run(...argv);
+      expect(result.code).toBe(2);
+      return result.err;
+    };
+    expect(usage('export', 'dijkstra', '--input-hex=abc')).toContain(
+      'hexadecimal',
+    );
+    expect(usage('export', 'dijkstra', '--input-hex=zz')).toContain(
+      'hexadecimal',
+    );
+    expect(usage('export', 'dijkstra', '--input-hex=ff')).toContain('UTF-8');
+    expect(
+      usage('export', 'dijkstra', '--input-hex=7b7d', '--input', '{}'),
+    ).toContain('not both');
+    expect(
+      usage('export', 'dijkstra', `--input-hex=${hex('{oops')}`),
+    ).toContain('JSON');
+    expect(usage('render', bstFile, '--input-hex', '7b7d')).toContain('export');
+  });
+});
+
+describe('algoviz export --error-file', () => {
+  it('writes the diagnostics of a failed export', () => {
+    const out = outDir();
+    const errors = join(out, 'deep', 'fig.err');
+    const result = run(
+      'export',
+      bstFile,
+      '--step',
+      'nope',
+      '--out',
+      out,
+      '--error-file',
+      errors,
+    );
+    expect(result.code).toBe(1);
+    expect(readFileSync(errors, 'utf8')).toBe(`${result.err}\n`);
+    expect(result.err).toMatch(/^NO_MATCH at \$: /);
+  });
+
+  it('writes a usage error without the usage text', () => {
+    const errors = join(outDir(), 'usage.err');
+    const result = run(
+      'export',
+      bstFile,
+      '--format=png',
+      `--error-file=${errors}`,
+    );
+    expect(result.code).toBe(2);
+    expect(readFileSync(errors, 'utf8')).toBe(
+      'Unknown format "png"; use svg or tikz\n',
+    );
+    expect(result.err).toContain('Usage:');
+  });
+
+  it('removes the file after a success', () => {
+    const out = outDir();
+    const errors = join(out, 'fig.err');
+    run(
+      'export',
+      bstFile,
+      '--step',
+      'nope',
+      '--out',
+      out,
+      '--error-file',
+      errors,
+    );
+    expect(existsSync(errors)).toBe(true);
+    const result = run(
+      'export',
+      bstFile,
+      '--step',
+      '0',
+      '--out',
+      out,
+      '--error-file',
+      errors,
+    );
+    expect(result.code).toBe(0);
+    expect(existsSync(errors)).toBe(false);
+    // Nothing to remove is not an error.
+    expect(
+      run(
+        'export',
+        bstFile,
+        '--step',
+        '0',
+        '--out',
+        out,
+        '--error-file',
+        errors,
+      ).code,
+    ).toBe(0);
+  });
+
+  it('leaves a file it cannot write to standard error alone', () => {
+    const parent = outDir();
+    mkdirSync(parent);
+    const blocker = join(parent, 'file');
+    writeFileSync(blocker, '');
+    const result = run(
+      'export',
+      bstFile,
+      '--step',
+      'nope',
+      '--error-file',
+      join(blocker, 'x.err'),
+    );
+    expect(result.code).toBe(1);
+    expect(result.err).toContain('NO_MATCH');
   });
 });

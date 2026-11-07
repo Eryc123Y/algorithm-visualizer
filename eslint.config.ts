@@ -18,6 +18,8 @@ export default defineConfigWithVueTs(
     '**/coverage/**',
     '**/playwright-report/**',
     '**/test-results/**',
+    // The standalone executable's build output, bundle included.
+    'packages/mcp/standalone/target/**',
   ]),
 
   pluginVue.configs['flat/recommended'],

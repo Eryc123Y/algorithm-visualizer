@@ -10,6 +10,8 @@ export default defineConfig({
     name: 'mcp',
     environment: 'node',
     include: ['tests/**/*.spec.ts'],
+    // These build the standalone executable with Rust: npm run test:standalone.
+    exclude: ['tests/standalone/**'],
     globalSetup: ['tests/build-app.ts'],
   },
 });
