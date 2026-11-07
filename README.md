@@ -97,7 +97,7 @@ algoviz export bst.delete --input '{"from": [8, 3, 10, 1, 6], "key": 3}' \
 
 `--step` takes the selectors the player takes: a frame number (`-1` is the last), a step name (`relax#3`), a step in a section (`insert-5/relax`), a section (`insert-5`) or a range (`a..b`). It may repeat or list several with commas, and every frame is exported without it. `--theme` is `light` (the default), `dark` or `print`. `--out` is the directory, the current one by default. `--name` is the file name pattern, `{name}-{frame}` by default: `{name}` is the document file's name or the algorithm id, `{frame}` the frame number padded with zeros, and `{step}` the step's selector with `/` and `#` written `_`, such as `insert-5_relax_2`. Each step's narration goes into its figure as an SVG description.
 
-In code, `exportFigures(document, { steps, theme })` from `@algoviz/svg` returns the same figures as strings, and `selectSeries` from `@algoviz/core` the frames that selectors name.
+In code, `exportFigures(document, { steps, theme })` from `@algoviz/svg` returns the same figures as strings, and `selectSeries` from `@algoviz/core` the frames that selectors name. `prepareFigures(document, { theme })` loads a document once and then draws a figure of any frame, or any series, on demand.
 
 ## Embedding
 

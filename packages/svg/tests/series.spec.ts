@@ -8,6 +8,7 @@ import {
   createTheme,
   exportFigures,
   lightTheme,
+  prepareFigures,
   renderSeries,
   renderSvg,
   type Figure,
@@ -118,6 +119,18 @@ describe('exportFigures', () => {
     expect(figure!.svg).toContain('aria-label="3"');
   });
 
+  it("gives each figure its step's narration, as in its <desc>", () => {
+    const figures = figuresOf(doc);
+    expect(figures.map((f) => f.narration)).toEqual([
+      undefined,
+      'Compare 3 and 1.',
+      'Swap them, since 1 < 3.',
+      'Compare 3 and 2.',
+      'Swap <them> & stop.',
+    ]);
+    expect('narration' in figures[0]!).toBe(false);
+  });
+
   it("describes each figure with its step's narration", () => {
     const figures = figuresOf(doc);
     const desc = (k: number) =>
@@ -177,6 +190,67 @@ describe('exportFigures', () => {
       ok: false,
       error: [{ code: 'OUT_OF_RANGE' }],
     });
+  });
+});
+
+describe('prepareFigures', () => {
+  function prepared(input: unknown = doc) {
+    const result = prepareFigures(input);
+    if (!result.ok) throw new Error(JSON.stringify(result.error));
+    return result.value;
+  }
+
+  it('counts the frames of the document', () => {
+    expect(prepared().frames).toBe(5);
+  });
+
+  it('draws the figures exportFigures draws', () => {
+    const p = prepared();
+    for (const steps of [[], ['pass-2'], ['swap#2', 0], [-1]]) {
+      expect(p.figures(steps)).toEqual({
+        ok: true,
+        value: figuresOf(doc, { steps }),
+      });
+    }
+    expect(p.figures()).toEqual({ ok: true, value: figuresOf(doc) });
+  });
+
+  it('draws one frame for a selector of one frame', () => {
+    const all = figuresOf(doc);
+    const p = prepared();
+    expect(p.figure('pass-1/swap')).toEqual({ ok: true, value: all[2] });
+    expect(p.figure(-1)).toEqual({ ok: true, value: all[4] });
+    expect(p.figure(0)).toEqual({ ok: true, value: all[0] });
+  });
+
+  it('rejects a selector of several frames for one figure', () => {
+    expect(prepared().figure('pass-2')).toMatchObject({
+      ok: false,
+      error: [{ code: 'INVALID_SELECTOR', path: '$' }],
+    });
+    expect(prepared().figure('relax')).toMatchObject({
+      ok: false,
+      error: [{ code: 'NO_MATCH', path: '$' }],
+    });
+  });
+
+  it('draws a frame the same whatever was drawn before', () => {
+    const all = figuresOf(doc);
+    const p = prepared();
+    expect(p.figure(3)).toEqual({ ok: true, value: all[3] });
+    expect(p.figures(['pass-1'])).toEqual({ ok: true, value: all.slice(0, 3) });
+    expect(p.figures()).toEqual({ ok: true, value: all });
+    expect(p.figure(3)).toEqual({ ok: true, value: all[3] });
+  });
+
+  it("reports the theme's and the document's errors", () => {
+    expect(prepareFigures(doc, { theme: 'neon' as never })).toMatchObject({
+      ok: false,
+      error: [{ code: 'UNKNOWN_THEME', path: '$.theme' }],
+    });
+    const invalid = prepareFigures({ version: '0.2', structures: {} });
+    expect(invalid.ok).toBe(false);
+    if (!invalid.ok) expect(invalid.error[0]!.code).toBe('INVALID_SHAPE');
   });
 });
 

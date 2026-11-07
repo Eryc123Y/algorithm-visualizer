@@ -20,6 +20,9 @@
       "path": "./packages/recipes"
     },
     {
+      "path": "./packages/typst"
+    },
+    {
       "path": "./packages/mcp"
     },
     {

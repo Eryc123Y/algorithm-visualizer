@@ -1,0 +1,18 @@
+{
+  "name": "@algoviz/typst",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The algoviz Typst package: the engine in QuickJS-ng inside a Typst WebAssembly plugin (ADR 0026).",
+  "type": "module",
+  "sideEffects": false,
+  "scripts": {
+    "build": "node --conditions=@algoviz/source scripts/build.ts",
+    "build:plugin": "node scripts/build-plugin.ts"
+  },
+  "dependencies": {
+    "@algoviz/recipes": "*",
+    "@algoviz/spec": "*",
+    "@algoviz/svg": "*",
+    "zod": "^4.6.7"
+  }
+}

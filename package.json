@@ -58,6 +58,7 @@
     "packages/core",
     "packages/svg",
     "packages/recipes",
+    "packages/typst",
     "packages/mcp",
     "packages/elements",
     "apps/playground"
