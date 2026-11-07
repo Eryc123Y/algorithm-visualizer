@@ -11,8 +11,8 @@ import type { VisualizationInput } from './visualization.ts';
 
 /**
  * Every protocol version this package reads, oldest first. A protocol
- * change appends a version here, moves `PROTOCOL_VERSION` to it and adds
- * its features to `PROTOCOL_FEATURES`.
+ * change appends a version here and adds its features to
+ * `PROTOCOL_FEATURES`.
  */
 export const PROTOCOL_VERSIONS = ['0.1'] as const;
 
@@ -20,7 +20,7 @@ export const PROTOCOL_VERSIONS = ['0.1'] as const;
 export type ProtocolVersion = (typeof PROTOCOL_VERSIONS)[number];
 
 /** The newest protocol version, the last one this package reads. */
-export const PROTOCOL_VERSION = '0.1' satisfies ProtocolVersion;
+export const PROTOCOL_VERSION: ProtocolVersion = PROTOCOL_VERSIONS.at(-1)!;
 
 /** A version's two numbers. */
 export interface VersionNumbers {
@@ -125,7 +125,9 @@ export function checkVersion(
     return error(`There is no protocol version ${quote(version)}`, fix);
   // An older major version. ADR 0021 gives each major version an
   // `upgrade(document)` from the one before it; the parser will apply them
-  // here, before validation. None exists before 1.0.
+  // here, before validation. None exists before 1.0, and this package's
+  // own reader (major 0) never gets here: only readers of a later major
+  // version, such as the 1.x reader in the tests, do.
   return error(
     `Protocol version ${quote(version)} is older than this copy of algoviz can read`,
     `This copy reads ${range}, and cannot upgrade older documents.`,
@@ -155,6 +157,11 @@ export interface ProtocolFeature<V extends string = ProtocolVersion> {
  *
  * The next are step names and sections (0.2, ADR 0020), and sources in
  * several languages (0.3, ADR 0017). Nothing needs more than 0.1 yet.
+ *
+ * With the first entry, the parser should also reject a document whose
+ * `version` is older than a feature it uses (e.g. "0.1" with sections),
+ * since a 0.1 reader cannot show it. That check waits for a feature to
+ * test it with.
  */
 export const PROTOCOL_FEATURES: readonly ProtocolFeature[] = [];
 

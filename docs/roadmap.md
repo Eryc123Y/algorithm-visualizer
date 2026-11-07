@@ -9,12 +9,13 @@ How the [requirements](requirements.md) get built, in order. Each item is one pu
 
 Everything later builds on these, so they come first. The ADRs are accepted (#13). The protocol changes come before the registry, so each recipe is rewritten only once, straight into its final form: a registry module with anchors, step names and code in both languages.
 
-- [ ] **0.1 Protocol versioning** [ADR 0021](adr/0021-protocol-versioning.md).
+- [x] **0.1 Protocol versioning** [ADR 0021](adr/0021-protocol-versioning.md) (#14).
   - `version` becomes `"major.minor"`; the parser reads every `0.x` up to the current one and rejects newer ones with a hint.
   - The JSON Schema and fixtures follow.
   - Writers record the oldest version that holds what the document uses.
 - [ ] **0.2 Step names and sections** [ADR 0020](adr/0020-step-names-and-sections.md) (protocol `0.2`).
   - `meta.id` and `sections` in the spec, with validation.
+  - Their entries in the protocol feature table (`PROTOCOL_FEATURES`), and a parser check that a document's `version` is not older than the features it uses (from the review of #14).
   - Selectors in core, used by the player's `frame` attribute and by `algoviz_inspect` and `algoviz_render`.
   - Section marks on the player's timeline, and the guide and fixtures.
 - [ ] **0.3 Sources in two languages** [ADR 0017](adr/0017-multi-language-source.md) (protocol `0.3`).
