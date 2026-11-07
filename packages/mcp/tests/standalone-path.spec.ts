@@ -36,4 +36,34 @@ describe("the standalone executable's path functions", () => {
     expect(dirname('dir\\sub\\doc.json')).toBe('dir\\sub');
     expect(join('dir\\sub', 'x.tex')).toBe('dir/sub/x.tex');
   });
+
+  // What node:path/win32 gives, with / where join writes separators.
+  it.each([
+    ['C:\\out', 'C:/out/f.tex', 'C:\\', 'out'],
+    ['C:\\a\\..\\..\\out', 'C:/out/f.tex', 'C:\\a\\..\\..', 'out'],
+    ['C:out', 'C:out/f.tex', 'C:', 'out'],
+    [
+      '\\\\server\\share\\d',
+      '//server/share/d/f.tex',
+      '\\\\server\\share\\',
+      'd',
+    ],
+    [
+      '\\\\server\\share\\..\\d',
+      '//server/share/d/f.tex',
+      '\\\\server\\share\\..',
+      'd',
+    ],
+  ])('keep the drive or share of %j', (path, joined, parent, base) => {
+    expect(join(path, 'f.tex')).toBe(joined);
+    expect(dirname(path)).toBe(parent);
+    expect(basename(path)).toBe(base);
+  });
+
+  it('keep the root of a drive', () => {
+    expect(dirname('C:\\a.err')).toBe('C:\\');
+    expect(dirname('C:\\')).toBe('C:\\');
+    expect(dirname('C:')).toBe('C:');
+    expect(basename('C:\\')).toBe('');
+  });
 });

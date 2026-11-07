@@ -63,6 +63,12 @@ function node(argv: readonly string[]): Run {
 }
 
 const dir = mkdtempSync(join(tmpdir(), 'algoviz-executable-'));
+// The input of the tests that need one; the export of every example
+// writes its own too.
+writeFileSync(
+  join(dir, 'dijkstra.json'),
+  JSON.stringify(algorithms.find((a) => a.id === 'dijkstra')!.examples[0]),
+);
 const contents = (d: string) =>
   readdirSync(d)
     .toSorted()
@@ -120,6 +126,86 @@ describe('the standalone executable', () => {
         expect(readFileSync(a, 'utf8')).toBe(readFileSync(b, 'utf8'));
       }
     }
+  });
+
+  it('reads arguments, files and input that are not UTF-8 as Node does', () => {
+    // Bytes that are not UTF-8 become U+FFFD, and the error is the CLI's.
+    if (process.platform !== 'win32') {
+      const arg = spawnSync(paths.executable, [
+        'validate',
+        Buffer.from([0x61, 0xff]) as unknown as string,
+      ]);
+      expect(arg.status).toBe(2);
+      expect(arg.stderr.toString()).toContain('Cannot read a\u{FFFD}');
+    }
+    const latin1 = join(dir, 'latin1.json');
+    writeFileSync(
+      latin1,
+      Buffer.from('{"values": [1, 2], "x": "\xe9"}', 'latin1'),
+    );
+    for (const argv of [
+      ['validate', latin1],
+      ['export', 'bubble-sort', '--input', latin1, '--out', join(dir, 'l1')],
+    ]) {
+      const ran = standalone(argv);
+      const expected = node(argv);
+      expect([ran.code, ran.err]).toEqual([expected.code, expected.err]);
+    }
+  });
+
+  it('decodes hexadecimal input as Node does, rejecting what is not UTF-8', () => {
+    const hex = (text: string) => Buffer.from(text, 'utf8').toString('hex');
+    const cases = [
+      // Bracket matching shows every character of its text.
+      hex('{"text": "(Äβ中)"}'),
+      // An overlong encoding, a lone surrogate and a truncated sequence.
+      'c0af',
+      'eda080',
+      hex('{"text": "a"}').slice(0, -2) + 'e2',
+      'ZZ',
+    ];
+    for (const value of cases) {
+      const [a, b] = [join(dir, `hex-a-${value}`), join(dir, `hex-b-${value}`)];
+      const argv = [
+        'export',
+        'balanced-brackets',
+        `--input-hex=${value}`,
+        '--format=tikz',
+      ];
+      const ran = standalone([...argv, '--out', a]);
+      const expected = node([...argv, '--out', b]);
+      expect([ran.code, ran.err], value).toEqual([expected.code, expected.err]);
+      if (expected.code === 0) expect(contents(a)).toEqual(contents(b));
+    }
+  });
+
+  it('refuses an error file that names the input, and leaves it alone', () => {
+    const input = join(dir, 'dijkstra.json');
+    const before = readFileSync(input, 'utf8');
+    const ran = standalone([
+      'export',
+      'dijkstra',
+      '--input',
+      input,
+      '--error-file',
+      input,
+    ]);
+    expect(ran.code).toBe(2);
+    expect(readFileSync(input, 'utf8')).toBe(before);
+  });
+
+  it('leaves no partial files', () => {
+    const out = join(dir, 'whole');
+    standalone([
+      'export',
+      'dijkstra',
+      '--input',
+      join(dir, 'dijkstra.json'),
+      '--format=tikz',
+      '--out',
+      out,
+    ]);
+    expect(readdirSync(out).filter((f) => !f.endsWith('.tex'))).toEqual([]);
   });
 
   it('removes the error file after a success', () => {

@@ -95,11 +95,13 @@ export async function bundleStandalone(): Promise<string> {
     .filter((o): o is Rollup.OutputChunk => o.type === 'chunk');
   if (chunks.length !== 1)
     throw new Error(`Expected one chunk, got ${chunks.length}`);
-  const code = chunks[0]!.code;
-  // No module of Node.js may be left to load. (`process` appears only in
-  // the CLI's default arguments, which the entry always passes.)
-  const node = /\bfrom\s*["']node:|\bimport\(\s*["']node:/.exec(code);
-  if (node !== null)
-    throw new Error(`The bundle still uses Node.js: ${node[0]}`);
+  const chunk = chunks[0]!;
+  // Nothing may be left to import, from Node.js or elsewhere: QuickJS has
+  // no modules but this one. (`process` appears only in the CLI's default
+  // arguments, which the entry always passes.)
+  const left = [...chunk.imports, ...chunk.dynamicImports];
+  if (left.length > 0 || /["']node:[a-z]/.test(chunk.code))
+    throw new Error(`The bundle still imports ${left.join(', ') || 'node:'}`);
+  const code = chunk.code;
   return code;
 }

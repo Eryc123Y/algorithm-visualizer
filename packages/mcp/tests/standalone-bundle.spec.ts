@@ -9,6 +9,7 @@ import {
   mkdtempSync,
   readdirSync,
   readFileSync,
+  renameSync,
   rmSync,
   writeFileSync,
 } from 'node:fs';
@@ -47,6 +48,7 @@ function standalone(argv: readonly string[], stdin = ''): Run {
     writeFile: (path: string, text: string) => writeFileSync(path, text),
     mkdir: (path: string) => mkdirSync(path, { recursive: true }),
     remove: (path: string) => rmSync(path, { force: true }),
+    rename: (from: string, to: string) => renameSync(from, to),
     exit: (n: number) => (code = n),
   };
   // A context with only JavaScript's own globals, as in QuickJS.

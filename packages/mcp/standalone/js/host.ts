@@ -14,6 +14,8 @@ export interface Host {
   mkdir(path: string): void;
   /** Removes a file; nothing if it is missing. */
   remove(path: string): void;
+  /** Renames a file, replacing any file of the new name. */
+  rename(from: string, to: string): void;
   /** The exit code, once the CLI returns. */
   exit(code: number): void;
 }

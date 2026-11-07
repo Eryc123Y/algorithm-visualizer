@@ -19,7 +19,13 @@
  *
  * A file of "-" is read from standard input. Exits with 1 on an error.
  */
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  mkdirSync,
+  readFileSync,
+  renameSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { basename, dirname, extname, join } from 'node:path';
 
 import { runAlgorithm } from '@algoviz/recipes';
@@ -294,7 +300,11 @@ function exportCommand(rest: readonly string[], values: Options): ToolResult {
     mkdirSync(out, { recursive: true });
     const lines = files.value.map(({ file, figure }) => {
       const path = join(out, file);
-      writeFileSync(path, `${figure.text.replace(/\n$/, '')}\n`);
+      // A whole file or none: the LaTeX package takes a figure file that
+      // exists for a finished one.
+      const partial = `${path}.part`;
+      writeFileSync(partial, `${figure.text.replace(/\n$/, '')}\n`);
+      renameSync(partial, path);
       return `${path}  ${figure.selector}`;
     });
     return { text: lines.join('\n') };
@@ -355,13 +365,22 @@ function dispatch(
  * The value of `--error-file`, read before anything else can fail, so even
  * a usage error reaches it.
  */
-function errorFileOf(argv: readonly string[]): string | undefined {
+function errorFileOf(argv: readonly string[]): {
+  readonly file?: string;
+  /** The file is also another argument, such as the document or input. */
+  readonly clash: boolean;
+} {
   let file: string | undefined;
+  let at = -1;
   argv.forEach((arg, k) => {
-    if (arg === '--error-file') file = argv[k + 1];
-    else if (arg.startsWith('--error-file=')) file = arg.slice(13);
+    if (arg === '--error-file') [file, at] = [argv[k + 1], k + 1];
+    else if (arg.startsWith('--error-file=')) [file, at] = [arg.slice(13), k];
   });
-  return file === '' ? undefined : file;
+  if (file === undefined || file === '') return { clash: false };
+  const others = argv
+    .filter((_, k) => k !== at)
+    .map((arg) => arg.replace(/^--[\w-]+=/, ''));
+  return others.includes(file) ? { clash: true } : { file, clash: false };
 }
 
 /**
@@ -391,7 +410,12 @@ export function main(
   out: (text: string) => void = (text) => process.stdout.write(`${text}\n`),
   err: (text: string) => void = (text) => process.stderr.write(`${text}\n`),
 ): number {
-  const errorFile = errorFileOf(argv);
+  const { file: errorFile, clash } = errorFileOf(argv);
+  if (clash) {
+    // Writing the message there would replace a file the command reads.
+    err(`--error-file names a file the command reads or writes\n\n${USAGE}`);
+    return 2;
+  }
   let ran: ReturnType<typeof run>;
   try {
     ran = run(argv);
@@ -415,8 +439,16 @@ export function main(
     err(result.text);
     return 1;
   }
+  if (outFile !== undefined)
+    try {
+      writeFileSync(outFile, `${result.text}\n`);
+    } catch (e) {
+      const message = `Cannot write to ${outFile}: ${e instanceof Error ? e.message : String(e)}`;
+      recordError(errorFile, message);
+      err(message);
+      return 1;
+    }
+  else out(result.text);
   recordError(errorFile, undefined);
-  if (outFile === undefined) out(result.text);
-  else writeFileSync(outFile, `${result.text}\n`);
   return 0;
 }

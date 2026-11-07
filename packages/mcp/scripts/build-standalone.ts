@@ -70,10 +70,36 @@ function toolchainBin(): string {
 
 /** The value of `--target`, if given. */
 function targetTriple(argv: readonly string[]): string | undefined {
-  const k = argv.indexOf('--target');
-  return k >= 0
-    ? argv[k + 1]
-    : argv.find((a) => a.startsWith('--target='))?.slice(9);
+  const k = argv.findIndex(
+    (a) => a === '--target' || a.startsWith('--target='),
+  );
+  if (k < 0) return undefined;
+  const value = argv[k]!.includes('=') ? argv[k]!.slice(9) : argv[k + 1];
+  if (value === undefined || value === '' || value.startsWith('-'))
+    throw new Error(
+      '--target needs a target triple, such as x86_64-unknown-linux-gnu',
+    );
+  return value;
+}
+
+/**
+ * Strips the executable with the system's strip, where it can: a cross
+ * build may need its own. On macOS, stripping drops the ad-hoc signature
+ * that arm64 requires, so the executable is signed again.
+ */
+function strip(output: string, cross: boolean): void {
+  if (cross || process.platform === 'win32') return;
+  if (spawnSync('strip', [output]).status !== 0) {
+    console.warn(
+      'strip failed or is missing; the executable keeps its symbols',
+    );
+    return;
+  }
+  if (
+    process.platform === 'darwin' &&
+    spawnSync('codesign', ['--force', '--sign', '-', output]).status !== 0
+  )
+    throw new Error(`Cannot sign ${output} again after stripping it`);
 }
 
 async function main(argv: readonly string[]): Promise<void> {
@@ -112,14 +138,13 @@ async function main(argv: readonly string[]): Promise<void> {
     'release',
     name,
   );
-  mkdirSync(paths.out, { recursive: true });
-  const output = join(paths.out, name);
+  // A build for another target goes beside the host's, under its triple.
+  const outDir = triple === undefined ? paths.out : join(paths.out, triple);
+  mkdirSync(outDir, { recursive: true });
+  const output = join(outDir, name);
   copyFileSync(built, output);
-  // The minimal toolchain cannot strip; the system's strip can, where there is one.
-  if (!windows && spawnSync('strip', [output]).status !== 0)
-    console.warn(
-      'strip failed or is missing; the executable keeps its symbols',
-    );
+  // The minimal toolchain cannot strip; the system's strip can.
+  strip(output, triple !== undefined);
   console.log(`${output}: ${statSync(output).size} bytes`);
 }
 

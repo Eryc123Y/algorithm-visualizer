@@ -28,3 +28,8 @@ export function mkdirSync(path: string): void {
 export function rmSync(path: string): void {
   host.remove(path);
 }
+
+/** Replaces any file at `to`, as Node does on every platform. */
+export function renameSync(from: string, to: string): void {
+  host.rename(from, to);
+}

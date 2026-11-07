@@ -524,3 +524,43 @@ describe('algoviz export --error-file', () => {
     expect(result.err).toContain('NO_MATCH');
   });
 });
+
+describe('algoviz export --error-file safety', () => {
+  it('refuses to name a file the command reads, and leaves it alone', () => {
+    const copy = join(outDir(), 'doc.json');
+    mkdirSync(join(copy, '..'), { recursive: true });
+    writeFileSync(copy, readFileSync(bstFile, 'utf8'));
+    const result = run('export', copy, '--step', 'nope', '--error-file', copy);
+    expect(result.code).toBe(2);
+    expect(result.err).toContain('--error-file names a file');
+    expect(readFileSync(copy, 'utf8')).toBe(readFileSync(bstFile, 'utf8'));
+    const input = run(
+      'export',
+      'dijkstra',
+      `--input=${inputFile}`,
+      `--error-file=${inputFile}`,
+    );
+    expect(input.code).toBe(2);
+    expect(JSON.parse(readFileSync(inputFile, 'utf8'))).toEqual(dijkstraInput);
+  });
+
+  it('reports a file --out of render cannot write, without a stack trace', () => {
+    const parent = outDir();
+    mkdirSync(parent);
+    writeFileSync(join(parent, 'file'), '');
+    const result = run(
+      'render',
+      bstFile,
+      '--out',
+      join(parent, 'file', 'x.svg'),
+    );
+    expect(result.code).toBe(1);
+    expect(result.err).toMatch(/^Cannot write to .*x\.svg: /);
+  });
+
+  it('writes whole files, leaving no partial ones', () => {
+    const out = outDir();
+    run('export', bstFile, '--format', 'tikz', '--out', out);
+    expect(files(out).filter((f) => !f.endsWith('.tex'))).toEqual([]);
+  });
+});
