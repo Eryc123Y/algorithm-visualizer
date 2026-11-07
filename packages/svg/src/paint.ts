@@ -21,6 +21,8 @@ import type {
 import { TITLE_TRACKING, edgeLabelBox, labelSegment } from '@algoviz/core';
 import { textWidth } from '@algoviz/fonts';
 
+import { num } from './format.ts';
+import { outlineNode, type GlyphLookup } from './outline.ts';
 import {
   resolveTheme,
   type CellStyle,
@@ -33,6 +35,11 @@ export interface SvgNode {
   readonly attrs: Readonly<Record<string, string>>;
   /** Text content (for `text` nodes). */
   readonly text?: string;
+  /**
+   * The font role of a `text` node, `value` unless `label`: the face
+   * standalone SVG outlines it with (ADR 0024).
+   */
+  readonly font?: 'value' | 'label';
   readonly children?: readonly SvgNode[];
 }
 
@@ -64,8 +71,7 @@ export interface PaintedScene {
   readonly items: readonly PaintedItem[];
 }
 
-/** Rounds to two decimals and drops trailing zeros. */
-export const num = (n: number): string => String(Math.round(n * 100) / 100);
+export { num } from './format.ts';
 
 /** Baseline offset that vertically centres text of this size. */
 const baselineOffset = (fontSize: number) => fontSize * 0.35;
@@ -473,6 +479,7 @@ function paintText(x: SceneText, t: SvgTheme): SvgNode {
       ...style,
     },
     text: x.text,
+    ...(x.role === 'index' ? {} : { font: 'label' as const }),
   };
 }
 
@@ -614,18 +621,34 @@ function paintItem(item: SceneItem, t: SvgTheme): PaintedItem[] {
   }
 }
 
+export interface PaintOptions {
+  /**
+   * Draws text as glyph outlines from these faces where every character
+   * has one; text stays text without it, as in the player.
+   */
+  readonly glyphs?: GlyphLookup;
+}
+
 export function paintScene(
   scene: Scene,
   theme?: SvgTheme | ThemeName,
+  { glyphs }: PaintOptions = {},
 ): PaintedScene {
   const t = resolveTheme(theme);
+  const painted = scene.items.flatMap((item) => paintItem(item, t));
   return {
     width: scene.width,
     height: scene.height,
     title: scene.title,
     background: t.background,
     fontFamily: t.fonts.value,
-    items: scene.items.flatMap((item) => paintItem(item, t)),
+    items:
+      glyphs === undefined
+        ? painted
+        : painted.map((item) => ({
+            ...item,
+            node: outlineNode(item.node, t, glyphs),
+          })),
   };
 }
 

@@ -33,8 +33,14 @@ const bubble = JSON.parse(
 
 describe('renderSvg', () => {
   it('renders a bubble sort frame (review the snapshot file when it changes)', async () => {
+    await expect(
+      renderSvg(sceneOf(bubble.input, 4), { outlineText: false }),
+    ).toMatchFileSnapshot('__snapshots__/bubble-sort-frame-4.svg');
+  });
+
+  it('renders a bubble sort frame with outlined text (review the snapshot too)', async () => {
     await expect(renderSvg(sceneOf(bubble.input, 4))).toMatchFileSnapshot(
-      '__snapshots__/bubble-sort-frame-4.svg',
+      '__snapshots__/bubble-sort-frame-4-outlined.svg',
     );
   });
 
@@ -47,20 +53,28 @@ describe('renderSvg', () => {
   });
 
   it('escapes text content and attributes', () => {
-    const svg = renderSvg(
-      sceneOf(
-        {
-          version: '0.1',
-          title: 'a < b & "c"',
-          structures: { arr: { kind: 'array', initial: ['<b>', "it's"] } },
-          steps: [],
-        },
-        0,
-      ),
-    );
+    const doc = (outlineText: boolean) =>
+      renderSvg(
+        sceneOf(
+          {
+            version: '0.1',
+            title: 'a < b & "c"',
+            structures: { arr: { kind: 'array', initial: ['<b>', "it's"] } },
+            steps: [],
+          },
+          0,
+        ),
+        { outlineText },
+      );
+    const svg = doc(false);
     expect(svg).not.toContain('<b>');
     expect(parse(svg).querySelector('title')?.textContent).toBe('a < b & "c"');
     expect(parse(svg).querySelectorAll('text')[2]?.textContent).toBe('<b>');
+    const outlined = doc(true);
+    expect(outlined).not.toContain('<b>');
+    expect(
+      parse(outlined).querySelector('path[aria-label="<b>"]'),
+    ).not.toBeNull();
   });
 
   it('draws arrows around their tip, so they move with what they point at', () => {

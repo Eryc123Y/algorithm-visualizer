@@ -112,8 +112,9 @@ Display mode also accepts `once` (play a single time) and `motion` (`linear` · 
 | Package                                  | Status    | Purpose                                                           |
 | ---------------------------------------- | --------- | ----------------------------------------------------------------- |
 | [`@algoviz/spec`](packages/spec)         | Available | Protocol schemas, types, validation and JSON Schema               |
+| [`@algoviz/fonts`](packages/fonts)       | Available | Metrics and outlines of the bundled fonts, and text measurement   |
 | [`@algoviz/core`](packages/core)         | Available | Structure kinds, reducers, timeline engine and layout to scenes   |
-| [`@algoviz/svg`](packages/svg)           | Available | Renders scenes to standalone SVG (no DOM needed)                  |
+| [`@algoviz/svg`](packages/svg)           | Available | Standalone SVG with text as glyph outlines (no DOM needed)        |
 | [`@algoviz/elements`](packages/elements) | Available | `<algo-player>`: interactive, animated player (Lit Web Component) |
 | [`@algoviz/recipes`](packages/recipes)   | Available | Typed recorder and visualizations of classic algorithms           |
 | [`@algoviz/mcp`](packages/mcp)           | Available | MCP server, MCP App and CLI: guide, validation, inspection, SVG   |
