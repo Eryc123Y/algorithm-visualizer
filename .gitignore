@@ -50,3 +50,7 @@ playwright-report/
 *.tsbuildinfo
 gallery.html
 packages/mcp/ui/
+
+# Typst plugin: Rust build output, and the engine bytecode built by Node
+packages/typst/plugin/target/
+packages/typst/package/engine.bc

@@ -1,0 +1,28 @@
+[package]
+name = "algoviz-typst-plugin"
+version = "0.1.0"
+edition = "2024"
+description = "The algoviz engine in QuickJS-ng, as a Typst WebAssembly plugin (ADR 0026)."
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+rquickjs = { version = "=0.14.0", default-features = false, features = ["std"] }
+wasm-minimal-protocol = "=0.2.1"
+
+[build-dependencies]
+cc = "=1.11.1"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
+
+# The build script runs on the host, where the minimal toolchain has no
+# objcopy to strip it with.
+[profile.release.build-override]
+strip = false
