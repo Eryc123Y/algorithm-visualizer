@@ -6,7 +6,8 @@
  */
 import { readFileSync } from 'node:fs';
 
-import { bubbleSort, dijkstra } from '@algoviz/recipes';
+import { selectFrame } from '@algoviz/core';
+import { bubbleSort, dijkstra, ops } from '@algoviz/recipes';
 import type { AlgoPlayer } from '@algoviz/elements';
 import type { Page } from '@playwright/test';
 
@@ -33,6 +34,21 @@ const graph = dijkstra(
   },
   'A',
 );
+
+// Two operations, each a section of named steps (ADR 0020).
+const bst = ops.bst.run({
+  from: [8, 3, 10, 1, 6, 14, 4, 7, 13],
+  ops: [
+    { op: 'search', key: 7 },
+    { op: 'insert', key: 5 },
+  ],
+}).document;
+const frameOf = (selector: string) => {
+  const frame = selectFrame(bst, selector);
+  if (!frame.ok) throw new Error(frame.error.message);
+  return frame.value;
+};
+const insertStart = bst.sections![1]!.start;
 
 // Passed into the page as plain JSON; the full document type is too deep
 // for Playwright's argument types.
@@ -357,4 +373,111 @@ test('several players on a page are independent', async ({ page }) => {
   await expect(page.locator('#q')).toHaveAttribute('frame', '0');
   await expectStageMatches(page.locator('#p'), sort);
   await expectStageMatches(page.locator('#q'), graph);
+});
+
+test('opens at a selector in the frame attribute', async ({ page }) => {
+  await open(page, inline(bst, 'frame="insert-5/go#2"'));
+  const player = page.locator('#p');
+  await expect(player).toHaveAttribute(
+    'frame',
+    String(frameOf('insert-5/go#2')),
+  );
+  await expectStageMatches(player, bst);
+  expect(
+    await player.evaluate((el: AlgoPlayer) => [el.stepName, el.section?.id]),
+  ).toEqual(['go', 'insert-5']);
+  // A section opens at its first step.
+  await player.evaluate((el: AlgoPlayer) =>
+    el.setAttribute('frame', 'insert-5'),
+  );
+  await expect(player).toHaveAttribute('frame', String(insertStart + 1));
+  await expect(player.locator('.section-title')).toHaveText('Insert 5');
+});
+
+test('a selector that matches nothing keeps the frame and says why', async ({
+  page,
+}) => {
+  await open(page, inline(bst, 'frame="found"'));
+  const player = page.locator('#p');
+  await expect(player).toHaveAttribute('frame', String(frameOf('found')));
+  await player.evaluate((el: AlgoPlayer) => el.setAttribute('frame', 'relax'));
+  const alert = player.getByRole('alert');
+  await expect(alert).toContainText('Cannot open frame "relax".');
+  await expect(alert).toContainText('Sections: search-7, insert-5.');
+  await expect(player).toHaveAttribute('frame', String(frameOf('found')));
+  await expect(player.locator('svg.scene')).toBeVisible();
+});
+
+test('the timeline shows sections, and moves between them', async ({
+  page,
+}) => {
+  await open(page, inline(bst));
+  const player = page.locator('#p');
+  const sections = player.locator('.sections .section');
+  await expect(sections).toHaveText(['Search 7', 'Insert 5']);
+  await expect(player.locator('.sections .current')).toHaveCount(0);
+
+  // Clicking a section goes to its first step.
+  await sections.nth(1).click();
+  await expect(player).toHaveAttribute('frame', String(insertStart + 1));
+  await expect(sections.nth(1)).toHaveClass(/current/);
+  await expect(
+    player.getByRole('slider', { name: 'Timeline' }),
+  ).toHaveAttribute(
+    'aria-valuetext',
+    `Frame ${insertStart + 1} of ${bst.steps.length}, Insert 5`,
+  );
+
+  // Page Up and Page Down move between sections from the keyboard.
+  await player.focus();
+  await page.keyboard.press('PageUp');
+  await expect(player).toHaveAttribute('frame', '1');
+  await expect(sections.nth(0)).toHaveClass(/current/);
+  await page.keyboard.press('PageDown');
+  await expect(player).toHaveAttribute('frame', String(insertStart + 1));
+  await page.keyboard.press('PageDown');
+  await expect(player).toHaveAttribute('frame', String(bst.steps.length));
+  await expectStageMatches(player, bst);
+  // Also from the slider, where screen readers hear the section's name.
+  const slider = player.getByRole('slider', { name: 'Timeline' });
+  await slider.focus();
+  await page.keyboard.press('PageUp');
+  await expect(player).toHaveAttribute('frame', String(insertStart + 1));
+
+  // Each section starts under the slider where its first frame is.
+  const geometry = await player.evaluate((el) => {
+    const root = el.shadowRoot!;
+    const box = (s: string) => root.querySelector(s)!.getBoundingClientRect();
+    return {
+      slider: box('input[type="range"]'),
+      track: box('.sections .track'),
+      second: box('.sections .section:nth-child(2)'),
+    };
+  });
+  expect(geometry.track.left).toBeGreaterThan(geometry.slider.left);
+  expect(geometry.track.right).toBeLessThan(geometry.slider.right);
+  const at = (frame: number) =>
+    geometry.track.left + (geometry.track.width * frame) / bst.steps.length;
+  expect(Math.abs(geometry.second.left - at(insertStart))).toBeLessThan(1);
+});
+
+test('algo-frame names the step and its section', async ({ page }) => {
+  await open(page, inline(bst));
+  const detail = await page.evaluate(async () => {
+    const el = document.querySelector('algo-player')!;
+    const next = new Promise<unknown>((resolve) =>
+      el.addEventListener('algo-frame', (e) => resolve(e.detail), {
+        once: true,
+      }),
+    );
+    el.next();
+    return next;
+  });
+  expect(detail).toEqual({
+    index: 1,
+    length: bst.steps.length,
+    playing: false,
+    stepName: 'go',
+    sectionId: 'search-7',
+  });
 });

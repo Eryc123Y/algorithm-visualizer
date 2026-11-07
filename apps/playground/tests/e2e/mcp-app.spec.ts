@@ -6,7 +6,7 @@
 import { readFileSync } from 'node:fs';
 
 import { createServer, PLAYER_URI } from '@algoviz/mcp';
-import { bubbleSort, dijkstra } from '@algoviz/recipes';
+import { bubbleSort, dijkstra, ops } from '@algoviz/recipes';
 import { Client, InMemoryTransport } from '@modelcontextprotocol/client';
 import type { Page } from '@playwright/test';
 
@@ -170,6 +170,29 @@ test('tells the model which frame the user stopped on', async ({ page }) => {
     .poll(async () => (await host(page).read()).contexts.at(-1))
     .toBe(
       `The user is looking at frame 1 of ${n} of "${sort.title}": ${narration}`,
+    );
+});
+
+test('names the step and section the user stopped on', async ({ page }) => {
+  const bst = ops.bst.run({
+    from: [8, 3, 10],
+    ops: [
+      { op: 'search', key: 10 },
+      { op: 'insert', key: 5 },
+    ],
+  }).document;
+  const { player } = await openHost(page);
+  // The tool resolves the selector; the page opens at that frame.
+  await host(page).result(
+    await callShow({ document: bst, frame: 'insert-5/go' }),
+  );
+  const frame = bst.sections![1]!.start + 1;
+  await expect(player).toHaveAttribute('frame', String(frame));
+  const narration = bst.steps[frame - 1]!.meta!.narration!;
+  await expect
+    .poll(async () => (await host(page).read()).contexts.at(-1))
+    .toBe(
+      `The user is looking at frame ${frame} of ${bst.steps.length} of "${bst.title}", step "go" in section "Insert 5": ${narration}`,
     );
 });
 

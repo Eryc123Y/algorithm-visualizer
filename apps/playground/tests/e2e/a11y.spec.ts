@@ -30,6 +30,21 @@ for (const colorScheme of ['light', 'dark'] as const)
     expect(await scan(page)).toEqual([]);
   });
 
+for (const colorScheme of ['light', 'dark'] as const)
+  test(`a player with sections (${colorScheme})`, async ({ page }) => {
+    await page.emulateMedia({ colorScheme, reducedMotion: 'reduce' });
+    await page.goto('/');
+    await page.getByTestId('example').selectOption('BST: insert, then search');
+    const player = page.getByTestId('player');
+    await player.getByRole('button', { name: 'Next step' }).click();
+    await expect(player.locator('.sections .current')).toHaveCount(1);
+    expect(await scan(page)).toEqual([]);
+    // A selector that matches nothing shows an alert beside the player.
+    await player.evaluate((el) => el.setAttribute('frame', 'nope'));
+    await expect(player.getByRole('alert')).toBeVisible();
+    expect(await scan(page)).toEqual([]);
+  });
+
 test('a player showing errors', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');

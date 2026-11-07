@@ -13,7 +13,7 @@ Everything later builds on these, so they come first. The ADRs are accepted (#13
   - `version` becomes `"major.minor"`; the parser reads every `0.x` up to the current one and rejects newer ones with a hint.
   - The JSON Schema and fixtures follow.
   - Writers record the oldest version that holds what the document uses.
-- [~] **0.2 Step names and sections** [ADR 0020](adr/0020-step-names-and-sections.md) (protocol `0.2`). Split in two PRs: the spec, core selectors, recipes and MCP (#15), then the player.
+- [x] **0.2 Step names and sections** [ADR 0020](adr/0020-step-names-and-sections.md) (protocol `0.2`). Split in two PRs: the spec, core selectors, recipes and MCP (#15), then the player (#16).
   - `meta.id` and `sections` in the spec, with validation.
   - Their entries in the protocol feature table (`PROTOCOL_FEATURES`), and a parser check that a document's `version` is not older than the features it uses (from the review of #14).
   - Selectors in core, used by the player's `frame` attribute and by `algoviz_inspect` and `algoviz_render`.

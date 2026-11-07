@@ -14,8 +14,12 @@
  * - the `src` attribute (URL of a JSON document),
  * - an inline `<script type="application/json">` child.
  *
+ * `frame` is a frame number or a selector such as `relax#2` or `insert-5`
+ * (ADR 0020). The timeline shows the document's sections, and Page Up and
+ * Page Down move between them.
+ *
  * Events: `algo-load` ({ length }), `algo-error` ({ errors }) and
- * `algo-frame` ({ index, length, playing }).
+ * `algo-frame` ({ index, length, playing, stepName?, sectionId? }).
  */
 import { html, LitElement, nothing, type PropertyValues } from 'lit';
 
@@ -24,10 +28,12 @@ import {
   defaultLayoutOptions,
   layoutTrace,
   loadTrace,
+  sectionAt,
+  stepNameAt,
   type Trace,
   type TraceLayout,
 } from '@algoviz/core';
-import { formatErrors, type Diagnostic } from '@algoviz/spec';
+import { formatErrors, ok, type Diagnostic, type Section } from '@algoviz/spec';
 import { paintScene, type SvgTheme, type ThemeName } from '@algoviz/svg';
 
 import { codeLines } from './code-panel.ts';
@@ -39,6 +45,13 @@ import {
   prevIcon,
   restartIcon,
 } from './icons.ts';
+import {
+  frameConverter,
+  openingFrame,
+  sectionStrip,
+  type FrameError,
+  type FrameSelector,
+} from './sections.ts';
 import { SceneStage } from './stage.ts';
 import { playerStyles } from './styles.ts';
 
@@ -52,6 +65,10 @@ export interface AlgoFrameDetail {
   readonly index: number;
   readonly length: number;
   readonly playing: boolean;
+  /** The name (`meta.id`) of the step that produced the frame, if any. */
+  readonly stepName?: string;
+  /** The id of that step's section, if any. */
+  readonly sectionId?: string;
 }
 
 const MAX_ANIMATION_MS = 450;
@@ -71,7 +88,7 @@ export class AlgoPlayer extends LitElement {
     once: { type: Boolean },
     motion: { type: String },
     visualization: { attribute: false },
-    frame: { type: Number, reflect: true },
+    frame: { converter: frameConverter, reflect: true },
     theme: { type: String },
     customTheme: { attribute: false },
     speed: { type: Number },
@@ -81,6 +98,7 @@ export class AlgoPlayer extends LitElement {
     hideCode: { type: Boolean, attribute: 'hide-code' },
     playback: { state: true },
     errors: { state: true },
+    frameError: { state: true },
     trace: { state: true },
     darkScheme: { state: true },
   };
@@ -95,8 +113,13 @@ export class AlgoPlayer extends LitElement {
   declare once: boolean;
   /** Cell movement; defaults to `arc` when interactive, `linear` in display. */
   declare motion: PlayerMotion | undefined;
-  /** Current frame: 0 is the initial state, `length` the last. */
-  declare frame: number;
+  /**
+   * Current frame: 0 is the initial state, `length` the last. Also takes
+   * a selector, such as `relax#2`, `insert-5/go` or `-1` (the last frame);
+   * it reads back as the frame number once the document has loaded. A
+   * section opens at its first step.
+   */
+  declare frame: FrameSelector;
   /** `light`, `dark`, `print`, or `auto` to follow the system. */
   declare theme: PlayerTheme;
   /** A full SVG theme (e.g. from `createTheme`); overrides `theme` for the scene. */
@@ -110,6 +133,7 @@ export class AlgoPlayer extends LitElement {
 
   declare protected playback: PlaybackState;
   declare protected errors: readonly Diagnostic[] | null;
+  declare protected frameError: FrameError | null;
   declare protected trace: Trace | null;
   declare protected darkScheme: boolean;
 
@@ -119,7 +143,7 @@ export class AlgoPlayer extends LitElement {
   #inlineText: string | null = null;
   #request = 0;
   #rendered = false;
-  #requestedFrame = 0;
+  #requestedFrame: FrameSelector = 0;
   readonly #controller: PlayerController;
   readonly #colorScheme = mediaQuery('(prefers-color-scheme: dark)');
   readonly #reducedMotion = mediaQuery('(prefers-reduced-motion: reduce)');
@@ -147,6 +171,7 @@ export class AlgoPlayer extends LitElement {
     this.hideControls = false;
     this.hideCode = false;
     this.errors = null;
+    this.frameError = null;
     this.trace = null;
     this.darkScheme = this.#colorScheme?.matches ?? false;
     this.#controller = new PlayerController({
@@ -181,6 +206,18 @@ export class AlgoPlayer extends LitElement {
   /** Number of steps in the loaded trace (frames are 0 to `length`). */
   get length(): number {
     return this.trace?.length ?? 0;
+  }
+
+  /** The name (`meta.id`) of the step that produced the current frame. */
+  get stepName(): string | undefined {
+    const doc = this.trace?.visualization;
+    return doc && stepNameAt(doc, this.playback.index);
+  }
+
+  /** The section of the step that produced the current frame. */
+  get section(): Section | undefined {
+    const doc = this.trace?.visualization;
+    return doc && sectionAt(doc, this.playback.index);
   }
 
   // --- Lifecycle -------------------------------------------------------------
@@ -235,19 +272,46 @@ export class AlgoPlayer extends LitElement {
       }
     }
     const reload = changed.has('visualization') || changed.has('src');
-    if (changed.has('frame') && !Number.isFinite(this.frame)) {
-      this.frame = this.playback.index;
-    } else if (changed.has('frame') && (this.trace === null || reload)) {
-      // Before a document is loaded, or with a new one, remember the frame
-      // to show once it is.
-      this.#requestedFrame = this.frame;
-    } else if (changed.has('frame') && this.frame !== this.playback.index) {
-      this.#controller.seek(this.frame);
-    }
+    if (changed.has('frame')) this.#onFrame(reload);
     if (reload) void this.#load();
     const resolved = this.#resolvedTheme();
     if (this.dataset['resolvedTheme'] !== resolved)
       this.dataset['resolvedTheme'] = resolved;
+  }
+
+  #onFrame(reload: boolean): void {
+    const frame = this.frame;
+    if (typeof frame === 'number' && !Number.isFinite(frame)) {
+      this.frame = this.playback.index;
+    } else if (this.trace === null || reload) {
+      // Before a document is loaded, or with a new one, remember the frame
+      // to show once it is.
+      this.#requestedFrame = frame;
+    } else if (frame !== this.playback.index) {
+      this.#goTo(frame);
+    }
+  }
+
+  /**
+   * Shows the frame a number or selector names. A selector that matches
+   * nothing keeps the current frame and says why.
+   */
+  #goTo(frame: FrameSelector): void {
+    const doc = this.trace?.visualization;
+    if (doc === undefined) return;
+    // Plain numbers are clamped to the timeline, as before selectors.
+    const index =
+      typeof frame === 'number' && frame >= 0
+        ? ok(frame)
+        : openingFrame(doc, frame);
+    if (index.ok) {
+      this.frameError = null;
+      this.#controller.seek(index.value);
+    } else {
+      this.frameError = { selector: String(frame), error: index.error };
+    }
+    // The frame reads back as a number, even if the seek changed nothing.
+    this.frame = this.playback.index;
   }
 
   protected override firstUpdated(): void {
@@ -289,11 +353,12 @@ export class AlgoPlayer extends LitElement {
       return;
     }
     this.errors = null;
+    this.frameError = null;
     this.trace = result.value;
     this.#layout = layoutTrace(result.value, this.#layoutOptions());
     this.#rendered = false;
     this.#controller.reset(result.value.length);
-    if (this.#requestedFrame > 0) this.#controller.seek(this.#requestedFrame);
+    if (this.#requestedFrame !== 0) this.#goTo(this.#requestedFrame);
     this.#requestedFrame = 0;
     this.dispatchEvent(
       new CustomEvent('algo-load', { detail: { length: result.value.length } }),
@@ -303,6 +368,7 @@ export class AlgoPlayer extends LitElement {
 
   #fail(errors: readonly Diagnostic[]): void {
     this.trace = null;
+    this.frameError = null;
     this.#layout = null;
     this.errors = errors;
     this.#controller.reset(0);
@@ -345,24 +411,63 @@ export class AlgoPlayer extends LitElement {
     const previous = this.playback;
     this.playback = state;
     this.frame = state.index;
+    // A selector that matched nothing no longer matters once the frame moves.
+    if (state.index !== previous.index) this.frameError = null;
     if (state.index !== previous.index || state.playing !== previous.playing) {
-      const detail: AlgoFrameDetail = { ...state };
+      const doc = this.trace?.visualization;
+      const stepName = doc && stepNameAt(doc, state.index);
+      const section = doc && sectionAt(doc, state.index);
+      const detail: AlgoFrameDetail = {
+        ...state,
+        ...(stepName === undefined ? {} : { stepName }),
+        ...(section === undefined ? {} : { sectionId: section.id }),
+      };
       this.dispatchEvent(new CustomEvent('algo-frame', { detail }));
     }
   }
 
+  /**
+   * Moves to the first step of the next section (direction 1) or of the
+   * current or previous one (-1), or to the end or the start.
+   */
+  #jumpSection(direction: 1 | -1): void {
+    const sections = this.trace?.visualization.sections ?? [];
+    const firsts = sections.map((s) => s.start + 1);
+    const index = this.playback.index;
+    const target =
+      direction > 0
+        ? (firsts.find((f) => f > index) ?? this.length)
+        : (firsts.filter((f) => f < index).at(-1) ?? 0);
+    this.seek(target);
+  }
+
   #onKeyDown = (event: KeyboardEvent): void => {
     if (this.#isDisplay) return;
-    // Let the timeline slider handle its own keys.
-    if (event.composedPath()[0] instanceof HTMLInputElement) return;
-    const actions: Record<string, () => void> = {
-      ArrowRight: () => this.next(),
-      ArrowLeft: () => this.prev(),
-      ' ': () => this.#controller.toggle(),
-      k: () => this.#controller.toggle(),
-      Home: () => this.seek(0),
-      End: () => this.seek(this.length),
-    };
+    const target = event.composedPath()[0];
+    // A focused code panel keeps its keys for scrolling.
+    if (target instanceof HTMLElement && target.classList.contains('code'))
+      return;
+    const sections = (this.trace?.visualization.sections ?? []).length > 0;
+    const jumps: Record<string, () => void> = sections
+      ? {
+          PageDown: () => this.#jumpSection(1),
+          PageUp: () => this.#jumpSection(-1),
+        }
+      : {};
+    // The timeline slider handles its own keys, except the section jumps,
+    // which matter most where screen readers announce the section.
+    const actions: Record<string, () => void> =
+      target instanceof HTMLInputElement
+        ? jumps
+        : {
+            ArrowRight: () => this.next(),
+            ArrowLeft: () => this.prev(),
+            ' ': () => this.#controller.toggle(),
+            k: () => this.#controller.toggle(),
+            Home: () => this.seek(0),
+            End: () => this.seek(this.length),
+            ...jumps,
+          };
     const action = actions[event.key];
     if (action === undefined) return;
     event.preventDefault();
@@ -449,6 +554,8 @@ export class AlgoPlayer extends LitElement {
     const display = this.#isDisplay;
     const showCode = source !== undefined && !this.hideCode && !display;
     const vars = Object.entries(step?.meta?.vars ?? {});
+    const sections = trace?.visualization.sections ?? [];
+    const section = this.section;
 
     return html`
       <div class="player" part="container">
@@ -457,6 +564,20 @@ export class AlgoPlayer extends LitElement {
             ? html`<div class="errors" role="alert" part="errors">
                 <strong>This visualization could not be loaded.</strong>
                 <pre>${formatErrors(this.errors)}</pre>
+              </div>`
+            : nothing
+        }
+        ${
+          this.frameError && trace
+            ? html`<div class="errors frame-error" role="alert" part="errors">
+                <strong
+                  >Cannot open frame
+                  ${JSON.stringify(this.frameError.selector)}.</strong
+                >
+                <p>
+                  ${this.frameError.error.message}.
+                  ${this.frameError.error.hint ?? ''}
+                </p>
               </div>`
             : nothing
         }
@@ -472,6 +593,7 @@ export class AlgoPlayer extends LitElement {
                   part="code"
                   role="region"
                   aria-label="Source code"
+                  tabindex="0"
                 >
 ${codeLines(source, step?.meta?.line)}</pre>`
               : nothing
@@ -482,6 +604,13 @@ ${codeLines(source, step?.meta?.line)}</pre>`
           part="caption"
           ?hidden=${trace === null || display}
         >
+          ${
+            sections.length > 0
+              ? html`<p class="section-title" part="section-title">
+                  ${section?.title ?? ''}
+                </p>`
+              : nothing
+          }
           <p class="narration" aria-live="polite">
             ${step?.meta?.narration ?? (index === 0 ? 'Initial state.' : '')}
           </p>
@@ -529,9 +658,19 @@ ${codeLines(source, step?.meta?.line)}</pre>`
             max=${length}
             .value=${String(index)}
             aria-label="Timeline"
+            aria-valuetext=${
+              sections.length > 0
+                ? `Frame ${index} of ${length}${section ? `, ${section.title}` : ''}`
+                : nothing
+            }
             @input=${(event: Event) => this.seek(Number((event.target as HTMLInputElement).value))}
           />
           <span class="counter" aria-live="off">${index} / ${length}</span>
+          ${
+            sections.length > 0 && !display
+              ? sectionStrip(sections, length, section, (f) => this.seek(f))
+              : nothing
+          }
         </div>
       </div>
       <slot hidden @slotchange=${this.#onSlotChange}></slot>

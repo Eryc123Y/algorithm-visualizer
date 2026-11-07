@@ -88,7 +88,7 @@ Names let people and tools refer to a step by what it does rather than by its nu
 }
 ```
 
-A selector names frames, in `algoviz_inspect`, `algoviz_render` and `algoviz_show`:
+A selector names frames, in `algoviz_inspect`, `algoviz_render` and `algoviz_show`, and in the player's `frame` attribute:
 
 | Selector              | Frames                                                                                                                  |
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------- |
