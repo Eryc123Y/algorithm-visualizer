@@ -45,9 +45,9 @@ Everything later builds on these, so they come first. The ADRs are accepted (#13
   - Write SVG files.
   - A series shares one set of layout metrics (`layoutState` already takes metrics), so all its figures have one scale.
   - Also run a registry algorithm on an input directly, without writing a document first.
-- [ ] **1.3 Typst package** _ADR_.
-  - First, a prototype that runs the engine (spec, core, svg and the registry) inside a Typst WebAssembly plugin, for example through a JavaScript engine compiled to WebAssembly. Measure its size and speed.
-  - Then the package, for example `#algoviz("dijkstra", (graph: …, source: "A"), step: "relax-3")` or `#algoviz(json("doc.json"), step: …)`, returning the SVG as an image.
+- [~] **1.3 Typst package** _ADR_ [ADR 0026](adr/0026-typst-package.md). A prototype measured QuickJS-ng and Boa in a Typst WebAssembly plugin; ADR 0026 records the numbers and picks QuickJS-ng (#36). Then two PRs:
+  - the plugin: QuickJS-ng in a Rust crate, the engine entry with its cache, `prepareFigures` in `@algoviz/svg`, the builds of `plugin.wasm` and `engine.bc`, and the Node tests.
+  - the package: `#algoviz("dijkstra", (graph: …, source: "A"), step: "relax#3")` or `#algoviz(json("doc.json"), step: …)` returning the SVG as an image, `algoviz-series`, themes, errors in the document, `typst.toml`, the README with examples, and the Typst tests.
 - [ ] **1.4 LaTeX package** _ADR_.
   - `\algoviz[step=relax-3]{dijkstra}{<input>}` and a document form. The package calls the `algoviz` command through shell escape (as `minted` does) and caches the output.
   - Output is TikZ from a new painter, so text uses the document's fonts and Beamer overlays fit inside one picture.
