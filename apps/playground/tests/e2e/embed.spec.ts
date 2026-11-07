@@ -7,11 +7,18 @@
 import { readFileSync } from 'node:fs';
 
 import { selectFrame } from '@algoviz/core';
-import { bubbleSort, dijkstra, ops } from '@algoviz/recipes';
+import { bubbleSort, dijkstra, runAlgorithm } from '@algoviz/recipes';
 import type { AlgoPlayer } from '@algoviz/elements';
 import type { Page } from '@playwright/test';
 
 import { expect, expectStageMatches, test } from './fixtures';
+
+/** The document of a registry module's run, which must succeed. */
+function documentOf(id: string, input: unknown) {
+  const run = runAlgorithm(id, input);
+  if (!run.ok) throw new Error(run.error.map((e) => e.message).join('; '));
+  return run.value.document;
+}
 
 const ORIGIN = 'http://embed.test';
 const bundle = () =>
@@ -36,13 +43,13 @@ const graph = dijkstra(
 );
 
 // Two operations, each a section of named steps (ADR 0020).
-const bst = ops.bst.run({
+const bst = documentOf('bst', {
   from: [8, 3, 10, 1, 6, 14, 4, 7, 13],
   ops: [
     { op: 'search', key: 7 },
     { op: 'insert', key: 5 },
   ],
-}).document;
+});
 const frameOf = (selector: string) => {
   const frame = selectFrame(bst, selector);
   if (!frame.ok) throw new Error(frame.error.message);

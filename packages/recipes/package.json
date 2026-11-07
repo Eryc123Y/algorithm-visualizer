@@ -19,9 +19,8 @@
     "build": "tsc --build tsconfig.lib.json"
   },
   "dependencies": {
-    "@algoviz/spec": "*"
-  },
-  "devDependencies": {
-    "@algoviz/core": "*"
+    "@algoviz/core": "*",
+    "@algoviz/spec": "*",
+    "zod": "^4.6.7"
   }
 }

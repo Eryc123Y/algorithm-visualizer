@@ -3,9 +3,8 @@ import { SectionId } from '@algoviz/spec';
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 
-import { ops } from '../src/index.ts';
-import { sectionIds } from '../src/ops/section-id.ts';
-import { fuzz } from './helpers.ts';
+import { sectionIds } from '../src/section-id.ts';
+import { fuzz, runOk } from './helpers.ts';
 
 describe('sectionIds', () => {
   it('turns titles into kebab-case ids', () => {
@@ -63,7 +62,7 @@ describe('operations as sections', () => {
   const from = [8, 3, 10, 1, 6, 14, 4, 7, 13];
 
   it('makes each operation a section titled after it', () => {
-    const { document } = ops.bst.run({
+    const { document } = runOk('bst', {
       from,
       ops: [
         { op: 'insert', key: 5 },
@@ -82,14 +81,14 @@ describe('operations as sections', () => {
   });
 
   it('names every step after its anchor in the code', () => {
-    const { document } = ops.bst.search({ from, key: 7 });
+    const { document } = runOk('bst.search', { from, key: 7 });
     expect(document.steps.map((s) => s.meta?.id)).toEqual([
       'go',
       'go',
       'go',
       'found',
     ]);
-    const heap = ops.heap.pop({ from: [1, 5, 2, 8] });
+    const heap = runOk('min-heap.pop', { from: [1, 5, 2, 8] });
     expect(heap.document.steps.map((s) => s.meta?.id).slice(0, 2)).toEqual([
       'swap-last',
       'remove',
@@ -97,7 +96,7 @@ describe('operations as sections', () => {
   });
 
   it('clears the last operation’s pointer in the first step of the next', () => {
-    const { document } = ops.bst.run({
+    const { document } = runOk('bst', {
       from,
       ops: [
         { op: 'search', key: 7 },
@@ -117,7 +116,7 @@ describe('operations as sections', () => {
   });
 
   it('lets selectors find each operation and its steps', () => {
-    const { document } = ops.bst.run({
+    const { document } = runOk('bst', {
       from,
       ops: [
         { op: 'search', key: 7 },

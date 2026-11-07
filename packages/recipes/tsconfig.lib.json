@@ -12,6 +12,10 @@
     "sourceMap": true
   },
   "include": ["src"],
-  // Resolves @algoviz/spec to its built declarations, so build it first.
-  "references": [{ "path": "../spec/tsconfig.lib.json" }]
+  // Resolves @algoviz/spec and @algoviz/core to their built declarations,
+  // so build them first.
+  "references": [
+    { "path": "../spec/tsconfig.lib.json" },
+    { "path": "../core/tsconfig.lib.json" }
+  ]
 }

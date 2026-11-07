@@ -6,13 +6,20 @@
 import { readFileSync } from 'node:fs';
 
 import { createServer, PLAYER_URI } from '@algoviz/mcp';
-import { bubbleSort, dijkstra, ops } from '@algoviz/recipes';
+import { bubbleSort, dijkstra, runAlgorithm } from '@algoviz/recipes';
 import { Client, InMemoryTransport } from '@modelcontextprotocol/client';
 import type { Page } from '@playwright/test';
 
 import { HOST_SCRIPT } from './build-bundle';
 import { expect, expectStageMatches, test } from './fixtures';
 import type { TestHost } from './mcp-host';
+
+/** The document of a registry module's run, which must succeed. */
+function documentOf(id: string, input: unknown) {
+  const run = runAlgorithm(id, input);
+  if (!run.ok) throw new Error(run.error.map((e) => e.message).join('; '));
+  return run.value.document;
+}
 
 const ORIGIN = 'http://host.test';
 const sort = bubbleSort([3, 1, 2]);
@@ -174,13 +181,13 @@ test('tells the model which frame the user stopped on', async ({ page }) => {
 });
 
 test('names the step and section the user stopped on', async ({ page }) => {
-  const bst = ops.bst.run({
+  const bst = documentOf('bst', {
     from: [8, 3, 10],
     ops: [
       { op: 'search', key: 10 },
       { op: 'insert', key: 5 },
     ],
-  }).document;
+  });
   const { player } = await openHost(page);
   // The tool resolves the selector; the page opens at that frame.
   await host(page).result(

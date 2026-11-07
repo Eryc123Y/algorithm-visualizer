@@ -3,10 +3,18 @@ import { describe, expect, it } from 'vitest';
 
 import type { VisualizationInput } from '@algoviz/spec';
 
-import { ops, type HeapCall } from '../src/index.ts';
-import { fuzz, replay, stateOf } from './helpers.ts';
+import { fuzz, replay, runError, runOk, stateOf } from './helpers.ts';
 
 type Order = 'min' | 'max';
+
+type HeapCall =
+  | { readonly op: 'push'; readonly value: number }
+  | { readonly op: 'pop' }
+  | {
+      readonly op: 'decrease-key' | 'increase-key';
+      readonly index: number;
+      readonly value: number;
+    };
 
 /** The heap's values at `frame` (default the last). */
 function valuesAt(doc: VisualizationInput, frame?: number): unknown[] {
@@ -77,9 +85,9 @@ const values = [5, 3, 8, 1, 9, 2];
 const narrations = (doc: VisualizationInput) =>
   doc.steps.map((s) => s.meta?.narration ?? '');
 
-describe('ops.heap', () => {
+describe('min-heap and max-heap', () => {
   it('starts from the heap the values build, without animating it', () => {
-    const { document } = ops.heap.push({ from: values, value: 4 });
+    const { document } = runOk('min-heap.push', { from: values, value: 4 });
     expect(valuesAt(document, 0)).toEqual(reference(values, [], 'min').start);
     expect(document.sections).toEqual([
       { id: 'push-4', title: 'Push 4', start: 0 },
@@ -87,15 +95,24 @@ describe('ops.heap', () => {
   });
 
   it('starts from a given array if it is a heap', () => {
-    const { document } = ops.heap.pop({ from: { array: [1, 3, 2, 5] } });
+    const { document } = runOk('min-heap.pop', {
+      from: { array: [1, 3, 2, 5] },
+    });
     expect(valuesAt(document, 0)).toEqual([1, 3, 2, 5]);
-    expect(() => ops.heap.pop({ from: { array: [1, 3, 2, 0] } })).toThrow(
-      'Not a min-heap: 3 at index 1 comes after its child 0 at index 3',
+    expect(
+      runError('min-heap.pop', { from: { array: [1, 3, 2, 0] } }),
+    ).toMatchObject({
+      code: 'INVALID_ARGUMENT',
+      message:
+        'Not a min-heap: 3 at index 1 comes after its child 0 at index 3',
+    });
+    expect(runError('max-heap.pop', { from: { array: [1, 3] } }).message).toBe(
+      'Not a max-heap: 1 at index 0 comes after its child 3 at index 1',
     );
   });
 
   it('pushes at the end and sifts up', () => {
-    const run = ops.heap.push({ from: values, value: 0 });
+    const run = runOk('min-heap.push', { from: values, value: 0 });
     expect(valuesAt(run.document)).toEqual(
       reference(values, [{ op: 'push', value: 0 }], 'min').end,
     );
@@ -109,7 +126,7 @@ describe('ops.heap', () => {
   });
 
   it('pops the root and sifts the last value down', () => {
-    const run = ops.heap.pop({ from: values });
+    const run = runOk('min-heap.pop', { from: values });
     expect(run.results).toEqual([1]);
     expect(valuesAt(run.document)).toEqual(
       reference(values, [{ op: 'pop' }], 'min').end,
@@ -118,55 +135,56 @@ describe('ops.heap', () => {
       'Move the last value 8 to the root, and 1 to the end.',
       'Remove 1: it is the minimum.',
     ]);
-    expect(ops.heap.pop({ from: [7] }).results).toEqual([7]);
-    expect(() => ops.heap.pop({ from: [] })).toThrow('The heap is empty');
+    expect(runOk('min-heap.pop', { from: [7] }).results).toEqual([7]);
+    expect(runError('min-heap.pop', { from: [] }).message).toBe(
+      'The heap is empty: there is nothing to pop',
+    );
   });
 
   it('decreases a key and sifts it up', () => {
-    const call = { op: 'decreaseKey', index: 4, value: 0 } as const;
-    const run = ops.heap.decreaseKey({ from: values, index: 4, value: 0 });
+    const call = { op: 'decrease-key', index: 4, value: 0 } as const;
+    const run = runOk('min-heap.decrease-key', {
+      from: values,
+      index: 4,
+      value: 0,
+    });
     expect(valuesAt(run.document)).toEqual(
       reference(values, [call], 'min').end,
     );
     expect(narrations(run.document)[0]).toBe('Decrease h[4] from 9 to 0.');
-    expect(() =>
-      ops.heap.decreaseKey({ from: values, index: 4, value: 10 }),
-    ).toThrow('decreaseKey must not increase h[4] (9) to 10');
-    expect(() =>
-      ops.heap.decreaseKey({ from: values, index: 6, value: 0 }),
-    ).toThrow('index 6 is past the end of the heap (6 values)');
+    expect(
+      runError('min-heap.decrease-key', { from: values, index: 4, value: 10 })
+        .message,
+    ).toBe('decrease-key must not increase h[4] (9) to 10');
+    expect(
+      runError('min-heap.decrease-key', { from: values, index: 6, value: 0 })
+        .message,
+    ).toBe('index 6 is past the end of the heap (6 values)');
   });
 
-  it('works as a max-heap, with increaseKey', () => {
-    const run = ops.heap.run({
-      from: values,
-      order: 'max',
-      ops: [
-        { op: 'push', value: 7 },
-        { op: 'pop' },
-        { op: 'increaseKey', index: 3, value: 10 },
-      ],
-    });
-    const ref = reference(
-      values,
-      [
-        { op: 'push', value: 7 },
-        { op: 'pop' },
-        { op: 'increaseKey', index: 3, value: 10 },
-      ],
-      'max',
-    );
+  it('works as a max-heap, with increase-key', () => {
+    const calls = [
+      { op: 'push', value: 7 },
+      { op: 'pop' },
+      { op: 'increase-key', index: 3, value: 10 },
+    ] as const;
+    const run = runOk('max-heap', { from: values, ops: calls });
+    const ref = reference(values, calls, 'max');
     expect(valuesAt(run.document)).toEqual(ref.end);
     expect(run.results).toEqual([null, 9, null]);
     expect(run.document.title).toBe(
       'Binary max-heap: push 7, pop, increase key at 3 to 10',
     );
-    expect(() =>
-      ops.heap.run({
+    expect(
+      runError('min-heap', {
         from: values,
-        ops: [{ op: 'increaseKey', index: 0, value: 9 }],
+        ops: [{ op: 'increase-key', index: 0, value: 9 }],
       }),
-    ).toThrow('increaseKey is for max-heaps; use decreaseKey');
+    ).toEqual({
+      code: 'INVALID_SHAPE',
+      path: '$.input.ops[0].op',
+      message: 'Unknown operation; use push, pop or decrease-key',
+    });
   });
 
   it('matches the reference on random operations, composed or chained', () => {
@@ -190,7 +208,7 @@ describe('ops.heap', () => {
             } else if (kind === 2 && size > 0) {
               const index = at % size;
               const now = reference(start, calls, order).end[index]!;
-              const op = order === 'min' ? 'decreaseKey' : 'increaseKey';
+              const op = order === 'min' ? 'decrease-key' : 'increase-key';
               const target =
                 order === 'min' ? Math.min(v, now) : Math.max(v, now);
               calls.push({ op, index, value: target });
@@ -199,7 +217,8 @@ describe('ops.heap', () => {
               size += 1;
             }
           }
-          const run = ops.heap.run({ from: start, order, ops: calls });
+          const id = `${order}-heap`;
+          const run = runOk(id, { from: start, ops: calls });
           const ref = reference(start, calls, order);
           expect(valuesAt(run.document)).toEqual(ref.end);
           expect(run.results).toEqual(ref.results);
@@ -208,63 +227,61 @@ describe('ops.heap', () => {
           // One section per call, and every step named (ADR 0020).
           expect(run.document.sections).toHaveLength(calls.length);
           expect(run.document.steps.every((s) => s.meta?.id)).toBe(true);
-          const one = ops.heap.run({
-            from: start,
-            order,
-            ops: calls.slice(0, 1),
-          });
-          const rest = ops.heap.run({
-            from: one.after,
-            order,
-            ops: calls.slice(1),
-          });
+          const one = runOk(id, { from: start, ops: calls.slice(0, 1) });
+          const rest = runOk(id, { from: one.after, ops: calls.slice(1) });
           expect(valuesAt(rest.document)).toEqual(ref.end);
-          expect(ops.heap.run({ from: start, order, ops: calls })).toEqual(run);
+          expect(runOk(id, { from: start, ops: calls })).toEqual(run);
         },
       ),
       fuzz,
     );
   });
 
-  it('rejects inputs it cannot show', () => {
-    expect(() => ops.heap.push({ from: values, value: Number.NaN })).toThrow(
-      RangeError,
-    );
-    expect(() =>
-      ops.heap.pop({ from: Array.from({ length: 33 }, (_, k) => k) }),
-    ).toThrow(/at most 32/);
-    expect(() =>
-      ops.heap.decreaseKey({ from: values, index: 1.5, value: 0 }),
-    ).toThrow(RangeError);
+  it('rejects inputs it cannot show, at their paths', () => {
+    const bad: [string, unknown, string][] = [
+      ['min-heap.push', { from: values, value: Number.NaN }, '$.input.value'],
+      [
+        'min-heap.pop',
+        { from: Array.from({ length: 33 }, (_, k) => k) },
+        '$.input.from',
+      ],
+      [
+        'min-heap.decrease-key',
+        { from: values, index: 1.5, value: 0 },
+        '$.input.index',
+      ],
+      ['min-heap.pop', { from: {} }, '$.input.from'],
+      ['min-heap.pop', { from: { array: 3 } }, '$.input.from'],
+      ['min-heap', { from: values, ops: [{ op: 'zap' }] }, '$.input.ops[0].op'],
+    ];
+    for (const [id, input, path] of bad)
+      expect(runError(id, input), JSON.stringify(input)).toMatchObject({
+        code: 'INVALID_SHAPE',
+        path,
+      });
+  });
+
+  it('says what forms `from` takes when it has neither', () => {
+    for (const from of [{}, { array: 3 }, Array.from({ length: 33 }, () => 1)])
+      expect(runError('min-heap.pop', { from }).message).toBe(
+        'from must be up to 32 numbers to push, or { array } of up to 32 numbers that already is a heap',
+      );
   });
 
   it('holds at most 32 values, so `after` can always start the next call', () => {
-    const full = ops.heap.push({
+    const full = runOk('min-heap.push', {
       from: Array.from({ length: 31 }, (_, k) => k),
       value: 31,
     });
     expect(full.after).toEqual({ array: expect.any(Array) });
-    expect(() => ops.heap.push({ from: full.after, value: 32 })).toThrow(
-      'The heap is full: it holds at most 32 values',
-    );
-    const last = ops.heap.decreaseKey({
+    expect(
+      runError('min-heap.push', { from: full.after, value: 32 }).message,
+    ).toBe('The heap is full: it holds at most 32 values');
+    const last = runOk('min-heap.decrease-key', {
       from: full.after,
       index: 31,
       value: -1,
     });
     expect(last.results).toEqual([null]);
-  });
-
-  it('rejects operations its types do not allow, as JSON may hold them', () => {
-    const zap = { op: 'zap' } as unknown as HeapCall;
-    expect(() => ops.heap.run({ from: values, ops: [zap] })).toThrow(
-      'Unknown operation "zap"; use push, pop or decreaseKey',
-    );
-    expect(() => ops.heap.pop({ from: {} as unknown as number[] })).toThrow(
-      'from must be an array of values or { array }',
-    );
-    expect(() =>
-      ops.heap.pop({ from: { array: 3 } as unknown as number[] }),
-    ).toThrow('from must be an array of values or { array }');
   });
 });
