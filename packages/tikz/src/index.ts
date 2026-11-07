@@ -1,3 +1,4 @@
+export * from './colour.ts';
 export * from './escape.ts';
 export * from './geometry.ts';
 export * from './render.ts';

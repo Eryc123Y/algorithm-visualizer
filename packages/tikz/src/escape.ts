@@ -4,8 +4,8 @@
  * (pdfLaTeX, LuaLaTeX, XeLaTeX) and any font encoding (OT1, T1, TU):
  *
  * - LaTeX's special characters become the commands that print them;
- * - characters that form ligatures in TeX fonts (`--`, `''`, `<<`, `,,`)
- *   are kept apart with `{}`;
+ * - quotes stay straight, and characters that form ligatures in TeX fonts
+ *   (`--`, `,,`) are kept apart with `{}`;
  * - spaces after the first of a run are kept with `\ `;
  * - symbols that algorithms show, such as `∞` and `∅`, become math
  *   commands, which every engine and encoding has;
@@ -29,6 +29,9 @@ const SPECIAL: Readonly<Record<string, string>> = {
   '>': '\\textgreater{}',
   '|': '\\textbar{}',
   '"': '\\textquotedbl{}',
+  // Straight, as typed: TeX fonts turn these into curly quotes.
+  "'": '\\textquotesingle{}',
+  '`': '\\textasciigrave{}',
 };
 
 const math = (command: string) => `\\ensuremath{${command}}`;
@@ -102,19 +105,25 @@ const SYMBOLS: Readonly<Record<string, string>> = {
   ),
 };
 
-/** Characters that join into a ligature with a following one of these. */
-const LIGATURE = new Set(['-', "'", '`', ',', '!', '?']);
+/**
+ * Characters that join into a ligature with a following one of these:
+ * `--` and `---` into dashes, and `,,` into a low quote in T1. Quotes are
+ * commands, so they join nothing.
+ */
+const LIGATURE = new Set(['-', ',']);
 
 /** A scene's text as LaTeX source that prints exactly that text. */
 export function texText(text: string): string {
   let out = '';
   let previous = '';
-  for (const char of text) {
+  for (const raw of text) {
+    // Control characters, such as line breaks, show as spaces.
+    const char = raw < ' ' ? ' ' : raw;
     if (LIGATURE.has(previous) && LIGATURE.has(char)) out += '{}';
     out +=
       char === ' ' && previous === ' '
         ? '\\ '
-        : (SPECIAL[char] ?? SYMBOLS[char] ?? (char < ' ' ? ' ' : char));
+        : (SPECIAL[char] ?? SYMBOLS[char] ?? char);
     previous = char;
   }
   return out;

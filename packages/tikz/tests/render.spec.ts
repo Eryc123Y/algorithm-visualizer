@@ -10,7 +10,7 @@ import {
 } from '@algoviz/core';
 import { createTheme, lightTheme } from '@algoviz/svg';
 
-import { parseColour, renderTikz, TIKZ_FORMAT } from '../src/index.ts';
+import { renderTikz, TIKZ_FORMAT } from '../src/index.ts';
 
 const sceneOf = (...items: SceneItem[]): Scene => ({
   width: 300,
@@ -65,26 +65,6 @@ const box = (
   text: '5',
   fontSize: 20,
   ...over,
-});
-
-describe('parseColour', () => {
-  it('reads the colour forms themes use', () => {
-    expect(parseColour('#0f7b6c')).toEqual({ hex: '0F7B6C', opacity: 1 });
-    expect(parseColour('#abc')).toEqual({ hex: 'AABBCC', opacity: 1 });
-    expect(parseColour('rgba(20, 45, 38, 0.10)')).toEqual({
-      hex: '142D26',
-      opacity: 0.1,
-    });
-    expect(parseColour('rgb(255 0 128)')).toEqual({
-      hex: 'FF0080',
-      opacity: 1,
-    });
-  });
-
-  it('rejects other text', () => {
-    expect(() => parseColour('teal')).toThrow(/Cannot read the colour/);
-    expect(() => parseColour('rgba(1, 2)')).toThrow(/Cannot read the colour/);
-  });
 });
 
 describe('renderTikz', () => {

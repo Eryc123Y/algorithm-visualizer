@@ -23,6 +23,7 @@ import {
   type ThemeName,
 } from '@algoviz/svg';
 
+import { parseColour } from './colour.ts';
 import { texText } from './escape.ts';
 import {
   apply,
@@ -44,50 +45,6 @@ export interface RenderTikzOptions {
    * and narration. Comments never change the drawing.
    */
   readonly comments?: readonly string[];
-}
-
-interface Colour {
-  readonly hex: string;
-  readonly opacity: number;
-}
-
-/** Reads the colours themes use: `#rgb`, `#rrggbb`, `rgb()` and `rgba()`. */
-export function parseColour(text: string): Colour {
-  const value = text.trim();
-  const short = /^#([0-9a-f])([0-9a-f])([0-9a-f])$/i.exec(value);
-  if (short !== null)
-    return {
-      hex: short
-        .slice(1)
-        .map((d) => d + d)
-        .join('')
-        .toUpperCase(),
-      opacity: 1,
-    };
-  if (/^#[0-9a-f]{6}$/i.test(value))
-    return { hex: value.slice(1).toUpperCase(), opacity: 1 };
-  const fn = /^rgba?\(([^)]*)\)$/i.exec(value);
-  if (fn !== null) {
-    const parts = fn[1]!
-      .split(/[\s,/]+/)
-      .filter(Boolean)
-      .map(Number);
-    if (
-      (parts.length === 3 || parts.length === 4) &&
-      parts.every((p) => Number.isFinite(p))
-    ) {
-      const [r, g, b, a = 1] = parts as [number, number, number, number?];
-      const byte = (n: number) =>
-        Math.max(0, Math.min(255, Math.round(n)))
-          .toString(16)
-          .padStart(2, '0');
-      return {
-        hex: `${byte(r)}${byte(g)}${byte(b)}`.toUpperCase(),
-        opacity: Math.max(0, Math.min(1, a)),
-      };
-    }
-  }
-  throw new Error(`Cannot read the colour "${text}"`);
 }
 
 /** Colours used by a figure, named in the order they are first used. */
@@ -189,12 +146,13 @@ const NODE_MARGIN = 6;
 /** How wide the text of a scene item may be; 0 when nothing bounds it. */
 function roomOf(item: SceneItem | undefined): number {
   switch (item?.type) {
+    // At least 1: 0 would mean that nothing bounds the text.
     case 'box':
     case 'badge':
-      return Math.max(0, item.width - 2 * BOX_MARGIN);
+      return Math.max(1, item.width - 2 * BOX_MARGIN);
     case 'node':
       return Math.max(
-        0,
+        1,
         2 * Math.max(item.radius, (item.width ?? 0) / 2) - 2 * NODE_MARGIN,
       );
     default:
@@ -246,15 +204,22 @@ function writeNode(
   context: Context,
 ): string[] {
   const { palette } = context;
-  const attrs = { ...inherited, ...node.attrs };
+  // Opacities multiply, as SVG's do.
+  const attrs: Readonly<Record<string, string>> =
+    inherited['opacity'] !== undefined && node.attrs['opacity'] !== undefined
+      ? {
+          ...inherited,
+          ...node.attrs,
+          opacity: String(
+            Number(inherited['opacity']) * Number(node.attrs['opacity']),
+          ),
+        }
+      : { ...inherited, ...node.attrs };
   const n = (name: string) => Number(attrs[name] ?? 0);
   switch (node.tag) {
     case 'g': {
-      const passed: Record<string, string> = {};
-      if (node.attrs['opacity'] !== undefined)
-        passed['opacity'] = String(
-          Number(inherited['opacity'] ?? 1) * Number(node.attrs['opacity']),
-        );
+      const passed =
+        attrs['opacity'] === undefined ? {} : { opacity: attrs['opacity'] };
       return (node.children ?? []).flatMap((child) =>
         writeNode(child, m, { ...inherited, ...passed }, context),
       );

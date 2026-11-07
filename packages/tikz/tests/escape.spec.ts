@@ -23,15 +23,23 @@ describe('texText', () => {
   it('keeps ligature pairs apart', () => {
     expect(texText('a--b')).toBe('a-{}-b');
     expect(texText('---')).toBe('-{}-{}-');
-    expect(texText("''")).toBe("'{}'");
     expect(texText(',,')).toBe(',{},');
-    expect(texText('!`')).toBe('!{}`');
-    expect(texText('a-b')).toBe('a-b');
+    expect(texText('a-b, c')).toBe('a-b, c');
+  });
+
+  it('keeps quotes straight, as typed', () => {
+    expect(texText("'a'")).toBe('\\textquotesingle{}a\\textquotesingle{}');
+    expect(texText("!`?``''")).toBe(
+      '!\\textasciigrave{}?\\textasciigrave{}\\textasciigrave{}\\textquotesingle{}\\textquotesingle{}',
+    );
   });
 
   it('keeps repeated spaces', () => {
     expect(texText('a  b')).toBe('a \\ b');
     expect(texText('a   b')).toBe('a \\ \\ b');
+    // A line break shows as a space, and counts as one.
+    expect(texText('a \nb')).toBe('a \\ b');
+    expect(texText('a\r\nb')).toBe('a \\ b');
   });
 
   it('writes the symbols of algorithm figures as math', () => {

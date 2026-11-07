@@ -4,20 +4,34 @@
  *
  * The SVG's tags are read and its transforms applied here, with code of
  * its own, so the comparison does not rest on the painter's geometry
- * module.
+ * module. Colours, line widths, dashes and text are compared too.
  */
+import { parseColour, texText } from '../src/index.ts';
+
 export interface Point {
   readonly x: number;
   readonly y: number;
 }
 
-/** A shape reduced to what both formats share: its kind and its points. */
+/** A shape reduced to what both formats share. */
 export interface Shape {
   readonly kind: 'rect' | 'circle' | 'open' | 'closed' | 'text';
   readonly points: readonly Point[];
   /** Circles: the radius. */
   readonly radius?: number;
+  /**
+   * Its paint in one canonical line: fill and stroke colours with their
+   * opacities, line width, dashes, caps, joins and corner radius; for
+   * text, its colour, halo, size, font role and text as LaTeX.
+   */
+  readonly style: string;
 }
+
+const round = (n: number) => String(Math.round(n * 100) / 100);
+
+/** A colour and an opacity, as the canonical style writes them. */
+const paint = (hex: string, opacity: number) =>
+  opacity === 1 ? hex : `${hex}@${round(opacity)}`;
 
 const POINT = /\((-?[\d.]+),(-?[\d.]+)\)/g;
 
@@ -30,15 +44,73 @@ export function drawingOf(tikz: string): string[] {
   return lines.slice(lines.indexOf('}{%') + 1, lines.lastIndexOf('}%'));
 }
 
+/** The colours a figure file defines, by name. */
+function definitions(tikz: string): Map<string, string> {
+  return new Map(
+    [...tikz.matchAll(/^\\algoviz@color\{(\d+)\}\{([0-9A-F]{6})\}%$/gm)].map(
+      (m) => [`algoviz@c${m[1]}`, m[2]!],
+    ),
+  );
+}
+
+/** The canonical style of a `\path`'s options. */
+function pathStyle(options: string, colours: Map<string, string>): string {
+  const o = new Map(
+    options.split(',').map((option) => {
+      const [key, value = ''] = option.split('=');
+      return [key!, value.replace(/\\algoviz@u/g, '')] as const;
+    }),
+  );
+  const colour = (key: string) => colours.get(o.get(key)!) ?? `?${o.get(key)}`;
+  const parts: string[] = [];
+  if (o.has('fill'))
+    parts.push(
+      `fill ${paint(colour('fill'), Number(o.get('fill opacity') ?? 1))}`,
+    );
+  if (o.has('draw')) {
+    parts.push(
+      `draw ${paint(colour('draw'), Number(o.get('draw opacity') ?? 1))}`,
+      `width ${o.get('line width')}`,
+    );
+    const dash = o.get('dash pattern');
+    if (dash !== undefined)
+      parts.push(`dash ${dash.replace(/(on|off) /g, '').trim()}`);
+    if (o.get('line cap') === 'round') parts.push('cap round');
+    if (o.get('line join') === 'round') parts.push('join round');
+  }
+  if (o.has('rounded corners'))
+    parts.push(`corners ${o.get('rounded corners')}`);
+  return parts.join('; ');
+}
+
 /** The shapes of a figure file, in drawing order. */
 export function tikzShapes(tikz: string): Shape[] {
+  const colours = definitions(tikz);
   return drawingOf(tikz).map((line): Shape => {
-    const text = /^\\algoviz@text\{(-?[\d.]+),(-?[\d.]+)\}/.exec(line);
-    if (text !== null)
+    const text =
+      /^\\algoviz@text\{(-?[\d.]+),(-?[\d.]+)\}\{[lcr]\}\{([\d.]+)\}\{[\d.]+\}\{(value|label)\}\{([^}]*)\}\{(?:([^,}]*),([\d.]+)\\algoviz@u)?\}\{(.*)\}$/.exec(
+        line,
+      );
+    if (text !== null) {
+      const [, x, y, size, font, colour, halo, padding, body] = text;
       return {
         kind: 'text',
-        points: [{ x: Number(text[1]), y: Number(text[2]) }],
+        points: [{ x: Number(x), y: Number(y) }],
+        style: [
+          `text ${colours.get(colour!) ?? `?${colour}`}`,
+          ...(halo === undefined
+            ? []
+            : [
+                `halo ${colours.get(halo) ?? `?${halo}`} ${round(2 * Number(padding))}`,
+              ]),
+          `size ${size}`,
+          font,
+          body,
+        ].join('; '),
       };
+    }
+    const options = /^\\path\[([^\]]*)\] /.exec(line)?.[1] ?? '';
+    const style = pathStyle(options, colours);
     const body = line.replace(/^\\path\[[^\]]*\] /, '');
     const rect =
       /^\((-?[\d.]+),(-?[\d.]+)\) rectangle \+\+\((-?[\d.]+),(-?[\d.]+)\);$/.exec(
@@ -57,20 +129,23 @@ export function tikzShapes(tikz: string): Shape[] {
           { x, y },
           { x: x + w, y: y + h },
         ],
+        style,
       };
     }
     if (/^\(-?[\d.]+,-?[\d.]+\) rectangle \(/.test(body))
-      return { kind: 'rect', points: pointsOf(body) };
+      return { kind: 'rect', points: pointsOf(body), style };
     const circle = /circle\[radius=(-?[\d.]+)\\algoviz@u\];$/.exec(body);
     if (circle !== null)
       return {
         kind: 'circle',
         points: pointsOf(body),
         radius: Number(circle[1]),
+        style,
       };
     return {
       kind: body.endsWith('-- cycle;') ? 'closed' : 'open',
       points: pointsOf(body),
+      style,
     };
   });
 }
@@ -115,6 +190,54 @@ type Attributes = Readonly<Record<string, string>>;
 
 const num = (attrs: Attributes, name: string) => Number(attrs[name] ?? 0);
 
+/** The canonical style of an SVG shape, with the opacity of its groups. */
+function svgStyle(attrs: Attributes, groupOpacity: number): string {
+  const opacity = groupOpacity * Number(attrs['opacity'] ?? 1);
+  const parts: string[] = [];
+  const fill = attrs['fill'];
+  if (fill !== undefined && fill !== 'none') {
+    const c = parseColour(fill);
+    parts.push(`fill ${paint(c.hex, c.opacity * opacity)}`);
+  }
+  const stroke = attrs['stroke'];
+  if (stroke !== undefined && stroke !== 'none') {
+    const c = parseColour(stroke);
+    parts.push(
+      `draw ${paint(c.hex, c.opacity * opacity)}`,
+      `width ${round(num(attrs, 'stroke-width'))}`,
+    );
+    const dash = attrs['stroke-dasharray'];
+    if (dash !== undefined) {
+      const n = dash.split(/[\s,]+/).filter(Boolean);
+      parts.push(`dash ${(n.length % 2 === 0 ? n : [...n, ...n]).join(' ')}`);
+    }
+    if (attrs['stroke-linecap'] === 'round') parts.push('cap round');
+    if (attrs['stroke-linejoin'] === 'round') parts.push('join round');
+  }
+  if (attrs['rx'] !== undefined && num(attrs, 'rx') > 0)
+    parts.push(`corners ${round(num(attrs, 'rx'))}`);
+  return parts.join('; ');
+}
+
+const decode = (xml: string) =>
+  xml.replace(/&#(\d+);/g, (_, code: string) =>
+    String.fromCharCode(Number(code)),
+  );
+
+/** The canonical style of an SVG text, with its text as LaTeX. */
+function svgTextStyle(attrs: Attributes, content: string): string {
+  const halo = attrs['stroke'];
+  return [
+    `text ${parseColour(attrs['fill'] ?? '#000').hex}`,
+    ...(halo === undefined
+      ? []
+      : [`halo ${parseColour(halo).hex} ${round(num(attrs, 'stroke-width'))}`]),
+    `size ${round(num(attrs, 'font-size'))}`,
+    attrs['font-family'] === undefined ? 'value' : 'label',
+    texText(decode(content)),
+  ].join('; ');
+}
+
 /**
  * The shapes of an SVG made with `outlineText: false`, in drawing order.
  * The SVG painter writes plain, regular markup, so its tags are read one by
@@ -123,24 +246,30 @@ const num = (attrs: Attributes, name: string) => Number(attrs[name] ?? 0);
 export function svgShapes(svg: string): Shape[] {
   const shapes: Shape[] = [];
   let at: ((p: Point) => Point) | undefined;
-  let depth = 0;
-  for (const [, close, tag, rest] of svg.matchAll(/<(\/?)(\w+)([^>]*)>/g)) {
+  // Opacities of the open groups inside the current item.
+  const groups: number[] = [];
+  for (const match of svg.matchAll(/<(\/?)(\w+)([^>]*)>/g)) {
+    const [, close, tag, rest] = match;
     const attrs: Attributes = Object.fromEntries(
       [...rest!.matchAll(/([\w-]+)="([^"]*)"/g)].map((m) => [m[1]!, m[2]!]),
     );
+    const opacity = groups.at(-1) ?? 1;
     if (tag === 'g') {
       if (close === '/') {
-        if (at !== undefined && --depth === 0) at = undefined;
+        groups.pop();
+        if (groups.length === 0) at = undefined;
       } else if (!rest!.endsWith('/')) {
-        if (at !== undefined) depth++;
+        if (at !== undefined)
+          groups.push(opacity * Number(attrs['opacity'] ?? 1));
         else if (attrs['data-key'] !== undefined) {
           at = transformOf(attrs['transform'] ?? '');
-          depth = 1;
+          groups.push(1);
         }
       }
       continue;
     }
     if (close === '/') continue;
+    const style = svgStyle(attrs, opacity);
     if (at === undefined) {
       // Outside items, only the background rectangle is drawn.
       if (tag === 'rect')
@@ -150,6 +279,7 @@ export function svgShapes(svg: string): Shape[] {
             { x: 0, y: 0 },
             { x: num(attrs, 'width'), y: num(attrs, 'height') },
           ],
+          style,
         });
       continue;
     }
@@ -162,6 +292,7 @@ export function svgShapes(svg: string): Shape[] {
             at({ x, y }),
             at({ x: x + num(attrs, 'width'), y: y + num(attrs, 'height') }),
           ],
+          style,
         });
         break;
       }
@@ -170,6 +301,7 @@ export function svgShapes(svg: string): Shape[] {
           kind: 'circle',
           points: [at({ x: num(attrs, 'cx'), y: num(attrs, 'cy') })],
           radius: num(attrs, 'r'),
+          style,
         });
         break;
       case 'line':
@@ -179,6 +311,7 @@ export function svgShapes(svg: string): Shape[] {
             at({ x: num(attrs, 'x1'), y: num(attrs, 'y1') }),
             at({ x: num(attrs, 'x2'), y: num(attrs, 'y2') }),
           ],
+          style,
         });
         break;
       case 'polygon': {
@@ -186,21 +319,29 @@ export function svgShapes(svg: string): Shape[] {
         const points: Point[] = [];
         for (let k = 0; k + 1 < n.length; k += 2)
           points.push(at({ x: n[k]!, y: n[k + 1]! }));
-        shapes.push({ kind: 'closed', points });
+        shapes.push({ kind: 'closed', points, style });
         break;
       }
       case 'path':
         shapes.push({
           kind: 'open',
           points: pathPoints(attrs['d'] ?? '').map(at),
+          style,
         });
         break;
-      case 'text':
+      case 'text': {
+        // An empty text is written as one tag, `<text …/>`.
+        const start = match.index + match[0].length;
+        const content = rest!.endsWith('/')
+          ? ''
+          : svg.slice(start, svg.indexOf('</text>', start));
         shapes.push({
           kind: 'text',
           points: [at({ x: num(attrs, 'x'), y: num(attrs, 'y') })],
+          style: svgTextStyle(attrs, content),
         });
         break;
+      }
     }
   }
   return shapes;
@@ -246,6 +387,10 @@ export function agreementProblems(
     });
     if (s.radius !== undefined && Math.abs(s.radius - (t.radius ?? 0)) > 0.011)
       problems.push(`shape ${k}: radius ${s.radius} and ${t.radius}`);
+    if (s.style !== t.style)
+      problems.push(
+        `shape ${k} (${s.kind}): SVG "${s.style}", TikZ "${t.style}"`,
+      );
   });
   return problems;
 }
