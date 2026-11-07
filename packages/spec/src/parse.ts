@@ -1,7 +1,8 @@
 /**
  * Parsing pipeline: untrusted input → canonical `Visualization`.
  *
- * 1. Reject unsupported versions with a dedicated error.
+ * 1. Reject versions this package cannot read with a dedicated error
+ *    (ADR 0021).
  * 2. Check the document's shape (actions only by `target` and `type`).
  * 3. Expand shorthands in structure declarations.
  * 4. Validate each action against the schema of its target's kind, expand
@@ -13,7 +14,6 @@
  * point in the timeline (e.g. an index within the current length) depends
  * on state and is checked by the core reducer.
  */
-import { PROTOCOL_VERSION } from './common.ts';
 import {
   formatPath,
   fromZodIssues,
@@ -29,6 +29,7 @@ import {
   type StructureKindName,
 } from './kinds/index.ts';
 import { err, ok, type Result } from './result.ts';
+import { checkVersion } from './version.ts';
 import {
   Envelope,
   type StructureDecl,
@@ -40,7 +41,7 @@ import {
 export function parseVisualization(
   input: unknown,
 ): Result<Visualization, readonly ProtocolError[]> {
-  const versionError = checkVersion(input);
+  const versionError = checkDocumentVersion(input);
   if (versionError) return err([versionError]);
   const protoErrors = checkProtoKeys(input);
   if (protoErrors.length > 0) return err(protoErrors);
@@ -108,17 +109,11 @@ export function parseVisualization(
   });
 }
 
-function checkVersion(input: unknown): ProtocolError | undefined {
+/** A missing `version` is left to the shape check, which reports it. */
+function checkDocumentVersion(input: unknown): ProtocolError | undefined {
   if (typeof input !== 'object' || input === null || !('version' in input))
     return undefined;
-  const { version } = input;
-  if (version === PROTOCOL_VERSION) return undefined;
-  return {
-    code: 'UNSUPPORTED_VERSION',
-    path: '$.version',
-    message: `Unsupported protocol version ${JSON.stringify(version)}`,
-    hint: `Set "version" to "${PROTOCOL_VERSION}".`,
-  };
+  return checkVersion(input.version);
 }
 
 const isRecord = (x: unknown): x is Record<string, unknown> =>

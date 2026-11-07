@@ -5,6 +5,14 @@ export * from './kinds/index.ts';
 export * from './parse.ts';
 export * from './result.ts';
 export {
+  minimumVersion,
+  PROTOCOL_FEATURES,
+  PROTOCOL_VERSION,
+  PROTOCOL_VERSIONS,
+  type ProtocolFeature,
+  type ProtocolVersion,
+} from './version.ts';
+export {
   StructureDecl,
   StructureDeclInput,
   TargetedAction,

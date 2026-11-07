@@ -36,7 +36,7 @@ An algoviz document is JSON that describes a step-by-step visualization of an al
 }
 ```
 
-- `version` is always `"0.1"`.
+- `version` is the protocol version, `"major.minor"`. Write the oldest version that has every feature you use; everything in this guide is in `"0.1"`.
 - `title` and `source` are optional. `source.code` is the code being taught; `meta.line` (1-based) highlights a line of it. Without `source`, leave out `line`.
 - `structures` maps names to declarations (at most 16). Names are identifiers: letters, digits and `_`, not starting with a digit, e.g. `arr`, `dist`, `call_stack`.
 - `steps` is the timeline. Each step has `actions` (applied in order, possibly none) and optional `meta`:

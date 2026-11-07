@@ -1,5 +1,5 @@
 {
-  "description": "A document for another protocol version is rejected before shape checks.",
+  "description": "A document of a newer major version is rejected before shape checks.",
   "input": {
     "version": "2.0",
     "structures": {},

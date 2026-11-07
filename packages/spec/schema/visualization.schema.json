@@ -4,8 +4,10 @@
   "properties": {
     "version": {
       "type": "string",
-      "const": "0.1",
-      "description": "Protocol version; must be \"0.1\"."
+      "enum": [
+        "0.1"
+      ],
+      "description": "Protocol version, \"major.minor\": the oldest version that has every feature the document uses."
     },
     "title": {
       "type": "string",

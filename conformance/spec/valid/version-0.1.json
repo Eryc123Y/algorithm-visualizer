@@ -1,0 +1,33 @@
+{
+  "description": "Documents of protocol 0.1 stay readable in every later 0.x version, and the canonical form keeps the version they declare.",
+  "input": {
+    "version": "0.1",
+    "structures": {
+      "arr": {
+        "kind": "array",
+        "initial": [
+          {
+            "id": "a",
+            "value": 1
+          }
+        ]
+      }
+    },
+    "steps": []
+  },
+  "expected": {
+    "version": "0.1",
+    "structures": {
+      "arr": {
+        "kind": "array",
+        "initial": [
+          {
+            "id": "a",
+            "value": 1
+          }
+        ]
+      }
+    },
+    "steps": []
+  }
+}
