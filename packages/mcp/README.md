@@ -58,12 +58,22 @@ algoviz guide graph table
 algoviz validate doc.json
 algoviz inspect doc.json 0 relax#2 -1
 algoviz render doc.json --frame insert-5/relax --theme dark --out relax.svg
+algoviz export doc.json --step insert-5 --theme print --out figures
+algoviz export dijkstra --input graph.json --step relax#3,-1 --out figures
 algoviz recipes
 algoviz run bst.delete '{"from": [8, 3, 10, 1, 6], "key": 3}' --out delete.json
 algoviz run dijkstra '{"graph": {"nodes": ["A", "B"], "edges": [["A", "B", 3]]}, "source": "A"}'
 ```
 
 From the repository without building, run `node --conditions=@algoviz/source packages/mcp/src/algoviz.ts …`.
+
+`render` prints one frame with its text kept as text, which suits models and quick looks. `export` writes figures for documents ([ADR 0025](../../docs/adr/0025-exporting-figures.md)):
+
+- **Source.** A document file (`-` reads standard input), or a registry id with `--input`, which takes JSON text or a file, and runs that algorithm first.
+- **Steps.** `--step` takes any selector, may repeat, and may list several with commas. The figures are the frames they name, in timeline order; without `--step`, every frame.
+- **Output.** Standalone SVG with text as glyph outlines, the step's narration as `<desc>`, and one size for every frame of the document. `--theme` is `light`, `dark` or `print`.
+- **Files.** `--out` is a directory (created if missing; default the current one), and `--name` a pattern (default `{name}-{frame}`) with `{name}` (file name or algorithm id), `{frame}` (padded with zeros) and `{step}` (the selector with `/` and `#` written `_`). Existing files are replaced, and each written file is listed with its frame's selector.
+- **Errors.** Exit code 1 for an invalid document or input, an unknown algorithm or a selector that matches nothing; 2 for usage errors, such as an unknown placeholder or `--out` given a `.svg` file. Nothing is written unless every figure renders.
 
 ## The guide
 

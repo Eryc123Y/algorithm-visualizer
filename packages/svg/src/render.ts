@@ -28,6 +28,12 @@ export interface RenderSvgOptions {
   readonly outlineText?: boolean;
   /** Outlines to draw text with, by face id. Default: the bundled faces. */
   readonly outlines?: readonly FontOutlines[];
+  /**
+   * A longer description than the scene's title, such as a step's
+   * narration, written as a `<desc>` after the `<title>`. Left out when
+   * empty.
+   */
+  readonly description?: string;
 }
 
 // Built on first use, not at import: a module-level call could keep the
@@ -38,7 +44,13 @@ export function renderSvg(
   scene: Scene,
   options: RenderSvgOptions = {},
 ): string {
-  const { scale = 1, keys = true, outlineText = true, outlines } = options;
+  const {
+    scale = 1,
+    keys = true,
+    outlineText = true,
+    outlines,
+    description,
+  } = options;
   const glyphs = !outlineText
     ? undefined
     : outlines === undefined
@@ -65,6 +77,7 @@ export function renderSvg(
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" width="${num(painted.width * scale)}" height="${num(painted.height * scale)}" viewBox="0 0 ${w} ${h}" role="img">` +
     `<title>${escapeXml(painted.title)}</title>` +
+    (description ? `<desc>${escapeXml(description)}</desc>` : '') +
     (painted.background === null
       ? ''
       : `<rect width="${w}" height="${h}" fill="${escapeXml(painted.background)}"/>`) +

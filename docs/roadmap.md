@@ -40,7 +40,7 @@ Everything later builds on these, so they come first. The ADRs are accepted (#13
   - `@algoviz/fonts`: the generator, metrics and outlines of JetBrains Mono SemiBold and Inter SemiBold, and `textWidth` (#30).
   - layout measures with the theme's font metrics; painters place labels with them; fixtures with wide values (#31).
   - standalone SVG draws text as outlines; the MCP render tool keeps text (#32).
-- [~] **1.2 `algoviz export`** _ADR_ [ADR 0025](adr/0025-exporting-figures.md).
+- [x] **1.2 `algoviz export`** _ADR_ [ADR 0025](adr/0025-exporting-figures.md) (#34), then `selectSeries`, `exportFigures` and the command (#35).
   - Select steps by "section / step id", by a range, or all of them.
   - Write SVG files.
   - A series shares one set of layout metrics (`layoutState` already takes metrics), so all its figures have one scale.

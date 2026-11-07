@@ -9,6 +9,7 @@ import {
   selectFrame,
   selectFrames,
   selectorOf,
+  selectSeries,
   stepNameAt,
   type Selectable,
 } from '../src/index.ts';
@@ -290,6 +291,35 @@ describe('selectorOf', () => {
   });
 });
 
+describe('selectSeries', () => {
+  const series = (...selectors: (string | number)[]) => {
+    const result = selectSeries(doc, selectors);
+    return result.ok ? result.value : result.error;
+  };
+
+  it('gives every frame without selectors', () => {
+    expect(series()).toEqual([0, 1, 2, 3, 4, 5, 6, 7]);
+  });
+
+  it('joins frames and ranges in timeline order, without repeats', () => {
+    expect(series('go#2')).toEqual([3]);
+    expect(series('delete-3/go#2', 'insert-5/go', -1)).toEqual([2, 7]);
+    expect(series('delete-3', 0)).toEqual([0, 4, 5, 6, 7]);
+    expect(series('insert-5', 'go#2..5')).toEqual([1, 2, 3, 4, 5]);
+    expect(series(3, '3', 'go#2')).toEqual([3]);
+    expect(series('0..-1')).toEqual(series());
+  });
+
+  it('stops at the first selector that fails, with its error', () => {
+    expect(series('go', 'nope', 99)).toMatchObject({
+      code: 'NO_MATCH',
+      message: 'No section or step is named "nope"',
+    });
+    expect(series(1, 99)).toMatchObject({ code: 'OUT_OF_RANGE' });
+    expect(series('go,relax')).toMatchObject({ code: 'INVALID_SELECTOR' });
+  });
+});
+
 // Generated documents, against a brute-force reading of ADR 0020.
 
 const NAMES = ['go', 'relax', 'swap'] as const;
@@ -410,6 +440,47 @@ describe('selectors on generated documents', () => {
           });
         },
       ),
+      params,
+    );
+  });
+});
+
+describe('series on generated documents', () => {
+  it('are the union of what each selector names, in order', () => {
+    const selectors = fc.array(
+      fc.oneof(
+        fc.constantFrom(...NAMES, ...SECTION_IDS),
+        fc
+          .tuple(fc.constantFrom(...NAMES), fc.integer({ min: 1, max: 4 }))
+          .map(([name, nth]) => `${name}#${nth}`),
+        fc.integer({ min: -35, max: 35 }),
+        fc
+          .tuple(
+            fc.integer({ min: 0, max: 30 }),
+            fc.integer({ min: -30, max: -1 }),
+          )
+          .map(([a, b]) => `${a}..${b}`),
+      ),
+      { maxLength: 5 },
+    );
+    fc.assert(
+      fc.property(documents, selectors, (d, list) => {
+        const result = selectSeries(d, list);
+        const ranges = list.map((s) => selectFrames(d, s));
+        const failed = ranges.find((r) => !r.ok);
+        if (failed !== undefined) {
+          expect(result).toEqual(failed);
+          return;
+        }
+        if (!result.ok) throw new Error('expected a series');
+        const want = new Set<number>();
+        if (list.length === 0)
+          for (let f = 0; f <= d.steps.length; f++) want.add(f);
+        for (const r of ranges)
+          if (r.ok)
+            for (let f = r.value.from; f <= r.value.to; f++) want.add(f);
+        expect(result.value).toEqual([...want].toSorted((a, b) => a - b));
+      }),
       params,
     );
   });

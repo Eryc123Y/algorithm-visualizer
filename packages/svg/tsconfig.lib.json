@@ -12,10 +12,11 @@
     "sourceMap": true
   },
   "include": ["src"],
-  // Resolves @algoviz/core and @algoviz/fonts to their built declarations,
-  // so build them first.
+  // Resolves @algoviz/core, @algoviz/fonts and @algoviz/spec to their built
+  // declarations, so build them first.
   "references": [
     { "path": "../core/tsconfig.lib.json" },
-    { "path": "../fonts/tsconfig.lib.json" }
+    { "path": "../fonts/tsconfig.lib.json" },
+    { "path": "../spec/tsconfig.lib.json" }
   ]
 }
