@@ -18,7 +18,7 @@ Everything later builds on these, so they come first. The ADRs are accepted (#13
   - Their entries in the protocol feature table (`PROTOCOL_FEATURES`), and a parser check that a document's `version` is not older than the features it uses (from the review of #14).
   - Selectors in core, used by the player's `frame` attribute and by `algoviz_inspect` and `algoviz_render`.
   - Section marks on the player's timeline, and the guide and fixtures.
-- [~] **0.3 Sources in two languages** [ADR 0017](adr/0017-multi-language-source.md) (protocol `0.3`). Split in two PRs: the spec, the highlighter, recording, `ops.bst` and `ops.heap` in pseudocode, MCP and the guide (#17), then the player.
+- [x] **0.3 Sources in two languages** [ADR 0017](adr/0017-multi-language-source.md) (protocol `0.3`). Split in two PRs: the spec, the highlighter, recording, `ops.bst` and `ops.heap` in pseudocode, MCP and the guide (#17), then the player's language switcher (#18).
   - `sources` with anchors, and `meta.at`, with validation.
   - The pseudocode highlighter (CLRS conventions, 0-based indices).
   - The language switch in the player.

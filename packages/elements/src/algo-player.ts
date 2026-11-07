@@ -18,6 +18,11 @@
  * (ADR 0020). The timeline shows the document's sections, and Page Up and
  * Page Down move between them.
  *
+ * A document with its code in several languages (`sources`, ADR 0017) gets
+ * a language switcher above the code. The reader's choice is remembered for
+ * the site and followed by every player on the page; otherwise the
+ * `language` attribute, then pseudocode, is shown first.
+ *
  * Events: `algo-load` ({ length }), `algo-error` ({ errors }) and
  * `algo-frame` ({ index, length, playing, stepName?, sectionId? }).
  */
@@ -46,6 +51,15 @@ import {
   prevIcon,
   restartIcon,
 } from './icons.ts';
+import {
+  chooseLanguage,
+  LANGUAGE_EVENT,
+  LANGUAGE_KEY,
+  languageName,
+  pickListing,
+  storedLanguage,
+  type LanguageEventDetail,
+} from './languages.ts';
 import {
   frameConverter,
   openingFrame,
@@ -97,6 +111,8 @@ export class AlgoPlayer extends LitElement {
     loop: { type: Boolean },
     hideControls: { type: Boolean, attribute: 'hide-controls' },
     hideCode: { type: Boolean, attribute: 'hide-code' },
+    language: { type: String },
+    preferredLanguage: { state: true },
     playback: { state: true },
     errors: { state: true },
     frameError: { state: true },
@@ -131,6 +147,15 @@ export class AlgoPlayer extends LitElement {
   declare loop: boolean;
   declare hideControls: boolean;
   declare hideCode: boolean;
+  /**
+   * The language of the code to show first, e.g. `python`, when the
+   * document has several; pseudocode by default. A language the reader
+   * chose wins.
+   */
+  declare language: string | undefined;
+
+  /** The language the reader chose, in this page or before on the site. */
+  declare protected preferredLanguage: string | undefined;
 
   declare protected playback: PlaybackState;
   declare protected errors: readonly Diagnostic[] | null;
@@ -171,6 +196,8 @@ export class AlgoPlayer extends LitElement {
     this.loop = false;
     this.hideControls = false;
     this.hideCode = false;
+    this.language = undefined;
+    this.preferredLanguage = storedLanguage();
     this.errors = null;
     this.frameError = null;
     this.trace = null;
@@ -221,12 +248,21 @@ export class AlgoPlayer extends LitElement {
     return doc && sectionAt(doc, this.playback.index);
   }
 
+  /** The language of the code on show, if the document names one. */
+  get currentLanguage(): string | undefined {
+    return this.#listing()?.language;
+  }
+
   // --- Lifecycle -------------------------------------------------------------
 
   override connectedCallback(): void {
     super.connectedCallback();
     this.addEventListener('keydown', this.#onKeyDown);
     this.#colorScheme?.addEventListener('change', this.#onColorScheme);
+    globalThis.addEventListener?.(LANGUAGE_EVENT, this.#onLanguage);
+    globalThis.addEventListener?.('storage', this.#onStorage);
+    // A choice made while this player was detached.
+    this.preferredLanguage = storedLanguage() ?? this.preferredLanguage;
     if (typeof IntersectionObserver === 'function') {
       this.#visibility = new IntersectionObserver(this.#onVisibility);
       this.#visibility.observe(this);
@@ -245,6 +281,8 @@ export class AlgoPlayer extends LitElement {
     super.disconnectedCallback();
     this.removeEventListener('keydown', this.#onKeyDown);
     this.#colorScheme?.removeEventListener('change', this.#onColorScheme);
+    globalThis.removeEventListener?.(LANGUAGE_EVENT, this.#onLanguage);
+    globalThis.removeEventListener?.('storage', this.#onStorage);
     this.#visibility?.disconnect();
     this.#visibility = null;
     // Pause (rather than dispose) so the UI state stays in sync and playback
@@ -448,6 +486,13 @@ export class AlgoPlayer extends LitElement {
     // A focused code panel keeps its keys for scrolling.
     if (target instanceof HTMLElement && target.classList.contains('code'))
       return;
+    // A language button keeps the keys that press it.
+    if (
+      target instanceof HTMLButtonElement &&
+      target.dataset['language'] !== undefined &&
+      (event.key === ' ' || event.key === 'Enter')
+    )
+      return;
     const sections = (this.trace?.visualization.sections ?? []).length > 0;
     const jumps: Record<string, () => void> = sections
       ? {
@@ -517,6 +562,34 @@ export class AlgoPlayer extends LitElement {
     this.darkScheme = event.matches;
   };
 
+  /** Another player on the page, or this one, told of a reader's choice. */
+  #onLanguage = (event: Event): void => {
+    const detail = (event as CustomEvent<LanguageEventDetail | undefined>)
+      .detail;
+    if (typeof detail?.language === 'string')
+      this.preferredLanguage = detail.language;
+  };
+
+  /** A reader's choice in another tab of this site. */
+  #onStorage = (event: StorageEvent): void => {
+    if (event.key === LANGUAGE_KEY && event.newValue !== null)
+      this.preferredLanguage = event.newValue;
+  };
+
+  /** The code listing on show: the reader's choice, `language`, pseudocode. */
+  #listing() {
+    const doc = this.trace?.visualization;
+    return pickListing(doc ? codeListings(doc) : [], [
+      this.preferredLanguage,
+      this.language,
+    ]);
+  }
+
+  #chooseLanguage(language: string): void {
+    this.preferredLanguage = language;
+    chooseLanguage(language);
+  }
+
   #resolvedTheme(): ThemeName {
     if (this.theme === 'auto') return this.darkScheme ? 'dark' : 'light';
     return this.theme;
@@ -551,7 +624,8 @@ export class AlgoPlayer extends LitElement {
     const trace = this.trace;
     const { index, length, playing } = this.playback;
     const step = trace?.frame(index).step;
-    const listing = trace ? codeListings(trace.visualization)[0] : undefined;
+    const listings = trace ? codeListings(trace.visualization) : [];
+    const listing = this.#listing();
     const display = this.#isDisplay;
     const showCode = listing !== undefined && !this.hideCode && !display;
     const vars = Object.entries(step?.meta?.vars ?? {});
@@ -589,14 +663,38 @@ export class AlgoPlayer extends LitElement {
           <div class="stage" part="stage"><svg class="scene"></svg></div>
           ${
             showCode
-              ? html`<pre
-                  class="code"
-                  part="code"
-                  role="region"
-                  aria-label="Source code"
-                  tabindex="0"
-                >
-${codeLines(listing.source, listing.lineOf(step))}</pre>`
+              ? html`<div class="code-panel">
+                  ${
+                    listings.length > 1
+                      ? html`<div
+                          class="languages"
+                          part="languages"
+                          role="group"
+                          aria-label="Code language"
+                        >
+                          ${listings.map(
+                            ({ language }) =>
+                              html`<button
+                                type="button"
+                                data-language=${language ?? ''}
+                                aria-pressed=${language === listing.language ? 'true' : 'false'}
+                                @click=${() => this.#chooseLanguage(language ?? '')}
+                              >
+                                ${languageName(language)}
+                              </button>`,
+                          )}
+                        </div>`
+                      : nothing
+                  }
+                  <pre
+                    class="code"
+                    part="code"
+                    role="region"
+                    aria-label=${listing.language === undefined ? 'Source code' : `Source code, ${languageName(listing.language)}`}
+                    tabindex="0"
+                  >
+${codeLines(listing.source, listing.lineOf(step))}</pre>
+                </div>`
               : nothing
           }
         </div>

@@ -85,9 +85,11 @@ Build the standalone bundle with `npm run build -w @algoviz/elements`, then:
 </algo-player>
 ```
 
-Attributes: `src`, `frame`, `theme` (`auto` · `light` · `dark` · `print`), `speed` (ms per step), `autoplay`, `loop`, `hide-controls`, `hide-code`. Style the chrome with CSS custom properties such as `--algo-accent`, or pass a full scene theme as the `customTheme` property.
+Attributes: `src`, `frame`, `theme` (`auto` · `light` · `dark` · `print`), `speed` (ms per step), `autoplay`, `loop`, `hide-controls`, `hide-code`, `language`. Style the chrome with CSS custom properties such as `--algo-accent`, or pass a full scene theme as the `customTheme` property.
 
 `frame` takes a frame number or a selector that names a step by meaning, so a link or a page keeps showing the same step when a document gains steps elsewhere: `frame="relax#3"` (the third step named `relax`), `frame="insert-5/fixup-case-3"` (counting inside section `insert-5`), `frame="insert-5"` (that section, from its first step) or `frame="-1"` (the last frame). Documents give steps names with `meta.id` and group them into `sections` ([ADR 0020](docs/adr/0020-step-names-and-sections.md)); the timeline shows the sections, and Page Up and Page Down move between them. Page scripts read `player.stepName` and `player.section` (the section's id, title and start), and the `algo-frame` event carries `stepName` and `sectionId`. The `frame` property reads back as a number once the document has loaded.
+
+A document can give its code in several languages, such as pseudocode in the conventions of CLRS and Python, with steps pointing at an anchor in each (`sources` and `meta.at`, [ADR 0017](docs/adr/0017-multi-language-source.md)). The player then shows a language switcher above the code and keeps the frame when the reader switches. Pseudocode comes first unless `language="python"` asks for another. Once a reader picks a language, that choice wins over both. It is remembered for the site when the browser allows local storage, and otherwise for the page, and every player follows it, also in other tabs. `player.currentLanguage` says which language is on show. The BST and heap operations come in both languages.
 
 For a purely visual animation without any teaching chrome, use display mode: it shows only the structures, plays and loops by itself, and pauses while off screen.
 

@@ -228,6 +228,41 @@ test.describe('attributes', () => {
     await expectStageMatches(player, sort);
   });
 
+  test('language picks the code shown first; the reader’s choice wins and is shared', async ({
+    page,
+  }) => {
+    // Two players: one asks for Python, the other has no preference.
+    await open(
+      page,
+      `${inline(bst, 'language="python" frame="go"')}${inline(bst, 'frame="go"').replace('id="p"', 'id="q"')}`,
+    );
+    const [p, q] = [page.locator('#p'), page.locator('#q')];
+    const python = (player: typeof p) =>
+      player.getByRole('button', { name: 'Python' });
+    await expect(python(p)).toHaveAttribute('aria-pressed', 'true');
+    await expect(p.locator('.line.current')).toContainText(
+      'node = node.left if key < node.key else node.right',
+    );
+    await expect(q.locator('.line.current')).toContainText(
+      'elseif key < node.key',
+    );
+    await expect(q.locator('.tok-procedure').first()).toHaveText('TREE-SEARCH');
+    // The reader picks pseudocode in the first: both show it, and it is
+    // remembered over the attribute after a reload.
+    await p.getByRole('button', { name: 'Pseudocode' }).click();
+    await expect(p.locator('.line.current')).toContainText(
+      'elseif key < node.key',
+    );
+    await q.getByRole('button', { name: 'Python' }).click();
+    await expect(python(p)).toHaveAttribute('aria-pressed', 'true');
+    await expect(p).toHaveAttribute('frame', String(frameOf('go')));
+    await page.reload();
+    await page.waitForFunction(
+      () => customElements.get('algo-player') !== undefined,
+    );
+    await expect(python(q)).toHaveAttribute('aria-pressed', 'true');
+  });
+
   test('hide-controls and hide-code', async ({ page }) => {
     await open(page, inline(sort, 'hide-controls hide-code'));
     const player = page.locator('#p');

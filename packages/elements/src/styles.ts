@@ -115,7 +115,40 @@ export const playerStyles = css`
     height: auto;
   }
 
+  .code-panel {
+    display: grid;
+    gap: 8px;
+    min-width: 0;
+  }
+  .languages {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .languages button {
+    width: auto;
+    height: 28px;
+    padding: 0 12px;
+    font: inherit;
+    font-size: 12px;
+  }
+  .languages button[aria-pressed='true'] {
+    color: var(--algo-accent-fg);
+    background: var(--algo-accent);
+    border-color: var(--algo-accent);
+  }
+  .languages button[aria-pressed='true']:hover {
+    color: var(--algo-accent-fg);
+  }
+  /* Printing drops backgrounds, so the language on show is also bold. */
+  :host([data-resolved-theme='print']) .languages button[aria-pressed='true'] {
+    font-weight: 700;
+    text-decoration: underline;
+  }
+
   .code {
+    /* Line offsets are measured from the panel, to centre the current line. */
+    position: relative;
     margin: 0;
     padding: 8px 0;
     max-height: 320px;
@@ -166,6 +199,10 @@ export const playerStyles = css`
   .tok-comment {
     color: var(--algo-code-comment);
     font-style: italic;
+  }
+  /* Procedure names in pseudocode, as CLRS sets them (ADR 0017). */
+  .tok-procedure .small-caps {
+    font-variant-caps: all-small-caps;
   }
 
   .caption {

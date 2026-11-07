@@ -143,6 +143,71 @@ test('shows the current source line and variables', async ({ page }) => {
   );
 });
 
+test('switches the code between pseudocode and Python, keeping the frame', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await page.getByTestId('example').selectOption('BST: insert, then search');
+  const player = page.getByTestId('player');
+  const next = player.getByRole('button', { name: 'Next step' });
+  await next.click();
+  await next.click();
+  const languages = player.getByRole('group', { name: 'Code language' });
+  const pseudocode = languages.getByRole('button', { name: 'Pseudocode' });
+  const python = languages.getByRole('button', { name: 'Python' });
+  await expect(pseudocode).toHaveAttribute('aria-pressed', 'true');
+  await expect(
+    player.getByRole('region', { name: 'Source code, Pseudocode' }),
+  ).toBeVisible();
+  await expect(player.locator('.line.current')).toContainText(
+    'if key < node.key',
+  );
+  const frame = await player.getAttribute('frame');
+
+  // By keyboard: Tab to Python and press it with Space, which does not
+  // start playback.
+  await pseudocode.focus();
+  await page.keyboard.press('Tab');
+  await expect(python).toBeFocused();
+  await page.keyboard.press(' ');
+  await expect(python).toHaveAttribute('aria-pressed', 'true');
+  await expect(pseudocode).toHaveAttribute('aria-pressed', 'false');
+  await expect(player).toHaveAttribute('frame', frame!);
+  await expect(player.getByRole('button', { name: 'Play' })).toBeVisible();
+  await expect(player.locator('.line.current')).toHaveText(
+    /^\s*if key < node.key:$/,
+  );
+
+  // Remembered on this site.
+  await page.reload();
+  await page.getByTestId('example').selectOption('BST: insert, then search');
+  await expect(
+    page.getByTestId('player').getByRole('button', { name: 'Python' }),
+  ).toHaveAttribute('aria-pressed', 'true');
+});
+
+test('keeps the current line in view of the code panel', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTestId('example').selectOption('BST: insert, then search');
+  const player = page.getByTestId('player');
+  for (const frame of [1, 4, 7]) {
+    await player.evaluate((el: AlgoPlayer, f) => el.seek(f), frame);
+    // The line's middle is inside the panel's visible height.
+    await expect
+      .poll(() =>
+        player.evaluate((el) => {
+          const code = el.shadowRoot!.querySelector('.code')!;
+          const line = code.querySelector('.line.current')!;
+          const c = code.getBoundingClientRect();
+          const l = line.getBoundingClientRect();
+          const middle = l.top + l.height / 2 - c.top;
+          return middle > 0 && middle < code.clientHeight;
+        }),
+      )
+      .toBe(true);
+  }
+});
+
 test.describe('themes', () => {
   test('the theme menu switches the scene colours', async ({ page }) => {
     await page.goto('/');
