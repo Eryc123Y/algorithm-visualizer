@@ -43,6 +43,16 @@ The owner (Eric) hands this project to Claude to iterate on unattended, one road
 - Copy pseudocode from CLRS. Write it in CLRS conventions, in our own words.
 - Leave the roadmap out of date.
 
+## CI budget
+
+The repository is private on GitHub Free: 2,000 Actions minutes a month, and one CI run costs about 6.
+
+- Run `npm run check`, the E2E tests and any fuzzing locally before pushing. Push a pull request once it is ready, not after every commit.
+- Don't re-run CI to retry a flaky test without finding the cause first.
+- Changes to root Markdown files and `docs/` skip CI (`paths-ignore` in `.github/workflows/ci.yml`). Keep pure documentation PRs free of code, so they stay free.
+- Merges to `main` do not run CI again. Use the manual "Run workflow" button if `main` ever needs a check.
+- If minutes run low, tell the owner rather than cutting checks. The owner can see usage under GitHub Settings → Billing.
+
 ## Size of an iteration
 
 - One roadmap item per session and per PR.
