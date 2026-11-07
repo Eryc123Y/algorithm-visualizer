@@ -14,13 +14,6 @@ import type { CatalogEntry } from './recipes.ts';
 
 /** Short titles, as the playground's menu shows them. */
 const TITLES: Readonly<Record<string, string>> = {
-  bubbleSort: 'Bubble sort',
-  insertionSort: 'Insertion sort',
-  selectionSort: 'Selection sort',
-  mergeSort: 'Merge sort',
-  quickSort: 'Quicksort',
-  heapSort: 'Heapsort',
-  countingSort: 'Counting sort',
   binarySearch: 'Binary search',
   reverseLinkedList: 'Reverse a linked list',
   balancedBrackets: 'Balanced brackets',
@@ -123,37 +116,6 @@ const Text = (description: string) =>
 
 /** The recipes not in the registry yet, in the order a course might meet them. */
 export const legacyRecipes: readonly CatalogEntry[] = [
-  ...(
-    [
-      ['bubbleSort', 'Bubble sort'],
-      ['insertionSort', 'Insertion sort'],
-      ['selectionSort', 'Selection sort'],
-      ['mergeSort', 'Merge sort, with the merge buffer'],
-      ['quickSort', 'Quicksort with Lomuto partitioning'],
-      ['heapSort', 'Heapsort, with the array drawn as a heap'],
-    ] as const
-  ).map(([name, description]) =>
-    recipe(
-      'sorting',
-      name,
-      description,
-      z.strictObject({ values: Values }),
-      ({ values }) => recipes[name](values),
-    ),
-  ),
-  recipe(
-    'sorting',
-    'countingSort',
-    'Counting sort, with the count array',
-    z.strictObject({
-      values: z
-        .array(z.int().min(0).max(99))
-        .min(1)
-        .max(32)
-        .describe('Integers from 0 to 99.'),
-    }),
-    ({ values }) => recipes.countingSort(values),
-  ),
   recipe(
     'searching',
     'binarySearch',

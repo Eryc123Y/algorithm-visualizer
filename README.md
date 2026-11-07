@@ -60,7 +60,7 @@ a.swap({ i: 0, j: 1 });
 const mine = r.build();
 ```
 
-The registry has binary search trees (`bst`, `bst.search`, `bst.insert`, `bst.delete`) and binary heaps (`min-heap` and `max-heap`, with push, pop and decrease- or increase-key). Each operation starts from a structure the caller describes, and a structure's sequence runs up to 8 operations. `algorithms` lists every module. The other recipes are being moved into the registry (roadmap 0.4 and 0.5): seven sorts, binary search, list reversal, bracket matching, AVL, traversals, trie, union–find, BFS, DFS, Dijkstra, Bellman–Ford, Prim, Kruskal, topological sort, Floyd–Warshall, LCS, edit distance, 0/1 knapsack and two hashing schemes. Until then, they are functions such as `dijkstra(graph, source)`.
+The registry has the seven sorting algorithms (`insertion-sort`, `merge-sort`, `heapsort`, `quicksort`, `counting-sort`, `bubble-sort` and `selection-sort`, following the procedures of CLRS), binary search trees (`bst`, `bst.search`, `bst.insert`, `bst.delete`) and binary heaps (`min-heap` and `max-heap`, with push, pop and decrease- or increase-key). Each operation starts from a structure the caller describes, and a structure's sequence runs up to 8 operations. `algorithms` lists every module. The other recipes are being moved into the registry (roadmap 0.5): binary search, list reversal, bracket matching, AVL, traversals, trie, union–find, BFS, DFS, Dijkstra, Bellman–Ford, Prim, Kruskal, topological sort, Floyd–Warshall, LCS, edit distance, 0/1 knapsack and two hashing schemes. Until then, they are functions such as `dijkstra(graph, source)`.
 
 MCP, the `algoviz` command line and the playground's example menu read the registry, grouped by topic.
 

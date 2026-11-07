@@ -315,10 +315,18 @@ function linearSearchTwoLanguages(): VisualizationInput {
   return r.build();
 }
 
+/** A sorting module's document from the registry. */
+function moduleDocument(id: string, values: number[]): VisualizationInput {
+  const run = recipes.runAlgorithm(id, { values });
+  if (!run.ok) throw new Error(run.error.map((e) => e.message).join('; '));
+  return run.value.document;
+}
+
 export const references: Readonly<Record<string, () => VisualizationInput>> = {
   'linear-search-two-languages': linearSearchTwoLanguages,
-  'insertion-sort': () => recipes.insertionSort([5, 2, 4, 6, 1, 3]),
-  'selection-sort': () => recipes.selectionSort([29, 10, 14, 37, 13]),
+  'insertion-sort': () => moduleDocument('insertion-sort', [5, 2, 4, 6, 1, 3]),
+  'selection-sort': () =>
+    moduleDocument('selection-sort', [29, 10, 14, 37, 13]),
   'binary-search-miss': () => recipes.binarySearch([1, 3, 4, 7, 9, 11, 15], 6),
   'two-sum-sorted': twoSum,
   'build-max-heap': buildMaxHeap,

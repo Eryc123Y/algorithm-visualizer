@@ -7,12 +7,26 @@
 import { err, type Diagnostic, type Result } from '@algoviz/spec';
 
 import type { Algorithm } from './algorithm.ts';
+import { bubbleSort } from './algorithms/sorting/bubble-sort.ts';
+import { countingSort } from './algorithms/sorting/counting-sort.ts';
+import { heapsort } from './algorithms/sorting/heapsort.ts';
+import { insertionSort } from './algorithms/sorting/insertion-sort.ts';
+import { mergeSort } from './algorithms/sorting/merge-sort.ts';
+import { quicksort } from './algorithms/sorting/quicksort.ts';
+import { selectionSort } from './algorithms/sorting/selection-sort.ts';
 import { runModule, type AlgorithmRun } from './run-module.ts';
 import { bst } from './structures/bst/index.ts';
 import { maxHeap, minHeap } from './structures/heap/index.ts';
 
 /** Every module, grouped by topic in menu order. */
 export const algorithms: readonly Algorithm[] = [
+  insertionSort,
+  mergeSort,
+  heapsort,
+  quicksort,
+  countingSort,
+  bubbleSort,
+  selectionSort,
   ...bst.modules,
   ...minHeap.modules,
   ...maxHeap.modules,

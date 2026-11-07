@@ -18,7 +18,7 @@ Tools that take frames accept a frame number (negative counts from the end) or a
 
 ## Recipes
 
-The recipes are the modules of the algorithm registry in `@algoviz/recipes` ([ADR 0019](../../docs/adr/0019-algorithm-registry.md), [ADR 0022](../../docs/adr/0022-registry-details.md)), so a new module appears here without changes to this package. Each has a stable, kebab-case id. A data structure has one per operation, such as `bst.delete` or `min-heap.decrease-key`, whose input is the starting structure `from` and the operation's arguments. It also has one for its sequence, such as `bst`, whose input is `from` and up to 8 operations, `ops`.
+The recipes are the modules of the algorithm registry in `@algoviz/recipes` ([ADR 0019](../../docs/adr/0019-algorithm-registry.md), [ADR 0022](../../docs/adr/0022-registry-details.md)), so a new module appears here without changes to this package. Each has a stable, kebab-case id. An algorithm has one, such as `insertion-sort`. A data structure has one per operation, such as `bst.delete` or `min-heap.decrease-key`, whose input is the starting structure `from` and the operation's arguments. It also has one for its sequence, such as `bst`, whose input is `from` and up to 8 operations, `ops`.
 
 Errors name the place in the input: `INVALID_SHAPE` at a path under `$.input`, `INVALID_ARGUMENT` for an input the recipe cannot show, such as a pop from an empty heap, and `UNKNOWN_RECIPE` at `$.id`.
 

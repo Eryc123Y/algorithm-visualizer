@@ -49,44 +49,7 @@ const clothes: GraphInput = {
   ],
 };
 
-const values = [5, 3, 8, 1, 9, 2, 7];
-
 export const legacyExamples: readonly Example[] = [
-  {
-    topic: 'sorting',
-    label: 'Bubble sort',
-    build: () => recipes.bubbleSort(values),
-  },
-  {
-    topic: 'sorting',
-    label: 'Insertion sort',
-    build: () => recipes.insertionSort(values),
-  },
-  {
-    topic: 'sorting',
-    label: 'Selection sort',
-    build: () => recipes.selectionSort(values),
-  },
-  {
-    topic: 'sorting',
-    label: 'Merge sort',
-    build: () => recipes.mergeSort(values),
-  },
-  {
-    topic: 'sorting',
-    label: 'Quicksort',
-    build: () => recipes.quickSort(values),
-  },
-  {
-    topic: 'sorting',
-    label: 'Heapsort',
-    build: () => recipes.heapSort(values),
-  },
-  {
-    topic: 'sorting',
-    label: 'Counting sort',
-    build: () => recipes.countingSort([3, 1, 4, 1, 5, 2, 0]),
-  },
   {
     topic: 'searching',
     label: 'Binary search',
