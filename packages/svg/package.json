@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@algoviz/core": "*",
-    "@algoviz/fonts": "*"
+    "@algoviz/fonts": "*",
+    "@algoviz/spec": "*"
   }
 }

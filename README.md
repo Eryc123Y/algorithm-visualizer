@@ -79,6 +79,26 @@ MCP, the `algoviz` command line and the playground's example menu read the regis
 
 [`@algoviz/mcp`](packages/mcp) lets a model write documents: it reads a guide written for models, validates its document (every step is replayed, and each error says where and why), inspects the state at any frame to check the result, and renders frames to SVG. In clients that display MCP Apps, `algoviz_show` then opens the interactive player right in the conversation. The same tools work as the `algoviz` command line. [`evals/`](evals) measures how well models do on 28 undergraduate tasks, each checked for what a correct visualization must show.
 
+## Figures
+
+`algoviz export` writes chosen steps of a document as standalone SVG files, ready for notes, handouts and slides ([ADR 0025](docs/adr/0025-exporting-figures.md)). Text is drawn as glyph outlines of the bundled fonts, so a figure looks the same in a browser, in Typst and after conversion for LaTeX. Every figure of a document has the same size, so a series of steps lines up at one scale, even when its figures are exported one at a time.
+
+```sh
+# Every frame of a document: doc-00.svg, doc-01.svg, …
+algoviz export doc.json --out figures
+
+# Run an algorithm on an input, without writing a document first
+algoviz export dijkstra --input graph.json --step relax#3 --out figures
+
+# Several steps, in the print theme, named after their steps
+algoviz export bst.delete --input '{"from": [8, 3, 10, 1, 6], "key": 3}' \
+  --step delete-3 --theme print --name '{name}-{step}'
+```
+
+`--step` takes the selectors the player takes: a frame number (`-1` is the last), a step name (`relax#3`), a step in a section (`insert-5/relax`), a section (`insert-5`) or a range (`a..b`). It may repeat or list several with commas, and every frame is exported without it. `--theme` is `light` (the default), `dark` or `print`. `--out` is the directory, the current one by default. `--name` is the file name pattern, `{name}-{frame}` by default: `{name}` is the document file's name or the algorithm id, `{frame}` the frame number padded with zeros, and `{step}` the step's selector with `/` and `#` written `_`, such as `insert-5_relax_2`. Each step's narration goes into its figure as an SVG description.
+
+In code, `exportFigures(document, { steps, theme })` from `@algoviz/svg` returns the same figures as strings, and `selectSeries` from `@algoviz/core` the frames that selectors name.
+
 ## Embedding
 
 Build the standalone bundle with `npm run build -w @algoviz/elements`, then:
@@ -109,15 +129,15 @@ Display mode also accepts `once` (play a single time) and `motion` (`linear` · 
 
 ## Packages
 
-| Package                                  | Status    | Purpose                                                           |
-| ---------------------------------------- | --------- | ----------------------------------------------------------------- |
-| [`@algoviz/spec`](packages/spec)         | Available | Protocol schemas, types, validation and JSON Schema               |
-| [`@algoviz/fonts`](packages/fonts)       | Available | Metrics and outlines of the bundled fonts, and text measurement   |
-| [`@algoviz/core`](packages/core)         | Available | Structure kinds, reducers, timeline engine and layout to scenes   |
-| [`@algoviz/svg`](packages/svg)           | Available | Standalone SVG with text as glyph outlines (no DOM needed)        |
-| [`@algoviz/elements`](packages/elements) | Available | `<algo-player>`: interactive, animated player (Lit Web Component) |
-| [`@algoviz/recipes`](packages/recipes)   | Available | Typed recorder and visualizations of classic algorithms           |
-| [`@algoviz/mcp`](packages/mcp)           | Available | MCP server, MCP App and CLI: guide, validation, inspection, SVG   |
+| Package                                  | Status    | Purpose                                                            |
+| ---------------------------------------- | --------- | ------------------------------------------------------------------ |
+| [`@algoviz/spec`](packages/spec)         | Available | Protocol schemas, types, validation and JSON Schema                |
+| [`@algoviz/fonts`](packages/fonts)       | Available | Metrics and outlines of the bundled fonts, and text measurement    |
+| [`@algoviz/core`](packages/core)         | Available | Structure kinds, reducers, timeline engine and layout to scenes    |
+| [`@algoviz/svg`](packages/svg)           | Available | Standalone SVG figures with text as glyph outlines (no DOM needed) |
+| [`@algoviz/elements`](packages/elements) | Available | `<algo-player>`: interactive, animated player (Lit Web Component)  |
+| [`@algoviz/recipes`](packages/recipes)   | Available | Typed recorder and visualizations of classic algorithms            |
+| [`@algoviz/mcp`](packages/mcp)           | Available | MCP server, MCP App and CLI: guide, validation, inspection, export |
 
 ## Design
 

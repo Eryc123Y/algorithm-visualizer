@@ -290,6 +290,26 @@ export function selectFrame(
   );
 }
 
+/**
+ * The frames of a series (ADR 0025): every frame that one of `selectors`
+ * names, in timeline order and without repeats. No selectors means every
+ * frame. The first selector that fails gives its error.
+ */
+export function selectSeries(
+  doc: Selectable,
+  selectors: readonly (string | number)[],
+): Result<readonly number[], SelectorError> {
+  if (selectors.length === 0)
+    return ok(Array.from({ length: doc.steps.length + 1 }, (_, f) => f));
+  const frames = new Set<number>();
+  for (const selector of selectors) {
+    const range = selectFrames(doc, selector);
+    if (!range.ok) return range;
+    for (let f = range.value.from; f <= range.value.to; f++) frames.add(f);
+  }
+  return ok([...frames].sort((a, b) => a - b));
+}
+
 /** The name of the step that produced a frame, if it has one. */
 export function stepNameAt(doc: Selectable, frame: number): string | undefined {
   return frame > 0 ? nameOf(doc, frame - 1) : undefined;
