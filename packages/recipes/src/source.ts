@@ -1,4 +1,4 @@
-/** Source code of recipes, from indented template literals. */
+/** Code of modules, from indented template literals. */
 
 /**
  * Drops a template literal's first line break and trailing space, and the
@@ -12,9 +12,4 @@ export function dedent(code: string): string {
       .map((l) => l.length - l.trimStart().length),
   );
   return lines.map((l) => l.slice(indent)).join('\n');
-}
-
-/** Python source for a recipe, from an indented template literal. */
-export function python(code: string): { language: string; code: string } {
-  return { language: 'python', code: dedent(code) };
 }

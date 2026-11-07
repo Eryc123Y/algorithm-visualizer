@@ -417,7 +417,7 @@ export const references: Readonly<Record<string, () => VisualizationInput>> = {
       ]),
     }),
   'graph-coloring': colouring,
-  lcs: () => recipes.longestCommonSubsequence('ABCB', 'BDCAB'),
+  lcs: () => moduleDocument('lcs', { first: 'ABCB', second: 'BDCAB' }),
   'coin-change': coinChange,
   'hash-chaining': () =>
     moduleDocument('hash-chaining', {

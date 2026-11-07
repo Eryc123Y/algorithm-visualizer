@@ -1,4 +1,7 @@
 export * from './algorithm.ts';
+export * from './algorithms/dynamic-programming/edit-distance.ts';
+export * from './algorithms/dynamic-programming/knapsack.ts';
+export * from './algorithms/dynamic-programming/lcs.ts';
 export * from './algorithms/graphs/bellman-ford.ts';
 export * from './algorithms/graphs/bfs.ts';
 export * from './algorithms/graphs/dfs.ts';
@@ -19,7 +22,6 @@ export * from './algorithms/sorting/merge-sort.ts';
 export * from './algorithms/sorting/quicksort.ts';
 export * from './algorithms/sorting/selection-sort.ts';
 export * from './algorithms/trees/tree-walks.ts';
-export * from './dynamic-programming.ts';
 export * from './recorder.ts';
 export * from './registry.ts';
 export * from './run-module.ts';
