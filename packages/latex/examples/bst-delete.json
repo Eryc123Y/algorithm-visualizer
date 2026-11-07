@@ -1,0 +1,122 @@
+{
+  "version": "0.3",
+  "title": "Binary search tree: delete 3",
+  "sources": [
+    {
+      "language": "pseudocode",
+      "code": "TREE-DELETE(node, key)\n    if node == NIL\n        return NIL\n    if key < node.key\n        node.left = TREE-DELETE(node.left, key)\n    elseif key > node.key\n        node.right = TREE-DELETE(node.right, key)\n    elseif node.left == NIL\n        return node.right\n    elseif node.right == NIL\n        return node.left\n    else\n        succ = node.right\n        while succ.left ≠ NIL\n            succ = succ.left\n        node.key = succ.key\n        node.right = TREE-DELETE(node.right, succ.key)\n    return node",
+      "anchors": {
+        "missing": 3,
+        "left": 5,
+        "right": 7,
+        "no-left": 9,
+        "no-right": 11,
+        "replacement": 13,
+        "copy": 16,
+        "remove": 17
+      }
+    },
+    {
+      "language": "python",
+      "code": "def delete(node, key):\n    if node is None:\n        return None\n    if key < node.key:\n        node.left = delete(node.left, key)\n    elif key > node.key:\n        node.right = delete(node.right, key)\n    elif node.left is None:\n        return node.right\n    elif node.right is None:\n        return node.left\n    else:\n        succ = node.right\n        while succ.left is not None:\n            succ = succ.left\n        node.key = succ.key\n        node.right = delete(node.right, succ.key)\n    return node",
+      "anchors": {
+        "missing": 3,
+        "left": 5,
+        "right": 7,
+        "no-left": 9,
+        "no-right": 11,
+        "replacement": 13,
+        "copy": 16,
+        "remove": 17
+      }
+    }
+  ],
+  "structures": {
+    "bst": {
+      "kind": "tree",
+      "binary": true,
+      "nodes": [
+        { "id": "n0", "value": 8, "children": ["n1", "n2"] },
+        { "id": "n1", "value": 3, "children": ["n3", "n4"] },
+        { "id": "n3", "value": 1 },
+        { "id": "n4", "value": 6, "children": ["n6", "n7"] },
+        { "id": "n6", "value": 4 },
+        { "id": "n7", "value": 7 },
+        { "id": "n2", "value": 10, "children": [null, "n5"] },
+        { "id": "n5", "value": 14, "children": ["n8", null] },
+        { "id": "n8", "value": 13 }
+      ],
+      "roots": ["n0"]
+    }
+  },
+  "steps": [
+    {
+      "actions": [
+        { "name": "curr", "node": "n0", "target": "bst", "type": "pointer" },
+        { "nodes": ["n0"], "target": "bst", "type": "highlight" }
+      ],
+      "meta": {
+        "id": "left",
+        "at": "left",
+        "narration": "3 < 8: delete from the left subtree."
+      }
+    },
+    {
+      "actions": [
+        { "name": "curr", "node": "n1", "target": "bst", "type": "pointer" },
+        { "name": "succ", "node": "n6", "target": "bst", "type": "pointer" },
+        { "nodes": ["n6"], "target": "bst", "type": "highlight" }
+      ],
+      "meta": {
+        "id": "replacement",
+        "at": "replacement",
+        "narration": "3 has two children: its successor 4 is the smallest key in its right subtree."
+      }
+    },
+    {
+      "actions": [
+        { "node": "n1", "value": 4, "target": "bst", "type": "setValue" }
+      ],
+      "meta": {
+        "id": "copy",
+        "at": "copy",
+        "narration": "Copy 4 into the node."
+      }
+    },
+    {
+      "actions": [
+        { "name": "succ", "node": null, "target": "bst", "type": "pointer" }
+      ],
+      "meta": {
+        "id": "remove",
+        "at": "remove",
+        "narration": "Now delete the old 4 from the right subtree."
+      }
+    },
+    {
+      "actions": [
+        { "name": "curr", "node": "n4", "target": "bst", "type": "pointer" },
+        { "nodes": ["n4"], "target": "bst", "type": "highlight" }
+      ],
+      "meta": {
+        "id": "left",
+        "at": "left",
+        "narration": "4 < 6: delete from the left subtree."
+      }
+    },
+    {
+      "actions": [
+        { "name": "curr", "node": "n6", "target": "bst", "type": "pointer" },
+        { "nodes": ["n6"], "target": "bst", "type": "highlight" },
+        { "name": "curr", "node": null, "target": "bst", "type": "pointer" },
+        { "node": "n6", "target": "bst", "type": "removeNode" }
+      ],
+      "meta": {
+        "id": "no-left",
+        "at": "no-left",
+        "narration": "4 is a leaf: remove it."
+      }
+    }
+  ],
+  "sections": [{ "id": "delete-3", "title": "Delete 3", "start": 0 }]
+}

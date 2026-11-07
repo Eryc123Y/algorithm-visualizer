@@ -1,0 +1,55 @@
+% Lecture notes with algoviz figures. Compile with shell escape:
+%   latexmk -pdf -shell-escape notes.tex     (or -pdflua, -pdfxe)
+% The figures are kept in _algoviz/, so later runs need no shell escape.
+\documentclass[11pt]{article}
+\usepackage{algoviz}
+\usepackage{amsmath}
+
+\begin{document}
+
+\section*{Shortest paths}
+
+Dijkstra's algorithm settles one node at a time. After the third
+relaxation of the textbook example, $B$ and $C$ are settled and the
+distance to $F$ has dropped from $14$ to $11$:
+
+\begin{center}
+  \algoviz[step=relax#3]{dijkstra}{
+    "graph": {
+      "nodes": ["A", "B", "C", "D", "E", "F"],
+      "edges": [["A", "B", 7], ["A", "C", 9], ["A", "F", 14], ["B", "C", 10],
+                ["B", "D", 15], ["C", "D", 11], ["C", "F", 2], ["D", "E", 6],
+                ["E", "F", 9]]
+    },
+    "source": "A"}
+\end{center}
+
+The input can also come from a file, here drawn in the print theme at a
+given width:
+
+\begin{center}
+  \algovizfile[algorithm=dijkstra, step=-1, theme=print, width=0.55\linewidth]{graph.json}
+\end{center}
+
+\section*{Sorting}
+
+Bubble sort swaps neighbours that are out of order; this is its second
+swap. Figures of one run share one scale.
+
+\begin{center}
+  \algoviz[step=swap#2]{bubble-sort}{"values": [5, 1, 4, 2, 8]}
+  \par\medskip
+  \algoviz[step=-1]{bubble-sort}{"values": [5, 1, 4, 2, 8]}
+\end{center}
+
+\section*{Deleting from a binary search tree}
+
+A document made beforehand, for example with
+\texttt{algoviz run bst.delete} or by a model, is drawn with
+\verb|\algovizfile|. Deleting $3$ copies its successor $4$ into its node:
+
+\begin{center}
+  \algovizfile[step=delete-3/copy]{bst-delete.json}
+\end{center}
+
+\end{document}

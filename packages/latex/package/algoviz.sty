@@ -1,0 +1,576 @@
+%% algoviz.sty: figures of algorithms and data structures, drawn with TikZ
+%% in the document's own fonts (ADR 0027 of the algoviz repository).
+%%
+%%   \algoviz[step=relax#3]{dijkstra}{"graph": {...}, "source": "A"}
+%%   \algovizfile[step=3]{heap.json}                 a JSON document
+%%   \algovizfile[algorithm=dijkstra]{graph.json}    an input in a file
+%%   \algovizinput{figure.tex}                       made by algoviz export
+%%   \algovizset{theme=print, width=\linewidth}
+%%
+%% The package runs the algoviz command through shell escape, as minted
+%% runs Pygments, and keeps the figures it writes in a cache directory.
+%% A figure that did not change is read from the cache without running
+%% anything, so cached figures need no shell escape at all.
+\NeedsTeXFormat{LaTeX2e}[2024-06-01]
+\ProvidesExplPackage{algoviz}{2026-11-08}{0.1.0}
+  {Algorithm figures drawn with TikZ (algoviz)}
+
+\RequirePackage{tikz}
+
+% ---------------------------------------------------------------------------
+% Messages
+% ---------------------------------------------------------------------------
+
+\msg_new:nnnn { algoviz } { no-shell-escape }
+  { Shell~escape~is~off,~so~the~figure~of~#1~cannot~be~made. }
+  {
+    The~algoviz~package~runs~the~algoviz~command~to~make~a~figure~the~
+    first~time.~Compile~with~-shell-escape,~for~example~
+    pdflatex~-shell-escape~file.tex.~Figures~made~before~are~read~from~
+    the~cache~directory~without~it.
+  }
+\msg_new:nnnn { algoviz } { restricted-shell-escape }
+  { Restricted~shell~escape~did~not~run~algoviz,~so~the~figure~of~#1~is~missing. }
+  {
+    In~restricted~mode~TeX~runs~only~the~commands~listed~in~
+    shell_escape_commands,~and~algoviz~is~not~one~of~them.~Compile~with~
+    -shell-escape.
+  }
+\msg_new:nnnn { algoviz } { no-command }
+  { The~command~'#1'~made~no~figure. }
+  {
+    Check~that~the~algoviz~command~is~installed~and~on~the~PATH,~for~
+    example~with~'algoviz~--help'~in~a~terminal,~or~name~it~with~the~
+    package~option~command=...~The~terminal~output~of~this~run~may~say~
+    more.
+  }
+\msg_new:nnnn { algoviz } { failed }
+  { algoviz~could~not~make~the~figure:~#1 }
+  { The~figure~is~replaced~by~a~box~with~the~whole~message. }
+\msg_new:nnnn { algoviz } { bad-argument }
+  { The~#1~'#2'~has~characters~that~it~cannot~have. }
+  { #3 }
+\msg_new:nnnn { algoviz } { no-file }
+  { File~'#1'~not~found. }
+  {
+    \iow_char:N\\algovizfile~reads~a~JSON~document,~or~an~input~with~
+    algorithm=,~and~\iow_char:N\\algovizinput~a~figure~made~by~
+    'algoviz~export~--format~tikz'.
+  }
+\msg_new:nnnn { algoviz } { format }
+  { The~figure~'#1'~has~format~#2,~but~this~package~reads~format~#3. }
+  {
+    The~figure~was~made~by~another~version~of~algoviz.~Use~the~algoviz~
+    command~and~package~of~one~release,~and~delete~the~cache~directory.
+  }
+
+% ---------------------------------------------------------------------------
+% Options and keys
+% ---------------------------------------------------------------------------
+
+\str_const:Nn \c__algoviz_version_str { 0.1.0 }
+% The version of the figure files that \algoviz@figure reads.
+\int_const:Nn \c__algoviz_format_int { 1 }
+
+\tl_new:N \l__algoviz_command_tl
+\str_new:N \l__algoviz_cache_str
+\tl_new:N \l__algoviz_step_tl
+\tl_new:N \l__algoviz_theme_tl
+\tl_new:N \l__algoviz_algorithm_tl
+\dim_new:N \l__algoviz_width_dim
+\dim_new:N \l__algoviz_height_dim
+\fp_new:N \l__algoviz_scale_fp
+\tl_new:N \l__algoviz_value_font_tl
+\tl_new:N \l__algoviz_label_font_tl
+
+\keys_define:nn { algoviz }
+  {
+    command .tl_set:N = \l__algoviz_command_tl ,
+    command .initial:n = algoviz ,
+    command .usage:n = preamble ,
+    cachedir .str_set:N = \l__algoviz_cache_str ,
+    cachedir .initial:n = _algoviz ,
+    cachedir .usage:n = preamble ,
+    step .tl_set:N = \l__algoviz_step_tl ,
+    step .initial:n = -1 ,
+    theme .tl_set:N = \l__algoviz_theme_tl ,
+    theme .initial:n = light ,
+    algorithm .tl_set:N = \l__algoviz_algorithm_tl ,
+    width .dim_set:N = \l__algoviz_width_dim ,
+    width .initial:n = 0pt ,
+    height .dim_set:N = \l__algoviz_height_dim ,
+    height .initial:n = 0pt ,
+    scale .fp_set:N = \l__algoviz_scale_fp ,
+    scale .initial:n = 1 ,
+    value~font .tl_set:N = \l__algoviz_value_font_tl ,
+    value~font .initial:n = \normalfont ,
+    label~font .tl_set:N = \l__algoviz_label_font_tl ,
+    label~font .initial:n = \normalfont\sffamily ,
+  }
+\ProcessKeyOptions [ algoviz ]
+
+\NewDocumentCommand \algovizset { m } { \keys_set:nn { algoviz } {#1} }
+
+% ---------------------------------------------------------------------------
+% Drawing a figure file
+% ---------------------------------------------------------------------------
+
+% One scene unit, set before a figure is drawn. Figure files write every
+% length in it.
+\dim_new:N \algoviz@u
+
+% At natural size a scene unit is a sixteenth of the current font size, so
+% values (20 units) come out at 1.25 times the text around the figure and
+% labels (12 units) at three quarters of it.
+\fp_const:Nn \c__algoviz_units_per_size_fp { 16 }
+
+\fp_new:N \l__algoviz_unit_fp
+\fp_new:N \l__algoviz_text_fp
+\box_new:N \l__algoviz_text_box
+\dim_new:N \l__algoviz_halo_dim
+\dim_new:N \g__algoviz_size_dim
+\str_new:N \l__algoviz_current_str
+
+% #1 format, #2 width, #3 height (scene units), #4 colours, #5 drawing.
+\cs_new_protected:cpn { algoviz@figure } #1#2#3#4#5
+  {
+    \int_compare:nNnTF {#1} = { \c__algoviz_format_int }
+      { \__algoviz_draw:nnnn {#2} {#3} {#4} {#5} }
+      {
+        \msg_error:nneee { algoviz } { format }
+          { \l__algoviz_current_str } {#1}
+          { \int_use:N \c__algoviz_format_int }
+      }
+  }
+\cs_generate_variant:Nn \msg_error:nnnnn { nneee }
+
+% The unit: from width or height when given, keeping the figure's shape;
+% otherwise the natural size times scale, but never wider than the line.
+\cs_new_protected:Npn \__algoviz_unit:nn #1#2
+  {
+    \bool_lazy_or:nnTF
+      { \dim_compare_p:nNn \l__algoviz_width_dim > \c_zero_dim }
+      { \dim_compare_p:nNn \l__algoviz_height_dim > \c_zero_dim }
+      {
+        \fp_set:Nn \l__algoviz_unit_fp { inf }
+        \dim_compare:nNnT \l__algoviz_width_dim > \c_zero_dim
+          {
+            \fp_set:Nn \l__algoviz_unit_fp
+              {
+                min ( \l__algoviz_unit_fp ,
+                  \dim_to_fp:n { \l__algoviz_width_dim } / (#1) )
+              }
+          }
+        \dim_compare:nNnT \l__algoviz_height_dim > \c_zero_dim
+          {
+            \fp_set:Nn \l__algoviz_unit_fp
+              {
+                min ( \l__algoviz_unit_fp ,
+                  \dim_to_fp:n { \l__algoviz_height_dim } / (#2) )
+              }
+          }
+      }
+      {
+        \fp_set:Nn \l__algoviz_unit_fp
+          {
+            min (
+              \l__algoviz_scale_fp * \f@size / \c__algoviz_units_per_size_fp ,
+              \dim_to_fp:n { \linewidth } / (#1)
+            )
+          }
+      }
+    \dim_set:Nn \algoviz@u { \fp_to_dim:n { \l__algoviz_unit_fp } }
+  }
+
+\cs_new_protected:Npn \__algoviz_draw:nnnn #1#2#3#4
+  {
+    \__algoviz_unit:nn {#1} {#2}
+    \begin{tikzpicture} [ x = \algoviz@u , y = -\algoviz@u ]
+      \useasboundingbox (0,0) rectangle (#1,#2);
+      #3
+      #4
+    \end{tikzpicture}
+  }
+
+\cs_new_protected:cpn { algoviz@color } #1#2
+  { \definecolor { algoviz@c #1 } { HTML } {#2} }
+
+% #1 x,y  #2 alignment l|c|r  #3 size  #4 room (0 for none)  #5 value|label
+% #6 colour  #7 halo (colour,padding) or nothing  #8 text
+\cs_new_protected:cpn { algoviz@text } #1#2#3#4#5#6#7#8
+  {
+    \node
+      [
+        inner~sep = 0pt , outer~sep = 0pt ,
+        anchor = \str_case:nn {#2} { {l} {base~west} {c} {base} {r} {base~east} }
+      ]
+      at (#1) { \__algoviz_text:nnnnnn {#3} {#4} {#5} {#6} {#7} {#8} } ;
+  }
+
+% The text in the document's font for its role, scaled from the size it is
+% set at to its size in the scene, and down to its room if it is wider.
+\cs_new_protected:Npn \__algoviz_text:nnnnnn #1#2#3#4#5#6
+  {
+    \hbox_set:Nn \l__algoviz_text_box
+      {
+        \use:c { l__algoviz_ #3 _font_tl }
+        % The size the font command left, whatever it is.
+        \dim_gset:Nn \g__algoviz_size_dim { \f@size pt }
+        \color {#4}
+        #6
+      }
+    \fp_set:Nn \l__algoviz_text_fp
+      { #1 * \l__algoviz_unit_fp / \dim_to_fp:n { \g__algoviz_size_dim } }
+    \bool_lazy_and:nnT
+      { \fp_compare_p:nNn {#2} > { 0 } }
+      { \dim_compare_p:nNn { \box_wd:N \l__algoviz_text_box } > \c_zero_dim }
+      {
+        \fp_set:Nn \l__algoviz_text_fp
+          {
+            min ( \l__algoviz_text_fp ,
+              #2 * \l__algoviz_unit_fp
+                / \dim_to_fp:n { \box_wd:N \l__algoviz_text_box } )
+          }
+      }
+    \box_scale:Nnn \l__algoviz_text_box
+      { \l__algoviz_text_fp } { \l__algoviz_text_fp }
+    \tl_if_empty:nF {#5} { \__algoviz_halo:w #5 \q_stop }
+    \box_use_drop:N \l__algoviz_text_box
+  }
+
+% A box of the halo colour behind the text, as far beyond it as the halo
+% of the SVG figure reaches. TikZ cannot stroke glyphs in every engine.
+\cs_new_protected:Npn \__algoviz_halo:w #1 , #2 \q_stop
+  {
+    \dim_set:Nn \l__algoviz_halo_dim {#2}
+    \hbox_overlap_right:n
+      {
+        \skip_horizontal:n { -\l__algoviz_halo_dim }
+        \color {#1}
+        \rule
+          [ \dim_eval:n { -\box_dp:N \l__algoviz_text_box - \l__algoviz_halo_dim } ]
+          { \dim_eval:n { \box_wd:N \l__algoviz_text_box + 2\l__algoviz_halo_dim } }
+          {
+            \dim_eval:n
+              {
+                \box_ht:N \l__algoviz_text_box + \box_dp:N \l__algoviz_text_box
+                + 2\l__algoviz_halo_dim
+              }
+          }
+      }
+  }
+
+% Reads a figure file, with @ as a letter for its macros.
+\cs_new_protected:Npn \__algoviz_input:n #1
+  {
+    \group_begin:
+      \str_set:Nn \l__algoviz_current_str {#1}
+      \char_set_catcode_letter:N \@
+      \file_input:n {#1}
+    \group_end:
+  }
+\cs_generate_variant:Nn \__algoviz_input:n { V }
+
+% ---------------------------------------------------------------------------
+% Errors in the document
+% ---------------------------------------------------------------------------
+
+\seq_new:N \l__algoviz_lines_seq
+\ior_new:N \g__algoviz_ior
+
+% A framed box with the lines of a message, in place of the figure.
+\cs_new_protected:Npn \__algoviz_error_box:
+  {
+    \par \noindent
+    \fbox
+      {
+        \parbox { \dim_eval:n { \linewidth - 2\fboxsep - 2\fboxrule } }
+          {
+            \raggedright \ttfamily \small
+            \seq_use:Nn \l__algoviz_lines_seq { \par }
+          }
+      }
+    \par
+  }
+
+% The engine's message, from the error file the command wrote.
+\cs_new_protected:Npn \__algoviz_fail_file:n #1
+  {
+    \seq_clear:N \l__algoviz_lines_seq
+    \ior_open:Nn \g__algoviz_ior {#1}
+    \ior_str_map_inline:Nn \g__algoviz_ior
+      { \seq_put_right:Nn \l__algoviz_lines_seq {##1} }
+    \ior_close:N \g__algoviz_ior
+    \msg_error:nne { algoviz } { failed }
+      { \seq_item:Nn \l__algoviz_lines_seq { 1 } }
+    \__algoviz_error_box:
+  }
+\cs_generate_variant:Nn \__algoviz_fail_file:n { V }
+
+% A message of the package's own, with a detail such as the command line.
+\cs_new_protected:Npn \__algoviz_fail:nn #1#2
+  {
+    \seq_clear:N \l__algoviz_lines_seq
+    \seq_put_right:Nn \l__algoviz_lines_seq { algoviz:~#1 }
+    \seq_put_right:Ne \l__algoviz_lines_seq {#2}
+    \__algoviz_error_box:
+  }
+
+% ---------------------------------------------------------------------------
+% Text that goes to the shell
+% ---------------------------------------------------------------------------
+
+\str_new:N \l__algoviz_step_str
+\str_new:N \l__algoviz_theme_str
+\str_new:N \l__algoviz_id_str
+\str_new:N \l__algoviz_input_str
+\str_new:N \l__algoviz_file_str
+\str_new:N \l__algoviz_hex_str
+\str_new:N \l__algoviz_hash_str
+\str_new:N \l__algoviz_figure_str
+\str_new:N \l__algoviz_error_str
+\str_new:N \l__algoviz_call_str
+
+% TeX's tokens as the characters they stand for: escaped specials (\# \%
+% \{ \} \& \$ \_) become the characters, and a doubled # becomes one, as
+% TeX doubles every parameter character it turns into a string.
+\cs_new_protected:Npn \__algoviz_to_str:Nn #1#2
+  {
+    \str_set:Ne #1 { \tl_to_str:n {#2} }
+    \regex_replace_all:nnN
+      { (\\\\) | \\ ([\#\%\{\}\&\$\_]) | (\#)\# } { \1\2\3 } #1
+    \tl_trim_spaces:N #1
+  }
+\cs_generate_variant:Nn \__algoviz_to_str:Nn { NV }
+
+% Registry ids, selectors and theme names have no character a shell reads.
+\regex_const:Nn \c__algoviz_id_regex { \A [a-z0-9] [a-z0-9.\-]* \Z }
+\regex_const:Nn \c__algoviz_step_regex { \A [A-Za-z0-9\#/.,\-]+ \Z }
+\regex_const:Nn \c__algoviz_theme_regex { \A [a-z0-9\-]+ \Z }
+% File names are quoted: none of the characters shells read inside quotes.
+\regex_const:Nn \c__algoviz_path_regex
+  { \A [^\"\$\`\\\%\!\^\&\|\<\>\;\*\?\x{00}-\x{1F}]+ \Z }
+
+% Runs #4 if the string #2 matches #1; otherwise an error names it (#3).
+\cs_new_protected:Npn \__algoviz_check:NNnn #1#2#3#4
+  {
+    \regex_match:NVTF #1 #2
+      {#4}
+      {
+        \msg_error:nneee { algoviz } { bad-argument } {#3} {#2}
+          { \__algoviz_hint:n {#3} }
+      }
+  }
+\cs_generate_variant:Nn \regex_match:NnTF { NV }
+
+\cs_new:Npn \__algoviz_hint:n #1
+  {
+    \str_case:nn {#1}
+      {
+        { step }
+          {
+            A~step~is~a~selector,~such~as~relax\iow_char:N\#3~or~
+            insert-5/relax.~Write~relax\iow_char:N\\\iow_char:N\#3~inside~
+            macro~definitions~and~Beamer~frames.
+          }
+        { theme } { Themes~are~named~light,~dark~or~print. }
+        { algorithm~id } { Algorithm~ids~are~written~like~dijkstra~or~bst.delete. }
+        { file~name }
+          {
+            Rename~the~file~or~its~directories~without~quotes,~\iow_char:N\$,~
+            \iow_char:N\%,~!,~\iow_char:N\&~and~the~like.
+          }
+        { cache~directory }
+          { Choose~a~name~without~quotes,~\iow_char:N\$,~\iow_char:N\%~and~the~like. }
+      }
+  }
+
+% The keys of one figure, with its step and theme as strings.
+\cs_new_protected:Npn \__algoviz_options:n #1
+  {
+    \keys_set:nn { algoviz } {#1}
+    \__algoviz_to_str:NV \l__algoviz_step_str \l__algoviz_step_tl
+    \__algoviz_to_str:NV \l__algoviz_theme_str \l__algoviz_theme_tl
+  }
+
+% Runs #1 once the step, the theme and the cache directory are checked.
+\cs_new_protected:Npn \__algoviz_checked:n #1
+  {
+    \__algoviz_check:NNnn \c__algoviz_step_regex \l__algoviz_step_str { step }
+      {
+        \__algoviz_check:NNnn \c__algoviz_theme_regex \l__algoviz_theme_str
+          { theme }
+          {
+            \__algoviz_check:NNnn \c__algoviz_path_regex \l__algoviz_cache_str
+              { cache~directory } {#1}
+          }
+      }
+  }
+
+% ---------------------------------------------------------------------------
+% Making figures
+% ---------------------------------------------------------------------------
+
+% #1: the source's arguments on the command line; #2: what the source is,
+% for the cache key; #3: its name, for messages.
+\cs_new_protected:Npn \__algoviz_make:nnn #1#2#3
+  {
+    \str_set:Ne \l__algoviz_hash_str
+      {
+        \str_lowercase:f
+          {
+            \str_mdfive_hash:e
+              {
+                algoviz~tikz~\int_use:N \c__algoviz_format_int \c_space_tl
+                \c__algoviz_version_str ; #2 ;
+                \l__algoviz_step_str ; \l__algoviz_theme_str
+              }
+          }
+      }
+    \str_set:Ne \l__algoviz_figure_str
+      { \l__algoviz_cache_str / \l__algoviz_hash_str .tex }
+    \str_set:Ne \l__algoviz_error_str
+      { \l__algoviz_cache_str / \l__algoviz_hash_str .err }
+    \file_if_exist:nTF { \l__algoviz_figure_str }
+      { \__algoviz_input:V \l__algoviz_figure_str }
+      {
+        \sys_if_shell:TF
+          { \__algoviz_run:nn {#1} {#3} }
+          {
+            \msg_error:nne { algoviz } { no-shell-escape } {#3}
+            \__algoviz_fail:nn { shell~escape~is~off. }
+              { Compile~with~-shell-escape~to~make~the~figure~of~#3. }
+          }
+      }
+  }
+\cs_generate_variant:Nn \str_mdfive_hash:n { e }
+
+% Runs the command, then draws its figure or says why there is none.
+\cs_new_protected:Npn \__algoviz_run:nn #1#2
+  {
+    \str_set:Ne \l__algoviz_call_str
+      {
+        \l__algoviz_command_tl \c_space_tl export \c_space_tl #1
+        \c_space_tl --step= \l__algoviz_step_str
+        \c_space_tl --theme= \l__algoviz_theme_str
+        \c_space_tl --format=tikz
+        \c_space_tl --out=" \l__algoviz_cache_str "
+        \c_space_tl --name= \l__algoviz_hash_str
+        \c_space_tl --error-file=" \l__algoviz_error_str "
+      }
+    \sys_shell_now:e { \l__algoviz_call_str }
+    \file_if_exist:nTF { \l__algoviz_figure_str }
+      { \__algoviz_input:V \l__algoviz_figure_str }
+      {
+        \file_if_exist:nTF { \l__algoviz_error_str }
+          { \__algoviz_fail_file:V \l__algoviz_error_str }
+          {
+            \sys_if_shell_unrestricted:TF
+              {
+                \msg_error:nnV { algoviz } { no-command } \l__algoviz_command_tl
+                \__algoviz_fail:nn
+                  { the~command~made~no~figure.~Is~it~installed? }
+                  { \l__algoviz_call_str }
+              }
+              {
+                \msg_error:nne { algoviz } { restricted-shell-escape } {#2}
+                \__algoviz_fail:nn
+                  { restricted~shell~escape~did~not~run~the~command. }
+                  { Compile~with~-shell-escape. }
+              }
+          }
+      }
+  }
+\cs_generate_variant:Nn \sys_shell_now:n { e }
+\cs_generate_variant:Nn \msg_error:nnn { nnV }
+
+% The input as hexadecimal UTF-8: pdfTeX's strings are bytes already;
+% LuaTeX's and XeTeX's are characters, encoded first.
+\cs_new_protected:Npn \__algoviz_hex:NN #1#2
+  {
+    \sys_if_engine_pdftex:TF
+      { \str_set_convert:NVnn #1 #2 { } { latin1/hex } }
+      { \str_set_convert:NVnn #1 #2 { } { utf8/hex } }
+  }
+\cs_generate_variant:Nn \str_set_convert:Nnnn { NV }
+
+\NewDocumentCommand \algoviz { O{} m +m }
+  {
+    \group_begin:
+      \__algoviz_options:n {#1}
+      \__algoviz_to_str:Nn \l__algoviz_id_str {#2}
+      \__algoviz_to_str:Nn \l__algoviz_input_str {#3}
+      % The braces of an object may be left out, as TeX takes them off.
+      \regex_match:nVF { \A [\[\{] } \l__algoviz_input_str
+        {
+          \str_set:Ne \l__algoviz_input_str
+            { \c_left_brace_str \l__algoviz_input_str \c_right_brace_str }
+        }
+      \__algoviz_checked:n
+        {
+          \__algoviz_check:NNnn \c__algoviz_id_regex \l__algoviz_id_str
+            { algorithm~id }
+            {
+              \__algoviz_hex:NN \l__algoviz_hex_str \l__algoviz_input_str
+              \__algoviz_make:nnn
+                { \l__algoviz_id_str \c_space_tl --input-hex= \l__algoviz_hex_str }
+                { algorithm ; \l__algoviz_id_str ; \l__algoviz_input_str }
+                { \l__algoviz_id_str }
+            }
+        }
+    \group_end:
+  }
+\cs_generate_variant:Nn \regex_match:nnTF { nV }
+
+\NewDocumentCommand \algovizfile { O{} m }
+  {
+    \group_begin:
+      \__algoviz_options:n {#1}
+      \__algoviz_to_str:NV \l__algoviz_id_str \l__algoviz_algorithm_tl
+      \file_get_full_name:nNTF {#2} \l__algoviz_file_str
+        {
+          \__algoviz_checked:n
+            {
+              \__algoviz_check:NNnn \c__algoviz_path_regex \l__algoviz_file_str
+                { file~name }
+                {
+                  \str_if_empty:NTF \l__algoviz_id_str
+                    {
+                      \__algoviz_make:nnn
+                        { " \l__algoviz_file_str " }
+                        { document ; \file_mdfive_hash:V \l__algoviz_file_str }
+                        { \l__algoviz_file_str }
+                    }
+                    {
+                      \__algoviz_check:NNnn \c__algoviz_id_regex
+                        \l__algoviz_id_str { algorithm~id }
+                        {
+                          \__algoviz_make:nnn
+                            {
+                              \l__algoviz_id_str \c_space_tl
+                              --input=" \l__algoviz_file_str "
+                            }
+                            {
+                              input ; \l__algoviz_id_str ;
+                              \file_mdfive_hash:V \l__algoviz_file_str
+                            }
+                            { \l__algoviz_id_str }
+                        }
+                    }
+                }
+            }
+        }
+        { \msg_error:nnn { algoviz } { no-file } {#2} }
+    \group_end:
+  }
+\cs_generate_variant:Nn \file_mdfive_hash:n { V }
+
+\NewDocumentCommand \algovizinput { O{} m }
+  {
+    \group_begin:
+      \keys_set:nn { algoviz } {#1}
+      \file_if_exist:nTF {#2}
+        { \__algoviz_input:n {#2} }
+        { \msg_error:nnn { algoviz } { no-file } {#2} }
+    \group_end:
+  }

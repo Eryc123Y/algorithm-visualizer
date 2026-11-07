@@ -1,0 +1,25 @@
+% Slides with algoviz figures. Compile with shell escape:
+%   latexmk -pdf -shell-escape slides.tex
+% Inside a frame, write the # of a step as \#, or make the frame fragile.
+\documentclass{beamer}
+\usepackage{algoviz}
+\algovizset{height=0.72\textheight}
+
+\begin{document}
+
+\begin{frame}{Dijkstra's algorithm: the second relaxation}
+  \centering
+  \algovizfile[algorithm=dijkstra, step=relax\#2]{graph.json}
+\end{frame}
+
+\begin{frame}[fragile]{Dijkstra's algorithm: the last relaxation}
+  \centering
+  \algovizfile[algorithm=dijkstra, step=relax#6]{graph.json}
+\end{frame}
+
+\begin{frame}{Heapsort, in the dark theme}
+  \centering
+  \algoviz[step=-1, theme=dark]{heapsort}{"values": [4, 10, 3, 5, 1]}
+\end{frame}
+
+\end{document}
