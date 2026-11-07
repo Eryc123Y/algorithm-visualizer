@@ -1,0 +1,291 @@
+{
+  "description": "Wide text in every kind that shows values: CJK strings, a long number, symbols, emoji and wide Latin letters, as values, labels, notes and edge weights. Layout measures them with the bundled metrics (ADR 0024), so they fit their cells and nodes.",
+  "input": {
+    "version": "0.1",
+    "title": "Wide text",
+    "structures": {
+      "arr": {
+        "kind": "array",
+        "label": "数组 A",
+        "initial": ["数组", 123456789012, "∞", "😀", "αβγ", "Wm"]
+      },
+      "t": {
+        "kind": "tree",
+        "label": "二叉树",
+        "levelOrder": ["根节点", "左", "右子树"]
+      },
+      "g": {
+        "kind": "graph",
+        "label": "图",
+        "directed": true,
+        "nodes": [
+          {
+            "id": "bj",
+            "value": "北京"
+          },
+          {
+            "id": "sh",
+            "value": "上海"
+          },
+          {
+            "id": "gz",
+            "value": "广州"
+          }
+        ],
+        "edges": [
+          ["bj", "sh", 1213],
+          ["sh", "gz", "∞"],
+          ["bj", "gz", 2105]
+        ]
+      },
+      "dp": {
+        "kind": "table",
+        "rowLabels": ["", "动", "态"],
+        "columnLabels": ["", "规", "划"],
+        "initial": [
+          [0, 0, 0],
+          [0, 1, 1],
+          [0, 1, 2]
+        ]
+      },
+      "list": {
+        "kind": "linkedList",
+        "initial": ["头", "节点二", "😀😀"]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "arr",
+            "type": "pointer",
+            "name": "i",
+            "index": 0
+          },
+          {
+            "target": "arr",
+            "type": "pointer",
+            "name": "WWW",
+            "index": 1
+          },
+          {
+            "target": "arr",
+            "type": "compare",
+            "i": 0,
+            "j": 1
+          },
+          {
+            "target": "t",
+            "type": "annotate",
+            "node": "e0",
+            "text": "距离 ∞"
+          },
+          {
+            "target": "g",
+            "type": "annotate",
+            "node": "bj",
+            "text": "距离 0"
+          },
+          {
+            "target": "g",
+            "type": "annotate",
+            "node": "gz",
+            "text": "∞"
+          }
+        ]
+      }
+    ]
+  },
+  "expectedLength": 1,
+  "expectedFrames": [
+    {
+      "index": 1,
+      "state": {
+        "arr": {
+          "kind": "array",
+          "state": {
+            "data": [
+              {
+                "id": "e0",
+                "value": "数组"
+              },
+              {
+                "id": "e1",
+                "value": 123456789012
+              },
+              {
+                "id": "e2",
+                "value": "∞"
+              },
+              {
+                "id": "e3",
+                "value": "😀"
+              },
+              {
+                "id": "e4",
+                "value": "αβγ"
+              },
+              {
+                "id": "e5",
+                "value": "Wm"
+              }
+            ],
+            "marks": {
+              "compare": [0, 1],
+              "swapped": null,
+              "highlight": [],
+              "pointers": {
+                "i": 0,
+                "WWW": 1
+              },
+              "settled": []
+            }
+          }
+        },
+        "t": {
+          "kind": "tree",
+          "state": {
+            "data": {
+              "nodes": [
+                {
+                  "id": "e0",
+                  "value": "根节点",
+                  "children": ["e1", "e2"],
+                  "color": null
+                },
+                {
+                  "id": "e1",
+                  "value": "左",
+                  "children": [null, null],
+                  "color": null
+                },
+                {
+                  "id": "e2",
+                  "value": "右子树",
+                  "children": [null, null],
+                  "color": null
+                }
+              ],
+              "roots": ["e0"]
+            },
+            "marks": {
+              "highlight": [],
+              "compare": null,
+              "visited": [],
+              "settled": [],
+              "groups": {},
+              "pointers": {},
+              "notes": {
+                "e0": "距离 ∞"
+              }
+            },
+            "binary": true
+          }
+        },
+        "g": {
+          "kind": "graph",
+          "state": {
+            "data": {
+              "nodes": [
+                {
+                  "id": "bj",
+                  "value": "北京"
+                },
+                {
+                  "id": "sh",
+                  "value": "上海"
+                },
+                {
+                  "id": "gz",
+                  "value": "广州"
+                }
+              ],
+              "edges": [
+                {
+                  "id": "bj-sh",
+                  "from": "bj",
+                  "to": "sh",
+                  "weight": 1213
+                },
+                {
+                  "id": "sh-gz",
+                  "from": "sh",
+                  "to": "gz",
+                  "weight": "∞"
+                },
+                {
+                  "id": "bj-gz",
+                  "from": "bj",
+                  "to": "gz",
+                  "weight": 2105
+                }
+              ]
+            },
+            "marks": {
+              "highlightNodes": [],
+              "highlightEdges": [],
+              "visited": [],
+              "settled": [],
+              "groups": {},
+              "pointers": {},
+              "notes": {
+                "bj": "距离 0",
+                "gz": "∞"
+              },
+              "edgeMarks": {}
+            },
+            "directed": true,
+            "layout": "auto"
+          }
+        },
+        "dp": {
+          "kind": "table",
+          "state": {
+            "data": [
+              [0, 0, 0],
+              [0, 1, 1],
+              [0, 1, 2]
+            ],
+            "marks": {
+              "highlight": [],
+              "depend": null,
+              "settled": []
+            }
+          }
+        },
+        "list": {
+          "kind": "linkedList",
+          "state": {
+            "data": [
+              {
+                "id": "e0",
+                "value": "头",
+                "next": "e1",
+                "prev": null
+              },
+              {
+                "id": "e1",
+                "value": "节点二",
+                "next": "e2",
+                "prev": null
+              },
+              {
+                "id": "e2",
+                "value": "😀😀",
+                "next": null,
+                "prev": null
+              }
+            ],
+            "doubly": false,
+            "marks": {
+              "highlight": [],
+              "visited": [],
+              "settled": [],
+              "pointers": {}
+            }
+          }
+        }
+      }
+    }
+  ]
+}

@@ -63,9 +63,20 @@ export class Dice {
       case 1:
         return this.chance(0.5);
       case 2:
-        return this.pick(['', 'a', 'é', '🙂', 'x'.repeat(40), '<&>"', 'ab cd']);
+        return this.pick([
+          '',
+          'a',
+          'é',
+          '🙂',
+          'x'.repeat(40),
+          '<&>"',
+          'ab cd',
+          '\u6570\u7ec4',
+          'W'.repeat(12),
+          '\u221e',
+        ]);
       case 3:
-        return this.pick([-0, -1, 0.5, 1e9, -12345.678, 2 ** 53]);
+        return this.pick([-0, -1, 0.5, 1e9, -12345.678, 2 ** 53, 123456789012]);
       default:
         return this.int(100) - 20;
     }

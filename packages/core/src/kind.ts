@@ -11,7 +11,7 @@
 import type { Result } from '@algoviz/spec';
 
 import type { ReduceError } from './errors.ts';
-import type { LayoutOptions } from './layout/options.ts';
+import type { LayoutFonts, LayoutOptions } from './layout/options.ts';
 import type { SceneItem } from './layout/scene.ts';
 
 export interface StructureState<Data, Marks> {
@@ -50,8 +50,11 @@ export interface KindRuntime<Decl, State, Action, Metrics> {
   beginStep(state: State): State;
   /** Applies one action. Must be pure and must not mutate `state`. */
   reduce(state: State, action: Action): Result<State, ReduceError>;
-  /** Sizes a state needs; merged over all frames. */
-  measure(state: State, decl: Decl): Metrics;
+  /**
+   * Sizes a state needs, with text widths in em of `fonts`; merged over
+   * all frames (ADR 0008, 0024).
+   */
+  measure(state: State, decl: Decl, fonts: LayoutFonts): Metrics;
   mergeMetrics(a: Metrics, b: Metrics): Metrics;
   /** Pure, DOM-free layout of one state (ADR 0003). */
   layout(input: LayoutInput<Decl, State, Metrics>): Block;

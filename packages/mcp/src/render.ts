@@ -3,7 +3,7 @@
  */
 import { layoutTrace } from '@algoviz/core';
 import { ok, type Diagnostic, type Result } from '@algoviz/spec';
-import { renderSvg, type ThemeName } from '@algoviz/svg';
+import { renderSvg, themes, type ThemeName } from '@algoviz/svg';
 
 import { loadDocument, resolveFrame, type FrameSelector } from './document.ts';
 
@@ -33,8 +33,11 @@ export function render(
   const trace = loaded.value;
   const index = resolveFrame(trace, frame);
   if (!index.ok) return index;
-  // Laid out with metrics from every frame, as a player would.
-  const scene = layoutTrace(trace).sceneAt(index.value);
+  // Laid out with metrics from every frame and the theme's fonts, as a
+  // player would.
+  const scene = layoutTrace(trace, {
+    fonts: themes[theme].fontMetrics,
+  }).sceneAt(index.value);
   return ok({
     frame: index.value,
     frames: trace.length + 1,

@@ -16,4 +16,4 @@ A state maps each structure name to `{ "kind", "state": { "data", "marks" } }`.
 
 ## `layout/`: scenes
 
-- `*.json`: `{ "description", "input", "frames" }`. With the default layout options and metrics measured over the whole trace, the scene of each listed frame `{ index, scene }` must equal the expected scene exactly, including item order. Coordinates are hand-computed from the rules in `packages/core/src/layout/`.
+- `*.json`: `{ "description", "input", "frames" }`. With the default layout options and metrics measured over the whole trace, the scene of each listed frame `{ index, scene }` must equal the expected scene exactly, including item order. Coordinates are hand-computed from the rules in `packages/core/src/layout/`, with text widths from the metrics of the bundled fonts in `packages/fonts/src/faces/` (ADR 0024).

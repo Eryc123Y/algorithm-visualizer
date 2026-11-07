@@ -19,6 +19,7 @@
     "build": "tsc --build tsconfig.lib.json"
   },
   "dependencies": {
+    "@algoviz/fonts": "*",
     "@algoviz/spec": "*"
   }
 }

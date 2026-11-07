@@ -7,7 +7,9 @@
  * leaves side by side and centre each parent over its children. Trees of a
  * forest follow each other left to right, half a column apart.
  */
-import { badgeHeight, badgeWidthFor, chars } from './common.ts';
+import { textWidth } from '@algoviz/fonts';
+
+import { badgeHeight, badgeWidthFor, ceilWidth } from './common.ts';
 import type { LayoutOptions } from './options.ts';
 import type { SceneItem } from './scene.ts';
 
@@ -35,36 +37,32 @@ const MIN_RADIUS = 20;
 const MAX_RADIUS = 26;
 const TEXT_INSET = 8;
 
-export function nodeShape(count: number, o: LayoutOptions): NodeShape {
-  const halfText = (font: number) => (count * font * o.charWidthRatio) / 2;
-  const natural = Math.ceil(halfText(o.valueFontSize) + TEXT_INSET);
+/** Shape of a node whose widest value is `em` wide in the value font. */
+export function nodeShape(em: number, o: LayoutOptions): NodeShape {
+  const halfText = (font: number) => (em * font) / 2;
+  const natural = ceilWidth(halfText(o.valueFontSize) + TEXT_INSET);
   if (natural <= MAX_RADIUS) {
     const radius = Math.max(MIN_RADIUS, natural);
     return { radius, halfWidth: radius, fontSize: o.valueFontSize };
   }
   const minFont = Math.min(o.valueFontSize, 13);
-  const fitted = Math.floor(
-    (2 * (MAX_RADIUS - TEXT_INSET)) / (count * o.charWidthRatio),
-  );
+  const fitted = Math.floor((2 * (MAX_RADIUS - TEXT_INSET)) / em + 1e-9);
   if (fitted >= minFont)
     return { radius: MAX_RADIUS, halfWidth: MAX_RADIUS, fontSize: fitted };
   return {
     radius: MAX_RADIUS,
-    halfWidth: Math.ceil(halfText(minFont) + 12),
+    halfWidth: ceilWidth(halfText(minFont) + 12),
     fontSize: minFont,
   };
 }
 
-/**
- * Width of a note of `count` characters beside a node of `shape`; painters
- * draw notes at 70% of the value size, at least 10.
- */
-export const noteWidth = (
-  count: number,
-  shape: NodeShape,
-  o: LayoutOptions,
-): number =>
-  Math.ceil(count * Math.max(10, shape.fontSize * 0.7) * o.charWidthRatio);
+/** Font size of notes beside a node: 70% of the value size, at least 10. */
+export const noteFontSize = (shape: NodeShape): number =>
+  Math.max(10, shape.fontSize * 0.7);
+
+/** Width of a note `em` wide in the value font, beside a node of `shape`. */
+export const noteTextWidth = (em: number, shape: NodeShape): number =>
+  ceilWidth(em * noteFontSize(shape));
 
 /**
  * Distance from a node's centre to its outline along the unit direction
@@ -139,20 +137,17 @@ export function placeForest(
 }
 
 /**
- * Width taken left of a node by `rows` pointer badges side by side, each
- * at most `maxPointerChars` long, and the arrow to the node.
+ * Width taken left of a node by `rows` pointer badges side by side, with
+ * names at most `pointerEm` wide, and the arrow to the node.
  */
 export const sidePointerWidth = (
   rows: number,
-  maxPointerChars: number,
+  pointerEm: number,
   o: LayoutOptions,
 ): number =>
   rows === 0
     ? 0
-    : POINTER_ARROW +
-      4 +
-      rows * badgeWidthFor(maxPointerChars, o) +
-      (rows - 1) * 4;
+    : POINTER_ARROW + 4 + rows * badgeWidthFor(pointerEm, o) + (rows - 1) * 4;
 
 /**
  * Pointer badges left of a node, joined by an arrow to its left side; only
@@ -168,7 +163,7 @@ export function sidePointerItems(
   const items: SceneItem[] = [];
   let right = at.x - at.halfWidth - 2 - POINTER_ARROW;
   pointers.forEach((pointer, k) => {
-    const width = badgeWidthFor(chars(pointer), o);
+    const width = badgeWidthFor(textWidth(pointer, o.fonts.value), o);
     if (k === 0)
       items.push({
         type: 'arrow',

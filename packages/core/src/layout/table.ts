@@ -17,28 +17,34 @@ import type { Cell, Scalar, TableDecl } from '@algoviz/spec';
 import type { Block, LayoutInput } from '../kind.ts';
 import type { TableState } from '../kinds/table.ts';
 import {
+  ceilWidth,
   cellWidthFor,
   formatScalar,
-  maxChars,
+  maxWidth,
   titleItems,
   titleRowHeight,
   titleWidth,
 } from './common.ts';
-import type { LayoutOptions } from './options.ts';
+import type { LayoutFonts, LayoutOptions } from './options.ts';
 import type { ElementRole, SceneItem } from './scene.ts';
 
 export interface TableMetrics {
   readonly rows: number;
   readonly columns: number;
-  readonly maxChars: number;
+  /** Widest value, in em of the value font. */
+  readonly valueWidth: number;
 }
 
 const cellText = (value: Scalar) => (value === null ? '' : formatScalar(value));
 
-export const measureTable = (state: TableState): TableMetrics => ({
+export const measureTable = (
+  state: TableState,
+  _decl: TableDecl,
+  fonts: LayoutFonts,
+): TableMetrics => ({
   rows: state.data.length,
   columns: state.data[0]?.length ?? 0,
-  maxChars: maxChars(state.data.flat().map(cellText)),
+  valueWidth: maxWidth(state.data.flat().map(cellText), fonts.value),
 });
 
 export const mergeTableMetrics = (
@@ -47,7 +53,7 @@ export const mergeTableMetrics = (
 ): TableMetrics => ({
   rows: Math.max(a.rows, b.rows),
   columns: Math.max(a.columns, b.columns),
-  maxChars: Math.max(a.maxChars, b.maxChars),
+  valueWidth: Math.max(a.valueWidth, b.valueWidth),
 });
 
 const GAP = 4;
@@ -95,15 +101,19 @@ export function layoutTable({
       ? Array.from({ length: metrics.columns }, (_, c) => String(c))
       : []);
   const width = cellWidthFor(
-    Math.max(metrics.maxChars, maxChars(columnLabels) * 0.7),
+    // Column labels, at index size, in value-size em.
+    Math.max(
+      metrics.valueWidth,
+      (maxWidth(columnLabels, o.fonts.value) * o.indexFontSize) /
+        co.valueFontSize,
+    ),
     co,
   );
   const height = Math.round(o.cellHeight * 0.8);
   const headerWidth =
     rowLabels.length === 0
       ? 0
-      : Math.ceil(maxChars(rowLabels) * o.indexFontSize * o.charWidthRatio) +
-        14;
+      : ceilWidth(maxWidth(rowLabels, o.fonts.value) * o.indexFontSize) + 14;
   const headerHeight = columnLabels.length === 0 ? 0 : o.indexFontSize + 10;
   const left = origin.x + headerWidth;
   const top = origin.y + titleRowHeight(o) + headerHeight;

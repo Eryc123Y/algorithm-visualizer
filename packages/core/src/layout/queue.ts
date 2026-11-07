@@ -12,25 +12,34 @@ import {
   formatScalar,
   groupPointers,
   indexRowHeight,
-  maxChars,
+  maxWidth,
   pointerAreaHeight,
   pointerItems,
   titleItems,
   titleRowHeight,
   titleWidth,
 } from './common.ts';
+import type { LayoutFonts } from './options.ts';
 import type { SceneItem } from './scene.ts';
 
 export interface QueueMetrics {
   readonly slots: number;
-  readonly maxChars: number;
+  /** Widest value, in em of the value font. */
+  readonly valueWidth: number;
   /** 2 when front and back ever coincide (one element), else 1 or 0. */
   readonly pointerRows: number;
 }
 
-export const measureQueue = (s: QueueState): QueueMetrics => ({
+export const measureQueue = (
+  s: QueueState,
+  _decl: QueueDecl,
+  fonts: LayoutFonts,
+): QueueMetrics => ({
   slots: s.data.length,
-  maxChars: maxChars(s.data.map((e) => formatScalar(e.value))),
+  valueWidth: maxWidth(
+    s.data.map((e) => formatScalar(e.value)),
+    fonts.value,
+  ),
   pointerRows: s.data.length === 0 ? 0 : s.data.length === 1 ? 2 : 1,
 });
 
@@ -39,7 +48,7 @@ export const mergeQueueMetrics = (
   b: QueueMetrics,
 ): QueueMetrics => ({
   slots: Math.max(a.slots, b.slots),
-  maxChars: Math.max(a.maxChars, b.maxChars),
+  valueWidth: Math.max(a.valueWidth, b.valueWidth),
   pointerRows: Math.max(a.pointerRows, b.pointerRows),
 });
 
@@ -54,7 +63,7 @@ export function layoutQueue({
   origin,
   options: o,
 }: LayoutInput<QueueDecl, QueueState, QueueMetrics>): Block {
-  const cellWidth = cellWidthFor(metrics.maxChars, o);
+  const cellWidth = cellWidthFor(metrics.valueWidth, o);
   const pitch = cellWidth + o.cellGap;
   const overhang = Math.max(PIPE * 2, badgeOverhang(5, cellWidth, o));
   const cellsLeft = origin.x + overhang;

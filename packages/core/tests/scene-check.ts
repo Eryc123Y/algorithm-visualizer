@@ -1,8 +1,50 @@
 /**
  * Checks shared by tests that lay out scenes: every item has a unique key,
- * finite coordinates, and lies inside the scene with its labels.
+ * finite coordinates, and lies inside the scene with its labels, and text
+ * fits the cell, node or badge it is drawn in. Text is measured in the
+ * default fonts, which the default themes draw with (ADR 0024).
  */
-import type { Scene, SceneItem } from '../src/index.ts';
+import { textWidth } from '@algoviz/fonts';
+
+import {
+  defaultFonts,
+  edgeLabelBox,
+  labelSegment,
+  TITLE_TRACKING,
+  type Scene,
+  type SceneItem,
+} from '../src/index.ts';
+
+type Extent = [number, number, number, number];
+
+const grow = ([x1, y1, x2, y2]: Extent, d: number): Extent => [
+  x1 - d,
+  y1 - d,
+  x2 + d,
+  y2 + d,
+];
+
+const union = (p: Extent, q: Extent): Extent => [
+  Math.min(p[0], q[0]),
+  Math.min(p[1], q[1]),
+  Math.max(p[2], q[2]),
+  Math.max(p[3], q[3]),
+];
+
+/** Width of text in the value font, at `fontSize`. */
+const valueWidth = (text: string, fontSize: number) =>
+  textWidth(text, defaultFonts.value) * fontSize;
+
+/** Width of a text item, in the font its role is drawn in. */
+function textItemWidth(item: SceneItem & { type: 'text' }): number {
+  if (item.role === 'index') return valueWidth(item.text, item.fontSize);
+  const tracking = item.role === 'title' ? TITLE_TRACKING : 0;
+  return (
+    (textWidth(item.text, defaultFonts.label) +
+      tracking * [...item.text].length) *
+    item.fontSize
+  );
+}
 
 /** Horizontal and vertical extent of an item, including annotations. */
 export function extent(item: SceneItem): [number, number, number, number] {
@@ -21,7 +63,7 @@ export function extent(item: SceneItem): [number, number, number, number] {
       // Painters draw labels at 70% of the value size, at least 10 units:
       // centred above, or turned and then reaching out by their width.
       const font = Math.max(10, item.fontSize * 0.7);
-      const width = [...item.label].length * font * 0.6;
+      const width = valueWidth(item.label, font);
       const turned = (item.labelAngle ?? 0) !== 0;
       const dx = turned ? half + width + 4 : Math.max(half, width / 2);
       const below = turned ? item.radius + font + 4 : item.radius;
@@ -42,31 +84,29 @@ export function extent(item: SceneItem): [number, number, number, number] {
     case 'edge': {
       const isLoop =
         item.via === undefined && item.x1 === item.x2 && item.y1 === item.y2;
-      // Labels sit beside the edge (or beyond a loop) and reach out by their
-      // own size; see paintEdge.
-      const labelWidth =
-        item.label === undefined
-          ? 0
-          : [...item.label].length * item.fontSize * 0.6;
-      const [dx, dy] = isLoop
-        ? [34, 34].map(
-            (d) =>
-              d +
-              (item.label === undefined
-                ? 0
-                : Math.max(labelWidth, item.fontSize) + 2),
-          )
-        : item.label === undefined
-          ? [0, 0]
-          : [labelWidth + 4, item.fontSize + 4];
       const xs = [item.x1, item.x2, ...(item.via ?? []).map((p) => p.x)];
       const ys = [item.y1, item.y2, ...(item.via ?? []).map((p) => p.y)];
-      return [
-        Math.min(...xs) - dx!,
-        Math.min(...ys) - dy!,
-        Math.max(...xs) + dx!,
-        Math.max(...ys) + dy!,
+      const line: [number, number, number, number] = [
+        Math.min(...xs),
+        Math.min(...ys),
+        Math.max(...xs),
+        Math.max(...ys),
       ];
+      if (item.label === undefined) return isLoop ? grow(line, 34) : line;
+      if (isLoop) {
+        // Beyond the loop, by the label's size in any direction.
+        const labelWidth = valueWidth(item.label, item.fontSize);
+        return grow(line, 34 + Math.max(labelWidth, item.fontSize) + 2);
+      }
+      // Beside the edge, where painters put it.
+      const [a, b] = labelSegment(item);
+      const box = edgeLabelBox(item, a, b, defaultFonts.value);
+      return union(line, [
+        box.x - box.halfWidth,
+        box.y - box.halfHeight,
+        box.x + box.halfWidth,
+        box.y + box.halfHeight,
+      ]);
     }
     case 'arrow':
       return [
@@ -75,8 +115,16 @@ export function extent(item: SceneItem): [number, number, number, number] {
         Math.max(item.x1, item.x2),
         Math.max(item.y1, item.y2),
       ];
-    case 'text':
-      return [item.x, item.y, item.x, item.y];
+    case 'text': {
+      const width = textItemWidth(item);
+      const left =
+        item.anchor === 'start'
+          ? item.x
+          : item.anchor === 'middle'
+            ? item.x - width / 2
+            : item.x - width;
+      return [left, item.y, left + width, item.y];
+    }
     default: {
       const unreachable: never = item;
       return unreachable;
@@ -110,6 +158,28 @@ export function sceneProblems(scene: Scene): string[] {
       );
   }
   return problems;
+}
+
+/**
+ * Text that does not fit inside what it is drawn in, with the room layout
+ * promises: 10 units each side in a cell (the least, in tables), 8 in a
+ * node, 6 on a badge.
+ */
+export function fitProblems(scene: Scene): string[] {
+  return scene.items.flatMap((item) => {
+    if (item.type !== 'box' && item.type !== 'node' && item.type !== 'badge')
+      return [];
+    const room =
+      item.type === 'node'
+        ? Math.max(2 * item.radius, item.width ?? 0) - 16
+        : item.type === 'box'
+          ? item.width - 20
+          : item.width - 12;
+    const width = valueWidth(item.text, item.fontSize);
+    return width > room + 1e-6
+      ? [`${item.key}: "${item.text}" is ${width} wide, room ${room}`]
+      : [];
+  });
 }
 
 const structureOf = (key: string) => key.slice(0, key.indexOf('/'));

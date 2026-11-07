@@ -34,7 +34,8 @@ const runs = Number(process.env['FUZZ_RUNS'] ?? 40);
 // computed specifier keeps TypeScript from pulling core's sources into this
 // project (TS6307); the cast restates the function's signature.
 const sceneCheck = new URL('../../core/tests/scene-check.ts', import.meta.url);
-const { sceneProblems } = (await import(sceneCheck.href)) as {
+const { fitProblems, sceneProblems } = (await import(sceneCheck.href)) as {
+  fitProblems: (scene: Scene) => string[];
   sceneProblems: (scene: Scene) => string[];
 };
 const TIMEOUT = 600_000;
@@ -62,7 +63,7 @@ function checkLayout(trace: Trace): void {
   const first = layout.sceneAt(0);
   for (let i = 0; i <= trace.length; i++) {
     const scene = i === 0 ? first : layout.sceneAt(i);
-    const problems = sceneProblems(scene);
+    const problems = [...sceneProblems(scene), ...fitProblems(scene)];
     if (problems.length > 0)
       throw new Error(
         `Frame ${i} of ${trace.length}: ${problems.slice(0, 5).join('; ')}` +

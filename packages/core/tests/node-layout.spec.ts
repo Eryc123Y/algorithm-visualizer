@@ -47,12 +47,13 @@ function nearSegment(
 describe('nodeShape', () => {
   const o = defaultLayoutOptions;
   it('fits short values in a circle and stretches long ones', () => {
-    expect(nodeShape(1, o)).toEqual({
+    // One character of JetBrains Mono is 0.6 em.
+    expect(nodeShape(0.6, o)).toEqual({
       radius: 20,
       halfWidth: 20,
       fontSize: 20,
     });
-    const long = nodeShape(11, o);
+    const long = nodeShape(6.6, o);
     expect(long.halfWidth).toBeGreaterThan(long.radius);
     expect(long.fontSize).toBeLessThan(o.valueFontSize);
   });
