@@ -11,7 +11,7 @@ Each file records one architectural decision: the context, what we decided, and 
 | [0005](0005-typescript-core.md)                     | The core is written in TypeScript; a Rust port is deferred           | Accepted                            |
 | [0006](0006-lit-web-components.md)                  | The interactive player is built as Web Components with Lit           | Accepted                            |
 | [0007](0007-explicit-element-ids.md)                | Element identity is explicit in the protocol                         | Accepted                            |
-| [0008](0008-trace-wide-layout-metrics.md)           | Layout uses metrics measured over the whole trace                    | Accepted                            |
+| [0008](0008-trace-wide-layout-metrics.md)           | Layout uses metrics measured over the whole trace                    | Accepted, partly superseded by 0024 |
 | [0009](0009-accessible-themable-visual-encoding.md) | Visual encoding is redundant, and themes are partial overrides       | Accepted                            |
 | [0010](0010-player-architecture.md)                 | Player architecture: shared painting, keyed animation, no decorators | Accepted                            |
 | [0011](0011-display-mode.md)                        | Display mode: the player as a purely visual element                  | Accepted                            |
@@ -27,5 +27,6 @@ Each file records one architectural decision: the context, what we decided, and 
 | [0021](0021-protocol-versioning.md)                 | The protocol version says what a reader must understand              | Accepted                            |
 | [0022](0022-registry-details.md)                    | Registry details: traces, structure modules, ids and sorting         | Accepted                            |
 | [0023](0023-remaining-modules.md)                   | The remaining recipes as registry modules: ids, inputs, procedures   | Accepted                            |
+| [0024](0024-text-measurement-and-fonts.md)          | Text is measured with bundled font metrics and outlined in SVG       | Accepted                            |
 
 Template: Status · Context · Decision · Consequences.
