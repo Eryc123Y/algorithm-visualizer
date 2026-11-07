@@ -296,7 +296,7 @@ test('a new document resets the player to its first frame', async ({
   const player = page.getByTestId('player');
   await player.focus();
   await page.keyboard.press('End');
-  await page.getByTestId('example').selectOption('Kruskal');
+  await page.getByTestId('example').selectOption('Kruskal’s algorithm');
   await expect(player).toHaveAttribute('frame', '0');
   await expectStageMatches(player, await editorDocument(page));
 });
@@ -344,7 +344,7 @@ test.describe('display mode', () => {
 test('fits a phone screen without sideways scrolling', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 800 });
   await page.goto('/');
-  for (const label of ['Dijkstra', 'Floyd–Warshall', 'Trie']) {
+  for (const label of ['Dijkstra’s algorithm', 'Floyd–Warshall', 'Trie']) {
     await page.getByTestId('example').selectOption(label);
     await settle(page.getByTestId('player'));
     const overflow = await page.evaluate(
@@ -361,7 +361,7 @@ test.describe('random interaction', () => {
   for (const [label, seed] of [
     ['Bubble sort', 1],
     ['AVL tree', 2],
-    ['Dijkstra', 3],
+    ['Dijkstra’s algorithm', 3],
     ['Reverse a linked list', 4],
     ['Longest common subsequence', 5],
   ] as const)

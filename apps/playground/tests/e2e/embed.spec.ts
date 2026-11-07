@@ -7,7 +7,7 @@
 import { readFileSync } from 'node:fs';
 
 import { selectFrame } from '@algoviz/core';
-import { dijkstra, runAlgorithm } from '@algoviz/recipes';
+import { runAlgorithm } from '@algoviz/recipes';
 import type { AlgoPlayer } from '@algoviz/elements';
 import type { Page } from '@playwright/test';
 
@@ -30,8 +30,8 @@ const bundle = () =>
   );
 
 const sort = documentOf('bubble-sort', { values: [4, 2, 3, 1] });
-const graph = dijkstra(
-  {
+const graph = documentOf('dijkstra', {
+  graph: {
     nodes: ['A', 'B', 'C'],
     edges: [
       ['A', 'B', 2],
@@ -39,8 +39,8 @@ const graph = dijkstra(
       ['A', 'C', 5],
     ],
   },
-  'A',
-);
+  source: 'A',
+});
 
 // Two operations, each a section of named steps (ADR 0020).
 const bst = documentOf('bst', {
