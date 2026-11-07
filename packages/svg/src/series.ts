@@ -75,16 +75,47 @@ export interface PreparedFigures {
   ): Result<readonly Figure[], readonly Diagnostic[]>;
 }
 
-/** Draws frames of a trace, all on its largest canvas. */
-type Painter = (frames: readonly number[]) => readonly Figure[];
+/**
+ * A frame of a document laid out on the document's canvas: the scene a
+ * painter draws, whatever the format (ADR 0025, 0027).
+ */
+export interface SceneFrame {
+  readonly frame: number;
+  /** The frame's most specific selector, e.g. `insert-5/relax#2` (ADR 0020). */
+  readonly selector: string;
+  /** The same for every frame of a document. */
+  readonly width: number;
+  readonly height: number;
+  /** The narration of the step that produced the frame, if it has one. */
+  readonly narration?: string;
+  /** Laid out in the theme's fonts, with `width` and `height` as its size. */
+  readonly scene: Scene;
+}
+
+/** A document loaded once, from which scenes of any of its frames are laid out. */
+export interface PreparedScenes {
+  /** Frames of the document, 0 to `frames - 1`. */
+  readonly frames: number;
+  /** The theme the scenes were laid out for, resolved. */
+  readonly theme: SvgTheme;
+  /** The scene of the one frame a selector names (`selectFrame`, ADR 0020). */
+  scene(selector: string | number): Result<SceneFrame, readonly Diagnostic[]>;
+  /** The scenes of a series (`selectSeries`, ADR 0025), in timeline order. */
+  scenes(
+    selectors?: readonly (string | number)[],
+  ): Result<readonly SceneFrame[], readonly Diagnostic[]>;
+}
+
+/** Lays out frames of a trace, all on its largest canvas. */
+type Framer = (frames: readonly number[]) => readonly SceneFrame[];
 
 /**
- * A painter for a trace. The first call lays the trace out with metrics
+ * A framer for a trace. The first call lays the trace out with metrics
  * measured over all its frames, in the theme's fonts, and measures the
  * canvas over every frame, keeping the scenes that call wants; later calls
  * lay out only their own frames.
  */
-function painterOf(trace: Trace, theme: SvgTheme): Painter {
+function framerOf(trace: Trace, theme: SvgTheme): Framer {
   let measured:
     | {
         readonly layout: ReturnType<typeof layoutTrace>;
@@ -110,11 +141,6 @@ function painterOf(trace: Trace, theme: SvgTheme): Painter {
     }
     const { layout, width, height } = measured;
     return frames.map((frame) => {
-      const scene = {
-        ...(kept.get(frame) ?? layout.sceneAt(frame)),
-        width,
-        height,
-      };
       // Frame f is the state after step f - 1; frame 0 has no step.
       const narration =
         frame > 0 ? doc.steps[frame - 1]?.meta?.narration : undefined;
@@ -124,13 +150,24 @@ function painterOf(trace: Trace, theme: SvgTheme): Painter {
         width,
         height,
         ...(narration === undefined ? {} : { narration }),
-        svg: renderSvg(scene, {
-          theme,
-          keys: false,
-          ...(narration === undefined ? {} : { description: narration }),
-        }),
+        scene: { ...(kept.get(frame) ?? layout.sceneAt(frame)), width, height },
       };
     });
+  };
+}
+
+/** The standalone SVG figure of a laid-out frame. */
+function figureOf(frame: SceneFrame, theme: SvgTheme): Figure {
+  const { scene, ...rest } = frame;
+  return {
+    ...rest,
+    svg: renderSvg(scene, {
+      theme,
+      keys: false,
+      ...(frame.narration === undefined
+        ? {}
+        : { description: frame.narration }),
+    }),
   };
 }
 
@@ -148,19 +185,21 @@ export function renderSeries(
     if (!Number.isInteger(frame) || frame < 0 || frame > trace.length)
       throw new RangeError(`Frame ${frame} is not in [0, ${trace.length}]`);
   if (frames.length === 0) return [];
-  return painterOf(trace, resolveTheme(options.theme))(frames);
+  const theme = resolveTheme(options.theme);
+  return framerOf(trace, theme)(frames).map((f) => figureOf(f, theme));
 }
 
 /**
- * Loads a document once, for figures of any of its frames. Errors are the
- * document's diagnostics, or `UNKNOWN_THEME` at `$.theme`; the figures'
- * selectors report theirs at `$`. Nothing is laid out until a figure is
- * drawn.
+ * Loads a document once, for scenes of any of its frames, laid out on one
+ * canvas in the theme's fonts. Errors are the document's diagnostics, or
+ * `UNKNOWN_THEME` at `$.theme`; the selectors report theirs at `$`. Nothing
+ * is laid out until a scene is asked for. Every painter's series is built
+ * on it, so SVG and TikZ figures share positions and canvas.
  */
-export function prepareFigures(
+export function prepareScenes(
   document: unknown,
   options: SeriesOptions = {},
-): Result<PreparedFigures, readonly Diagnostic[]> {
+): Result<PreparedScenes, readonly Diagnostic[]> {
   // Callers from other languages, such as the Typst plugin, pass any text.
   const { theme } = options;
   if (typeof theme === 'string' && !Object.hasOwn(themes, theme))
@@ -176,16 +215,48 @@ export function prepareFigures(
   if (!loaded.ok) return loaded;
   const trace = loaded.value;
   const doc = trace.visualization;
-  const paint = painterOf(trace, resolveTheme(theme));
+  const resolved = resolveTheme(theme);
+  const frame = framerOf(trace, resolved);
   return ok({
     frames: trace.length + 1,
+    theme: resolved,
+    scene(selector) {
+      const selected = selectFrame(doc, selector);
+      return selected.ok
+        ? ok(frame([selected.value])[0]!)
+        : err([selected.error]);
+    },
+    scenes(selectors = []) {
+      const selected = selectSeries(doc, selectors);
+      return selected.ok ? ok(frame(selected.value)) : err([selected.error]);
+    },
+  });
+}
+
+/**
+ * Loads a document once, for figures of any of its frames. Errors are the
+ * document's diagnostics, or `UNKNOWN_THEME` at `$.theme`; the figures'
+ * selectors report theirs at `$`. Nothing is laid out until a figure is
+ * drawn.
+ */
+export function prepareFigures(
+  document: unknown,
+  options: SeriesOptions = {},
+): Result<PreparedFigures, readonly Diagnostic[]> {
+  const prepared = prepareScenes(document, options);
+  if (!prepared.ok) return prepared;
+  const scenes = prepared.value;
+  return ok({
+    frames: scenes.frames,
     figure(selector) {
-      const frame = selectFrame(doc, selector);
-      return frame.ok ? ok(paint([frame.value])[0]!) : err([frame.error]);
+      const frame = scenes.scene(selector);
+      return frame.ok ? ok(figureOf(frame.value, scenes.theme)) : frame;
     },
     figures(selectors = []) {
-      const frames = selectSeries(doc, selectors);
-      return frames.ok ? ok(paint(frames.value)) : err([frames.error]);
+      const frames = scenes.scenes(selectors);
+      return frames.ok
+        ? ok(frames.value.map((f) => figureOf(f, scenes.theme)))
+        : frames;
     },
   });
 }

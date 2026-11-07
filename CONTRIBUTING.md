@@ -14,18 +14,19 @@ npm run dev                       # start the playground
 
 This is an npm workspaces monorepo.
 
-| Path                 | Package               | Purpose                                                                                        |
-| -------------------- | --------------------- | ---------------------------------------------------------------------------------------------- |
-| `packages/spec/`     | `@algoviz/spec`       | Protocol: Zod schemas, inferred types, parsing and validation. No DOM or Node.js APIs.         |
-| `packages/fonts/`    | `@algoviz/fonts`      | Metrics and outlines of the bundled fonts (OFL), and text measurement. No DOM or Node.js APIs. |
-| `packages/core/`     | `@algoviz/core`       | Structure kinds, reducers, the timeline engine and layout to scenes. No DOM or Node.js APIs.   |
-| `packages/svg/`      | `@algoviz/svg`        | Scene → standalone SVG string. No DOM or Node.js APIs.                                         |
-| `packages/elements/` | `@algoviz/elements`   | `<algo-player>` Web Component (Lit) and a standalone CDN bundle.                               |
-| `packages/recipes/`  | `@algoviz/recipes`    | Typed recorder and classic algorithms, each tested against a reference implementation.         |
-| `packages/typst/`    | `@algoviz/typst`      | The Typst package: the engine in QuickJS-ng inside a WebAssembly plugin (ADR 0026).            |
-| `apps/playground/`   | `@algoviz/playground` | Vite + Vue app for demos and, later, documentation.                                            |
-| `conformance/`       | —                     | Language-agnostic JSON fixtures every implementation must pass.                                |
-| `docs/adr/`          | —                     | Architecture decision records. Read these before changing the design.                          |
+| Path                 | Package               | Purpose                                                                                          |
+| -------------------- | --------------------- | ------------------------------------------------------------------------------------------------ |
+| `packages/spec/`     | `@algoviz/spec`       | Protocol: Zod schemas, inferred types, parsing and validation. No DOM or Node.js APIs.           |
+| `packages/fonts/`    | `@algoviz/fonts`      | Metrics and outlines of the bundled fonts (OFL), and text measurement. No DOM or Node.js APIs.   |
+| `packages/core/`     | `@algoviz/core`       | Structure kinds, reducers, the timeline engine and layout to scenes. No DOM or Node.js APIs.     |
+| `packages/svg/`      | `@algoviz/svg`        | Scene → standalone SVG string. No DOM or Node.js APIs.                                           |
+| `packages/tikz/`     | `@algoviz/tikz`       | Scene → TikZ for the LaTeX package, from the SVG painter's shapes (ADR 0027). No DOM or Node.js. |
+| `packages/elements/` | `@algoviz/elements`   | `<algo-player>` Web Component (Lit) and a standalone CDN bundle.                                 |
+| `packages/recipes/`  | `@algoviz/recipes`    | Typed recorder and classic algorithms, each tested against a reference implementation.           |
+| `packages/typst/`    | `@algoviz/typst`      | The Typst package: the engine in QuickJS-ng inside a WebAssembly plugin (ADR 0026).              |
+| `apps/playground/`   | `@algoviz/playground` | Vite + Vue app for demos and, later, documentation.                                              |
+| `conformance/`       | —                     | Language-agnostic JSON fixtures every implementation must pass.                                  |
+| `docs/adr/`          | —                     | Architecture decision records. Read these before changing the design.                            |
 
 Workspace packages expose their TypeScript sources through the `@algoviz/source` export condition. The playground, Vitest and the type checker use it, so nothing needs to be built before development or tests. Published consumers get `dist/`.
 
