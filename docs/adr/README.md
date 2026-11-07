@@ -29,5 +29,6 @@ Each file records one architectural decision: the context, what we decided, and 
 | [0023](0023-remaining-modules.md)                   | The remaining recipes as registry modules: ids, inputs, procedures   | Accepted                            |
 | [0024](0024-text-measurement-and-fonts.md)          | Text is measured with bundled font metrics and outlined in SVG       | Accepted                            |
 | [0025](0025-exporting-figures.md)                   | Figures are exported as a series of SVG files that share one canvas  | Accepted                            |
+| [0026](0026-typst-package.md)                       | The Typst package runs the engine in QuickJS in a Wasm plugin        | Accepted                            |
 
 Template: Status · Context · Decision · Consequences.
