@@ -2,7 +2,7 @@
  * Ready-made documents from @algoviz/recipes, for the example picker.
  */
 import * as recipes from '@algoviz/recipes';
-import type { GraphInput } from '@algoviz/recipes';
+import { runAlgorithm, type GraphInput } from '@algoviz/recipes';
 import type { VisualizationInput } from '@algoviz/spec';
 
 const cities: GraphInput = {
@@ -44,6 +44,13 @@ const clothes: GraphInput = {
     ['socks', 'shoes'],
   ],
 };
+
+/** The document of a registry module's run on a known-good input. */
+function documentOf(id: string, input: unknown): VisualizationInput {
+  const run = runAlgorithm(id, input);
+  if (!run.ok) throw new Error(run.error.map((e) => e.message).join('; '));
+  return run.value.document;
+}
 
 export interface Example {
   readonly group: string;
@@ -236,31 +243,30 @@ export const examples: readonly Example[] = [
   {
     group: 'Operations',
     label: 'BST: delete a node with two children',
-    build: () => recipes.ops.bst.delete({ from: bstKeys, key: 3 }).document,
+    build: () => documentOf('bst.delete', { from: bstKeys, key: 3 }),
   },
   {
     group: 'Operations',
     label: 'BST: insert, then search',
     build: () =>
-      recipes.ops.bst.run({
+      documentOf('bst', {
         from: bstKeys,
         ops: [
           { op: 'insert', key: 5 },
           { op: 'search', key: 5 },
         ],
-      }).document,
+      }),
   },
   {
     group: 'Operations',
     label: 'Min-heap: pop',
-    build: () => recipes.ops.heap.pop({ from: values }).document,
+    build: () => documentOf('min-heap.pop', { from: values }),
   },
   {
     group: 'Operations',
     label: 'Min-heap: decrease key',
     build: () =>
-      recipes.ops.heap.decreaseKey({ from: values, index: 5, value: 0 })
-        .document,
+      documentOf('min-heap.decrease-key', { from: values, index: 5, value: 0 }),
   },
 ];
 

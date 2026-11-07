@@ -1,9 +1,17 @@
+export * from './algorithm.ts';
 export * from './dynamic-programming.ts';
 export * from './graphs.ts';
 export * from './hashing.ts';
 export * from './linear.ts';
-export * from './ops/index.ts';
 export * from './recorder.ts';
+export * from './registry.ts';
+export * from './run-module.ts';
 export * from './searching.ts';
+export type { Language, Snippet } from './snippet.ts';
+export { LANGUAGES } from './snippet.ts';
 export * from './sorting.ts';
+export * from './structure.ts';
+export * from './structures/bst/index.ts';
+export * from './structures/heap/index.ts';
+export * from './trace.ts';
 export * from './trees.ts';

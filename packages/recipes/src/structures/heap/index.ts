@@ -1,32 +1,26 @@
 /**
- * Binary heap operations (ADR 0018): push, pop, and decrease-key (or, on a
- * max-heap, increase-key), each from a heap given as values to push or as
- * an array that already is a heap. The heap is an array shown as a tree,
- * as in `binaryHeap`. The code is in pseudocode and Python (ADR 0017),
- * both with indices from 0.
+ * Binary heap operations (ADR 0018, 0019): push, pop and, on a min-heap,
+ * decrease-key or, on a max-heap, increase-key, each from a heap given as
+ * values to push or as an array that already is a heap, and a sequence of
+ * them. A min-heap and a max-heap are two structures, `min-heap` and
+ * `max-heap`. The heap is an array shown as a tree, as in `binaryHeap`.
+ * The code is in pseudocode and Python (ADR 0017), both with indices from
+ * 0.
  */
-import { checkFinite, checkInteger, checkLength } from '../check.ts';
+import { z } from 'zod';
+
+import type { Handle } from '../../recorder.ts';
+import { listing } from '../../snippet.ts';
 import {
-  checkOp,
+  defineStructure,
   MAX_SIZE,
-  runOps,
+  operationsOf,
   type Applied,
-  type OpRun,
-  type StructureDef,
-} from './run.ts';
-import { listing, type Listing } from './snippet.ts';
-import { silentTape, type Tape } from './tape.ts';
+  type Structure,
+} from '../../structure.ts';
+import { silentHandle, silentTrace, type Trace } from '../../trace.ts';
 
 export type HeapOrder = 'min' | 'max';
-
-export type HeapCall =
-  | { readonly op: 'push'; readonly value: number }
-  | { readonly op: 'pop' }
-  | {
-      readonly op: 'decreaseKey' | 'increaseKey';
-      readonly index: number;
-      readonly value: number;
-    };
 
 /** Values to push one by one, or an array that already is a heap. */
 export type HeapFrom =
@@ -43,7 +37,7 @@ export interface HeapState {
   readonly next: number;
 }
 
-type T = Tape<'array'>;
+type On = Handle<'array'>;
 
 const parentOf = (i: number) => (i - 1) >> 1;
 
@@ -69,7 +63,7 @@ function orderOf(order: HeapOrder) {
     wrongWay: min ? '>' : '<',
     extreme: min ? 'minimum' : 'maximum',
     child: min ? 'smaller' : 'larger',
-    change: min ? ('decreaseKey' as const) : ('increaseKey' as const),
+    change: min ? ('decrease-key' as const) : ('increase-key' as const),
   };
 }
 type Order = ReturnType<typeof orderOf>;
@@ -77,44 +71,56 @@ type Order = ReturnType<typeof orderOf>;
 const swapItems = (items: readonly Item[], i: number, j: number) =>
   items.map((x, k) => (k === i ? items[j]! : k === j ? items[i]! : x));
 
-function swapStep(tape: T, items: readonly Item[], i: number, j: number) {
-  tape.step('swap', `Swap ${items[i]!.value} and ${items[j]!.value}.`);
-  tape.on.swap({ i, j });
+function swapStep(
+  trace: Trace,
+  on: On,
+  items: readonly Item[],
+  i: number,
+  j: number,
+) {
+  trace.step('swap', `Swap ${items[i]!.value} and ${items[j]!.value}.`);
+  on.swap({ i, j });
   return swapItems(items, i, j);
 }
 
-function siftUp(items: readonly Item[], i: number, o: Order, tape: T) {
+function siftUp(
+  items: readonly Item[],
+  i: number,
+  o: Order,
+  trace: Trace,
+  on: On,
+) {
   let h = items;
   while (i > 0) {
     const p = parentOf(i);
     const [x, y] = [h[i]!.value, h[p]!.value];
     const up = o.above(x, y);
-    tape.step(
+    trace.step(
       'compare',
       `${x} ${up ? o.less : o.notLess} ${y}, its parent: ${up ? 'swap up' : 'stop'}.`,
     );
-    tape.on.compare({ i, j: p });
+    on.compare({ i, j: p });
     if (!up) break;
-    h = swapStep(tape, h, i, p);
+    h = swapStep(trace, on, h, i, p);
     i = p;
   }
   return h;
 }
 
-function siftDown(items: readonly Item[], o: Order, tape: T) {
+function siftDown(items: readonly Item[], o: Order, trace: Trace, on: On) {
   let h = items;
   for (let i = 0; 2 * i + 1 < h.length;) {
     let c = 2 * i + 1;
     if (c + 1 < h.length && o.above(h[c + 1]!.value, h[c]!.value)) c += 1;
     const [x, y] = [h[i]!.value, h[c]!.value];
     const down = o.above(y, x);
-    tape.step(
+    trace.step(
       'compare',
       `${x} ${down ? o.more : o.notMore} ${y}, the ${o.child} child: ${down ? 'swap down' : 'stop'}.`,
     );
-    tape.on.compare({ i, j: c });
+    on.compare({ i, j: c });
     if (!down) break;
-    h = swapStep(tape, h, i, c);
+    h = swapStep(trace, on, h, i, c);
     i = c;
   }
   return h;
@@ -209,34 +215,40 @@ function push(
   s: HeapState,
   value: number,
   o: Order,
-  tape: T,
+  trace: Trace,
+  on: On,
 ): Applied<HeapState> {
   if (s.items.length >= MAX_SIZE)
     throw new RangeError(
       `The heap is full: it holds at most ${MAX_SIZE} values`,
     );
   const item = { id: `h${s.next}`, value };
-  tape.step('append', `Put ${value} at the end.`);
-  tape.on.insert({ index: s.items.length, element: item });
-  const items = siftUp([...s.items, item], s.items.length, o, tape);
+  trace.step('append', `Put ${value} at the end.`);
+  on.insert({ index: s.items.length, element: item });
+  const items = siftUp([...s.items, item], s.items.length, o, trace, on);
   return { state: { items, next: s.next + 1 }, result: null };
 }
 
-function pop(s: HeapState, o: Order, tape: T): Applied<HeapState> {
+function pop(s: HeapState, o: Order, trace: Trace, on: On): Applied<HeapState> {
   if (s.items.length === 0)
     throw new RangeError('The heap is empty: there is nothing to pop');
   const last = s.items.length - 1;
   const top = s.items[0]!.value;
   if (last > 0) {
-    tape.step(
+    trace.step(
       'swap-last',
       `Move the last value ${s.items[last]!.value} to the root, and ${top} to the end.`,
     );
-    tape.on.swap({ i: 0, j: last });
+    on.swap({ i: 0, j: last });
   }
-  tape.step('remove', `Remove ${top}: it is the ${o.extreme}.`);
-  tape.on.remove({ index: last });
-  const items = siftDown(swapItems(s.items, 0, last).slice(0, last), o, tape);
+  trace.step('remove', `Remove ${top}: it is the ${o.extreme}.`);
+  on.remove({ index: last });
+  const items = siftDown(
+    swapItems(s.items, 0, last).slice(0, last),
+    o,
+    trace,
+    on,
+  );
   return { state: { ...s, items }, result: top };
 }
 
@@ -245,7 +257,8 @@ function changeKey(
   index: number,
   value: number,
   o: Order,
-  tape: T,
+  trace: Trace,
+  on: On,
 ): Applied<HeapState> {
   const n = s.items.length;
   if (index >= n)
@@ -258,11 +271,11 @@ function changeKey(
       `${o.change} must not ${o.order === 'min' ? 'increase' : 'decrease'} h[${index}] (${old}) to ${value}`,
     );
   const verb = o.order === 'min' ? 'Decrease' : 'Increase';
-  tape.step('set', `${verb} h[${index}] from ${old} to ${value}.`);
-  tape.on.set({ index, value });
+  trace.step('set', `${verb} h[${index}] from ${old} to ${value}.`);
+  on.set({ index, value });
   const changed = s.items.map((x, k) => (k === index ? { ...x, value } : x));
   return {
-    state: { ...s, items: siftUp(changed, index, o, tape) },
+    state: { ...s, items: siftUp(changed, index, o, trace, on) },
     result: null,
   };
 }
@@ -283,24 +296,21 @@ function valuesOf(from: HeapFrom): {
   readonly values: readonly number[];
   readonly given: boolean;
 } {
-  if (Array.isArray(from)) return { values: from, given: false };
-  const array: unknown =
-    typeof from === 'object' && from !== null && 'array' in from
-      ? from.array
-      : undefined;
-  if (!Array.isArray(array))
-    throw new RangeError('from must be an array of values or { array }');
-  return { values: array, given: true };
+  return Array.isArray(from)
+    ? { values: from, given: false }
+    : {
+        values: (from as { readonly array: readonly number[] }).array,
+        given: true,
+      };
 }
 
 function start(from: HeapFrom, o: Order): HeapState {
   const { values, given } = valuesOf(from);
-  checkLength('from', values, MAX_SIZE);
-  checkFinite('from', values);
   if (!given) {
-    const tape = silentTape('array');
+    const trace = silentTrace();
+    const on = silentHandle('array');
     const empty: HeapState = { items: [], next: 0 };
-    return values.reduce((s, v) => push(s, v, o, tape).state, empty);
+    return values.reduce((s, v) => push(s, v, o, trace, on).state, empty);
   }
   checkHeap(values, o);
   return {
@@ -309,84 +319,107 @@ function start(from: HeapFrom, o: Order): HeapState {
   };
 }
 
-function heapDef(
-  order: HeapOrder,
-): StructureDef<HeapState, HeapFrom, 'array', HeapCall> {
+const Values = z.array(z.number()).max(MAX_SIZE);
+const From = z
+  .union(
+    [
+      Values.describe('Values pushed one by one to build the heap.'),
+      z.strictObject({
+        array: Values.describe('An array that already is a heap.'),
+      }),
+    ],
+    {
+      // A union reports only that no form matched; say what the forms are.
+      error: (issue) =>
+        issue.code === 'invalid_union'
+          ? `from must be up to ${MAX_SIZE} numbers to push, or { array } of up to ${MAX_SIZE} numbers that already is a heap`
+          : undefined,
+    },
+  )
+  .describe(
+    'The starting heap: values to push, or { array } that already is a heap.',
+  );
+const Value = z.number();
+const Index = z
+  .int()
+  .min(0)
+  .max(MAX_SIZE - 1)
+  .describe('Position in the heap array, from 0.');
+
+const sample = [5, 3, 8, 1, 9, 2];
+
+/** The modules of a min-heap or a max-heap. */
+function heapStructure(order: HeapOrder): Structure {
   const o = orderOf(order);
-  const code: Record<'push' | 'pop' | 'change', Listing> = codes(o);
-  return {
+  const code = codes(o);
+  const op = operationsOf<HeapState, HeapFrom, 'array'>();
+  const [change, way] =
+    order === 'min' ? ['decrease', 'smaller'] : ['increase', 'larger'];
+  return defineStructure<HeapState, HeapFrom, 'array'>({
+    id: `${order}-heap`,
+    title: `Binary ${order}-heap`,
+    topic: 'heaps',
+    summary: `Pushes, pops and ${change}s keys one after another in a binary ${order}-heap stored as an array.`,
     name: 'heap',
     kind: 'array',
-    title: `Binary ${order}-heap`,
+    from: From,
+    examples: [
+      {
+        from: sample,
+        ops: [
+          { op: 'push', value: order === 'min' ? 0 : 10 },
+          { op: 'pop' },
+          { op: `${change}-key`, index: 4, value: order === 'min' ? 2 : 7 },
+        ],
+      },
+    ],
     start: (from) => start(from, o),
     describe: (s) => ({ array: s.items.map((x) => x.value) }),
     declare: (s) => ({ kind: 'array', view: 'tree', initial: [...s.items] }),
     clear: () => undefined,
-    check(call) {
-      const other = order === 'min' ? 'increaseKey' : 'decreaseKey';
-      if (call.op === other)
-        throw new RangeError(
-          `${call.op} is for ${order === 'min' ? 'max' : 'min'}-heaps; use ${o.change}`,
-        );
-      checkOp(call.op, ['push', 'pop', o.change]);
-      if (call.op === 'pop') return;
-      checkFinite('value', [call.value]);
-      if (call.op === 'push') return;
-      checkInteger('index', call.index, 0, MAX_SIZE - 1);
-    },
-    titleOf: (call) =>
-      call.op === 'push'
-        ? `push ${call.value}`
-        : call.op === 'pop'
-          ? 'pop'
-          : `${call.op === 'decreaseKey' ? 'decrease' : 'increase'} key at ${call.index} to ${call.value}`,
-    code: (call) =>
-      call.op === 'push'
-        ? code.push
-        : call.op === 'pop'
-          ? code.pop
-          : code.change,
-    apply(s, call, tape) {
-      if (call.op === 'push') return push(s, call.value, o, tape);
-      if (call.op === 'pop') return pop(s, o, tape);
-      return changeKey(s, call.index, call.value, o, tape);
-    },
-  };
+    operations: [
+      op({
+        name: 'push',
+        title: 'push',
+        summary: `Puts a value at the end of a binary ${order}-heap and sifts it up.`,
+        args: { value: Value.describe('The value to push.') },
+        examples: [{ from: sample, value: order === 'min' ? 0 : 10 }],
+        code: code.push,
+        titleOf: ({ value }) => `push ${value}`,
+        apply: (s, { value }, trace, on) => push(s, value, o, trace, on),
+      }),
+      op({
+        name: 'pop',
+        title: 'pop',
+        summary: `Removes the ${o.extreme} of a binary ${order}-heap: the last value moves to the root and sifts down.`,
+        args: {},
+        examples: [{ from: sample }],
+        code: code.pop,
+        titleOf: () => 'pop',
+        apply: (s, _, trace, on) => pop(s, o, trace, on),
+      }),
+      op({
+        name: `${change}-key`,
+        title: `${change} key`,
+        summary: `Makes the value at an index of a binary ${order}-heap ${way} and sifts it up.`,
+        args: {
+          index: Index,
+          value: Value.describe(
+            `The new value, no ${order === 'min' ? 'larger' : 'smaller'} than the old one.`,
+          ),
+        },
+        examples: [{ from: sample, index: 4, value: order === 'min' ? 0 : 10 }],
+        code: code.change,
+        titleOf: ({ index, value }) => `${change} key at ${index} to ${value}`,
+        apply: (s, { index, value }, trace, on) =>
+          changeKey(s, index, value, o, trace, on),
+      }),
+    ],
+  });
 }
 
-const DEFS = { min: heapDef('min'), max: heapDef('max') };
+/** Operations on a binary min-heap. */
+export const minHeap = heapStructure('min');
 
-/** Where a heap operation starts, and its order. */
-export interface HeapArgs {
-  readonly from: HeapFrom;
-  readonly order?: HeapOrder;
-}
-
-/** Operations on a binary heap, a min-heap unless `order` is `'max'`. */
-export const heap = {
-  run: (
-    args: HeapArgs & { readonly ops: readonly HeapCall[] },
-  ): OpRun<HeapFrom> => runOps(DEFS[args.order ?? 'min'], args.from, args.ops),
-  push: ({ from, order, value }: HeapArgs & { readonly value: number }) =>
-    runOps(DEFS[order ?? 'min'], from, [{ op: 'push', value }]),
-  pop: ({ from, order }: HeapArgs) =>
-    runOps(DEFS[order ?? 'min'], from, [{ op: 'pop' }]),
-  decreaseKey: ({
-    from,
-    index,
-    value,
-  }: {
-    readonly from: HeapFrom;
-    readonly index: number;
-    readonly value: number;
-  }) => runOps(DEFS.min, from, [{ op: 'decreaseKey', index, value }]),
-  increaseKey: ({
-    from,
-    index,
-    value,
-  }: {
-    readonly from: HeapFrom;
-    readonly index: number;
-    readonly value: number;
-  }) => runOps(DEFS.max, from, [{ op: 'increaseKey', index, value }]),
-};
+/** Operations on a binary max-heap. */
+export const maxHeap = heapStructure('max');

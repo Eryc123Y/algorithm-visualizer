@@ -65,6 +65,22 @@ Kinds are plug-ins (ADR 0012). Use an existing kind of similar shape as the mode
 4. **Guide:** add `packages/mcp/guide/kinds/<kind>.md` with the declaration, a table row for every action and a complete example. Tests fail until every action is listed and the example validates.
 5. **Recipes and evals:** the recorder picks up the new actions by itself; add a recipe if a classic algorithm uses the kind, and an eval task in `evals/` that needs it.
 
+## Adding an algorithm
+
+Every algorithm, and every operation of a data structure, is a module of the registry in `@algoviz/recipes` (ADR 0019, ADR 0022). MCP, the command line and the playground read the registry, so a module needs no other changes.
+
+1. **Module:** add `packages/recipes/src/algorithms/<topic>/<id>.ts` and export the module made by `defineAlgorithm`:
+   - a kebab-case `id`, a `title`, a `topic`, a one-sentence `summary`;
+   - a Zod `input` schema, and `examples`, the first being the default in menus;
+   - its `code` in pseudocode (CLRS conventions, indices from 0, our own words) and in Python, with `// @name` and `# @name` markers on the lines steps point at;
+   - `run(input, trace)`, which declares structures with `trace.add` and starts every step with `trace.step(anchor, narration)`. Narrations name values, not the syntax of either language. Throw a `RangeError` for an input the module cannot show.
+
+   A data structure goes in `packages/recipes/src/structures/<name>/`, with `defineStructure`: a model, `start`, `describe`, `declare` and one entry per operation (ADR 0018).
+
+2. **Registry:** add the module to `algorithms` in `packages/recipes/src/registry.ts`, next to its topic.
+3. **Tests:** `tests/registry.spec.ts` checks every module (examples, anchors, narrations, step names, determinism). Add the module's own test against an independent reference implementation, and property tests in `tests/properties.spec.ts`.
+4. **Look at it:** open it in the playground, in both languages.
+
 ## Tests
 
 - Unit tests live in each workspace's `tests/` directory as `*.spec.ts`.

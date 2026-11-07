@@ -1,6 +1,12 @@
 import { loadTrace, type KindedState, type Trace } from '@algoviz/core';
-import type { StructureKindName, VisualizationInput } from '@algoviz/spec';
+import type {
+  Diagnostic,
+  StructureKindName,
+  VisualizationInput,
+} from '@algoviz/spec';
 import { formatErrors } from '@algoviz/spec';
+
+import { runAlgorithm, type AlgorithmRun } from '../src/index.ts';
 
 /** Loads a document, failing the test with readable errors if it is invalid. */
 export function replay(doc: VisualizationInput): Trace {
@@ -37,3 +43,17 @@ export const fuzz = {
     ? { seed: Number(process.env['FUZZ_SEED']) }
     : {}),
 };
+
+/** Runs a registry module, failing the test with its errors if it fails. */
+export function runOk(id: string, input: unknown): AlgorithmRun {
+  const result = runAlgorithm(id, input);
+  if (!result.ok) throw new Error(formatErrors(result.error));
+  return result.value;
+}
+
+/** The first error of a run that must fail. */
+export function runError(id: string, input: unknown): Diagnostic {
+  const result = runAlgorithm(id, input);
+  if (result.ok) throw new Error(`${id} ran on ${JSON.stringify(input)}`);
+  return result.error[0]!;
+}

@@ -6,7 +6,7 @@
  */
 import { AnchorName, LIMITS, type AnchoredSource } from '@algoviz/spec';
 
-import { dedent } from '../source.ts';
+import { dedent } from './source.ts';
 
 /** Languages of operation code, in the order readers see them (ADR 0017). */
 export const LANGUAGES = ['pseudocode', 'python'] as const;
@@ -47,9 +47,17 @@ export function snippet(language: Language, code: string): Snippet {
       anchors.set(name, k + 1);
       return text.slice(0, match.index);
     });
+  return makeSnippet(language, lines.join('\n'), anchors);
+}
+
+function makeSnippet(
+  language: Language,
+  code: string,
+  anchors: ReadonlyMap<string, number>,
+): Snippet {
   return {
     language,
-    code: lines.join('\n'),
+    code,
     anchors,
     line(anchor) {
       const line = anchors.get(anchor);
@@ -58,6 +66,18 @@ export function snippet(language: Language, code: string): Snippet {
       return line;
     },
   };
+}
+
+/** The snippet of an anchored source in one of `LANGUAGES`. */
+export function snippetOf(source: AnchoredSource): Snippet {
+  const language = LANGUAGES.find((l) => l === source.language);
+  if (language === undefined)
+    throw new Error(`"${source.language}" is not a language of recipes`);
+  return makeSnippet(
+    language,
+    source.code,
+    new Map(Object.entries(source.anchors)),
+  );
 }
 
 /** The code of one operation in every language, with the same markers. */

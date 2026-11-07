@@ -87,11 +87,25 @@ const BstOp = z.discriminatedUnion('op', [
   }),
 ]);
 
-/** Drops an absent `replaceWith`, which exact optional types keep apart. */
-const bstCall = (op: z.output<typeof BstOp>): recipes.BstCall =>
-  op.op === 'delete' && op.replaceWith === undefined
-    ? { op: 'delete', key: op.key }
-    : (op as recipes.BstCall);
+/**
+ * The document of a registry module's run (ADR 0019), for the entries that
+ * already run through the registry. Errors left after this catalogue's own
+ * schema are inputs the structure cannot show.
+ */
+function registryDocument(id: string, input: unknown): VisualizationInput {
+  const run = recipes.runAlgorithm(id, input);
+  if (!run.ok) throw new RangeError(run.error.map((e) => e.message).join('; '));
+  return run.value.document;
+}
+
+/** Heap operations are kebab-case in the registry. */
+const heapCall = <C extends { op: string }>(call: C) =>
+  call.op === 'decreaseKey' || call.op === 'increaseKey'
+    ? {
+        ...call,
+        op: call.op === 'decreaseKey' ? 'decrease-key' : 'increase-key',
+      }
+    : call;
 
 const Index = z
   .int()
@@ -274,8 +288,7 @@ export const recipeCatalog: readonly RecipeEntry[] = [
       ),
       ops: OpList(BstOp),
     }),
-    ({ from, ops }) =>
-      recipes.ops.bst.run({ from, ops: ops.map(bstCall) }).document,
+    ({ from, ops }) => registryDocument('bst', { from, ops }),
   ),
   recipe(
     'operations',
@@ -296,11 +309,10 @@ export const recipeCatalog: readonly RecipeEntry[] = [
       ops: OpList(HeapOp),
     }),
     ({ from, order, ops }) =>
-      recipes.ops.heap.run({
+      registryDocument(`${order ?? 'min'}-heap`, {
         from,
-        ...(order === undefined ? {} : { order }),
-        ops,
-      }).document,
+        ops: ops.map(heapCall),
+      }),
   ),
   recipe(
     'graphs',
