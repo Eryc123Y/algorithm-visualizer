@@ -108,6 +108,8 @@ Display mode also accepts `once` (play a single time) and `motion` (`linear` · 
 
 ## Design
 
+What version 1.0 must do is in [`docs/requirements.md`](docs/requirements.md), and the order of work in [`docs/roadmap.md`](docs/roadmap.md).
+
 The architecture is documented as decision records in [`docs/adr/`](docs/adr). In short: traces are event-sourced (actions are the source of truth and states are derived by pure reducers), layout is a pure function so the same visualization can be rendered anywhere, and every document is validated before rendering with errors an LLM can act on.
 
 ## Contributing
