@@ -1,0 +1,24 @@
+{
+  "description": "`version` is \"major.minor\", without a patch number or leading zeros.",
+  "input": {
+    "version": "0.1.0",
+    "structures": {
+      "arr": {
+        "kind": "array",
+        "initial": [
+          {
+            "id": "a",
+            "value": 1
+          }
+        ]
+      }
+    },
+    "steps": []
+  },
+  "expectedErrors": [
+    {
+      "code": "UNSUPPORTED_VERSION",
+      "path": "$.version"
+    }
+  ]
+}

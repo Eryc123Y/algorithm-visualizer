@@ -2,7 +2,12 @@ import { readFileSync } from 'node:fs';
 
 import { describe, expect, it } from 'vitest';
 
-import { visualizationJsonSchema } from '../src/index.ts';
+import {
+  PROTOCOL_VERSION,
+  PROTOCOL_VERSIONS,
+  SCHEMA_ID,
+  visualizationJsonSchema,
+} from '../src/index.ts';
 
 describe('visualizationJsonSchema', () => {
   it('matches the committed schema file (run `npm run generate:schema -w @algoviz/spec`)', () => {
@@ -23,6 +28,20 @@ describe('visualizationJsonSchema', () => {
     };
     expect(schema.properties.structures.minProperties).toBe(1);
     expect(schema.properties.structures.maxProperties).toBe(16);
+  });
+
+  it('accepts every protocol version the parser reads, and no other', () => {
+    const schema = visualizationJsonSchema() as {
+      properties: { version: { enum?: unknown; const?: unknown } };
+    };
+    expect(schema.properties.version.enum).toEqual([...PROTOCOL_VERSIONS]);
+    expect(schema.properties.version.const).toBeUndefined();
+  });
+
+  it('is identified by the newest protocol version', () => {
+    expect(SCHEMA_ID).toBe(
+      `urn:algoviz:schema:visualization:${PROTOCOL_VERSION}`,
+    );
   });
 
   it('forbids both forms of a table or hash table, as the parser does', () => {

@@ -4,7 +4,7 @@
  */
 import { z } from 'zod';
 
-import { PROTOCOL_VERSION } from './common.ts';
+import { PROTOCOL_VERSION } from './version.ts';
 import { VisualizationInput } from './visualization.ts';
 
 export const SCHEMA_ID = `urn:algoviz:schema:visualization:${PROTOCOL_VERSION}`;

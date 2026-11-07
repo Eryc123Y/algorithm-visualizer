@@ -15,8 +15,8 @@
 import {
   actionTypesOf,
   formatErrors,
+  minimumVersion,
   parseVisualization,
-  PROTOCOL_VERSION,
   type KindTypeMap,
   type Source,
   type StepMeta,
@@ -132,12 +132,14 @@ export class Recorder {
 
   #document(): VisualizationInput {
     const { title, source } = this.#options;
-    return {
-      version: PROTOCOL_VERSION,
+    const content = {
       ...(title === undefined ? {} : { title }),
       ...(source === undefined ? {} : { source }),
       structures: { ...this.#structures },
       steps: [...this.#steps],
     };
+    // The oldest version that has what this document uses (ADR 0021), so
+    // older players can show it too.
+    return { version: minimumVersion(content), ...content };
   }
 }

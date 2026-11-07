@@ -6,9 +6,12 @@ import { describe, expectTypeOf, it } from 'vitest';
 
 import type {
   ArrayAction,
+  minimumVersion,
+  ProtocolVersion,
   Result,
   TargetedAction,
   Visualization,
+  VisualizationInput,
 } from '../src/index.ts';
 
 describe('protocol types', () => {
@@ -29,6 +32,23 @@ describe('protocol types', () => {
     expectTypeOf<Pick<Visualization, 'title'>>().toEqualTypeOf<{
       title?: string | undefined;
     }>();
+  });
+
+  it('types `version` as one of the versions this package reads', () => {
+    expectTypeOf<Visualization['version']>().toEqualTypeOf<ProtocolVersion>();
+    expectTypeOf<
+      VisualizationInput['version']
+    >().toEqualTypeOf<ProtocolVersion>();
+    expectTypeOf<ProtocolVersion>().toExtend<string>();
+  });
+
+  it('gives writers a version they can put in a document', () => {
+    expectTypeOf<
+      ReturnType<typeof minimumVersion>
+    >().toEqualTypeOf<ProtocolVersion>();
+    expectTypeOf<Visualization>().toExtend<
+      Parameters<typeof minimumVersion>[0]
+    >();
   });
 
   it('only exposes `value` on successful results', () => {

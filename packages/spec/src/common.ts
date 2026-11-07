@@ -3,9 +3,6 @@
  */
 import { z } from 'zod';
 
-/** Protocol version this package reads and writes. */
-export const PROTOCOL_VERSION = '0.1';
-
 /** Upper bounds that keep a single document cheap to validate and render. */
 export const LIMITS = {
   structures: 16,

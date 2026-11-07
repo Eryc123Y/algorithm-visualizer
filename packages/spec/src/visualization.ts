@@ -8,13 +8,7 @@
  */
 import { z } from 'zod';
 
-import {
-  LIMITS,
-  PROTOCOL_VERSION,
-  Source,
-  StepMeta,
-  StructureName,
-} from './common.ts';
+import { LIMITS, Source, StepMeta, StructureName } from './common.ts';
 import {
   ArrayAction,
   ArrayActionInput,
@@ -48,6 +42,7 @@ import {
   TableDecl,
   TableDeclInput,
 } from './kinds/index.ts';
+import { PROTOCOL_VERSIONS } from './version.ts';
 
 const targetField = {
   target: StructureName.describe(
@@ -162,8 +157,10 @@ const document = <D extends z.ZodType, A extends z.ZodType>(
 ) =>
   z.strictObject({
     version: z
-      .literal(PROTOCOL_VERSION)
-      .describe(`Protocol version; must be "${PROTOCOL_VERSION}".`),
+      .enum(PROTOCOL_VERSIONS)
+      .describe(
+        'Protocol version, "major.minor": the oldest version that has every feature the document uses.',
+      ),
     title: z.string().max(LIMITS.textLength).optional(),
     source: Source.optional(),
     structures: structures(decl),
