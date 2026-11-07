@@ -97,6 +97,17 @@ algoviz export bst.delete --input '{"from": [8, 3, 10, 1, 6], "key": 3}' \
 
 `--step` takes the selectors the player takes: a frame number (`-1` is the last), a step name (`relax#3`), a step in a section (`insert-5/relax`), a section (`insert-5`) or a range (`a..b`). It may repeat or list several with commas, and every frame is exported without it. `--theme` is `light` (the default), `dark` or `print`. `--out` is the directory, the current one by default. `--name` is the file name pattern, `{name}-{frame}` by default: `{name}` is the document file's name or the algorithm id, `{frame}` the frame number padded with zeros, and `{step}` the step's selector with `/` and `#` written `_`, such as `insert-5_relax_2`. Each step's narration goes into its figure as an SVG description.
 
+In Typst, [the algoviz package](packages/typst/package/README.md) draws the same figures from inside a document, with the engine running in a WebAssembly plugin, so students need nothing but Typst ([ADR 0026](docs/adr/0026-typst-package.md)):
+
+```typ
+#import "@preview/algoviz:0.1.0": algoviz, algoviz-series
+
+#algoviz("dijkstra", (graph: graph, source: "A"), step: "relax#3")
+#grid(columns: 3, ..algoviz-series("bst.delete", (from: (8, 3, 10, 1, 6), key: 3)))
+```
+
+The package is not on Typst Universe yet; its README says how to use it as a local package until it is.
+
 In code, `exportFigures(document, { steps, theme })` from `@algoviz/svg` returns the same figures as strings, and `selectSeries` from `@algoviz/core` the frames that selectors name. `prepareFigures(document, { theme })` loads a document once and then draws a figure of any frame, or any series, on demand.
 
 ## Embedding
@@ -138,6 +149,7 @@ Display mode also accepts `once` (play a single time) and `motion` (`linear` · 
 | [`@algoviz/elements`](packages/elements) | Available | `<algo-player>`: interactive, animated player (Lit Web Component)  |
 | [`@algoviz/recipes`](packages/recipes)   | Available | Typed recorder and visualizations of classic algorithms            |
 | [`@algoviz/mcp`](packages/mcp)           | Available | MCP server, MCP App and CLI: guide, validation, inspection, export |
+| [`algoviz` for Typst](packages/typst)    | Local     | Typst package: figures from inside a document, via a Wasm plugin   |
 
 ## Design
 

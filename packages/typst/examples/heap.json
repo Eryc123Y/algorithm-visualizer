@@ -1,0 +1,127 @@
+{
+  "version": "0.3",
+  "title": "Binary min-heap: push 0, pop",
+  "sources": [
+    {
+      "language": "pseudocode",
+      "code": "HEAP-PUSH(h, x)\n    h.size = h.size + 1\n    h[h.size - 1] = x\n    i = h.size - 1\n    while i > 0\n        p = ⌊(i - 1) / 2⌋  // the parent of i, counting from 0\n        if h[p] ≤ h[i]\n            return\n        exchange h[i] with h[p]\n        i = p\n\nHEAP-POP(h)\n    exchange h[0] with h[h.size - 1]\n    top = h[h.size - 1]\n    h.size = h.size - 1\n    i = 0\n    while 2i + 1 < h.size\n        c = 2i + 1  // the left child of i, counting from 0\n        if c + 1 < h.size and h[c + 1] < h[c]\n            c = c + 1\n        if h[i] ≤ h[c]\n            return top\n        exchange h[i] with h[c]\n        i = c\n    return top",
+      "anchors": {
+        "push-append": 3,
+        "push-compare": 7,
+        "push-swap": 9,
+        "pop-swap-last": 13,
+        "pop-remove": 15,
+        "pop-compare": 21,
+        "pop-swap": 23
+      }
+    },
+    {
+      "language": "python",
+      "code": "def push(h, x):\n    h.append(x)\n    i = len(h) - 1\n    while i > 0:\n        p = (i - 1) // 2\n        if h[p] <= h[i]:\n            break\n        h[i], h[p] = h[p], h[i]\n        i = p\n\ndef pop(h):\n    h[0], h[-1] = h[-1], h[0]\n    top = h.pop()\n    i = 0\n    while 2 * i + 1 < len(h):\n        c = 2 * i + 1\n        if c + 1 < len(h) and h[c + 1] < h[c]:\n            c += 1\n        if h[i] <= h[c]:\n            break\n        h[i], h[c] = h[c], h[i]\n        i = c\n    return top",
+      "anchors": {
+        "push-append": 2,
+        "push-compare": 6,
+        "push-swap": 8,
+        "pop-swap-last": 12,
+        "pop-remove": 13,
+        "pop-compare": 19,
+        "pop-swap": 21
+      }
+    }
+  ],
+  "structures": {
+    "heap": {
+      "kind": "array",
+      "view": "tree",
+      "initial": [
+        { "id": "h3", "value": 1 },
+        { "id": "h1", "value": 3 },
+        { "id": "h5", "value": 2 },
+        { "id": "h0", "value": 5 },
+        { "id": "h4", "value": 9 },
+        { "id": "h2", "value": 8 }
+      ]
+    }
+  },
+  "steps": [
+    {
+      "actions": [
+        {
+          "index": 6,
+          "element": { "id": "h6", "value": 0 },
+          "target": "heap",
+          "type": "insert"
+        }
+      ],
+      "meta": {
+        "id": "append",
+        "at": "push-append",
+        "narration": "Put 0 at the end."
+      }
+    },
+    {
+      "actions": [{ "i": 6, "j": 2, "target": "heap", "type": "compare" }],
+      "meta": {
+        "id": "compare",
+        "at": "push-compare",
+        "narration": "0 < 2, its parent: swap up."
+      }
+    },
+    {
+      "actions": [{ "i": 6, "j": 2, "target": "heap", "type": "swap" }],
+      "meta": { "id": "swap", "at": "push-swap", "narration": "Swap 0 and 2." }
+    },
+    {
+      "actions": [{ "i": 2, "j": 0, "target": "heap", "type": "compare" }],
+      "meta": {
+        "id": "compare",
+        "at": "push-compare",
+        "narration": "0 < 1, its parent: swap up."
+      }
+    },
+    {
+      "actions": [{ "i": 2, "j": 0, "target": "heap", "type": "swap" }],
+      "meta": { "id": "swap", "at": "push-swap", "narration": "Swap 0 and 1." }
+    },
+    {
+      "actions": [{ "i": 0, "j": 6, "target": "heap", "type": "swap" }],
+      "meta": {
+        "id": "swap-last",
+        "at": "pop-swap-last",
+        "narration": "Move the last value 2 to the root, and 0 to the end."
+      }
+    },
+    {
+      "actions": [{ "index": 6, "target": "heap", "type": "remove" }],
+      "meta": {
+        "id": "remove",
+        "at": "pop-remove",
+        "narration": "Remove 0: it is the minimum."
+      }
+    },
+    {
+      "actions": [{ "i": 0, "j": 2, "target": "heap", "type": "compare" }],
+      "meta": {
+        "id": "compare",
+        "at": "pop-compare",
+        "narration": "2 > 1, the smaller child: swap down."
+      }
+    },
+    {
+      "actions": [{ "i": 0, "j": 2, "target": "heap", "type": "swap" }],
+      "meta": { "id": "swap", "at": "pop-swap", "narration": "Swap 2 and 1." }
+    },
+    {
+      "actions": [{ "i": 2, "j": 5, "target": "heap", "type": "compare" }],
+      "meta": {
+        "id": "compare",
+        "at": "pop-compare",
+        "narration": "2 ≤ 8, the smaller child: stop."
+      }
+    }
+  ],
+  "sections": [
+    { "id": "push-0", "title": "Push 0", "start": 0 },
+    { "id": "pop", "title": "Pop", "start": 5 }
+  ]
+}

@@ -42,6 +42,7 @@ Run from the repository root.
 | `npm run format` / `format:check`           | Prettier                                                            |
 | `npm test` / `test:watch` / `test:coverage` | Unit tests for all workspaces (Vitest)                              |
 | `npm run test:e2e`                          | Playwright tests against the playground's production build          |
+| `npm run test:typst`                        | The Typst package in the `typst` command (needs Typst 0.15)         |
 | `npm run check`                             | Typecheck, lint, format check and unit tests (what CI runs first)   |
 | `npm run generate:schema -w @algoviz/spec`  | Regenerate `packages/spec/schema/visualization.schema.json`         |
 | `npm run gallery -- out.html [file.json …]` | Render every frame of fixtures or documents to one page, for review |
@@ -92,6 +93,7 @@ Every algorithm, and every operation of a data structure, is a module of the reg
 - Type-level behaviour is tested with `expectTypeOf`; those assertions are enforced by `npm run typecheck`, not by Vitest.
 - Behaviour that other implementations must match belongs in `conformance/` as JSON fixtures (see its README).
 - E2E tests live in `apps/playground/tests/e2e/` and run against production builds: the playground, and the standalone `<algo-player>` bundle in a plain page. They check what the player draws against the engine's scene for each frame, fail on any console error, and scan for accessibility problems with axe. Run them with `npm run test:e2e`; to use a Chromium that is already installed, set `PLAYWRIGHT_CHROMIUM=/path/to/chromium`.
+- The Typst package's tests in `packages/typst/tests/typst/` compile its examples and call its functions with the `typst` command, so they run apart from `npm run check`: `npm run test:typst`. Run them when the package, its plugin or the engine's output changes.
 - Generative (property-based) tests live in `packages/core/tests/properties/` and `packages/recipes/tests/properties.spec.ts`. They run a few dozen random cases by default; run them deeper before a release with `FUZZ_RUNS=5000 npx vitest run --project core --project recipes`, and replay a failure with the `FUZZ_SEED` it prints.
 
 ## Git workflow

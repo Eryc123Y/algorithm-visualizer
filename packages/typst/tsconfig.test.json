@@ -8,5 +8,11 @@
     "noEmit": true,
     "customConditions": ["@algoviz/source"]
   },
-  "include": ["src", "tests", "scripts", "vitest.config.ts"]
+  "include": [
+    "src",
+    "tests",
+    "scripts",
+    "vitest.config.ts",
+    "vitest.typst.config.ts"
+  ]
 }
