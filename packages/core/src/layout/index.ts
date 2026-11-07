@@ -188,7 +188,12 @@ export function layoutTrace(
   trace: Trace,
   options: Partial<LayoutOptions> = {},
 ): TraceLayout {
-  const o: LayoutOptions = { ...defaultLayoutOptions, ...options };
+  // `fonts: undefined` (e.g. from a theme without metrics) keeps the default.
+  const o: LayoutOptions = {
+    ...defaultLayoutOptions,
+    ...options,
+    fonts: options.fonts ?? defaultFonts,
+  };
   const metrics = measureTrace(trace, o.fonts);
   return {
     metrics,

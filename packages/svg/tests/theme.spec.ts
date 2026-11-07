@@ -1,10 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
-import type { Scene } from '@algoviz/core';
+import { defaultFonts, type Scene } from '@algoviz/core';
+import { uniformFont } from '@algoviz/fonts';
 
 import {
   createTheme,
   lightTheme,
+  resolveTheme,
+  type SvgTheme,
   printTheme,
   renderSvg,
   themes,
@@ -40,6 +43,25 @@ describe('createTheme', () => {
     expect(theme.cell.compare.fill).toBe(lightTheme.cell.compare.fill);
     expect(theme.cell.swap).toEqual(lightTheme.cell.swap);
     expect(lightTheme.radius).toBe(8);
+  });
+
+  it('replaces the face of a role whole and keeps the other', () => {
+    const wide = uniformFont(1);
+    const theme = createTheme('light', { fontMetrics: { value: wide } });
+    expect(theme.fontMetrics.value).toBe(wide);
+    expect(theme.fontMetrics.label).toBe(defaultFonts.label);
+    expect(lightTheme.fontMetrics).toBe(defaultFonts);
+    // Without a font override, the theme keeps the base's pair.
+    expect(createTheme('dark', { radius: 2 }).fontMetrics).toBe(defaultFonts);
+  });
+
+  it('gives a theme object without font metrics the default faces', () => {
+    const old = Object.fromEntries(
+      Object.entries(lightTheme).filter(([key]) => key !== 'fontMetrics'),
+    );
+    const theme = resolveTheme(old as unknown as SvgTheme);
+    expect(theme.fontMetrics).toBe(defaultFonts);
+    expect(resolveTheme(lightTheme)).toBe(lightTheme);
   });
 
   it('lets null replace a value, e.g. to remove shadows', () => {

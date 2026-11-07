@@ -101,6 +101,10 @@ const DISPLAY_END_HOLD_MS = 1500;
 const mediaQuery = (query: string): MediaQueryList | undefined =>
   typeof matchMedia === 'function' ? matchMedia(query) : undefined;
 
+/** Whether two font pairs set text in the same faces. */
+const sameFonts = (a: LayoutFonts | null, b: LayoutFonts): boolean =>
+  a !== null && a.value === b.value && a.label === b.label;
+
 export class AlgoPlayer extends LitElement {
   static override styles = playerStyles;
 
@@ -322,7 +326,7 @@ export class AlgoPlayer extends LitElement {
     if (
       this.trace !== null &&
       this.#layout !== null &&
-      this.#layoutFonts !== this.#sceneTheme().fontMetrics
+      !sameFonts(this.#layoutFonts, this.#sceneTheme().fontMetrics)
     )
       this.#relayout();
     const reload = changed.has('visualization') || changed.has('src');
@@ -618,7 +622,7 @@ export class AlgoPlayer extends LitElement {
 
   /** The theme the scene is painted with. */
   #sceneTheme(): SvgTheme {
-    return this.customTheme ?? resolveTheme(this.#resolvedTheme());
+    return resolveTheme(this.customTheme ?? this.#resolvedTheme());
   }
 
   #resolvedTheme(): ThemeName {

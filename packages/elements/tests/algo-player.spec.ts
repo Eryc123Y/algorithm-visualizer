@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { createTheme } from '@algoviz/svg';
+import { createTheme, type SvgTheme } from '@algoviz/svg';
 
 import '../src/define.ts';
 import type { AlgoPlayer } from '../src/index.ts';
@@ -173,6 +173,20 @@ describe('<algo-player>', () => {
     el.theme = 'dark';
     await el.updateComplete;
     expect(width(el)).toBe(before);
+  });
+
+  it('draws with a custom theme that has no font metrics', async () => {
+    const el = await mount((e) => {
+      e.visualization = doc;
+    });
+    const old = Object.fromEntries(
+      Object.entries(createTheme('light')).filter(
+        ([key]) => key !== 'fontMetrics',
+      ),
+    );
+    el.customTheme = old as unknown as SvgTheme;
+    await el.updateComplete;
+    expect(shadow(el).querySelectorAll('[data-role]')).toHaveLength(2);
   });
 
   it('reads inline JSON from a script child', async () => {

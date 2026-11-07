@@ -101,8 +101,12 @@ export function layoutTable({
       ? Array.from({ length: metrics.columns }, (_, c) => String(c))
       : []);
   const width = cellWidthFor(
-    // Column labels may reach into the cells' padding.
-    Math.max(metrics.valueWidth, maxWidth(columnLabels, o.fonts.value) * 0.7),
+    // Column labels, at index size, in value-size em.
+    Math.max(
+      metrics.valueWidth,
+      (maxWidth(columnLabels, o.fonts.value) * o.indexFontSize) /
+        co.valueFontSize,
+    ),
     co,
   );
   const height = Math.round(o.cellHeight * 0.8);

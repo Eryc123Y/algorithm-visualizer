@@ -337,26 +337,22 @@ export type DeepPartial<T> = T extends object
   : T;
 
 /**
- * Partial overrides of a theme. Font metrics are replaced whole, never
- * merged field by field.
+ * Partial overrides of a theme. In `fontMetrics`, each role's face is
+ * replaced whole, never merged field by field.
  */
 export type ThemeOverrides = DeepPartial<Omit<SvgTheme, 'fontMetrics'>> & {
   readonly fontMetrics?: Partial<LayoutFonts>;
 };
 
-/** A plain object to merge into, other than a face's metrics. */
 const isPlainObject = (x: unknown): x is Record<string, unknown> =>
-  typeof x === 'object' &&
-  x !== null &&
-  !Array.isArray(x) &&
-  !('advances' in x);
+  typeof x === 'object' && x !== null && !Array.isArray(x);
 
-function deepMerge<T>(base: T, overrides: ThemeOverrides | DeepPartial<T>): T {
+function deepMerge<T>(base: T, overrides: DeepPartial<T>): T {
   if (!isPlainObject(base) || !isPlainObject(overrides)) return overrides as T;
   const out: Record<string, unknown> = { ...base };
   for (const [key, value] of Object.entries(overrides)) {
     if (value === undefined) continue;
-    out[key] = key in base ? deepMerge(base[key], value as never) : value;
+    out[key] = key in base ? deepMerge(base[key], value) : value;
   }
   return out as T;
 }
@@ -369,5 +365,25 @@ export function createTheme(
   base: SvgTheme | ThemeName,
   overrides: ThemeOverrides = {},
 ): SvgTheme {
-  return deepMerge(typeof base === 'string' ? themes[base] : base, overrides);
+  const theme = resolveTheme(base);
+  const { fontMetrics, ...rest } = overrides;
+  return {
+    ...deepMerge<Omit<SvgTheme, 'fontMetrics'>>(theme, rest),
+    fontMetrics:
+      fontMetrics === undefined
+        ? theme.fontMetrics
+        : { ...theme.fontMetrics, ...fontMetrics },
+  };
+}
+
+/**
+ * A theme by name, or a theme object. A theme object made before themes
+ * had `fontMetrics` gets the default faces, which its fonts were meant to
+ * match.
+ */
+export function resolveTheme(theme: SvgTheme | ThemeName = 'light'): SvgTheme {
+  if (typeof theme === 'string') return themes[theme];
+  return (theme.fontMetrics as LayoutFonts | undefined) === undefined
+    ? { ...theme, fontMetrics: defaultFonts }
+    : theme;
 }

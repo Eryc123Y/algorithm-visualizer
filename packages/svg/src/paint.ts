@@ -22,7 +22,7 @@ import { TITLE_TRACKING, edgeLabelBox, labelSegment } from '@algoviz/core';
 import { textWidth } from '@algoviz/fonts';
 
 import {
-  themes,
+  resolveTheme,
   type CellStyle,
   type SvgTheme,
   type ThemeName,
@@ -72,10 +72,6 @@ const baselineOffset = (fontSize: number) => fontSize * 0.35;
 
 const ARROW_HEAD_LENGTH = 6;
 const ARROW_HEAD_HALF_WIDTH = 4;
-
-export const resolveTheme = (
-  theme: SvgTheme | ThemeName = 'light',
-): SvgTheme => (typeof theme === 'string' ? themes[theme] : theme);
 
 /**
  * Style of a cell or node. Strong roles (compare, swap, highlight, settled)
