@@ -51,21 +51,6 @@ const clothes: GraphInput = {
 
 export const legacyExamples: readonly Example[] = [
   {
-    topic: 'searching',
-    label: 'Binary search',
-    build: () => recipes.binarySearch([1, 3, 4, 7, 9, 11, 15], 9),
-  },
-  {
-    topic: 'lists',
-    label: 'Reverse a linked list',
-    build: () => recipes.reverseLinkedList([1, 2, 3, 4]),
-  },
-  {
-    topic: 'lists',
-    label: 'Balanced brackets',
-    build: () => recipes.balancedBrackets('{[()()]}'),
-  },
-  {
     topic: 'trees',
     label: 'BST: insert keys, then search',
     build: () => recipes.bstInsert([8, 3, 10, 1, 6, 14, 4, 7, 13], 7),
@@ -182,15 +167,5 @@ export const legacyExamples: readonly Example[] = [
         ],
         7,
       ),
-  },
-  {
-    topic: 'hashing',
-    label: 'Separate chaining',
-    build: () => recipes.hashChaining([15, 11, 27, 8, 12, 4, 22], 7, 22),
-  },
-  {
-    topic: 'hashing',
-    label: 'Linear probing',
-    build: () => recipes.linearProbing([15, 11, 27, 8, 12], 7),
   },
 ];

@@ -1,7 +1,7 @@
 import * as spec from '@algoviz/spec';
 import { describe, expect, it, vi } from 'vitest';
 
-import { binarySearch, Recorder } from '../src/index.ts';
+import { Recorder } from '../src/index.ts';
 
 // Watch the version helper without changing what it returns.
 vi.mock('@algoviz/spec', async (importOriginal) => {
@@ -24,6 +24,10 @@ describe('Recorder versions', () => {
   });
 
   it('writes 0.1 for a document that uses no later feature', () => {
-    expect(binarySearch([1, 2, 3], 2).version).toBe('0.1');
+    const r = new Recorder({ title: 'Look' });
+    const a = r.add('a', { kind: 'array', initial: [1, 2, 3] });
+    r.step('Look at the middle value.');
+    a.highlight({ indices: [1] });
+    expect(r.build().version).toBe('0.1');
   });
 });

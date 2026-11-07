@@ -8,7 +8,6 @@ import { describe, expect, it } from 'vitest';
 import type { Trace } from '@algoviz/core';
 import type { VisualizationInput } from '@algoviz/spec';
 
-import { binarySearch } from '../src/index.ts';
 import { randomInts, replay, runError, runOk, stateOf } from './helpers.ts';
 
 const inputs = [
@@ -302,18 +301,5 @@ describe('counting-sort', () => {
         code: 'INVALID_SHAPE',
         path: '$.input.values[1]',
       });
-  });
-});
-
-describe('binarySearch', () => {
-  const sorted = [1, 3, 4, 7, 9, 11, 15];
-  it.each([...sorted, 0, 5, 16].map((t) => [t]))('looks for %i', (target) => {
-    const trace = replay(binarySearch(sorted, target));
-    const settled = stateOf(trace, 'a', 'array').marks.settled;
-    const found = sorted.indexOf(target);
-    expect(settled).toEqual(found < 0 ? [] : [`e${found}`]);
-    expect(trace.length).toBeLessThanOrEqual(
-      2 + 3 * Math.ceil(Math.log2(sorted.length + 1)),
-    );
   });
 });

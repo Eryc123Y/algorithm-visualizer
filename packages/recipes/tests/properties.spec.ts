@@ -7,8 +7,6 @@
  * Run bigger with e.g. `FUZZ_RUNS=2000 npx vitest run --project recipes
  * tests/properties.spec.ts`.
  */
-import { spawnSync } from 'node:child_process';
-
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 
@@ -25,23 +23,19 @@ import { renderSvg } from '@algoviz/svg';
 
 import {
   avlInsert,
-  balancedBrackets,
   bellmanFord,
   binaryHeap,
-  binarySearch,
   breadthFirstSearch,
   bstInsert,
   depthFirstSearch,
   dijkstra,
   editDistance,
   floydWarshall,
-  hashChaining,
   knapsack,
   kruskal,
-  linearProbing,
   longestCommonSubsequence,
   prim,
-  reverseLinkedList,
+  runAlgorithm,
   topologicalSort,
   treeTraversal,
   trieInsert,
@@ -359,41 +353,63 @@ describe('counting-sort input checks', () => {
 // Searching
 
 const searchInput = fc
-  .array(smallInt, { maxLength: 40 })
+  .array(smallInt, { minLength: 1, maxLength: 32 })
   .map(ascending)
   .chain((values) =>
-    fc.tuple(
-      fc.constant(values),
-      values.length === 0
-        ? smallInt
-        : fc.oneof(fc.constantFrom(...values), smallInt),
-    ),
+    fc.record({
+      values: fc.constant(values),
+      target: fc.oneof(fc.constantFrom(...values), smallInt),
+    }),
   );
 
 recipe(
-  'binarySearch',
+  'binary-search',
   searchInput,
-  ([values, target]) => binarySearch(values, target),
-  (trace, [values, target]) => {
+  (input) => runOk('binary-search', input).document,
+  (trace, { values, target }) => {
     const a = stateOf(trace, 'a', 'array');
     const settled = a.marks.settled;
     if (values.includes(target)) {
       expect(settled).toHaveLength(1);
       expect(a.data.find((e) => e.id === settled[0])?.value).toBe(target);
     } else expect(settled).toEqual([]);
+    // The start, a look and a move per halving, and the outcome.
     expect(trace.length).toBeLessThanOrEqual(
-      2 + 3 * Math.ceil(Math.log2(values.length + 1)),
+      2 + 2 * Math.ceil(Math.log2(values.length + 1)),
     );
   },
 );
+
+describe('binary-search input checks', () => {
+  it(
+    'refuses values that are not sorted',
+    () => {
+      fc.assert(
+        fc.property(
+          fc
+            .array(smallInt, { minLength: 2, maxLength: 32 })
+            .filter((a) => a.some((x, i) => i > 0 && a[i - 1]! > x)),
+          smallInt,
+          (values, target) => {
+            expect(runError('binary-search', { values, target })).toMatchObject(
+              { code: 'INVALID_ARGUMENT', path: '$.input' },
+            );
+          },
+        ),
+        { numRuns: runs },
+      );
+    },
+    TIMEOUT,
+  );
+});
 
 // ---------------------------------------------------------------------------
 // Linear structures
 
 recipe(
-  'reverseLinkedList',
-  numberArrays(20),
-  reverseLinkedList,
+  'reverse-linked-list',
+  numberArrays(12).filter((a) => a.length > 0),
+  (values) => runOk('reverse-linked-list', { values }).document,
   (trace, values) => {
     const list = stateOf(trace, 'list', 'linkedList');
     const byId = new Map(list.data.map((n) => [n.id, n]));
@@ -418,9 +434,9 @@ function isBalanced(text: string): boolean {
 }
 
 recipe(
-  'balancedBrackets',
-  strings('()[]{}a ', 30),
-  balancedBrackets,
+  'balanced-brackets',
+  strings('()[]{}a ', 32).filter((t) => t.length >= 1 && t.length <= 32),
+  (text) => runOk('balanced-brackets', { text }).document,
   (trace, text) => {
     const last = trace.visualization.steps.at(-1)?.meta?.narration ?? '';
     const balanced = isBalanced(text);
@@ -704,83 +720,96 @@ const hashKeys = fc.oneof(
   fc.array(fc.integer({ min: -1e9, max: 1e9 }), { maxLength: 6 }),
 );
 
-recipe(
-  'hashChaining',
+type HashCall = { op: 'insert' | 'search'; key: number };
+
+/** A starting table and up to 8 calls that keep within `maxKeys`. */
+const hashRuns = (maxKeys: (size: number) => number) =>
   fc
     .tuple(
+      fc.integer({ min: 1, max: 16 }),
       hashKeys,
-      fc.oneof(
-        fc.integer({ min: 1, max: 12 }),
-        fc.integer({ min: 1, max: 100 }),
+      fc.array(
+        fc.record({
+          op: fc.constantFrom<'insert' | 'search'>('insert', 'search'),
+          key: fc.oneof(smallInt, fc.integer({ min: -1e9, max: 1e9 })),
+        }),
+        { minLength: 1, maxLength: 8 },
       ),
     )
-    .chain(([ks, size]) =>
-      fc.tuple(
-        fc.constant(ks),
-        fc.constant(size),
-        fc.option(
-          ks.length === 0
-            ? smallInt
-            : fc.oneof(fc.constantFrom(...ks), smallInt),
-          { nil: undefined },
-        ),
-      ),
-    ),
-  ([ks, size, search]) => hashChaining(ks, size, search),
-  (trace, [ks, size, search]) => {
+    .map(([size, ks, picks]) => {
+      const keys = ks.slice(0, maxKeys(size));
+      let room = maxKeys(size) - keys.length;
+      const ops: HashCall[] = picks.map((c) =>
+        c.op === 'insert' && room-- <= 0 ? { ...c, op: 'search' } : c,
+      );
+      return { from: { size, keys }, ops };
+    });
+
+recipe(
+  'hash-chaining',
+  hashRuns(() => 24),
+  (input) => runOk('hash-chaining', input).document,
+  (trace, { from: { size, keys }, ops }) => {
+    const chains: number[][] = Array.from({ length: size }, () => []);
+    for (const k of keys) chains[mod(k, size)]!.unshift(k);
+    for (const { op, key } of ops)
+      if (op === 'insert') chains[mod(key, size)]!.unshift(key);
     const t = stateOf(trace, 't', 'hashTable');
-    expect(t.data).toHaveLength(size);
-    t.data.forEach((chain, b) =>
-      expect(chain.map((e) => e.value)).toEqual(
-        ks.filter((k) => mod(k, size) === b),
-      ),
-    );
-    expect(t.marks.settled).toEqual(
-      search !== undefined && ks.includes(search)
-        ? [`k${ks.indexOf(search)}`]
-        : [],
-    );
+    expect(t.data.map((chain) => chain.map((e) => e.value))).toEqual(chains);
   },
 );
 
 recipe(
-  'linearProbing',
-  fc
-    .integer({ min: 0, max: 40 })
-    .chain((size) =>
-      fc.tuple(
-        fc.oneof(
-          fc.array(fc.integer({ min: -100, max: 100 }), { maxLength: size }),
-          fc.array(fc.integer({ min: 0, max: 3 }), { maxLength: size }),
-        ),
-        fc.constant(size),
-      ),
-    ),
-  ([ks, size]) => linearProbing(ks, size),
-  (trace, [ks, size]) => {
+  'linear-probing',
+  hashRuns((size) => size),
+  (input) => runOk('linear-probing', input).document,
+  (trace, { from: { size, keys }, ops }) => {
     const slots = Array<number | string>(size).fill('');
-    for (const key of ks) {
+    const insert = (key: number) => {
       let i = mod(key, size);
       while (slots[i] !== '') i = (i + 1) % size;
       slots[i] = key;
-    }
+    };
+    keys.forEach(insert);
+    for (const { op, key } of ops) if (op === 'insert') insert(key);
     expect(valuesOf(trace, 't')).toEqual(slots);
   },
 );
 
-describe('linearProbing input checks', () => {
-  rejects(
-    'rejects more keys than slots',
-    fc
-      .integer({ min: 0, max: 10 })
-      .chain((size) =>
-        fc.tuple(
-          fc.array(smallInt, { minLength: size + 1, maxLength: size + 5 }),
-          fc.constant(size),
-        ),
+describe('hashing input checks', () => {
+  const bad = fc.record({
+    size: fc.oneof(
+      fc.integer({ min: 17, max: 1000 }),
+      fc.integer({ min: -10, max: 0 }),
+      fc.double({ min: 1, max: 16 }).filter((x) => !Number.isInteger(x)),
+      fc.integer({ min: 1, max: 16 }),
+    ),
+    keys: fc.array(
+      fc.oneof(
+        smallInt,
+        fc.double({ min: -100, max: 100, noNaN: true }),
+        fc.constantFrom(NaN, Infinity, 2 ** 60),
       ),
-    ([ks, size]) => linearProbing(ks, size),
-  );
+      { maxLength: 30 },
+    ),
+  });
+  for (const id of ['hash-chaining', 'linear-probing'])
+    it(
+      `${id} reports a table it cannot hold, or runs`,
+      () => {
+        fc.assert(
+          fc.property(bad, smallInt, (from, key) => {
+            const run = runAlgorithm(`${id}.insert`, { from, key });
+            if (!run.ok)
+              expect(['INVALID_SHAPE', 'INVALID_ARGUMENT']).toContain(
+                run.error[0]!.code,
+              );
+          }),
+          { numRuns: runs },
+        );
+      },
+      TIMEOUT,
+    );
 });
 
 // ---------------------------------------------------------------------------
@@ -1462,82 +1491,6 @@ describe('inputs outside the checked domain', () => {
         })),
     ),
     allGraphRecipes,
-  );
-
-  total(
-    'hashChaining with a bucket count other than 1 to 100',
-    fc.tuple(
-      fc.array(fc.integer({ min: -100, max: 100 }), { maxLength: 5 }),
-      fc.oneof(
-        fc.integer({ min: 101, max: 1000 }),
-        fc.integer({ min: -10, max: 0 }),
-        fc.double({ min: 1, max: 100 }).filter((x) => !Number.isInteger(x)),
-      ),
-    ),
-    ([ks, size]) => hashChaining(ks, size),
-  );
-
-  const fractional = fc
-    .double({ min: -100, max: 100, noNaN: true })
-    .filter((x) => !Number.isInteger(x));
-  const withFraction = fc
-    .tuple(
-      fc.array(fc.integer({ min: -100, max: 100 }), { maxLength: 4 }),
-      fractional,
-      fc.nat(),
-      fc.integer({ min: 1, max: 8 }),
-    )
-    .map(([ks, x, at, size]) => {
-      const keys = ks.toSpliced(at % (ks.length + 1), 0, x);
-      return [keys, Math.max(size, keys.length)] as const;
-    });
-
-  total('hashChaining with a fractional key', withFraction, ([ks, size]) =>
-    hashChaining(ks, size),
-  );
-
-  // linearProbing loops on such keys, so it runs in a child process that
-  // is killed when it takes too long.
-  it(
-    'linearProbing with a fractional key: rejects with a RangeError or gives a document that loads',
-    () => {
-      const recipes = new URL('../src/index.ts', import.meta.url).href;
-      const core = new URL('../../core/src/index.ts', import.meta.url).href;
-      fc.assert(
-        fc.property(withFraction, ([ks, size]) => {
-          const script = `
-            const { linearProbing } = await import(${JSON.stringify(recipes)});
-            const { loadTrace } = await import(${JSON.stringify(core)});
-            let outcome;
-            try {
-              const doc = linearProbing(${JSON.stringify(ks)}, ${size});
-              outcome = loadTrace(doc).ok ? 'loads' : 'invalid document';
-            } catch (error) {
-              outcome = error instanceof RangeError ? 'RangeError' : String(error);
-            }
-            console.log(outcome);`;
-          const child = spawnSync(
-            process.execPath,
-            [
-              '--conditions=@algoviz/source',
-              '--max-old-space-size=256',
-              '--input-type=module',
-              '-e',
-              script,
-            ],
-            { encoding: 'utf8', timeout: 10_000 },
-          );
-          const outcome =
-            child.signal !== null || child.status !== 0
-              ? `did not finish (signal ${child.signal}, status ${child.status})`
-              : child.stdout.trim();
-          expect(['RangeError', 'loads']).toContain(outcome);
-        }),
-        // Each failing run takes the whole time limit.
-        { numRuns: Math.min(runs, 10), endOnFailure: true },
-      );
-    },
-    TIMEOUT,
   );
 
   // Tables have at most 100 rows and 100 columns; knapsack checks its

@@ -125,7 +125,10 @@ describe('the MCP server over stdio', () => {
   it('reports bad recipe arguments without crashing', async () => {
     const result = await client.callTool({
       name: 'algoviz_run_recipe',
-      arguments: { id: 'linearProbing', input: { keys: [1.5], size: 3 } },
+      arguments: {
+        id: 'linear-probing.insert',
+        input: { from: { size: 3, keys: [1.5] }, key: 1 },
+      },
     });
     expect(result.isError).toBe(true);
     // The server is still there.

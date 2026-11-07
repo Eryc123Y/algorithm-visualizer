@@ -2,9 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   editDistance,
-  hashChaining,
   knapsack,
-  linearProbing,
   longestCommonSubsequence,
 } from '../src/index.ts';
 import { replay, stateOf } from './helpers.ts';
@@ -77,32 +75,5 @@ describe('knapsack', () => {
     expect(table.data[items.length]![capacity]).toBe(best);
     const taken = table.marks.settled.map(([i]) => items[i - 1]!);
     expect(taken.reduce((v, i) => v + i.value, 0)).toBe(best);
-  });
-});
-
-describe('hashing', () => {
-  it('chains keys by remainder and finds one', () => {
-    const keys = [15, 11, 27, 8, 12, 4, 22];
-    const trace = replay(hashChaining(keys, 7, 22));
-    const t = stateOf(trace, 't', 'hashTable');
-    t.data.forEach((chain, b) =>
-      expect(chain.map((e) => e.value)).toEqual(
-        keys.filter((k) => k % 7 === b),
-      ),
-    );
-    expect(t.marks.settled).toEqual([`k${keys.indexOf(22)}`]);
-  });
-  it('probes linearly for a free slot', () => {
-    const keys = [15, 11, 27, 8, 12];
-    const trace = replay(linearProbing(keys, 7));
-    const slots = Array<number | string>(7).fill('');
-    for (const key of keys) {
-      let i = key % 7;
-      while (slots[i] !== '') i = (i + 1) % 7;
-      slots[i] = key;
-    }
-    expect(stateOf(trace, 't', 'array').data.map((e) => e.value)).toEqual(
-      slots,
-    );
   });
 });

@@ -72,8 +72,8 @@ describe('algoviz CLI', () => {
     for (const command of ['run', 'recipe']) {
       const { code, out } = run(
         command,
-        'binarySearch',
-        '{"values":[1,2],"target":2}',
+        'editDistance',
+        '{"first":"ab","second":"b"}',
       );
       expect(code).toBe(0);
       expect(JSON.parse(out)).toHaveProperty('version', '0.1');
