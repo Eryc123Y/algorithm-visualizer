@@ -8,7 +8,7 @@
 import type { Scene } from '@algoviz/core';
 import type { FontOutlines } from '@algoviz/fonts';
 
-import { bundledOutlines, glyphLookup } from './outline.ts';
+import { bundledOutlines, glyphLookup, type GlyphLookup } from './outline.ts';
 import { escapeXml, num, paintScene, serializeNode } from './paint.ts';
 import type { SvgTheme, ThemeName } from './theme.ts';
 
@@ -30,7 +30,9 @@ export interface RenderSvgOptions {
   readonly outlines?: readonly FontOutlines[];
 }
 
-const bundledGlyphs = glyphLookup(bundledOutlines);
+// Built on first use, not at import: a module-level call could keep the
+// outlines in bundles that never render standalone SVG, such as the player.
+let bundledGlyphs: GlyphLookup | undefined;
 
 export function renderSvg(
   scene: Scene,
@@ -40,7 +42,7 @@ export function renderSvg(
   const glyphs = !outlineText
     ? undefined
     : outlines === undefined
-      ? bundledGlyphs
+      ? (bundledGlyphs ??= glyphLookup(bundledOutlines))
       : glyphLookup(outlines);
   const painted = paintScene(scene, options.theme, {
     ...(glyphs === undefined ? {} : { glyphs }),

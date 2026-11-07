@@ -102,9 +102,14 @@ const TEXT_ONLY: ReadonlySet<string> = new Set([
 /** A scale factor with enough digits for font units (e.g. 13 / 2048). */
 const factor = (n: number): string => String(Number(n.toPrecision(6)));
 
-/** Letter spacing in em, from a `letter-spacing` attribute such as "0.02em". */
-const trackingOf = (value: string | undefined): number =>
-  value?.endsWith('em') ? Number(value.slice(0, -2)) : 0;
+/**
+ * Letter spacing in em, from a `letter-spacing` attribute such as "0.02em";
+ * painters write only em, so anything else counts as none.
+ */
+function trackingOf(value: string | undefined): number {
+  const em = value?.endsWith('em') ? Number(value.slice(0, -2)) : 0;
+  return Number.isFinite(em) ? em : 0;
+}
 
 /**
  * `node` with each text in it drawn as one path in the theme's face, where
