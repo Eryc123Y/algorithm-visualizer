@@ -1,6 +1,6 @@
 # 0008. Layout uses metrics measured over the whole trace
 
-- Status: Accepted
+- Status: Accepted; the text-width rule is superseded by ADR 0024
 - Date: 2026-10-06
 
 ## Context
