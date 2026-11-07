@@ -14,7 +14,7 @@ import { z } from 'zod';
 import { guide, guideSection } from './guide.ts';
 import { SERVER_INSTRUCTIONS, visualizeRequest } from './instructions.ts';
 import { PLAYER_URI, playerHtml, show } from './show.ts';
-import { Document, tools } from './tools.ts';
+import { Document, FrameSelectorArg, tools } from './tools.ts';
 
 export const SERVER_NAME = 'algoviz';
 export const SERVER_VERSION = '0.0.0';
@@ -59,12 +59,9 @@ export function createServer(): McpServer {
         'Shows a valid document to the user as an interactive player in the conversation, with play, step and seek controls. Use it once the document validates and does what you meant. Hosts without MCP Apps only get the text result, so also give the user the document or a link if they need it.',
       inputSchema: z.strictObject({
         document: Document,
-        frame: z
-          .int()
-          .optional()
-          .describe(
-            'The frame to open on: 0 (default) is the initial state, -1 the last.',
-          ),
+        frame: FrameSelectorArg.optional().describe(
+          'The frame to open on: 0 (default) is the initial state, -1 the last; or a selector of one frame, such as "relax#2" or "insert-5/go".',
+        ),
       }),
       annotations: readOnly,
       _meta: { ui: { resourceUri: PLAYER_URI } },

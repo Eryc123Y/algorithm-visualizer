@@ -81,7 +81,9 @@ describe('ops.heap', () => {
   it('starts from the heap the values build, without animating it', () => {
     const { document } = ops.heap.push({ from: values, value: 4 });
     expect(valuesAt(document, 0)).toEqual(reference(values, [], 'min').start);
-    expect(narrations(document)[0]).toBe('Push 4.');
+    expect(document.sections).toEqual([
+      { id: 'push-4', title: 'Push 4', start: 0 },
+    ]);
   });
 
   it('starts from a given array if it is a heap', () => {
@@ -98,7 +100,6 @@ describe('ops.heap', () => {
       reference(values, [{ op: 'push', value: 0 }], 'min').end,
     );
     expect(narrations(run.document)).toEqual([
-      'Push 0.',
       'Put 0 at the end.',
       '0 < 2, its parent: swap up.',
       'Swap 0 and 2.',
@@ -113,8 +114,7 @@ describe('ops.heap', () => {
     expect(valuesAt(run.document)).toEqual(
       reference(values, [{ op: 'pop' }], 'min').end,
     );
-    expect(narrations(run.document).slice(0, 3)).toEqual([
-      'Pop.',
+    expect(narrations(run.document).slice(0, 2)).toEqual([
       'Move the last value 8 to the root, and 1 to the end.',
       'Remove 1: it is the minimum.',
     ]);
@@ -128,7 +128,7 @@ describe('ops.heap', () => {
     expect(valuesAt(run.document)).toEqual(
       reference(values, [call], 'min').end,
     );
-    expect(narrations(run.document)[1]).toBe('Decrease h[4] from 9 to 0.');
+    expect(narrations(run.document)[0]).toBe('Decrease h[4] from 9 to 0.');
     expect(() =>
       ops.heap.decreaseKey({ from: values, index: 4, value: 10 }),
     ).toThrow('decreaseKey must not increase h[4] (9) to 10');
@@ -205,6 +205,9 @@ describe('ops.heap', () => {
           expect(run.results).toEqual(ref.results);
           expect(isHeap(valuesAt(run.document), order)).toBe(true);
           expect(run.after).toEqual({ array: ref.end });
+          // One section per call, and every step named (ADR 0020).
+          expect(run.document.sections).toHaveLength(calls.length);
+          expect(run.document.steps.every((s) => s.meta?.id)).toBe(true);
           const one = ops.heap.run({
             from: start,
             order,

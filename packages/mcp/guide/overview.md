@@ -36,18 +36,68 @@ An algoviz document is JSON that describes a step-by-step visualization of an al
 }
 ```
 
-- `version` is the protocol version, `"major.minor"`. Write the oldest version that has every feature you use; everything in this guide is in `"0.1"`.
+- `version` is the protocol version, `"major.minor"`. Write the oldest version that has every feature you use: `"0.2"` if any step has a name or the document has sections (below), and `"0.1"` otherwise.
 - `title` and `source` are optional. `source.code` is the code being taught; `meta.line` (1-based) highlights a line of it. Without `source`, leave out `line`.
 - `structures` maps names to declarations (at most 16). Names are identifiers: letters, digits and `_`, not starting with a digit, e.g. `arr`, `dist`, `call_stack`.
 - `steps` is the timeline. Each step has `actions` (applied in order, possibly none) and optional `meta`:
   - `narration`: one or two sentences for a learner, saying what happens and why.
   - `line`: the source line, if there is `source`.
   - `vars`: variable values to display, e.g. `{ "i": 2, "min": 3 }`.
+  - `id`: the step's name, such as `compare` or `relax` (see below).
 - Each action names its structure in `target` and its operation in `type`; the other fields depend on the structure's kind.
 
 ## Frames
 
 Frame 0 shows the declared initial state; frame `n` shows the state after step `n`. Plan one step per thing a learner should see: a comparison, a swap, a node visited. A step may hold several actions that belong together (e.g. `compare` and `pointer`), and a step with no actions can just narrate.
+
+## Step names and sections
+
+Names let people and tools refer to a step by what it does rather than by its number, which changes whenever steps are added. Both need `"version": "0.2"`.
+
+- `meta.id` names the kind of step: `"compare"`, `"swap"`, `"relax"`, `"fixup-case-3"`. Use lower-case kebab-case that starts with a letter, at most 40 characters. Names repeat: every relaxation is `"relax"`. Name every step.
+- `sections` groups consecutive steps under a title, such as each operation of a sequence. `start` is the index of the section's first step (0-based), and the section lasts until the next one starts. Sections are listed in order, each has at least one step, and their ids are unique. Steps before the first section belong to none. Don't give a section the id of a step name: the bare name would then select the section.
+
+```json
+{
+  "version": "0.2",
+  "title": "Push twice, then pop",
+  "structures": {
+    "s": { "kind": "stack", "initial": [1] }
+  },
+  "steps": [
+    {
+      "actions": [{ "target": "s", "type": "push", "element": 2 }],
+      "meta": { "id": "push", "narration": "Push 2 on top." }
+    },
+    {
+      "actions": [{ "target": "s", "type": "push", "element": 3 }],
+      "meta": { "id": "push", "narration": "Push 3 on top." }
+    },
+    {
+      "actions": [{ "target": "s", "type": "pop" }],
+      "meta": {
+        "id": "pop",
+        "narration": "Pop takes 3, the last value pushed."
+      }
+    }
+  ],
+  "sections": [
+    { "id": "push-2-and-3", "title": "Push 2 and 3", "start": 0 },
+    { "id": "pop-3", "title": "Pop 3", "start": 2 }
+  ]
+}
+```
+
+A selector names frames, in `algoviz_inspect`, `algoviz_render` and `algoviz_show`:
+
+| Selector              | Frames                                                                                                                  |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `3`, `-1`             | Frame 3; negative numbers count from the end.                                                                           |
+| `push`                | The frame after the first step named `push`.                                                                            |
+| `push#2`              | The frame after the second step named `push`.                                                                           |
+| `push-2-and-3/push#2` | The same, counting only inside that section.                                                                            |
+| `pop-3`               | A section: from the frame before its first step to the one after its last. A bare name is a section if one has that id. |
+| `push..-1`            | The range between two selectors, both included.                                                                         |
 
 ## Marks
 

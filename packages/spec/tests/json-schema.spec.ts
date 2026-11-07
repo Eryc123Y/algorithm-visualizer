@@ -38,6 +38,19 @@ describe('visualizationJsonSchema', () => {
     expect(schema.properties.version.const).toBeUndefined();
   });
 
+  it('describes step names and sections for LLMs (ADR 0020)', () => {
+    const schema = visualizationJsonSchema() as {
+      properties: { sections: { type: string; maxItems: number } };
+    };
+    expect(schema.properties.sections).toMatchObject({
+      type: 'array',
+      maxItems: 1000,
+    });
+    const text = JSON.stringify(schema);
+    expect(text).toContain('^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$');
+    expect(text).toContain('"maxLength":40');
+  });
+
   it('is identified by the newest protocol version', () => {
     expect(SCHEMA_ID).toBe(
       `urn:algoviz:schema:visualization:${PROTOCOL_VERSION}`,

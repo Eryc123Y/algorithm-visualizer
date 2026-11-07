@@ -14,7 +14,7 @@ import type { VisualizationInput } from './visualization.ts';
  * change appends a version here and adds its features to
  * `PROTOCOL_FEATURES`.
  */
-export const PROTOCOL_VERSIONS = ['0.1'] as const;
+export const PROTOCOL_VERSIONS = ['0.1', '0.2'] as const;
 
 /** A protocol version this package reads. */
 export type ProtocolVersion = (typeof PROTOCOL_VERSIONS)[number];
@@ -149,21 +149,21 @@ export interface ProtocolFeature<V extends string = ProtocolVersion> {
 
 /**
  * Features added after the first protocol version, with the version that
- * added each. A protocol change adds its entries here, for example:
- *
- * ```ts
- * { name: 'sections', since: '0.2', usedBy: (d) => d.sections !== undefined }
- * ```
- *
- * The next are step names and sections (0.2, ADR 0020), and sources in
- * several languages (0.3, ADR 0017). Nothing needs more than 0.1 yet.
- *
- * With the first entry, the parser should also reject a document whose
- * `version` is older than a feature it uses (e.g. "0.1" with sections),
- * since a 0.1 reader cannot show it. That check waits for a feature to
- * test it with.
+ * added each. A protocol change adds its entries here. The next are
+ * sources in several languages (0.3, ADR 0017).
  */
-export const PROTOCOL_FEATURES: readonly ProtocolFeature[] = [];
+export const PROTOCOL_FEATURES: readonly ProtocolFeature[] = [
+  {
+    name: 'step names',
+    since: '0.2',
+    usedBy: (d) => d.steps.some((step) => step.meta?.id !== undefined),
+  },
+  {
+    name: 'sections',
+    since: '0.2',
+    usedBy: (d) => d.sections !== undefined,
+  },
+];
 
 /**
  * The newest `since` among the features a document uses, or `base` if it
@@ -188,4 +188,34 @@ export function newestNeeded<V extends string>(
  */
 export function minimumVersion(document: Content): ProtocolVersion {
   return newestNeeded(document, PROTOCOL_FEATURES, PROTOCOL_VERSIONS[0]);
+}
+
+/** "a", "a and b", "a, b and c". */
+function listOf(names: readonly string[]): string {
+  return names.length < 2
+    ? names.join('')
+    : `${names.slice(0, -1).join(', ')} and ${names.at(-1)!}`;
+}
+
+/**
+ * Checks that a document's `version` is not older than a feature it uses,
+ * which a reader of that version could not show. Gives a
+ * `VERSION_TOO_OLD` error, or undefined.
+ */
+export function checkFeatures<V extends string>(
+  document: Content,
+  version: V,
+  features: readonly ProtocolFeature<V>[],
+): ProtocolError | undefined {
+  const newer = features.filter(
+    (f) => compareVersions(f.since, version) > 0 && f.usedBy(document),
+  );
+  if (newer.length === 0) return undefined;
+  const needed = newestNeeded(document, newer, version);
+  return {
+    code: 'VERSION_TOO_OLD',
+    path: '$.version',
+    message: `The document uses ${listOf(newer.map((f) => f.name))}, which need protocol version "${needed}", but its version is "${version}"`,
+    hint: `Set "version" to "${needed}".`,
+  };
 }

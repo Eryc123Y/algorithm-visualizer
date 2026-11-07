@@ -62,9 +62,21 @@ describe('guide', () => {
     }
   });
 
-  it('has a valid example in the overview', () => {
-    const [block] = jsonBlocks(guideOverview());
-    const report = validate(JSON.parse(block!));
-    expect(report.valid && report.warnings).toEqual([]);
+  it('has valid examples in the overview', () => {
+    const blocks = jsonBlocks(guideOverview());
+    expect(blocks.length).toBeGreaterThan(1);
+    for (const block of blocks) {
+      const report = validate(JSON.parse(block));
+      expect(report.valid ? [] : report.errors).toEqual([]);
+      expect(report.valid && report.warnings).toEqual([]);
+    }
+  });
+
+  it('shows step names and sections with the version they need', () => {
+    const blocks = jsonBlocks(guideOverview()).map(
+      (block) => JSON.parse(block) as { version: string; sections?: unknown },
+    );
+    const named = blocks.find((doc) => doc.sections !== undefined);
+    expect(named?.version).toBe('0.2');
   });
 });

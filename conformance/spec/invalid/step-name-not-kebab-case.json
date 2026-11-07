@@ -1,0 +1,25 @@
+{
+  "description": "Step names and section ids are lower-case kebab-case that starts with a letter, at most 40 characters, so a selector can tell them from frame numbers.",
+  "input": {
+    "version": "0.2",
+    "structures": { "a": { "kind": "array", "initial": [1, 2] } },
+    "steps": [
+      { "actions": [], "meta": { "id": "Compare" } },
+      { "actions": [], "meta": { "id": "2nd-pass" } },
+      { "actions": [], "meta": { "id": "relax#2" } }
+    ],
+    "sections": [
+      {
+        "id": "a-very-long-section-id-of-more-than-forty-chars",
+        "title": "Long",
+        "start": 0
+      }
+    ]
+  },
+  "expectedErrors": [
+    { "code": "INVALID_SHAPE", "path": "$.steps[0].meta.id" },
+    { "code": "INVALID_SHAPE", "path": "$.steps[1].meta.id" },
+    { "code": "INVALID_SHAPE", "path": "$.steps[2].meta.id" },
+    { "code": "INVALID_SHAPE", "path": "$.sections[0].id" }
+  ]
+}

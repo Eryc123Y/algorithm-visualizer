@@ -185,12 +185,12 @@ const specFixtures = new URL(
 );
 
 describe('minimumVersion', () => {
-  it('gives the oldest version for documents that use no later feature', () => {
+  it('gives the version each valid fixture declares, as a writer would', () => {
     for (const file of readdirSync(specFixtures)) {
       const fixture = JSON.parse(
         readFileSync(new URL(file, specFixtures), 'utf8'),
       ) as { input: VisualizationInput };
-      expect(minimumVersion(fixture.input), file).toBe(PROTOCOL_VERSIONS[0]);
+      expect(minimumVersion(fixture.input), file).toBe(fixture.input.version);
     }
   });
 

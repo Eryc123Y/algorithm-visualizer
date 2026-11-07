@@ -11,6 +11,7 @@ import type {
 
 import { checkLength } from '../check.ts';
 import { Recorder } from '../recorder.ts';
+import { sectionIds } from './section-id.ts';
 import { joinSnippets, type Snippet } from './snippet.ts';
 import { recordingTape, type Tape } from './tape.ts';
 
@@ -39,7 +40,10 @@ export interface StructureDef<
   describe(state: S): From;
   /** The declaration that shows `state`, with explicit ids. */
   declare(state: S): Extract<StructureDeclInput, { readonly kind: K }>;
-  /** Removes pointers an earlier operation left behind. */
+  /**
+   * Removes pointers an earlier operation left behind, in the first step
+   * of the next operation.
+   */
   clear(tape: Tape<K>): void;
   /** Checks a call's arguments; throws a RangeError for invalid ones. */
   check(call: Call): void;
@@ -87,20 +91,23 @@ export function runOps<
   let state = def.start(from);
   const snippets = calls.map((call) => def.code(call));
   const code = joinSnippets(snippets);
+  const titles = calls.map((call) => def.titleOf(call));
+  const ids = sectionIds(titles);
   const recorder = new Recorder({
-    title: `${def.title}: ${calls.map((c) => def.titleOf(c)).join(', ')}`,
+    title: `${def.title}: ${titles.join(', ')}`,
     source: code.source,
   });
   const on = recorder.add(def.name, def.declare(state));
   const results = calls.map((call, k) => {
-    const snippet = snippets[k]!;
-    const tape = recordingTape(recorder, on, code, snippet);
-    // A narration-only step names the operation and marks where it begins.
-    recorder.step({
-      line: code.line(snippet),
-      narration: `${capitalize(def.titleOf(call))}.`,
-    });
-    if (k > 0) def.clear(tape);
+    // Each operation is a section (ADR 0020).
+    recorder.section(ids[k]!, capitalize(titles[k]!));
+    const tape = recordingTape(
+      recorder,
+      on,
+      code,
+      snippets[k]!,
+      k > 0 ? (t) => def.clear(t) : undefined,
+    );
     const applied = def.apply(state, call, tape);
     state = applied.state;
     return applied.result;

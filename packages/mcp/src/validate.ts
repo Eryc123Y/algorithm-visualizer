@@ -16,6 +16,8 @@ export interface DocumentSummary {
   readonly steps: number;
   /** Frames go from 0 (before the first step) to `steps`. */
   readonly frames: number;
+  /** Section ids, in order (ADR 0020). */
+  readonly sections: readonly string[];
 }
 
 export type ValidationReport =
@@ -42,6 +44,7 @@ export function summarize(trace: Trace): DocumentSummary {
     })),
     steps: trace.length,
     frames: trace.length + 1,
+    sections: (vis.sections ?? []).map((s) => s.id),
   };
 }
 
@@ -74,6 +77,16 @@ export function lint(trace: Trace): Diagnostic[] {
       message: 'The document has source code, but no step points at a line',
       hint: 'Set `meta.line` on steps to highlight the line being executed.',
     });
+  const names = new Set(steps.map((step) => step.meta?.id));
+  (trace.visualization.sections ?? []).forEach(({ id }, k) => {
+    if (names.has(id))
+      warnings.push({
+        code: 'SECTION_HIDES_STEP',
+        path: `$.sections[${k}].id`,
+        message: `Section "${id}" has the id of a step name, so the selector "${id}" means the section`,
+        hint: `Rename the section, e.g. after what its steps do; the step is still "${id}#1".`,
+      });
+  });
   steps.forEach((step, s) => {
     if (step.actions.length === 0 && step.meta === undefined)
       warnings.push({
@@ -115,8 +128,12 @@ export function formatReport(report: ValidationReport): string {
   const structures = summary.structures
     .map(({ name, kind }) => `${name} (${kind})`)
     .join(', ');
+  const sections =
+    summary.sections.length > 0
+      ? `; sections ${summary.sections.join(', ')}`
+      : '';
   const lines = [
-    `Valid: ${structures}; ${summary.steps} steps, frames 0–${summary.steps}.`,
+    `Valid: ${structures}; ${summary.steps} steps, frames 0–${summary.steps}${sections}.`,
   ];
   if (warnings.length > 0)
     lines.push(`Warnings:\n${formatErrors(warnings, { max: MAX_ERRORS })}`);

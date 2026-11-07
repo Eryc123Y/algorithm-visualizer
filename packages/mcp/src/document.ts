@@ -2,7 +2,13 @@
  * Reading documents that tools receive: either a JSON value or the JSON
  * text of one, as models pass both.
  */
-import { loadTrace, type Trace } from '@algoviz/core';
+import {
+  loadTrace,
+  selectFrame,
+  selectFrames,
+  type FrameRange,
+  type Trace,
+} from '@algoviz/core';
 import { err, ok, type Diagnostic, type Result } from '@algoviz/spec';
 
 /** Parses JSON text; any other value is returned as it is. */
@@ -31,22 +37,28 @@ export function loadDocument(
 }
 
 /**
- * Resolves a frame number: negative numbers count from the end, so -1 is
- * the last frame.
+ * A selector, a number or text (ADR 0020), shared by the tools that take
+ * frames.
+ */
+export type FrameSelector = number | string;
+
+/**
+ * The one frame a selector names: a frame number (negative counts from the
+ * end, so -1 is the last), a step such as "relax#2" or "insert-5/go".
  */
 export function resolveFrame(
   trace: Trace,
-  frame: number,
+  frame: FrameSelector,
 ): Result<number, Diagnostic[]> {
-  const index = frame < 0 ? trace.length + 1 + frame : frame;
-  if (Number.isInteger(index) && index >= 0 && index <= trace.length)
-    return ok(index);
-  return err([
-    {
-      code: 'OUT_OF_RANGE',
-      path: '$',
-      message: `Frame ${frame} does not exist`,
-      hint: `Frames go from 0 (before the first step) to ${trace.length} (after the last); -1 is the last.`,
-    },
-  ]);
+  const result = selectFrame(trace.visualization, frame);
+  return result.ok ? result : err([result.error]);
+}
+
+/** The frames a selector names, `from` to `to`; a section or `a..b` names several. */
+export function resolveFrames(
+  trace: Trace,
+  frames: FrameSelector,
+): Result<FrameRange, Diagnostic[]> {
+  const result = selectFrames(trace.visualization, frames);
+  return result.ok ? result : err([result.error]);
 }
