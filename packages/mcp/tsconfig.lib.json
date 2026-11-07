@@ -17,6 +17,7 @@
     { "path": "../spec/tsconfig.lib.json" },
     { "path": "../core/tsconfig.lib.json" },
     { "path": "../svg/tsconfig.lib.json" },
+    { "path": "../tikz/tsconfig.lib.json" },
     { "path": "../recipes/tsconfig.lib.json" }
   ]
 }

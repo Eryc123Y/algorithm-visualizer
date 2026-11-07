@@ -69,6 +69,37 @@ describe('figureFiles', () => {
   });
 });
 
+describe('figureFiles in TikZ', () => {
+  const tex = (pattern?: string) => {
+    const result = figureFiles(series, {
+      name: 'doc',
+      format: 'tikz',
+      ...(pattern === undefined ? {} : { pattern }),
+    });
+    return result.ok ? result.value.map((f) => f.file) : result.error;
+  };
+
+  it('names files as for SVG, ending in .tex', () => {
+    expect(tex()).toEqual(['doc-00.tex', 'doc-03.tex', 'doc-11.tex']);
+    expect(tex('{step}.tex')).toEqual([
+      '0.tex',
+      'insert-5_relax_2.tex',
+      'done.tex',
+    ]);
+    // .svg is part of the name in TikZ, not its extension.
+    expect(tex('{frame}.svg')).toEqual([
+      '00.svg.tex',
+      '03.svg.tex',
+      '11.svg.tex',
+    ]);
+  });
+
+  it('checks the pattern against the format', () => {
+    expect(patternProblem('.tex', 'tikz')).toBe('The name is empty');
+    expect(patternProblem('.tex', 'svg')).toBeUndefined();
+  });
+});
+
 describe('patternProblem', () => {
   it('accepts the known placeholders', () => {
     expect(patternProblem('{name}-{frame}-{step}.svg')).toBeUndefined();

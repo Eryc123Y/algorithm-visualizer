@@ -3,8 +3,6 @@
  * Markdown in `guide/`, one overview plus one section per structure kind,
  * so a model can read only the kinds it needs.
  */
-import { readFileSync } from 'node:fs';
-
 import {
   err,
   kindNames,
@@ -14,9 +12,9 @@ import {
   type StructureKindName,
 } from '@algoviz/spec';
 
-// `guide/` sits next to both `src/` and `dist/`.
-const read = (path: string) =>
-  readFileSync(new URL(`../guide/${path}`, import.meta.url), 'utf8').trim();
+import { readGuideFile } from './guide-files.ts';
+
+const read = (path: string) => readGuideFile(path).trim();
 
 let overview: string | undefined;
 const sections = new Map<StructureKindName, string>();

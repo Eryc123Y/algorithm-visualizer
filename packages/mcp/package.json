@@ -19,13 +19,16 @@
   ],
   "scripts": {
     "build": "tsc --build tsconfig.lib.json && vite build --config vite.app.config.ts",
-    "build:app": "vite build --config vite.app.config.ts"
+    "build:app": "vite build --config vite.app.config.ts",
+    "build:standalone": "node --conditions=@algoviz/source scripts/build-standalone.ts",
+    "test:standalone": "vitest run --config vitest.standalone.config.ts"
   },
   "dependencies": {
     "@algoviz/core": "*",
     "@algoviz/recipes": "*",
     "@algoviz/spec": "*",
     "@algoviz/svg": "*",
+    "@algoviz/tikz": "*",
     "@modelcontextprotocol/ext-apps": "^2.0.3",
     "@modelcontextprotocol/server": "^2.3.1",
     "zod": "^4.6.7"

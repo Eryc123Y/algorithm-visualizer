@@ -54,3 +54,6 @@ packages/mcp/ui/
 # Typst plugin: Rust build output, and the engine bytecode built by Node
 packages/typst/plugin/target/
 packages/typst/package/engine.bc
+
+# Standalone algoviz: Rust build output and the bundle it compiles
+packages/mcp/standalone/target/

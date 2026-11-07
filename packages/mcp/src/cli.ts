@@ -6,8 +6,10 @@
  *   algoviz validate <file>
  *   algoviz inspect <file> [frame …]
  *   algoviz render <file> [--frame f] [--theme dark] [--out frame.svg]
- *   algoviz export <file> [--step s …] [--theme t] [--out dir] [--name pattern]
+ *   algoviz export <file> [--step s …] [--theme t] [--format svg|tikz]
+ *                  [--out dir] [--name pattern] [--error-file file]
  *   algoviz export <id> --input <json|file> [the same options]
+ *   algoviz export <id> --input-hex <hex> [the same options]
  *
  *   algoviz recipes
  *   algoviz run <id> <input-json> [--out doc.json]
@@ -17,15 +19,28 @@
  *
  * A file of "-" is read from standard input. Exits with 1 on an error.
  */
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { basename, extname, join } from 'node:path';
+import {
+  mkdirSync,
+  readFileSync,
+  renameSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
+import { basename, dirname, extname, join } from 'node:path';
 
 import { runAlgorithm } from '@algoviz/recipes';
 import { formatErrors, ok, type Diagnostic, type Result } from '@algoviz/spec';
 import { exportFigures, themes, type ThemeName } from '@algoviz/svg';
+import { exportTikzFigures } from '@algoviz/tikz';
 
 import { readDocument } from './document.ts';
-import { DEFAULT_PATTERN, figureFiles, patternProblem } from './export.ts';
+import {
+  DEFAULT_PATTERN,
+  FORMAT_EXTENSIONS,
+  figureFiles,
+  patternProblem,
+  type FigureFormat,
+} from './export.ts';
 import { callTool, type ToolResult } from './tools.ts';
 
 const USAGE = `Usage:
@@ -34,8 +49,9 @@ const USAGE = `Usage:
   algoviz inspect <file> [frame …]       State at frames (default: the last)
   algoviz render <file> [--frame f] [--theme light|dark] [--out file.svg]
   algoviz export <file> [--step s …] [--theme light|dark|print]
-                 [--out dir] [--name pattern]
-                                         Write frames as SVG figures
+                 [--format svg|tikz] [--out dir] [--name pattern]
+                 [--error-file file]
+                                         Write frames as SVG or TikZ figures
   algoviz export <id> --input <json|file> [the same options]
                                          Run an algorithm, then export
   algoviz recipes                        List ready-made visualizations
@@ -48,7 +64,10 @@ or "insert-5/relax", a section such as "insert-5", or a range "a..b".
 Render takes one frame. Export takes any number: --step may repeat or list
 them with commas, and every frame is the default. It names files with
 {name}, {frame} and {step} (default "${DEFAULT_PATTERN}") and writes them to the
---out directory (default: the current one).`;
+--out directory (default: the current one). --format tikz writes .tex files
+for the algoviz LaTeX package. --input-hex takes the input as hexadecimal
+UTF-8, for programs that cannot quote JSON for a shell, and --error-file
+also writes any error to a file, which a successful export removes.`;
 
 class UsageError extends Error {}
 
@@ -69,12 +88,22 @@ interface Options {
   /** Export only: selectors, each possibly a comma-separated list. */
   step?: string[];
   input?: string;
+  inputHex?: string;
   name?: string;
+  format?: string;
+  errorFile?: string;
   help?: boolean;
 }
 
 /** Options that only `export` takes. */
-const EXPORT_ONLY = { step: '--step', input: '--input', name: '--name' };
+const EXPORT_ONLY = {
+  step: '--step',
+  input: '--input',
+  inputHex: '--input-hex',
+  name: '--name',
+  format: '--format',
+  errorFile: '--error-file',
+};
 
 /**
  * A small argument parser: node:util's parseArgs would read frame numbers
@@ -94,6 +123,9 @@ function parse(argv: readonly string[]) {
     if (flag === '--frame') values.frame = take();
     else if (flag === '--step') values.step = [...(values.step ?? []), take()];
     else if (flag === '--input') values.input = take();
+    else if (flag === '--input-hex') values.inputHex = take();
+    else if (flag === '--format') values.format = take();
+    else if (flag === '--error-file') values.errorFile = take();
     else if (flag === '--name') values.name = take();
     else if (flag === '--theme') values.theme = take();
     else if (flag === '--out' || flag === '-o') values.out = take();
@@ -127,24 +159,47 @@ const failure = (errors: readonly Diagnostic[]): ToolResult => ({
 const isThemeName = (name: string): name is ThemeName =>
   Object.hasOwn(themes, name);
 
-/** The document to export: a file's, or an algorithm's run on `--input`. */
+/**
+ * Text from hexadecimal UTF-8, as the LaTeX package passes input: digits
+ * and letters only, so no shell can read anything into it.
+ */
+export function fromHex(hex: string): string {
+  if (!/^(?:[0-9a-f]{2})*$/i.test(hex))
+    throw new UsageError(
+      '--input-hex takes an even number of hexadecimal digits',
+    );
+  try {
+    return decodeURIComponent(hex.replace(/../g, '%$&'));
+  } catch {
+    throw new UsageError('--input-hex is not UTF-8 text');
+  }
+}
+
+/** The input given with `--input` or `--input-hex`, as JSON text. */
+function inputText(values: Options): string {
+  if (values.inputHex !== undefined) return fromHex(values.inputHex);
+  const input = values.input!;
+  return /^\s*[[{]/.test(input)
+    ? input
+    : readText(
+        input,
+        '\n--input takes JSON text that starts with { or [, or a JSON file.',
+      );
+}
+
+/** The document to export: a file's, or an algorithm's run on its input. */
 function exportSource(
   source: string,
-  input: string | undefined,
+  values: Options,
 ): Result<unknown, readonly Diagnostic[]> {
-  if (input === undefined)
+  if (values.input === undefined && values.inputHex === undefined)
     return readDocument(
       readText(
         source,
         '\nTo run an algorithm, name its input with --input <json|file>.',
       ),
     );
-  const text = /^\s*[[{]/.test(input)
-    ? input
-    : readText(
-        input,
-        '\n--input takes JSON text that starts with { or [, or a JSON file.',
-      );
+  const text = inputText(values);
   let value: unknown;
   try {
     value = JSON.parse(text) as unknown;
@@ -157,9 +212,44 @@ function exportSource(
   return run.ok ? ok(run.value.document) : run;
 }
 
+const isFormat = (name: string): name is FigureFormat =>
+  Object.hasOwn(FORMAT_EXTENSIONS, name);
+
+/** A figure in some format: its frame, its selector and its file's text. */
+interface FormattedFigure {
+  readonly frame: number;
+  readonly selector: string;
+  readonly text: string;
+}
+
+/** The figures of a series in one format, as files are written from them. */
+function exportSeries(
+  document: unknown,
+  options: { steps: readonly string[]; theme: ThemeName },
+  format: FigureFormat,
+): Result<
+  { readonly frames: number; readonly figures: readonly FormattedFigure[] },
+  readonly Diagnostic[]
+> {
+  const series =
+    format === 'svg'
+      ? exportFigures(document, options)
+      : exportTikzFigures(document, options);
+  if (!series.ok) return series;
+  return ok({
+    frames: series.value.frames,
+    figures: series.value.figures.map((f) => ({
+      frame: f.frame,
+      selector: f.selector,
+      text: 'svg' in f ? f.svg : f.tikz,
+    })),
+  });
+}
+
 /**
- * Writes the chosen frames as SVG figures (ADR 0025), and lists each file
- * with its frame's selector. Nothing is written unless all of them render.
+ * Writes the chosen frames as SVG or TikZ figures (ADR 0025, 0027), and
+ * lists each file with its frame's selector. Nothing is written unless all
+ * of them render.
  */
 function exportCommand(rest: readonly string[], values: Options): ToolResult {
   if (values.frame !== undefined)
@@ -174,36 +264,47 @@ function exportCommand(rest: readonly string[], values: Options): ToolResult {
     throw new UsageError(
       `Unknown theme "${theme}"; use ${Object.keys(themes).join(', ')}`,
     );
+  const format = values.format ?? 'svg';
+  if (!isFormat(format))
+    throw new UsageError(`Unknown format "${format}"; use svg or tikz`);
+  if (values.input !== undefined && values.inputHex !== undefined)
+    throw new UsageError(
+      'Give the input with --input or --input-hex, not both',
+    );
   const out = values.out ?? '.';
-  if (/\.svg$/i.test(out))
+  if (/\.(?:svg|tex)$/i.test(out))
     throw new UsageError(
       `--out names a directory, not a file such as "${out}"; name the files with --name`,
     );
   const pattern = values.name ?? DEFAULT_PATTERN;
-  const problem = patternProblem(pattern);
+  const problem = patternProblem(pattern, format);
   if (problem !== undefined) throw new UsageError(problem);
 
-  const document = exportSource(source, values.input);
+  const document = exportSource(source, values);
   if (!document.ok) return failure(document.error);
   const steps = (values.step ?? []).flatMap((s) =>
     s.split(',').map((part) => part.trim()),
   );
-  const series = exportFigures(document.value, { steps, theme });
+  const series = exportSeries(document.value, { steps, theme }, format);
   if (!series.ok) return failure(series.error);
   const name =
-    values.input !== undefined
+    values.input !== undefined || values.inputHex !== undefined
       ? source
       : source === '-'
         ? 'figure'
         : basename(source, extname(source));
-  const files = figureFiles(series.value, { name, pattern });
+  const files = figureFiles(series.value, { name, pattern, format });
   if (!files.ok) throw new UsageError(files.error);
 
   try {
     mkdirSync(out, { recursive: true });
     const lines = files.value.map(({ file, figure }) => {
       const path = join(out, file);
-      writeFileSync(path, `${figure.svg}\n`);
+      // A whole file or none: the LaTeX package takes a figure file that
+      // exists for a finished one.
+      const partial = `${path}.part`;
+      writeFileSync(partial, `${figure.text.replace(/\n$/, '')}\n`);
+      renameSync(partial, path);
       return `${path}  ${figure.selector}`;
     });
     return { text: lines.join('\n') };
@@ -261,6 +362,46 @@ function dispatch(
 }
 
 /**
+ * The value of `--error-file`, read before anything else can fail, so even
+ * a usage error reaches it.
+ */
+function errorFileOf(argv: readonly string[]): {
+  readonly file?: string;
+  /** The file is also another argument, such as the document or input. */
+  readonly clash: boolean;
+} {
+  let file: string | undefined;
+  let at = -1;
+  argv.forEach((arg, k) => {
+    if (arg === '--error-file') [file, at] = [argv[k + 1], k + 1];
+    else if (arg.startsWith('--error-file=')) [file, at] = [arg.slice(13), k];
+  });
+  if (file === undefined || file === '') return { clash: false };
+  const others = argv
+    .filter((_, k) => k !== at)
+    .map((arg) => arg.replace(/^--[\w-]+=/, ''));
+  return others.includes(file) ? { clash: true } : { file, clash: false };
+}
+
+/**
+ * Keeps `--error-file` in step with the run: the message of a failure, or
+ * no file after a success. A file that cannot be written leaves the
+ * message on standard error alone.
+ */
+function recordError(file: string | undefined, message: string | undefined) {
+  if (file === undefined) return;
+  try {
+    if (message === undefined) rmSync(file, { force: true });
+    else {
+      mkdirSync(dirname(file), { recursive: true });
+      writeFileSync(file, `${message}\n`);
+    }
+  } catch {
+    // Standard error has the message anyway.
+  }
+}
+
+/**
  * Runs the CLI and returns the exit code; the output goes to `out` unless
  * `--out` names a file.
  */
@@ -269,21 +410,45 @@ export function main(
   out: (text: string) => void = (text) => process.stdout.write(`${text}\n`),
   err: (text: string) => void = (text) => process.stderr.write(`${text}\n`),
 ): number {
+  const { file: errorFile, clash } = errorFileOf(argv);
+  if (clash) {
+    // Writing the message there would replace a file the command reads.
+    err(`--error-file names a file the command reads or writes\n\n${USAGE}`);
+    return 2;
+  }
   let ran: ReturnType<typeof run>;
   try {
     ran = run(argv);
   } catch (e) {
     // SyntaxError: an input that is not JSON.
-    if (!(e instanceof UsageError || e instanceof SyntaxError)) throw e;
+    if (!(e instanceof UsageError || e instanceof SyntaxError)) {
+      // A bug: the error file says so, and the exception goes on up.
+      recordError(
+        errorFile,
+        `Internal error in algoviz: ${e instanceof Error ? e.message : String(e)}`,
+      );
+      throw e;
+    }
+    recordError(errorFile, e.message);
     err(`${e.message}\n\n${USAGE}`);
     return 2;
   }
   const { result, outFile } = ran;
   if (result.isError) {
+    recordError(errorFile, result.text);
     err(result.text);
     return 1;
   }
-  if (outFile === undefined) out(result.text);
-  else writeFileSync(outFile, `${result.text}\n`);
+  if (outFile !== undefined)
+    try {
+      writeFileSync(outFile, `${result.text}\n`);
+    } catch (e) {
+      const message = `Cannot write to ${outFile}: ${e instanceof Error ? e.message : String(e)}`;
+      recordError(errorFile, message);
+      err(message);
+      return 1;
+    }
+  else out(result.text);
+  recordError(errorFile, undefined);
   return 0;
 }

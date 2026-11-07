@@ -15,6 +15,7 @@
     "test:coverage": "vitest run --coverage",
     "test:e2e": "npm run test:e2e -w @algoviz/playground",
     "test:typst": "npm run test:typst -w @algoviz/typst",
+    "test:standalone": "npm run test:standalone -w @algoviz/mcp",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",

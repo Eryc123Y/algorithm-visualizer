@@ -71,9 +71,18 @@ From the repository without building, run `node --conditions=@algoviz/source pac
 
 - **Source.** A document file (`-` reads standard input), or a registry id with `--input`, which takes JSON text or a file, and runs that algorithm first.
 - **Steps.** `--step` takes any selector, may repeat, and may list several with commas. The figures are the frames they name, in timeline order; without `--step`, every frame.
-- **Output.** Standalone SVG with text as glyph outlines, the step's narration as `<desc>`, and one size for every frame of the document. `--theme` is `light`, `dark` or `print`.
+- **Output.** Standalone SVG with text as glyph outlines, the step's narration as `<desc>`, and one size for every frame of the document. `--theme` is `light`, `dark` or `print`. `--format tikz` writes `.tex` figures for the LaTeX package instead: the same shapes in TikZ, with text left to the document's fonts ([ADR 0027](../../docs/adr/0027-latex-package.md)).
 - **Files.** `--out` is a directory (created if missing; default the current one), and `--name` a pattern (default `{name}-{frame}`) with `{name}` (file name or algorithm id), `{frame}` (padded with zeros) and `{step}` (the selector with `/` and `#` written `_`). Existing files are replaced, and each written file is listed with its frame's selector.
 - **Errors.** Exit code 1 for an invalid document or input, an unknown algorithm or a selector that matches nothing; 2 for usage errors, such as an unknown placeholder or `--out` given a `.svg` file. Nothing is written unless every figure renders.
+- **For programs.**
+  - `--input-hex` takes the input as hexadecimal UTF-8 in place of `--input`, so a program that cannot quote JSON for every shell, such as the LaTeX package, can pass any input.
+  - `--error-file <file>` also writes the message of a failure to that file, and removes the file after a success.
+
+### Without Node.js
+
+`npm run build:standalone -w @algoviz/mcp` builds `dist/standalone/algoviz`, a 2 MB executable that runs every command but the MCP server with no Node.js installed ([ADR 0027](../../docs/adr/0027-latex-package.md)). It is the CLI's JavaScript compiled to bytecode for QuickJS-ng, the engine the Typst plugin uses, inside a small Rust program. The build needs rustup, which installs the pinned Rust, and a C compiler. It builds for the machine it runs on; `-- --target <triple>` builds for another target the toolchain has.
+
+A command takes about 20 ms to start, and one Dijkstra figure 45 ms on an Apple M4. Very long documents are slower than in Node, since QuickJS interprets: 0.3 s for the 1,024 steps of the longest bubble sort. `npm run test:standalone` builds the executable and checks that its figures are the Node CLI's, byte for byte. Releases for each platform wait for roadmap 4.3.
 
 ## The guide
 
