@@ -163,12 +163,14 @@ test('switches the code between pseudocode and Python, keeping the frame', async
   );
   const frame = await player.getAttribute('frame');
 
-  // The menu keeps its keys: from it, arrows and Space neither step the
-  // player nor start playback.
+  // From the menu, the left and right arrows still step the player, and
+  // leave the language alone.
   await languages.focus();
   await page.keyboard.press('ArrowRight');
-  await page.keyboard.press('Escape');
+  await expect(player).toHaveAttribute('frame', String(Number(frame) + 1));
+  await page.keyboard.press('ArrowLeft');
   await expect(player).toHaveAttribute('frame', frame!);
+  await expect(languages).toHaveValue('pseudocode');
   await languages.selectOption('python');
   await expect(languages).toHaveValue('python');
   await expect(player).toHaveAttribute('frame', frame!);
