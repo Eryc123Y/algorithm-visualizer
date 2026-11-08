@@ -44,8 +44,8 @@ function lines(scene: Scene, skip?: string): Obstacles['segments'] {
 const nodes = (scene: Scene) =>
   scene.items.filter((i): i is SceneNode => i.type === 'node');
 
-/** The box of a node's note, as painters place it. */
-function noteOf(n: SceneNode): LabelBox {
+/** The box of a node's note, as painters place it, `em` wide if given. */
+function noteOf(n: SceneNode, em?: number): LabelBox {
   const fontSize = Math.max(10, n.fontSize * 0.7);
   return noteBox(
     {
@@ -55,7 +55,7 @@ function noteOf(n: SceneNode): LabelBox {
       halfWidth: Math.max(n.radius, (n.width ?? 0) / 2),
     },
     n.labelAngle ?? 0,
-    (textWidth(n.label ?? '', font) * fontSize) / 2,
+    ((em ?? textWidth(n.label ?? '', font)) * fontSize) / 2,
     fontSize,
   );
 }
@@ -64,7 +64,7 @@ function noteOf(n: SceneNode): LabelBox {
  * Whether a tree node's note had a clear spot among its preferred ones,
  * above, above left and above right, away from edges and other nodes.
  */
-function hadRoom(scene: Scene, n: SceneNode): boolean {
+function hadRoom(scene: Scene, n: SceneNode, widest: number): boolean {
   const others: Obstacles = {
     segments: lines(scene),
     discs: nodes(scene)
@@ -73,7 +73,8 @@ function hadRoom(scene: Scene, n: SceneNode): boolean {
     boxes: [],
   };
   return [0, 315, 45].some(
-    (angle) => clearance(noteOf({ ...n, labelAngle: angle }), others) >= CLEAR,
+    (angle) =>
+      clearance(noteOf({ ...n, labelAngle: angle }, widest), others) >= CLEAR,
   );
 }
 
@@ -82,14 +83,17 @@ function hadRoom(scene: Scene, n: SceneNode): boolean {
  * note may, when none of its preferred spots was clear: it then keeps its
  * halo over the line (ADR 0031).
  */
-function crossings(scene: Scene, trees: ReadonlySet<string>): string[] {
+function crossings(scene: Scene, trees: ReadonlyMap<string, number>): string[] {
   const all: Obstacles = { segments: lines(scene), discs: [], boxes: [] };
   const out: string[] = [];
   for (const n of nodes(scene))
     if (
       n.label !== undefined &&
       clearance(noteOf(n), all) < CLEAR &&
-      !(trees.has(n.key.split('/')[0]!) && !hadRoom(scene, n))
+      !(
+        trees.has(n.key.split('/')[0]!) &&
+        !hadRoom(scene, n, trees.get(n.key.split('/')[0]!)!)
+      )
     )
       out.push(`note of ${n.key}`);
   for (const i of scene.items) {
@@ -133,10 +137,11 @@ describe('text clear of edges in the registry examples', () => {
     const trace = loadTrace(run.value.document);
     if (!trace.ok) throw new Error(id);
     const layout = layoutTrace(trace.value);
-    const trees = new Set(
-      Object.entries(run.value.document.structures)
-        .filter(([, d]) => d.kind === 'tree')
-        .map(([name]) => name),
+    // Each tree and its widest note, which layout chooses directions with.
+    const trees = new Map(
+      Object.entries(layout.metrics).flatMap(([name, m]) =>
+        m.kind === 'tree' ? [[name, m.metrics.noteWidth] as const] : [],
+      ),
     );
     const problems = new Set<string>();
     for (let f = 0; f <= trace.value.length; f++)

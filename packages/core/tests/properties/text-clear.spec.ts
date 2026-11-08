@@ -52,12 +52,16 @@ function linesOf(
 
 const halfOf = (n: SceneNode) => Math.max(n.radius, (n.width ?? 0) / 2);
 
-function noteAt(n: SceneNode, angle: number): LabelBox {
+/**
+ * A note's box at `angle`, its text `em` wide in the value font: its own
+ * width, or the widest note of the trace, which layout chooses with.
+ */
+function noteAt(n: SceneNode, angle: number, em?: number): LabelBox {
   const size = Math.max(10, n.fontSize * 0.7);
   return noteBox(
     { x: n.x, y: n.y, radius: n.radius, halfWidth: halfOf(n) },
     angle,
-    (textWidth(n.label ?? '', font) * size) / 2,
+    ((em ?? textWidth(n.label ?? '', font)) * size) / 2,
     size,
   );
 }
@@ -67,7 +71,7 @@ const overlaps = (p: LabelBox, q: LabelBox) =>
   Math.abs(p.y - q.y) < p.halfHeight + q.halfHeight + 2;
 
 /** What is wrong with the text of one scene. */
-function problems(scene: Scene, trees: ReadonlySet<string>): string[] {
+function problems(scene: Scene, trees: ReadonlyMap<string, number>): string[] {
   const out: string[] = [];
   const all = edges(scene).flatMap(linesOf);
   const noted = nodes(scene).filter((n) => n.label !== undefined);
@@ -85,7 +89,8 @@ function problems(scene: Scene, trees: ReadonlySet<string>): string[] {
     const dy = Math.max(0, Math.abs(box.y - n.y) - box.halfHeight);
     if (Math.hypot(dx, dy) < n.radius + NOTE_GAP - 1e-6)
       out.push(`note of ${n.key} inside its gap`);
-    if (!trees.has(n.key.split('/')[0]!)) continue;
+    const widest = trees.get(n.key.split('/')[0]!);
+    if (widest === undefined) continue;
     const others: Obstacles = {
       segments: all,
       discs: nodes(scene)
@@ -95,7 +100,7 @@ function problems(scene: Scene, trees: ReadonlySet<string>): string[] {
     };
     if (
       clearance(box, { ...others, discs: [], boxes: [] }) < CLEAR &&
-      [0, 315, 45].some((a) => clearance(noteAt(n, a), others) >= CLEAR)
+      [0, 315, 45].some((a) => clearance(noteAt(n, a, widest), others) >= CLEAR)
     )
       out.push(`note of ${n.key} crosses an edge but had room`);
   }
@@ -153,12 +158,13 @@ describe.each(['graph', 'tree'])('text clear of edges (%s)', (kind) => {
           const built = build(new Dice(values), [kind]);
           const loaded = loadTrace(built.doc);
           if (!loaded.ok) return;
-          const trees = new Set(
-            Object.entries(built.doc.structures)
-              .filter(([, d]) => d.kind === 'tree')
-              .map(([name]) => name),
-          );
           const layout = layoutTrace(loaded.value);
+          // Each tree and the width of its widest note, in em.
+          const trees = new Map(
+            Object.entries(layout.metrics).flatMap(([name, m]) =>
+              m.kind === 'tree' ? [[name, m.metrics.noteWidth] as const] : [],
+            ),
+          );
           // A dozen frames, evenly, always the first and the last.
           const n = loaded.value.length;
           const frames = new Set(
