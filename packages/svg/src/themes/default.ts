@@ -75,9 +75,10 @@ export const lightTheme: SvgTheme = {
     black: { fill: '#2b2f2d', stroke: '#111312', text: '#ffffff' },
   },
   edge: {
-    default: { stroke: '#9aa7a2', width: 1.75, opacity: 1 },
+    // 3:1 on white, as graphics need (WCAG 1.4.11).
+    default: { stroke: '#86928e', width: 1.75, opacity: 1 },
     link: { stroke: '#6b7772', width: 1.5, opacity: 1 },
-    highlight: { stroke: '#d08a18', width: 3, opacity: 1 },
+    highlight: { stroke: '#c27f12', width: 3, opacity: 1 },
     // Green, as settled cells: what is in the result. Teal is for pointers.
     selected: { stroke: '#2f7d4f', width: 3.5, opacity: 1 },
     rejected: { stroke: '#c9d3cf', width: 1.25, opacity: 1 },

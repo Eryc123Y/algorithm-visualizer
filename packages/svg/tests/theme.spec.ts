@@ -74,6 +74,15 @@ describe('createTheme', () => {
     expect(resolveTheme(lightTheme)).toBe(lightTheme);
   });
 
+  it('gives a theme object without TeX families those of ADR 0027', () => {
+    const old = Object.fromEntries(
+      Object.entries(themes.textbook).filter(([key]) => key !== 'tex'),
+    );
+    const theme = resolveTheme(old as unknown as SvgTheme);
+    expect(theme.tex).toEqual({ value: 'normal', label: 'sf' });
+    expect(theme.fontMetrics).toBe(themes.textbook.fontMetrics);
+  });
+
   it('lets null replace a value, e.g. to remove shadows', () => {
     expect(createTheme(lightTheme, { shadow: null }).shadow).toBeNull();
   });
@@ -175,6 +184,16 @@ describe.each(Object.entries(themes))('the %s theme', (name, t) => {
     if (t.settledMark !== null)
       pairs.push(['check mark', t.settledMark, t.cell.settled.fill]);
     expect(below(pairs, 3)).toEqual([]);
+  });
+
+  it('draws edges at 3:1 against its paper (non-text contrast)', () => {
+    const { edge } = t;
+    const pairs: Pair[] = (
+      ['default', 'link', 'highlight', 'selected'] as const
+    ).map((role) => [`${role} edge`, edge[role].stroke, paper(t)]);
+    expect(below(pairs, 3)).toEqual([]);
+    // Rejected edges are faint on purpose, but not invisible.
+    expect(ratio(edge.rejected.stroke, paper(t))).toBeGreaterThan(1.2);
   });
 
   it('paints its paper unless the paper is light', () => {

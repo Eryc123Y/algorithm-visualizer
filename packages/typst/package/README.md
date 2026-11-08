@@ -41,7 +41,7 @@ The algoviz engine runs inside the package as a WebAssembly plugin, so nothing e
 
   A section alone (`"insert-5"`) or a range (`"2..5"`) names several frames, so use it with `algoviz-series`.
 
-- **`theme`** is `"light"`, `"dark"` or `"print"`.
+- **`theme`** is a built-in theme: `"light"` (the default), `"dark"`, `"print"`, `"textbook"`, `"textbook-dark"`, `"blocks"`, `"blocks-dark"`, `"answer-sheet"` or `"turbo-c"`.
 - **`layout`** says where the structures an algorithm keeps besides its main one go, such as Dijkstra's priority queue or a call stack: `"narrow"`, the default here, puts them below the main structure, for a column of notes; `"wide"` puts them beside it. `algoviz-slides` draws wide by default.
 - **`width`, `height`, `fit` and `alt`** are passed to `image`. `alt` defaults to the narration of the step.
 

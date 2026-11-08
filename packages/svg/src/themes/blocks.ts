@@ -86,7 +86,8 @@ export const blocksTheme: SvgTheme = {
   edge: {
     default: { stroke: navy, width: 2.5, opacity: 1 },
     link: { stroke: navy, width: 2, opacity: 1 },
-    highlight: { stroke: '#f2a900', width: 4, opacity: 1 },
+    // Amber rather than the yellow rod, for 3:1 on white.
+    highlight: { stroke: '#c98300', width: 4, opacity: 1 },
     selected: { stroke: green, width: 5, opacity: 1 },
     rejected: { stroke: '#c3c8d6', width: 2, opacity: 1 },
   },

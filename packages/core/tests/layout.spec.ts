@@ -224,6 +224,19 @@ describe('captions', () => {
     expect(boxes(scene)[0]!.y).toBeLessThan(boxes(lone('values'))[0]!.y);
   });
 
+  it('leaves a lone graph uncaptioned too, on one canvas for every frame', () => {
+    const trace = mustLoad({
+      version: '0.1',
+      structures: {
+        g: { kind: 'graph', nodes: ['A', 'B'], edges: [['A', 'B']] },
+      },
+      steps: [{ actions: [{ target: 'g', type: 'highlight', nodes: ['A'] }] }],
+    });
+    const layout = layoutTrace(trace);
+    expect(titles(layout.sceneAt(0))).toEqual([]);
+    expect(layout.sceneAt(1).height).toBe(layout.sceneAt(0).height);
+  });
+
   it('captions a lone structure that has a label', () => {
     expect(titles(lone('values'))).toEqual(['values']);
   });

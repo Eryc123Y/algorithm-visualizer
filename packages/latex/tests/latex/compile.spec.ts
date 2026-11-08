@@ -222,6 +222,18 @@ describe('the package', () => {
     expect(calls(dir)).toEqual([]);
   });
 
+  it('refuses a figure file of another format, naming both', () => {
+    const dir = workspace();
+    writeFileSync(
+      join(dir, 'old.tex'),
+      '\\algoviz@figure{1}{100}{40}{%\n\\algoviz@color{1}{1F2A26}%\n}{%\n}%\n',
+    );
+    const file = document(dir, 'old-format', '\\algovizinput{old.tex}');
+    expect(tex(dir, file, 'off')).toContain(
+      "The figure 'old.tex' has format 1, but this package reads format 2.",
+    );
+  });
+
   it('shows the engine’s errors in the document, with the step names', () => {
     const dir = workspace();
     const file = document(
