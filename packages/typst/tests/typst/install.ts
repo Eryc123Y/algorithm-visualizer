@@ -99,13 +99,18 @@ export function frameworksMissing(): string | undefined {
   }
 }
 
-/** The SVG `algoviz export` draws for a document. */
+/**
+ * The SVG `algoviz export` draws for a document, in the layout the Typst
+ * function draws in by default: narrow for notes, wide for slides (ADR
+ * 0029).
+ */
 export function exported(
   document: unknown,
   steps: readonly (string | number)[],
   theme: ThemeName,
+  layout: 'wide' | 'narrow' = 'narrow',
 ): string[] {
-  const series = exportFigures(document, { steps, theme });
+  const series = exportFigures(document, { steps, theme, layout });
   if (!series.ok) throw new Error(JSON.stringify(series.error));
   return series.value.figures.map((f) => f.svg);
 }

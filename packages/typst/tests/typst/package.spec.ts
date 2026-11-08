@@ -164,6 +164,45 @@ describe('figures in Typst', () => {
   });
 });
 
+describe('layout (ADR 0029)', () => {
+  // An array with a stack in the side panel.
+  const sided = {
+    version: '0.4',
+    structures: {
+      a: { kind: 'array', initial: [3, 1, 2] },
+      calls: { kind: 'stack', initial: ['sort'], place: 'side' },
+    },
+    steps: [{ actions: [{ target: 'a', type: 'swap', i: 0, j: 1 }] }],
+  };
+
+  it('is narrow for notes by default, and takes "wide"', () => {
+    writeFileSync(join(root, 'sided.json'), JSON.stringify(sided));
+    const [one, wide, series, figures] = evaluate(
+      `(
+        str(algoviz(json("/sided.json")).source),
+        str(algoviz(json("/sided.json"), layout: "wide").source),
+        algoviz-series(json("/sided.json")).map(i => str(i.source)),
+        algoviz-figures(json("/sided.json"), layout: "wide").figures.map(f => f.svg),
+      )`,
+    ) as [string, string, string[], string[]];
+    expect(one).toBe(exported(sided, [-1], 'light', 'narrow')[0]);
+    expect(wide).toBe(exported(sided, [-1], 'light', 'wide')[0]);
+    expect(one).not.toBe(wide);
+    expect(series).toEqual(exported(sided, [], 'light', 'narrow'));
+    expect(figures).toEqual(exported(sided, [], 'light', 'wide'));
+  });
+
+  it('reports an unknown layout, and stops for one of the wrong type', () => {
+    writeFileSync(join(root, 'sided.json'), JSON.stringify(sided));
+    expect(
+      evaluate('algoviz-figures(json("/sided.json"), layout: "square")'),
+    ).toMatchObject({ ok: false, diagnostics: [{ code: 'UNKNOWN_LAYOUT' }] });
+    expect(failure('algoviz(json("/sided.json"), layout: 1)')).toContain(
+      '`layout` takes "wide" or "narrow"',
+    );
+  });
+});
+
 describe('errors', () => {
   it('replace the figure with a box, or stop compilation when strict', () => {
     const doc = join(root, 'strict.typ');

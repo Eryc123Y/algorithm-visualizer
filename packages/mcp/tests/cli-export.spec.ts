@@ -161,6 +161,60 @@ describe('algoviz export', () => {
     );
   });
 
+  it('draws side structures beside or below with --layout', () => {
+    // An array with a stack in the side panel (ADR 0029).
+    const sided = join(dir, 'sided.json');
+    writeFileSync(
+      sided,
+      JSON.stringify({
+        version: '0.4',
+        structures: {
+          a: { kind: 'array', initial: [3, 1, 2] },
+          calls: { kind: 'stack', initial: ['sort'], place: 'side' },
+        },
+        steps: [{ actions: [{ target: 'a', type: 'swap', i: 0, j: 1 }] }],
+      }),
+    );
+    const sizes = (...extra: string[]) => {
+      const out = outDir();
+      const formats = ['svg', 'tikz'].map((format) => {
+        expect(
+          run(
+            'export',
+            sided,
+            '--step',
+            '1',
+            '--format',
+            format,
+            ...extra,
+            '--out',
+            out,
+          ).code,
+        ).toBe(0);
+        return format;
+      });
+      expect(formats).toHaveLength(2);
+      const svg = readFileSync(join(out, 'sided-1.svg'), 'utf8');
+      const tex = readFileSync(join(out, 'sided-1.tex'), 'utf8');
+      return { svg: sizeOf(svg).map(Number), tex };
+    };
+    const byDefault = sizes();
+    const wide = sizes('--layout', 'wide');
+    const narrow = sizes('--layout=narrow');
+    expect(wide).toEqual(byDefault);
+    expect(wide.svg[0]).toBeGreaterThan(narrow.svg[0]!);
+    expect(wide.svg[1]).toBeLessThan(narrow.svg[1]!);
+    expect(narrow.tex).not.toBe(wide.tex);
+
+    const frame = join(dir, 'sided-render.svg');
+    expect(
+      run('render', sided, '--layout', 'narrow', '--out', frame).code,
+    ).toBe(0);
+    expect(sizeOf(readFileSync(frame, 'utf8')).map(Number)[0]).toBeLessThan(
+      wide.svg[0]!,
+    );
+  });
+
   it('writes into the current directory by default', () => {
     const cwd = process.cwd();
     const here = mkdtempSync(join(dir, 'cwd-'));
@@ -277,6 +331,15 @@ describe('algoviz export errors', () => {
     expect(usage('export', bstFile, '--name', '{nope}')).toContain('{nope}');
     expect(usage('export', bstFile, '--name', 'fixed')).toContain('{frame}');
     expect(usage('export', bstFile, '--theme', 'neon')).toContain('neon');
+    expect(usage('export', bstFile, '--layout', 'square')).toContain(
+      'Unknown layout "square"; use wide, narrow',
+    );
+    expect(usage('render', bstFile, '--layout', 'square')).toContain(
+      'Unknown layout "square"; use wide, narrow',
+    );
+    expect(usage('validate', bstFile, '--layout', 'narrow')).toContain(
+      '--layout only applies to export and render',
+    );
     expect(usage('export', bstFile, '--frame', '1')).toContain('--step');
     expect(usage('render', bstFile, '--step', '1')).toContain('export');
     expect(usage('run', 'bst', '{}', '--input', '{}')).toContain('export');
@@ -284,6 +347,7 @@ describe('algoviz export errors', () => {
 
   it('lists export in the usage', () => {
     expect(run().out).toContain('algoviz export');
+    expect(run().out).toContain('[--layout wide|narrow]');
   });
 });
 

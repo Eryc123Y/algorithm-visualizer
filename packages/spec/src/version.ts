@@ -14,7 +14,7 @@ import type { VisualizationInput } from './visualization.ts';
  * change appends a version here and adds its features to
  * `PROTOCOL_FEATURES`.
  */
-export const PROTOCOL_VERSIONS = ['0.1', '0.2', '0.3'] as const;
+export const PROTOCOL_VERSIONS = ['0.1', '0.2', '0.3', '0.4'] as const;
 
 /** A protocol version this package reads. */
 export type ProtocolVersion = (typeof PROTOCOL_VERSIONS)[number];
@@ -171,6 +171,12 @@ export const PROTOCOL_FEATURES: readonly ProtocolFeature[] = [
     name: 'anchors',
     since: '0.3',
     usedBy: (d) => d.steps.some((step) => step.meta?.at !== undefined),
+  },
+  {
+    name: 'placement',
+    since: '0.4',
+    usedBy: (d) =>
+      Object.values(d.structures).some((s) => s.place !== undefined),
   },
 ];
 

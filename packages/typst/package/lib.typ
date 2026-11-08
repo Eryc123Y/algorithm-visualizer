@@ -79,6 +79,21 @@
   theme
 }
 
+// Where structures with `place: "side"` go (ADR 0029): `auto` is the
+// function's own default, "narrow" for notes and "wide" for slides; the
+// engine checks the name.
+#let _layout(name, layout, default) = {
+  if layout == auto { return default }
+  if type(layout) != str {
+    panic(
+      name
+        + ": `layout` takes \"wide\" or \"narrow\", not "
+        + repr(type(layout)),
+    )
+  }
+  layout
+}
+
 // What the engine reported, as a box in place of the figure, or as a
 // compile error when `strict` is true. The box holds the diagnostics as
 // metadata labelled <algoviz-error>, so `query(<algoviz-error>)` lists them.
@@ -132,6 +147,10 @@
 /// - step (int, str): The frame: a number (0 the start, -1 the last), a step
 ///   such as "relax#3", or a step in a section such as "insert-5/relax#2".
 /// - theme (str): "light", "dark" or "print".
+/// - layout (auto, str): Where structures the document places on the side,
+///   such as a queue or a call stack, go: "narrow" (the default here) puts
+///   them below the main ones, for a column of notes; "wide" puts them
+///   beside, for slides.
 /// - strict (bool): Stop compilation on an error, instead of showing it in
 ///   place of the figure.
 /// - width, height, fit, alt: As for `image`; `alt` defaults to the step's
@@ -142,6 +161,7 @@
   ..args,
   step: -1,
   theme: "light",
+  layout: auto,
   strict: false,
   width: auto,
   height: auto,
@@ -152,6 +172,7 @@
   let response = _render(request + (
     step: _selector("algoviz", "step", step),
     theme: _theme("algoviz", theme),
+    layout: _layout("algoviz", layout, "narrow"),
   ))
   if response.ok {
     _image(response.figures.first(), width, height, fit, alt)
@@ -166,12 +187,14 @@
 /// - steps (auto, int, str, array): `auto` for every frame, or the
 ///   selectors of `algoviz`'s `step`; a section such as "insert-5" or a
 ///   range such as "2..5" names several frames.
+/// - theme, layout, strict, width, height, fit: As for `algoviz`.
 /// -> array
 #let algoviz-series(
   source,
   ..args,
   steps: auto,
   theme: "light",
+  layout: auto,
   strict: false,
   width: auto,
   height: auto,
@@ -181,6 +204,7 @@
   let response = _render(request + (
     steps: _selectors("algoviz-series", steps),
     theme: _theme("algoviz-series", theme),
+    layout: _layout("algoviz-series", layout, "narrow"),
   ))
   if response.ok {
     response.figures.map(f => _image(f, width, height, fit, auto))
@@ -192,13 +216,21 @@
 /// The engine's answer for a series, as data: `(ok: true, frames: n,
 /// figures: ((frame:, selector:, width:, height:, narration:, svg:), ..))`,
 /// or `(ok: false, diagnostics: ((code:, path:, message:, hint:), ..))`.
-/// For captions, custom layouts and slides.
+/// For captions, custom layouts and slides. `layout` is "narrow" by
+/// default, as for `algoviz`.
 /// -> dictionary
-#let algoviz-figures(source, ..args, steps: auto, theme: "light") = {
+#let algoviz-figures(
+  source,
+  ..args,
+  steps: auto,
+  theme: "light",
+  layout: auto,
+) = {
   let request = _source("algoviz-figures", source, args)
   _render(request + (
     steps: _selectors("algoviz-figures", steps),
     theme: _theme("algoviz-figures", theme),
+    layout: _layout("algoviz-figures", layout, "narrow"),
   ))
 }
 
@@ -214,6 +246,8 @@
 /// - start (int): The subslide of the first frame. The last frame stays from
 ///   its subslide on. A series of one frame is the image alone, on every
 ///   subslide, whatever `start` says.
+/// - layout (auto, str): As for `algoviz`, but "wide" by default, as slides
+///   have room beside the main structure.
 /// - theme, strict, width, height, fit: As for `algoviz`.
 /// -> content
 #let algoviz-slides(
@@ -223,6 +257,7 @@
   steps: auto,
   start: 1,
   theme: "light",
+  layout: auto,
   strict: false,
   width: auto,
   height: auto,
@@ -244,6 +279,7 @@
   let response = _render(request + (
     steps: _selectors("algoviz-slides", steps),
     theme: _theme("algoviz-slides", theme),
+    layout: _layout("algoviz-slides", layout, "wide"),
   ))
   if not response.ok {
     return _failure("algoviz-slides", response.diagnostics, strict)

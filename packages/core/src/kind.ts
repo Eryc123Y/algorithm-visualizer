@@ -11,7 +11,7 @@
 import type { Result } from '@algoviz/spec';
 
 import type { ReduceError } from './errors.ts';
-import type { LayoutFonts, LayoutOptions } from './layout/options.ts';
+import type { LayoutFonts, LayoutOptions, Region } from './layout/options.ts';
 import type { SceneItem } from './layout/scene.ts';
 
 export interface StructureState<Data, Marks> {
@@ -37,6 +37,8 @@ export interface LayoutInput<Decl, State, Metrics> {
   readonly metrics: Metrics;
   /** Top-left corner of the structure's block. */
   readonly origin: { readonly x: number; readonly y: number };
+  /** The column the structure is drawn in (ADR 0029). */
+  readonly region: Region;
   readonly options: LayoutOptions;
 }
 

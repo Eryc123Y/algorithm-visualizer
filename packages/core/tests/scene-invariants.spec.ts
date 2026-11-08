@@ -30,6 +30,7 @@ const fixtures = ['core/valid', 'spec/valid'].flatMap((dir) =>
 describe.each([
   ['default options', {}],
   ['bare options', bareLayoutOptions],
+  ['narrow layout', { layout: 'narrow' as const }],
 ])('scene invariants (%s)', (_, options) => {
   it.each(fixtures)('%s', (name, fixture) => {
     const result = loadTrace(fixture.input);

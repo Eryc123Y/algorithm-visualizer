@@ -81,9 +81,10 @@ export async function expectStageMatches(
   document: unknown,
 ): Promise<void> {
   await settle(player);
-  const { frame, mode, drawn } = await player.evaluate((el) => ({
+  const { frame, mode, layout, drawn } = await player.evaluate((el) => ({
     frame: Number(el.getAttribute('frame')),
     mode: el.getAttribute('mode') ?? 'interactive',
+    layout: el.getAttribute('layout') === 'narrow' ? 'narrow' : 'wide',
     drawn: [
       ...el.shadowRoot!.querySelectorAll<SVGGElement>('svg.scene g[data-key]'),
     ].map((g) => ({
@@ -94,7 +95,10 @@ export async function expectStageMatches(
   }));
   const loaded = loadTrace(document);
   if (!loaded.ok) throw new Error(JSON.stringify(loaded.error));
-  const options = mode === 'display' ? bareLayoutOptions : defaultLayoutOptions;
+  const options = {
+    ...(mode === 'display' ? bareLayoutOptions : defaultLayoutOptions),
+    layout: layout as 'wide' | 'narrow',
+  };
   const scene = paintScene(layoutTrace(loaded.value, options).sceneAt(frame));
   const want = new Map(
     scene.items.map((i) => [i.key, `${num(i.x)},${num(i.y)}`]),

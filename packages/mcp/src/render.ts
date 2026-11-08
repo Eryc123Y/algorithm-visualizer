@@ -1,7 +1,7 @@
 /**
  * One frame of a document as a standalone SVG image.
  */
-import { layoutTrace } from '@algoviz/core';
+import { layoutTrace, type FigureLayout } from '@algoviz/core';
 import { ok, type Diagnostic, type Result } from '@algoviz/spec';
 import { renderSvg, themes, type ThemeName } from '@algoviz/svg';
 
@@ -14,6 +14,8 @@ export interface RenderOptions {
    */
   readonly frame?: FrameSelector;
   readonly theme?: ThemeName;
+  /** Where side structures go (ADR 0029); default `'wide'`, as in the player. */
+  readonly layout?: FigureLayout;
 }
 
 export interface RenderResult {
@@ -26,7 +28,7 @@ export interface RenderResult {
 
 export function render(
   input: unknown,
-  { frame = -1, theme = 'light' }: RenderOptions = {},
+  { frame = -1, theme = 'light', layout = 'wide' }: RenderOptions = {},
 ): Result<RenderResult, readonly Diagnostic[]> {
   const loaded = loadDocument(input);
   if (!loaded.ok) return loaded;
@@ -37,6 +39,7 @@ export function render(
   // player would.
   const scene = layoutTrace(trace, {
     fonts: themes[theme].fontMetrics,
+    layout,
   }).sceneAt(index.value);
   return ok({
     frame: index.value,

@@ -9,7 +9,7 @@
  */
 import { z } from 'zod';
 
-import { Index, LIMITS, Scalar } from '../common.ts';
+import { Index, LIMITS, Place, Scalar } from '../common.ts';
 import { typesOf, type DeclIssue, type KindSpec } from './kind.ts';
 
 const Labels = z
@@ -34,6 +34,7 @@ export const TableDecl = z
   .strictObject({
     kind: z.literal('table'),
     label: z.string().max(LIMITS.textLength).optional(),
+    place: Place.optional(),
     cells: Grid.describe('Rows of cells; null cells are empty.'),
     rowLabels: Labels.optional(),
     columnLabels: Labels.optional(),
@@ -45,6 +46,7 @@ export const TableDeclInput = z
   .strictObject({
     kind: z.literal('table'),
     label: z.string().max(LIMITS.textLength).optional(),
+    place: Place.optional(),
     rows: z.int().min(0).max(LIMITS.tableRows).optional(),
     columns: z.int().min(0).max(LIMITS.tableColumns).optional(),
     initial: Grid.optional().describe(

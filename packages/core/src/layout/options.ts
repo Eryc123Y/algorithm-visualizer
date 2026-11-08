@@ -23,13 +23,31 @@ export const defaultFonts: LayoutFonts = {
 };
 
 /**
+ * How a figure arranges structures declared with `place: "side"` (ADR
+ * 0029): in a column right of the main ones (`wide`, for slides and the
+ * player) or below them (`narrow`, for a column of notes).
+ */
+export type FigureLayout = 'wide' | 'narrow';
+
+/**
+ * Where a structure is drawn: `side` in the side column of a wide figure,
+ * `main` everywhere else. Kinds that can draw either way, such as the
+ * priority queue, follow it.
+ */
+export type Region = 'main' | 'side';
+
+/**
  * Geometry settings shared by all kinds' layouts.
  */
 export interface LayoutOptions {
   /** Margin around the whole scene. */
   readonly padding: number;
+  /** Where side structures go; see `FigureLayout`. */
+  readonly layout: FigureLayout;
   /** Vertical space between structures. */
   readonly structureGap: number;
+  /** Horizontal space between the main and side columns of a wide figure. */
+  readonly columnGap: number;
   readonly cellHeight: number;
   readonly minCellWidth: number;
   readonly cellGap: number;
@@ -53,7 +71,9 @@ export interface LayoutOptions {
 
 export const defaultLayoutOptions: LayoutOptions = {
   padding: 20,
+  layout: 'wide',
   structureGap: 28,
+  columnGap: 40,
   cellHeight: 52,
   minCellWidth: 52,
   cellGap: 8,

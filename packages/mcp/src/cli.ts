@@ -5,8 +5,9 @@
  *   algoviz guide [kind …]
  *   algoviz validate <file>
  *   algoviz inspect <file> [frame …]
- *   algoviz render <file> [--frame f] [--theme dark] [--out frame.svg]
- *   algoviz export <file> [--step s …] [--theme t] [--format svg|tikz]
+ *   algoviz render <file> [--frame f] [--theme dark] [--layout narrow]
+ *                  [--out frame.svg]
+ *   algoviz export <file> [--step s …] [--theme t] [--layout l] [--format svg|tikz]
  *                  [--one-file] [--out dir] [--name pattern]
  *                  [--error-file file]
  *   algoviz export <id> --input <json|file> [the same options]
@@ -29,6 +30,7 @@ import {
 } from 'node:fs';
 import { basename, dirname, extname, join } from 'node:path';
 
+import type { FigureLayout } from '@algoviz/core';
 import { runAlgorithm } from '@algoviz/recipes';
 import { formatErrors, ok, type Diagnostic, type Result } from '@algoviz/spec';
 import { exportFigures, themes, type ThemeName } from '@algoviz/svg';
@@ -49,9 +51,11 @@ const USAGE = `Usage:
   algoviz guide [kind …]                 Authoring guide (all kinds by default)
   algoviz validate <file>                Check a document
   algoviz inspect <file> [frame …]       State at frames (default: the last)
-  algoviz render <file> [--frame f] [--theme light|dark] [--out file.svg]
+  algoviz render <file> [--frame f] [--theme light|dark]
+                 [--layout wide|narrow] [--out file.svg]
   algoviz export <file> [--step s …] [--theme light|dark|print]
-                 [--format svg|tikz] [--one-file] [--out dir]
+                 [--layout wide|narrow] [--format svg|tikz] [--one-file]
+                 [--out dir]
                  [--name pattern] [--error-file file]
                                          Write frames as SVG or TikZ figures
   algoviz export <id> --input <json|file> [the same options]
@@ -68,7 +72,9 @@ them with commas, and every frame is the default. It names files with
 {name}, {frame} and {step} (default "${DEFAULT_PATTERN}") and writes them to the
 --out directory (default: the current one). --format tikz writes .tex files
 for the algoviz LaTeX package, and --one-file writes all of them into one
-file, named "{name}" by default, for Beamer overlays. --input-hex takes the
+file, named "{name}" by default, for Beamer overlays. --layout says where
+structures declared with "place": "side" go: beside the others (wide, the
+default) or below them (narrow, for a column of notes). --input-hex takes the
 input as hexadecimal UTF-8, for programs that cannot quote JSON for a shell,
 and --error-file also writes any error to a file, which a successful export
 removes.`;
@@ -88,6 +94,7 @@ function readText(file: string, hint = ''): string {
 interface Options {
   frame?: string;
   theme?: string;
+  layout?: string;
   out?: string;
   /** Export only: selectors, each possibly a comma-separated list. */
   step?: string[];
@@ -135,6 +142,7 @@ function parse(argv: readonly string[]) {
     else if (flag === '--error-file') values.errorFile = take();
     else if (flag === '--name') values.name = take();
     else if (flag === '--theme') values.theme = take();
+    else if (flag === '--layout') values.layout = take();
     else if (flag === '--out' || flag === '-o') values.out = take();
     else if (arg === '--one-file') values.oneFile = true;
     else if (arg === '--help' || arg === '-h') values.help = true;
@@ -156,6 +164,8 @@ function run(argv: readonly string[]): {
   for (const [key, flag] of Object.entries(EXPORT_ONLY))
     if (values[key as keyof typeof EXPORT_ONLY] !== undefined)
       throw new UsageError(`${flag} only applies to export`);
+  if (values.layout !== undefined && command !== 'render')
+    throw new UsageError('--layout only applies to export and render');
   return { result: dispatch(command, rest, values), outFile: values.out };
 }
 
@@ -166,6 +176,18 @@ const failure = (errors: readonly Diagnostic[]): ToolResult => ({
 
 const isThemeName = (name: string): name is ThemeName =>
   Object.hasOwn(themes, name);
+
+const LAYOUTS: readonly FigureLayout[] = ['wide', 'narrow'];
+
+/** The layout a flag names, wide by default (ADR 0029). */
+function layoutOf(name: string | undefined): FigureLayout {
+  const layout = name ?? 'wide';
+  if (!(LAYOUTS as readonly string[]).includes(layout))
+    throw new UsageError(
+      `Unknown layout "${layout}"; use ${LAYOUTS.join(', ')}`,
+    );
+  return layout as FigureLayout;
+}
 
 /**
  * Text from hexadecimal UTF-8, as the LaTeX package passes input: digits
@@ -233,7 +255,11 @@ interface FormattedFigure {
 /** The figures of a series in one format, as files are written from them. */
 function exportSeries(
   document: unknown,
-  options: { steps: readonly string[]; theme: ThemeName },
+  options: {
+    steps: readonly string[];
+    theme: ThemeName;
+    layout: FigureLayout;
+  },
   format: FigureFormat,
 ): Result<
   { readonly frames: number; readonly figures: readonly FormattedFigure[] },
@@ -272,6 +298,7 @@ function exportCommand(rest: readonly string[], values: Options): ToolResult {
     throw new UsageError(
       `Unknown theme "${theme}"; use ${Object.keys(themes).join(', ')}`,
     );
+  const layout = layoutOf(values.layout);
   const format = values.format ?? 'svg';
   if (!isFormat(format))
     throw new UsageError(`Unknown format "${format}"; use svg or tikz`);
@@ -294,7 +321,7 @@ function exportCommand(rest: readonly string[], values: Options): ToolResult {
   const steps = (values.step ?? []).flatMap((s) =>
     s.split(',').map((part) => part.trim()),
   );
-  const series = exportSeries(document.value, { steps, theme }, format);
+  const series = exportSeries(document.value, { steps, theme, layout }, format);
   if (!series.ok) return failure(series.error);
   const name =
     values.input !== undefined || values.inputHex !== undefined
@@ -343,7 +370,11 @@ function exportCommand(rest: readonly string[], values: Options): ToolResult {
 function dispatch(
   command: string,
   rest: readonly string[],
-  values: { frame?: string | undefined; theme?: string | undefined },
+  values: {
+    frame?: string | undefined;
+    theme?: string | undefined;
+    layout?: string | undefined;
+  },
 ): ToolResult {
   const file = rest[0];
   const needFile = () => {
@@ -368,6 +399,9 @@ function dispatch(
         document: needFile(),
         ...(values.frame === undefined ? {} : { frame: values.frame }),
         ...(values.theme === undefined ? {} : { theme: values.theme }),
+        ...(values.layout === undefined
+          ? {}
+          : { layout: layoutOf(values.layout) }),
       });
     case 'recipes':
       return callTool('algoviz_list_recipes', {});

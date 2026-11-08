@@ -11,7 +11,14 @@
  */
 import { z } from 'zod';
 
-import { ElementId, Group, LIMITS, PointerName, Scalar } from '../common.ts';
+import {
+  ElementId,
+  Group,
+  LIMITS,
+  Place,
+  PointerName,
+  Scalar,
+} from '../common.ts';
 import { typesOf, type DeclIssue, type IdRef, type KindSpec } from './kind.ts';
 
 const Coordinate = z.number().min(-1e5).max(1e5);
@@ -80,6 +87,7 @@ export const GraphDecl = z
   .strictObject({
     kind: z.literal('graph'),
     label: z.string().max(LIMITS.textLength).optional(),
+    place: Place.optional(),
     directed: z.boolean(),
     layout: GraphLayout,
     nodes: z.array(GraphNode).max(LIMITS.elementsPerStructure),
@@ -91,6 +99,7 @@ export type GraphDecl = z.infer<typeof GraphDecl>;
 export const GraphDeclInput = z.strictObject({
   kind: z.literal('graph'),
   label: z.string().max(LIMITS.textLength).optional(),
+  place: Place.optional(),
   directed: z.boolean().optional().describe('Default false.'),
   layout: GraphLayout.optional(),
   nodes: z.array(NodeInput).max(LIMITS.elementsPerStructure).optional(),

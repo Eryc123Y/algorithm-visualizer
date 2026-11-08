@@ -15,6 +15,7 @@ import {
   Index,
   isElement,
   LIMITS,
+  Place,
   PointerName,
   Scalar,
 } from '../common.ts';
@@ -36,6 +37,7 @@ export const ArrayDecl = z
   .strictObject({
     kind: z.literal('array'),
     label: z.string().max(LIMITS.textLength).optional(),
+    place: Place.optional(),
     view: View,
     initial: z.array(Element).max(LIMITS.elementsPerStructure),
   })

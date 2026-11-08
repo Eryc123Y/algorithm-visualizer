@@ -97,6 +97,8 @@ algoviz export bst.delete --input '{"from": [8, 3, 10, 1, 6], "key": 3}' \
 
 `--step` takes the selectors the player takes: a frame number (`-1` is the last), a step name (`relax#3`), a step in a section (`insert-5/relax`), a section (`insert-5`) or a range (`a..b`). It may repeat or list several with commas, and every frame is exported without it. `--theme` is `light` (the default), `dark` or `print`. `--out` is the directory, the current one by default. `--name` is the file name pattern, `{name}-{frame}` by default: `{name}` is the document file's name or the algorithm id, `{frame}` the frame number padded with zeros, and `{step}` the step's selector with `/` and `#` written `_`, such as `insert-5_relax_2`. Each step's narration goes into its figure as an SVG description.
 
+A figure draws the structures an algorithm keeps besides its main one, such as Dijkstra's priority queue or a call stack, in a side panel ([ADR 0029](docs/adr/0029-auxiliary-structures.md)). `--layout wide`, the default, puts the side panel right of the main structure, for slides and web pages; `--layout narrow` puts it below, for a column of notes. The Typst and LaTeX packages draw narrow in notes and wide on slides by default, and take `layout` too.
+
 `--format tikz` writes the same figures as TikZ in `.tex` files, with text left to the fonts of the LaTeX document that includes them ([ADR 0027](docs/adr/0027-latex-package.md)). The command also builds as a standalone 2 MB executable that needs no Node.js; see [the CLI's README](packages/mcp/README.md#without-nodejs).
 
 In Typst, [the algoviz package](packages/typst/package/README.md) draws the same figures from inside a document, with the engine running in a WebAssembly plugin, so students need nothing but Typst ([ADR 0026](docs/adr/0026-typst-package.md)):
@@ -133,7 +135,7 @@ In slides, a series steps through one frame per overlay, all in one picture ([AD
 #algoviz-slides(only, "dijkstra", (graph: graph, source: "A"), steps: "relax#1..-1", height: 75%)
 ```
 
-In code, `exportFigures(document, { steps, theme })` from `@algoviz/svg` returns the same figures as strings, and `selectSeries` from `@algoviz/core` the frames that selectors name. `prepareFigures(document, { theme })` loads a document once and then draws a figure of any frame, or any series, on demand.
+In code, `exportFigures(document, { steps, theme, layout })` from `@algoviz/svg` returns the same figures as strings, and `selectSeries` from `@algoviz/core` the frames that selectors name. `prepareFigures(document, { theme, layout })` loads a document once and then draws a figure of any frame, or any series, on demand.
 
 ## Embedding
 
@@ -149,7 +151,7 @@ Build the standalone bundle with `npm run build -w @algoviz/elements`, then:
 </algo-player>
 ```
 
-Attributes: `src`, `frame`, `theme` (`auto` · `light` · `dark` · `print`), `speed` (ms per step), `autoplay`, `loop`, `hide-controls`, `hide-code`, `language`. Style the chrome with CSS custom properties such as `--algo-accent`, or pass a full scene theme as the `customTheme` property.
+Attributes: `src`, `frame`, `theme` (`auto` · `light` · `dark` · `print`), `layout` (`wide`, the default, or `narrow`, which puts side structures below the main one for a narrow column), `speed` (ms per step), `autoplay`, `loop`, `hide-controls`, `hide-code`, `language`. Style the chrome with CSS custom properties such as `--algo-accent`, or pass a full scene theme as the `customTheme` property.
 
 `frame` takes a frame number or a selector that names a step by meaning, so a link or a page keeps showing the same step when a document gains steps elsewhere: `frame="relax#3"` (the third step named `relax`), `frame="insert-5/fixup-case-3"` (counting inside section `insert-5`), `frame="insert-5"` (that section, from its first step) or `frame="-1"` (the last frame). Documents give steps names with `meta.id` and group them into `sections` ([ADR 0020](docs/adr/0020-step-names-and-sections.md)); the timeline shows the sections, and Page Up and Page Down move between them. Page scripts read `player.stepName` and `player.section` (the section's id, title and start), and the `algo-frame` event carries `stepName` and `sectionId`. The `frame` property reads back as a number once the document has loaded.
 

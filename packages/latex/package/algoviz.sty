@@ -100,6 +100,11 @@
 \bool_new:N \l__algoviz_series_bool
 \str_new:N \l__algoviz_start_str
 \tl_new:N \l__algoviz_theme_tl
+% Where structures placed on the side go (ADR 0029): wide or narrow, or
+% empty for the document's default.
+\str_new:N \l__algoviz_layout_str
+\str_new:N \g__algoviz_default_layout_str
+\str_gset:Nn \g__algoviz_default_layout_str { narrow }
 \tl_new:N \l__algoviz_algorithm_tl
 \dim_new:N \l__algoviz_width_dim
 \dim_new:N \l__algoviz_height_dim
@@ -146,6 +151,13 @@
     start .initial:n = + ,
     theme .tl_set:N = \l__algoviz_theme_tl ,
     theme .initial:n = light ,
+    layout .choices:nn =
+      { wide, narrow, auto }
+      {
+        \int_compare:nNnTF \l_keys_choice_int = 3
+          { \str_clear:N \l__algoviz_layout_str }
+          { \str_set:NV \l__algoviz_layout_str \l_keys_choice_tl }
+      } ,
     algorithm .tl_set:N = \l__algoviz_algorithm_tl ,
     width .dim_set:N = \l__algoviz_width_dim ,
     width .initial:n = 0pt ,
@@ -273,6 +285,8 @@
 \cs_generate_variant:Nn \__algoviz_picture:nnn { ee }
 
 % Beamer, or beamerarticle notes made from the same frames, have overlays.
+% Slides have room beside a figure's main structure, so Beamer draws side
+% structures beside it; beamerarticle notes, like other documents, below.
 \bool_new:N \g__algoviz_overlays_bool
 \hook_gput_code:nnn { begindocument } { algoviz }
   {
@@ -280,6 +294,16 @@
       { \IfClassLoadedTF { beamer } { \c_true_bool } { \c_false_bool } }
       { \IfPackageLoadedTF { beamerarticle } { \c_true_bool } { \c_false_bool } }
       { \bool_gset_true:N \g__algoviz_overlays_bool }
+    \IfClassLoadedT { beamer }
+      { \str_gset:Nn \g__algoviz_default_layout_str { wide } }
+  }
+
+% The layout of a figure: the key's, or the document's default.
+\cs_new:Npn \__algoviz_layout:
+  {
+    \str_if_empty:NTF \l__algoviz_layout_str
+      { \g__algoviz_default_layout_str }
+      { \l__algoviz_layout_str }
   }
 
 % The figures read from a file: one is a figure; several share one picture,
@@ -640,7 +664,8 @@
               {
                 algoviz~tikz~\int_use:N \c__algoviz_format_int \c_space_tl
                 \c__algoviz_version_str ; #2 ;
-                \__algoviz_selection: ; \l__algoviz_theme_str
+                \__algoviz_selection: ; \l__algoviz_theme_str ;
+                \__algoviz_layout:
               }
           }
       }
@@ -670,6 +695,7 @@
         \l__algoviz_command_tl \c_space_tl export \c_space_tl #1
         \__algoviz_step_option:
         \c_space_tl --theme= \l__algoviz_theme_str
+        \c_space_tl --layout= \__algoviz_layout:
         \c_space_tl --format=tikz
         \c_space_tl --out=" \l__algoviz_cache_str "
         \c_space_tl --name= \l__algoviz_hash_str

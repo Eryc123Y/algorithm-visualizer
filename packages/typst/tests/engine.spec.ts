@@ -122,6 +122,28 @@ describe('createEngine', () => {
     expect(engine.cached).toBe(2);
   });
 
+  it('draws in a layout, wide by default, and caches each layout apart', () => {
+    // A stack in the side panel (ADR 0029).
+    const document = {
+      version: '0.4',
+      structures: {
+        a: { kind: 'array', initial: [3, 1, 2] },
+        calls: { kind: 'stack', initial: ['sort'], place: 'side' },
+      },
+      steps: [],
+    };
+    const engine = createEngine();
+    const wide = figures(engine.render({ document }));
+    expect(figures(engine.render({ document, layout: 'wide' }))).toEqual(wide);
+    expect(engine.cached).toBe(1);
+    const narrow = figures(engine.render({ document, layout: 'narrow' }));
+    expect(engine.cached).toBe(2);
+    const series = exportFigures(document, { layout: 'narrow' });
+    if (!series.ok) throw new Error(JSON.stringify(series.error));
+    expect(narrow).toEqual(series.value.figures);
+    expect(wide[0]!.width).toBeGreaterThan(narrow[0]!.width);
+  });
+
   it('does not cache failures', () => {
     const engine = createEngine();
     engine.render({ algorithm: 'bst.delete', input: { from: 'x' } });
@@ -143,6 +165,9 @@ describe('errors', () => {
     expect(
       render({ algorithm: 'bst.delete', input: bst, theme: 'neon' }),
     ).toEqual([['UNKNOWN_THEME', '$.theme']]);
+    expect(
+      render({ algorithm: 'bst.delete', input: bst, layout: 'square' }),
+    ).toEqual([['UNKNOWN_LAYOUT', '$.layout']]);
     expect(render({ document: { version: '0.2' } })[0]).toEqual([
       'INVALID_SHAPE',
       '$.structures',

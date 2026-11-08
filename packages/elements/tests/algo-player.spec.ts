@@ -175,6 +175,38 @@ describe('<algo-player>', () => {
     expect(width(el)).toBe(before);
   });
 
+  it('places side structures beside or below with the layout attribute', async () => {
+    const size = (el: AlgoPlayer) => {
+      const svg = shadow(el).querySelector('svg.scene');
+      return [
+        Number(svg?.getAttribute('width')),
+        Number(svg?.getAttribute('height')),
+      ];
+    };
+    const sided = {
+      version: '0.4',
+      structures: {
+        arr: { kind: 'array', initial: [2, 1] },
+        calls: { kind: 'stack', initial: ['sort'], place: 'side' },
+      },
+      steps: [],
+    };
+    const el = await mount((e) => {
+      e.visualization = sided;
+    });
+    expect(el.layout).toBe('wide');
+    const [wideWidth, wideHeight] = size(el);
+    el.setAttribute('layout', 'narrow');
+    await el.updateComplete;
+    const [narrowWidth, narrowHeight] = size(el);
+    expect(narrowWidth).toBeLessThan(wideWidth!);
+    expect(narrowHeight).toBeGreaterThan(wideHeight!);
+    // An unknown value draws wide, the default.
+    el.setAttribute('layout', 'square');
+    await el.updateComplete;
+    expect(size(el)).toEqual([wideWidth, wideHeight]);
+  });
+
   it('draws with a custom theme that has no font metrics', async () => {
     const el = await mount((e) => {
       e.visualization = doc;

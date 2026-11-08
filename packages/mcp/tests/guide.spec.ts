@@ -97,4 +97,18 @@ describe('guide', () => {
     ]);
     expect(anchored?.steps.every((s) => s.meta?.at !== undefined)).toBe(true);
   });
+
+  it('places an auxiliary structure on the side, as version 0.4', () => {
+    const blocks = jsonBlocks(guideOverview()).map(
+      (block) =>
+        JSON.parse(block) as {
+          version: string;
+          structures: Record<string, { place?: string }>;
+        },
+    );
+    const placed = blocks.find((doc) =>
+      Object.values(doc.structures).some((s) => s.place === 'side'),
+    );
+    expect(placed?.version).toBe('0.4');
+  });
 });

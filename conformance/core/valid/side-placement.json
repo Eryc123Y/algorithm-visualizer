@@ -1,0 +1,236 @@
+{
+  "description": "Placement changes nothing in the state: a call stack on the side and an output array in the main column replay as without place (ADR 0029).",
+  "input": {
+    "version": "0.4",
+    "structures": {
+      "a": {
+        "kind": "array",
+        "initial": [3, 1, 2]
+      },
+      "calls": {
+        "kind": "stack",
+        "label": "call stack",
+        "initial": [],
+        "place": "side"
+      },
+      "out": {
+        "kind": "array",
+        "initial": [],
+        "place": "main"
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "calls",
+            "type": "push",
+            "element": "sort a[0..2]"
+          },
+          {
+            "target": "a",
+            "type": "compare",
+            "i": 0,
+            "j": 1
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "a",
+            "type": "swap",
+            "i": 0,
+            "j": 1
+          },
+          {
+            "target": "out",
+            "type": "insert",
+            "index": 0,
+            "element": 1
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "calls",
+            "type": "pop"
+          }
+        ]
+      }
+    ]
+  },
+  "expectedLength": 3,
+  "expectedFrames": [
+    {
+      "index": 0,
+      "state": {
+        "a": {
+          "kind": "array",
+          "state": {
+            "data": [
+              {
+                "id": "e0",
+                "value": 3
+              },
+              {
+                "id": "e1",
+                "value": 1
+              },
+              {
+                "id": "e2",
+                "value": 2
+              }
+            ],
+            "marks": {
+              "compare": null,
+              "swapped": null,
+              "highlight": [],
+              "pointers": {},
+              "settled": []
+            }
+          }
+        },
+        "calls": {
+          "kind": "stack",
+          "state": {
+            "data": [],
+            "marks": {
+              "highlight": []
+            }
+          }
+        },
+        "out": {
+          "kind": "array",
+          "state": {
+            "data": [],
+            "marks": {
+              "compare": null,
+              "swapped": null,
+              "highlight": [],
+              "pointers": {},
+              "settled": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 1,
+      "state": {
+        "a": {
+          "kind": "array",
+          "state": {
+            "data": [
+              {
+                "id": "e0",
+                "value": 3
+              },
+              {
+                "id": "e1",
+                "value": 1
+              },
+              {
+                "id": "e2",
+                "value": 2
+              }
+            ],
+            "marks": {
+              "compare": [0, 1],
+              "swapped": null,
+              "highlight": [],
+              "pointers": {},
+              "settled": []
+            }
+          }
+        },
+        "calls": {
+          "kind": "stack",
+          "state": {
+            "data": [
+              {
+                "id": "e0",
+                "value": "sort a[0..2]"
+              }
+            ],
+            "marks": {
+              "highlight": []
+            }
+          }
+        },
+        "out": {
+          "kind": "array",
+          "state": {
+            "data": [],
+            "marks": {
+              "compare": null,
+              "swapped": null,
+              "highlight": [],
+              "pointers": {},
+              "settled": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 3,
+      "state": {
+        "a": {
+          "kind": "array",
+          "state": {
+            "data": [
+              {
+                "id": "e1",
+                "value": 1
+              },
+              {
+                "id": "e0",
+                "value": 3
+              },
+              {
+                "id": "e2",
+                "value": 2
+              }
+            ],
+            "marks": {
+              "compare": null,
+              "swapped": null,
+              "highlight": [],
+              "pointers": {},
+              "settled": []
+            }
+          }
+        },
+        "calls": {
+          "kind": "stack",
+          "state": {
+            "data": [],
+            "marks": {
+              "highlight": []
+            }
+          }
+        },
+        "out": {
+          "kind": "array",
+          "state": {
+            "data": [
+              {
+                "id": "e0",
+                "value": 1
+              }
+            ],
+            "marks": {
+              "compare": null,
+              "swapped": null,
+              "highlight": [],
+              "pointers": {},
+              "settled": []
+            }
+          }
+        }
+      }
+    }
+  ]
+}
