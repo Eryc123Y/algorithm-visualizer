@@ -150,11 +150,14 @@ function layoutColumn(
   column: FigureColumn,
   origin: { readonly x: number; readonly y: number },
   o: LayoutOptions,
+  closed: ReadonlySet<string>,
 ): ColumnLayout {
   const items: SceneItem[] = [];
   let y = origin.y;
   let width = 0;
   let first = true;
+  // Room closed bands give up in this frame, kept in the column's size.
+  let reserved = 0;
   // A lone structure's id says nothing the figure does not; a label does.
   const lone = Object.keys(vis.structures).length === 1;
   for (const name of column.names) {
@@ -174,6 +177,7 @@ function layoutColumn(
       metrics: m.metrics,
       origin: { x: origin.x, y },
       region: column.region,
+      ...(closed.has(name) ? { pointersShown: false } : {}),
       options:
         lone && decl.label === undefined ? { ...o, showTitles: false } : o,
     } as Parameters<(typeof runtimes)[typeof entry.kind]['layout']>[0]);
@@ -181,8 +185,9 @@ function layoutColumn(
     for (const item of block.items) items.push(item);
     width = Math.max(width, block.width);
     y += block.height;
+    reserved += block.reserved ?? 0;
   }
-  return { items, width, height: y - origin.y };
+  return { items, width, height: y - origin.y + reserved };
 }
 
 /**
@@ -196,6 +201,7 @@ export function layoutState(
   state: VisualizationState,
   metrics?: SceneMetrics,
   options: LayoutOptions = defaultLayoutOptions,
+  closedBands: ReadonlySet<string> = new Set(),
 ): Scene {
   const o = options;
   const measured = metrics ?? measureState(vis, state, o.fonts);
@@ -216,6 +222,7 @@ export function layoutState(
       column,
       { x, y: o.padding },
       o,
+      closedBands,
     );
     for (const item of laid.items) items.push(item);
     x += laid.width;
@@ -229,6 +236,23 @@ export function layoutState(
     title: vis.title ?? 'Visualization',
     items,
   };
+}
+
+/**
+ * For each structure with a pointer band, the first and last frame in
+ * which it has a pointer (ADR 0031).
+ */
+function pointerSpans(trace: Trace): Map<string, [number, number]> {
+  const spans = new Map<string, [number, number]>();
+  for (let i = 0; i <= trace.length; i++)
+    for (const [name, entry] of Object.entries(trace.frame(i).state)) {
+      if (entry.kind !== 'array' && entry.kind !== 'linkedList') continue;
+      if (Object.keys(entry.state.marks.pointers).length === 0) continue;
+      const span = spans.get(name);
+      if (span === undefined) spans.set(name, [i, i]);
+      else span[1] = i;
+    }
+  return spans;
 }
 
 /** Lays out the frames of a trace with metrics shared by all of them. */
@@ -248,9 +272,25 @@ export function layoutTrace(
     fonts: options.fonts ?? defaultFonts,
   };
   const metrics = measureTrace(trace, o.fonts);
+  const spans = pointerSpans(trace);
+  // Bands below a structure open over the frames from its first pointer to
+  // its last, and close outside them (ADR 0031).
+  const closedAt = (index: number): ReadonlySet<string> =>
+    new Set(
+      Object.keys(trace.visualization.structures).filter((name) => {
+        const span = spans.get(name);
+        return span === undefined || index < span[0] || index > span[1];
+      }),
+    );
   return {
     metrics,
     sceneAt: (index) =>
-      layoutState(trace.visualization, trace.frame(index).state, metrics, o),
+      layoutState(
+        trace.visualization,
+        trace.frame(index).state,
+        metrics,
+        o,
+        closedAt(index),
+      ),
   };
 }

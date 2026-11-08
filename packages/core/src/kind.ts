@@ -24,6 +24,12 @@ export interface Block {
   readonly items: readonly SceneItem[];
   readonly width: number;
   readonly height: number;
+  /**
+   * Room the block gives up in this frame but keeps in the scene's size,
+   * such as a closed pointer band (ADR 0031): what follows moves up, and
+   * the scene stays the size it has in every frame.
+   */
+  readonly reserved?: number;
 }
 
 export interface LayoutInput<Decl, State, Metrics> {
@@ -39,6 +45,12 @@ export interface LayoutInput<Decl, State, Metrics> {
   readonly origin: { readonly x: number; readonly y: number };
   /** The column the structure is drawn in (ADR 0029). */
   readonly region: Region;
+  /**
+   * Whether the frame is in the span of frames where the structure has
+   * pointers (ADR 0031); a kind with a pointer band below it closes the
+   * band when false. Absent means open.
+   */
+  readonly pointersShown?: boolean;
   readonly options: LayoutOptions;
 }
 
