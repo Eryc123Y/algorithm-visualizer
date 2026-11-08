@@ -1,35 +1,13 @@
 /**
  * Styles of the player chrome. Every colour and font is a CSS custom property
  * that pages can override on the element, e.g.
- * `algo-player { --algo-accent: #7c3aed; }`.
+ * `algo-player { --algo-accent: #7c3aed; }`. Their values in each built-in
+ * theme are in `chrome.ts`.
  */
 import { css } from 'lit';
 
 export const playerStyles = css`
   :host {
-    --algo-bg: #ffffff;
-    --algo-fg: #1f2a26;
-    --algo-muted: #66736d;
-    --algo-border: #dfe5e2;
-    --algo-surface: #f5f7f6;
-    --algo-accent: #0f7b6c;
-    --algo-accent-fg: #ffffff;
-    --algo-line-bg: #fff4dc;
-    --algo-line-edge: #d08a18;
-    --algo-error: #b42318;
-    --algo-code-keyword: #8a2f6b;
-    --algo-code-builtin: #0b6b5e;
-    --algo-code-function: #1f56a8;
-    --algo-code-string: #9a4a10;
-    --algo-code-number: #8a5a00;
-    --algo-code-comment: #5f6e68;
-    --algo-radius: 14px;
-    --algo-font:
-      'Inter', 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
-    --algo-mono:
-      'JetBrains Mono', 'SFMono-Regular', ui-monospace, Menlo, Consolas,
-      monospace;
-
     display: block;
     container-type: inline-size;
     color: var(--algo-fg);
@@ -40,32 +18,12 @@ export const playerStyles = css`
   :host([hidden]) {
     display: none;
   }
-  :host([data-resolved-theme='dark']) {
-    --algo-bg: #151b19;
-    --algo-fg: #e4ebe8;
-    --algo-muted: #95a39d;
-    --algo-border: #2b3633;
-    --algo-surface: #1c2422;
-    --algo-accent: #4fc4b0;
-    --algo-accent-fg: #0d1a17;
-    --algo-line-bg: #3b2c12;
-    --algo-line-edge: #e9a53a;
-    --algo-error: #ff8a7a;
-    --algo-code-keyword: #e7a0d4;
-    --algo-code-builtin: #5fd0bd;
-    --algo-code-function: #93b9ff;
-    --algo-code-string: #f2a874;
-    --algo-code-number: #e9c86f;
-    --algo-code-comment: #97a59f;
-  }
-  /* Print is greyscale: only keywords (bold) and comments (italic) stand out. */
-  :host([data-resolved-theme='print']) {
-    --algo-code-keyword: var(--algo-fg);
-    --algo-code-builtin: var(--algo-fg);
-    --algo-code-function: var(--algo-fg);
-    --algo-code-string: var(--algo-fg);
-    --algo-code-number: var(--algo-fg);
-    --algo-code-comment: var(--algo-muted);
+  /* Printed as shown, so a night theme stays legible on paper (ADR 0030). */
+  @media print {
+    :host {
+      print-color-adjust: exact;
+      -webkit-print-color-adjust: exact;
+    }
   }
   :host(:focus-visible) {
     outline: none;
@@ -120,30 +78,31 @@ export const playerStyles = css`
     gap: 8px;
     min-width: 0;
   }
+  /* The language menu: a native select, drawn in the chrome's colours. */
   .languages {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-  }
-  .languages button {
-    width: auto;
+    justify-self: start;
     height: 28px;
-    padding: 0 12px;
+    padding: 0 28px 0 12px;
+    color: var(--algo-fg);
+    background-color: var(--algo-bg);
+    /* A chevron in the text colour, drawn without an image. */
+    background-image:
+      linear-gradient(45deg, transparent 50%, currentColor 50%),
+      linear-gradient(135deg, currentColor 50%, transparent 50%);
+    background-position:
+      calc(100% - 16px) 55%,
+      calc(100% - 11px) 55%;
+    background-size: 5px 5px;
+    background-repeat: no-repeat;
+    border: 1px solid var(--algo-border);
+    border-radius: 999px;
     font: inherit;
     font-size: 12px;
+    appearance: none;
+    cursor: pointer;
   }
-  .languages button[aria-pressed='true'] {
-    color: var(--algo-accent-fg);
-    background: var(--algo-accent);
+  .languages:hover {
     border-color: var(--algo-accent);
-  }
-  .languages button[aria-pressed='true']:hover {
-    color: var(--algo-accent-fg);
-  }
-  /* Printing drops backgrounds, so the language on show is also bold. */
-  :host([data-resolved-theme='print']) .languages button[aria-pressed='true'] {
-    font-weight: 700;
-    text-decoration: underline;
   }
 
   .code {
@@ -273,6 +232,7 @@ export const playerStyles = css`
   }
   button:focus-visible,
   input:focus-visible,
+  select:focus-visible,
   .code:focus-visible {
     outline: 2px solid var(--algo-accent);
     outline-offset: 2px;

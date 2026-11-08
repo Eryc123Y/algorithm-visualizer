@@ -45,9 +45,17 @@ async function mount(setup: (el: AlgoPlayer) => void): Promise<AlgoPlayer> {
 const root = (el: AlgoPlayer) => el.shadowRoot!;
 const current = (el: AlgoPlayer) =>
   root(el).querySelector('.line.current')?.textContent?.trim();
-const buttons = (el: AlgoPlayer) => [
-  ...root(el).querySelectorAll<HTMLButtonElement>('.languages button'),
-];
+/** The language menu, if the player shows one. */
+const menu = (el: AlgoPlayer) =>
+  root(el).querySelector<HTMLSelectElement>('select.languages');
+const options = (el: AlgoPlayer) =>
+  [...menu(el)!.options].map((o) => o.textContent?.trim());
+/** Picks a language from the menu, as a reader does. */
+function choose(el: AlgoPlayer, language: string): void {
+  const select = menu(el)!;
+  select.value = language;
+  select.dispatchEvent(new Event('change', { bubbles: true }));
+}
 /** Storage that refuses, starting from pseudocode chosen on this page. */
 function refuseStorage() {
   const refuse = () => {
@@ -58,10 +66,9 @@ function refuseStorage() {
   chooseLanguage('pseudocode');
 }
 
-const pressed = (el: AlgoPlayer) =>
-  buttons(el)
-    .filter((b) => b.getAttribute('aria-pressed') === 'true')
-    .map((b) => b.textContent?.trim());
+/** The language the menu shows as chosen. */
+const shown = (el: AlgoPlayer) =>
+  menu(el)!.selectedOptions[0]?.textContent?.trim();
 
 beforeEach(() => localStorage.clear());
 afterEach(() => {
@@ -71,16 +78,18 @@ afterEach(() => {
 });
 
 describe('<algo-player> code languages (ADR 0017)', () => {
-  it('shows pseudocode first, with a switcher of every language', async () => {
+  it('shows pseudocode first, with a menu of every language', async () => {
     const el = await mount((e) => (e.visualization = doc));
-    const group = root(el).querySelector('.languages')!;
-    expect(group.getAttribute('role')).toBe('group');
-    expect(group.getAttribute('aria-label')).toBe('Code language');
-    expect(buttons(el).map((b) => b.textContent?.trim())).toEqual([
-      'Pseudocode',
-      'Python',
+    const select = menu(el)!;
+    expect(select.getAttribute('aria-label')).toBe('Code language');
+    expect(select.getAttribute('part')).toBe('languages');
+    expect(options(el)).toEqual(['Pseudocode', 'Python']);
+    expect([...select.options].map((o) => o.value)).toEqual([
+      'pseudocode',
+      'python',
     ]);
-    expect(pressed(el)).toEqual(['Pseudocode']);
+    expect(select.value).toBe('pseudocode');
+    expect(shown(el)).toBe('Pseudocode');
     expect(el.currentLanguage).toBe('pseudocode');
   });
 
@@ -89,18 +98,18 @@ describe('<algo-player> code languages (ADR 0017)', () => {
     el.seek(2);
     await el.updateComplete;
     expect(current(el)).toBe('exchange a[0] with a[1]');
-    buttons(el)[1]!.click();
+    choose(el, 'python');
     await el.updateComplete;
     expect(el.frame).toBe(2);
     expect(current(el)).toBe('a[0], a[1] = a[1], a[0]');
-    expect(pressed(el)).toEqual(['Python']);
+    expect(shown(el)).toBe('Python');
     expect(el.currentLanguage).toBe('python');
   });
 
   it('remembers the choice for the site, and other players follow it', async () => {
     const first = await mount((e) => (e.visualization = doc));
     const second = await mount((e) => (e.visualization = doc));
-    buttons(first)[1]!.click();
+    choose(first, 'python');
     await first.updateComplete;
     await second.updateComplete;
     expect(localStorage.getItem(LANGUAGE_KEY)).toBe('python');
@@ -121,6 +130,7 @@ describe('<algo-player> code languages (ADR 0017)', () => {
       e.visualization = doc;
     });
     expect(chosen.currentLanguage).toBe('pseudocode');
+    expect(menu(chosen)!.value).toBe('pseudocode');
   });
 
   it('falls back to pseudocode for a language the document does not have', async () => {
@@ -136,7 +146,7 @@ describe('<algo-player> code languages (ADR 0017)', () => {
     refuseStorage();
     const el = await mount((e) => (e.visualization = doc));
     expect(el.currentLanguage).toBe('pseudocode');
-    buttons(el)[1]!.click();
+    choose(el, 'python');
     await el.updateComplete;
     expect(el.currentLanguage).toBe('python');
   });
@@ -145,7 +155,7 @@ describe('<algo-player> code languages (ADR 0017)', () => {
     const away = await mount((e) => (e.visualization = doc));
     away.remove();
     const other = await mount((e) => (e.visualization = doc));
-    buttons(other)[1]!.click();
+    choose(other, 'python');
     document.body.append(away);
     await away.updateComplete;
     expect(away.currentLanguage).toBe('python');
@@ -164,7 +174,7 @@ describe('<algo-player> code languages (ADR 0017)', () => {
   it('keeps the choice for later players on the page when storage throws', async () => {
     refuseStorage();
     const first = await mount((e) => (e.visualization = doc));
-    buttons(first)[1]!.click();
+    choose(first, 'python');
     const later = await mount((e) => (e.visualization = doc));
     expect(later.currentLanguage).toBe('python');
   });
@@ -183,8 +193,28 @@ describe('<algo-player> code languages (ADR 0017)', () => {
     const el = await mount(
       (e) => (e.visualization = { ...doc, sources: sources.slice(1) }),
     );
-    expect(root(el).querySelector('.languages')).toBeNull();
+    expect(menu(el)).toBeNull();
     expect(el.currentLanguage).toBe('python');
+  });
+
+  it('leaves the menu its keys, so they do not step the player', async () => {
+    const el = await mount((e) => (e.visualization = doc));
+    el.seek(1);
+    await el.updateComplete;
+    for (const key of ['ArrowRight', 'ArrowLeft', ' ', 'Home', 'End'])
+      menu(el)!.dispatchEvent(
+        new KeyboardEvent('keydown', { key, bubbles: true, composed: true }),
+      );
+    await el.updateComplete;
+    expect(el.frame).toBe(1);
+  });
+
+  it('follows another player’s choice in its menu', async () => {
+    const first = await mount((e) => (e.visualization = doc));
+    const second = await mount((e) => (e.visualization = doc));
+    choose(first, 'python');
+    await second.updateComplete;
+    expect(menu(second)!.value).toBe('python');
   });
 
   it('sets procedure names in small capitals, keeping their text', async () => {

@@ -1,9 +1,14 @@
 /**
  * Accessibility: no serious or critical axe violations in the playground
- * or in an embedded player, in either theme, with or without errors.
+ * or in an embedded player, in every built-in theme (ADR 0030), with or
+ * without errors.
  */
 import AxeBuilder from '@axe-core/playwright';
 import type { Page } from '@playwright/test';
+
+import { themeNames } from '@algoviz/svg';
+
+import type { AlgoPlayer } from '@algoviz/elements';
 
 import { expect, test } from './fixtures';
 
@@ -42,6 +47,19 @@ for (const colorScheme of ['light', 'dark'] as const)
     // A selector that matches nothing shows an alert beside the player.
     await player.evaluate((el) => el.setAttribute('frame', 'nope'));
     await expect(player.getByRole('alert')).toBeVisible();
+    expect(await scan(page)).toEqual([]);
+  });
+
+for (const theme of themeNames)
+  test(`a player in the ${theme} theme, with its code`, async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/');
+    await page.getByTestId('theme').selectOption(theme);
+    await page.getByTestId('example').selectOption('Dijkstra’s algorithm');
+    const player = page.getByTestId('player');
+    await expect(player).toHaveAttribute('data-resolved-theme', theme);
+    await player.evaluate((el: AlgoPlayer) => el.seek(12));
+    await expect(player.locator('.line.current')).toHaveCount(1);
     expect(await scan(page)).toEqual([]);
   });
 

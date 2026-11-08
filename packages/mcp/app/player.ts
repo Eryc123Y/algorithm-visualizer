@@ -4,9 +4,15 @@
  * tells the model which frame the user is looking at: its number, its
  * step's name and section (ADR 0020), and its narration.
  */
-import '@algoviz/elements/define';
-import type { AlgoPlayer } from '@algoviz/elements';
+import { AlgoPlayer } from '@algoviz/elements';
 import { App, type McpUiHostContext } from '@modelcontextprotocol/ext-apps';
+
+// The page is one file in the host's sandbox, with no fonts beside it, so
+// text uses each theme's fallback fonts (ADR 0030). Set before the element
+// is defined, which connects the player already in the page.
+AlgoPlayer.fontsUrl = null;
+if (!customElements.get('algo-player'))
+  customElements.define('algo-player', AlgoPlayer);
 
 interface Shown {
   readonly document: {

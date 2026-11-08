@@ -19,7 +19,7 @@
  * Page Down move between them.
  *
  * A document with its code in several languages (`sources`, ADR 0017) gets
- * a language switcher above the code. The reader's choice is remembered for
+ * a language menu above the code. The reader's choice is remembered for
  * the site and followed by every player on the page; otherwise the
  * `language` attribute, then pseudocode, is shown first.
  *
@@ -77,8 +77,15 @@ import {
 } from './sections.ts';
 import { SceneStage } from './stage.ts';
 import { playerStyles } from './styles.ts';
+import { chromeStyles, resolvePlayerTheme } from './chrome.ts';
+import { defaultFontsUrl, linkFonts } from './fonts.ts';
 
-export type PlayerTheme = ThemeName | 'auto';
+/**
+ * A built-in theme's name, `auto` (light or dark by the reader's colour
+ * scheme), or a day and a night theme, such as `textbook textbook-dark`,
+ * that follow the colour scheme (ADR 0030).
+ */
+export type PlayerTheme = ThemeName | 'auto' | `${ThemeName} ${ThemeName}`;
 
 export type PlayerMode = 'interactive' | 'display';
 
@@ -107,7 +114,16 @@ const sameFonts = (a: LayoutFonts | null, b: LayoutFonts): boolean =>
   a !== null && a.value === b.value && a.label === b.label;
 
 export class AlgoPlayer extends LitElement {
-  static override styles = playerStyles;
+  static override styles = [playerStyles, chromeStyles()];
+
+  /**
+   * The stylesheet of the themes' web fonts (ADR 0030), linked from the
+   * document the first time a player connects. By default it is
+   * `fonts/fonts.css` next to the player's module; a bundle that copies
+   * the fonts elsewhere names their place here, and null turns loading
+   * off, leaving text to the fallbacks of each theme's font lists.
+   */
+  static fontsUrl: string | null | undefined = undefined;
 
   static override properties = {
     src: { type: String },
@@ -156,7 +172,11 @@ export class AlgoPlayer extends LitElement {
    * section opens at its first step.
    */
   declare frame: FrameSelector;
-  /** `light`, `dark`, `print`, or `auto` to follow the system. */
+  /**
+   * A built-in theme (`light`, `textbook`, `turbo-c`, …), `auto` to follow
+   * the system between light and dark, or a pair such as
+   * `textbook textbook-dark` to follow it between those two.
+   */
   declare theme: PlayerTheme;
   /** A full SVG theme (e.g. from `createTheme`); overrides `theme` for the scene. */
   declare customTheme: SvgTheme | undefined;
@@ -279,6 +299,11 @@ export class AlgoPlayer extends LitElement {
 
   override connectedCallback(): void {
     super.connectedCallback();
+    linkFonts(
+      AlgoPlayer.fontsUrl === undefined
+        ? defaultFontsUrl()
+        : AlgoPlayer.fontsUrl,
+    );
     this.addEventListener('keydown', this.#onKeyDown);
     this.#colorScheme?.addEventListener('change', this.#onColorScheme);
     globalThis.addEventListener?.(LANGUAGE_EVENT, this.#onLanguage);
@@ -519,13 +544,8 @@ export class AlgoPlayer extends LitElement {
     // A focused code panel keeps its keys for scrolling.
     if (target instanceof HTMLElement && target.classList.contains('code'))
       return;
-    // A language button keeps the keys that press it.
-    if (
-      target instanceof HTMLButtonElement &&
-      target.dataset['language'] !== undefined &&
-      (event.key === ' ' || event.key === 'Enter')
-    )
-      return;
+    // The language menu keeps its keys for choosing.
+    if (target instanceof HTMLSelectElement) return;
     const sections = (this.trace?.visualization.sections ?? []).length > 0;
     const jumps: Record<string, () => void> = sections
       ? {
@@ -642,8 +662,7 @@ export class AlgoPlayer extends LitElement {
   }
 
   #resolvedTheme(): ThemeName {
-    if (this.theme === 'auto') return this.darkScheme ? 'dark' : 'light';
-    return this.theme;
+    return resolvePlayerTheme(String(this.theme ?? 'auto'), this.darkScheme);
   }
 
   // --- Rendering -------------------------------------------------------------
@@ -714,24 +733,26 @@ export class AlgoPlayer extends LitElement {
               ? html`<div class="code-panel">
                   ${
                     listings.length > 1
-                      ? html`<div
+                      ? html`<select
                           class="languages"
                           part="languages"
-                          role="group"
                           aria-label="Code language"
+                          .value=${listing.language ?? ''}
+                          @change=${(event: Event) =>
+                            this.#chooseLanguage(
+                              (event.target as HTMLSelectElement).value,
+                            )}
                         >
                           ${listings.map(
                             ({ language }) =>
-                              html`<button
-                                type="button"
-                                data-language=${language ?? ''}
-                                aria-pressed=${language === listing.language ? 'true' : 'false'}
-                                @click=${() => this.#chooseLanguage(language ?? '')}
+                              html`<option
+                                value=${language ?? ''}
+                                ?selected=${language === listing.language}
                               >
                                 ${languageName(language)}
-                              </button>`,
+                              </option>`,
                           )}
-                        </div>`
+                        </select>`
                       : nothing
                   }
                   <pre
