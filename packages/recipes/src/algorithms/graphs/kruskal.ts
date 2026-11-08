@@ -3,9 +3,12 @@
  * lightest to heaviest (ties in the order listed), and keep each one whose
  * ends are in different sets, uniting the sets. The sets are a
  * disjoint-set forest with union by rank and path compression, drawn
- * beside the graph. Edges are taken as undirected; a disconnected graph
- * gives a minimum spanning forest.
+ * beside the graph. The sorted edges are a table under the graph, the
+ * current one highlighted and the ones taken settled (ADR 0029). Edges are
+ * taken as undirected; a disconnected graph gives a minimum spanning
+ * forest.
  */
+import { LIMITS } from '@algoviz/spec';
 import { z } from 'zod';
 
 import { defineAlgorithm } from '../../algorithm.ts';
@@ -25,7 +28,9 @@ export const kruskal = defineAlgorithm({
   summary:
     'Builds a minimum spanning forest by taking edges from lightest to heaviest and keeping each that joins two different trees.',
   input: z.strictObject({
-    graph: Graph.describe('A graph whose edges are taken as undirected.'),
+    graph: Graph.describe(
+      'A graph whose edges are taken as undirected, with at most 100 edges: one column each in the table of edges by weight.',
+    ),
   }),
   examples: [{ graph: CITIES }],
   code: {
@@ -55,10 +60,28 @@ export const kruskal = defineAlgorithm({
   },
   run(input, trace) {
     const g: GraphInput = { ...graphOf(input.graph), directed: false };
+    if (g.edges.length > LIMITS.tableColumns)
+      throw new RangeError(
+        `Kruskal’s algorithm draws its edges in a table of at most ${LIMITS.tableColumns} columns: give at most ${LIMITS.tableColumns} edges`,
+      );
+    const ids = edgeIds(g);
+    const sorted = g.edges
+      .map(([u, v, w = 1], k) => ({ u, v, w, edge: ids[k]! }))
+      .sort((a, b) => a.w - b.w);
     const graph = trace.add('g', declareGraph(g, true));
+    const table = trace.add('edges', {
+      kind: 'table',
+      label: 'edges by weight',
+      rowLabels: ['w'],
+      columnLabels: sorted.map(({ u, v }) => `${u}–${v}`),
+      // One row, also when there are no edges.
+      rows: 1,
+      initial: [sorted.map(({ w }) => w)],
+    });
     const sets = trace.add('sets', {
       kind: 'tree',
       label: 'disjoint sets',
+      place: 'side',
       nodes: g.nodes.map((v) => ({ id: v, value: v })),
     });
     const parent = new Map(g.nodes.map((v) => [v, v]));
@@ -78,18 +101,16 @@ export const kruskal = defineAlgorithm({
         x = next;
       }
     };
-    const ids = edgeIds(g);
-    const sorted = g.edges
-      .map(([u, v, w = 1], k) => ({ u, v, w, edge: ids[k]! }))
-      .sort((a, b) => a.w - b.w);
     trace.step('sort', 'Take the edges in order of weight, lightest first.');
-    for (const { u, v, w, edge } of sorted) {
+    for (const [k, { u, v, w, edge }] of sorted.entries()) {
+      const cell: [number, number] = [0, k];
       trace.step(
         'compare',
         `${u}–${v}, weight ${w}: find the sets of ${u} and ${v}.`,
         { vars: { w } },
       );
       graph.highlight({ edges: [edge] });
+      table.highlight({ cells: [cell] });
       // The roots are found, and paths compressed, in the step that
       // reports them, so the first step does not give the answer away.
       if (find(u) === find(v)) {
@@ -104,6 +125,7 @@ export const kruskal = defineAlgorithm({
         compress(v);
         sets.highlight({ nodes: [r] });
         graph.highlight({ edges: [edge] }).markEdge({ edge, mark: 'rejected' });
+        table.highlight({ cells: [cell] });
         continue;
       }
       const [ru, rv] = [find(u), find(v)];
@@ -118,6 +140,7 @@ export const kruskal = defineAlgorithm({
       compress(v);
       sets.highlight({ nodes: [ru, rv] });
       graph.highlight({ edges: [edge] }).markEdge({ edge, mark: 'selected' });
+      table.highlight({ cells: [cell] }).settle({ cells: [cell] });
       sets.setChild({ parent: root, child });
       parent.set(child, root);
       if (rank.get(ru) === rank.get(rv)) {

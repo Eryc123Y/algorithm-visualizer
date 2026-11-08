@@ -2,9 +2,11 @@
  * Merge sort, as in CLRS: split a[p..r] in half, sort each half, and merge
  * them. MERGE copies a[p..r] into a buffer `aux` drawn under `a`, instead
  * of CLRS's two arrays L and R, so each value sits under the place it came
- * from (ADR 0022).
+ * from (ADR 0022). The call stack beside them holds a call from its split
+ * to its merged step (ADR 0029); calls on one value record no step.
  */
 import { defineAlgorithm } from '../../algorithm.ts';
+import { callStack } from '../../call-stack.ts';
 import { range, SAMPLE, SortInput } from './input.ts';
 
 export const mergeSort = defineAlgorithm({
@@ -62,15 +64,17 @@ export const mergeSort = defineAlgorithm({
                   j += 1
     `,
   },
-  run({ values }, trace) {
+  run({ values }, outer) {
     const a = [...values];
     const n = a.length;
     const aux: (number | null)[] = values.map(() => null);
-    const arr = trace.add('a', { kind: 'array', initial: [...values] });
-    const buf = trace.add('aux', {
+    const arr = outer.add('a', { kind: 'array', initial: [...values] });
+    const buf = outer.add('aux', {
       kind: 'array',
       initial: values.map(() => ''),
     });
+    const calls = callStack(outer);
+    const { trace } = calls;
 
     const merge = (p: number, q: number, r: number): void => {
       trace.step(
@@ -113,6 +117,7 @@ export const mergeSort = defineAlgorithm({
           ? `a[${p}..${r}] is merged: the array is sorted.`
           : `a[${p}..${r}] is merged and sorted.`,
       );
+      calls.pop();
       buf
         .pointer({ name: 'i', index: null })
         .pointer({ name: 'j', index: null });
@@ -139,6 +144,7 @@ export const mergeSort = defineAlgorithm({
         `Split a[${p}..${r}] into a[${p}..${q}] and a[${q + 1}..${r}], and sort each.`,
         { vars: { p, q, r } },
       );
+      calls.push(`call-${p}-${r}`, `sort a[${p}..${r}]`);
       arr.highlight({ indices: range(p, r) });
       sort(p, q);
       sort(q + 1, r);

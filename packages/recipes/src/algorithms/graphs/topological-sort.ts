@@ -7,6 +7,7 @@
 import { z } from 'zod';
 
 import { defineAlgorithm } from '../../algorithm.ts';
+import { callStack } from '../../call-stack.ts';
 import {
   adjacency,
   CLOTHES,
@@ -91,11 +92,14 @@ export const topologicalSort = defineAlgorithm({
     checkAcyclic(g);
     const graph = trace.add('g', declareGraph(g, false));
     const order = trace.add('order', { kind: 'array', initial: [] });
+    // The calls of TOPOLOGICAL-VISIT, as dfs draws them (ADR 0029).
+    const calls = callStack(trace);
     const adj = adjacency(g);
     const seen = new Set<string>();
     const visit = (u: string): void => {
       seen.add(u);
       trace.step('discover', `Visit ${u}.`);
+      calls.push(`call-${u}`, `visit ${u}`);
       graph.visit({ node: u }).pointer({ name: 'u', node: u });
       for (const { to: v, edge } of adj.get(u)!) {
         const fresh = !seen.has(v);
@@ -117,6 +121,7 @@ export const topologicalSort = defineAlgorithm({
       );
       graph.pointer({ name: 'u', node: u }).settle({ node: u });
       order.insert({ index: 0, element: { id: `o-${u}`, value: u } });
+      calls.pop();
     };
     for (const u of g.nodes) {
       if (seen.has(u)) continue;

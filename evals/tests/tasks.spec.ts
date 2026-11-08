@@ -56,18 +56,21 @@ describe('eval tasks', () => {
           const solved =
             decl.kind === 'hashTable'
               ? { buckets: data }
-              : decl.kind === 'table'
-                ? { cells: data }
-                : decl.kind === 'tree'
-                  ? treeDecl(data as TreeData)
-                  : decl.kind === 'graph' || decl.kind === 'linkedList'
-                    ? {}
-                    : { initial: data };
+              : decl.kind === 'priorityQueue'
+                ? { initial: (data as { items: unknown }).items }
+                : decl.kind === 'table'
+                  ? { cells: data }
+                  : decl.kind === 'tree'
+                    ? treeDecl(data as TreeData)
+                    : decl.kind === 'graph' || decl.kind === 'linkedList'
+                      ? {}
+                      : { initial: data };
           return [name, { ...decl, ...solved }];
         }),
       );
       const result = grade(task, {
-        version: '0.1',
+        // Side panels and priority queues need 0.4 (ADR 0029).
+        version: '0.4',
         structures,
         steps: Array.from({ length: task.minSteps }, (_, k) => ({
           actions: [],

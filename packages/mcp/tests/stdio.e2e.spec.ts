@@ -119,7 +119,9 @@ describe('the MCP server over stdio', () => {
       name: 'algoviz_validate',
       arguments: { document: textOf(doc) },
     });
-    expect(textOf(valid)).toMatch(/^Valid: g \(graph\), sets \(tree\)/);
+    expect(textOf(valid)).toMatch(
+      /^Valid: g \(graph\), edges \(table\), sets \(tree\)/,
+    );
   });
 
   it('reports bad recipe arguments without crashing', async () => {

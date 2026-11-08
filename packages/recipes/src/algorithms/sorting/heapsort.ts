@@ -64,9 +64,11 @@ export const heapsort = defineAlgorithm({
   run({ values }, trace) {
     const a = [...values];
     const n = a.length;
+    // The heap as a tree with the array under it, where the sorted part
+    // grows at the end (ADR 0029).
     const heap = trace.add('a', {
       kind: 'array',
-      view: 'tree',
+      view: 'heap',
       initial: [...values],
     });
 

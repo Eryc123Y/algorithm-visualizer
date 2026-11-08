@@ -68,6 +68,7 @@ export const dfs = defineAlgorithm({
     const calls = trace.add('calls', {
       kind: 'stack',
       label: 'call stack',
+      place: 'side',
       initial: [],
     });
     const adj = adjacency(g);

@@ -71,6 +71,7 @@ export const floydWarshall = defineAlgorithm({
     const graph = trace.add('g', declareGraph(g, true));
     const table = trace.add('dist', {
       kind: 'table',
+      place: 'side',
       initial: d.map((row) => row.map((x) => (x === Infinity ? '∞' : x))),
       rowLabels: [...g.nodes],
       columnLabels: [...g.nodes],

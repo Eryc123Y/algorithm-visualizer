@@ -68,13 +68,27 @@ export const prim = defineAlgorithm({
     const r = input.root;
     checkNode(g, r);
     const graph = trace.add('g', declareGraph(g, true));
+    // Q in the side panel, every vertex keyed by its key (ADR 0029).
+    const queueOf = trace.add('Q', {
+      kind: 'priorityQueue',
+      place: 'side',
+      initial: [],
+    });
     const adj = adjacency(g);
     const key = new Map(g.nodes.map((v) => [v, v === r ? 0 : Infinity]));
     const via = new Map<string, string>();
     const queue = new Set(g.nodes);
-    trace.step('start', `Every key is ∞, except the root ${r}'s, which is 0.`);
-    for (const v of g.nodes)
+    trace.step(
+      'start',
+      `Every key is ∞, except the root ${r}'s, which is 0. Every vertex goes into the queue Q.`,
+    );
+    for (const v of g.nodes) {
       graph.annotate({ node: v, text: shown(key.get(v)!) });
+      queueOf.insert({
+        element: { id: v, value: v },
+        key: v === r ? 0 : null,
+      });
+    }
     while (queue.size > 0) {
       // The least key; ties go to the vertex listed first.
       const u = [...queue].reduce((a, b) =>
@@ -91,6 +105,7 @@ export const prim = defineAlgorithm({
             : `${u} has key ∞: no edge joins it to the tree so far, so a new tree starts at ${u}.`,
       );
       graph.pointer({ name: 'u', node: u }).settle({ node: u });
+      queueOf.extract();
       if (edge !== undefined) graph.markEdge({ edge, mark: 'selected' });
       for (const { to: v, weight, edge: e } of adj.get(u)!) {
         if (!queue.has(v)) {
@@ -115,6 +130,7 @@ export const prim = defineAlgorithm({
         graph
           .highlight({ nodes: [v], edges: [e] })
           .annotate({ node: v, text: String(weight) });
+        queueOf.setKey({ id: v, key: weight });
       }
     }
     trace.step(

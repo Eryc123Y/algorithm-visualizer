@@ -57,22 +57,27 @@ function load(doc: VisualizationInput): Trace {
   return result.value;
 }
 
-/** Every frame's scene is well formed and as large as frame 0's. */
+/**
+ * Every frame's scene is well formed and as large as frame 0's, in both
+ * layouts (ADR 0029).
+ */
 function checkLayout(trace: Trace): void {
-  const layout = layoutTrace(trace);
-  const first = layout.sceneAt(0);
-  for (let i = 0; i <= trace.length; i++) {
-    const scene = i === 0 ? first : layout.sceneAt(i);
-    const problems = [...sceneProblems(scene), ...fitProblems(scene)];
-    if (problems.length > 0)
-      throw new Error(
-        `Frame ${i} of ${trace.length}: ${problems.slice(0, 5).join('; ')}` +
-          (problems.length > 5 ? ` …and ${problems.length - 5} more` : ''),
-      );
-    if (scene.width !== first.width || scene.height !== first.height)
-      throw new Error(
-        `Frame ${i} is ${scene.width}×${scene.height} but frame 0 is ${first.width}×${first.height}`,
-      );
+  for (const figure of ['wide', 'narrow'] as const) {
+    const layout = layoutTrace(trace, { layout: figure });
+    const first = layout.sceneAt(0);
+    for (let i = 0; i <= trace.length; i++) {
+      const scene = i === 0 ? first : layout.sceneAt(i);
+      const problems = [...sceneProblems(scene), ...fitProblems(scene)];
+      if (problems.length > 0)
+        throw new Error(
+          `${figure}, frame ${i} of ${trace.length}: ${problems.slice(0, 5).join('; ')}` +
+            (problems.length > 5 ? ` …and ${problems.length - 5} more` : ''),
+        );
+      if (scene.width !== first.width || scene.height !== first.height)
+        throw new Error(
+          `${figure}: frame ${i} is ${scene.width}×${scene.height} but frame 0 is ${first.width}×${first.height}`,
+        );
+    }
   }
 }
 

@@ -41,7 +41,11 @@ export const insertionSort = defineAlgorithm({
     const a = [...values];
     const n = a.length;
     const arr = trace.add('a', { kind: 'array', initial: [...values] });
-    const cell = trace.add('key', { kind: 'array', initial: [''] });
+    const cell = trace.add('key', {
+      kind: 'array',
+      place: 'side',
+      initial: [''],
+    });
     for (let i = 1; i < n; i++) {
       const key = a[i]!;
       trace.step(
