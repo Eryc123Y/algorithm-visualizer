@@ -8,6 +8,7 @@ import { describe, expect, it } from 'vitest';
 import type { ElementRole, Scene, SceneNode } from '@algoviz/core';
 
 import { paintScene, themeNames, themes, type SvgNode } from '../src/index.ts';
+import { inkDepth } from './glyph-depth.ts';
 
 /** fast-check settings, deepened with FUZZ_RUNS and replayed with FUZZ_SEED. */
 const params = {
@@ -43,14 +44,19 @@ function mark(node: SvgNode): SvgNode | undefined {
   );
 }
 
-/** The absolute points of a mark's path: `M x y l dx dy l dx dy`. */
+/** The points of a mark's path, which is a move and two lines. */
 function points(d: string): { x: number; y: number }[] {
-  const n = (d.match(/-?\d+(?:\.\d+)?/g) ?? []).map(Number);
-  const out = [{ x: n[0]!, y: n[1]! }];
-  for (let k = 2; k + 1 < n.length; k += 2)
-    out.push({ x: out.at(-1)!.x + n[k]!, y: out.at(-1)!.y + n[k + 1]! });
+  const out: { x: number; y: number }[] = [];
+  for (const [, c, args] of d.matchAll(/([MLml])([^MLml]*)/g)) {
+    const [x, y] = (args!.match(/-?\d*\.?\d+/g) ?? []).map(Number);
+    const from = c === 'l' || c === 'm' ? out.at(-1)! : { x: 0, y: 0 };
+    out.push({ x: from.x + x!, y: from.y + y! });
+  }
   return out;
 }
+
+/** Characters of values: digits, letters with and without descenders, punctuation. */
+const VALUE_CHARS = [...'0123456789abcdfgjpqxyzAJQ()[],;_|@$-'];
 
 const painted = (node: Partial<SceneNode>, theme = themes.light) =>
   paintScene(sceneOf(node), theme).items[0]!.node;
@@ -67,7 +73,13 @@ describe('check marks on nodes', () => {
         }),
         fc.constantFrom(...themeNames),
         fc.constantFrom<ElementRole>('settled', 'compare', 'swap', 'highlight'),
-        (radius, fontSize, stretch, name, role) => {
+        fc
+          .array(fc.constantFrom(...VALUE_CHARS), {
+            minLength: 1,
+            maxLength: 3,
+          })
+          .map((chars) => chars.join('')),
+        (radius, fontSize, stretch, name, role, text) => {
           const theme = themes[name];
           const width = stretch === undefined ? undefined : stretch * radius;
           const halfWidth = Math.max(radius, (width ?? 0) / 2);
@@ -76,6 +88,7 @@ describe('check marks on nodes', () => {
               radius,
               fontSize,
               role,
+              text,
               ...(role === 'settled' ? {} : { settled: true as const }),
               ...(width === undefined ? {} : { width }),
             },
@@ -92,11 +105,29 @@ describe('check marks on nodes', () => {
               Math.min(halfWidth - radius, p.x),
             );
             expect(Math.hypot(p.x - sx, p.y)).toBeLessThanOrEqual(inner + 1e-9);
-            // Under the value's baseline, whatever the face.
+            // Under the value's ink: its baseline, and any descender.
+            const depth = inkDepth(text, theme.fontMetrics.value.id);
             expect(p.y - cap).toBeGreaterThanOrEqual(
-              0.35 * fontSize + 1 - 1e-9,
+              (0.35 + depth) * fontSize + 1 - 1e-6,
             );
           }
+          // Big enough to read as a check, even under a descender.
+          const ys = points(path!.attrs['d']!).map((p) => p.y);
+          expect(Math.max(...ys) - Math.min(...ys)).toBeGreaterThanOrEqual(
+            0.1 * radius,
+          );
+          // In the same place whatever role the node takes.
+          const settled = painted(
+            {
+              radius,
+              fontSize,
+              role: 'settled',
+              text,
+              ...(width === undefined ? {} : { width }),
+            },
+            theme,
+          );
+          expect(mark(settled)?.attrs['d']).toBe(path!.attrs['d']);
         },
       ),
       params,

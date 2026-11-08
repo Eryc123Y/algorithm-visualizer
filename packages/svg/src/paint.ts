@@ -26,6 +26,7 @@ import {
 } from '@algoviz/core';
 import { textWidth } from '@algoviz/fonts';
 
+import { descentOf } from './descent.ts';
 import { num } from './format.ts';
 import { outlineNode, type GlyphLookup } from './outline.ts';
 import {
@@ -131,14 +132,38 @@ const isSettled = (item: SceneBox | SceneNode): boolean =>
 const markColour = (t: SvgTheme, role: ElementRole, c: CellStyle): string =>
   role === 'settled' ? (t.settledMark ?? c.text) : c.text;
 
+const MARK_WIDTH = 1.75;
+/** Room between the check mark and the value's ink. */
+const MARK_GAP = 1;
+/** The smallest a check mark gets, as a fraction of its full size. */
+const MARK_MIN_SCALE = 0.4;
+
 /**
- * A node's check mark: under the value, where it cannot read as an accent
- * on a letter, and inside the outline less its border for every radius
- * layout uses (ADR 0031). Its points are at most 0.75 r from the centre.
+ * A node's check mark (ADR 0031): under the value, where it cannot read as
+ * an accent on a letter, with its corner just inside the thickest border
+ * the theme draws, so it stays put whatever role the node takes. Under a
+ * value whose glyphs descend, it shrinks until it clears them.
  */
-function nodeCheck(r: number): string {
-  const at = (x: number, y: number) => `${num(x * r)} ${num(y * r)}`;
-  return `M${at(-0.17, 0.6)}l${at(0.12, 0.12)}l${at(0.25, -0.25)}`;
+function nodeCheck(n: SceneNode, t: SvgTheme): string {
+  const r = n.radius;
+  const cap = MARK_WIDTH / 2;
+  const border = Math.max(...Object.values(t.cell).map((c) => c.strokeWidth));
+  const inner = r - border - cap;
+  // Less a little, so that rounding to two decimals stays inside.
+  const corner = {
+    x: -0.05 * r,
+    y: Math.sqrt(inner ** 2 - (0.05 * r) ** 2) - 0.02,
+  };
+  const ink =
+    baselineOffset(n.fontSize) +
+    descentOf(n.text, t.fontMetrics.value) * n.fontSize;
+  // The long arm rises 0.25 r at full size; its end is the mark's top,
+  // which rounding may raise by up to 0.005.
+  const room = corner.y - cap - MARK_GAP - ink - 0.01;
+  const scale = Math.max(MARK_MIN_SCALE, Math.min(1, room / (0.25 * r)));
+  const at = (dx: number, dy: number) =>
+    `${num(corner.x + dx * r * scale)} ${num(corner.y + dy * r * scale)}`;
+  return `M${at(-0.12, -0.12)}L${at(0, 0)}L${at(0.25, -0.25)}`;
 }
 
 function paintBox(b: SceneBox, t: SvgTheme): SvgNode {
@@ -241,10 +266,10 @@ function paintNode(n: SceneNode, t: SvgTheme): SvgNode {
     children.push({
       tag: 'path',
       attrs: {
-        d: nodeCheck(n.radius),
+        d: nodeCheck(n, t),
         fill: 'none',
         stroke: markColour(t, n.role, c),
-        'stroke-width': '1.75',
+        'stroke-width': num(MARK_WIDTH),
         'stroke-linecap': 'round',
         'stroke-linejoin': 'round',
       },
