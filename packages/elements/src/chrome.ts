@@ -24,7 +24,12 @@ export interface ChromeTokens {
   readonly lineBg: string;
   readonly lineEdge: string;
   readonly error: string;
+  /** The container's corners. */
   readonly radius: string;
+  /** Buttons, the language menu and variable chips (ADR 0031). */
+  readonly controlRadius: string;
+  /** The code panel and the error box (ADR 0031). */
+  readonly panelRadius: string;
   /** Running text, and code and counters. */
   readonly font: string;
   readonly mono: string;
@@ -68,6 +73,8 @@ const light: ChromeTokens = {
   lineEdge: '#d08a18',
   error: '#b42318',
   radius: '14px',
+  controlRadius: '999px',
+  panelRadius: '10px',
   font: INTER,
   mono: JETBRAINS,
   code: {
@@ -130,6 +137,8 @@ const textbook: ChromeTokens = {
   lineEdge: '#e0b500',
   error: '#b3261e',
   radius: '2px',
+  controlRadius: '2px',
+  panelRadius: '2px',
   font: STIX,
   mono: NOTO_MONO,
   code: {
@@ -155,6 +164,8 @@ const textbookDark: ChromeTokens = {
   lineEdge: '#f2d23c',
   error: '#ff8577',
   radius: '2px',
+  controlRadius: '2px',
+  panelRadius: '2px',
   font: STIX,
   mono: NOTO_MONO,
   code: {
@@ -181,6 +192,8 @@ const blocks: ChromeTokens = {
   lineEdge: '#ffd23f',
   error: '#c0291e',
   radius: '18px',
+  controlRadius: '999px',
+  panelRadius: '12px',
   font: LEXEND,
   mono: DM_MONO,
   code: {
@@ -206,6 +219,8 @@ const blocksDark: ChromeTokens = {
   lineEdge: '#ffd23f',
   error: '#ff9b8f',
   radius: '18px',
+  controlRadius: '999px',
+  panelRadius: '12px',
   font: LEXEND,
   mono: DM_MONO,
   code: {
@@ -232,6 +247,8 @@ const answerSheet: ChromeTokens = {
   lineEdge: '#2b2b2e',
   error: '#b0182f',
   radius: '0px',
+  controlRadius: '0px',
+  panelRadius: '0px',
   font: NOTO_SANS,
   mono: NOTO_MONO,
   code: {
@@ -259,6 +276,8 @@ const turboC: ChromeTokens = {
   // CGA light red is 4.2:1 on blue; light magenta is the CGA red that reads.
   error: '#ff55ff',
   radius: '0px',
+  controlRadius: '0px',
+  panelRadius: '0px',
   font: PIXEL,
   mono: PIXEL,
   code: {
@@ -298,6 +317,8 @@ export function chromeDeclarations(t: ChromeTokens): string {
     ['--algo-line-edge', t.lineEdge],
     ['--algo-error', t.error],
     ['--algo-radius', t.radius],
+    ['--algo-control-radius', t.controlRadius],
+    ['--algo-panel-radius', t.panelRadius],
     ['--algo-font', t.font],
     ['--algo-mono', t.mono],
     ...Object.entries(t.code).map(([token, colour]): [string, string] => [

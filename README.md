@@ -152,7 +152,7 @@ Build the standalone bundle with `npm run build -w @algoviz/elements`, then:
 </algo-player>
 ```
 
-Attributes: `src`, `frame`, `theme` (a built-in theme, `auto` for light or dark by the reader's colour scheme, or a day and a night theme such as `"textbook textbook-dark"`), `layout` (`wide`, the default, or `narrow`, which puts side structures below the main one for a narrow column), `speed` (ms per step), `autoplay`, `loop`, `hide-controls`, `hide-code`, `language`. Style the chrome with CSS custom properties such as `--algo-accent`, or pass a full scene theme as the `customTheme` property.
+Attributes: `src`, `frame`, `theme` (a built-in theme, `auto` for light or dark by the reader's colour scheme, or a day and a night theme such as `"textbook textbook-dark"`), `layout` (`wide`, the default, or `narrow`, which puts side structures below the main one for a narrow column), `speed` (ms per step), `autoplay`, `loop`, `hide-controls`, `hide-code`, `language`. Style the chrome with CSS custom properties such as `--algo-accent`, or its corners with `--algo-radius` (the player), `--algo-control-radius` (buttons and menus) and `--algo-panel-radius` (the code panel), or pass a full scene theme as the `customTheme` property.
 
 Each theme draws in its own fonts. The player links `fonts/fonts.css`, next to its script, the first time a player shows, and the browser downloads only the font files a page draws. A bundler that puts the fonts elsewhere says where with `AlgoPlayer.fontsUrl = '/assets/fonts.css'`, and `AlgoPlayer.fontsUrl = null` turns loading off: text then falls back to similar fonts installed on the reader's system.
 
