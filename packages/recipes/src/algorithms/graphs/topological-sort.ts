@@ -91,7 +91,11 @@ export const topologicalSort = defineAlgorithm({
     const g: GraphInput = { ...graphOf(input.graph), directed: true };
     checkAcyclic(g);
     const graph = trace.add('g', declareGraph(g, false));
-    const order = trace.add('order', { kind: 'array', initial: [] });
+    const order = trace.add('order', {
+      kind: 'array',
+      label: 'L',
+      initial: [],
+    });
     // The calls of TOPOLOGICAL-VISIT, as dfs draws them (ADR 0029).
     const calls = callStack(trace);
     const adj = adjacency(g);

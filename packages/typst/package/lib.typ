@@ -74,7 +74,7 @@
 
 #let _theme(name, theme) = {
   if type(theme) != str {
-    panic(name + ": `theme` takes a name such as \"dark\", not " + repr(type(theme)))
+    panic(name + ": `theme` takes a name such as \"textbook\", not " + repr(type(theme)))
   }
   theme
 }
@@ -146,7 +146,9 @@
 ///   its input; or a document, such as one read with `json("doc.json")`.
 /// - step (int, str): The frame: a number (0 the start, -1 the last), a step
 ///   such as "relax#3", or a step in a section such as "insert-5/relax#2".
-/// - theme (str): "light", "dark" or "print".
+/// - theme (str): A built-in theme: "light" (the default), "dark", "print",
+///   "textbook", "textbook-dark", "blocks", "blocks-dark", "answer-sheet" or
+///   "turbo-c".
 /// - layout (auto, str): Where structures the document places on the side,
 ///   such as a queue or a call stack, go: "narrow" (the default here) puts
 ///   them below the main ones, for a column of notes; "wide" puts them

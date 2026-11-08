@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+
 import { describe, expect, it } from 'vitest';
 
 import { algorithms, runAlgorithm } from '@algoviz/recipes';
@@ -250,5 +252,13 @@ describe('respond', () => {
       ok: false,
       diagnostics: [{ code: 'INVALID_JSON', path: '$' }],
     });
+  });
+});
+
+describe('the package', () => {
+  it('carries the licences of every face whose outlines the engine draws', () => {
+    const read = (path: string) =>
+      readFileSync(new URL(path, import.meta.url), 'utf8');
+    expect(read('../package/OFL.txt')).toBe(read('../../fonts/OFL.txt'));
   });
 });

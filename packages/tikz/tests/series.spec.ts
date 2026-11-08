@@ -68,7 +68,7 @@ describe('exportTikzFigures', () => {
       sizes.value.map((f) => [f.width, f.height]),
     );
     // The last frame is the widest, and frame 0 shares its canvas.
-    const head = /\\algoviz@figure\{1\}\{([\d.]+)\}\{([\d.]+)\}/;
+    const head = /\\algoviz@figure\{2\}\{([\d.]+)\}\{([\d.]+)\}/;
     expect(head.exec(all[0]!.tikz)!.slice(1)).toEqual(
       head.exec(all[4]!.tikz)!.slice(1),
     );

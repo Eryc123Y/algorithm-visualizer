@@ -7,7 +7,8 @@ import { SceneStage } from '../src/stage.ts';
 
 const result = loadTrace({
   version: '0.1',
-  structures: { arr: { kind: 'array', initial: [2, 1] } },
+  // A label keeps the lone array's caption, which the positions below include.
+  structures: { arr: { kind: 'array', label: 'arr', initial: [2, 1] } },
   steps: [
     { actions: [{ target: 'arr', type: 'pointer', name: 'i', index: 0 }] },
     { actions: [{ target: 'arr', type: 'swap', i: 0, j: 1 }] },

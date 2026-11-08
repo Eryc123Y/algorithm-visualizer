@@ -40,8 +40,9 @@ function seriesFile(
 ): void {
   const figure = ({ word, width = 100 }: { word: string; width?: number }) =>
     [
-      `% algoviz figure for LaTeX, format 1: ${word}`,
-      `\\algoviz@figure{1}{${width}}{40}{%`,
+      `% algoviz figure for LaTeX, format 2: ${word}`,
+      `\\algoviz@figure{2}{${width}}{40}{%`,
+      '\\algoviz@fonts{normal}{sf}%',
       '\\algoviz@color{1}{1F2A26}%',
       '}{%',
       `\\algoviz@text{50,25}{c}{12}{0}{label}{algoviz@c1}{}{${word}}`,

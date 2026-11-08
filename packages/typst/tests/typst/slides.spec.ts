@@ -12,6 +12,7 @@ import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { runAlgorithm } from '@algoviz/recipes';
+import { themeNames } from '@algoviz/svg';
 
 import {
   examples,
@@ -132,6 +133,19 @@ describe('algoviz-slides with a stand-in only', () => {
     const run = runAlgorithm('bst.delete', bstInput);
     if (!run.ok) throw new Error('bst.delete');
     expect(frames[1]!.alt).toBe(run.value.document.steps[0]!.meta?.narration);
+  });
+
+  it('draws in every built-in theme (ADR 0030)', () => {
+    const document = documentOf('bst.delete', bstInput);
+    for (const theme of themeNames) {
+      const frames = slides(
+        `"bst.delete", ${BST}, steps: (0, -1), theme: "${theme}"`,
+      ).filter((p) => p.kind === 'frame');
+      expect(
+        frames.map((p) => p.svg),
+        theme,
+      ).toEqual(exported(document, [0, -1], theme, 'wide'));
+    }
   });
 
   it('draws wide by default, as slides have room, and takes layout', () => {

@@ -5,8 +5,13 @@
  * with a code point the face has no outline for stays text.
  */
 import {
+  dotGothic16RegularOutlines,
   interSemiBoldOutlines,
   jetbrainsMonoSemiBoldOutlines,
+  lexendSemiBoldOutlines,
+  notoSansMonoSemiBoldOutlines,
+  notoSansSemiBoldOutlines,
+  stixTwoTextSemiBoldOutlines,
   textWidth,
   type FontMetrics,
   type FontOutlines,
@@ -16,10 +21,15 @@ import { num } from './format.ts';
 import type { SvgNode } from './paint.ts';
 import type { SvgTheme } from './theme.ts';
 
-/** The outlines of the bundled faces. */
+/** The outlines of the bundled faces, those of every built-in theme. */
 export const bundledOutlines: readonly FontOutlines[] = [
   jetbrainsMonoSemiBoldOutlines,
   interSemiBoldOutlines,
+  stixTwoTextSemiBoldOutlines,
+  lexendSemiBoldOutlines,
+  notoSansSemiBoldOutlines,
+  notoSansMonoSemiBoldOutlines,
+  dotGothic16RegularOutlines,
 ];
 
 /** The glyphs of a face by code point, or undefined if it has none. */

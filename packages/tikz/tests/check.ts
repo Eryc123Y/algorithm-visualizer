@@ -406,8 +406,12 @@ const TEXT_COMMAND =
 export function wellFormedProblems(tikz: string): string[] {
   const problems: string[] = [];
   if (/NaN|undefined|Infinity/.test(tikz)) problems.push('not a number');
-  const head = /^\\algoviz@figure\{1\}\{([\d.]+)\}\{([\d.]+)\}\{%$/m.exec(tikz);
-  if (head === null) return [...problems, 'no \\algoviz@figure line'];
+  const head =
+    /^\\algoviz@figure\{2\}\{([\d.]+)\}\{([\d.]+)\}\{%\n\\algoviz@fonts\{(?:normal|rm|sf|tt)\}\{(?:normal|rm|sf|tt)\}%$/m.exec(
+      tikz,
+    );
+  if (head === null)
+    return [...problems, 'no \\algoviz@figure and \\algoviz@fonts lines'];
   const [width, height] = [Number(head[1]), Number(head[2])];
   const defined = new Set(
     [...tikz.matchAll(/^\\algoviz@color\{(\d+)\}\{[0-9A-F]{6}\}%$/gm)].map(

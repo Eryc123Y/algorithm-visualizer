@@ -26,7 +26,8 @@ const heap = (
   withSteps = true,
 ) => ({
   version: '0.4',
-  structures: { h: { kind: 'array', view, initial } },
+  // A label, so the lone structure keeps its caption.
+  structures: { h: { kind: 'array', label: 'h', view, initial } },
   steps: !withSteps
     ? [{ actions: [{ target: 'h', type: 'pointer', name: 'i', index: 0 }] }]
     : [

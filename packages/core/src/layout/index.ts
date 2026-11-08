@@ -154,6 +154,8 @@ function layoutColumn(
   let y = origin.y;
   let width = 0;
   let first = true;
+  // A lone structure's id says nothing the figure does not; a label does.
+  const lone = Object.keys(vis.structures).length === 1;
   for (const name of column.names) {
     const decl = vis.structures[name]!;
     const entry = state[name];
@@ -171,7 +173,8 @@ function layoutColumn(
       metrics: m.metrics,
       origin: { x: origin.x, y },
       region: column.region,
-      options: o,
+      options:
+        lone && decl.label === undefined ? { ...o, showTitles: false } : o,
     } as Parameters<(typeof runtimes)[typeof entry.kind]['layout']>[0]);
     // A loop, not push(...items): spreading a large array overflows the stack.
     for (const item of block.items) items.push(item);

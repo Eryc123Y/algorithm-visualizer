@@ -48,18 +48,18 @@ The package runs the `algoviz` command through shell escape, as `minted` runs Py
 
 ## Keys
 
-| Key               | Default                 | Meaning                                                                          |
-| ----------------- | ----------------------- | -------------------------------------------------------------------------------- |
-| `step`            | `-1`                    | The frame to draw (below).                                                       |
-| `steps`           | none                    | A series of frames, one per slide in Beamer ([Slides](#slides)).                 |
-| `start`           | `+`                     | The slide of a series' first frame ([Slides](#slides)).                          |
-| `theme`           | `light`                 | `light`, `dark` or `print`.                                                      |
-| `layout`          | `narrow`, Beamer `wide` | Where structures beside the main one go, such as a queue: below it or beside it. |
-| `width`, `height` | natural                 | The figure's size. With both, the figure fits inside both and keeps its shape.   |
-| `scale`           | `1`                     | A factor on the natural size.                                                    |
-| `value font`      | `\normalfont`           | The font of values in cells and nodes, indices, edge labels and pointers.        |
-| `label font`      | `\normalfont\sffamily`  | The font of titles and labels such as "top".                                     |
-| `algorithm`       | none                    | With `\algovizfile`: the file is this algorithm's input, not a document.         |
+| Key               | Default                 | Meaning                                                                                                                                                                                                                                                                         |
+| ----------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `step`            | `-1`                    | The frame to draw (below).                                                                                                                                                                                                                                                      |
+| `steps`           | none                    | A series of frames, one per slide in Beamer ([Slides](#slides)).                                                                                                                                                                                                                |
+| `start`           | `+`                     | The slide of a series' first frame ([Slides](#slides)).                                                                                                                                                                                                                         |
+| `theme`           | `light`                 | A built-in theme: `light`, `dark`, `print`, `textbook`, `textbook-dark`, `blocks`, `blocks-dark`, `answer-sheet` or `turbo-c`.                                                                                                                                                  |
+| `layout`          | `narrow`, Beamer `wide` | Where structures beside the main one go, such as a queue: below it or beside it.                                                                                                                                                                                                |
+| `width`, `height` | natural                 | The figure's size. With both, the figure fits inside both and keeps its shape.                                                                                                                                                                                                  |
+| `scale`           | `1`                     | A factor on the natural size.                                                                                                                                                                                                                                                   |
+| `value font`      | the theme's             | The font of values in cells and nodes, indices, edge labels and pointers. By default the document's family the theme names: `\normalfont` for light, dark and print, `\rmfamily` for the textbook themes, `\sffamily` for blocks, `\ttfamily` for the answer sheet and Turbo C. |
+| `label font`      | the theme's             | The font of titles and labels such as "top". By default `\sffamily`, but `\rmfamily` for the textbook themes and `\ttfamily` for Turbo C.                                                                                                                                       |
+| `algorithm`       | none                    | With `\algovizfile`: the file is this algorithm's input, not a document.                                                                                                                                                                                                        |
 
 An algorithm's figure draws what it keeps besides its main structure, such as Dijkstra's priority queue or a call stack. `layout=narrow` puts those structures below the main one, which suits a column of notes; `layout=wide` puts them beside it, which suits a slide. The default is `wide` in the `beamer` class and `narrow` everywhere else, `beamerarticle` notes included; `layout=auto` goes back to it.
 
@@ -126,6 +126,7 @@ Each figure is kept in `_algoviz/` under the MD5 of everything that changes its 
 - Fonts and sizes are applied when the figure is drawn, so changing them makes no new figure.
 - Share or commit `_algoviz/` to compile the document where the command is missing or shell escape is off, such as on arXiv or for a co-author.
 - The package deletes nothing. Delete `_algoviz/` to clean up, and after updating the `algoviz` command.
+- Figure files carry a format number, and the package reads its own format only. A file that `algoviz export --format tikz` made with an older command stops with an error that names both formats: make it again with the command of this release.
 
 ## Errors
 

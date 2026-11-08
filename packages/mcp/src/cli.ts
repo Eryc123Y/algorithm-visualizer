@@ -5,7 +5,7 @@
  *   algoviz guide [kind …]
  *   algoviz validate <file>
  *   algoviz inspect <file> [frame …]
- *   algoviz render <file> [--frame f] [--theme dark] [--layout narrow]
+ *   algoviz render <file> [--frame f] [--theme t] [--layout narrow]
  *                  [--out frame.svg]
  *   algoviz export <file> [--step s …] [--theme t] [--layout l] [--format svg|tikz]
  *                  [--one-file] [--out dir] [--name pattern]
@@ -33,7 +33,12 @@ import { basename, dirname, extname, join } from 'node:path';
 import type { FigureLayout } from '@algoviz/core';
 import { runAlgorithm } from '@algoviz/recipes';
 import { formatErrors, ok, type Diagnostic, type Result } from '@algoviz/spec';
-import { exportFigures, themes, type ThemeName } from '@algoviz/svg';
+import {
+  exportFigures,
+  isThemeName,
+  themeNames,
+  type ThemeName,
+} from '@algoviz/svg';
 import { exportTikzFigures } from '@algoviz/tikz';
 
 import { readDocument } from './document.ts';
@@ -51,9 +56,9 @@ const USAGE = `Usage:
   algoviz guide [kind …]                 Authoring guide (all kinds by default)
   algoviz validate <file>                Check a document
   algoviz inspect <file> [frame …]       State at frames (default: the last)
-  algoviz render <file> [--frame f] [--theme light|dark]
+  algoviz render <file> [--frame f] [--theme t]
                  [--layout wide|narrow] [--out file.svg]
-  algoviz export <file> [--step s …] [--theme light|dark|print]
+  algoviz export <file> [--step s …] [--theme t]
                  [--layout wide|narrow] [--format svg|tikz] [--one-file]
                  [--out dir]
                  [--name pattern] [--error-file file]
@@ -77,7 +82,8 @@ structures declared with "place": "side" go: beside the others (wide, the
 default) or below them (narrow, for a column of notes). --input-hex takes the
 input as hexadecimal UTF-8, for programs that cannot quote JSON for a shell,
 and --error-file also writes any error to a file, which a successful export
-removes.`;
+removes. --theme picks a built-in theme: ${themeNames.join(', ')}; light is
+the default.`;
 
 class UsageError extends Error {}
 
@@ -173,9 +179,6 @@ const failure = (errors: readonly Diagnostic[]): ToolResult => ({
   text: formatErrors(errors),
   isError: true,
 });
-
-const isThemeName = (name: string): name is ThemeName =>
-  Object.hasOwn(themes, name);
 
 const LAYOUTS: readonly FigureLayout[] = ['wide', 'narrow'];
 
@@ -296,7 +299,7 @@ function exportCommand(rest: readonly string[], values: Options): ToolResult {
   const theme = values.theme ?? 'light';
   if (!isThemeName(theme))
     throw new UsageError(
-      `Unknown theme "${theme}"; use ${Object.keys(themes).join(', ')}`,
+      `Unknown theme "${theme}"; use ${themeNames.join(', ')}`,
     );
   const layout = layoutOf(values.layout);
   const format = values.format ?? 'svg';

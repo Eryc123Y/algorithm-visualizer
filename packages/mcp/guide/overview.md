@@ -39,6 +39,7 @@ An algoviz document is JSON that describes a step-by-step visualization of an al
 - `version` is the protocol version, `"major.minor"`. Write the oldest version that has every feature you use: `"0.4"` if a structure has `place` (below), `"0.3"` if the document has `sources` (code in several languages, below), `"0.2"` if any step has a name or the document has sections, and `"0.1"` otherwise.
 - `title` and `source` are optional. `source.code` is the code being taught; `meta.line` (1-based) highlights a line of it. Without `source`, leave out `line`. To show the code in pseudocode and Python, give `sources` instead (below).
 - `structures` maps names to declarations (at most 16). Names are identifiers: letters, digits and `_`, not starting with a digit, e.g. `arr`, `dist`, `call_stack`.
+- A structure's caption is its `label`, or else its name. A structure alone in its document gets no caption unless it has a `label`; give one only when it says more than the figure does, such as `"label": "call stack"`.
 - `steps` is the timeline. Each step has `actions` (applied in order, possibly none) and optional `meta`:
   - `narration`: one or two sentences for a learner, saying what happens and why.
   - `line`: the source line, if there is `source`.

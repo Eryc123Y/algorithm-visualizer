@@ -13,6 +13,7 @@ import {
   prepareScenes,
   renderSeries,
   renderSvg,
+  themeNames,
   type Figure,
 } from '../src/index.ts';
 
@@ -148,7 +149,7 @@ describe('exportFigures', () => {
     const dark = figuresOf(doc, { steps: [1], theme: 'dark' })[0]!.svg;
     const custom = figuresOf(doc, {
       steps: [1],
-      theme: createTheme('light', { title: '#123456' }),
+      theme: createTheme('light', { index: '#123456' }),
     })[0]!.svg;
     expect(dark).not.toBe(light);
     expect(custom).toContain('#123456');
@@ -163,7 +164,7 @@ describe('exportFigures', () => {
           code: 'UNKNOWN_THEME',
           path: '$.theme',
           message: 'No theme named "neon"',
-          hint: 'Themes: light, dark, print.',
+          hint: `Themes: ${themeNames.join(', ')}.`,
         },
       ],
     });

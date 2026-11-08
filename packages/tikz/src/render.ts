@@ -34,8 +34,11 @@ import {
   type Point,
 } from './geometry.ts';
 
-/** The version of the file format that `\algoviz@figure` reads. */
-export const TIKZ_FORMAT = 1;
+/**
+ * The version of the file format that `\algoviz@figure` reads. Format 2
+ * starts a figure's colours with the theme's TeX families (ADR 0030).
+ */
+export const TIKZ_FORMAT = 2;
 
 export interface RenderTikzOptions {
   /** A theme name or a full theme, e.g. from `createTheme`. Default `'light'`. */
@@ -303,8 +306,9 @@ const comment = (text: string) => `% ${text.replace(/\s+/g, ' ').trim()}`;
 /**
  * Renders a scene as a TikZ figure for the LaTeX package: a call to
  * `\algoviz@figure` with the format, the canvas size in scene units, the
- * colours and the drawing. Positions are those of `renderSvg`; text is
- * left to the document's fonts.
+ * theme's TeX families and colours, and the drawing. Positions are those of
+ * `renderSvg`; text is left to the document's fonts, in the families the
+ * theme names (`\algoviz@fonts{<values>}{<labels>}`).
  */
 export function renderTikz(
   scene: Scene,
@@ -339,6 +343,7 @@ export function renderTikz(
     ...(options.comments ?? []).map(comment),
     comment('Draw it with \\algovizinput from the algoviz LaTeX package.'),
     `\\algoviz@figure{${TIKZ_FORMAT}}{${num(painted.width)}}{${num(painted.height)}}{%`,
+    `\\algoviz@fonts{${theme.tex.value}}{${theme.tex.label}}%`,
     ...palette.definitions(),
     '}{%',
     ...body,
