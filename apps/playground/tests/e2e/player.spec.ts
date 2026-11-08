@@ -3,6 +3,7 @@
  * at any frame, however it is reached, and every control.
  */
 import type { AlgoPlayer } from '@algoviz/elements';
+import { themeNames } from '@algoviz/svg';
 
 import { examples } from '../../src/samples/examples';
 import {
@@ -152,10 +153,8 @@ test('switches the code between pseudocode and Python, keeping the frame', async
   const next = player.getByRole('button', { name: 'Next step' });
   await next.click();
   await next.click();
-  const languages = player.getByRole('group', { name: 'Code language' });
-  const pseudocode = languages.getByRole('button', { name: 'Pseudocode' });
-  const python = languages.getByRole('button', { name: 'Python' });
-  await expect(pseudocode).toHaveAttribute('aria-pressed', 'true');
+  const languages = player.getByRole('combobox', { name: 'Code language' });
+  await expect(languages).toHaveValue('pseudocode');
   await expect(
     player.getByRole('region', { name: 'Source code, Pseudocode' }),
   ).toBeVisible();
@@ -164,26 +163,38 @@ test('switches the code between pseudocode and Python, keeping the frame', async
   );
   const frame = await player.getAttribute('frame');
 
-  // By keyboard: Tab to Python and press it with Space, which does not
-  // start playback.
-  await pseudocode.focus();
-  await page.keyboard.press('Tab');
-  await expect(python).toBeFocused();
-  await page.keyboard.press(' ');
-  await expect(python).toHaveAttribute('aria-pressed', 'true');
-  await expect(pseudocode).toHaveAttribute('aria-pressed', 'false');
+  // From the menu, the left and right arrows still step the player, and
+  // leave the language alone.
+  await languages.focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(player).toHaveAttribute('frame', String(Number(frame) + 1));
+  await page.keyboard.press('ArrowLeft');
+  await expect(player).toHaveAttribute('frame', frame!);
+  await expect(languages).toHaveValue('pseudocode');
+  await languages.selectOption('python');
+  await expect(languages).toHaveValue('python');
   await expect(player).toHaveAttribute('frame', frame!);
   await expect(player.getByRole('button', { name: 'Play' })).toBeVisible();
+  await expect(
+    player.getByRole('region', { name: 'Source code, Python' }),
+  ).toBeVisible();
   await expect(player.locator('.line.current')).toHaveText(
     /^\s*if key < node.key:$/,
   );
+
+  // And by choosing an option.
+  await languages.selectOption('pseudocode');
+  await expect(
+    player.getByRole('region', { name: 'Source code, Pseudocode' }),
+  ).toBeVisible();
+  await languages.selectOption({ label: 'Python' });
 
   // Remembered on this site.
   await page.reload();
   await page.getByTestId('example').selectOption('Binary search tree');
   await expect(
-    page.getByTestId('player').getByRole('button', { name: 'Python' }),
-  ).toHaveAttribute('aria-pressed', 'true');
+    page.getByTestId('player').getByRole('combobox', { name: 'Code language' }),
+  ).toHaveValue('python');
 });
 
 test('keeps the current line in view of the code panel', async ({ page }) => {
@@ -236,6 +247,22 @@ test.describe('themes', () => {
     expect(dark.fills).not.toBe(light.fills);
     await page.getByTestId('theme').selectOption('print');
     await expect(player).toHaveAttribute('data-resolved-theme', 'print');
+  });
+
+  test('the theme menu lists every built-in theme', async ({ page }) => {
+    await page.goto('/');
+    const values = await page
+      .getByTestId('theme')
+      .locator('option')
+      .evaluateAll((options) =>
+        options.map((o) => (o as HTMLOptionElement).value),
+      );
+    for (const name of themeNames) expect(values).toContain(name);
+    await page.getByTestId('theme').selectOption('answer-sheet');
+    await expect(page.getByTestId('player')).toHaveAttribute(
+      'data-resolved-theme',
+      'answer-sheet',
+    );
   });
 
   test('auto follows the system, also when it changes', async ({ page }) => {

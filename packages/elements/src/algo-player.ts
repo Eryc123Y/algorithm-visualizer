@@ -19,7 +19,7 @@
  * Page Down move between them.
  *
  * A document with its code in several languages (`sources`, ADR 0017) gets
- * a language switcher above the code. The reader's choice is remembered for
+ * a language menu above the code. The reader's choice is remembered for
  * the site and followed by every player on the page; otherwise the
  * `language` attribute, then pseudocode, is shown first.
  *
@@ -77,8 +77,15 @@ import {
 } from './sections.ts';
 import { SceneStage } from './stage.ts';
 import { playerStyles } from './styles.ts';
+import { chromeStyles, resolvePlayerTheme } from './chrome.ts';
+import { defaultFontsUrl, linkFonts } from './fonts.ts';
 
-export type PlayerTheme = ThemeName | 'auto';
+/**
+ * A built-in theme's name, `auto` (light or dark by the reader's colour
+ * scheme), or a day and a night theme, such as `textbook textbook-dark`,
+ * that follow the colour scheme (ADR 0030).
+ */
+export type PlayerTheme = ThemeName | 'auto' | `${ThemeName} ${ThemeName}`;
 
 export type PlayerMode = 'interactive' | 'display';
 
@@ -96,6 +103,14 @@ export interface AlgoFrameDetail {
 
 const MAX_ANIMATION_MS = 450;
 
+/** The keys the player takes while its language menu has focus. */
+const MENU_PASSES: ReadonlySet<string> = new Set([
+  'ArrowLeft',
+  'ArrowRight',
+  'PageUp',
+  'PageDown',
+]);
+
 /** How long display mode holds the last frame before looping. */
 const DISPLAY_END_HOLD_MS = 1500;
 
@@ -107,7 +122,17 @@ const sameFonts = (a: LayoutFonts | null, b: LayoutFonts): boolean =>
   a !== null && a.value === b.value && a.label === b.label;
 
 export class AlgoPlayer extends LitElement {
-  static override styles = playerStyles;
+  static override styles = [playerStyles, chromeStyles()];
+
+  /**
+   * The stylesheet of the themes' web fonts (ADR 0030), linked from the
+   * document the first time a player connects. By default it is
+   * `fonts/fonts.css` next to the player's module; a bundle that copies
+   * the fonts elsewhere names their place here, and null turns loading
+   * off, leaving text to the fallbacks of each theme's font lists. Set it
+   * before the first player connects: the stylesheet is linked once.
+   */
+  static fontsUrl: string | null | undefined = undefined;
 
   static override properties = {
     src: { type: String },
@@ -131,6 +156,7 @@ export class AlgoPlayer extends LitElement {
     frameError: { state: true },
     trace: { state: true },
     darkScheme: { state: true },
+    printing: { state: true },
   };
 
   /** URL of a JSON document. */
@@ -156,7 +182,11 @@ export class AlgoPlayer extends LitElement {
    * section opens at its first step.
    */
   declare frame: FrameSelector;
-  /** `light`, `dark`, `print`, or `auto` to follow the system. */
+  /**
+   * A built-in theme (`light`, `textbook`, `turbo-c`, …), `auto` to follow
+   * the system between light and dark, or a pair such as
+   * `textbook textbook-dark` to follow it between those two.
+   */
   declare theme: PlayerTheme;
   /** A full SVG theme (e.g. from `createTheme`); overrides `theme` for the scene. */
   declare customTheme: SvgTheme | undefined;
@@ -181,6 +211,11 @@ export class AlgoPlayer extends LitElement {
   declare protected frameError: FrameError | null;
   declare protected trace: Trace | null;
   declare protected darkScheme: boolean;
+  /**
+   * Whether the page is being printed: `auto` and day-and-night pairs
+   * then print in their day theme (ADR 0030).
+   */
+  declare protected printing: boolean;
 
   #layout: TraceLayout | null = null;
   /** The fonts `#layout` measured text with. */
@@ -224,6 +259,7 @@ export class AlgoPlayer extends LitElement {
     this.frameError = null;
     this.trace = null;
     this.darkScheme = this.#colorScheme?.matches ?? false;
+    this.printing = false;
     this.#controller = new PlayerController({
       interval: this.speed,
       onChange: (state) => this.#onPlayback(state),
@@ -279,8 +315,15 @@ export class AlgoPlayer extends LitElement {
 
   override connectedCallback(): void {
     super.connectedCallback();
+    linkFonts(
+      AlgoPlayer.fontsUrl === undefined
+        ? defaultFontsUrl()
+        : AlgoPlayer.fontsUrl,
+    );
     this.addEventListener('keydown', this.#onKeyDown);
     this.#colorScheme?.addEventListener('change', this.#onColorScheme);
+    globalThis.addEventListener?.('beforeprint', this.#onBeforePrint);
+    globalThis.addEventListener?.('afterprint', this.#onAfterPrint);
     globalThis.addEventListener?.(LANGUAGE_EVENT, this.#onLanguage);
     globalThis.addEventListener?.('storage', this.#onStorage);
     // A choice made while this player was detached.
@@ -303,6 +346,8 @@ export class AlgoPlayer extends LitElement {
     super.disconnectedCallback();
     this.removeEventListener('keydown', this.#onKeyDown);
     this.#colorScheme?.removeEventListener('change', this.#onColorScheme);
+    globalThis.removeEventListener?.('beforeprint', this.#onBeforePrint);
+    globalThis.removeEventListener?.('afterprint', this.#onAfterPrint);
     globalThis.removeEventListener?.(LANGUAGE_EVENT, this.#onLanguage);
     globalThis.removeEventListener?.('storage', this.#onStorage);
     this.#visibility?.disconnect();
@@ -519,12 +564,9 @@ export class AlgoPlayer extends LitElement {
     // A focused code panel keeps its keys for scrolling.
     if (target instanceof HTMLElement && target.classList.contains('code'))
       return;
-    // A language button keeps the keys that press it.
-    if (
-      target instanceof HTMLButtonElement &&
-      target.dataset['language'] !== undefined &&
-      (event.key === ' ' || event.key === 'Enter')
-    )
+    // The language menu keeps the keys it chooses with; the player takes
+    // the left and right arrows and the section jumps from it.
+    if (target instanceof HTMLSelectElement && !MENU_PASSES.has(event.key))
       return;
     const sections = (this.trace?.visualization.sections ?? []).length > 0;
     const jumps: Record<string, () => void> = sections
@@ -604,6 +646,14 @@ export class AlgoPlayer extends LitElement {
     this.#rendered = false;
   }
 
+  #onBeforePrint = (): void => {
+    this.printing = true;
+  };
+
+  #onAfterPrint = (): void => {
+    this.printing = false;
+  };
+
   #onColorScheme = (event: MediaQueryListEvent): void => {
     this.darkScheme = event.matches;
   };
@@ -642,8 +692,10 @@ export class AlgoPlayer extends LitElement {
   }
 
   #resolvedTheme(): ThemeName {
-    if (this.theme === 'auto') return this.darkScheme ? 'dark' : 'light';
-    return this.theme;
+    return resolvePlayerTheme(
+      String(this.theme ?? 'auto'),
+      this.darkScheme && !this.printing,
+    );
   }
 
   // --- Rendering -------------------------------------------------------------
@@ -714,24 +766,26 @@ export class AlgoPlayer extends LitElement {
               ? html`<div class="code-panel">
                   ${
                     listings.length > 1
-                      ? html`<div
+                      ? html`<select
                           class="languages"
                           part="languages"
-                          role="group"
                           aria-label="Code language"
+                          .value=${listing.language ?? ''}
+                          @change=${(event: Event) =>
+                            this.#chooseLanguage(
+                              (event.target as HTMLSelectElement).value,
+                            )}
                         >
                           ${listings.map(
                             ({ language }) =>
-                              html`<button
-                                type="button"
-                                data-language=${language ?? ''}
-                                aria-pressed=${language === listing.language ? 'true' : 'false'}
-                                @click=${() => this.#chooseLanguage(language ?? '')}
+                              html`<option
+                                value=${language ?? ''}
+                                ?selected=${language === listing.language}
                               >
                                 ${languageName(language)}
-                              </button>`,
+                              </option>`,
                           )}
-                        </div>`
+                        </select>`
                       : nothing
                   }
                   <pre

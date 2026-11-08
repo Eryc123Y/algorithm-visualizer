@@ -19,6 +19,10 @@
       "@algoviz/source": "./src/define.ts",
       "types": "./dist/define.d.ts",
       "default": "./dist/define.js"
+    },
+    "./fonts.css": {
+      "@algoviz/source": "./src/fonts/fonts.css",
+      "default": "./dist/fonts/fonts.css"
     }
   },
   "files": [

@@ -440,3 +440,36 @@ describe('<algo-player>', () => {
     });
   });
 });
+
+describe('<algo-player> themes (ADR 0030)', () => {
+  /** Mounts a player in a dark colour scheme with the given theme. */
+  async function dark(theme: string): Promise<AlgoPlayer> {
+    const el = await mount((e) => {
+      e.setAttribute('theme', theme);
+      e.visualization = doc;
+    });
+    (el as unknown as { darkScheme: boolean }).darkScheme = true;
+    await el.updateComplete;
+    return el;
+  }
+
+  it('follows the colour scheme between the themes of a pair', async () => {
+    const el = await dark('textbook textbook-dark');
+    expect(el.dataset['resolvedTheme']).toBe('textbook-dark');
+  });
+
+  it('prints auto and pairs in their day theme, and a named theme as shown', async () => {
+    const pair = await dark('textbook textbook-dark');
+    const auto = await dark('auto');
+    const named = await dark('turbo-c');
+    window.dispatchEvent(new Event('beforeprint'));
+    for (const el of [pair, auto, named]) await el.updateComplete;
+    expect(pair.dataset['resolvedTheme']).toBe('textbook');
+    expect(auto.dataset['resolvedTheme']).toBe('light');
+    expect(named.dataset['resolvedTheme']).toBe('turbo-c');
+    window.dispatchEvent(new Event('afterprint'));
+    for (const el of [pair, auto]) await el.updateComplete;
+    expect(pair.dataset['resolvedTheme']).toBe('textbook-dark');
+    expect(auto.dataset['resolvedTheme']).toBe('dark');
+  });
+});

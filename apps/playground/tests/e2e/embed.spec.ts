@@ -21,6 +21,7 @@ function documentOf(id: string, input: unknown) {
 }
 
 const ORIGIN = 'http://embed.test';
+const cdn = new URL('../../../../packages/elements/dist/cdn/', import.meta.url);
 const bundle = () =>
   readFileSync(
     new URL(
@@ -79,6 +80,12 @@ async function open(
       });
     if (path === '/algoviz-player.js')
       return route.fulfill({ contentType: 'text/javascript', body: bundle() });
+    // The web fonts sit next to the bundle, where the player looks.
+    if (path.startsWith('/fonts/'))
+      return route.fulfill({
+        contentType: path.endsWith('.css') ? 'text/css' : 'font/woff2',
+        body: readFileSync(new URL(`.${path}`, cdn)),
+      });
     const file = files[path];
     if (file !== undefined)
       return route.fulfill({
@@ -103,6 +110,50 @@ test('renders an inline document', async ({ page }) => {
   await expectStageMatches(player, sort);
   await player.getByRole('button', { name: 'Next step' }).click();
   await expectStageMatches(player, sort);
+});
+
+test('draws a theme in its own fonts, loaded from beside the bundle', async ({
+  page,
+}) => {
+  await open(page, inline(sort, 'theme="turbo-c"'));
+  const player = page.locator('#p');
+  await expect(player).toHaveAttribute('data-resolved-theme', 'turbo-c');
+  await expect(page.locator('link[data-algoviz-fonts]')).toHaveAttribute(
+    'href',
+    `${ORIGIN}/fonts/fonts.css`,
+  );
+  await expect
+    .poll(() =>
+      page.evaluate(async () => {
+        await document.fonts.ready;
+        return [...document.fonts].some(
+          (f) => f.family === 'DotGothic16' && f.status === 'loaded',
+        );
+      }),
+    )
+    .toBe(true);
+  // One link, however many players.
+  await page.evaluate(() =>
+    document.body.append(document.createElement('algo-player')),
+  );
+  await expect(page.locator('link[data-algoviz-fonts]')).toHaveCount(1);
+});
+
+test('follows the colour scheme between a day and a night theme', async ({
+  page,
+}) => {
+  await page.emulateMedia({ colorScheme: 'light' });
+  await open(page, inline(sort, 'theme="blocks blocks-dark"'));
+  const player = page.locator('#p');
+  await expect(player).toHaveAttribute('data-resolved-theme', 'blocks');
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await expect(player).toHaveAttribute('data-resolved-theme', 'blocks-dark');
+  const background = await player.evaluate(
+    (el) =>
+      getComputedStyle(el.shadowRoot!.querySelector('.player')!)
+        .backgroundColor,
+  );
+  expect(background).toBe('rgb(27, 35, 66)');
 });
 
 test('loads a document from src and reports it', async ({ page }) => {
@@ -216,9 +267,7 @@ test('changing src loads the new document', async ({ page }) => {
     '/b.json': graph,
   });
   const player = page.locator('#p');
-  await expect(
-    player.locator('[data-key="arr/title"], [data-key="a/title"]'),
-  ).not.toHaveCount(0);
+  await expect(player.locator('[data-key^="a/"]')).not.toHaveCount(0);
   await player.evaluate((el: AlgoPlayer) => el.setAttribute('src', '/b.json'));
   await expect(player.locator('[data-key="g/element/A"]')).toHaveCount(1);
   await expectStageMatches(player, graph);
@@ -244,9 +293,9 @@ test.describe('attributes', () => {
       `${inline(bst, 'language="python" frame="go"')}${inline(bst, 'frame="go"').replace('id="p"', 'id="q"')}`,
     );
     const [p, q] = [page.locator('#p'), page.locator('#q')];
-    const python = (player: typeof p) =>
-      player.getByRole('button', { name: 'Python' });
-    await expect(python(p)).toHaveAttribute('aria-pressed', 'true');
+    const menu = (player: typeof p) =>
+      player.getByRole('combobox', { name: 'Code language' });
+    await expect(menu(p)).toHaveValue('python');
     await expect(p.locator('.line.current')).toContainText(
       'node = node.left if key < node.key else node.right',
     );
@@ -256,18 +305,18 @@ test.describe('attributes', () => {
     await expect(q.locator('.tok-procedure').first()).toHaveText('TREE-SEARCH');
     // The reader picks pseudocode in the first: both show it, and it is
     // remembered over the attribute after a reload.
-    await p.getByRole('button', { name: 'Pseudocode' }).click();
+    await menu(p).selectOption('pseudocode');
     await expect(p.locator('.line.current')).toContainText(
       'elseif key < node.key',
     );
-    await q.getByRole('button', { name: 'Python' }).click();
-    await expect(python(p)).toHaveAttribute('aria-pressed', 'true');
+    await menu(q).selectOption({ label: 'Python' });
+    await expect(menu(p)).toHaveValue('python');
     await expect(p).toHaveAttribute('frame', String(frameOf('go')));
     await page.reload();
     await page.waitForFunction(
       () => customElements.get('algo-player') !== undefined,
     );
-    await expect(python(q)).toHaveAttribute('aria-pressed', 'true');
+    await expect(menu(q)).toHaveValue('python');
   });
 
   test('hide-controls and hide-code', async ({ page }) => {

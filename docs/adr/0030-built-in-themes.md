@@ -91,7 +91,7 @@ Text in a TikZ figure stays in the document's fonts (ADR 0027), so figures match
 
 - **Tokens per theme.** `@algoviz/elements` holds the `--algo-*` values of every built-in theme in one table keyed by `ThemeName`, so a theme without chrome does not compile. The table becomes `:host([data-resolved-theme="…"])` rules, each with its `color-scheme`. A page's own properties on the element still win.
 - **`customTheme`** replaces the figure's theme only, as before; the chrome follows `theme`.
-- **Print.** The chrome is printed as shown (`print-color-adjust: exact`), so a night theme prints legibly; the `print` theme is the one for paper.
+- **Print.** The chrome is printed as shown (`print-color-adjust: exact`), so a night theme prints legibly; the `print` theme is the one for paper. `auto` and a day-and-night pair print in their day theme, since the reader's colour scheme says nothing about paper. (Added on 2026-11-08, in the pull request that built the chrome.)
 - **The language switcher** becomes a `<select>` named "Code language" (the owner's request, 2026-11-08), in place of the row of pressed buttons. The `language` attribute, the reader's stored choice shared by every player on the site, and `currentLanguage` keep their meaning; the `languages` part names the select.
 - **The playground's Theme menu** lists every built-in theme, with `auto`.
 

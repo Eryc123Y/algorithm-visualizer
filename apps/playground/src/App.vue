@@ -17,7 +17,21 @@ import { reverse } from './samples/reverse';
 const initial = JSON.stringify(bubbleSortDocument([5, 3, 8, 1, 4]), null, 2);
 const text = ref(initial);
 const theme = ref<PlayerTheme>('auto');
-const themes: PlayerTheme[] = ['auto', 'light', 'dark', 'print'];
+/** Every built-in theme (ADR 0030), with its name in the docs. */
+const themes: readonly { value: PlayerTheme; label: string }[] = [
+  { value: 'auto', label: 'Auto: light or dark' },
+  { value: 'light', label: 'Light (default)' },
+  { value: 'dark', label: 'Dark · 深色' },
+  { value: 'print', label: 'Print · 打印' },
+  { value: 'textbook', label: 'Textbook · 课本批注' },
+  { value: 'textbook-dark', label: 'Textbook night · 课本批注 · 夜间' },
+  { value: 'textbook textbook-dark', label: 'Textbook, day or night' },
+  { value: 'blocks', label: 'Blocks · 积木教具' },
+  { value: 'blocks-dark', label: 'Blocks night · 积木教具 · 夜间' },
+  { value: 'blocks blocks-dark', label: 'Blocks, day or night' },
+  { value: 'answer-sheet', label: 'Answer sheet · 答题卡' },
+  { value: 'turbo-c', label: 'Turbo C lab · 机房 Turbo C' },
+];
 const mode = ref<PlayerMode>('interactive');
 const modes: PlayerMode[] = ['interactive', 'display'];
 
@@ -109,8 +123,8 @@ watch(parsed, ({ value, error }) => {
             class="rounded border px-2 py-1"
             data-testid="theme"
           >
-            <option v-for="name in themes" :key="name" :value="name">
-              {{ name }}
+            <option v-for="t in themes" :key="t.value" :value="t.value">
+              {{ t.label }}
             </option>
           </select>
         </label>

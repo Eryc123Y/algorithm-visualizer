@@ -14,6 +14,15 @@ export default defineConfig({
   test: {
     name: 'elements',
     environment: 'happy-dom',
+    // The player links its web fonts; the tests need not download them.
+    environmentOptions: {
+      happyDOM: {
+        settings: {
+          disableCSSFileLoading: true,
+          handleDisabledFileLoadingAsSuccess: true,
+        },
+      },
+    },
     include: ['tests/**/*.spec.ts'],
   },
 });
