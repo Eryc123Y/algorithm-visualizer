@@ -10,7 +10,7 @@ import { describe, expect, it } from 'vitest';
 import { queueOrder, type Trace } from '@algoviz/core';
 
 import { algorithms, runAlgorithm, type GraphInput } from '../src/index.ts';
-import { fuzz, replay, runOk, stateOf } from './helpers.ts';
+import { fuzz, replay, runError, runOk, stateOf } from './helpers.ts';
 
 const traceOf = (id: string, input: unknown) =>
   replay(runOk(id, input).document);
@@ -133,12 +133,12 @@ describe.each([
       expect(extracts.map((f) => queueAt(trace, f))).toEqual(
         reference(g, start),
       );
-      // Every vertex is inserted in the first step, the start with key 0.
-      expect(queueAt(trace, 1)).toEqual(
-        reference(g, start).length === 0
-          ? []
-          : [`${start}:0`, ...queueAt(trace, 1).slice(1)],
-      );
+      // Every vertex is inserted in the first step, in listed order: the
+      // start with key 0 in front, the others with no key yet.
+      expect(queueAt(trace, 1)).toEqual([
+        `${start}:0`,
+        ...g.nodes.filter((v) => v !== start).map((v) => `${v}:∞`),
+      ]);
       expect(queueAt(trace, trace.length)).toEqual([]);
       // An improved key moves the vertex, highlighted.
       for (const f of framesOf(
@@ -225,9 +225,11 @@ describe("kruskal's edges, sorted by weight", () => {
       { length: 101 },
       (_, k): [string, string, number] => ['A', 'B', k],
     );
-    expect(() => runOk('kruskal', { graph: { nodes, edges } })).toThrow(
-      /at most 100 edges/,
-    );
+    expect(runError('kruskal', { graph: { nodes, edges } })).toMatchObject({
+      code: 'INVALID_ARGUMENT',
+      path: '$.input',
+      message: expect.stringMatching(/at most 100 edges/) as string,
+    });
   });
 });
 

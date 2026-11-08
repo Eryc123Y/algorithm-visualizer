@@ -21,7 +21,7 @@ export interface CallStack {
   readonly trace: Trace;
   /** Pushes an entry, `{ id, value }`; ids are unique for the whole run. */
   push(id: string, value: string): void;
-  /** Takes the top entry off now. */
+  /** Takes the top entry off now; not while entries wait to leave. */
   pop(): void;
   /** Takes the top entry off at the start of the next step. */
   leave(): void;
@@ -57,6 +57,10 @@ export function callStack(trace: Trace, label = 'call stack'): CallStack {
       depth += 1;
     },
     pop() {
+      // The top entries may have left already; popping now would take one
+      // of them instead of the current call.
+      if (left > 0)
+        throw new Error('A call stack pops calls that left at the next step');
       calls.pop();
       depth -= 1;
     },
