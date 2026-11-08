@@ -52,7 +52,8 @@ Everything later builds on these, so they come first. The ADRs are accepted (#13
   - the TikZ painter: `@algoviz/tikz` on the SVG painter's shapes, and `prepareScenes` in `@algoviz/svg` (#40).
   - the command: `algoviz export --format tikz`, `--input-hex` and `--error-file`, and the standalone executable with its build script and tests (#41).
   - the package: `\algoviz[step=relax#3]{dijkstra}{<input>}`, `\algovizfile` for a document or an input file, `\algovizinput`, the cache, errors in the document, the README with examples, and compile tests with pdfLaTeX, LuaLaTeX and XeLaTeX (#42).
-- [ ] **1.5 Slides.** One overlay per step: `\only<n>` in Beamer, and the equivalent in Typst slide frameworks (polylux, touying). The overlays come from the same step selection as 1.2.
+- [~] **1.5 Slides** _ADR_ [ADR 0028](adr/0028-slides.md) (#43). One overlay per step: `\only<n>` in Beamer, and the equivalent in Typst slide frameworks (polylux, touying). The overlays come from the same step selection as 1.2. ADR 0028, then one PR:
+  - `algoviz export --one-file`, which writes a series into one TikZ file; the LaTeX keys `steps` and `start`, which draw a series as Beamer overlays in one picture; `algoviz-slides` in Typst, through polylux's or touying's `only`; examples whose prose matches their steps; compile tests with pdfLaTeX, LuaLaTeX, polylux 0.4.0 and touying 0.8.0.
 - [ ] **1.6 Built-in themes.**
   - Turn every theme-lab direction into a named built-in theme next to light, dark and print.
   - Keep the current light theme as the default, and refine it where it looks unnatural: a design pass with the frontend-design skill and a design subagent.
