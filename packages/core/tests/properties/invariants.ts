@@ -3,7 +3,34 @@
  * actions: data is well formed, and every mark refers to something that
  * exists. Returns a list of problems, empty if none.
  */
-import type { KindedState, TreeState } from '../../src/index.ts';
+import {
+  queueOrder,
+  type KindedState,
+  type TreeState,
+} from '../../src/index.ts';
+
+type Keyed = { readonly id: string; readonly key: number | null };
+
+/**
+ * The ids in the order a priority queue serves them, by repeatedly taking
+ * the best key that is left (null worst, the earliest on ties): written
+ * apart from the reducer's sort, so the two check each other.
+ */
+function servingOrder(order: 'min' | 'max', items: readonly Keyed[]): string[] {
+  const left = [...items];
+  const out: string[] = [];
+  while (left.length > 0) {
+    let best = 0;
+    for (let k = 1; k < left.length; k++) {
+      const a = left[k]!.key;
+      const b = left[best]!.key;
+      if (a === null) continue;
+      if (b === null || (order === 'min' ? a < b : a > b)) best = k;
+    }
+    out.push(left.splice(best, 1)[0]!.id);
+  }
+  return out;
+}
 
 const unique = (xs: readonly string[], what: string): string[] => {
   const seen = new Set<string>();
@@ -53,6 +80,23 @@ export function stateProblems(entry: KindedState): string[] {
           'ids',
         ),
         ...within(marks.highlight, data.length, 'highlight'),
+      ];
+    }
+    case 'priorityQueue': {
+      const { data, marks } = entry.state;
+      const ids = data.items.map((item) => item.id);
+      const served = servingOrder(data.order, data.items).join(' ');
+      const drawn = queueOrder(data)
+        .map((item) => item.id)
+        .join(' ');
+      return [
+        ...(served === drawn
+          ? []
+          : [`queue order ${drawn}, but items are served ${served}`]),
+        ...unique(ids, 'ids'),
+        ...unique([...marks.highlight], 'highlights'),
+        ...known(marks.highlight, new Set(ids), 'highlight'),
+        ...(['min', 'max'].includes(data.order) ? [] : ['unknown order']),
       ];
     }
     case 'linkedList': {

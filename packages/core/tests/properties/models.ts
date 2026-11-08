@@ -4,9 +4,10 @@
  * returns the new data, or `undefined` if the action must be rejected.
  * Marks are left to the invariants.
  */
-import type { Scalar, StructureDecl } from '@algoviz/spec';
+import { LIMITS, type Scalar, type StructureDecl } from '@algoviz/spec';
 
 type Element = { id: string; value: Scalar };
+type Item = Element & { key: number | null };
 type ListNode = Element & { next: string | null; prev: string | null };
 type A = Record<string, unknown>;
 
@@ -14,7 +15,8 @@ export type ModelData =
   | { kind: 'array' | 'stack' | 'queue'; items: Element[] }
   | { kind: 'linkedList'; doubly: boolean; nodes: ListNode[] }
   | { kind: 'table'; cells: Scalar[][] }
-  | { kind: 'hashTable'; buckets: Element[][] };
+  | { kind: 'hashTable'; buckets: Element[][] }
+  | { kind: 'priorityQueue'; order: 'min' | 'max'; items: Item[] };
 
 export type ModelKind = ModelData['kind'];
 export const modelled: readonly string[] = [
@@ -24,6 +26,7 @@ export const modelled: readonly string[] = [
   'linkedList',
   'table',
   'hashTable',
+  'priorityQueue',
 ];
 
 export function initModel(decl: StructureDecl): ModelData | undefined {
@@ -51,6 +54,12 @@ export function initModel(decl: StructureDecl): ModelData | undefined {
       return { kind: 'table', cells: decl.cells.map((row) => [...row]) };
     case 'hashTable':
       return { kind: 'hashTable', buckets: decl.buckets.map((c) => [...c]) };
+    case 'priorityQueue':
+      return {
+        kind: 'priorityQueue',
+        order: decl.order ?? 'min',
+        items: [...decl.initial],
+      };
     default:
       return undefined;
   }
@@ -65,6 +74,7 @@ const insertAt = <T>(xs: T[], i: number, x: T) => [
 ];
 
 export function applyModel(m: ModelData, a: A): ModelData | undefined {
+  if (m.kind === 'priorityQueue') return applyPriorityQueue(m, a);
   switch (m.kind) {
     case 'array': {
       const xs = m.items;
@@ -268,6 +278,58 @@ export function applyModel(m: ModelData, a: A): ModelData | undefined {
   }
 }
 
+/**
+ * The position, in insertion order, of the item a priority queue serves
+ * first: a linear scan for the best key, null worst, the earliest on ties.
+ */
+function frontIndex(order: 'min' | 'max', items: readonly Item[]): number {
+  let best = -1;
+  for (let k = 0; k < items.length; k++) {
+    const key = items[k]!.key;
+    if (key === null) {
+      if (best < 0) best = k;
+      continue;
+    }
+    const held = best < 0 ? null : items[best]!.key;
+    if (held === null || (order === 'min' ? key < held : key > held)) best = k;
+  }
+  return best;
+}
+
+function applyPriorityQueue(
+  m: ModelData & { kind: 'priorityQueue' },
+  a: A,
+): ModelData | undefined {
+  const xs = m.items;
+  const has = (id: unknown) => xs.some((x) => x.id === id);
+  switch (a['type']) {
+    case 'insert': {
+      const e = a['element'] as Element;
+      if (has(e.id) || xs.length >= LIMITS.elementsPerStructure)
+        return undefined;
+      return { ...m, items: [...xs, { ...e, key: a['key'] as number | null }] };
+    }
+    case 'extract': {
+      const k = frontIndex(m.order, xs);
+      return k < 0 ? undefined : { ...m, items: xs.filter((_, j) => j !== k) };
+    }
+    case 'setKey':
+      return has(a['id'])
+        ? {
+            ...m,
+            items: xs.map((x) =>
+              x.id === a['id'] ? { ...x, key: a['key'] as number | null } : x,
+            ),
+          }
+        : undefined;
+    case 'peek':
+      return xs.length === 0 ? undefined : m;
+    case 'highlight':
+      return (a['ids'] as string[]).every(has) ? m : undefined;
+  }
+  throw new Error(`unmodelled priority queue action ${String(a['type'])}`);
+}
+
 /** The engine state's data, in the model's shape. */
 export function dataOf(entry: { kind: string; state: unknown }): unknown {
   const s = entry.state as Record<string, unknown>;
@@ -278,6 +340,8 @@ export function dataOf(entry: { kind: string; state: unknown }): unknown {
       return { kind: 'table', cells: s['data'] };
     case 'hashTable':
       return { kind: 'hashTable', buckets: s['data'] };
+    case 'priorityQueue':
+      return { kind: 'priorityQueue', ...(s['data'] as object) };
     default:
       return { kind: entry.kind, items: s['data'] };
   }

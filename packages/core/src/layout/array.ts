@@ -89,7 +89,61 @@ function roleOf(state: ArrayState, index: number, id: string): BoxRole {
 export function layoutArray(
   input: LayoutInput<ArrayDecl, ArrayState, ArrayMetrics>,
 ): Block {
-  if (input.decl.view === 'tree') return layoutArrayHeap(input);
+  switch (input.decl.view) {
+    case 'tree':
+      return layoutArrayHeap(input);
+    case 'heap':
+      return layoutHeapView(input);
+    default:
+      return layoutArrayRow(input);
+  }
+}
+
+/** Space between the tree and the row of the heap view. */
+const HEAP_ROW_GAP = 12;
+
+/**
+ * The heap view (ADR 0029): the tree with the row under it, from the one
+ * state, so marks and pointers show in both. The structure has one title;
+ * row items are keyed under `name/row/` so that both views animate.
+ * The narrower view is centred under or over the wider one.
+ */
+function layoutHeapView(
+  input: LayoutInput<ArrayDecl, ArrayState, ArrayMetrics>,
+): Block {
+  const { name, title, origin, options: o } = input;
+  const untitled = { ...o, showTitles: false };
+  const top = origin.y + titleRowHeight(o);
+  const treeAt = (x: number) =>
+    layoutArrayHeap({ ...input, origin: { x, y: top }, options: untitled });
+  const rowAt = (x: number, y: number) =>
+    layoutArrayRow({
+      ...input,
+      name: `${name}/row`,
+      origin: { x, y },
+      options: untitled,
+    });
+  const tree = treeAt(origin.x);
+  const row = rowAt(origin.x, top);
+  const width = Math.max(tree.width, row.width, titleWidth(title, o));
+  const shift = (w: number) => origin.x + Math.round((width - w) / 2);
+  const placedTree = tree.width < width ? treeAt(shift(tree.width)) : tree;
+  const rowTop = top + tree.height + HEAP_ROW_GAP;
+  const placedRow = rowAt(shift(row.width), rowTop);
+  const items = titleItems(name, title, origin, o);
+  for (const item of placedTree.items) items.push(item);
+  for (const item of placedRow.items) items.push(item);
+  return {
+    items,
+    width,
+    height: rowTop + row.height - origin.y,
+  };
+}
+
+/** The row view: cells left to right, indices above, pointers below. */
+function layoutArrayRow(
+  input: LayoutInput<ArrayDecl, ArrayState, ArrayMetrics>,
+): Block {
   const { name, title, state, metrics, origin, options: o } = input;
   const cellWidth = cellWidthFor(metrics.valueWidth, o);
   const pitch = cellWidth + o.cellGap;

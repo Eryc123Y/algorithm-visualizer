@@ -1,0 +1,45 @@
+{
+  "description": "setKey names an item in the queue; an extracted item is gone.",
+  "input": {
+    "version": "0.4",
+    "structures": {
+      "Q": {
+        "kind": "priorityQueue",
+        "initial": [
+          {
+            "id": "A",
+            "value": "A",
+            "key": 1
+          },
+          {
+            "id": "B",
+            "value": "B",
+            "key": 2
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "Q",
+            "type": "extract"
+          },
+          {
+            "target": "Q",
+            "type": "setKey",
+            "id": "A",
+            "key": 0
+          }
+        ]
+      }
+    ]
+  },
+  "expectedErrors": [
+    {
+      "code": "NOT_FOUND",
+      "path": "$.steps[0].actions[1].id"
+    }
+  ]
+}

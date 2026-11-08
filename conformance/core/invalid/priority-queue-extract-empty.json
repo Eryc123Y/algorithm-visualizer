@@ -1,0 +1,41 @@
+{
+  "description": "extract needs an item in the queue.",
+  "input": {
+    "version": "0.4",
+    "structures": {
+      "Q": {
+        "kind": "priorityQueue",
+        "initial": [
+          {
+            "value": "A",
+            "key": 1
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "Q",
+            "type": "extract"
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "Q",
+            "type": "extract"
+          }
+        ]
+      }
+    ]
+  },
+  "expectedErrors": [
+    {
+      "code": "EMPTY",
+      "path": "$.steps[1].actions[0]"
+    }
+  ]
+}

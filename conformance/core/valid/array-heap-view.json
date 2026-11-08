@@ -1,0 +1,121 @@
+{
+  "description": "The heap view: one array drawn as a tree with the row under it. The state is that of any array.",
+  "input": {
+    "version": "0.4",
+    "structures": {
+      "h": {
+        "kind": "array",
+        "view": "heap",
+        "initial": [9, 7, 8, 3]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "h",
+            "type": "swap",
+            "i": 0,
+            "j": 3
+          },
+          {
+            "target": "h",
+            "type": "settle",
+            "index": 3
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "h",
+            "type": "pointer",
+            "name": "i",
+            "index": 0
+          },
+          {
+            "target": "h",
+            "type": "compare",
+            "i": 0,
+            "j": 1
+          }
+        ]
+      }
+    ]
+  },
+  "expectedLength": 2,
+  "expectedFrames": [
+    {
+      "index": 0,
+      "state": {
+        "h": {
+          "kind": "array",
+          "state": {
+            "data": [
+              {
+                "id": "e0",
+                "value": 9
+              },
+              {
+                "id": "e1",
+                "value": 7
+              },
+              {
+                "id": "e2",
+                "value": 8
+              },
+              {
+                "id": "e3",
+                "value": 3
+              }
+            ],
+            "marks": {
+              "compare": null,
+              "swapped": null,
+              "highlight": [],
+              "pointers": {},
+              "settled": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 2,
+      "state": {
+        "h": {
+          "kind": "array",
+          "state": {
+            "data": [
+              {
+                "id": "e3",
+                "value": 3
+              },
+              {
+                "id": "e1",
+                "value": 7
+              },
+              {
+                "id": "e2",
+                "value": 8
+              },
+              {
+                "id": "e0",
+                "value": 9
+              }
+            ],
+            "marks": {
+              "compare": [0, 1],
+              "swapped": null,
+              "highlight": [],
+              "pointers": {
+                "i": 0
+              },
+              "settled": ["e0"]
+            }
+          }
+        }
+      }
+    }
+  ]
+}

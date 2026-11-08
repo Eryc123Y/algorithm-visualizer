@@ -26,10 +26,10 @@ export const ArrayElement = Element;
 export type ArrayElement = Element;
 
 const View = z
-  .enum(['row', 'tree'])
+  .enum(['row', 'tree', 'heap'])
   .optional()
   .describe(
-    'How to draw the array: "row" (default) or "tree", a complete binary tree where index i has children 2i+1 and 2i+2, as for heaps.',
+    'How to draw the array: "row" (default); "tree", a complete binary tree where index i has children 2i+1 and 2i+2; or "heap", that tree with the row under it, both drawn from the one array, as textbooks draw heaps.',
   );
 
 /** Canonical declaration: every element has an explicit id. */

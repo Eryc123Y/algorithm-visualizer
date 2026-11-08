@@ -25,16 +25,17 @@ A visualization is a declarative JSON document: the structures involved and a ti
 
 ## Structures
 
-| Kind         | For                                                        | Notable actions                                              |
-| ------------ | ---------------------------------------------------------- | ------------------------------------------------------------ |
-| `array`      | sorting, searching, two pointers; `view: "tree"` for heaps | `compare` `swap` `set` `insert` `remove` `pointer` `settle`  |
-| `stack`      | call stacks, bracket matching, DFS                         | `push` `pop` `peek`                                          |
-| `queue`      | BFS, schedulers; also a deque                              | `enqueue` `dequeue` `pushFront` `popBack` `peek`             |
-| `linkedList` | singly, doubly and circular lists                          | `insert` `remove` `link` `pointer` `visit`                   |
-| `tree`       | BST, AVL, red–black, tries, recursion trees, union–find    | `addNode` `setChild` `rotate` `setColor` `annotate` `visit`  |
-| `graph`      | traversals, shortest paths, spanning trees, flows          | `addEdge` `setWeight` `markEdge` `annotate` `visit` `settle` |
-| `table`      | dynamic programming, adjacency matrices                    | `set` `depend` `highlight` `settle`                          |
-| `hashTable`  | separate chaining                                          | `insert` `remove` `highlight` `settle`                       |
+| Kind            | For                                                        | Notable actions                                              |
+| --------------- | ---------------------------------------------------------- | ------------------------------------------------------------ |
+| `array`         | sorting, searching, two pointers; `view: "heap"` for heaps | `compare` `swap` `set` `insert` `remove` `pointer` `settle`  |
+| `stack`         | call stacks, bracket matching, DFS                         | `push` `pop` `peek`                                          |
+| `queue`         | BFS, schedulers; also a deque                              | `enqueue` `dequeue` `pushFront` `popBack` `peek`             |
+| `linkedList`    | singly, doubly and circular lists                          | `insert` `remove` `link` `pointer` `visit`                   |
+| `tree`          | BST, AVL, red–black, tries, recursion trees, union–find    | `addNode` `setChild` `rotate` `setColor` `annotate` `visit`  |
+| `graph`         | traversals, shortest paths, spanning trees, flows          | `addEdge` `setWeight` `markEdge` `annotate` `visit` `settle` |
+| `table`         | dynamic programming, adjacency matrices                    | `set` `depend` `highlight` `settle`                          |
+| `hashTable`     | separate chaining                                          | `insert` `remove` `highlight` `settle`                       |
+| `priorityQueue` | Dijkstra's and Prim's queue: items in key order            | `insert` `extract` `setKey` `peek`                           |
 
 Shorthands keep documents short: `"initial": [5, 3, 8]` generates element ids, a tree can be given in LeetCode `levelOrder`, and a graph as `"nodes": ["A", "B"]` with `"edges": [["A", "B", 4]]`. The JSON Schema is in [`packages/spec/schema`](packages/spec/schema).
 

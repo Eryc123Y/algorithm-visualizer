@@ -16,6 +16,7 @@ import type {
   HashTableState,
   KindedState,
   LinkedListState,
+  PriorityQueueState,
   QueueState,
   StackState,
   TableState,
@@ -57,7 +58,9 @@ export function declaration(kind: StructureKindName, r: Dice): StructureDecl {
       return {
         kind,
         ...label,
-        ...(r.chance(0.3) ? { view: r.pick(['row', 'tree'] as const) } : {}),
+        ...(r.chance(0.3)
+          ? { view: r.pick(['row', 'tree', 'heap'] as const) }
+          : {}),
         initial: elements(r, r.int(9 * r.scale)),
       };
     case 'stack':
@@ -95,6 +98,16 @@ export function declaration(kind: StructureKindName, r: Dice): StructureDecl {
           : {}),
       } as unknown as StructureDecl;
     }
+    case 'priorityQueue':
+      return {
+        kind,
+        ...label,
+        ...(r.chance(0.4) ? { order: r.pick(['min', 'max'] as const) } : {}),
+        initial: elements(r, r.int(7 * r.scale)).map((e) => ({
+          ...e,
+          key: priorityKey(r),
+        })),
+      };
     case 'hashTable': {
       const size = 1 + r.int(6);
       const all = elements(r, r.int(8 * r.scale));
@@ -193,6 +206,40 @@ export function action(entry: KindedState, r: Dice): Fields {
       return tableAction(entry.state, r);
     case 'hashTable':
       return hashAction(entry.state, r);
+    case 'priorityQueue':
+      return priorityQueueAction(entry.state, r);
+  }
+}
+
+/** A key with many ties: small integers, sometimes a fraction or null. */
+const priorityKey = (r: Dice): number | null =>
+  r.chance(0.2) ? null : r.chance(0.1) ? r.int(100) / 7 - 5 : r.int(5) - 1;
+
+function priorityQueueAction(s: PriorityQueueState, r: Dice): Fields {
+  const all = ids(s.data.items);
+  // Mostly an item in the queue, sometimes one that is not.
+  const someId = () =>
+    all.length > 0 && !r.chance(0.05) ? r.pick(all) : r.id(all, 'p', 0);
+  switch (r.int(7)) {
+    case 0:
+    case 1:
+      return {
+        type: 'insert',
+        element: { id: r.id(all, 'p'), value: r.value() },
+        key: priorityKey(r),
+      };
+    case 2:
+      return { type: 'extract' };
+    case 3:
+    case 4:
+      return { type: 'setKey', id: someId(), key: priorityKey(r) };
+    case 5:
+      return { type: 'peek' };
+    default:
+      return {
+        type: 'highlight',
+        ids: Array.from({ length: 1 + r.int(2) }, someId),
+      };
   }
 }
 
@@ -540,6 +587,8 @@ export function declIds(decl: StructureDecl): string[] {
       return [];
     case 'hashTable':
       return decl.buckets.flatMap(ids);
+    case 'priorityQueue':
+      return ids(decl.initial);
   }
 }
 
