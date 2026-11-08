@@ -22,9 +22,13 @@ The owner (Eric) hands this project to Claude to iterate on unattended, one road
    - `npm run test:e2e` when the player, elements or playground change.
    - `FUZZ_RUNS=2000` on the property tests you touched.
    - A visual check in the browser or with `npm run gallery` for anything drawn. Look at it yourself; don't ask the owner to.
-6. **Review**: run the code-reviewer agent once on the finished diff, check each finding against the code, and fix the real ones. Don't wait for or act on the Codex bot's PR reviews.
+6. **Review**: Codex reviews every pull request when it opens; it replaces the code-reviewer agent (the owner's decision on 2026-11-08).
+   - Wait until Codex's summary comment on the PR reports the code review `completed` for the head commit (its `codex-review-state` line); it usually takes a few minutes. Findings arrive as review comments on the diff.
+   - Check each finding against the code. Fix the real ones, and answer the others in their thread with the reason.
+   - After pushing fixes, comment `@codex review` for one more round. Don't start a third.
+   - If Codex has not reviewed within 20 minutes, or says it cannot, run the code-reviewer agent once on the diff instead, and say so in the PR.
 7. **Record**: mark the item `[x]` with the PR number in `docs/roadmap.md` in the same PR, and update the README or the MCP guide if what users see changed.
-8. **Ship**: open a PR and turn on Auto-fix. Merge it yourself, without asking (merge commit, like the earlier PRs), once CI is green and no review finding is open. If GitHub Actions cannot run (quota or billing), merge after the full local verification of step 5, and say so in the PR and the report. Then sync local `main`.
+8. **Ship**: open a PR and turn on Auto-fix. Merge it yourself, without asking (merge commit, like the earlier PRs), once Codex's review is done (step 6), no finding is open and CI is green. If GitHub Actions cannot run (quota or billing), merge after the full local verification of step 5, and say so in the PR and the report. Then sync local `main`.
 9. **Report** to the owner in a few lines: what changed, how it was verified, the PR link, and the next item.
 
 ## Ask the owner first
