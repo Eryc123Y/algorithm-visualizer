@@ -10,6 +10,7 @@ import {
   defaultFonts,
   edgeLabelBox,
   labelSegment,
+  noteBox,
   TITLE_TRACKING,
   type Scene,
   type SceneItem,
@@ -60,18 +61,20 @@ export function extent(item: SceneItem): [number, number, number, number] {
           item.x + half,
           item.y + item.radius,
         ];
-      // Painters draw labels at 70% of the value size, at least 10 units:
-      // centred above, or turned and then reaching out by their width.
+      // Painters draw notes at 70% of the value size, at least 10 units,
+      // in the box layout chose for them (ADR 0031).
       const font = Math.max(10, item.fontSize * 0.7);
-      const width = valueWidth(item.label, font);
-      const turned = (item.labelAngle ?? 0) !== 0;
-      const dx = turned ? half + width + 4 : Math.max(half, width / 2);
-      const below = turned ? item.radius + font + 4 : item.radius;
+      const box = noteBox(
+        { x: item.x, y: item.y, radius: item.radius, halfWidth: half },
+        item.labelAngle ?? 0,
+        valueWidth(item.label, font) / 2,
+        font,
+      );
       return [
-        item.x - dx,
-        item.y - item.radius - font - 4,
-        item.x + dx,
-        item.y + below,
+        Math.min(item.x - half, box.x - box.halfWidth),
+        Math.min(item.y - item.radius, box.y - box.halfHeight),
+        Math.max(item.x + half, box.x + box.halfWidth),
+        Math.max(item.y + item.radius, box.y + box.halfHeight),
       ];
     }
     case 'badge':

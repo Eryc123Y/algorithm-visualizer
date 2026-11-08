@@ -21,6 +21,7 @@ import {
   cellWidthFor,
   formatScalar,
   maxWidth,
+  settledUnder,
   titleItems,
   titleRowHeight,
   titleWidth,
@@ -155,6 +156,10 @@ export function layoutTable({
         width,
         height,
         role: roleOf(state, [r, c]),
+        ...settledUnder(
+          roleOf(state, [r, c]),
+          has(state.marks.settled, [r, c]),
+        ),
         text: cellText(value),
         fontSize: co.valueFontSize,
       }),

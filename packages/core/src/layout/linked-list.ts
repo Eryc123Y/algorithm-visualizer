@@ -22,8 +22,9 @@ import {
   groupPointers,
   maxWidth,
   pointerAreaHeight,
-  pointerRows,
   pointerItems,
+  pointerRows,
+  settledUnder,
   titleItems,
   titleRowHeight,
   titleWidth,
@@ -123,6 +124,7 @@ export function layoutLinkedList({
       width,
       height,
       role: role(k, node.id),
+      ...settledUnder(role(k, node.id), settled.includes(node.id)),
       text: formatScalar(node.value),
       fontSize: o.valueFontSize,
     });

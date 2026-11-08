@@ -6,7 +6,7 @@ import { textWidth, type FontMetrics } from '@algoviz/fonts';
 import type { Scalar } from '@algoviz/spec';
 
 import type { LayoutOptions } from './options.ts';
-import type { SceneItem } from './scene.ts';
+import type { ElementRole, SceneItem } from './scene.ts';
 
 /**
  * The value at `key` if `record` has it as an own property. Ids are
@@ -163,3 +163,13 @@ export function pointerItems<S>(
   }
   return items;
 }
+
+/**
+ * `{ settled: true }` when an element is settled but a stronger, transient
+ * role is drawn (ADR 0031), so painters keep its check mark; else nothing.
+ */
+export const settledUnder = (
+  role: ElementRole,
+  settled: boolean,
+): { readonly settled?: true } =>
+  settled && role !== 'settled' ? { settled: true } : {};
