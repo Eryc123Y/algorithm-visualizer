@@ -125,6 +125,28 @@ describe('<algo-player algorithm>', () => {
     ).toContain('INVALID_JSON');
   });
 
+  it('keeps the error of broken inline JSON, without running the example', async () => {
+    const el = await mount(
+      '<algo-player algorithm="bfs"><script type="application/json">{"graph": </script></algo-player>',
+    );
+    // Give a stale load of the first example time to finish.
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    await el.updateComplete;
+    expect(errorsOf(el)).toContain('INVALID_JSON');
+    expect(el.length).toBe(0);
+  });
+
+  it('runs the first example once the input attribute is removed', async () => {
+    const el = await mount(
+      '<algo-player algorithm="bfs" input="A-B"></algo-player>',
+    );
+    const changed = settled(el);
+    el.removeAttribute('input');
+    await changed;
+    expect(errorsOf(el)).toBe('');
+    expect(el.length).toBe(lengthOf('bfs'));
+  });
+
   it('lets the visualization property win over the algorithm', async () => {
     const el = document.createElement('algo-player');
     el.algorithm = 'bfs';

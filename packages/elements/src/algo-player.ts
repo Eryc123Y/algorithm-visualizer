@@ -474,7 +474,8 @@ export class AlgoPlayer extends LitElement {
     const pending = documentOf({
       visualization: this.visualization,
       algorithm: this.algorithm,
-      input: this.input,
+      // Removing the attribute sets null: no input, as when never given.
+      input: this.input ?? undefined,
       src: this.src,
       inline: this.#inline,
     });
@@ -531,6 +532,9 @@ export class AlgoPlayer extends LitElement {
     } catch (error) {
       // Inline JSON is the lowest-priority source; ignore it when another is set.
       if (this.#hasOtherContent) return;
+      // A load started before the inline JSON was read, such as an
+      // algorithm's first example, must not replace this error.
+      this.#request++;
       this.#fail([
         {
           code: 'INVALID_JSON',
@@ -549,7 +553,7 @@ export class AlgoPlayer extends LitElement {
     return (
       this.visualization !== undefined ||
       Boolean(this.src) ||
-      (Boolean(this.algorithm) && this.input !== undefined)
+      (Boolean(this.algorithm) && this.input != null)
     );
   }
 
