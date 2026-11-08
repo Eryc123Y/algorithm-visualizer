@@ -68,11 +68,20 @@ Everything later builds on these, so they come first. The ADRs are accepted (#13
   - Keep the current light theme as the default, and refine it where it looks unnatural: a design pass with the frontend-design skill and a design subagent.
   - Every theme is tested on every kind and output (contrast, print, the Typst and LaTeX packages).
   - The README and the docs site show how to switch themes.
-  - Delete the lab.
+  - The playground's Theme menu lists every built-in theme.
+  - The player's code-language switcher becomes a dropdown menu instead of a row of buttons (the owner's request, 2026-11-08).
+  - Delete the lab, keeping a copy outside the repository.
   - Before-and-after screenshots go in the PR and the report.
 - [ ] **1.7 Painter fixes** found during theme work:
   - check marks on graph and tree nodes stick out of the circle;
-  - radii in the code panel and buttons are hard-coded instead of theme tokens.
+  - radii in the code panel and buttons are hard-coded instead of theme tokens;
+  - edge weight labels sit on edges that cross them (the weight 15 in the Dijkstra and Kruskal examples);
+  - the heap view keeps elements past the heap size linked into the tree, where CLRS draws them apart;
+  - a highlighted vertex that is already settled no longer shows that it is settled (Dijkstra relaxing an edge back to a finished vertex).
+- [ ] **1.9 Algorithm and input everywhere** _ADR_ (added 2026-11-08 after the owner set the goal of the lowest cost of use, now in the requirements' purpose). People and models give an algorithm and its input, not a document, in every output.
+  - The player takes an algorithm and its input, as the teaching-website use case asks, the standalone bundle included. The ADR weighs carrying the registry in the bundle against loading it on demand.
+  - Shorter input notations where people already have one, such as a graph written `A-B 4, B-C 2`, accepted alike by the command line, MCP, the player and the Typst and LaTeX packages.
+  - Measured before and after: the concepts a user must know and the input they write for a set of typical tasks.
 
 ## Phase 2: CLRS coverage
 
