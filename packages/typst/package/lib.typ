@@ -18,6 +18,7 @@
 ))))
 
 // The source of a request: an algorithm id with its input, or a document.
+// Without an input, an algorithm runs on its first example (ADR 0032).
 #let _source(name, source, args) = {
   let named = args.named()
   if named.len() > 0 {
@@ -25,7 +26,7 @@
   }
   let rest = args.pos()
   if type(source) == str {
-    if rest.len() != 1 {
+    if rest.len() > 1 or (rest.len() == 0 and source.starts-with("{")) {
       panic(
         name
           + ": `"
@@ -35,7 +36,9 @@
           + "(\"bst.delete\", (from: (8, 3, 10), key: 3)); pass a document as a dictionary, such as json(\"doc.json\")",
       )
     }
-    (algorithm: source, input: rest.first())
+    if rest.len() == 0 { (algorithm: source) } else {
+      (algorithm: source, input: rest.first())
+    }
   } else if type(source) == dictionary {
     if rest.len() != 0 {
       panic(name + ": a document takes no input")
@@ -143,7 +146,9 @@
 /// A figure of one step of an algorithm or a document.
 ///
 /// - source (str, dictionary): A registry id, such as "dijkstra", followed by
-///   its input; or a document, such as one read with `json("doc.json")`.
+///   its input, which may be written short, such as "A-B 4, B-C 1", and
+///   without which the algorithm runs on its first example; or a document,
+///   such as one read with `json("doc.json")`.
 /// - step (int, str): The frame: a number (0 the start, -1 the last), a step
 ///   such as "relax#3", or a step in a section such as "insert-5/relax#2".
 /// - theme (str): A built-in theme: "light" (the default), "dark", "print",

@@ -7,16 +7,13 @@ The algoviz engine runs inside the package as a WebAssembly plugin, so nothing e
 ```typ
 #import "@preview/algoviz:0.1.0": algoviz
 
-#let graph = (
-  nodes: ("A", "B", "C", "D"),
-  edges: (("A", "B", 4), ("B", "C", 1), ("A", "C", 7), ("C", "D", 2)),
-)
-
 #figure(
-  algoviz("dijkstra", (graph: graph, source: "A"), step: "improve#3"),
+  algoviz("dijkstra", "A-B 4, B-C 1, A-C 7, C-D 2", step: "improve#3"),
   caption: [Dijkstra's algorithm from A: the edge from B improves C from 7 to 5.],
 )
 ```
+
+The graph is written as an edge list, and Dijkstra's algorithm starts at its first node; see [Algorithms and inputs](#algorithms-and-inputs).
 
 > **Not on Typst Universe yet.** Until it is published, use it as a local package:
 >
@@ -33,7 +30,7 @@ The algoviz engine runs inside the package as a WebAssembly plugin, so nothing e
   width: auto, height: auto, fit: "contain", alt: auto)
 ```
 
-- **`source`** is an algorithm id followed by its input, or a document alone.
+- **`source`** is an algorithm id followed by its input, or a document alone. Without an input, the algorithm runs on its first example.
 - **`step`** names one frame:
   - a frame number: `0` is the starting state, `-1` the last frame (the default);
   - a step name, counted from 1: `"relax#3"` is the third step named `relax`;
@@ -51,20 +48,26 @@ To find the step names, ask for a step that does not exist. The error lists the 
 
 ### Algorithms and inputs
 
-Every algorithm of the algoviz registry is available, with the input its schema describes. A few examples:
+Every algorithm of the algoviz registry is available, with the input its schema describes. Inputs take the short notations people already write, as strings, or the structured forms as Typst values:
 
-| Id                                             | Input                                                                |
-| ---------------------------------------------- | -------------------------------------------------------------------- |
-| `insertion-sort`, `merge-sort`, `quicksort`, … | `(values: (5, 2, 4, 6, 1, 3))`                                       |
-| `binary-search`                                | `(values: (1, 3, 5, 7, 9), target: 7)`                               |
-| `bst.insert`, `bst.delete`, `bst.search`       | `(from: (8, 3, 10, 1, 6), key: 3)`                                   |
-| `min-heap.push`                                | `(from: (5, 3, 8, 1, 9, 2), value: 0)`                               |
-| `bfs`, `dijkstra`, `bellman-ford`              | `(graph: (nodes: ("A", "B"), edges: (("A", "B", 4),)), source: "A")` |
-| `prim`                                         | `(graph: …, root: "A")`                                              |
-| `dfs`, `kruskal`, `floyd-warshall`             | `(graph: …)`                                                         |
-| `lcs`, `edit-distance`                         | `(first: "ABCBDAB", second: "BDCABA")`                               |
+| Id                                                     | Input                                                                     |
+| ------------------------------------------------------ | ------------------------------------------------------------------------- |
+| `insertion-sort`, `merge-sort`, `quicksort`, …         | `"5 2 4 6 1 3"`, `(5, 2, 4, 6, 1, 3)` or `(values: (5, 2, 4, 6, 1, 3))`   |
+| `binary-search`                                        | `(values: "1 3 5 7 9", target: 7)`                                        |
+| `inorder-tree-walk`, …                                 | `"[4, 2, 6, 1, 3, null, 7]"`, a tree in LeetCode's level order            |
+| `bst.insert`, `bst.delete`, `bst.search`               | `(from: "8 3 10 1 6", key: 3)`                                            |
+| `bst`, `min-heap`, … (several operations)              | `(from: "8 3 10 1 6", ops: "insert 4, delete 3")`                         |
+| `min-heap.push`                                        | `(from: "5 3 8 1 9 2", value: 0)`                                         |
+| `bfs`, `dijkstra`, `bellman-ford`, `prim`              | `"A-B 4, B-C 1, A-C 7"`, or `(graph: "A-B 4, B-C 1", source: "C")`        |
+| `dfs`, `kruskal`, `floyd-warshall`, `topological-sort` | `"A-B 4, B-C 1, A-C 7"`; `"shirt->tie, tie->jacket"` for a directed graph |
+| `lcs`, `edit-distance`                                 | `(first: "ABCBDAB", second: "BDCABA")`                                    |
 
-`algoviz recipes` (the command line) lists every id with the JSON Schema of its input, and `examples/inputs.typ` draws each row of this table. An input that does not fit the schema is reported with the path of the wrong field, such as `$.input.key`.
+- **Lists** are numbers separated by commas or spaces, optionally in brackets; a level order writes `null` for a gap.
+- **Graphs** are edge lists: `-` joins an undirected edge and `->` a directed one, a number after a space is the weight, and a name alone is a node without edges. Names are letters, digits and `_`, and nodes come in the order they first appear. A graph algorithm starts at the first node unless `source` (`root` for Prim) says otherwise.
+- **Operations** are written as exercises write them, each with its arguments in order: `"insert 4, delete 3"`.
+- An input that needs only one thing may be that thing alone, as the table's first and graph rows show. The structured forms work too, such as `(graph: (nodes: ("A", "B"), edges: (("A", "B", 4),)), source: "A")`.
+
+`algoviz recipes` (the command line) lists every id with the JSON Schema of its input, and `examples/inputs.typ` draws each row of this table. An input that does not fit is reported with the path of the wrong field, such as `$.input.key`, and a notation with the token and its position, such as `INVALID_NOTATION at $.input: Expected a weight or "," after "B-C", not "x" (character 12)`.
 
 ## Several steps: `algoviz-series`
 
@@ -105,7 +108,7 @@ It steps through a series in a slide deck, one frame per subslide, with your sli
 
 == Dijkstra's algorithm, step by step
 
-#align(center, algoviz-slides(only, "dijkstra", (graph: graph, source: "A"), height: 75%))
+#align(center, algoviz-slides(only, "dijkstra", "A-B 4, B-C 1, A-C 7, C-D 2", height: 75%))
 ```
 
 With [polylux](https://typst.app/universe/package/polylux), the same call goes inside `#slide[…]`, with polylux's `only`.
@@ -148,7 +151,7 @@ Every function takes `theme:`, and every theme works in notes, in series and on 
 | `"turbo-c"`       | 机房 Turbo C    | The blue Turbo C screen, in the pixel font DotGothic16                            |
 
 ```typ
-#algoviz("dijkstra", (graph: graph, source: "A"), step: "relax#3", theme: "textbook")
+#algoviz("dijkstra", "A-B 4, B-C 1, A-C 7, C-D 2", step: "relax#3", theme: "textbook")
 ```
 
 The night themes and Turbo C paint their own background, so they read on white paper too; the light ones are transparent. To change the theme of a whole document, use `with`:

@@ -134,8 +134,8 @@ In Typst, [the algoviz package](packages/typst/package/README.md) draws the same
 ```typ
 #import "@preview/algoviz:0.1.0": algoviz, algoviz-series
 
-#algoviz("dijkstra", (graph: graph, source: "A"), step: "relax#3")
-#grid(columns: 3, ..algoviz-series("bst.delete", (from: (8, 3, 10, 1, 6), key: 3)))
+#algoviz("dijkstra", "A-B 4, B-C 1, A-C 7, C-D 2", step: "relax#3")
+#grid(columns: 3, ..algoviz-series("bst.delete", (from: "8 3 10 1 6", key: 3)))
 ```
 
 The package is not on Typst Universe yet; its README says how to use it as a local package until it is.
@@ -145,7 +145,8 @@ In LaTeX, [the algoviz package](packages/latex/package/README.md) draws them wit
 ```latex
 \usepackage{algoviz}
 
-\algoviz[step=relax#3]{dijkstra}{"graph": {...}, "source": "A"}
+\algoviz[step=relax#3]{dijkstra}{A-B 4, B-C 1, A-C 7, C-D 2}
+\algoviz{bst}{"from": "8 3 10 1 6", "ops": "insert 4, delete 3"}
 \algovizfile[step=delete-3/copy, theme=print, width=0.6\linewidth]{bst-delete.json}
 ```
 
@@ -160,7 +161,7 @@ In slides, a series steps through one frame per overlay, all in one picture ([AD
 ```
 
 ```typ
-#algoviz-slides(only, "dijkstra", (graph: graph, source: "A"), steps: "relax#1..-1", height: 75%)
+#algoviz-slides(only, "dijkstra", "A-B 4, B-C 1, A-C 7, C-D 2", steps: "relax#1..-1", height: 75%)
 ```
 
 In code, `exportFigures(document, { steps, theme, layout })` from `@algoviz/svg` returns the same figures as strings, and `selectSeries` from `@algoviz/core` the frames that selectors name. `prepareFigures(document, { theme, layout })` loads a document once and then draws a figure of any frame, or any series, on demand.

@@ -77,10 +77,11 @@ Everything later builds on these, so they come first. The ADRs are accepted (#13
   - node notes overlap edges: the ranks of the disjoint sets, and Dijkstra's distances, which also sit at uneven angles (found in the design pass of 1.6);
   - in the heap view, the index under a node sits on its child edges;
   - pointer rows reserved for a whole trace leave a blank band in frames without pointers, such as the last frame of insertion sort.
-- [ ] **1.9 Algorithm and input everywhere** _ADR_ (added 2026-11-08 after the owner set the goal of the lowest cost of use, now in the requirements' purpose). People and models give an algorithm and its input, not a document, in every output.
-  - The player takes an algorithm and its input, as the teaching-website use case asks, the standalone bundle included. The ADR weighs carrying the registry in the bundle against loading it on demand.
-  - Shorter input notations where people already have one, such as a graph written `A-B 4, B-C 2`, accepted alike by the command line, MCP, the player and the Typst and LaTeX packages.
-  - Measured before and after: the concepts a user must know and the input they write for a set of typical tasks.
+- [x] **1.9 Algorithm and input everywhere** _ADR_ [ADR 0032](adr/0032-algorithm-and-input.md) (#60) (added 2026-11-08 after the owner set the goal of the lowest cost of use, now in the requirements' purpose). People and models give an algorithm and its input, not a document, in every output. ADR 0032, then three PRs:
+  - notations in the input schemas (lists, graphs as edge lists `A-B 4, B-C 2`, operation lists `insert 4, delete 3`), an input given as its main field alone, the first example when there is no input, one rule for input written as text, errors that quote the token, and recipes by name in `algoviz_show`, `algoviz_render` and `algoviz_inspect` (#61);
+  - the player's `algorithm` and `input`, with the registry as a second file of the standalone bundle, `algoviz-recipes.js`, loaded on demand (#62);
+  - the Typst and LaTeX packages: no input runs the first example, LaTeX hands its text to the command, and the READMEs and examples use the notations (#63).
+  - Measured on six typical tasks, characters typed before → after: Dijkstra in Typst 161 → 69; BFS in LaTeX 146 → 38; insertion sort on a web page 128 (a command and a tag) → 74; a model showing Dijkstra writes 5,274 → 58; BST operations in LaTeX 104 → 68; a LeetCode tree walk with the command line 72 → 56. The concepts each needs are in the ADR.
 - [ ] **1.10 Figures that fill a slide** _ADR_ (found in 1.6). In Beamer and in Typst slides a figure is drawn at its natural size, at most the line's width, so wide figures (Kruskal's, the wide layout) come out small on a slide. By default a slide figure should fill the frame's width and a share of its height, keeping its shape; the ADR amends ADR 0027 and 0028.
 
 ## Phase 2: CLRS coverage

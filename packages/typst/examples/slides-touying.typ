@@ -5,20 +5,9 @@
 
 #show: simple-theme.with(aspect-ratio: "16-9")
 
-#let input = (
-  graph: (
-    nodes: ("s", "a", "b", "c", "t"),
-    edges: (
-      ("s", "a", 4),
-      ("s", "b", 1),
-      ("b", "a", 2),
-      ("a", "c", 1),
-      ("b", "c", 5),
-      ("c", "t", 3),
-    ),
-  ),
-  source: "s",
-)
+// The graph, as an edge list; Dijkstra's algorithm starts at its first
+// node, s.
+#let input = "s-a 4, s-b 1, b-a 2, a-c 1, b-c 5, c-t 3"
 
 // touying's own `only` shows each frame on its subslide.
 == Dijkstra's algorithm, step by step
