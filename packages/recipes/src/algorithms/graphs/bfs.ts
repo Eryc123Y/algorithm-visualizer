@@ -70,7 +70,11 @@ export const bfs = defineAlgorithm({
     checkNode(g, s);
     // Rows of the layered layout are the layers from the source.
     const graph = trace.add('g', declareGraph(g, false, { from: s }));
-    const queue = trace.add('queue', { kind: 'queue', initial: [] });
+    const queue = trace.add('queue', {
+      kind: 'queue',
+      place: 'side',
+      initial: [],
+    });
     const adj = adjacency(g);
     const d = new Map([[s, 0]]);
     const q = [s];

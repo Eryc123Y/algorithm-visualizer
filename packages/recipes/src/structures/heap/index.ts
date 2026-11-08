@@ -3,7 +3,8 @@
  * decrease-key or, on a max-heap, increase-key, each from a heap given as
  * values to push or as an array that already is a heap, and a sequence of
  * them. A min-heap and a max-heap are two structures, `min-heap` and
- * `max-heap`. The heap is an array shown as a tree.
+ * `max-heap`. The heap is an array, drawn as a tree with the row under it
+ * (ADR 0029).
  * The code is in pseudocode and Python (ADR 0017), both with indices from
  * 0.
  */
@@ -383,7 +384,7 @@ function heapStructure(order: HeapOrder): Structure {
     ],
     start: (from) => start(from, o),
     describe: (s) => ({ array: s.items.map((x) => x.value) }),
-    declare: (s) => ({ kind: 'array', view: 'tree', initial: [...s.items] }),
+    declare: (s) => ({ kind: 'array', view: 'heap', initial: [...s.items] }),
     clear: () => undefined,
     operations: [
       op({

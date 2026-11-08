@@ -3,7 +3,8 @@
  * but the source's, which is 0; then the vertex of least distance leaves a
  * min-priority queue, its distance is final, and every edge leaving it is
  * relaxed. A vertex that leaves with distance ∞ is unreachable. Weights
- * must not be negative; Bellman–Ford takes those.
+ * must not be negative; Bellman–Ford takes those. The queue Q is drawn in
+ * the side panel, every vertex with its distance as its key (ADR 0029).
  */
 import { z } from 'zod';
 
@@ -70,13 +71,26 @@ export const dijkstra = defineAlgorithm({
         'Dijkstra’s algorithm needs non-negative weights; use bellman-ford for negative ones',
       );
     const graph = trace.add('g', declareGraph(g, true));
+    const queueOf = trace.add('Q', {
+      kind: 'priorityQueue',
+      place: 'side',
+      initial: [],
+    });
     const adj = adjacency(g);
     const d = new Map(g.nodes.map((v) => [v, v === s ? 0 : Infinity]));
     const via = new Map<string, string>();
     const queue = new Set(g.nodes);
-    trace.step('start', `Every distance is ∞, except ${s}'s, which is 0.`);
-    for (const v of g.nodes)
+    trace.step(
+      'start',
+      `Every distance is ∞, except ${s}'s, which is 0. Every vertex goes into the queue Q, keyed by its distance.`,
+    );
+    for (const v of g.nodes) {
       graph.annotate({ node: v, text: shown(d.get(v)!) });
+      queueOf.insert({
+        element: { id: v, value: v },
+        key: v === s ? 0 : null,
+      });
+    }
     while (queue.size > 0) {
       // The least distance; ties go to the vertex listed first.
       const u = [...queue].reduce((a, b) => (d.get(b)! < d.get(a)! ? b : a));
@@ -88,6 +102,7 @@ export const dijkstra = defineAlgorithm({
           `${u} leaves the queue with distance ∞: it cannot be reached from ${s}.`,
         );
         graph.pointer({ name: 'u', node: u });
+        queueOf.extract();
         continue;
       }
       trace.step(
@@ -95,6 +110,7 @@ export const dijkstra = defineAlgorithm({
         `${u} has the least distance left, ${du}: it is final.`,
       );
       graph.pointer({ name: 'u', node: u }).settle({ node: u });
+      queueOf.extract();
       for (const { to: v, weight, edge } of adj.get(u)!) {
         const c = du + weight;
         const dv = d.get(v)!;
@@ -118,6 +134,7 @@ export const dijkstra = defineAlgorithm({
           .highlight({ nodes: [v], edges: [edge] })
           .annotate({ node: v, text: String(c) })
           .markEdge({ edge, mark: 'selected' });
+        queueOf.setKey({ id: v, key: c });
       }
     }
     trace.step(

@@ -67,7 +67,11 @@ export const balancedBrackets = defineAlgorithm({
     // Characters, not UTF-16 code units, so that "é" or "🙂" is one cell.
     const chars = [...text];
     const input = trace.add('s', { kind: 'array', initial: chars });
-    const stack = trace.add('stack', { kind: 'stack', initial: [] });
+    const stack = trace.add('stack', {
+      kind: 'stack',
+      place: 'side',
+      initial: [],
+    });
     const open: string[] = [];
     for (const [k, ch] of chars.entries()) {
       if ('([{'.includes(ch)) {

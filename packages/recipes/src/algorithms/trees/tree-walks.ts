@@ -2,11 +2,13 @@
  * The three depth-first walks of a binary tree (ADR 0023): inorder,
  * preorder and postorder, each a module of its own with its own code. A
  * tree is given in level order, with null for gaps, and each walk writes
- * the keys it visits into an output array.
+ * the keys it visits into an output array, with the call stack beside
+ * the tree (ADR 0029).
  */
 import { z } from 'zod';
 
 import { defineAlgorithm, type Algorithm } from '../../algorithm.ts';
+import { callStack } from '../../call-stack.ts';
 
 /** Most entries of a level order, so the tree fits on one screen. */
 export const MAX_LEVEL_ORDER = 31;
@@ -96,18 +98,23 @@ function treeWalk(order: Order): Algorithm<TreeInput> {
     input: TreeInput,
     examples: [{ levelOrder: [4, 2, 6, 1, 3, null, 7] }],
     code: code(order),
-    run({ levelOrder }, trace) {
+    run({ levelOrder }, outer) {
       const { values, children } = shape(levelOrder);
-      const tree = trace.add('tree', {
+      const tree = outer.add('tree', {
         kind: 'tree',
         levelOrder: [...levelOrder],
       });
-      const out = trace.add('out', { kind: 'array', initial: [] });
+      const out = outer.add('out', { kind: 'array', initial: [] });
+      // A call on a node is on the stack from its enter step until the
+      // next step after it returns (ADR 0029).
+      const calls = callStack(outer);
+      const { trace } = calls;
       let written = 0;
       const walk = (n: number | null): void => {
         if (n === null) return;
         const id = `e${n}`;
         trace.step('enter', `Enter ${values[n]}.`);
+        calls.push(`call-${id}`, `walk ${values[n]}`);
         tree.pointer({ name: 'x', node: id });
         for (const part of BODY[order]) {
           if (part !== 'visit') {
@@ -124,9 +131,11 @@ function treeWalk(order: Order): Algorithm<TreeInput> {
             element: { id: `o${n}`, value: values[n]! },
           });
         }
+        calls.leave();
       };
       walk(0);
       tree.pointer({ name: 'x', node: null });
+      calls.close();
     },
   });
 }

@@ -1,9 +1,12 @@
 /**
  * Quicksort, as in CLRS: PARTITION (Lomuto's scheme) takes the last value
  * as the pivot x, keeps values ≤ x on the left, and puts the pivot between
- * the two parts; then each part is sorted the same way.
+ * the two parts; then each part is sorted the same way. The call stack
+ * beside the array holds each call on one value or more; a call leaves it
+ * at the next step after it returns (ADR 0029).
  */
 import { defineAlgorithm } from '../../algorithm.ts';
+import { callStack } from '../../call-stack.ts';
 import { SAMPLE, SortInput } from './input.ts';
 
 export const quicksort = defineAlgorithm({
@@ -50,9 +53,11 @@ export const quicksort = defineAlgorithm({
           return i + 1
     `,
   },
-  run({ values }, trace) {
+  run({ values }, outer) {
     const a = [...values];
-    const arr = trace.add('a', { kind: 'array', initial: [...values] });
+    const arr = outer.add('a', { kind: 'array', initial: [...values] });
+    const calls = callStack(outer);
+    const { trace } = calls;
 
     const partition = (p: number, r: number): number => {
       const x = a[r]!;
@@ -61,6 +66,7 @@ export const quicksort = defineAlgorithm({
         `Partition a[${p}..${r}] around the pivot ${x}, its last value.`,
         { vars: { p, r, x } },
       );
+      calls.push(`call-${p}-${r}`, `sort a[${p}..${r}]`);
       arr.pointer({ name: 'pivot', index: r }).highlight({ indices: [r] });
       let i = p - 1;
       for (let j = p; j < r; j++) {
@@ -110,13 +116,17 @@ export const quicksort = defineAlgorithm({
       if (p > r) return;
       if (p === r) {
         trace.step('single', `a[${p}] = ${a[p]} is alone: it is in place.`);
+        calls.push(`call-${p}-${r}`, `sort a[${p}..${r}]`);
         arr.settle({ index: p });
+        calls.leave();
         return;
       }
       const q = partition(p, r);
       sort(p, q - 1);
       sort(q + 1, r);
+      calls.leave();
     };
     sort(0, a.length - 1);
+    calls.close();
   },
 });
