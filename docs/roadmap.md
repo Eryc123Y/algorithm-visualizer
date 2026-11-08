@@ -54,7 +54,10 @@ Everything later builds on these, so they come first. The ADRs are accepted (#13
   - the package: `\algoviz[step=relax#3]{dijkstra}{<input>}`, `\algovizfile` for a document or an input file, `\algovizinput`, the cache, errors in the document, the README with examples, and compile tests with pdfLaTeX, LuaLaTeX and XeLaTeX (#42).
 - [x] **1.5 Slides** _ADR_ [ADR 0028](adr/0028-slides.md) (#43). One overlay per step: `\only<n>` in Beamer, and the equivalent in Typst slide frameworks (polylux, touying). The overlays come from the same step selection as 1.2. ADR 0028, then one PR (#44):
   - `algoviz export --one-file`, which writes a series into one TikZ file; the LaTeX keys `steps` and `start`, which draw a series as Beamer overlays in one picture; `algoviz-slides` in Typst, through polylux's or touying's `only`; examples whose prose matches their steps; compile tests with pdfLaTeX, LuaLaTeX, polylux 0.4.0 and touying 0.8.0.
-- [ ] **1.8 Auxiliary structures** _ADR_ (added 2026-11-08 at the owner's request; it comes before 1.6, so the themes cover its kinds and placements). Figures show the structures an algorithm keeps besides its main one, in a sensible place next to it, not the main structure alone.
+- [~] **1.8 Auxiliary structures** _ADR_ [ADR 0029](adr/0029-auxiliary-structures.md) (added 2026-11-08 at the owner's request; it comes before 1.6, so the themes cover its kinds and placements). Figures show the structures an algorithm keeps besides its main one, in a sensible place next to it, not the main structure alone. ADR 0029 (protocol `0.4`), then three PRs:
+  - placement: `place: "side"` on any structure, and the `wide` and `narrow` layouts in core, the CLI, the player and the Typst and LaTeX packages;
+  - the `priorityQueue` kind and the `heap` view of `array`;
+  - the recipes: Dijkstra's and Prim's queue, Kruskal's sorted edges, heaps in both views, call stacks, and side panels for the existing auxiliaries.
   - Placement: where each structure goes relative to the others, beside or below, so a figure fits a slide, a note column and the player.
   - A priority queue that shows its items with their keys and follows insert, extract-min and decrease-key.
   - The existing recipes that lack one, from a survey on 2026-11-08:
