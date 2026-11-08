@@ -18,6 +18,7 @@ import {
   layoutTrace,
   loadTrace,
   noteBox,
+  noteRegion,
   type LabelBox,
   type Obstacles,
   type Scene,
@@ -66,6 +67,17 @@ function noteAt(n: SceneNode, angle: number, em?: number): LabelBox {
   );
 }
 
+/** Where any note up to `em` wide may lie at `angle`, as layout chooses. */
+function regionAt(n: SceneNode, angle: number, em: number): LabelBox {
+  const size = Math.max(10, n.fontSize * 0.7);
+  return noteRegion(
+    { x: n.x, y: n.y, radius: n.radius, halfWidth: halfOf(n) },
+    angle,
+    (em * size) / 2,
+    size,
+  );
+}
+
 const overlaps = (p: LabelBox, q: LabelBox) =>
   Math.abs(p.x - q.x) < p.halfWidth + q.halfWidth + 2 &&
   Math.abs(p.y - q.y) < p.halfHeight + q.halfHeight + 2;
@@ -100,7 +112,10 @@ function problems(scene: Scene, trees: ReadonlyMap<string, number>): string[] {
     };
     if (
       clearance(box, { ...others, discs: [], boxes: [] }) < CLEAR &&
-      [0, 315, 45].some((a) => clearance(noteAt(n, a, widest), others) >= CLEAR)
+      // Room by more than layout's rounding of note widths (ceilWidth).
+      [0, 315, 45].some(
+        (a) => clearance(regionAt(n, a, widest), others) >= CLEAR + 1,
+      )
     )
       out.push(`note of ${n.key} crosses an edge but had room`);
   }

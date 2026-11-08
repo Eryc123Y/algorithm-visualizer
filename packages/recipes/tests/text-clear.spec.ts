@@ -17,6 +17,7 @@ import {
   layoutTrace,
   loadTrace,
   noteBox,
+  noteRegion,
   type LabelBox,
   type Obstacles,
   type Scene,
@@ -72,9 +73,22 @@ function hadRoom(scene: Scene, n: SceneNode, widest: number): boolean {
       .map((m) => ({ x: m.x, y: m.y, radius: m.radius })),
     boxes: [],
   };
+  // Where any note up to the widest may lie, as layout chooses; with room
+  // by more than layout's rounding of note widths (ceilWidth).
+  const size = Math.max(10, n.fontSize * 0.7);
+  const outline = {
+    x: n.x,
+    y: n.y,
+    radius: n.radius,
+    halfWidth: Math.max(n.radius, (n.width ?? 0) / 2),
+  };
   return [0, 315, 45].some(
     (angle) =>
-      clearance(noteOf({ ...n, labelAngle: angle }, widest), others) >= CLEAR,
+      clearance(
+        noteRegion(outline, angle, (widest * size) / 2, size),
+        others,
+      ) >=
+      CLEAR + 1,
   );
 }
 

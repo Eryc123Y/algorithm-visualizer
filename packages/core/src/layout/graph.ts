@@ -43,7 +43,7 @@ import {
   sidePointerWidth,
 } from './node-tree.ts';
 import { separateEdgeLabels, type LabelBox } from './edge-label.ts';
-import { clearestAngle, noteBox, type NodeOutline } from './notes.ts';
+import { clearestAngle, noteRegion, type NodeOutline } from './notes.ts';
 import type { LayoutFonts } from './options.ts';
 import type { EdgeRole, ElementRole, SceneItem } from './scene.ts';
 
@@ -622,11 +622,14 @@ export function layoutGraph({
     radius,
     halfWidth,
   });
+  // Each link as the band its edges may take: parallel edges spread up to
+  // the widest shift any pair of the trace has, routed or straight.
   const edgeLines = metrics.links.flatMap(([from, to]) => {
     if (from === to) return [];
-    const bends = arrangement.bends?.get(linkKey(from, to)) ?? [];
-    const points = [centre(from), ...bends.map(toPixel), centre(to)];
-    return points.slice(1).map((p, k) => [points[k]!, p] as const);
+    const bends = arrangement.bends?.get(linkKey(from, to));
+    const spread = bends === undefined ? straightShift : routeShift;
+    const points = [centre(from), ...(bends ?? []).map(toPixel), centre(to)];
+    return points.slice(1).map((p, k) => [points[k]!, p, spread] as const);
   });
   // The block's bounds, which notes keep inside.
   const blockWidth = Math.max(
@@ -652,7 +655,7 @@ export function layoutGraph({
         : [{ ...centre(n), radius: halfWidth }],
     );
     const boxAt = (angle: number) =>
-      noteBox(outlineOf(id), angle, noteHalf, noteFont);
+      noteRegion(outlineOf(id), angle, noteHalf, noteFont);
     const candidates = ranked(
       sides([0, 45, 315, 90, 270, 135, 225, 180]),
       loopAngles(id),
