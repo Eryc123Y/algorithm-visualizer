@@ -227,7 +227,12 @@ export function layoutTree({
     const at = centre(node.id);
     const candidates = [
       ...NOTE_ANGLES,
-      ...MORE_NOTE_ANGLES.filter((a) => inside(noteAt(at.x, at.y, a))),
+      ...MORE_NOTE_ANGLES.filter(
+        // The left is the pointer badges' side, as in graphs.
+        (a) =>
+          !(a === 270 && metrics.pointerRows > 0) &&
+          inside(noteAt(at.x, at.y, a)),
+      ),
     ];
     const angle = clearestAngle(candidates, (a) => noteAt(at.x, at.y, a), {
       segments: lines,
