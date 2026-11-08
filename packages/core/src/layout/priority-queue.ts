@@ -141,6 +141,11 @@ function itemCells(
   ];
 }
 
+const EMPTY = '(empty)';
+/** Room the "(empty)" label needs, so a queue that empties keeps its size. */
+const emptyWidth = (o: LayoutOptions) =>
+  ceilWidth(maxWidth([EMPTY], o.fonts.label) * o.indexFontSize);
+
 const emptyLabel = (name: string, x: number, y: number, o: LayoutOptions) => ({
   type: 'text' as const,
   key: `${name}/empty`,
@@ -148,7 +153,7 @@ const emptyLabel = (name: string, x: number, y: number, o: LayoutOptions) => ({
   y,
   anchor: 'start' as const,
   role: 'label' as const,
-  text: '(empty)',
+  text: EMPTY,
   fontSize: o.indexFontSize,
 });
 
@@ -221,6 +226,7 @@ function layoutRow({
     items,
     width: Math.max(
       2 * overhang + slots * pitch - o.cellGap,
+      overhang + emptyWidth(o),
       titleWidth(title, o),
     ),
     height: bottom - origin.y + pointerAreaHeight(1, o),
@@ -300,7 +306,11 @@ function layoutColumn({
   );
   return {
     items,
-    width: Math.max(right - left + labelWidth, titleWidth(title, o)),
+    width: Math.max(
+      right - left + labelWidth,
+      emptyWidth(o),
+      titleWidth(title, o),
+    ),
     height: top - origin.y + slots * (height + ROW_GAP) - ROW_GAP,
   };
 }

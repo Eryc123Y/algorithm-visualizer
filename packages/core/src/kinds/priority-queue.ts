@@ -61,9 +61,14 @@ export function queueOrder(data: PriorityQueueData): PriorityItem[] {
     .map(({ item }) => item);
 }
 
-/** The id of the front item, if there is one. */
-const frontOf = (data: PriorityQueueData): string | undefined =>
-  queueOrder(data)[0]?.id;
+/** The id of the front item, if there is one: the first of least rank. */
+function frontOf(data: PriorityQueueData): string | undefined {
+  let front: PriorityItem | undefined;
+  for (const item of data.items)
+    if (front === undefined || compareKeys(data.order, item.key, front.key) < 0)
+      front = item;
+  return front?.id;
+}
 
 const WHAT = 'priority queue';
 

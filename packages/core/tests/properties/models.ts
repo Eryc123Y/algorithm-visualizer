@@ -4,7 +4,7 @@
  * returns the new data, or `undefined` if the action must be rejected.
  * Marks are left to the invariants.
  */
-import type { Scalar, StructureDecl } from '@algoviz/spec';
+import { LIMITS, type Scalar, type StructureDecl } from '@algoviz/spec';
 
 type Element = { id: string; value: Scalar };
 type Item = Element & { key: number | null };
@@ -305,7 +305,8 @@ function applyPriorityQueue(
   switch (a['type']) {
     case 'insert': {
       const e = a['element'] as Element;
-      if (has(e.id) || xs.length >= 1000) return undefined;
+      if (has(e.id) || xs.length >= LIMITS.elementsPerStructure)
+        return undefined;
       return { ...m, items: [...xs, { ...e, key: a['key'] as number | null }] };
     }
     case 'extract': {
