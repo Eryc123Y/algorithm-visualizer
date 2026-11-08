@@ -7,6 +7,8 @@ import {
   separateEdgeLabels,
   type SceneEdge,
   type SceneItem,
+  CLEAR,
+  segmentToBox,
 } from '../src/index.ts';
 
 const font = defaultFonts.value;
@@ -56,9 +58,29 @@ describe('edge labels', () => {
       Math.abs(p!.x - q!.x) >= p!.halfWidth + q!.halfWidth ||
       Math.abs(p!.y - q!.y) >= p!.halfHeight + q!.halfHeight;
     expect(apart).toBe(true);
-    // The first keeps the middle; the second moves along its edge.
-    expect(items[0]).not.toHaveProperty('labelAt');
+    // Both move along their edges, off the crossing, clear of the other
+    // edge (ADR 0031).
+    expect(items[0]).toHaveProperty('labelAt');
     expect(items[1]).toHaveProperty('labelAt');
+    const horizontal = [
+      { x: 0, y: 100 },
+      { x: 200, y: 100 },
+    ] as const;
+    const vertical = [
+      { x: 100, y: 0 },
+      { x: 100, y: 200 },
+    ] as const;
+    expect(segmentToBox(...vertical, p!)).toBeGreaterThanOrEqual(CLEAR);
+    expect(segmentToBox(...horizontal, q!)).toBeGreaterThanOrEqual(CLEAR);
+  });
+
+  it('keep the middle when no other edge is near', () => {
+    const items = separateEdgeLabels(
+      [edge('h', 0, 100, 200, 100, '-1'), edge('v', 300, 0, 300, 200, '-2')],
+      font,
+    );
+    expect(items[0]).not.toHaveProperty('labelAt');
+    expect(items[1]).not.toHaveProperty('labelAt');
   });
 
   it('keep clear of nodes where they can', () => {

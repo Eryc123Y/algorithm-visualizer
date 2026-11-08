@@ -254,6 +254,45 @@ describe('captions', () => {
   });
 });
 
+describe('tree notes and pointer badges (ADR 0031, Codex on #58)', () => {
+  it('never turns a note to the left, where the badges go', () => {
+    const trace = mustLoad({
+      version: '0.1',
+      structures: {
+        t: {
+          kind: 'tree',
+          binary: true,
+          nodes: [
+            { id: '0', value: 0, children: ['3', '1'] },
+            { id: '3', value: 3 },
+            { id: '1', value: 1, children: ['2', '4'] },
+            { id: '2', value: 2 },
+            { id: '4', value: 4 },
+          ],
+          roots: ['0'],
+        },
+      },
+      steps: [
+        {
+          actions: [
+            {
+              target: 't',
+              type: 'annotate',
+              node: '2',
+              text: 'a seventeen-wide.',
+            },
+            { target: 't', type: 'pointer', name: 'p2', node: '2' },
+          ],
+        },
+      ],
+    });
+    const node = layoutTrace(trace)
+      .sceneAt(1)
+      .items.find((i) => i.key === 't/element/2');
+    expect(node?.type === 'node' && node.labelAngle).not.toBe(270);
+  });
+});
+
 describe('bare layout', () => {
   it('draws only cells and pointers, starting right below the padding', () => {
     const trace = mustLoad(

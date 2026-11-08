@@ -23,6 +23,7 @@ import {
   maxWidth,
   own,
   pointerRows,
+  settledUnder,
   titleItems,
   titleRowHeight,
   titleWidth,
@@ -32,14 +33,22 @@ import {
   NODE_GAP_Y,
   NOTE_HEIGHT,
   nodeShape,
+  noteFontSize,
   noteTextWidth,
   placeForest,
   sidePointerItems,
   sidePointerWidth,
   treeEdge,
 } from './node-tree.ts';
+import type { LabelBox } from './edge-label.ts';
+import { clearestAngle, noteRegion } from './notes.ts';
 import type { LayoutFonts } from './options.ts';
 import type { ElementRole, SceneItem } from './scene.ts';
+
+/** Where a tree's notes go, in order: above, above left, above right. */
+const NOTE_ANGLES: readonly number[] = [0, 315, 45];
+/** Where else they may go, inside the tree's block: the sides, below. */
+const MORE_NOTE_ANGLES: readonly number[] = [90, 270, 180];
 
 export interface TreeMetrics {
   /** Columns the widest frame spans. */
@@ -128,14 +137,30 @@ export function layoutTree({
   // binary tree are never on the same level.
   const pitchX = 2 * halfWidth + NODE_GAP_X + (state.binary ? 0 : pointerWidth);
   const pitchY = 2 * radius + NODE_GAP_Y;
-  // Notes are centred above nodes and may be wider than them.
-  const noteOverhang = Math.max(
-    0,
-    Math.ceil(noteTextWidth(metrics.noteWidth, shape) / 2 - halfWidth),
-  );
+  // Notes go above nodes, or above left or above right, whichever clears
+  // the edges (ADR 0031); the block keeps room for any of them, measured
+  // with the widest note of the trace.
+  const noteFont = noteFontSize(shape);
+  const noteHalf = noteTextWidth(metrics.noteWidth, shape) / 2;
+  const noteAt = (x: number, y: number, angle: number) =>
+    noteRegion({ x, y, radius, halfWidth }, angle, noteHalf, noteFont);
+  const reaches = NOTE_ANGLES.map((angle) => noteAt(0, 0, angle));
+  const noteOverhang = metrics.hasNotes
+    ? Math.max(
+        0,
+        Math.ceil(
+          Math.max(...reaches.map((b) => b.x + b.halfWidth)) - halfWidth,
+        ),
+      )
+    : 0;
+  const noteRoom = metrics.hasNotes
+    ? Math.max(
+        NOTE_HEIGHT,
+        Math.ceil(Math.max(...reaches.map((b) => b.halfHeight - b.y)) - radius),
+      )
+    : 4;
   const left = origin.x + Math.max(pointerWidth, noteOverhang);
-  const top =
-    origin.y + titleRowHeight(o) + (metrics.hasNotes ? NOTE_HEIGHT : 4);
+  const top = origin.y + titleRowHeight(o) + noteRoom;
   const { column, depth } = placeForest(
     state.data.roots,
     childrenLookup(state),
@@ -173,9 +198,56 @@ export function layoutTree({
         );
 
   const { groups, notes, pointers } = state.marks;
+  // The direction of each note, in node order, clear of this frame's edges,
+  // the other nodes and the notes before it.
+  const lines = state.data.nodes.flatMap((node) =>
+    node.children.flatMap((child) =>
+      child === null ? [] : [[centre(node.id), centre(child)] as const],
+    ),
+  );
+  const placed: LabelBox[] = [];
+  const noteAngles = new Map<string, number>();
+  const columns = Math.max(1, metrics.columns);
+  const levels = Math.max(1, metrics.levels);
+  const width = Math.max(
+    Math.max(pointerWidth, noteOverhang) +
+      (columns - 1) * pitchX +
+      2 * halfWidth +
+      noteOverhang,
+    titleWidth(title, o),
+  );
+  const height = top - origin.y + (levels - 1) * pitchY + 2 * radius + 4;
+  const inside = (b: LabelBox) =>
+    b.x - b.halfWidth >= origin.x &&
+    b.x + b.halfWidth <= origin.x + width &&
+    b.y - b.halfHeight >= origin.y + titleRowHeight(o) &&
+    b.y + b.halfHeight <= origin.y + height;
+  for (const node of state.data.nodes) {
+    if (own(notes, node.id) === undefined) continue;
+    const at = centre(node.id);
+    const candidates = [
+      ...NOTE_ANGLES,
+      ...MORE_NOTE_ANGLES.filter(
+        // The left is the pointer badges' side, as in graphs.
+        (a) =>
+          !(a === 270 && metrics.pointerRows > 0) &&
+          inside(noteAt(at.x, at.y, a)),
+      ),
+    ];
+    const angle = clearestAngle(candidates, (a) => noteAt(at.x, at.y, a), {
+      segments: lines,
+      discs: state.data.nodes.flatMap((n) =>
+        n.id === node.id ? [] : [{ ...centre(n.id), radius: halfWidth }],
+      ),
+      boxes: placed,
+    });
+    noteAngles.set(node.id, angle);
+    placed.push(noteAt(at.x, at.y, angle));
+  }
   for (const node of state.data.nodes) {
     const group = own(groups, node.id);
     const note = own(notes, node.id);
+    const angle = noteAngles.get(node.id) ?? 0;
     items.push({
       type: 'node',
       key: `${name}/element/${node.id}`,
@@ -183,11 +255,16 @@ export function layoutTree({
       radius,
       ...(halfWidth > radius ? { width: 2 * halfWidth } : {}),
       role: roleOf(state, node.id),
+      ...settledUnder(
+        roleOf(state, node.id),
+        state.marks.settled.includes(node.id),
+      ),
       ...(group === undefined ? {} : { group }),
       ...(node.color === null ? {} : { variant: node.color }),
       text: formatScalar(node.value),
       fontSize: shape.fontSize,
       ...(note === undefined ? {} : { label: note }),
+      ...(angle === 0 ? {} : { labelAngle: angle }),
     });
   }
 
@@ -196,17 +273,5 @@ export function layoutTree({
       ...sidePointerItems(name, names, { ...centre(id), halfWidth }, o),
     );
 
-  const columns = Math.max(1, metrics.columns);
-  const levels = Math.max(1, metrics.levels);
-  return {
-    items,
-    width: Math.max(
-      Math.max(pointerWidth, noteOverhang) +
-        (columns - 1) * pitchX +
-        2 * halfWidth +
-        noteOverhang,
-      titleWidth(title, o),
-    ),
-    height: top - origin.y + (levels - 1) * pitchY + 2 * radius + 4,
-  };
+  return { items, width, height };
 }

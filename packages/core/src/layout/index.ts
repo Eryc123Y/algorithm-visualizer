@@ -37,6 +37,7 @@ export * from './queue.ts';
 export * from './stack.ts';
 export * from './tree.ts';
 export * from './node-tree.ts';
+export * from './notes.ts';
 export * from './options.ts';
 export * from './placement.ts';
 export * from './scene.ts';

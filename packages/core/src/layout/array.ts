@@ -26,6 +26,7 @@ import {
   maxWidth,
   pointerAreaHeight,
   pointerItems,
+  settledUnder,
   titleItems,
   titleRowHeight,
   titleWidth,
@@ -180,6 +181,10 @@ function layoutArrayRow(
       width: cellWidth,
       height: o.cellHeight,
       role: roleOf(state, index, element.id),
+      ...settledUnder(
+        roleOf(state, index, element.id),
+        state.marks.settled.includes(element.id),
+      ),
       text: formatScalar(element.value),
       fontSize: o.valueFontSize,
     });
