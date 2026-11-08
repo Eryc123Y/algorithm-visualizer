@@ -197,16 +197,37 @@ describe('<algo-player> code languages (ADR 0017)', () => {
     expect(el.currentLanguage).toBe('python');
   });
 
-  it('leaves the menu its keys, so they do not step the player', async () => {
+  it('leaves the menu the keys it chooses with', async () => {
     const el = await mount((e) => (e.visualization = doc));
     el.seek(1);
     await el.updateComplete;
-    for (const key of ['ArrowRight', 'ArrowLeft', ' ', 'Home', 'End'])
+    for (const key of ['ArrowUp', 'ArrowDown', ' ', 'Enter', 'Home', 'End'])
       menu(el)!.dispatchEvent(
         new KeyboardEvent('keydown', { key, bubbles: true, composed: true }),
       );
     await el.updateComplete;
     expect(el.frame).toBe(1);
+    expect(
+      root(el).querySelector('button.primary')?.getAttribute('aria-label'),
+    ).toBe('Play');
+  });
+
+  it('steps the player with the left and right arrows from the menu', async () => {
+    const el = await mount((e) => (e.visualization = doc));
+    el.seek(1);
+    await el.updateComplete;
+    const right = new KeyboardEvent('keydown', {
+      key: 'ArrowRight',
+      bubbles: true,
+      composed: true,
+      cancelable: true,
+    });
+    menu(el)!.dispatchEvent(right);
+    await el.updateComplete;
+    expect(el.frame).toBe(2);
+    // Taken from the menu, so it does not also change the language.
+    expect(right.defaultPrevented).toBe(true);
+    expect(menu(el)!.value).toBe('pseudocode');
   });
 
   it('follows another player’s choice in its menu', async () => {
