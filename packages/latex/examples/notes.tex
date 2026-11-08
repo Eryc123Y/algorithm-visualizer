@@ -9,12 +9,12 @@
 
 \section*{Shortest paths}
 
-Dijkstra's algorithm settles one node at a time. After the third
-relaxation of the textbook example, $B$ and $C$ are settled and the
-distance to $F$ has dropped from $14$ to $11$:
+Dijkstra's algorithm settles one node at a time. Once $B$ and $C$ are
+settled in the textbook example, the edge from $C$ lowers the distance
+to $F$ from $14$ to $11$:
 
 \begin{center}
-  \algoviz[step=relax#3]{dijkstra}{
+  \algoviz[step=improve#6]{dijkstra}{
     "graph": {
       "nodes": ["A", "B", "C", "D", "E", "F"],
       "edges": [["A", "B", 7], ["A", "C", 9], ["A", "F", 14], ["B", "C", 10],

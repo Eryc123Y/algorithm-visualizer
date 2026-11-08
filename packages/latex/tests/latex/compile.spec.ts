@@ -10,158 +10,25 @@
  * Run with npm run test:latex.
  */
 import { spawnSync } from 'node:child_process';
-import {
-  chmodSync,
-  copyFileSync,
-  existsSync,
-  mkdtempSync,
-  readdirSync,
-  readFileSync,
-  writeFileSync,
-} from 'node:fs';
-import { tmpdir } from 'node:os';
+import { copyFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
 
-const repo = fileURLToPath(new URL('../../../../', import.meta.url));
-const examples = join(repo, 'packages/latex/examples');
-const command =
-  process.env['ALGOVIZ_COMMAND'] ??
-  [
-    process.execPath,
-    '--no-warnings',
-    '--conditions=@algoviz/source',
-    join(repo, 'packages/mcp/src/algoviz.ts'),
-  ].join(' ');
-
-type Engine = 'pdflatex' | 'lualatex' | 'xelatex';
-type Shell = 'unrestricted' | 'restricted' | 'off';
-
-const LATEXMK: Readonly<Record<Engine, string>> = {
-  pdflatex: '-pdf',
-  lualatex: '-pdflua',
-  xelatex: '-pdfxe',
-};
-
-/**
- * A fresh directory with the examples and a command that logs each call
- * to calls.log before running algoviz.
- */
-function workspace(): string {
-  const dir = mkdtempSync(join(tmpdir(), 'algoviz-latex-'));
-  for (const file of readdirSync(examples))
-    copyFileSync(join(examples, file), join(dir, file));
-  const wrapper = join(dir, 'algoviz-calls');
-  writeFileSync(
-    wrapper,
-    `#!/bin/sh\necho "$@" >> "${join(dir, 'calls.log')}"\nexec ${command} "$@"\n`,
-  );
-  chmodSync(wrapper, 0o755);
-  return dir;
-}
-
-const env = {
-  ...process.env,
-  TEXINPUTS: `${join(repo, 'packages/latex/package')}//:`,
-};
-
-const pretex = (dir: string, options = '') =>
-  `\\PassOptionsToPackage{command=${join(dir, 'algoviz-calls')}${options}}{algoviz}`;
-
-/** Compiles with latexmk, as users do; `force` runs TeX again anyway. */
-function latexmk(
-  dir: string,
-  file: string,
-  engine: Engine,
-  shell: Exclude<Shell, 'restricted'> = 'unrestricted',
-  force = false,
-): string {
-  spawnSync(
-    'latexmk',
-    [
-      LATEXMK[engine],
-      shell === 'off' ? '-no-shell-escape' : '-shell-escape',
-      '-interaction=nonstopmode',
-      ...(force ? ['-g'] : []),
-      `-usepretex=${pretex(dir)}`,
-      file,
-    ],
-    { cwd: dir, env, encoding: 'utf8' },
-  );
-  return log(dir, file);
-}
-
-/** Compiles once with an engine, for the cases latexmk cannot set up. */
-function tex(
-  dir: string,
-  file: string,
-  shell: Shell,
-  options = '',
-  engine: Engine = 'pdflatex',
-): string {
-  const flag = {
-    unrestricted: '-shell-escape',
-    restricted: '-shell-restricted',
-    off: '-no-shell-escape',
-  }[shell];
-  spawnSync(
-    engine,
-    [
-      flag,
-      '-interaction=nonstopmode',
-      `${pretex(dir, options)}\\input{${file}}`,
-    ],
-    { cwd: dir, env, encoding: 'utf8' },
-  );
-  return log(dir, file);
-}
-
-/** A log, with the lines TeX broke at 79 characters joined again. */
-const log = (dir: string, file: string) =>
-  readFileSync(join(dir, file.replace(/\.tex$/, '.log')), 'utf8')
-    .split('\n')
-    .reduce<string[]>((lines, line) => {
-      const last = lines.at(-1);
-      if (last !== undefined && last.length > 0 && last.length % 79 === 0)
-        lines[lines.length - 1] = last + line;
-      else lines.push(line);
-      return lines;
-    }, [])
-    .join('\n')
-    // l3msg wraps messages itself, continuing them after "(algoviz)".
-    .replace(/\n\(algoviz\)\s+/g, ' ');
-
-/** The lines of a log that report errors. */
-const errors = (text: string) =>
-  text.split('\n').filter((line) => line.startsWith('!'));
-
-const calls = (dir: string) =>
-  existsSync(join(dir, 'calls.log'))
-    ? readFileSync(join(dir, 'calls.log'), 'utf8')
-        .trim()
-        .split('\n')
-        .filter(Boolean)
-    : [];
-
-const cached = (dir: string) =>
-  existsSync(join(dir, '_algoviz'))
-    ? readdirSync(join(dir, '_algoviz')).filter((f) => f.endsWith('.tex'))
-    : [];
-
-const pdfText = (pdf: string) =>
-  spawnSync('pdftotext', ['-layout', pdf, '-'], { encoding: 'utf8' }).stdout;
-
-/** A document of its own: the figures given, after the preamble. */
-function document(dir: string, name: string, body: string): string {
-  const file = `${name}.tex`;
-  writeFileSync(
-    join(dir, file),
-    `\\documentclass{article}\n\\usepackage{algoviz}\n\\begin{document}\n${body}\n\\end{document}\n`,
-  );
-  return file;
-}
+import {
+  cached,
+  calls,
+  command,
+  document,
+  env,
+  errors,
+  latexmk,
+  log,
+  pdfText,
+  tex,
+  workspace,
+  type Engine,
+} from './helpers.ts';
 
 // The notes make five figures: two of Dijkstra, two of bubble sort and one
 // of a document.
@@ -193,7 +60,7 @@ describe.each<Engine>(['pdflatex', 'lualatex', 'xelatex'])(
       expect(fonts).toMatch(/LMRoman|CMR|LatinModern|lmroman/i);
       // Node names and distances are real text.
       const text = pdfText(join(dir, 'notes.pdf'));
-      for (const label of ['A', 'B', 'F', '14', '22'])
+      for (const label of ['A', 'B', 'F', '14', '11'])
         expect(text).toContain(label);
     });
 
@@ -210,18 +77,6 @@ describe.each<Engine>(['pdflatex', 'lualatex', 'xelatex'])(
     });
   },
 );
-
-describe('slides.tex in Beamer', () => {
-  it('compiles, with # written \\# in a frame and # in a fragile one', () => {
-    const dir = workspace();
-    const text = latexmk(dir, 'slides.tex', 'pdflatex');
-    expect(errors(text)).toEqual([]);
-    expect(calls(dir)).toHaveLength(3);
-    expect(calls(dir).filter((c) => c.includes('--step=relax#'))).toHaveLength(
-      2,
-    );
-  });
-});
 
 describe('the package', () => {
   it('spells a step with # or \\#, and both name one figure', () => {

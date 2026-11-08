@@ -1,6 +1,6 @@
 # algoviz for Typst
 
-Step-by-step figures of algorithms and data structures in your Typst notes. Name an algorithm, give it your input and pick a step, such as the third relaxation of Dijkstra's algorithm on your graph, and get a vector figure. You can also pass a document that you wrote, or that an AI wrote for you, in the algoviz format.
+Step-by-step figures of algorithms and data structures in your Typst notes and slides. Name an algorithm, give it your input and pick a step, such as the moment Dijkstra's algorithm improves a distance on your graph, and get a vector figure. You can also pass a document that you wrote, or that an AI wrote for you, in the algoviz format.
 
 The algoviz engine runs inside the package as a WebAssembly plugin, so nothing else needs to be installed. A figure is exactly the SVG that `algoviz export` writes, with its text drawn as outlines of the bundled fonts, so it looks the same everywhere.
 
@@ -13,8 +13,8 @@ The algoviz engine runs inside the package as a WebAssembly plugin, so nothing e
 )
 
 #figure(
-  algoviz("dijkstra", (graph: graph, source: "A"), step: "relax#3"),
-  caption: [Dijkstra's algorithm from A, at its third relaxation.],
+  algoviz("dijkstra", (graph: graph, source: "A"), step: "improve#3"),
+  caption: [Dijkstra's algorithm from A: the edge from B improves C from 7 to 5.],
 )
 ```
 
@@ -86,6 +86,38 @@ All figures of a document share one canvas, the largest of its frames. They ther
 )
 ```
 
+## Slides: `algoviz-slides`
+
+```typ
+#algoviz-slides(only, source, input, steps: auto, start: 1, theme: "light",
+  strict: false, width: auto, height: auto, fit: "contain")
+```
+
+It steps through a series in a slide deck, one frame per subslide, with your slide framework's own `only`. All frames share one box, sized by the first, so nothing moves from subslide to subslide. With [touying](https://typst.app/universe/package/touying):
+
+```typ
+#import "@preview/touying:0.8.0": *
+#import themes.simple: *
+#import "@preview/algoviz:0.1.0": algoviz-slides
+
+#show: simple-theme.with(aspect-ratio: "16-9")
+
+== Dijkstra's algorithm, step by step
+
+#align(center, algoviz-slides(only, "dijkstra", (graph: graph, source: "A"), height: 75%))
+```
+
+With [polylux](https://typst.app/universe/package/polylux), the same call goes inside `#slide[…]`, with polylux's `only`.
+
+- **`only`** is the framework's `only`, passed in, as algoviz does not import a framework. It works with any function that takes a subslide number or a string such as `"3-"`, and a body. polylux 0.4.0 and touying 0.8.0 are tested.
+- **`steps`** selects the frames as for `algoviz-series`: `auto` for every frame, a range such as `"relax#2..-1"`, a section such as `"insert-5"`, or an array of selectors.
+- **`start`** is the subslide of the first frame. The last frame stays from its subslide to the end of the slide. Neither framework's `only` follows `#pause`, so after a `#pause` in touying, give the subslide yourself, such as `start: 2`.
+- **`width`, `height` and `fit`** size every frame as for `algoviz`; relative sizes such as `height: 75%` work in both frameworks. Each frame keeps its step's narration as `alt`.
+- A series of one frame is the image alone, on every subslide. An error shows in a box, as for `algoviz`.
+- In touying's handout mode, which keeps the last subslide of each slide, a series shows its last frame.
+
+`examples/slides-polylux.typ` and `examples/slides-touying.typ` step through a whole run, a range from the second subslide, and a section.
+
 ## Documents
 
 A document is the JSON format algoviz draws from: its structures, and a timeline of steps that apply actions such as `compare` or `swap`. Read one with `json` and pass it in place of the algorithm and its input:
@@ -125,7 +157,7 @@ Arguments of the wrong type, such as a number for `theme` or a misspelt argument
 
 ## The engine's data: `algoviz-figures`
 
-`algoviz-figures(source, input, steps: auto, theme: "light")` returns the engine's answer as a dictionary, for captions, custom layouts and slides:
+`algoviz-figures(source, input, steps: auto, theme: "light")` returns the engine's answer as a dictionary, for captions and custom layouts:
 
 ```typ
 #let series = algoviz-figures("bst.delete", (from: (8, 3, 10, 1, 6), key: 3), steps: (0, -1))

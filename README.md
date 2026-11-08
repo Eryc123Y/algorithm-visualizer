@@ -121,6 +121,18 @@ In LaTeX, [the algoviz package](packages/latex/package/README.md) draws them wit
 
 The package is not on CTAN yet; its README says how to use it, and how to build the standalone `algoviz` it calls, until it is.
 
+In slides, a series steps through one frame per overlay, all in one picture ([ADR 0028](docs/adr/0028-slides.md)): `steps` in a Beamer frame, and `algoviz-slides` with polylux's or touying's own `only` in Typst.
+
+```latex
+\begin{frame}{Dijkstra's algorithm}
+  \algovizfile[algorithm=dijkstra, steps]{graph.json}   % one slide per frame
+\end{frame}
+```
+
+```typ
+#algoviz-slides(only, "dijkstra", (graph: graph, source: "A"), steps: "relax#1..-1", height: 75%)
+```
+
 In code, `exportFigures(document, { steps, theme })` from `@algoviz/svg` returns the same figures as strings, and `selectSeries` from `@algoviz/core` the frames that selectors name. `prepareFigures(document, { theme })` loads a document once and then draws a figure of any frame, or any series, on demand.
 
 ## Embedding
@@ -163,7 +175,7 @@ Display mode also accepts `once` (play a single time) and `motion` (`linear` · 
 | [`@algoviz/elements`](packages/elements) | Available | `<algo-player>`: interactive, animated player (Lit Web Component)  |
 | [`@algoviz/recipes`](packages/recipes)   | Available | Typed recorder and visualizations of classic algorithms            |
 | [`@algoviz/mcp`](packages/mcp)           | Available | MCP server, MCP App and CLI: guide, validation, inspection, export |
-| [`algoviz` for Typst](packages/typst)    | Local     | Typst package: figures from inside a document, via a Wasm plugin   |
+| [`algoviz` for Typst](packages/typst)    | Local     | Typst package: figures and slides, via a Wasm plugin               |
 | [`algoviz` for LaTeX](packages/latex)    | Local     | LaTeX package: TikZ figures in the document's fonts, via the CLI   |
 
 ## Design
