@@ -40,6 +40,12 @@ export default defineConfig({
   base: './',
   resolve: {
     conditions: ['@algoviz/source', 'browser', 'import', 'module', 'default'],
+    // The page never runs an algorithm: the server does.
+    alias: {
+      '@algoviz/recipes': fileURLToPath(
+        new URL('app/no-recipes.ts', import.meta.url),
+      ),
+    },
   },
   plugins: [inlineScripts()],
   build: {
@@ -50,6 +56,9 @@ export default defineConfig({
     modulePreload: false,
     rollupOptions: {
       input: fileURLToPath(new URL('app/player.html', import.meta.url)),
+      // One script: the player's import of the registry, on demand
+      // (ADR 0032), would otherwise split the bundle.
+      output: { codeSplitting: false },
     },
   },
 });

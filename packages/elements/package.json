@@ -33,6 +33,7 @@
   },
   "dependencies": {
     "@algoviz/core": "*",
+    "@algoviz/recipes": "*",
     "@algoviz/spec": "*",
     "@algoviz/svg": "*",
     "lit": "^3.3.1"

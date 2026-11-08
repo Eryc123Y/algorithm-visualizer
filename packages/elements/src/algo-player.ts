@@ -14,6 +14,13 @@
  * - the `src` attribute (URL of a JSON document),
  * - an inline `<script type="application/json">` child.
  *
+ * With the `algorithm` attribute (a registry id, ADR 0032), the content is
+ * that algorithm's input instead: the `input` attribute (JSON, an object
+ * without its braces, or a notation such as `5 2 4 6 1 3`) or property
+ * (any value), else the JSON at `src`, else the inline JSON, else none,
+ * which runs the algorithm's first example. The `visualization` property
+ * still wins. The registry is loaded on first use.
+ *
  * `frame` is a frame number or a selector such as `relax#2` or `insert-5`
  * (ADR 0020). The timeline shows the document's sections, and Page Up and
  * Page Down move between them.
@@ -51,6 +58,7 @@ import {
 } from '@algoviz/svg';
 
 import { codeLines } from './code-panel.ts';
+import { documentOf } from './content.ts';
 import { PlayerController, type PlaybackState } from './controller.ts';
 import {
   nextIcon,
@@ -136,6 +144,8 @@ export class AlgoPlayer extends LitElement {
 
   static override properties = {
     src: { type: String },
+    algorithm: { type: String },
+    input: {},
     mode: { type: String, reflect: true },
     layout: { type: String },
     once: { type: Boolean },
@@ -159,8 +169,15 @@ export class AlgoPlayer extends LitElement {
     printing: { state: true },
   };
 
-  /** URL of a JSON document. */
+  /** URL of a JSON document, or of the algorithm's input. */
   declare src: string | undefined;
+  /** A registry id, such as `dijkstra`: the content is then its input. */
+  declare algorithm: string | undefined;
+  /**
+   * The algorithm's input: text, read as JSON or a notation such as
+   * `A-B 4, B-C 2`, or any value; without it, the first example runs.
+   */
+  declare input: unknown;
   /** A document object; takes precedence over `src` and inline JSON. */
   declare visualization: unknown;
   /** `interactive` (default) or `display`: animation only, no chrome. */
@@ -240,6 +257,8 @@ export class AlgoPlayer extends LitElement {
   constructor() {
     super();
     this.src = undefined;
+    this.algorithm = undefined;
+    this.input = undefined;
     this.mode = 'interactive';
     this.layout = 'wide';
     this.once = false;
@@ -389,7 +408,11 @@ export class AlgoPlayer extends LitElement {
       !sameFonts(this.#layoutFonts, this.#sceneTheme().fontMetrics)
     )
       this.#relayout();
-    const reload = changed.has('visualization') || changed.has('src');
+    const reload =
+      changed.has('visualization') ||
+      changed.has('src') ||
+      changed.has('algorithm') ||
+      changed.has('input');
     if (changed.has('frame')) this.#onFrame(reload);
     if (reload) void this.#load();
     const resolved = this.#resolvedTheme();
@@ -448,24 +471,24 @@ export class AlgoPlayer extends LitElement {
 
   async #load(): Promise<void> {
     const request = ++this.#request;
-    let input: unknown;
-    if (this.visualization !== undefined) {
-      input = this.visualization;
-    } else if (this.src) {
-      try {
-        const response = await fetch(this.src);
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        input = await response.json();
-      } catch (error) {
-        if (request === this.#request) this.#fail([loadError(this.src, error)]);
-        return;
-      }
-    } else {
-      input = this.#inline;
+    const pending = documentOf({
+      visualization: this.visualization,
+      algorithm: this.algorithm,
+      // Removing the attribute sets null: no input, as when never given.
+      input: this.input ?? undefined,
+      src: this.src,
+      inline: this.#inline,
+    });
+    // A document given directly loads at once, without a microtask.
+    const content = pending instanceof Promise ? await pending : pending;
+    if (request !== this.#request) return;
+    if (!content.ok) {
+      this.#fail(content.error);
+      return;
     }
-    if (request !== this.#request || input === undefined) return;
+    if (content.value === undefined) return;
 
-    const result = loadTrace(input);
+    const result = loadTrace(content.value);
     if (!result.ok) {
       this.#fail(result.error);
       return;
@@ -508,7 +531,10 @@ export class AlgoPlayer extends LitElement {
       this.#inline = JSON.parse(script.textContent ?? '');
     } catch (error) {
       // Inline JSON is the lowest-priority source; ignore it when another is set.
-      if (this.visualization !== undefined || this.src) return;
+      if (this.#hasOtherContent) return;
+      // A load started before the inline JSON was read, such as an
+      // algorithm's first example, must not replace this error.
+      this.#request++;
       this.#fail([
         {
           code: 'INVALID_JSON',
@@ -519,7 +545,16 @@ export class AlgoPlayer extends LitElement {
       ]);
       return;
     }
-    if (this.visualization === undefined && !this.src) void this.#load();
+    if (!this.#hasOtherContent) void this.#load();
+  }
+
+  /** Whether content other than the inline JSON is given. */
+  get #hasOtherContent(): boolean {
+    return (
+      this.visualization !== undefined ||
+      Boolean(this.src) ||
+      (Boolean(this.algorithm) && this.input != null)
+    );
   }
 
   // --- Playback --------------------------------------------------------------
@@ -737,7 +772,13 @@ export class AlgoPlayer extends LitElement {
         ${
           this.errors
             ? html`<div class="errors" role="alert" part="errors">
-                <strong>This visualization could not be loaded.</strong>
+                <strong
+                  >${
+                    this.algorithm && this.visualization === undefined
+                      ? 'This algorithm could not be run on its input.'
+                      : 'This visualization could not be loaded.'
+                  }</strong
+                >
                 <pre>${formatErrors(this.errors)}</pre>
               </div>`
             : nothing
@@ -877,14 +918,6 @@ ${codeLines(listing.source, listing.lineOf(step))}</pre>
       <slot hidden @slotchange=${this.#onSlotChange}></slot>
     `;
   }
-}
-
-function loadError(src: string, error: unknown): Diagnostic {
-  return {
-    code: 'LOAD_FAILED',
-    path: '$',
-    message: `Could not load ${src}: ${error instanceof Error ? error.message : String(error)}`,
-  };
 }
 
 declare global {

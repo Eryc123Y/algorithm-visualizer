@@ -22,13 +22,8 @@ function documentOf(id: string, input: unknown) {
 
 const ORIGIN = 'http://embed.test';
 const cdn = new URL('../../../../packages/elements/dist/cdn/', import.meta.url);
-const bundle = () =>
-  readFileSync(
-    new URL(
-      '../../../../packages/elements/dist/cdn/algoviz-player.js',
-      import.meta.url,
-    ),
-  );
+/** A file of the standalone bundle, such as algoviz-player.js. */
+const bundleFile = (name: string) => readFileSync(new URL(name, cdn));
 
 const sort = documentOf('bubble-sort', { values: [4, 2, 3, 1] });
 const graph = documentOf('dijkstra', {
@@ -78,8 +73,12 @@ async function open(
 <script type="module" src="/algoviz-player.js"></script>
 <body style="margin:0">${body}</body>`,
       });
-    if (path === '/algoviz-player.js')
-      return route.fulfill({ contentType: 'text/javascript', body: bundle() });
+    // The player, and the registry next to it (ADR 0032).
+    if (/^\/algoviz-[\w-]+\.js$/.test(path))
+      return route.fulfill({
+        contentType: 'text/javascript',
+        body: bundleFile(path.slice(1)),
+      });
     // The web fonts sit next to the bundle, where the player looks.
     if (path.startsWith('/fonts/'))
       return route.fulfill({
@@ -570,5 +569,81 @@ test('algo-frame names the step and its section', async ({ page }) => {
     playing: false,
     stepName: 'go',
     sectionId: 'search-7',
+  });
+});
+
+test.describe('an algorithm and its input (ADR 0032)', () => {
+  /** Whether the page asked for the registry's file. */
+  const loadsRegistry = (page: Page) => {
+    const asked = { value: false };
+    page.on('request', (request) => {
+      if (request.url().endsWith('/algoviz-recipes.js')) asked.value = true;
+    });
+    return asked;
+  };
+
+  test('runs an algorithm on its input, loading the registry once', async ({
+    page,
+  }) => {
+    const asked = loadsRegistry(page);
+    await open(
+      page,
+      `<algo-player id="p" algorithm="insertion-sort" input="5 2 4 6 1 3"></algo-player>
+       <algo-player id="q" algorithm="dijkstra" input="A-B 2, B-C 1, A-C 5" frame="-1"></algo-player>`,
+    );
+    const player = page.locator('#p');
+    await expect(player.locator('.narration')).toHaveText('Initial state.');
+    await expectStageMatches(
+      player,
+      documentOf('insertion-sort', { values: [5, 2, 4, 6, 1, 3] }),
+    );
+    await player.getByRole('button', { name: 'Next step' }).click();
+    await expectStageMatches(
+      player,
+      documentOf('insertion-sort', { values: [5, 2, 4, 6, 1, 3] }),
+    );
+    await expectStageMatches(page.locator('#q'), graph);
+    expect(asked.value).toBe(true);
+  });
+
+  test('runs the first example without an input', async ({ page }) => {
+    await open(page, '<algo-player id="p" algorithm="bfs"></algo-player>');
+    await expectStageMatches(page.locator('#p'), documentOf('bfs', undefined));
+  });
+
+  test('takes the input from src or inline JSON', async ({ page }) => {
+    await open(
+      page,
+      `<algo-player id="p" algorithm="bubble-sort" src="/input.json"></algo-player>
+       <algo-player id="q" algorithm="bubble-sort"><script type="application/json">{"values": [4, 2, 3, 1]}</script></algo-player>`,
+      { '/input.json': { values: '4 2 3 1' } },
+    );
+    await expectStageMatches(page.locator('#p'), sort);
+    await expectStageMatches(page.locator('#q'), sort);
+  });
+
+  test('shows an input error at its token, then runs a fixed input', async ({
+    page,
+  }) => {
+    await open(
+      page,
+      '<algo-player id="p" algorithm="dijkstra" input="A-B 2, B-C x"></algo-player>',
+    );
+    const player = page.locator('#p');
+    await expect(player.locator('.errors')).toContainText(
+      'INVALID_NOTATION at $.input: Expected a weight or "," after "B-C", not "x" (character 12)',
+    );
+    await player.evaluate((el: AlgoPlayer) => {
+      el.setAttribute('input', 'A-B 2, B-C 1, A-C 5');
+    });
+    await expect(player.locator('.errors')).toHaveCount(0);
+    await expectStageMatches(player, graph);
+  });
+
+  test('a page of documents never loads the registry', async ({ page }) => {
+    const asked = loadsRegistry(page);
+    await open(page, inline(sort));
+    await expectStageMatches(page.locator('#p'), sort);
+    expect(asked.value).toBe(false);
   });
 });

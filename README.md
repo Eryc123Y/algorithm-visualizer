@@ -167,11 +167,24 @@ In code, `exportFigures(document, { steps, theme, layout })` from `@algoviz/svg`
 
 ## Embedding
 
-Build the standalone bundle with `npm run build -w @algoviz/elements`, then:
+Build the standalone bundle with `npm run build -w @algoviz/elements`, then name an algorithm and give its input ([ADR 0032](docs/adr/0032-algorithm-and-input.md)):
 
 ```html
 <script type="module" src="algoviz-player.js"></script>
 
+<algo-player algorithm="insertion-sort" input="5 2 4 6 1 3"></algo-player>
+<algo-player
+  algorithm="dijkstra"
+  input="A-B 4, B-C 1, A-C 7, C-D 2"
+  frame="improve#3"
+></algo-player>
+```
+
+`algorithm` is any id of the registry ([Recipes](#recipes)), and `input` takes JSON, an object without its outer braces, or a notation ([Inputs](#inputs)). Without `input`, the algorithm runs on its first example. With `algorithm`, `src` or an inline `<script type="application/json">` may hold the input instead, and the `input` property takes any value, such as an object. An input that does not fit shows in the player, with the token where it went wrong, and fires `algo-error`.
+
+The registry is a second file of the bundle, `algoviz-recipes.js`, which the player loads from next to itself the first time a player has `algorithm`: 146 KB, 40 KB gzipped, on top of the player's 407 KB (104 KB). Keep the two files together under these names. A page that shows only documents never loads it:
+
+```html
 <algo-player theme="auto">
   <script type="application/json">
     { "version": "0.1", "structures": { … }, "steps": [ … ] }
@@ -179,7 +192,7 @@ Build the standalone bundle with `npm run build -w @algoviz/elements`, then:
 </algo-player>
 ```
 
-Attributes: `src`, `frame`, `theme` (a built-in theme, `auto` for light or dark by the reader's colour scheme, or a day and a night theme such as `"textbook textbook-dark"`), `layout` (`wide`, the default, or `narrow`, which puts side structures below the main one for a narrow column), `speed` (ms per step), `autoplay`, `loop`, `hide-controls`, `hide-code`, `language`. Style the chrome with CSS custom properties such as `--algo-accent`, or its corners with `--algo-radius` (the player), `--algo-control-radius` (buttons and menus) and `--algo-panel-radius` (the code panel), or pass a full scene theme as the `customTheme` property.
+Attributes: `algorithm`, `input`, `src`, `frame`, `theme` (a built-in theme, `auto` for light or dark by the reader's colour scheme, or a day and a night theme such as `"textbook textbook-dark"`), `layout` (`wide`, the default, or `narrow`, which puts side structures below the main one for a narrow column), `speed` (ms per step), `autoplay`, `loop`, `hide-controls`, `hide-code`, `language`. Style the chrome with CSS custom properties such as `--algo-accent`, or its corners with `--algo-radius` (the player), `--algo-control-radius` (buttons and menus) and `--algo-panel-radius` (the code panel), or pass a full scene theme as the `customTheme` property.
 
 Each theme draws in its own fonts. The player links `fonts/fonts.css`, next to its script, the first time a player shows, and the browser downloads only the font files a page draws. A bundler that puts the fonts elsewhere says where with `AlgoPlayer.fontsUrl = '/assets/fonts.css'`, and `AlgoPlayer.fontsUrl = null` turns loading off: text then falls back to similar fonts installed on the reader's system.
 
