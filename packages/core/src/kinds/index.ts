@@ -17,6 +17,7 @@ export * from './graph.ts';
 export * from './hash-table.ts';
 export * from './table.ts';
 export * from './linked-list.ts';
+export * from './priority-queue.ts';
 export * from './queue.ts';
 export * from './stack.ts';
 export * from './tree.ts';

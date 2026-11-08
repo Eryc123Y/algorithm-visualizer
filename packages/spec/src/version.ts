@@ -178,6 +178,20 @@ export const PROTOCOL_FEATURES: readonly ProtocolFeature[] = [
     usedBy: (d) =>
       Object.values(d.structures).some((s) => s.place !== undefined),
   },
+  {
+    name: 'priority queues',
+    since: '0.4',
+    usedBy: (d) =>
+      Object.values(d.structures).some((s) => s.kind === 'priorityQueue'),
+  },
+  {
+    name: 'the heap view',
+    since: '0.4',
+    usedBy: (d) =>
+      Object.values(d.structures).some(
+        (s) => s.kind === 'array' && s.view === 'heap',
+      ),
+  },
 ];
 
 /**

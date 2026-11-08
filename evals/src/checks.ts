@@ -11,6 +11,7 @@ import {
   type HashTableState,
   type KindedState,
   type LinkedListState,
+  type PriorityQueueState,
   type QueueState,
   type StackState,
   type TableState,
@@ -29,6 +30,7 @@ type StateOf = {
   graph: GraphState;
   table: TableState;
   hashTable: HashTableState;
+  priorityQueue: PriorityQueueState;
 };
 
 /** A structure seen across the trace: its name and its states by frame. */

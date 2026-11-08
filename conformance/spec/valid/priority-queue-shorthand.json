@@ -1,0 +1,69 @@
+{
+  "description": "Items without an id get e0, e1, … by position, and a bare inserted value the next free id; keys stay as given.",
+  "input": {
+    "version": "0.4",
+    "structures": {
+      "Q": {
+        "kind": "priorityQueue",
+        "initial": [
+          {
+            "value": "A",
+            "key": 1
+          },
+          {
+            "id": "b",
+            "value": "B",
+            "key": null
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "Q",
+            "type": "insert",
+            "element": "C",
+            "key": 0.5
+          }
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "version": "0.4",
+    "structures": {
+      "Q": {
+        "kind": "priorityQueue",
+        "initial": [
+          {
+            "id": "e0",
+            "value": "A",
+            "key": 1
+          },
+          {
+            "id": "b",
+            "value": "B",
+            "key": null
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "Q",
+            "type": "insert",
+            "element": {
+              "id": "e1",
+              "value": "C"
+            },
+            "key": 0.5
+          }
+        ]
+      }
+    ]
+  }
+}

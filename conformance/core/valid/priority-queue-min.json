@@ -1,0 +1,305 @@
+{
+  "description": "A min-priority queue as Dijkstra's algorithm uses it: the state keeps items in insertion order; extract takes the least key, null keys come last, and ties go to the item inserted first, also after setKey (C ties D at 7 and goes first). setKey and peek highlight for one step.",
+  "input": {
+    "version": "0.4",
+    "structures": {
+      "Q": {
+        "kind": "priorityQueue",
+        "label": "Q",
+        "place": "side",
+        "initial": [
+          {
+            "id": "A",
+            "value": "A",
+            "key": 0
+          },
+          {
+            "id": "B",
+            "value": "B",
+            "key": null
+          },
+          {
+            "id": "C",
+            "value": "C",
+            "key": null
+          },
+          {
+            "id": "D",
+            "value": "D",
+            "key": null
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "Q",
+            "type": "extract"
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "Q",
+            "type": "setKey",
+            "id": "D",
+            "key": 7
+          },
+          {
+            "target": "Q",
+            "type": "setKey",
+            "id": "C",
+            "key": 7
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "Q",
+            "type": "peek"
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "Q",
+            "type": "insert",
+            "element": {
+              "id": "E",
+              "value": "E"
+            },
+            "key": 3
+          },
+          {
+            "target": "Q",
+            "type": "highlight",
+            "ids": ["E", "B"]
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "Q",
+            "type": "extract"
+          },
+          {
+            "target": "Q",
+            "type": "extract"
+          }
+        ]
+      }
+    ]
+  },
+  "expectedLength": 5,
+  "expectedFrames": [
+    {
+      "index": 0,
+      "state": {
+        "Q": {
+          "kind": "priorityQueue",
+          "state": {
+            "data": {
+              "order": "min",
+              "items": [
+                {
+                  "id": "A",
+                  "value": "A",
+                  "key": 0
+                },
+                {
+                  "id": "B",
+                  "value": "B",
+                  "key": null
+                },
+                {
+                  "id": "C",
+                  "value": "C",
+                  "key": null
+                },
+                {
+                  "id": "D",
+                  "value": "D",
+                  "key": null
+                }
+              ]
+            },
+            "marks": {
+              "highlight": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 1,
+      "state": {
+        "Q": {
+          "kind": "priorityQueue",
+          "state": {
+            "data": {
+              "order": "min",
+              "items": [
+                {
+                  "id": "B",
+                  "value": "B",
+                  "key": null
+                },
+                {
+                  "id": "C",
+                  "value": "C",
+                  "key": null
+                },
+                {
+                  "id": "D",
+                  "value": "D",
+                  "key": null
+                }
+              ]
+            },
+            "marks": {
+              "highlight": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 2,
+      "state": {
+        "Q": {
+          "kind": "priorityQueue",
+          "state": {
+            "data": {
+              "order": "min",
+              "items": [
+                {
+                  "id": "B",
+                  "value": "B",
+                  "key": null
+                },
+                {
+                  "id": "C",
+                  "value": "C",
+                  "key": 7
+                },
+                {
+                  "id": "D",
+                  "value": "D",
+                  "key": 7
+                }
+              ]
+            },
+            "marks": {
+              "highlight": ["D", "C"]
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 3,
+      "state": {
+        "Q": {
+          "kind": "priorityQueue",
+          "state": {
+            "data": {
+              "order": "min",
+              "items": [
+                {
+                  "id": "B",
+                  "value": "B",
+                  "key": null
+                },
+                {
+                  "id": "C",
+                  "value": "C",
+                  "key": 7
+                },
+                {
+                  "id": "D",
+                  "value": "D",
+                  "key": 7
+                }
+              ]
+            },
+            "marks": {
+              "highlight": ["C"]
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 4,
+      "state": {
+        "Q": {
+          "kind": "priorityQueue",
+          "state": {
+            "data": {
+              "order": "min",
+              "items": [
+                {
+                  "id": "B",
+                  "value": "B",
+                  "key": null
+                },
+                {
+                  "id": "C",
+                  "value": "C",
+                  "key": 7
+                },
+                {
+                  "id": "D",
+                  "value": "D",
+                  "key": 7
+                },
+                {
+                  "id": "E",
+                  "value": "E",
+                  "key": 3
+                }
+              ]
+            },
+            "marks": {
+              "highlight": ["E", "B"]
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 5,
+      "state": {
+        "Q": {
+          "kind": "priorityQueue",
+          "state": {
+            "data": {
+              "order": "min",
+              "items": [
+                {
+                  "id": "B",
+                  "value": "B",
+                  "key": null
+                },
+                {
+                  "id": "D",
+                  "value": "D",
+                  "key": 7
+                }
+              ]
+            },
+            "marks": {
+              "highlight": []
+            }
+          }
+        }
+      }
+    }
+  ]
+}

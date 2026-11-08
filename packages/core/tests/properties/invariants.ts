@@ -55,6 +55,16 @@ export function stateProblems(entry: KindedState): string[] {
         ...within(marks.highlight, data.length, 'highlight'),
       ];
     }
+    case 'priorityQueue': {
+      const { data, marks } = entry.state;
+      const ids = data.items.map((item) => item.id);
+      return [
+        ...unique(ids, 'ids'),
+        ...unique([...marks.highlight], 'highlights'),
+        ...known(marks.highlight, new Set(ids), 'highlight'),
+        ...(['min', 'max'].includes(data.order) ? [] : ['unknown order']),
+      ];
+    }
     case 'linkedList': {
       const { data, marks, doubly } = entry.state;
       const ids = new Set(data.map((e) => e.id));

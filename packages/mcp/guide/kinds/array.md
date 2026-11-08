@@ -1,8 +1,8 @@
 ## array
 
-A row of cells: sorting, searching, two pointers, sliding windows. With `"view": "tree"` it is drawn as a complete binary tree (index `i` has children `2i+1` and `2i+2`), for heaps.
+A row of cells: sorting, searching, two pointers, sliding windows. With `"view": "tree"` it is drawn as a complete binary tree (index `i` has children `2i+1` and `2i+2`). With `"view": "heap"` (version `"0.4"`) it is drawn as that tree with the row under it, both from the one array, as textbooks draw heaps: prefer it for heaps and heapsort, where the sorted part grows at the end of the row.
 
-Declaration: `{ "kind": "array", "initial": [5, 3, 8], "label"?: "…", "view"?: "row" | "tree" }`. `initial` holds bare values (ids `e0`, `e1`, …) or `{ "id", "value" }` elements. Values are numbers, strings, booleans or null.
+Declaration: `{ "kind": "array", "initial": [5, 3, 8], "label"?: "…", "view"?: "row" | "tree" | "heap" }`. `initial` holds bare values (ids `e0`, `e1`, …) or `{ "id", "value" }` elements. Values are numbers, strings, booleans or null.
 
 | Action      | Fields             | Effect                                                                                                   |
 | ----------- | ------------------ | -------------------------------------------------------------------------------------------------------- |

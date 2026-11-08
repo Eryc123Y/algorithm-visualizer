@@ -9,6 +9,7 @@ import { arrayKind } from './kinds/array.ts';
 import { graphKind } from './kinds/graph.ts';
 import { hashTableKind } from './kinds/hash-table.ts';
 import { linkedListKind } from './kinds/linked-list.ts';
+import { priorityQueueKind } from './kinds/priority-queue.ts';
 import { queueKind } from './kinds/queue.ts';
 import { stackKind } from './kinds/stack.ts';
 import { tableKind } from './kinds/table.ts';
@@ -48,6 +49,11 @@ import {
   measureTable,
   mergeTableMetrics,
 } from './layout/table.ts';
+import {
+  layoutPriorityQueue,
+  measurePriorityQueue,
+  mergePriorityQueueMetrics,
+} from './layout/priority-queue.ts';
 import { layoutTree, measureTree, mergeTreeMetrics } from './layout/tree.ts';
 
 const registry = {
@@ -98,6 +104,12 @@ const registry = {
     measure: measureHashTable,
     mergeMetrics: mergeHashTableMetrics,
     layout: layoutHashTable,
+  },
+  priorityQueue: {
+    ...priorityQueueKind,
+    measure: measurePriorityQueue,
+    mergeMetrics: mergePriorityQueueMetrics,
+    layout: layoutPriorityQueue,
   },
 } satisfies {
   // Fails to compile if the protocol has a kind without a runtime, or if a

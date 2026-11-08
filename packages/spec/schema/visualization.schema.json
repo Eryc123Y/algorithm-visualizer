@@ -109,11 +109,12 @@
                 "description": "Where the structure goes: \"main\" (default) with the main picture, or \"side\" for an auxiliary structure such as a queue, a call stack or a table of results. Side structures go right of the main ones in wide figures (slides, the player) and below them in narrow ones (notes)."
               },
               "view": {
-                "description": "How to draw the array: \"row\" (default) or \"tree\", a complete binary tree where index i has children 2i+1 and 2i+2, as for heaps.",
+                "description": "How to draw the array: \"row\" (default); \"tree\", a complete binary tree where index i has children 2i+1 and 2i+2; or \"heap\", that tree with the row under it, both drawn from the one array, as textbooks draw heaps.",
                 "type": "string",
                 "enum": [
                   "row",
-                  "tree"
+                  "tree",
+                  "heap"
                 ]
               },
               "initial": {
@@ -1084,6 +1085,86 @@
                 "buckets"
               ]
             }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "priorityQueue"
+              },
+              "label": {
+                "type": "string",
+                "maxLength": 2000
+              },
+              "place": {
+                "type": "string",
+                "enum": [
+                  "main",
+                  "side"
+                ],
+                "description": "Where the structure goes: \"main\" (default) with the main picture, or \"side\" for an auxiliary structure such as a queue, a call stack or a table of results. Side structures go right of the main ones in wide figures (slides, the player) and below them in narrow ones (notes)."
+              },
+              "order": {
+                "description": "\"min\" (default): the least key is at the front, as for EXTRACT-MIN; \"max\": the greatest.",
+                "type": "string",
+                "enum": [
+                  "min",
+                  "max"
+                ]
+              },
+              "initial": {
+                "maxItems": 1000,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                      "description": "Identifier of an element, unique within its structure and stable for the whole trace."
+                    },
+                    "value": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "maxLength": 2000
+                        },
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "A displayable value: number, string, boolean or null."
+                    },
+                    "key": {
+                      "description": "The priority: a number, or null for no key yet, drawn as ∞ (−∞ in a max-priority queue) and ordered after every number.",
+                      "type": [
+                        "number",
+                        "null"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "key"
+                  ],
+                  "additionalProperties": false,
+                  "description": "An item `{ \"value\", \"key\" }`, with an `id` to choose one (ids \"e0\", \"e1\", … are generated otherwise)."
+                },
+                "description": "Items in insertion order, which breaks ties between keys: [{ \"value\": \"A\", \"key\": 0 }, { \"value\": \"B\", \"key\": null }]; give \"id\" to choose an id."
+              }
+            },
+            "required": [
+              "kind",
+              "initial"
+            ],
+            "additionalProperties": false
           }
         ]
       },
@@ -3869,6 +3950,196 @@
                       },
                       "required": [
                         "type",
+                        "target"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "insert"
+                        },
+                        "element": {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string",
+                                  "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                                  "description": "Identifier of an element, unique within its structure and stable for the whole trace."
+                                },
+                                "value": {
+                                  "anyOf": [
+                                    {
+                                      "type": "number"
+                                    },
+                                    {
+                                      "type": "string",
+                                      "maxLength": 2000
+                                    },
+                                    {
+                                      "type": "boolean"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ],
+                                  "description": "A displayable value: number, string, boolean or null."
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "value"
+                              ],
+                              "additionalProperties": false,
+                              "description": "An element with an explicit id."
+                            },
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "type": "string",
+                                  "maxLength": 2000
+                                },
+                                {
+                                  "type": "boolean"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "description": "A displayable value: number, string, boolean or null."
+                            }
+                          ],
+                          "description": "An element `{ \"id\", \"value\" }`, or a bare value to get a generated id."
+                        },
+                        "key": {
+                          "description": "The priority: a number, or null for no key yet, drawn as ∞ (−∞ in a max-priority queue) and ordered after every number.",
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "target": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+                          "description": "Name of the structure this action applies to."
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "element",
+                        "key",
+                        "target"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "extract"
+                        },
+                        "target": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+                          "description": "Name of the structure this action applies to."
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "target"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "setKey"
+                        },
+                        "id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                          "description": "Identifier of an element, unique within its structure and stable for the whole trace."
+                        },
+                        "key": {
+                          "description": "The priority: a number, or null for no key yet, drawn as ∞ (−∞ in a max-priority queue) and ordered after every number.",
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "target": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+                          "description": "Name of the structure this action applies to."
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "id",
+                        "key",
+                        "target"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "peek"
+                        },
+                        "target": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+                          "description": "Name of the structure this action applies to."
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "target"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "highlight"
+                        },
+                        "ids": {
+                          "minItems": 1,
+                          "maxItems": 1000,
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                            "description": "Identifier of an element, unique within its structure and stable for the whole trace."
+                          }
+                        },
+                        "target": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+                          "description": "Name of the structure this action applies to."
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "ids",
                         "target"
                       ],
                       "additionalProperties": false

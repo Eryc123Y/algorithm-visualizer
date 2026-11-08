@@ -32,6 +32,7 @@ export * from './array-heap.ts';
 export * from './common.ts';
 export * from './edge-label.ts';
 export * from './linked-list.ts';
+export * from './priority-queue.ts';
 export * from './queue.ts';
 export * from './stack.ts';
 export * from './tree.ts';

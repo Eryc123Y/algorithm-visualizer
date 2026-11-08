@@ -1,0 +1,24 @@
+{
+  "description": "A key is a number or null.",
+  "input": {
+    "version": "0.4",
+    "structures": {
+      "Q": {
+        "kind": "priorityQueue",
+        "initial": [
+          {
+            "value": "A",
+            "key": "low"
+          }
+        ]
+      }
+    },
+    "steps": []
+  },
+  "expectedErrors": [
+    {
+      "code": "INVALID_SHAPE",
+      "path": "$.structures.Q.initial[0].key"
+    }
+  ]
+}

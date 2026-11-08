@@ -1,0 +1,169 @@
+{
+  "description": "A max-priority queue: extract takes the greatest key; a null key still comes last.",
+  "input": {
+    "version": "0.4",
+    "structures": {
+      "Q": {
+        "kind": "priorityQueue",
+        "order": "max",
+        "initial": [
+          {
+            "value": "x",
+            "key": null
+          },
+          {
+            "value": "y",
+            "key": 2
+          },
+          {
+            "value": "z",
+            "key": 5
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "Q",
+            "type": "extract"
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "Q",
+            "type": "setKey",
+            "id": "e0",
+            "key": 9
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "Q",
+            "type": "extract"
+          }
+        ]
+      }
+    ]
+  },
+  "expectedLength": 3,
+  "expectedFrames": [
+    {
+      "index": 0,
+      "state": {
+        "Q": {
+          "kind": "priorityQueue",
+          "state": {
+            "data": {
+              "order": "max",
+              "items": [
+                {
+                  "id": "e0",
+                  "value": "x",
+                  "key": null
+                },
+                {
+                  "id": "e1",
+                  "value": "y",
+                  "key": 2
+                },
+                {
+                  "id": "e2",
+                  "value": "z",
+                  "key": 5
+                }
+              ]
+            },
+            "marks": {
+              "highlight": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 1,
+      "state": {
+        "Q": {
+          "kind": "priorityQueue",
+          "state": {
+            "data": {
+              "order": "max",
+              "items": [
+                {
+                  "id": "e0",
+                  "value": "x",
+                  "key": null
+                },
+                {
+                  "id": "e1",
+                  "value": "y",
+                  "key": 2
+                }
+              ]
+            },
+            "marks": {
+              "highlight": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 2,
+      "state": {
+        "Q": {
+          "kind": "priorityQueue",
+          "state": {
+            "data": {
+              "order": "max",
+              "items": [
+                {
+                  "id": "e0",
+                  "value": "x",
+                  "key": 9
+                },
+                {
+                  "id": "e1",
+                  "value": "y",
+                  "key": 2
+                }
+              ]
+            },
+            "marks": {
+              "highlight": ["e0"]
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 3,
+      "state": {
+        "Q": {
+          "kind": "priorityQueue",
+          "state": {
+            "data": {
+              "order": "max",
+              "items": [
+                {
+                  "id": "e1",
+                  "value": "y",
+                  "key": 2
+                }
+              ]
+            },
+            "marks": {
+              "highlight": []
+            }
+          }
+        }
+      }
+    }
+  ]
+}

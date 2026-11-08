@@ -57,7 +57,7 @@ export const tools: readonly ToolDefinition[] = [
         .array(z.string())
         .optional()
         .describe(
-          'Structure kinds to include, e.g. ["array", "graph"]. Default: all of array, stack, queue, linkedList, tree, graph, table, hashTable.',
+          'Structure kinds to include, e.g. ["array", "graph"]. Default: all of array, stack, queue, linkedList, tree, graph, table, hashTable, priorityQueue.',
         ),
     }),
     run({ kinds }) {
