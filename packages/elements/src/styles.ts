@@ -95,7 +95,7 @@ export const playerStyles = css`
     background-size: 5px 5px;
     background-repeat: no-repeat;
     border: 1px solid var(--algo-border);
-    border-radius: 999px;
+    border-radius: var(--algo-control-radius);
     font: inherit;
     font-size: 12px;
     appearance: none;
@@ -113,7 +113,7 @@ export const playerStyles = css`
     max-height: 320px;
     overflow: auto;
     background: var(--algo-surface);
-    border-radius: 10px;
+    border-radius: var(--algo-panel-radius);
     font-family: var(--algo-mono);
     font-size: 12.5px;
     line-height: 1.7;
@@ -185,7 +185,7 @@ export const playerStyles = css`
   }
   .vars li {
     padding: 1px 8px;
-    border-radius: 999px;
+    border-radius: var(--algo-control-radius);
     background: var(--algo-surface);
     border: 1px solid var(--algo-border);
     font-family: var(--algo-mono);
@@ -208,7 +208,7 @@ export const playerStyles = css`
     color: var(--algo-fg);
     background: transparent;
     border: 1px solid var(--algo-border);
-    border-radius: 999px;
+    border-radius: var(--algo-control-radius);
     cursor: pointer;
   }
   button:hover:not(:disabled) {
@@ -314,7 +314,7 @@ export const playerStyles = css`
   .errors {
     padding: 12px 14px;
     border: 1px solid var(--algo-error);
-    border-radius: 10px;
+    border-radius: var(--algo-panel-radius);
     color: var(--algo-error);
   }
   .errors p {

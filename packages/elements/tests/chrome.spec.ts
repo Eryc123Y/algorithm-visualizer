@@ -8,6 +8,7 @@ import {
   chromeThemes,
   resolvePlayerTheme,
 } from '../src/chrome.ts';
+import { playerStyles } from '../src/styles.ts';
 
 /** WCAG relative luminance of a #rrggbb colour. */
 function luminance(hex: string): number {
@@ -67,9 +68,32 @@ describe.each(Object.entries(chromeThemes))('the %s chrome', (_, t) => {
       '--algo-mono',
       '--algo-code-keyword',
       '--algo-code-comment',
+      '--algo-control-radius',
+      '--algo-panel-radius',
     ])
       expect(css).toContain(`${name}: `);
     expect(css).toContain(`color-scheme: ${t.scheme};`);
+  });
+});
+
+describe('radii (ADR 0031)', () => {
+  it('square themes have square controls and panels', () => {
+    for (const name of ['answer-sheet', 'turbo-c'] as const) {
+      expect(chromeThemes[name].controlRadius).toBe('0px');
+      expect(chromeThemes[name].panelRadius).toBe('0px');
+    }
+    expect(chromeThemes.light.controlRadius).toBe('999px');
+  });
+
+  it('every rounded control and panel of the player takes a token', () => {
+    const css = playerStyles.cssText;
+    // Radii come from tokens, except the display mode's, which has none.
+    const literal = [...css.matchAll(/border-radius:\s*([^;]+);/g)]
+      .map((m) => m[1]!.trim())
+      .filter((v) => !v.startsWith('var(--algo-') && v !== '0');
+    expect(literal).toEqual([]);
+    expect(css).toContain('var(--algo-control-radius)');
+    expect(css).toContain('var(--algo-panel-radius)');
   });
 });
 
