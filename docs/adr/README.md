@@ -34,5 +34,6 @@ Each file records one architectural decision: the context, what we decided, and 
 | [0028](0028-slides.md)                              | Slides step through a series, one overlay per frame                  | Accepted                            |
 | [0029](0029-auxiliary-structures.md)                | Figures place auxiliary structures beside the main one               | Accepted                            |
 | [0030](0030-built-in-themes.md)                     | Built-in themes are named and work in every output                   | Accepted                            |
+| [0031](0031-painter-fixes.md)                       | Marks, notes and pointer bands that read in every frame              | Accepted                            |
 
 Template: Status · Context · Decision · Consequences.
