@@ -8,7 +8,12 @@ import {
   type Scene,
   type SceneItem,
 } from '@algoviz/core';
-import { createTheme, lightTheme } from '@algoviz/svg';
+import {
+  createTheme,
+  lightTheme,
+  type SvgTheme,
+  type ThemeName,
+} from '@algoviz/svg';
 
 import { renderTikz, TIKZ_FORMAT } from '../src/index.ts';
 
@@ -70,14 +75,31 @@ const box = (
 describe('renderTikz', () => {
   it('calls \\algoviz@figure with the format, the canvas and the drawing', () => {
     const tikz = renderTikz(sceneOf(), { comments: ['Frame 3, relax#2.'] });
-    expect(tikz.split('\n').slice(0, 5)).toEqual([
+    expect(tikz.split('\n').slice(0, 6)).toEqual([
       `% algoviz figure for LaTeX, format ${TIKZ_FORMAT}: Test`,
       '% Frame 3, relax#2.',
       '% Draw it with \\algovizinput from the algoviz LaTeX package.',
       `\\algoviz@figure{${TIKZ_FORMAT}}{300}{200}{%`,
+      '\\algoviz@fonts{normal}{sf}%',
       '}{%',
     ]);
+    expect(TIKZ_FORMAT).toBe(2);
     expect(tikz.endsWith('}%\n')).toBe(true);
+  });
+
+  it('names the theme’s TeX families for values and labels (ADR 0030)', () => {
+    const fonts = (theme: ThemeName | SvgTheme) =>
+      /^\\algoviz@fonts\{(\w+)\}\{(\w+)\}%$/m
+        .exec(renderTikz(sceneOf(), { theme }))!
+        .slice(1);
+    expect(fonts('turbo-c')).toEqual(['tt', 'tt']);
+    expect(fonts('textbook')).toEqual(['rm', 'rm']);
+    expect(fonts('answer-sheet')).toEqual(['tt', 'sf']);
+    expect(fonts('print')).toEqual(['normal', 'sf']);
+    expect(fonts(createTheme('light', { tex: { value: 'tt' } }))).toEqual([
+      'tt',
+      'sf',
+    ]);
   });
 
   it('keeps comments on one line, so they cannot run anything', () => {

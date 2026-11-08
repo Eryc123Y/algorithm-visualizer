@@ -12,7 +12,12 @@ import { describe, expect, it } from 'vitest';
 
 import { layoutTrace, loadTrace, type Scene } from '@algoviz/core';
 import { algorithms, runAlgorithm } from '@algoviz/recipes';
-import { prepareFigures, renderSvg, type ThemeName } from '@algoviz/svg';
+import {
+  prepareFigures,
+  renderSvg,
+  themeNames,
+  type ThemeName,
+} from '@algoviz/svg';
 
 import { prepareTikzFigures, renderTikz } from '../src/index.ts';
 import {
@@ -22,7 +27,7 @@ import {
   wellFormedProblems,
 } from './check.ts';
 
-const THEMES: readonly ThemeName[] = ['light', 'dark', 'print'];
+const THEMES: readonly ThemeName[] = themeNames;
 
 /** Everything wrong with the TikZ figure of a scene, compared with its SVG. */
 function problems(scene: Scene, theme: ThemeName): string[] {

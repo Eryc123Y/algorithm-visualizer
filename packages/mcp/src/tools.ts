@@ -4,6 +4,7 @@
  */
 import { TOPICS } from '@algoviz/recipes';
 import { formatErrors, type Diagnostic } from '@algoviz/spec';
+import { themeNames, type ThemeName } from '@algoviz/svg';
 import { z } from 'zod';
 
 import { guide } from './guide.ts';
@@ -107,7 +108,12 @@ export const tools: readonly ToolDefinition[] = [
       frame: FrameSelectorArg.optional().describe(
         'Frame number (negative counts from the end) or a selector of one frame, e.g. "relax#2". Default -1.',
       ),
-      theme: z.enum(['light', 'dark']).optional().describe('Default "light".'),
+      theme: z
+        .enum(themeNames as [ThemeName, ...ThemeName[]])
+        .optional()
+        .describe(
+          `A built-in theme (${themeNames.join(', ')}). Default "light".`,
+        ),
       layout: z
         .enum(['wide', 'narrow'])
         .optional()

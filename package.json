@@ -48,6 +48,7 @@
     "lint-staged": "^16.4.0",
     "opentype.js": "^2.0.0",
     "prettier": "^3.9.9",
+    "subset-font": "^2.9.0",
     "tailwindcss": "^4.3.3",
     "typescript": "~6.0",
     "typescript-eslint": "^8.71.1",

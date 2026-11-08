@@ -90,8 +90,9 @@
 % ---------------------------------------------------------------------------
 
 \str_const:Nn \c__algoviz_version_str { 0.1.0 }
-% The version of the figure files that \algoviz@figure reads.
-\int_const:Nn \c__algoviz_format_int { 1 }
+% The version of the figure files that \algoviz@figure reads. Format 2
+% starts each figure's colours with \algoviz@fonts (ADR 0030).
+\int_const:Nn \c__algoviz_format_int { 2 }
 
 \tl_new:N \l__algoviz_command_tl
 \str_new:N \l__algoviz_cache_str
@@ -111,6 +112,12 @@
 \fp_new:N \l__algoviz_scale_fp
 \tl_new:N \l__algoviz_value_font_tl
 \tl_new:N \l__algoviz_label_font_tl
+% The families the figure's theme sets values and labels in (ADR 0030),
+% which \algoviz@fonts gives at the start of the figure's colours.
+\tl_new:N \l__algoviz_value_family_tl
+\tl_new:N \l__algoviz_label_family_tl
+\tl_set:Nn \l__algoviz_value_family_tl { normal }
+\tl_set:Nn \l__algoviz_label_family_tl { sf }
 
 % The slide of a series' first frame: + for Beamer's incremental count, as
 % <+> takes it, or a slide number, short enough for TeX's integers.
@@ -165,10 +172,11 @@
     height .initial:n = 0pt ,
     scale .fp_set:N = \l__algoviz_scale_fp ,
     scale .initial:n = 1 ,
+    % Empty: the family the figure's theme names.
     value~font .tl_set:N = \l__algoviz_value_font_tl ,
-    value~font .initial:n = \normalfont ,
+    value~font .initial:n = ,
     label~font .tl_set:N = \l__algoviz_label_font_tl ,
-    label~font .initial:n = \normalfont\sffamily ,
+    label~font .initial:n = ,
   }
 \ProcessKeyOptions [ algoviz ]
 
@@ -373,6 +381,30 @@
 \cs_new_protected:cpn { algoviz@color } #1#2
   { \definecolor { algoviz@c #1 } { HTML } {#2} }
 
+% The families of the figure's theme for values (#1) and labels (#2):
+% normal, rm, sf or tt. Local to the figure, like its colours.
+\cs_new_protected:cpn { algoviz@fonts } #1#2
+  {
+    \tl_set:Nn \l__algoviz_value_family_tl {#1}
+    \tl_set:Nn \l__algoviz_label_family_tl {#2}
+  }
+
+% The font of role #1 (value or label): its key, or the theme's family.
+\cs_new_protected:Npn \__algoviz_font:n #1
+  {
+    \tl_if_empty:cTF { l__algoviz_ #1 _font_tl }
+      {
+        \normalfont
+        \str_case_e:nn { \tl_use:c { l__algoviz_ #1 _family_tl } }
+          {
+            { rm } { \rmfamily }
+            { sf } { \sffamily }
+            { tt } { \ttfamily }
+          }
+      }
+      { \use:c { l__algoviz_ #1 _font_tl } }
+  }
+
 % #1 x,y  #2 alignment l|c|r  #3 size  #4 room (0 for none)  #5 value|label
 % #6 colour  #7 halo (colour,padding) or nothing  #8 text
 \cs_new_protected:cpn { algoviz@text } #1#2#3#4#5#6#7#8
@@ -391,7 +423,7 @@
   {
     \hbox_set:Nn \l__algoviz_text_box
       {
-        \use:c { l__algoviz_ #3 _font_tl }
+        \__algoviz_font:n {#3}
         % The size the font command left, whatever it is.
         \dim_gset:Nn \g__algoviz_size_dim { \f@size pt }
         \color {#4}
@@ -576,7 +608,11 @@
             Write~\iow_char:N\\\iow_char:N\#~inside~macro~definitions~and~
             Beamer~frames.
           }
-        { theme } { Themes~are~named~light,~dark~or~print. }
+        { theme }
+          {
+            Theme~names~are~written~in~lower~case~with~hyphens,~such~as~
+            light,~textbook~or~turbo-c.
+          }
         { algorithm~id } { Algorithm~ids~are~written~like~dijkstra~or~bst.delete. }
         { file~name }
           {

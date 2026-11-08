@@ -13,6 +13,7 @@ import { describe, expect, it } from 'vitest';
 
 import { selectFrame } from '@algoviz/core';
 import { findAlgorithm, runAlgorithm } from '@algoviz/recipes';
+import { themeNames } from '@algoviz/svg';
 
 import { main } from '../src/cli.ts';
 
@@ -158,6 +159,25 @@ describe('algoviz export', () => {
     ).toBe(0);
     expect(readFileSync(join(dark, 'bst-03.svg'), 'utf8')).not.toBe(
       readFileSync(join(light, 'bst-03.svg'), 'utf8'),
+    );
+  });
+
+  it('draws every built-in theme, as SVG and as TikZ (ADR 0030)', () => {
+    const svgs = new Set<string>();
+    for (const theme of themeNames) {
+      const out = outDir();
+      const args = ['--step', '3', '--theme', theme, '--out', out];
+      expect(run('export', bstFile, ...args).code).toBe(0);
+      expect(run('export', bstFile, ...args, '--format', 'tikz').code).toBe(0);
+      svgs.add(readFileSync(join(out, 'bst-03.svg'), 'utf8'));
+      const tikz = readFileSync(join(out, 'bst-03.tex'), 'utf8');
+      expect(tikz).toMatch(
+        /^\\algoviz@fonts\{(normal|rm|sf|tt)\}\{(normal|rm|sf|tt)\}%$/m,
+      );
+    }
+    expect(svgs.size).toBe(themeNames.length);
+    expect(run('render', bstFile, '--theme', 'turbo-c').out).toContain(
+      'DotGothic16',
     );
   });
 
@@ -370,9 +390,9 @@ describe('algoviz export --format tikz', () => {
     expect(files(out)).toEqual(['dijkstra-11.tex']);
     expect(result.out).toBe(`${join(out, 'dijkstra-11.tex')}  relax#3`);
     const tikz = readFileSync(join(out, 'dijkstra-11.tex'), 'utf8');
-    expect(tikz).toMatch(/^% algoviz figure for LaTeX, format 1: /);
+    expect(tikz).toMatch(/^% algoviz figure for LaTeX, format 2: /);
     expect(tikz).toContain('% Frame 11, relax#3.\n');
-    expect(tikz).toMatch(/^\\algoviz@figure\{1\}\{[\d.]+\}\{[\d.]+\}\{%$/m);
+    expect(tikz).toMatch(/^\\algoviz@figure\{2\}\{[\d.]+\}\{[\d.]+\}\{%$/m);
     expect(tikz.endsWith('}%\n')).toBe(true);
   });
 
@@ -414,7 +434,7 @@ describe('algoviz export --format tikz', () => {
         join(tikzOut, file.replace(/\.svg$/, '.tex')),
         'utf8',
       );
-      expect(tikz).toContain(`\\algoviz@figure{1}{${w}}{${h}}{%`);
+      expect(tikz).toContain(`\\algoviz@figure{2}{${w}}{${h}}{%`);
     }
   });
 

@@ -20,8 +20,9 @@ import { err, ok, type Diagnostic, type Result } from '@algoviz/spec';
 
 import { renderSvg } from './render.ts';
 import {
+  isThemeName,
   resolveTheme,
-  themes,
+  themeNames,
   type SvgTheme,
   type ThemeName,
 } from './theme.ts';
@@ -225,13 +226,13 @@ export function prepareScenes(
 ): Result<PreparedScenes, readonly Diagnostic[]> {
   // Callers from other languages, such as the Typst plugin, pass any text.
   const { theme, layout } = options;
-  if (typeof theme === 'string' && !Object.hasOwn(themes, theme))
+  if (typeof theme === 'string' && !isThemeName(theme))
     return err([
       {
         code: 'UNKNOWN_THEME',
         path: '$.theme',
         message: `No theme named ${JSON.stringify(theme)}`,
-        hint: `Themes: ${Object.keys(themes).join(', ')}.`,
+        hint: `Themes: ${themeNames.join(', ')}.`,
       },
     ]);
   if (layout !== undefined && !LAYOUTS.includes(layout))

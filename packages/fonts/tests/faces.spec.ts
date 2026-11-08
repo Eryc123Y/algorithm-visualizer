@@ -1,18 +1,34 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  dotGothic16Regular,
+  dotGothic16RegularOutlines,
   interSemiBold,
   interSemiBoldOutlines,
   jetbrainsMonoSemiBold,
   jetbrainsMonoSemiBoldOutlines,
+  lexendSemiBold,
+  lexendSemiBoldOutlines,
+  notoSansMonoSemiBold,
+  notoSansMonoSemiBoldOutlines,
+  notoSansSemiBold,
+  notoSansSemiBoldOutlines,
+  stixTwoTextSemiBold,
+  stixTwoTextSemiBoldOutlines,
   textWidth,
   type FontMetrics,
   type FontOutlines,
 } from '../src/index.ts';
 
-const faces: readonly (readonly [FontMetrics, FontOutlines])[] = [
-  [jetbrainsMonoSemiBold, jetbrainsMonoSemiBoldOutlines],
-  [interSemiBold, interSemiBoldOutlines],
+/** Each face, and the symbols of algorithm figures it has (ADR 0030). */
+const faces: readonly (readonly [FontMetrics, FontOutlines, string])[] = [
+  [jetbrainsMonoSemiBold, jetbrainsMonoSemiBoldOutlines, '∞≤≥≠←→×÷±−αβπ'],
+  [interSemiBold, interSemiBoldOutlines, '∞≤≥≠←→×÷±−αβπ'],
+  [stixTwoTextSemiBold, stixTwoTextSemiBoldOutlines, '×÷±−αβπ'],
+  [lexendSemiBold, lexendSemiBoldOutlines, '∞≤≥≠×÷±−π'],
+  [notoSansSemiBold, notoSansSemiBoldOutlines, '×÷±−αβπ'],
+  [notoSansMonoSemiBold, notoSansMonoSemiBoldOutlines, '×÷±−αβπ'],
+  [dotGothic16Regular, dotGothic16RegularOutlines, '∞←→×÷±−αβπ'],
 ];
 
 const ascii = Array.from({ length: 0x7f - 0x20 }, (_, k) => 0x20 + k);
@@ -52,7 +68,7 @@ function points(path: string): { x: number; y: number }[] {
   return out;
 }
 
-describe.each(faces)('%s', (metrics, outlines) => {
+describe.each(faces)('$0.id', (metrics, outlines, symbols) => {
   const advance = (cp: number) =>
     textWidth(String.fromCodePoint(cp), metrics) * metrics.unitsPerEm;
 
@@ -69,10 +85,14 @@ describe.each(faces)('%s', (metrics, outlines) => {
     }
   });
 
-  it('outlines the symbols of algorithm figures', () => {
+  it('outlines the symbols of algorithm figures that it has', () => {
     const outlined = new Set(outlines.glyphs.map(([cp]) => cp));
-    for (const char of '∞≤≥≠←→×÷±−αβπ')
+    for (const char of symbols)
       expect(outlined.has(char.codePointAt(0)!)).toBe(true);
+  });
+
+  it('declares the weight it was generated at', () => {
+    expect(metrics.weight).toBe(metrics.id.endsWith('-regular') ? 400 : 600);
   });
 
   it('measures every glyph it outlines with its own table', () => {
@@ -106,6 +126,16 @@ describe('the bundled faces', () => {
       expect(run).toEqual([run[0], expect.any(Number), 600]);
     expect(textWidth('0123456789', jetbrainsMonoSemiBold)).toBe(6);
     expect(textWidth('∞≤←', jetbrainsMonoSemiBold)).toBeCloseTo(1.8, 12);
+  });
+
+  it('Noto Sans Mono is monospace and DotGothic16 half-width', () => {
+    expect(textWidth('0123456789', notoSansMonoSemiBold)).toBe(6);
+    expect(textWidth('0123456789', dotGothic16Regular)).toBe(5);
+  });
+
+  it('STIX Two Text, Lexend and Noto Sans are proportional', () => {
+    for (const face of [stixTwoTextSemiBold, lexendSemiBold, notoSansSemiBold])
+      expect(textWidth('W', face)).toBeGreaterThan(2 * textWidth('i', face));
   });
 
   it('Inter is proportional', () => {

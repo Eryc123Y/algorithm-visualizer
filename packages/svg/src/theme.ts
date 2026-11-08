@@ -1,11 +1,14 @@
 /**
- * Visual themes for the SVG painter (ADR 0009). Scenes carry semantic roles;
- * a theme turns them into colours, strokes and fonts.
+ * Visual themes for the painters (ADR 0009, 0030). Scenes carry semantic
+ * roles; a theme turns them into colours, strokes and fonts.
  *
  * Every role is distinguishable without colour: compare has a heavy border,
  * swap a heavy dashed border, highlight a tinted fill, visited a dotted
- * border, and settled a solid fill with a check mark. This keeps figures readable in print, on
- * projectors and for colour-blind learners.
+ * border, and settled a solid fill with a check mark. This keeps figures
+ * readable in print, on projectors and for colour-blind learners.
+ *
+ * The built-in themes are in `themes/`, one file per direction, and are
+ * chosen by name in every output: the player, the CLI, MCP, Typst and LaTeX.
  */
 import {
   defaultFonts,
@@ -13,6 +16,12 @@ import {
   type ElementRole,
   type LayoutFonts,
 } from '@algoviz/core';
+
+import { answerSheetTheme } from './themes/answer-sheet.ts';
+import { blocksDarkTheme, blocksTheme } from './themes/blocks.ts';
+import { darkTheme, lightTheme, printTheme } from './themes/default.ts';
+import { textbookDarkTheme, textbookTheme } from './themes/textbook.ts';
+import { turboCTheme } from './themes/turbo-c.ts';
 
 export interface CellStyle {
   readonly fill: string;
@@ -22,6 +31,12 @@ export interface CellStyle {
   readonly dash: string | null;
   readonly text: string;
 }
+
+/**
+ * The family a LaTeX document sets a role's text in (ADR 0030): its normal
+ * font, or its serif, sans-serif or monospaced family.
+ */
+export type TexFamily = 'normal' | 'rm' | 'sf' | 'tt';
 
 export interface SvgTheme {
   /**
@@ -35,13 +50,22 @@ export interface SvgTheme {
     readonly label: string;
   };
   /**
-   * The faces the painter draws with. Lay scenes out with the same metrics
-   * (`LayoutOptions.fonts`), so text fits what layout measured (ADR 0024).
+   * The faces the painter draws with, at their own weights. Lay scenes out
+   * with the same metrics (`LayoutOptions.fonts`), so text fits what layout
+   * measured (ADR 0024).
    */
   readonly fontMetrics: LayoutFonts;
+  /**
+   * The family of the LaTeX document that TikZ figures set each role in,
+   * since they use the document's fonts (ADR 0027, 0030).
+   */
+  readonly tex: { readonly value: TexFamily; readonly label: TexFamily };
   /** Corner radius of cells. */
   readonly radius: number;
-  /** Fill behind the whole scene, or null for transparent. */
+  /**
+   * Fill behind the whole scene, or null for transparent. Themes with dark
+   * paper paint it, so their text stays legible on a white page.
+   */
   readonly background: string | null;
   /** Colour of the soft shadow under cells, or null for none. */
   readonly shadow: string | null;
@@ -68,7 +92,10 @@ export interface SvgTheme {
   /** Red–black tree node colours. */
   readonly rb: { readonly red: GroupStyle; readonly black: GroupStyle };
   readonly edge: Readonly<Record<EdgeRole, EdgeStyle>>;
-  /** Outline drawn behind edge labels so they stay legible over lines. */
+  /**
+   * Outline drawn behind edge labels so they stay legible over lines: the
+   * colour of the paper the theme is drawn on.
+   */
   readonly labelHalo: string;
 }
 
@@ -84,249 +111,42 @@ export interface EdgeStyle {
   readonly opacity: number;
 }
 
-const fonts = {
-  value:
-    "'JetBrains Mono', 'SFMono-Regular', ui-monospace, Menlo, Consolas, monospace",
-  label:
-    "'Inter', 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif",
+export {
+  answerSheetTheme,
+  blocksDarkTheme,
+  blocksTheme,
+  darkTheme,
+  lightTheme,
+  printTheme,
+  textbookDarkTheme,
+  textbookTheme,
+  turboCTheme,
 };
 
-export const lightTheme: SvgTheme = {
-  fonts,
-  fontMetrics: defaultFonts,
-  radius: 8,
-  background: null,
-  shadow: 'rgba(20, 45, 38, 0.10)',
-  title: '#1f2a26',
-  index: '#66736d',
-  pointer: { line: '#0f7b6c', fill: '#0f7b6c', text: '#ffffff' },
-  cell: {
-    visited: {
-      fill: '#f3f6f8',
-      stroke: '#7b8b94',
-      strokeWidth: 1.5,
-      dash: '2 2.5',
-      text: '#3d4a52',
-    },
-    default: {
-      fill: '#ffffff',
-      stroke: '#c9d3cf',
-      strokeWidth: 1.25,
-      dash: null,
-      text: '#1f2a26',
-    },
-    compare: {
-      fill: '#fff4dc',
-      stroke: '#d08a18',
-      strokeWidth: 2.5,
-      dash: null,
-      text: '#5c3b06',
-    },
-    swap: {
-      fill: '#ffebe4',
-      stroke: '#d4552b',
-      strokeWidth: 2.5,
-      dash: '5 3',
-      text: '#6b2410',
-    },
-    highlight: {
-      fill: '#e8efff',
-      stroke: '#4a74d9',
-      strokeWidth: 1.75,
-      dash: null,
-      text: '#1b3270',
-    },
-    settled: {
-      fill: '#2f7d4f',
-      stroke: '#2f7d4f',
-      strokeWidth: 1.25,
-      dash: null,
-      text: '#ffffff',
-    },
-  },
-  settledMark: '#ffffff',
-  groups: [
-    { fill: '#dbeafe', stroke: '#3b82f6', text: '#1e3a8a' },
-    { fill: '#fce7f3', stroke: '#db2777', text: '#831843' },
-    { fill: '#dcfce7', stroke: '#16a34a', text: '#14532d' },
-    { fill: '#fef3c7', stroke: '#d97706', text: '#78350f' },
-    { fill: '#ede9fe', stroke: '#7c3aed', text: '#4c1d95' },
-    { fill: '#cffafe', stroke: '#0891b2', text: '#164e63' },
-  ],
-  rb: {
-    red: { fill: '#d63c3c', stroke: '#a82525', text: '#ffffff' },
-    black: { fill: '#2b2f2d', stroke: '#111312', text: '#ffffff' },
-  },
-  edge: {
-    default: { stroke: '#9aa7a2', width: 1.75, opacity: 1 },
-    link: { stroke: '#6b7772', width: 1.5, opacity: 1 },
-    highlight: { stroke: '#d08a18', width: 3, opacity: 1 },
-    selected: { stroke: '#0f7b6c', width: 3.5, opacity: 1 },
-    rejected: { stroke: '#c9d3cf', width: 1.25, opacity: 0.6 },
-  },
-  labelHalo: '#ffffff',
-};
-
-export const darkTheme: SvgTheme = {
-  fonts,
-  fontMetrics: defaultFonts,
-  radius: 8,
-  background: null,
-  shadow: 'rgba(0, 0, 0, 0.35)',
-  title: '#e4ebe8',
-  index: '#7f8c87',
-  pointer: { line: '#4fc4b0', fill: '#4fc4b0', text: '#0d1a17' },
-  cell: {
-    visited: {
-      fill: '#1a2226',
-      stroke: '#7f939c',
-      strokeWidth: 1.5,
-      dash: '2 2.5',
-      text: '#cfd8dc',
-    },
-    default: {
-      fill: '#1c2522',
-      stroke: '#34433e',
-      strokeWidth: 1.25,
-      dash: null,
-      text: '#e4ebe8',
-    },
-    compare: {
-      fill: '#3b2c12',
-      stroke: '#e9a53a',
-      strokeWidth: 2.5,
-      dash: null,
-      text: '#fbe3b8',
-    },
-    swap: {
-      fill: '#3d1e15',
-      stroke: '#f07a52',
-      strokeWidth: 2.5,
-      dash: '5 3',
-      text: '#ffd6c8',
-    },
-    highlight: {
-      fill: '#1b2846',
-      stroke: '#7c9ef0',
-      strokeWidth: 1.75,
-      dash: null,
-      text: '#dbe5ff',
-    },
-    settled: {
-      fill: '#3f9a63',
-      stroke: '#3f9a63',
-      strokeWidth: 1.25,
-      dash: null,
-      text: '#0d1a13',
-    },
-  },
-  settledMark: '#0d1a13',
-  groups: [
-    { fill: '#1e3a5f', stroke: '#60a5fa', text: '#dbeafe' },
-    { fill: '#4a1d36', stroke: '#f472b6', text: '#fce7f3' },
-    { fill: '#173d26', stroke: '#4ade80', text: '#dcfce7' },
-    { fill: '#45330f', stroke: '#fbbf24', text: '#fef3c7' },
-    { fill: '#33215c', stroke: '#a78bfa', text: '#ede9fe' },
-    { fill: '#123d47', stroke: '#22d3ee', text: '#cffafe' },
-  ],
-  rb: {
-    red: { fill: '#c23535', stroke: '#ff8080', text: '#ffffff' },
-    black: { fill: '#0b0d0c', stroke: '#8a9590', text: '#ffffff' },
-  },
-  edge: {
-    default: { stroke: '#5f6f69', width: 1.75, opacity: 1 },
-    link: { stroke: '#8a9590', width: 1.5, opacity: 1 },
-    highlight: { stroke: '#e9a53a', width: 3, opacity: 1 },
-    selected: { stroke: '#4fc4b0', width: 3.5, opacity: 1 },
-    rejected: { stroke: '#34433e', width: 1.25, opacity: 0.7 },
-  },
-  labelHalo: '#151b19',
-};
-
-/** Greyscale theme for handouts, LaTeX and Typst documents. */
-export const printTheme: SvgTheme = {
-  fonts,
-  fontMetrics: defaultFonts,
-  radius: 4,
-  background: null,
-  shadow: null,
-  title: '#000000',
-  index: '#555555',
-  pointer: { line: '#000000', fill: '#000000', text: '#ffffff' },
-  cell: {
-    visited: {
-      fill: '#ffffff',
-      stroke: '#000000',
-      strokeWidth: 1,
-      dash: '1.5 2',
-      text: '#000000',
-    },
-    default: {
-      fill: '#ffffff',
-      stroke: '#555555',
-      strokeWidth: 1,
-      dash: null,
-      text: '#000000',
-    },
-    compare: {
-      fill: '#ffffff',
-      stroke: '#000000',
-      strokeWidth: 2.5,
-      dash: null,
-      text: '#000000',
-    },
-    swap: {
-      fill: '#ffffff',
-      stroke: '#000000',
-      strokeWidth: 2.5,
-      dash: '5 3',
-      text: '#000000',
-    },
-    highlight: {
-      fill: '#e4e4e4',
-      stroke: '#555555',
-      strokeWidth: 1,
-      dash: null,
-      text: '#000000',
-    },
-    settled: {
-      fill: '#3a3a3a',
-      stroke: '#3a3a3a',
-      strokeWidth: 1,
-      dash: null,
-      text: '#ffffff',
-    },
-  },
-  settledMark: '#ffffff',
-  groups: [
-    { fill: '#f2f2f2', stroke: '#555555', text: '#000000' },
-    { fill: '#d9d9d9', stroke: '#555555', text: '#000000' },
-    { fill: '#bfbfbf', stroke: '#555555', text: '#000000' },
-    { fill: '#a6a6a6', stroke: '#333333', text: '#000000' },
-    { fill: '#8c8c8c', stroke: '#333333', text: '#000000' },
-    { fill: '#737373', stroke: '#333333', text: '#ffffff' },
-  ],
-  rb: {
-    red: { fill: '#ffffff', stroke: '#000000', text: '#000000' },
-    black: { fill: '#222222', stroke: '#000000', text: '#ffffff' },
-  },
-  edge: {
-    default: { stroke: '#555555', width: 1.5, opacity: 1 },
-    link: { stroke: '#333333', width: 1.25, opacity: 1 },
-    highlight: { stroke: '#000000', width: 3, opacity: 1 },
-    selected: { stroke: '#000000', width: 4, opacity: 1 },
-    rejected: { stroke: '#bbbbbb', width: 1, opacity: 1 },
-  },
-  labelHalo: '#ffffff',
-};
-
+/** The built-in themes by name (ADR 0030). `light` is the default. */
 export const themes = {
   light: lightTheme,
   dark: darkTheme,
   print: printTheme,
-} as const;
+  textbook: textbookTheme,
+  'textbook-dark': textbookDarkTheme,
+  blocks: blocksTheme,
+  'blocks-dark': blocksDarkTheme,
+  'answer-sheet': answerSheetTheme,
+  'turbo-c': turboCTheme,
+} as const satisfies Record<string, SvgTheme>;
 
 export type ThemeName = keyof typeof themes;
+
+/** The names of the built-in themes, in the order they are listed. */
+export const themeNames = Object.keys(themes) as readonly ThemeName[];
+
+/** Whether `name` is a built-in theme's name. */
+export const isThemeName = (name: string): name is ThemeName =>
+  Object.hasOwn(themes, name);
+
+/** The families of themes made before themes named them (ADR 0027). */
+const DEFAULT_TEX: SvgTheme['tex'] = { value: 'normal', label: 'sf' };
 
 /**
  * Every property optional, recursively. Strings, numbers and null are leaves
@@ -359,7 +179,7 @@ function deepMerge<T>(base: T, overrides: DeepPartial<T>): T {
 
 /**
  * Derives a theme from a base theme and partial overrides, e.g.
- * `createTheme(lightTheme, { cell: { compare: { stroke: '#c00' } } })`.
+ * `createTheme('textbook', { cell: { compare: { stroke: '#c00' } } })`.
  */
 export function createTheme(
   base: SvgTheme | ThemeName,
@@ -379,11 +199,16 @@ export function createTheme(
 /**
  * A theme by name, or a theme object. A theme object made before themes
  * had `fontMetrics` gets the default faces, which its fonts were meant to
- * match.
+ * match, and one made before `tex` gets the families of ADR 0027.
  */
 export function resolveTheme(theme: SvgTheme | ThemeName = 'light'): SvgTheme {
   if (typeof theme === 'string') return themes[theme];
-  return (theme.fontMetrics as LayoutFonts | undefined) === undefined
-    ? { ...theme, fontMetrics: defaultFonts }
-    : theme;
+  const partial = theme as Partial<SvgTheme>;
+  if (partial.fontMetrics !== undefined && partial.tex !== undefined)
+    return theme;
+  return {
+    ...theme,
+    fontMetrics: partial.fontMetrics ?? defaultFonts,
+    tex: partial.tex ?? DEFAULT_TEX,
+  };
 }

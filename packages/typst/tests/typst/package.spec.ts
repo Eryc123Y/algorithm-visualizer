@@ -11,7 +11,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { algorithms, runAlgorithm } from '@algoviz/recipes';
 import type { Diagnostic } from '@algoviz/spec';
-import { exportFigures } from '@algoviz/svg';
+import { exportFigures, themeNames } from '@algoviz/svg';
 
 import { instantiatePlugin } from '../../scripts/host.ts';
 import {
@@ -106,14 +106,11 @@ describe('the examples', () => {
 
 describe('figures in Typst', () => {
   it('are the SVG of exportFigures for every registry example', () => {
-    const cases = algorithms.flatMap((a) =>
-      a.examples.map((input, k) => ({
-        algorithm: a.id,
-        input,
-        // Every theme, spread over the examples.
-        theme: (['light', 'dark', 'print'] as const)[k % 3]!,
-      })),
-    );
+    const cases = algorithms
+      .flatMap((a) => a.examples.map((input) => ({ algorithm: a.id, input })))
+      // Every theme, spread over the examples.
+      .map((c, k) => ({ ...c, theme: themeNames[k % themeNames.length]! }));
+    expect(new Set(cases.map((c) => c.theme))).toEqual(new Set(themeNames));
     writeFileSync(join(root, 'cases.json'), JSON.stringify(cases));
     const svg = evaluate(
       'json("/cases.json").map(c => algoviz-figures(c.algorithm, c.input, theme: c.theme).figures.map(f => f.svg))',

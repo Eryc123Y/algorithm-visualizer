@@ -76,6 +76,13 @@ export { num } from './format.ts';
 /** Baseline offset that vertically centres text of this size. */
 const baselineOffset = (fontSize: number) => fontSize * 0.35;
 
+/**
+ * The weight of a role's text: its face's own (ADR 0030), so a face with one
+ * weight is drawn as designed and never made bold by the renderer.
+ */
+const weight = (t: SvgTheme, role: 'value' | 'label' = 'value'): string =>
+  String(t.fontMetrics[role].weight);
+
 const ARROW_HEAD_LENGTH = 6;
 const ARROW_HEAD_HALF_WIDTH = 4;
 
@@ -157,7 +164,7 @@ function paintBox(b: SceneBox, t: SvgTheme): SvgNode {
       y: num(b.height / 2 + baselineOffset(b.fontSize)),
       'text-anchor': 'middle',
       'font-size': num(b.fontSize),
-      'font-weight': '600',
+      'font-weight': weight(t),
       fill: c.text,
     },
     text: b.text,
@@ -222,7 +229,7 @@ function paintNode(n: SceneNode, t: SvgTheme): SvgNode {
       y: num(baselineOffset(n.fontSize)),
       'text-anchor': 'middle',
       'font-size': num(n.fontSize),
-      'font-weight': '600',
+      'font-weight': weight(t),
       fill: c.text,
     },
     text: n.text,
@@ -245,7 +252,7 @@ function paintNode(n: SceneNode, t: SvgTheme): SvgNode {
         y: num(dy * reach + baselineOffset(fontSize)),
         'text-anchor': 'middle',
         'font-size': num(fontSize),
-        'font-weight': '600',
+        'font-weight': weight(t),
         fill: t.index,
         stroke: t.labelHalo,
         'stroke-width': '3',
@@ -446,7 +453,7 @@ function edgeLabel(e: SceneEdge, t: SvgTheme): SvgNode {
       y: num(baselineOffset(e.fontSize)),
       'text-anchor': 'middle',
       'font-size': num(e.fontSize),
-      'font-weight': '600',
+      'font-weight': weight(t),
       fill: t.title,
       stroke: t.labelHalo,
       'stroke-width': '3.5',
@@ -462,14 +469,18 @@ function paintText(x: SceneText, t: SvgTheme): SvgNode {
     x.role === 'title'
       ? {
           'font-family': t.fonts.label,
-          'font-weight': '600',
+          'font-weight': weight(t, 'label'),
           'letter-spacing': `${TITLE_TRACKING}em`,
           fill: t.title,
         }
       : x.role === 'label'
-        ? { 'font-family': t.fonts.label, 'font-weight': '600', fill: t.index }
+        ? {
+            'font-family': t.fonts.label,
+            'font-weight': weight(t, 'label'),
+            fill: t.index,
+          }
         : // One weight per font role, as the bundled faces have (ADR 0024).
-          { 'font-weight': '600', fill: t.index };
+          { 'font-weight': weight(t), fill: t.index };
   return {
     tag: 'text',
     attrs: {
@@ -505,7 +516,7 @@ function paintBadge(b: SceneBadge, t: SvgTheme): SvgNode {
           y: num(baselineOffset(b.fontSize)),
           'text-anchor': 'middle',
           'font-size': num(b.fontSize),
-          'font-weight': '600',
+          'font-weight': weight(t),
           fill: t.pointer.text,
         },
         text: b.text,

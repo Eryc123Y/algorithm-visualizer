@@ -13,6 +13,7 @@ import {
   prepareScenes,
   renderSeries,
   renderSvg,
+  themeNames,
   type Figure,
 } from '../src/index.ts';
 
@@ -163,7 +164,7 @@ describe('exportFigures', () => {
           code: 'UNKNOWN_THEME',
           path: '$.theme',
           message: 'No theme named "neon"',
-          hint: 'Themes: light, dark, print.',
+          hint: `Themes: ${themeNames.join(', ')}.`,
         },
       ],
     });

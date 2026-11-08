@@ -15,6 +15,8 @@ import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
+import { themeNames } from '@algoviz/svg';
+
 import {
   cached,
   calls,
@@ -311,6 +313,41 @@ describe('the package', () => {
       "Package algoviz Error: The command 'algoviz-that-is-not-installed' made no figure.",
     );
     expect(pdfText(join(dir, 'missing.pdf'))).toContain('Is it installed?');
+  });
+
+  it('draws every built-in theme in the families it names (ADR 0030)', () => {
+    const dir = workspace();
+    const figure = (theme: string) =>
+      `\\algoviz[theme=${theme}, step=3]{bubble-sort}{"values": [3, 1, 2]}`;
+    const file = document(dir, 'themes', themeNames.map(figure).join('\n\n'));
+    for (const engine of ['pdflatex', 'lualatex', 'xelatex'] as const)
+      expect(
+        errors(tex(dir, file, 'unrestricted', '', engine)),
+        engine,
+      ).toEqual([]);
+    // One call per theme; the second and third engines read the cache.
+    expect(calls(dir)).toHaveLength(themeNames.length);
+    const fonts = (name: string, body: string) => {
+      const one = document(dir, name, body);
+      expect(errors(tex(dir, one, 'unrestricted'))).toEqual([]);
+      return spawnSync('pdffonts', [join(dir, `${name}.pdf`)], {
+        encoding: 'utf8',
+      }).stdout;
+    };
+    // Turbo C sets everything in the typewriter family, blocks in sans.
+    const typewriter = fonts('turbo-c', figure('turbo-c'));
+    expect(typewriter).toMatch(/LMMono|CMTT|lmmono/i);
+    expect(typewriter).not.toMatch(/LMSans|CMSS|lmsans/i);
+    const sans = fonts('blocks', figure('blocks'));
+    expect(sans).toMatch(/LMSans|CMSS|lmsans/i);
+    expect(sans).not.toMatch(/LMMono|CMTT|lmmono/i);
+    // A font key still overrides the theme's family.
+    expect(
+      fonts(
+        'override',
+        `\\algovizset{value font=\\sffamily, label font=\\sffamily}\n${figure('turbo-c')}`,
+      ),
+    ).not.toMatch(/LMMono|CMTT|lmmono/i);
   });
 
   it('runs every engine on a document with characters outside ASCII', () => {
