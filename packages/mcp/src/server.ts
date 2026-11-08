@@ -13,8 +13,9 @@ import { z } from 'zod';
 
 import { guide, guideSection } from './guide.ts';
 import { SERVER_INSTRUCTIONS, visualizeRequest } from './instructions.ts';
-import { PLAYER_URI, playerHtml, show } from './show.ts';
-import { Document, FrameSelectorArg, tools } from './tools.ts';
+import { PLAYER_URI, playerHtml, showSource } from './show.ts';
+import { sourceArgs } from './source.ts';
+import { FrameSelectorArg, tools } from './tools.ts';
 
 export const SERVER_NAME = 'algoviz';
 export const SERVER_VERSION = '0.0.0';
@@ -56,9 +57,9 @@ export function createServer(): McpServer {
     {
       title: 'Show to the user',
       description:
-        'Shows a valid document to the user as an interactive player in the conversation, with play, step and seek controls. Use it once the document validates and does what you meant. Hosts without MCP Apps only get the text result, so also give the user the document or a link if they need it.',
+        'Shows a valid document to the user as an interactive player in the conversation, with play, step and seek controls. Use it once the document validates and does what you meant. For a recipe, give the recipe and its input instead of a document, such as recipe "dijkstra" with input "A-B 4, B-C 1, A-C 7": there is no need to run it first. Hosts without MCP Apps only get the text result, so also give the user the document or a link if they need it.',
       inputSchema: z.strictObject({
-        document: Document,
+        ...sourceArgs,
         frame: FrameSelectorArg.optional().describe(
           'The frame to open on: 0 (default) is the initial state, -1 the last; or a selector of one frame, such as "relax#2" or "insert-5/go".',
         ),
@@ -66,8 +67,8 @@ export function createServer(): McpServer {
       annotations: readOnly,
       _meta: { ui: { resourceUri: PLAYER_URI } },
     },
-    ({ document, frame }) => {
-      const result = show(document, frame);
+    ({ frame, ...source }) => {
+      const result = showSource(source, frame);
       return result.ok
         ? {
             content: [{ type: 'text', text: result.text }],

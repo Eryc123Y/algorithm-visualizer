@@ -10,11 +10,14 @@
  *   algoviz export <file> [--step s …] [--theme t] [--layout l] [--format svg|tikz]
  *                  [--one-file] [--out dir] [--name pattern]
  *                  [--error-file file]
- *   algoviz export <id> --input <json|file> [the same options]
+ *   algoviz export <id> --input <input|file> [the same options]
  *   algoviz export <id> --input-hex <hex> [the same options]
  *
  *   algoviz recipes
- *   algoviz run <id> <input-json> [--out doc.json]
+ *   algoviz run <id> [input] [--out doc.json]
+ *
+ * An input is JSON, a JSON object without its braces, or a notation such
+ * as "5 2 4 6 1 3" or "A-B 4, B-C 2" (ADR 0032).
  *
  * A frame is a number (negative counts from the end) or a selector such as
  * "relax#2", "insert-5/go" or "insert-5" (ADR 0020).
@@ -31,7 +34,7 @@ import {
 import { basename, dirname, extname, join } from 'node:path';
 
 import type { FigureLayout } from '@algoviz/core';
-import { runAlgorithm } from '@algoviz/recipes';
+import { readInput, runAlgorithm } from '@algoviz/recipes';
 import { formatErrors, ok, type Diagnostic, type Result } from '@algoviz/spec';
 import {
   exportFigures,
@@ -63,12 +66,18 @@ const USAGE = `Usage:
                  [--out dir]
                  [--name pattern] [--error-file file]
                                          Write frames as SVG or TikZ figures
-  algoviz export <id> --input <json|file> [the same options]
+  algoviz export <id> --input <input|file> [the same options]
                                          Run an algorithm, then export
   algoviz recipes                        List ready-made visualizations
-  algoviz run <id> <input-json> [--out file.json]
-                                         Run one, e.g. run bst.delete
-                                         '{"from": [8, 3, 10], "key": 3}'
+  algoviz run <id> [input] [--out file.json]
+                                         Run one, e.g. run dijkstra
+                                         'A-B 4, B-C 1, A-C 7'
+
+An input is JSON, a JSON object without its outer braces, or a notation:
+a list "5 2 4 6 1 3", a graph "A-B 4, B-C 2" ("->" for directed edges),
+or operations "insert 4, delete 3". An input may be its main field alone,
+such as a sort's values or a graph algorithm's graph, and without one an
+algorithm runs on its first example. --input also takes a file.
 
 A frame is a number (0 the start, -1 the last), a step such as "relax#2"
 or "insert-5/relax", a section such as "insert-5", or a range "a..b".
@@ -208,16 +217,21 @@ export function fromHex(hex: string): string {
   }
 }
 
-/** The input given with `--input` or `--input-hex`, as JSON text. */
+/**
+ * The text of the input given with `--input` or `--input-hex` (ADR 0032):
+ * the argument itself if it starts with { or [; a file's if it names one,
+ * as "-" and names ending in .json always do; else the argument.
+ */
 function inputText(values: Options): string {
   if (values.inputHex !== undefined) return fromHex(values.inputHex);
   const input = values.input!;
-  return /^\s*[[{]/.test(input)
-    ? input
-    : readText(
-        input,
-        '\n--input takes JSON text that starts with { or [, or a JSON file.',
-      );
+  if (/^\s*[[{]/.test(input)) return input;
+  if (input === '-' || /\.json$/i.test(input)) return readText(input);
+  try {
+    return readFileSync(input, 'utf8');
+  } catch {
+    return input;
+  }
 }
 
 /** The document to export: a file's, or an algorithm's run on its input. */
@@ -232,16 +246,9 @@ function exportSource(
         '\nTo run an algorithm, name its input with --input <json|file>.',
       ),
     );
-  const text = inputText(values);
-  let value: unknown;
-  try {
-    value = JSON.parse(text) as unknown;
-  } catch (e) {
-    throw new UsageError(
-      `The input is not JSON: ${e instanceof Error ? e.message : String(e)}`,
-    );
-  }
-  const run = runAlgorithm(source, value);
+  const value = readInput(inputText(values));
+  if (!value.ok) return value;
+  const run = runAlgorithm(source, value.value);
   return run.ok ? ok(run.value.document) : run;
 }
 
@@ -409,13 +416,11 @@ function dispatch(
     case 'recipes':
       return callTool('algoviz_list_recipes', {});
     case 'run': {
-      const [id, input] = rest;
-      if (id === undefined || input === undefined)
-        throw new UsageError(`${command} needs an id and an input`);
-      return callTool('algoviz_run_recipe', {
-        id,
-        input: JSON.parse(input) as unknown,
-      });
+      const [id, text] = rest;
+      if (id === undefined) throw new UsageError(`${command} needs an id`);
+      const input = readInput(text ?? '');
+      if (!input.ok) return failure(input.error);
+      return callTool('algoviz_run_recipe', { id, input: input.value });
     }
     default:
       throw new UsageError(`Unknown command "${command}"`);

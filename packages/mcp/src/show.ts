@@ -8,6 +8,7 @@ import { readFileSync } from 'node:fs';
 import { formatErrors } from '@algoviz/spec';
 
 import { loadDocument, resolveFrame, type FrameSelector } from './document.ts';
+import { sourceOf, type SourceArgs } from './source.ts';
 import { formatReport, validate } from './validate.ts';
 
 export const PLAYER_URI = 'ui://algoviz/player.html';
@@ -22,6 +23,17 @@ export interface ShowContent {
 export type ShowResult =
   | { readonly ok: true; readonly text: string; readonly content: ShowContent }
   | { readonly ok: false; readonly text: string };
+
+/** Shows a document, or a recipe run on its input (ADR 0032). */
+export function showSource(
+  source: SourceArgs,
+  frame: FrameSelector = 0,
+): ShowResult {
+  const document = sourceOf(source);
+  return document.ok
+    ? show(document.value, frame)
+    : { ok: false, text: formatErrors(document.error) };
+}
 
 /** Checks a document and opens it at `frame`, a number or a selector. */
 export function show(input: unknown, frame: FrameSelector = 0): ShowResult {

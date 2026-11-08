@@ -49,6 +49,7 @@ export const topologicalSort = defineAlgorithm({
   input: z.strictObject({
     graph: Graph.describe('A graph whose edges are taken as directed.'),
   }),
+  main: 'graph',
   examples: [{ graph: CLOTHES }],
   code: {
     pseudocode: `

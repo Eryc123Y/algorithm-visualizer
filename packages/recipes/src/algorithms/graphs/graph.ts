@@ -7,6 +7,8 @@
 import type { GraphDeclInput } from '@algoviz/spec';
 import { z } from 'zod';
 
+import { graphField } from '../../notation/schema.ts';
+
 /** Most nodes and edges a graph has, so it fits on one screen. */
 export const MAX_NODES = 40;
 export const MAX_EDGES = 200;
@@ -22,8 +24,8 @@ export interface GraphInput {
   readonly directed?: boolean;
 }
 
-/** The input graph of every graph module. */
-export const Graph = z
+/** The structured form of an input graph. */
+const GraphObject = z
   .strictObject({
     nodes: z
       .array(z.string())
@@ -48,6 +50,16 @@ export const Graph = z
     directed: z.boolean().optional().describe('Default false.'),
   })
   .describe('A graph.');
+
+/**
+ * The input graph of every graph module: its structured form, or the edge
+ * list notation (ADR 0032).
+ */
+export const Graph = graphField(GraphObject, {
+  maxNodes: MAX_NODES,
+  maxEdges: MAX_EDGES,
+  maxWeight: MAX_WEIGHT,
+});
 
 /** Node names become ids, so they must be short and use id characters. */
 const NODE_NAME = /^[A-Za-z0-9_.:-]{1,24}$/;
@@ -86,6 +98,16 @@ export function graphOf(input: z.output<typeof Graph>): GraphInput {
 export function checkNode(g: GraphInput, node: string): void {
   if (!g.nodes.includes(node))
     throw new RangeError(`"${node}" is not a node of the graph`);
+}
+
+/**
+ * The node to start from: `node` if given, checked, or else the first
+ * node (ADR 0032).
+ */
+export function startOf(g: GraphInput, node: string | undefined): string {
+  if (node === undefined) return g.nodes[0]!;
+  checkNode(g, node);
+  return node;
 }
 
 /**

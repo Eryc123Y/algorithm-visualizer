@@ -7,7 +7,6 @@
 import { loadTrace } from '@algoviz/core';
 import {
   err,
-  fromZodIssues,
   ok,
   type Diagnostic,
   type Result,
@@ -15,6 +14,7 @@ import {
 } from '@algoviz/spec';
 
 import { sourcesOf, type Algorithm, type OpResult } from './algorithm.ts';
+import { inputDiagnostics } from './notation/issues.ts';
 import { Recorder } from './recorder.ts';
 import { recordingTrace } from './trace.ts';
 
@@ -28,20 +28,22 @@ export interface AlgorithmRun {
 }
 
 /**
- * Runs `algorithm` on `input`. Errors are diagnostics:
+ * Runs `algorithm` on `input`, or on its first example if `input` is
+ * undefined (ADR 0032). Errors are diagnostics:
  * - `INVALID_SHAPE` for an input its schema rejects, at a path under
- *   `$.input`;
+ *   `$.input`, and `INVALID_NOTATION` for a notation it cannot read;
  * - `INVALID_ARGUMENT` at `$.input` for an input it cannot show, such as a
  *   pop from an empty heap;
  * - the engine's errors if the document does not replay.
  */
 export function runModule<I>(
   algorithm: Algorithm<I>,
-  input: unknown,
+  input?: unknown,
 ): Result<AlgorithmRun, readonly Diagnostic[]> {
-  const parsed = algorithm.input.safeParse(input);
-  if (!parsed.success)
-    return err(fromZodIssues(parsed.error.issues, ['input'], 'INVALID_SHAPE'));
+  const parsed = algorithm.input.safeParse(
+    input === undefined ? algorithm.examples[0] : input,
+  );
+  if (!parsed.success) return err(inputDiagnostics(parsed.error.issues));
   let run: AlgorithmRun;
   try {
     run = record(algorithm, parsed.data);

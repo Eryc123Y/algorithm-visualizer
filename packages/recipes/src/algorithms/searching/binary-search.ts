@@ -6,6 +6,7 @@
 import { z } from 'zod';
 
 import { defineAlgorithm } from '../../algorithm.ts';
+import { listField } from '../../notation/schema.ts';
 
 /** Most values binary search takes, so every step stays readable. */
 export const MAX_SEARCHED = 32;
@@ -26,11 +27,14 @@ export const binarySearch = defineAlgorithm({
   summary:
     'Finds a value in a sorted array by looking at the middle of the range left and halving it.',
   input: z.strictObject({
-    values: z
-      .array(z.number())
-      .min(1)
-      .max(MAX_SEARCHED)
-      .describe('Sorted numbers, e.g. [1, 3, 4, 7, 9, 11, 15].'),
+    values: listField(
+      z
+        .array(z.number())
+        .min(1)
+        .max(MAX_SEARCHED)
+        .describe('Sorted numbers, e.g. [1, 3, 4, 7, 9, 11, 15].'),
+      'number',
+    ),
     target: z.number().describe('The value to find.'),
   }),
   examples: [

@@ -134,7 +134,7 @@ describe('runModule', () => {
       ok: false,
       error: [{ code: 'INVALID_SHAPE', path: '$.input.values' }],
     });
-    expect(runModule(swap, undefined)).toMatchObject({
+    expect(runModule(swap, null)).toMatchObject({
       ok: false,
       error: [{ code: 'INVALID_SHAPE', path: '$.input' }],
     });

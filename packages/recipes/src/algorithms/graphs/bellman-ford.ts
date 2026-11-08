@@ -9,7 +9,7 @@ import { z } from 'zod';
 
 import { defineAlgorithm } from '../../algorithm.ts';
 import {
-  checkNode,
+  startOf,
   declareGraph,
   edgeIds,
   Graph,
@@ -27,8 +27,14 @@ export const bellmanFord = defineAlgorithm({
     'Finds shortest paths from a source even with negative weights, relaxing every edge |V| − 1 times, and reports a negative cycle.',
   input: z.strictObject({
     graph: Graph.describe('A graph whose edges are taken as directed.'),
-    source: z.string().describe('The node to measure distances from.'),
+    source: z
+      .string()
+      .optional()
+      .describe(
+        'The node to measure distances from; by default the first node.',
+      ),
   }),
+  main: 'graph',
   examples: [
     {
       graph: {
@@ -78,8 +84,7 @@ export const bellmanFord = defineAlgorithm({
   },
   run(input, trace) {
     const g: GraphInput = { ...graphOf(input.graph), directed: true };
-    const s = input.source;
-    checkNode(g, s);
+    const s = startOf(g, input.source);
     const graph = trace.add('g', declareGraph(g, true));
     const ids = edgeIds(g);
     const d = new Map(g.nodes.map((v) => [v, v === s ? 0 : Infinity]));

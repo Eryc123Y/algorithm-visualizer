@@ -24,6 +24,7 @@ import {
   silentTrace,
   type Trace,
 } from '../../trace.ts';
+import { listField } from '../../notation/schema.ts';
 
 /** Most elements a forest has, so it fits on one screen. */
 export const MAX_ELEMENTS = 16;
@@ -220,16 +221,22 @@ const From = z.union(
         .describe('Pairs to unite first, e.g. [[0, 1], [2, 3]].'),
     }),
     z.strictObject({
-      parent: z
-        .array(Element)
-        .min(1)
-        .max(MAX_ELEMENTS)
-        .describe('The parent of each element; a root is its own parent.'),
-      rank: z
-        .array(z.int().min(0).max(MAX_ELEMENTS))
-        .min(1)
-        .max(MAX_ELEMENTS)
-        .describe('The rank of each element.'),
+      parent: listField(
+        z
+          .array(Element)
+          .min(1)
+          .max(MAX_ELEMENTS)
+          .describe('The parent of each element; a root is its own parent.'),
+        'number',
+      ),
+      rank: listField(
+        z
+          .array(z.int().min(0).max(MAX_ELEMENTS))
+          .min(1)
+          .max(MAX_ELEMENTS)
+          .describe('The rank of each element.'),
+        'number',
+      ),
     }),
   ],
   {

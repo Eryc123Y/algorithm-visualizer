@@ -2,6 +2,17 @@
 
 An algoviz document is JSON that describes a step-by-step visualization of an algorithm: the data structures involved, and a timeline of steps that change them. A player shows one frame per step, with the narration and the current source line.
 
+## Recipes first
+
+A recipe from `algoviz_list_recipes` covers most classic algorithms and single operations on data structures. When one matches the request, don't write a document: run the recipe, or show and draw it by name, with its input written short.
+
+- A list: `"5 2 4 6 1 3"`, or `"[4, 2, 6, null, 7]"` for a tree in level order.
+- A graph: `"A-B 4, B-C 2, A-C 7"`. `-` is an undirected edge and `->` a directed one, a number after a space is the weight, and a name alone is a node with no edges.
+- Operations on a data structure: `"insert 4, delete 3"`, each with its arguments in order.
+- An input with one needed field may be that field alone, such as the graph for `"dijkstra"`, which then starts at the first node; give `{ "graph": "…", "source": "C" }` to start elsewhere. Without an input, a recipe runs on its first example.
+
+`algoviz_show` with `{ "recipe": "dijkstra", "input": "A-B 4, B-C 1, A-C 7" }` shows the run to the user without a document to copy; `algoviz_render` and `algoviz_inspect` take `recipe` and `input` the same way. A notation error quotes the token and its position, such as `INVALID_NOTATION at $.input.graph: Expected a weight or "," after "B-C", not "x" (character 12)`.
+
 ## Document
 
 ```json

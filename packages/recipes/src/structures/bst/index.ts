@@ -18,6 +18,7 @@ import {
   type Applied,
 } from '../../structure.ts';
 import { silentHandle, silentTrace, type Trace } from '../../trace.ts';
+import { listField } from '../../notation/schema.ts';
 
 interface BstNode {
   readonly key: number;
@@ -424,12 +425,15 @@ export const bst = defineStructure<BstState, From, 'tree'>({
     'Searches, inserts and deletes keys one after another in a binary search tree.',
   name: 'bst',
   kind: 'tree',
-  from: z
-    .array(z.number())
-    .max(MAX_SIZE)
-    .describe(
-      'Keys in insertion order that build the starting tree, e.g. [8, 3, 10, 1, 6].',
-    ),
+  from: listField(
+    z
+      .array(z.number())
+      .max(MAX_SIZE)
+      .describe(
+        'Keys in insertion order that build the starting tree, e.g. [8, 3, 10, 1, 6].',
+      ),
+    'number',
+  ),
   examples: [
     {
       from: [8, 3, 10, 1, 6, 14],

@@ -14,6 +14,7 @@ export const insertionSort = defineAlgorithm({
   summary:
     'Grows a sorted prefix by lifting out the next value, shifting larger ones right, and dropping it into the gap.',
   input: SortInput,
+  main: 'values',
   examples: [SAMPLE],
   code: {
     pseudocode: `

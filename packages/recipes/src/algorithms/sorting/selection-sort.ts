@@ -12,6 +12,7 @@ export const selectionSort = defineAlgorithm({
   summary:
     'Finds the smallest value of the unsorted part and swaps it to the front of that part, one position at a time.',
   input: SortInput,
+  main: 'values',
   examples: [SAMPLE],
   code: {
     pseudocode: `

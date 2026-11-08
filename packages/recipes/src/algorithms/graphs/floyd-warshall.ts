@@ -18,6 +18,7 @@ export const floydWarshall = defineAlgorithm({
   summary:
     'Finds shortest paths between all pairs of vertices in a distance table, allowing paths through one more vertex in each pass.',
   input: z.strictObject({ graph: Graph }),
+  main: 'graph',
   examples: [
     {
       graph: {

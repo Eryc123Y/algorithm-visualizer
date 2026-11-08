@@ -17,6 +17,7 @@ export const dfs = defineAlgorithm({
   summary:
     'Explores a graph as deep as it can before backing up, from every vertex not yet reached, recording discovery and finishing times.',
   input: z.strictObject({ graph: Graph }),
+  main: 'graph',
   examples: [{ graph: CLOTHES }],
   code: {
     pseudocode: `

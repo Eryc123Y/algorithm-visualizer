@@ -22,6 +22,7 @@ import {
   silentTrace,
   type Trace,
 } from '../../trace.ts';
+import { listField } from '../../notation/schema.ts';
 
 /** Most words a trie holds, so it fits on one screen. */
 export const MAX_WORDS = 8;
@@ -237,12 +238,15 @@ export const trie = defineStructure<TrieState, From, 'tree'>({
     'Inserts and searches words one after another in a trie, where each word is a path of characters from the root.',
   name: 'trie',
   kind: 'tree',
-  from: z
-    .array(Word)
-    .max(MAX_WORDS)
-    .describe(
-      `Up to ${MAX_WORDS} words that build the starting trie, e.g. ["tea", "ten", "to"].`,
-    ),
+  from: listField(
+    z
+      .array(Word)
+      .max(MAX_WORDS)
+      .describe(
+        `Up to ${MAX_WORDS} words that build the starting trie, e.g. ["tea", "ten", "to"].`,
+      ),
+    'word',
+  ),
   examples: [
     {
       from: [],
