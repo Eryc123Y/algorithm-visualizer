@@ -41,7 +41,7 @@ import {
   treeEdge,
 } from './node-tree.ts';
 import type { LabelBox } from './edge-label.ts';
-import { clearestAngle, noteBox } from './notes.ts';
+import { clearestAngle, noteRegion } from './notes.ts';
 import type { LayoutFonts } from './options.ts';
 import type { ElementRole, SceneItem } from './scene.ts';
 
@@ -143,7 +143,7 @@ export function layoutTree({
   const noteFont = noteFontSize(shape);
   const noteHalf = noteTextWidth(metrics.noteWidth, shape) / 2;
   const noteAt = (x: number, y: number, angle: number) =>
-    noteBox({ x, y, radius, halfWidth }, angle, noteHalf, noteFont);
+    noteRegion({ x, y, radius, halfWidth }, angle, noteHalf, noteFont);
   const reaches = NOTE_ANGLES.map((angle) => noteAt(0, 0, angle));
   const noteOverhang = metrics.hasNotes
     ? Math.max(

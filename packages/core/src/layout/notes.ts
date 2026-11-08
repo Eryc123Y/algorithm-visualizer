@@ -48,10 +48,43 @@ export function noteBox(
   };
 }
 
+/**
+ * Where a note of any width up to `halfWidth` may lie in the direction
+ * `angle`: a narrower note sits closer to the node at a diagonal, so the
+ * region spans the boxes of a note of no width and of the widest one.
+ * Layouts choose a direction with it, so that every note of the trace
+ * clears what the region clears.
+ */
+export function noteRegion(
+  node: NodeOutline,
+  angle: number,
+  halfWidth: number,
+  fontSize: number,
+): LabelBox {
+  const near = noteBox(node, angle, 0, fontSize);
+  const far = noteBox(node, angle, halfWidth, fontSize);
+  const left = Math.min(near.x - near.halfWidth, far.x - far.halfWidth);
+  const right = Math.max(near.x + near.halfWidth, far.x + far.halfWidth);
+  const top = Math.min(near.y - near.halfHeight, far.y - far.halfHeight);
+  const bottom = Math.max(near.y + near.halfHeight, far.y + far.halfHeight);
+  return {
+    x: (left + right) / 2,
+    y: (top + bottom) / 2,
+    halfWidth: (right - left) / 2,
+    halfHeight: (bottom - top) / 2,
+  };
+}
+
 /** What text beside a node must keep clear of. */
 export interface Obstacles {
-  /** Lines, such as edges, from end to end. */
-  readonly segments: readonly (readonly [Point, Point])[];
+  /**
+   * Lines, such as edges, from end to end, each with the half-width of
+   * the band it may be drawn anywhere across (parallel edges spread
+   * apart), or none.
+   */
+  readonly segments: readonly (
+    readonly [Point, Point] | readonly [Point, Point, number]
+  )[];
   /** Nodes, as circles. */
   readonly discs: readonly (Point & { readonly radius: number })[];
   /** Other text already placed. */
@@ -121,8 +154,8 @@ export function segmentToBox(a: Point, b: Point, box: LabelBox): number {
 /** How far a box stays from every obstacle; 0 where it touches one. */
 export function clearance(box: LabelBox, obstacles: Obstacles): number {
   let least = Infinity;
-  for (const [a, b] of obstacles.segments)
-    least = Math.min(least, segmentToBox(a, b, box));
+  for (const [a, b, half = 0] of obstacles.segments)
+    least = Math.min(least, Math.max(0, segmentToBox(a, b, box) - half));
   for (const d of obstacles.discs)
     least = Math.min(least, Math.max(0, pointToBox(d, box) - d.radius));
   for (const o of obstacles.boxes)
