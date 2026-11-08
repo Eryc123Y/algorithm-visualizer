@@ -34,7 +34,7 @@ Scene nodes and boxes gain an optional `settled: true` when the element is settl
 
 ### Text clear of lines
 
-- **Check marks** on nodes lie inside the circle or stadium, less its border, in the quarter above and right of the value; their size follows the radius.
+- **Check marks** on nodes lie inside the circle or stadium, less its border, under the value, where they cannot read as an accent on a letter; their size follows the radius.
 - **Edge labels** are painted after every edge of their structure, so their halo covers the lines they sit on. Layout also moves a label along its edge, as it does to keep labels apart (ADR 0013), until its box clears other edges where a nearby position does.
 - **Node notes** (a distance, a rank, a height) sit a fixed gap outside the node's outline in their direction, so a note at a diagonal is as close as one above. Layout picks the direction, in an order of preference, as the first whose note box clears every edge and every other node, measured with the widest note of the trace so that the direction does not change from frame to frame; failing that, the clearest. Trees choose among above, above left and above right, where they reserve room.
 - **Heap indices** are notes of their positions: above the node, or above left or above right, away from the edges, as CLRS numbers its heaps.
