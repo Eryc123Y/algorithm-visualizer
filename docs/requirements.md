@@ -6,6 +6,13 @@ What algoviz is for, what version 1.0 must do, and how good it has to be. The [r
 
 algoviz makes step-by-step pictures and animations of algorithms and data structures. A visualization is a declarative JSON document, so the same document becomes a vector figure, an animation on a web page, slides, or an interactive player in an AI conversation. Every output is drawn by algoviz's own engine and painters.
 
+Using algoviz should cost as little as possible, for people and for models alike. Each kind of user has a shortest path to a figure, and it stays short:
+
+- a student, a teacher or a model names an algorithm and gives its input, the structures it works on, written in notations they already know, and algoviz runs the algorithm;
+- only an algorithm that algoviz does not have needs a document, written by hand, by code or by a model.
+
+A feature that lengthens one of these paths needs a reason, and a change meant to shorten them is measured: by the concepts a user must know and the input they must write for typical tasks, and for models by the evals.
+
 ## Users and use cases
 
 1. **Students writing notes in Typst or LaTeX.** A student calls a package function with an algorithm, its input and the step they want, for example the third relaxation of Dijkstra on their graph, and gets a native vector figure in the document. They can also pass a document they wrote or got from an AI. A Typst package and a LaTeX package do this, and both run algoviz's engine underneath.
