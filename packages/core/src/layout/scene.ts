@@ -39,6 +39,11 @@ export interface SceneBox {
   readonly width: number;
   readonly height: number;
   readonly role: ElementRole;
+  /**
+   * The element is settled, though a stronger, transient role is drawn
+   * (ADR 0031); painters keep its check mark. Absent when `role` says it.
+   */
+  readonly settled?: true;
   readonly group?: GroupIndex;
   /** Centred inside the box. */
   readonly text: string;
@@ -60,6 +65,8 @@ export interface SceneNode {
    */
   readonly width?: number;
   readonly role: ElementRole;
+  /** As for `SceneBox.settled`. */
+  readonly settled?: true;
   readonly group?: GroupIndex;
   /** Red–black tree colour; part of the data, not decoration. */
   readonly variant?: 'red' | 'black';

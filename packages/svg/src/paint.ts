@@ -18,7 +18,12 @@ import type {
   SceneNode,
   SceneText,
 } from '@algoviz/core';
-import { TITLE_TRACKING, edgeLabelBox, labelSegment } from '@algoviz/core';
+import {
+  TITLE_TRACKING,
+  edgeLabelBox,
+  labelSegment,
+  noteBox,
+} from '@algoviz/core';
 import { textWidth } from '@algoviz/fonts';
 
 import { num } from './format.ts';
@@ -115,6 +120,27 @@ function elementStyle(
   };
 }
 
+/** Whether an item draws the settled check mark (ADR 0009, 0031). */
+const isSettled = (item: SceneBox | SceneNode): boolean =>
+  item.role === 'settled' || item.settled === true;
+
+/**
+ * The check mark's colour: the theme's on the settled fill, else the text
+ * colour of the role drawn, which every theme gives 4.5:1 on its fill.
+ */
+const markColour = (t: SvgTheme, role: ElementRole, c: CellStyle): string =>
+  role === 'settled' ? (t.settledMark ?? c.text) : c.text;
+
+/**
+ * A node's check mark: under the value, where it cannot read as an accent
+ * on a letter, and inside the outline less its border for every radius
+ * layout uses (ADR 0031). Its points are at most 0.75 r from the centre.
+ */
+function nodeCheck(r: number): string {
+  const at = (x: number, y: number) => `${num(x * r)} ${num(y * r)}`;
+  return `M${at(-0.17, 0.6)}l${at(0.12, 0.12)}l${at(0.25, -0.25)}`;
+}
+
 function paintBox(b: SceneBox, t: SvgTheme): SvgNode {
   const c = elementStyle(t, b.role, b.group, undefined);
   const r = num(Math.min(t.radius, b.width / 2, b.height / 2));
@@ -145,13 +171,13 @@ function paintBox(b: SceneBox, t: SvgTheme): SvgNode {
       ...(c.dash === null ? {} : { 'stroke-dasharray': c.dash }),
     },
   });
-  if (b.role === 'settled' && t.settledMark !== null)
+  if (isSettled(b) && t.settledMark !== null)
     children.push({
       tag: 'path',
       attrs: {
         d: `M${num(b.width - 15)} 10l3.5 3.5l6-7`,
         fill: 'none',
-        stroke: t.settledMark,
+        stroke: markColour(t, b.role, c),
         'stroke-width': '1.75',
         'stroke-linecap': 'round',
         'stroke-linejoin': 'round',
@@ -211,13 +237,13 @@ function paintNode(n: SceneNode, t: SvgTheme): SvgNode {
       ...(c.dash === null ? {} : { 'stroke-dasharray': c.dash }),
     },
   });
-  if (n.role === 'settled' && t.settledMark !== null)
+  if (isSettled(n) && t.settledMark !== null)
     children.push({
       tag: 'path',
       attrs: {
-        d: `M${num(halfWidth - n.radius * 0.55)} ${num(-n.radius * 0.75)}l3 3l5-6`,
+        d: nodeCheck(n.radius),
         fill: 'none',
-        stroke: t.settledMark,
+        stroke: markColour(t, n.role, c),
         'stroke-width': '1.75',
         'stroke-linecap': 'round',
         'stroke-linejoin': 'round',
@@ -235,21 +261,19 @@ function paintNode(n: SceneNode, t: SvgTheme): SvgNode {
     text: n.text,
   });
   if (n.label !== undefined) {
-    // Centred just outside the outline in the direction of labelAngle.
+    // A gap outside the outline in the direction of labelAngle (ADR 0031).
     const fontSize = Math.max(10, n.fontSize * 0.7);
-    const rad = ((n.labelAngle ?? 0) * Math.PI) / 180;
-    const [dx, dy] = [Math.sin(rad), -Math.cos(rad)];
-    const textHalfWidth =
-      (textWidth(n.label, t.fontMetrics.value) * fontSize) / 2;
-    const reach =
-      Math.abs(dx) * (halfWidth + textHalfWidth) +
-      Math.abs(dy) * (n.radius + fontSize / 2) +
-      4;
+    const box = noteBox(
+      { x: 0, y: 0, radius: n.radius, halfWidth },
+      n.labelAngle ?? 0,
+      (textWidth(n.label, t.fontMetrics.value) * fontSize) / 2,
+      fontSize,
+    );
     children.push({
       tag: 'text',
       attrs: {
-        ...(dx === 0 ? {} : { x: num(dx * reach) }),
-        y: num(dy * reach + baselineOffset(fontSize)),
+        ...(Math.abs(box.x) < 1e-9 ? {} : { x: num(box.x) }),
+        y: num(box.y + baselineOffset(fontSize)),
         'text-anchor': 'middle',
         'font-size': num(fontSize),
         'font-weight': weight(t),
@@ -632,6 +656,38 @@ function paintItem(item: SceneItem, t: SvgTheme): PaintedItem[] {
   }
 }
 
+/** The structure an item belongs to: its key up to the first `/`. */
+const structureOf = (key: string): string => key.split('/', 1)[0]!;
+
+/**
+ * Edge labels moved after the last edge of their structure, so that their
+ * halos cover the lines they sit on (ADR 0031). Everything else keeps its
+ * order.
+ */
+function labelsOnTop(items: readonly PaintedItem[]): PaintedItem[] {
+  const isLabel = (i: PaintedItem) =>
+    i.key.endsWith('#label') && i.key.includes('/edge/');
+  const lastEdge = new Map<string, number>();
+  items.forEach((item, k) => {
+    if (item.attrs['data-edge'] !== undefined || item.key.endsWith('#head'))
+      lastEdge.set(structureOf(item.key), k);
+  });
+  const pending = new Map<string, PaintedItem[]>();
+  const out: PaintedItem[] = [];
+  items.forEach((item, k) => {
+    const name = structureOf(item.key);
+    if (isLabel(item) && (lastEdge.get(name) ?? -1) > k)
+      pending.set(name, [...(pending.get(name) ?? []), item]);
+    else out.push(item);
+    if (lastEdge.get(name) === k) {
+      out.push(...(pending.get(name) ?? []));
+      pending.delete(name);
+    }
+  });
+  for (const rest of pending.values()) out.push(...rest);
+  return out;
+}
+
 export interface PaintOptions {
   /**
    * Draws text as glyph outlines from these faces where every character
@@ -646,7 +702,9 @@ export function paintScene(
   { glyphs }: PaintOptions = {},
 ): PaintedScene {
   const t = resolveTheme(theme);
-  const painted = scene.items.flatMap((item) => paintItem(item, t));
+  const painted = labelsOnTop(
+    scene.items.flatMap((item) => paintItem(item, t)),
+  );
   return {
     width: scene.width,
     height: scene.height,

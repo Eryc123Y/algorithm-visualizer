@@ -5,6 +5,7 @@
  */
 import { textWidth, type FontMetrics } from '@algoviz/fonts';
 
+import { CLEAR, clearance, noteBox, type Obstacles } from './notes.ts';
 import type { SceneEdge, SceneItem } from './scene.ts';
 
 export interface Point {
@@ -69,44 +70,73 @@ export function edgeLabelBox(
 }
 
 /** Positions along an edge to try for its label, nearest the middle first. */
-const CANDIDATES = [0.5, 0.38, 0.62, 0.28, 0.72];
+export const LABEL_POSITIONS: readonly number[] = [0.5, 0.38, 0.62, 0.28, 0.72];
 
 const overlaps = (p: LabelBox, q: LabelBox) =>
   Math.abs(p.x - q.x) < p.halfWidth + q.halfWidth + 2 &&
   Math.abs(p.y - q.y) < p.halfHeight + q.halfHeight + 2;
 
+/** An edge's line, as segments from end to end; none for a self-loop. */
+function edgeLines(e: SceneEdge): [Point, Point][] {
+  const points = [{ x: e.x1, y: e.y1 }, ...(e.via ?? []), { x: e.x2, y: e.y2 }];
+  if (points.length === 2 && Math.hypot(e.x2 - e.x1, e.y2 - e.y1) < 0.5)
+    return [];
+  return points.slice(1).map((p, k) => [points[k]!, p]);
+}
+
 /**
- * Moves edge labels along their edges so that they do not cover each other
- * or a node, where a nearby position is free. Labels that cannot move stay
- * in the middle. Self-loops keep their labels beyond the loop.
+ * Moves edge labels along their edges so that they do not cover each other,
+ * a node, a node's note or another edge, where a nearby position is free
+ * (ADR 0013, 0031). A label with no free position goes where it keeps the
+ * most room from other edges among those that cover nothing, else in the
+ * middle. Self-loops keep their labels beyond the loop.
  */
 export function separateEdgeLabels(
   items: readonly SceneItem[],
   font: FontMetrics,
 ): SceneItem[] {
-  const placed: LabelBox[] = items.flatMap((i) =>
-    i.type === 'node'
-      ? [
-          {
-            x: i.x,
-            y: i.y,
-            halfWidth: Math.max(i.radius, (i.width ?? 0) / 2),
-            halfHeight: i.radius,
-          },
-        ]
-      : [],
+  const placed: LabelBox[] = items.flatMap((i) => {
+    if (i.type !== 'node') return [];
+    const halfWidth = Math.max(i.radius, (i.width ?? 0) / 2);
+    const node = { x: i.x, y: i.y, halfWidth, halfHeight: i.radius };
+    if (i.label === undefined) return [node];
+    const fontSize = Math.max(10, i.fontSize * 0.7);
+    return [
+      node,
+      noteBox(
+        { x: i.x, y: i.y, radius: i.radius, halfWidth },
+        i.labelAngle ?? 0,
+        labelHalfWidth(i.label, fontSize, font),
+        fontSize,
+      ),
+    ];
+  });
+  const lines = items.flatMap((i) =>
+    i.type === 'edge' ? edgeLines(i).map((line) => ({ key: i.key, line })) : [],
   );
   return items.map((item) => {
     if (item.type !== 'edge' || item.label === undefined) return item;
     const [a, b] = labelSegment(item);
     if (Math.hypot(b.x - a.x, b.y - a.y) < 0.5) return item;
-    for (const at of CANDIDATES) {
+    const others: Obstacles = {
+      segments: lines.flatMap((l) => (l.key === item.key ? [] : [l.line])),
+      discs: [],
+      boxes: [],
+    };
+    let fallback: { at: number; room: number } | undefined;
+    for (const at of LABEL_POSITIONS) {
       const box = edgeLabelBox(item, a, b, font, at);
       if (placed.some((p) => overlaps(p, box))) continue;
-      placed.push(box);
-      return at === 0.5 ? item : { ...item, labelAt: at };
+      const room = clearance(box, others);
+      if (room >= CLEAR) {
+        placed.push(box);
+        return at === 0.5 ? item : { ...item, labelAt: at };
+      }
+      if (fallback === undefined || room > fallback.room)
+        fallback = { at, room };
     }
-    placed.push(edgeLabelBox(item, a, b, font, 0.5));
-    return item;
+    const at = fallback?.at ?? 0.5;
+    placed.push(edgeLabelBox(item, a, b, font, at));
+    return at === 0.5 ? item : { ...item, labelAt: at };
   });
 }

@@ -23,6 +23,7 @@ import type { ArrayMetrics } from './array.ts';
 import {
   formatScalar,
   groupPointers,
+  settledUnder,
   titleItems,
   titleRowHeight,
   titleWidth,
@@ -36,7 +37,12 @@ import {
   sidePointerWidth,
   treeEdge,
 } from './node-tree.ts';
+import { labelHalfWidth, type LabelBox } from './edge-label.ts';
+import { NOTE_GAP, clearestAngle, noteBox } from './notes.ts';
 import type { ElementRole, SceneItem } from './scene.ts';
+
+/** Where a position's index goes: above, above left, above right. */
+const INDEX_ANGLES: readonly number[] = [0, 315, 45];
 
 function roleOf(state: ArrayState, index: number, id: string): ElementRole {
   const { compare, swapped, highlight, settled } = state.marks;
@@ -64,8 +70,11 @@ export function layoutArrayHeap({
   );
   const pitchX = 2 * halfWidth + NODE_GAP_X;
   const pitchY = 2 * radius + NODE_GAP_Y;
+  // Indices go above their nodes, as CLRS numbers heaps (ADR 0031): the
+  // root's needs room above it.
+  const indexRoom = o.showIndices ? NOTE_GAP + o.indexFontSize + 2 : 4;
   const left = origin.x + pointerWidth;
-  const top = origin.y + titleRowHeight(o) + 4;
+  const top = origin.y + titleRowHeight(o) + indexRoom;
 
   // Place every position the trace ever uses, so the shape stays put while
   // the heap grows and shrinks.
@@ -105,6 +114,20 @@ export function layoutArrayHeap({
         o,
       ),
     );
+  // Every edge the shape ever has, so an index keeps its place as the
+  // heap grows and shrinks.
+  const lines = Array.from(
+    { length: Math.max(0, slots - 1) },
+    (_, k) => [centre(k >> 1), centre(k + 1)] as const,
+  );
+  const indexBox = (index: number, angle: number) =>
+    noteBox(
+      { ...centre(index), radius, halfWidth },
+      angle,
+      labelHalfWidth(String(index), o.indexFontSize, o.fonts.value),
+      o.indexFontSize,
+    );
+  const placed: LabelBox[] = [];
   state.data.forEach((element, index) => {
     const at = centre(index);
     items.push({
@@ -114,21 +137,33 @@ export function layoutArrayHeap({
       radius,
       ...(halfWidth > radius ? { width: 2 * halfWidth } : {}),
       role: roleOf(state, index, element.id),
+      ...settledUnder(
+        roleOf(state, index, element.id),
+        state.marks.settled.includes(element.id),
+      ),
       text: formatScalar(element.value),
       fontSize: shape.fontSize,
     });
-    if (o.showIndices)
-      items.push({
-        type: 'text',
-        key: `${name}/index/${index}`,
-        // Below the node, between the edges to its children.
-        x: at.x,
-        y: at.y + radius + 9,
-        anchor: 'middle',
-        role: 'index',
-        text: String(index),
-        fontSize: o.indexFontSize,
-      });
+    if (!o.showIndices) return;
+    const angle = clearestAngle(INDEX_ANGLES, (a) => indexBox(index, a), {
+      segments: lines,
+      discs: Array.from({ length: slots }, (_, k) => k)
+        .filter((k) => k !== index)
+        .map((k) => ({ ...centre(k), radius: halfWidth })),
+      boxes: placed,
+    });
+    const box = indexBox(index, angle);
+    placed.push(box);
+    items.push({
+      type: 'text',
+      key: `${name}/index/${index}`,
+      x: box.x,
+      y: box.y,
+      anchor: 'middle',
+      role: 'index',
+      text: String(index),
+      fontSize: o.indexFontSize,
+    });
   });
   for (const [index, names] of groupPointers(
     Object.entries(state.marks.pointers),
@@ -144,6 +179,6 @@ export function layoutArrayHeap({
       pointerWidth + (columns - 1) * pitchX + 2 * halfWidth + 16,
       titleWidth(title, o),
     ),
-    height: top - origin.y + (levels - 1) * pitchY + 2 * radius + 12,
+    height: top - origin.y + (levels - 1) * pitchY + 2 * radius + 4,
   };
 }

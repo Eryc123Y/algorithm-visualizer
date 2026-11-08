@@ -28,6 +28,7 @@ import {
   maxWidth,
   own,
   pointerRows,
+  settledUnder,
   titleItems,
   titleRowHeight,
   titleWidth,
@@ -35,12 +36,14 @@ import {
 import {
   NOTE_HEIGHT,
   nodeShape,
+  noteFontSize,
   noteTextWidth,
   outlineDistance,
   sidePointerItems,
   sidePointerWidth,
 } from './node-tree.ts';
-import { separateEdgeLabels } from './edge-label.ts';
+import { separateEdgeLabels, type LabelBox } from './edge-label.ts';
+import { clearestAngle, noteBox, type NodeOutline } from './notes.ts';
 import type { LayoutFonts } from './options.ts';
 import type { EdgeRole, ElementRole, SceneItem } from './scene.ts';
 
@@ -608,11 +611,65 @@ export function layoutGraph({
     );
   };
   const loopsSeen = new Map<string, number>();
-  const labelAngle = (id: string): number =>
-    ranked(sides([0, 45, 315, 90, 270, 135, 225, 180]), [
-      ...away(id),
-      ...loopAngles(id),
-    ])[0]!;
+  // Notes turn to the first direction, in order of preference, whose box
+  // clears every edge any frame draws, every other node and the notes
+  // placed before, measured with the widest note of the trace so that the
+  // direction stays put (ADR 0031). Directions a self-loop takes come last.
+  const noteFont = noteFontSize(shape);
+  const noteHalf = noteTextWidth(metrics.noteWidth, shape) / 2;
+  const outlineOf = (id: string): NodeOutline => ({
+    ...centre(id),
+    radius,
+    halfWidth,
+  });
+  const edgeLines = metrics.links.flatMap(([from, to]) => {
+    if (from === to) return [];
+    const bends = arrangement.bends?.get(linkKey(from, to)) ?? [];
+    const points = [centre(from), ...bends.map(toPixel), centre(to)];
+    return points.slice(1).map((p, k) => [points[k]!, p] as const);
+  });
+  // The block's bounds, which notes keep inside.
+  const blockWidth = Math.max(
+    pointerWidth + maxX - minX + 2 * halfWidth + 2 * pad,
+    titleWidth(title, o),
+    n === 0 ? 2 * halfWidth + 60 : 0,
+  );
+  const blockHeight =
+    titleRowHeight(o) + above + maxY - minY + 2 * radius + pad;
+  const inside = (b: LabelBox) =>
+    b.x - b.halfWidth >= origin.x &&
+    b.x + b.halfWidth <= origin.x + blockWidth &&
+    b.y - b.halfHeight >= origin.y + titleRowHeight(o) &&
+    b.y + b.halfHeight <= origin.y + blockHeight;
+  const placedNotes: LabelBox[] = [];
+  const angles = new Map<string, number>();
+  const labelAngle = (id: string): number => {
+    const known = angles.get(id);
+    if (known !== undefined) return known;
+    const others = metrics.nodes.flatMap((n) =>
+      n === id || !arrangement.at.has(n)
+        ? []
+        : [{ ...centre(n), radius: halfWidth }],
+    );
+    const boxAt = (angle: number) =>
+      noteBox(outlineOf(id), angle, noteHalf, noteFont);
+    const candidates = ranked(
+      sides([0, 45, 315, 90, 270, 135, 225, 180]),
+      loopAngles(id),
+    ).filter((angle) => angle === 0 || inside(boxAt(angle)));
+    const angle = clearestAngle(candidates, boxAt, {
+      segments: edgeLines,
+      discs: others,
+      boxes: placedNotes,
+    });
+    angles.set(id, angle);
+    placedNotes.push(boxAt(angle));
+    return angle;
+  };
+  // Every node of the trace, in a fixed order, so a note's direction does
+  // not depend on which other nodes have notes in this frame.
+  if (metrics.hasNotes)
+    for (const id of metrics.nodes) if (arrangement.at.has(id)) labelAngle(id);
 
   for (const e of state.data.edges) {
     const key = `${name}/edge/${e.id}`;
@@ -725,6 +782,10 @@ export function layoutGraph({
       radius,
       ...(halfWidth > radius ? { width: 2 * halfWidth } : {}),
       role: nodeRole(state, node.id),
+      ...settledUnder(
+        nodeRole(state, node.id),
+        state.marks.settled.includes(node.id),
+      ),
       ...(group === undefined ? {} : { group }),
       text: formatScalar(node.value),
       fontSize: shape.fontSize,
@@ -741,11 +802,7 @@ export function layoutGraph({
 
   return {
     items: separateEdgeLabels(items, o.fonts.value),
-    width: Math.max(
-      pointerWidth + maxX - minX + 2 * halfWidth + 2 * pad,
-      titleWidth(title, o),
-      n === 0 ? 2 * halfWidth + 60 : 0,
-    ),
-    height: titleRowHeight(o) + above + maxY - minY + 2 * radius + pad,
+    width: blockWidth,
+    height: blockHeight,
   };
 }
