@@ -199,8 +199,11 @@ export function layoutState(
   let width = 0;
   let height = 0;
 
-  for (const column of arrangeStructures(vis.structures, o.layout)) {
-    if (x > o.padding) x += o.columnGap;
+  for (const [k, column] of arrangeStructures(
+    vis.structures,
+    o.layout,
+  ).entries()) {
+    if (k > 0) x += o.columnGap;
     const laid = layoutColumn(
       vis,
       state,

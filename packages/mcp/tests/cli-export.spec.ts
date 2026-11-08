@@ -337,6 +337,9 @@ describe('algoviz export errors', () => {
     expect(usage('render', bstFile, '--layout', 'square')).toContain(
       'Unknown layout "square"; use wide, narrow',
     );
+    expect(usage('validate', bstFile, '--layout', 'narrow')).toContain(
+      '--layout only applies to export and render',
+    );
     expect(usage('export', bstFile, '--frame', '1')).toContain('--step');
     expect(usage('render', bstFile, '--step', '1')).toContain('export');
     expect(usage('run', 'bst', '{}', '--input', '{}')).toContain('export');

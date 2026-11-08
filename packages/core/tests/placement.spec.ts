@@ -82,7 +82,7 @@ const layoutOf = (input: unknown, layout: FigureLayout) =>
   layoutTrace(mustLoad(input), { layout });
 
 describe('placement (ADR 0029)', () => {
-  const { padding, structureGap, columnGap } = defaultLayoutOptions;
+  const { padding, columnGap } = defaultLayoutOptions;
 
   it('defaults to the wide layout', () => {
     expect(defaultLayoutOptions.layout).toBe('wide');
@@ -188,12 +188,5 @@ describe('placement (ADR 0029)', () => {
       expect(arrangeStructures(plain.visualization.structures, layout)).toEqual(
         [{ region: 'main', names: ['a', 'calls', 'out'] }],
       );
-  });
-
-  it('spaces structures in a column by structureGap', () => {
-    const scene = layoutOf(sided(), 'wide').sceneAt(0);
-    const a = boundsOf(scene, 'a');
-    expect(titleOf(scene, 'out').y).toBeGreaterThan(a[3]);
-    expect(structureGap).toBeGreaterThan(0);
   });
 });

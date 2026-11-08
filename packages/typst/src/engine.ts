@@ -8,9 +8,9 @@
  * keeps the last few prepared documents, so further figures of a document
  * cost only their own layout and painting. Layout is pure (ADR 0003), so the
  * cache never changes a figure. Its key is the JSON of the source, the
- * theme and the layout, so each entry holds a copy of its document's text as well as the
- * prepared trace; eight entries stay small for documents of the registry's
- * size.
+ * theme and the layout, so each entry holds a copy of its document's text
+ * as well as the prepared trace; eight entries stay small for documents of
+ * the registry's size.
  */
 import { z } from 'zod';
 

@@ -164,6 +164,8 @@ function run(argv: readonly string[]): {
   for (const [key, flag] of Object.entries(EXPORT_ONLY))
     if (values[key as keyof typeof EXPORT_ONLY] !== undefined)
       throw new UsageError(`${flag} only applies to export`);
+  if (values.layout !== undefined && command !== 'render')
+    throw new UsageError('--layout only applies to export and render');
   return { result: dispatch(command, rest, values), outFile: values.out };
 }
 

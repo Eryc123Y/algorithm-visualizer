@@ -301,6 +301,39 @@ test('a new document resets the player to its first frame', async ({
   await expectStageMatches(player, await editorDocument(page));
 });
 
+test('places side structures beside or below with the layout attribute', async ({
+  page,
+}) => {
+  await page.goto('/');
+  // An array with a call stack in the side panel (ADR 0029).
+  const sided = {
+    version: '0.4',
+    structures: {
+      a: { kind: 'array', initial: [3, 1, 2] },
+      calls: { kind: 'stack', initial: ['sort a[0..2]'], place: 'side' },
+    },
+    steps: [{ actions: [{ target: 'a', type: 'swap', i: 0, j: 1 }] }],
+  };
+  await page.getByTestId('editor').fill(JSON.stringify(sided));
+  const player = page.getByTestId('player');
+  await expect(player.getByRole('alert')).toHaveCount(0);
+  const size = () =>
+    player.evaluate((el) => {
+      const svg = el.shadowRoot!.querySelector('svg.scene')!;
+      return [
+        Number(svg.getAttribute('width')),
+        Number(svg.getAttribute('height')),
+      ];
+    });
+  await expectStageMatches(player, sided);
+  const [wideWidth, wideHeight] = await size();
+  await player.evaluate((el) => el.setAttribute('layout', 'narrow'));
+  await expectStageMatches(player, sided);
+  const [narrowWidth, narrowHeight] = await size();
+  expect(narrowWidth).toBeLessThan(wideWidth!);
+  expect(narrowHeight).toBeGreaterThan(wideHeight!);
+});
+
 test.describe('display mode', () => {
   test('pauses while off screen and resumes when scrolled back', async ({
     page,
