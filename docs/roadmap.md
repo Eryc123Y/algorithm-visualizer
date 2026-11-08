@@ -63,7 +63,7 @@ Everything later builds on these, so they come first. The ADRs are accepted (#13
     - call stacks for merge sort, quicksort, the tree walks and topological sort;
     - side panels for the existing auxiliaries (BFS's queue, DFS's stack, insertion sort's key, the bracket stack, Floyd–Warshall's table).
   - The quality bar in the requirements now asks for this, so every Phase 2 entry meets it too.
-- [ ] **1.6 Built-in themes.**
+- [~] **1.6 Built-in themes** _ADR_ [ADR 0030](adr/0030-built-in-themes.md). ADR 0030, then three PRs: the themes and their fonts in the painters, Typst and LaTeX; the player's chrome, web fonts and language menu; the documentation and the lab's removal.
   - Turn every theme-lab direction into a named built-in theme next to light, dark and print.
   - Keep the current light theme as the default, and refine it where it looks unnatural: a design pass with the frontend-design skill and a design subagent.
   - Every theme is tested on every kind and output (contrast, print, the Typst and LaTeX packages).
