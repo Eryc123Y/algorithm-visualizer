@@ -14,6 +14,7 @@ export const heapsort = defineAlgorithm({
   summary:
     'Builds a max-heap in the array, then repeatedly moves the maximum to the end and sifts the new root down.',
   input: SortInput,
+  main: 'values',
   examples: [SAMPLE],
   code: {
     pseudocode: `

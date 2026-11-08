@@ -59,21 +59,27 @@ algoviz validate doc.json
 algoviz inspect doc.json 0 relax#2 -1
 algoviz render doc.json --frame insert-5/relax --theme dark --out relax.svg
 algoviz export doc.json --step insert-5 --theme print --out figures
-algoviz export dijkstra --input graph.json --step relax#3,-1 --out figures
+algoviz export dijkstra --input 'A-B 4, B-C 1, A-C 7' --step relax#3,-1 --out figures
 algoviz recipes
-algoviz run bst.delete '{"from": [8, 3, 10, 1, 6], "key": 3}' --out delete.json
-algoviz run dijkstra '{"graph": {"nodes": ["A", "B"], "edges": [["A", "B", 3]]}, "source": "A"}'
+algoviz run bst.delete '"from": "8 3 10 1 6", "key": 3' --out delete.json
+algoviz run dijkstra 'A-B 3, B-C 1'
+algoviz run dijkstra '{"graph": {"nodes": ["A", "B"], "edges": [["A", "B", 3]]}, "source": "B"}'
+algoviz run insertion-sort
 ```
+
+An input is JSON, a JSON object with its outer braces left out, or a notation: a list `5 2 4 6 1 3`, a graph `A-B 4, B-C 2` (`->` for directed edges) or operations `insert 4, delete 3`. An input whose algorithm needs one thing may be that thing alone, such as a graph for Dijkstra's algorithm, and `run` without an input runs the algorithm's first example ([ADR 0032](../../docs/adr/0032-algorithm-and-input.md)).
+
+In MCP, `algoviz_show`, `algoviz_render` and `algoviz_inspect` take a `recipe` and its `input` in place of a `document`, so a model shows a ready-made algorithm without copying its document.
 
 From the repository without building, run `node --conditions=@algoviz/source packages/mcp/src/algoviz.ts …`.
 
 `render` prints one frame with its text kept as text, which suits models and quick looks. `export` writes figures for documents ([ADR 0025](../../docs/adr/0025-exporting-figures.md)):
 
-- **Source.** A document file (`-` reads standard input), or a registry id with `--input`, which takes JSON text or a file, and runs that algorithm first.
+- **Source.** A document file (`-` reads standard input), or a registry id with `--input`, which takes an input or a file of one (a name ending in `.json` is always a file), and runs that algorithm first.
 - **Steps.** `--step` takes any selector, may repeat, and may list several with commas. The figures are the frames they name, in timeline order; without `--step`, every frame.
 - **Output.** Standalone SVG with text as glyph outlines, the step's narration as `<desc>`, and one size for every frame of the document. `--theme` picks a built-in theme: `light` (the default), `dark`, `print`, `textbook`, `textbook-dark`, `blocks`, `blocks-dark`, `answer-sheet` or `turbo-c` ([ADR 0030](../../docs/adr/0030-built-in-themes.md)). `--format tikz` writes `.tex` figures for the LaTeX package instead: the same shapes in TikZ, with text left to the document's fonts ([ADR 0027](../../docs/adr/0027-latex-package.md)).
 - **Files.** `--out` is a directory (created if missing; default the current one), and `--name` a pattern (default `{name}-{frame}`) with `{name}` (file name or algorithm id), `{frame}` (padded with zeros) and `{step}` (the selector with `/` and `#` written `_`). Existing files are replaced, and each written file is listed with its frame's selector. With `--format tikz`, `--one-file` writes every figure into one file, named `{name}` by default, for Beamer overlays ([ADR 0028](../../docs/adr/0028-slides.md)); the LaTeX package's `\algovizinput` draws it as a series.
-- **Errors.** Exit code 1 for an invalid document or input, an unknown algorithm or a selector that matches nothing; 2 for usage errors, such as an unknown placeholder, `--out` given a `.svg` file, or `--one-file` with SVG or a `{frame}` in the name. Nothing is written unless every figure renders.
+- **Errors.** Exit code 1 for an invalid document or input (JSON that does not parse included), an unknown algorithm or a selector that matches nothing; 2 for usage errors, such as an unknown placeholder, `--out` given a `.svg` file, or `--one-file` with SVG or a `{frame}` in the name. Nothing is written unless every figure renders.
 - **For programs.**
   - `--input-hex` takes the input as hexadecimal UTF-8 in place of `--input`, so a program that cannot quote JSON for every shell, such as the LaTeX package, can pass any input.
   - `--error-file <file>` also writes the message of a failure to that file, and removes the file after a success.

@@ -6,6 +6,7 @@
 import type { AnchoredSource } from '@algoviz/spec';
 import type { z } from 'zod';
 
+import { withMainField } from './notation/schema.ts';
 import { LANGUAGES, listing, type Language, type Snippet } from './snippet.ts';
 import type { Trace } from './trace.ts';
 
@@ -100,6 +101,11 @@ export interface AlgorithmDef<S extends z.ZodType> {
   readonly topic: Topic;
   readonly summary: string;
   readonly input: S;
+  /**
+   * The field a run cannot do without, when it is the only one: the input
+   * may then be that field's value alone (ADR 0032).
+   */
+  readonly main?: S extends z.ZodObject ? keyof S['shape'] & string : never;
   readonly examples: readonly [z.output<S>, ...z.output<S>[]];
   /** The code in each language, with `// @x` and `# @x` markers. */
   readonly code: Readonly<Record<Language, string>>;
@@ -113,11 +119,15 @@ export interface AlgorithmDef<S extends z.ZodType> {
 export function defineAlgorithm<S extends z.ZodType>(
   def: AlgorithmDef<S>,
 ): Algorithm<z.output<S>> {
-  const { code, input, ...rest } = def;
+  const { code, input, main, ...rest } = def;
+  const schema =
+    main === undefined
+      ? input
+      : withMainField(input as unknown as z.ZodObject, main);
   return {
     ...rest,
     // Zod types an arbitrary schema's output loosely; `S` restates it.
-    input: input as z.ZodType<z.output<S>>,
+    input: schema as z.ZodType<z.output<S>>,
     code: listing(def.id, code).code,
   };
 }

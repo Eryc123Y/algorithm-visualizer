@@ -209,16 +209,18 @@ describe('recipes', () => {
   });
 
   it('checks inputs against the schema, at paths under $.input', () => {
-    for (const [id, input, path] of [
-      ['bubble-sort', { values: 'nope' }, '$.input.values'],
-      ['binary-search', { values: 'nope', target: 1 }, '$.input.values'],
-      ['bst.search', { from: [1], key: 'x' }, '$.input.key'],
+    for (const [id, input, code, path] of [
+      ['bubble-sort', { values: 'nope' }, 'INVALID_NOTATION', '$.input.values'],
+      [
+        'binary-search',
+        { values: [1, 'x'], target: 1 },
+        'INVALID_SHAPE',
+        '$.input.values[1]',
+      ],
+      ['bst.search', { from: [1], key: 'x' }, 'INVALID_SHAPE', '$.input.key'],
     ] as const) {
       const doc = runRecipe(id, input);
-      expect(!doc.ok && doc.error[0]).toMatchObject({
-        code: 'INVALID_SHAPE',
-        path,
-      });
+      expect(!doc.ok && doc.error[0]).toMatchObject({ code, path });
     }
   });
 
@@ -312,7 +314,7 @@ describe('tools', () => {
   });
 
   it('let the recipe check its input, whatever JSON it is', () => {
-    for (const input of [[1, 2], 3, undefined]) {
+    for (const input of [[1, 2], 3, null]) {
       const result = callTool('algoviz_run_recipe', { id: 'bst', input });
       expect(result.isError).toBe(true);
       expect(result.text).toMatch(/^INVALID_SHAPE at \$\.input/);

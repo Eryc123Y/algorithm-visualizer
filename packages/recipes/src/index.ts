@@ -36,3 +36,4 @@ export * from './structures/hashing/linear-probing.ts';
 export * from './structures/heap/index.ts';
 export * from './structures/trie/index.ts';
 export * from './trace.ts';
+export * from './notation/index.ts';

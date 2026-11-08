@@ -375,7 +375,7 @@ describe('disjoint-set', () => {
       code: 'INVALID_ARGUMENT',
       message: '3 is not an element: the elements are 0 to 1',
     });
-    expect(runError('disjoint-set.find-set', { from: {}, x: 0 }).message).toBe(
+    expect(runError('disjoint-set.find-set', { from: {}, x: 0 }).hint).toBe(
       'from must be { size, unions } with 1 to 16 elements, or { parent, rank } as after gives it',
     );
   });

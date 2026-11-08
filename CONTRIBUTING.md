@@ -92,7 +92,7 @@ Every algorithm, and every operation of a data structure, is a module of the reg
 
 1. **Module:** add `packages/recipes/src/algorithms/<topic>/<id>.ts` and export the module made by `defineAlgorithm`:
    - a kebab-case `id`, a `title`, a `topic`, a one-sentence `summary`;
-   - a Zod `input` schema, and `examples`, the first being the default in menus;
+   - a Zod `input` schema, and `examples`, the first being the default in menus and the input of a run without one. Lists, graphs and operations take their notations through `listField`, `Graph` and `defineStructure` (ADR 0032). If the input has only one field a run needs, name it `main`, so the input may be that field alone;
    - its `code` in pseudocode (CLRS conventions, indices from 0, our own words) and in Python, with `// @name` and `# @name` markers on the lines steps point at;
    - `run(input, trace)`, which declares structures with `trace.add` and starts every step with `trace.step(anchor, narration)`. Narrations name values, not the syntax of either language. Throw a `RangeError` for an input the module cannot show.
 

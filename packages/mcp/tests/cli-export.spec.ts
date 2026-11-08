@@ -338,10 +338,6 @@ describe('algoviz export errors', () => {
       return result.err;
     };
     expect(usage('export')).toContain('export needs a file');
-    expect(usage('export', 'dijkstra', '--input', '{oops')).toContain('JSON');
-    expect(usage('export', 'dijkstra', '--input', '5')).toContain(
-      'starts with { or [',
-    );
     expect(
       usage('export', 'dijkstra', '--input', join(dir, 'missing.json')),
     ).toContain('Cannot read');
@@ -509,9 +505,6 @@ describe('algoviz export --input-hex', () => {
     expect(
       usage('export', 'dijkstra', '--input-hex=7b7d', '--input', '{}'),
     ).toContain('not both');
-    expect(
-      usage('export', 'dijkstra', `--input-hex=${hex('{oops')}`),
-    ).toContain('JSON');
     expect(usage('render', bstFile, '--input-hex', '7b7d')).toContain('export');
   });
 });

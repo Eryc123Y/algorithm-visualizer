@@ -74,11 +74,38 @@ The registry holds these modules, by topic ([ADR 0022](docs/adr/0022-registry-de
 
 A data structure has one module per operation, such as `bst.delete`, which starts from a structure the caller describes, and one for its sequence, such as `bst`, which runs up to 8 operations. `algorithms` lists every module.
 
+### Inputs
+
+Inputs take the notations people already write ([ADR 0032](docs/adr/0032-algorithm-and-input.md)), in every output: the command line, MCP, the player, Typst and LaTeX. The structured JSON forms work too.
+
+| Input                                      | Notation                                               | Structured form                               |
+| ------------------------------------------ | ------------------------------------------------------ | --------------------------------------------- |
+| a list, such as values to sort or a heap's | `"5 2 4 6 1 3"`, `"5, 2, 4"`, `"[5, 2, 4]"`            | `[5, 2, 4, 6, 1, 3]`                          |
+| a tree in level order (LeetCode's)         | `"[4, 2, 6, 1, 3, null, 7]"`                           | `[4, 2, 6, 1, 3, null, 7]`                    |
+| a graph                                    | `"A-B 4, B-C 2, A-C 7"`, `"s->t 3"` for directed edges | `{"nodes": […], "edges": [["A", "B", 4], …]}` |
+| a data structure's operations              | `"insert 4, delete 3"`                                 | `[{"op": "insert", "key": 4}, …]`             |
+
+In a graph, `-` joins an undirected edge and `->` a directed one, a number after a space is the weight, and a name alone is a node with no edges; names are letters, digits and `_`. Nodes come in the order they first appear.
+
+An input whose algorithm needs only one thing may be that thing alone: `"5 2 4 6 1 3"` for a sort, a level order for a tree walk, a graph for a graph algorithm, which then starts at the first node (`"source"` or `"root"` picks another). An algorithm given no input runs on its first example. An input that does not parse says where:
+
+```text
+INVALID_NOTATION at $.input.graph: Expected a weight or "," after "B-C", not "x" (character 12)
+```
+
+```sh
+algoviz run dijkstra 'A-B 4, B-C 1, A-C 7, C-D 2'
+algoviz run bst '"from": [8, 3, 10, 1, 6], "ops": "insert 4, delete 3"'
+algoviz run insertion-sort        # the first example
+```
+
+On the command line, an input is JSON, a JSON object with its outer braces left out, or else a notation; `--input` also takes a file.
+
 MCP, the `algoviz` command line and the playground's example menu read the registry, grouped by topic.
 
 ## For models
 
-[`@algoviz/mcp`](packages/mcp) lets a model write documents: it reads a guide written for models, validates its document (every step is replayed, and each error says where and why), inspects the state at any frame to check the result, and renders frames to SVG. In clients that display MCP Apps, `algoviz_show` then opens the interactive player right in the conversation. The same tools work as the `algoviz` command line. [`evals/`](evals) measures how well models do on 28 undergraduate tasks, each checked for what a correct visualization must show.
+[`@algoviz/mcp`](packages/mcp) lets a model write documents: it reads a guide written for models, validates its document (every step is replayed, and each error says where and why), inspects the state at any frame to check the result, and renders frames to SVG. In clients that display MCP Apps, `algoviz_show` then opens the interactive player right in the conversation. For a ready-made algorithm a model writes no document at all: `algoviz_show { "recipe": "dijkstra", "input": "A-B 4, B-C 1, A-C 7" }` shows it, and `algoviz_render` and `algoviz_inspect` take a recipe the same way. The same tools work as the `algoviz` command line. [`evals/`](evals) measures how well models do on 28 undergraduate tasks, each checked for what a correct visualization must show.
 
 ## Figures
 
@@ -89,10 +116,10 @@ MCP, the `algoviz` command line and the playground's example menu read the regis
 algoviz export doc.json --out figures
 
 # Run an algorithm on an input, without writing a document first
-algoviz export dijkstra --input graph.json --step relax#3 --out figures
+algoviz export dijkstra --input 'A-B 4, B-C 1, A-C 7, C-D 2' --step improve#3 --out figures
 
 # Several steps, in the print theme, named after their steps
-algoviz export bst.delete --input '{"from": [8, 3, 10, 1, 6], "key": 3}' \
+algoviz export bst.delete --input '"from": "8 3 10 1 6", "key": 3' \
   --step delete-3 --theme print --name '{name}-{step}'
 ```
 

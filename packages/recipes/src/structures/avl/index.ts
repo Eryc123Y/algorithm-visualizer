@@ -23,6 +23,7 @@ import {
   silentTrace,
   type Trace,
 } from '../../trace.ts';
+import { listField } from '../../notation/schema.ts';
 
 interface AvlNode {
   readonly key: number;
@@ -322,12 +323,15 @@ export const avl = defineStructure<AvlState, From, 'tree'>({
     'Inserts keys one after another into an AVL tree, rebalancing it with rotations so that sibling heights differ by at most one.',
   name: 'avl',
   kind: 'tree',
-  from: z
-    .array(z.number())
-    .max(MAX_SIZE)
-    .describe(
-      'Keys in insertion order that build the starting tree, e.g. [10, 20, 30]; a repeated key is skipped.',
-    ),
+  from: listField(
+    z
+      .array(z.number())
+      .max(MAX_SIZE)
+      .describe(
+        'Keys in insertion order that build the starting tree, e.g. [10, 20, 30]; a repeated key is skipped.',
+      ),
+    'number',
+  ),
   examples: [
     {
       from: [],

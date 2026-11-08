@@ -13,6 +13,7 @@ export const bubbleSort = defineAlgorithm({
   summary:
     'Swaps neighbours that are out of order, from the end towards the front, so each pass bubbles the smallest remaining value into place.',
   input: SortInput,
+  main: 'values',
   examples: [SAMPLE],
   code: {
     pseudocode: `

@@ -11,6 +11,7 @@ import { guide } from './guide.ts';
 import { formatInspect, inspect, MAX_FRAMES } from './inspect.ts';
 import { listRecipes, recipeCatalog, runRecipe } from './recipes.ts';
 import { render } from './render.ts';
+import { Document, RecipeInput, sourceArgs, sourceOf } from './source.ts';
 import { formatReport, validate } from './validate.ts';
 
 export interface ToolResult {
@@ -41,11 +42,11 @@ export const FrameSelectorArg = z.union([z.int(), z.string().max(200)]);
 const SELECTORS =
   'A frame is a number (0 is the initial state, n the state after step n, -1 the last) or a selector: a step name such as "relax" or "relax#2" (the second step named relax), a step in a section such as "insert-5/relax#2", a section such as "insert-5" (all its frames), or a range "a..b".';
 
-export const Document = z
-  .union([z.record(z.string(), z.unknown()), z.string()])
-  .describe(
-    'The visualization document: a JSON object with version, structures and steps (or its JSON text).',
-  );
+export { Document } from './source.ts';
+
+/** Shows a recipe by name instead of a document, so none is copied. */
+const BY_RECIPE =
+  'Give the document, or a recipe and its input instead, such as recipe "dijkstra" with input "A-B 4, B-C 1, A-C 7".';
 
 export const tools: readonly ToolDefinition[] = [
   tool({
@@ -80,9 +81,9 @@ export const tools: readonly ToolDefinition[] = [
   tool({
     name: 'algoviz_inspect',
     title: 'Inspect frames',
-    description: `Shows the state of every structure at chosen frames: data, marks such as pointers or visited nodes, and the step's narration, line, name and section. ${SELECTORS} A section's frames run from the frame before its first step, which still shows the step before it, to the frame after its last. Use it to check that a valid document does what you meant, e.g. that an array ends up sorted. At most ${MAX_FRAMES} frames per call.`,
+    description: `Shows the state of every structure at chosen frames: data, marks such as pointers or visited nodes, and the step's narration, line, name and section. ${SELECTORS} A section's frames run from the frame before its first step, which still shows the step before it, to the frame after its last. Use it to check that a valid document does what you meant, e.g. that an array ends up sorted. At most ${MAX_FRAMES} frames per call. ${BY_RECIPE}`,
     input: z.strictObject({
-      document: Document,
+      ...sourceArgs,
       frames: z
         .array(FrameSelectorArg)
         .min(1)
@@ -92,8 +93,10 @@ export const tools: readonly ToolDefinition[] = [
           'Frames or selectors, e.g. [0, "relax#2", "insert-5", -1]. Default [-1].',
         ),
     }),
-    run({ document, frames }) {
-      const report = inspect(document, frames);
+    run({ frames, ...source }) {
+      const document = sourceOf(source);
+      if (!document.ok) return failure(document.error);
+      const report = inspect(document.value, frames);
       return report.ok
         ? { text: formatInspect(report.value) }
         : failure(report.error);
@@ -102,9 +105,9 @@ export const tools: readonly ToolDefinition[] = [
   tool({
     name: 'algoviz_render',
     title: 'Render a frame',
-    description: `Draws one frame of a valid document as a standalone SVG image, as the player would show it. ${SELECTORS} A section or range is several frames, so name one of its steps instead.`,
+    description: `Draws one frame of a valid document as a standalone SVG image, as the player would show it. ${SELECTORS} A section or range is several frames, so name one of its steps instead. ${BY_RECIPE}`,
     input: z.strictObject({
-      document: Document,
+      ...sourceArgs,
       frame: FrameSelectorArg.optional().describe(
         'Frame number (negative counts from the end) or a selector of one frame, e.g. "relax#2". Default -1.',
       ),
@@ -121,8 +124,10 @@ export const tools: readonly ToolDefinition[] = [
           'Where structures with "place": "side" go: beside the others ("wide", default, as in the player) or below them ("narrow", as in a column of notes).',
         ),
     }),
-    run({ document, frame, theme, layout }) {
-      const result = render(document, {
+    run({ frame, theme, layout, ...source }) {
+      const document = sourceOf(source);
+      if (!document.ok) return failure(document.error);
+      const result = render(document.value, {
         ...(frame === undefined ? {} : { frame }),
         ...(theme === undefined ? {} : { theme }),
         ...(layout === undefined ? {} : { layout }),
@@ -143,13 +148,11 @@ export const tools: readonly ToolDefinition[] = [
     name: 'algoviz_run_recipe',
     title: 'Run a recipe',
     description:
-      'Builds the document of a recipe from algoviz_list_recipes for the given input, e.g. id "bst.delete" with input { "from": [8, 3, 10, 1, 6], "key": 3 }. Returns the document as JSON, already validated.',
+      'Builds the document of a recipe from algoviz_list_recipes for the given input, e.g. id "bst.delete" with input { "from": "8 3 10 1 6", "key": 3 }, id "dijkstra" with input "A-B 4, B-C 1, A-C 7", or id "bst" with input { "from": [8, 3, 10], "ops": "insert 4, delete 3" }. Returns the document as JSON, already validated. To show or draw a recipe, pass it to algoviz_show or algoviz_render by name instead.',
     input: z.strictObject({
       id: z.string().describe('Recipe id, e.g. "bst.delete" or "dijkstra".'),
       // Any JSON: the recipe's own schema checks it, at paths under $.input.
-      input: z
-        .unknown()
-        .describe('The input, as its JSON Schema in the list describes it.'),
+      input: RecipeInput,
     }),
     run({ id, input }) {
       const doc = runRecipe(id, input);

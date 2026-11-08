@@ -1,15 +1,20 @@
 /** The input every comparison sort takes. */
 import { z } from 'zod';
 
+import { listField } from '../../notation/schema.ts';
+
 /** Most values a sorting module takes, so every step stays readable. */
 export const MAX_VALUES = 32;
 
 export const SortInput = z.strictObject({
-  values: z
-    .array(z.number())
-    .min(1)
-    .max(MAX_VALUES)
-    .describe('The numbers to sort, e.g. [5, 3, 8, 1, 9, 2, 7].'),
+  values: listField(
+    z
+      .array(z.number())
+      .min(1)
+      .max(MAX_VALUES)
+      .describe('The numbers to sort, e.g. [5, 3, 8, 1, 9, 2, 7].'),
+    'number',
+  ),
 });
 export type SortInput = z.output<typeof SortInput>;
 

@@ -32,6 +32,7 @@ export const balancedBrackets = defineAlgorithm({
         'Text with brackets, e.g. "{[()]}"; other characters are skipped.',
       ),
   }),
+  main: 'text',
   examples: [{ text: '{[()()]}' }, { text: '([)]' }],
   code: {
     pseudocode: `

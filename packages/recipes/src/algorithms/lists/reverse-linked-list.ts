@@ -5,6 +5,7 @@
 import { z } from 'zod';
 
 import { defineAlgorithm } from '../../algorithm.ts';
+import { listField } from '../../notation/schema.ts';
 
 /** Most nodes the list takes, so it fits on one row. */
 export const MAX_LIST = 12;
@@ -16,12 +17,18 @@ export const reverseLinkedList = defineAlgorithm({
   summary:
     'Reverses a singly linked list in place, turning one link around at a time.',
   input: z.strictObject({
-    values: z
-      .array(z.number())
-      .min(1)
-      .max(MAX_LIST)
-      .describe('The values of the list from head to tail, e.g. [1, 2, 3, 4].'),
+    values: listField(
+      z
+        .array(z.number())
+        .min(1)
+        .max(MAX_LIST)
+        .describe(
+          'The values of the list from head to tail, e.g. [1, 2, 3, 4].',
+        ),
+      'number',
+    ),
   }),
+  main: 'values',
   examples: [{ values: [1, 2, 3, 4] }],
   code: {
     pseudocode: `

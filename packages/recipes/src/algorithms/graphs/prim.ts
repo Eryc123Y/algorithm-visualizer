@@ -11,7 +11,7 @@ import { z } from 'zod';
 import { defineAlgorithm } from '../../algorithm.ts';
 import {
   adjacency,
-  checkNode,
+  startOf,
   CITIES,
   declareGraph,
   Graph,
@@ -28,8 +28,12 @@ export const prim = defineAlgorithm({
     'Grows a minimum spanning tree from a root, adding the lightest edge from the tree to a vertex outside it at each step.',
   input: z.strictObject({
     graph: Graph.describe('A graph whose edges are taken as undirected.'),
-    root: z.string().describe('The node to grow the tree from.'),
+    root: z
+      .string()
+      .optional()
+      .describe('The node to grow the tree from; by default the first node.'),
   }),
+  main: 'graph',
   examples: [{ graph: CITIES, root: 'A' }],
   code: {
     pseudocode: `
@@ -65,8 +69,7 @@ export const prim = defineAlgorithm({
   },
   run(input, trace) {
     const g: GraphInput = { ...graphOf(input.graph), directed: false };
-    const r = input.root;
-    checkNode(g, r);
+    const r = startOf(g, input.root);
     const graph = trace.add('g', declareGraph(g, true));
     // Q in the side panel, every vertex keyed by its key (ADR 0029).
     const queueOf = trace.add('Q', {

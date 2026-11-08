@@ -32,6 +32,7 @@ export const kruskal = defineAlgorithm({
       'A graph whose edges are taken as undirected, with at most 100 edges: one column each in the table of edges by weight.',
     ),
   }),
+  main: 'graph',
   examples: [{ graph: CITIES }],
   code: {
     pseudocode: `

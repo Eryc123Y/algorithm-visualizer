@@ -16,6 +16,7 @@ export const mergeSort = defineAlgorithm({
   summary:
     'Splits the array in halves down to single values, then merges sorted halves through a buffer.',
   input: SortInput,
+  main: 'values',
   examples: [SAMPLE],
   code: {
     pseudocode: `

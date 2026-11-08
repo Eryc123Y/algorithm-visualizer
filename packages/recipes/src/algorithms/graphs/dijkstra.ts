@@ -11,7 +11,7 @@ import { z } from 'zod';
 import { defineAlgorithm } from '../../algorithm.ts';
 import {
   adjacency,
-  checkNode,
+  startOf,
   CITIES,
   declareGraph,
   Graph,
@@ -27,8 +27,14 @@ export const dijkstra = defineAlgorithm({
     'Finds shortest paths from a source in a graph with non-negative weights, fixing the closest remaining vertex at each step.',
   input: z.strictObject({
     graph: Graph,
-    source: z.string().describe('The node to measure distances from.'),
+    source: z
+      .string()
+      .optional()
+      .describe(
+        'The node to measure distances from; by default the first node.',
+      ),
   }),
+  main: 'graph',
   examples: [{ graph: CITIES, source: 'A' }],
   code: {
     pseudocode: `
@@ -64,8 +70,7 @@ export const dijkstra = defineAlgorithm({
   },
   run(input, trace) {
     const g = graphOf(input.graph);
-    const s = input.source;
-    checkNode(g, s);
+    const s = startOf(g, input.source);
     if (g.edges.some(([, , w = 1]) => w < 0))
       throw new RangeError(
         'Dijkstra’s algorithm needs non-negative weights; use bellman-ford for negative ones',

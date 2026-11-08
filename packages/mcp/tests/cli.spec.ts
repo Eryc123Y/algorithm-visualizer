@@ -106,9 +106,7 @@ describe('algoviz CLI', () => {
     expect(run('validate').code).toBe(2);
     expect(run('frobnicate').code).toBe(2);
     expect(run('render', file, '--zoom', '2').code).toBe(2);
-    expect(run('run', 'bst', '{oops').code).toBe(2);
     expect(run('run').code).toBe(2);
-    expect(run('run', 'bst').code).toBe(2);
   });
 
   it('prints usage without a command', () => {

@@ -26,6 +26,8 @@ import {
   type Snippet,
 } from './snippet.ts';
 import { listingTrace, type Trace } from './trace.ts';
+import { printOperations } from './notation/operations.ts';
+import { operationsField } from './notation/schema.ts';
 
 /** Most operations one run takes. */
 export const MAX_OPS = 8;
@@ -234,11 +236,15 @@ export function defineStructure<S, From, K extends StructureKindName>(
   );
   const Sequence = z.strictObject({
     from: def.from,
-    ops: z
-      .array(call)
-      .min(1)
-      .max(MAX_OPS)
-      .describe('Operations, run in order on the starting structure.'),
+    ops: operationsField(
+      z
+        .array(call)
+        .min(1)
+        .max(MAX_OPS)
+        .describe('Operations, run in order on the starting structure.'),
+      def.operations,
+      printOperations(def.examples[0].ops, def.operations) ?? '',
+    ),
   });
   const sequence: Algorithm = {
     id: def.id,

@@ -16,6 +16,7 @@ export const quicksort = defineAlgorithm({
   summary:
     'Partitions around the last value as pivot, keeping smaller or equal values on its left, then sorts each part the same way.',
   input: SortInput,
+  main: 'values',
   examples: [SAMPLE],
   code: {
     pseudocode: `

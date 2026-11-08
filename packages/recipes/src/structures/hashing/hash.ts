@@ -4,6 +4,7 @@
  * given as its size and the keys inserted into it in order.
  */
 import { z } from 'zod';
+import { listField } from '../../notation/schema.ts';
 
 /** Most buckets or slots a table has, so it fits on one screen. */
 export const MAX_SLOTS = 16;
@@ -23,10 +24,13 @@ export const tableFrom = (maxKeys: number, example: string) =>
         .min(1)
         .max(MAX_SLOTS)
         .describe(`The number of slots m, from 1 to ${MAX_SLOTS}.`),
-      keys: z
-        .array(Key)
-        .max(maxKeys)
-        .describe(`Integer keys inserted in this order, e.g. ${example}.`),
+      keys: listField(
+        z
+          .array(Key)
+          .max(maxKeys)
+          .describe(`Integer keys inserted in this order, e.g. ${example}.`),
+        'number',
+      ),
     })
     .describe('The starting table: its size, and the keys inserted into it.');
 

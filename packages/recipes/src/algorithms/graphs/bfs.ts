@@ -9,7 +9,7 @@ import { z } from 'zod';
 import { defineAlgorithm } from '../../algorithm.ts';
 import {
   adjacency,
-  checkNode,
+  startOf,
   CITIES,
   declareGraph,
   Graph,
@@ -24,8 +24,12 @@ export const bfs = defineAlgorithm({
     'Explores a graph in layers from a source with a queue, finding each vertex’s distance in edges and a breadth-first tree.',
   input: z.strictObject({
     graph: Graph,
-    source: z.string().describe('The node to start from.'),
+    source: z
+      .string()
+      .optional()
+      .describe('The node to start from; by default the first node.'),
   }),
+  main: 'graph',
   examples: [{ graph: CITIES, source: 'A' }],
   code: {
     pseudocode: `
@@ -66,8 +70,7 @@ export const bfs = defineAlgorithm({
   },
   run(input, trace) {
     const g = graphOf(input.graph);
-    const s = input.source;
-    checkNode(g, s);
+    const s = startOf(g, input.source);
     // Rows of the layered layout are the layers from the source.
     const graph = trace.add('g', declareGraph(g, false, { from: s }));
     const queue = trace.add('queue', {

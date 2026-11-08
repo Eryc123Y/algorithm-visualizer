@@ -8,6 +8,7 @@ import { z } from 'zod';
 
 import { defineAlgorithm } from '../../algorithm.ts';
 import { MAX_VALUES } from './input.ts';
+import { listField } from '../../notation/schema.ts';
 
 /** The largest value counting sort takes, so the count array stays small. */
 export const MAX_COUNTED = 99;
@@ -19,14 +20,18 @@ export const countingSort = defineAlgorithm({
   summary:
     'Counts each value, turns the counts into running sums, and places every value into an output array, keeping equal values in order.',
   input: z.strictObject({
-    values: z
-      .array(z.int().min(0).max(MAX_COUNTED))
-      .min(1)
-      .max(MAX_VALUES)
-      .describe(
-        `Integers from 0 to ${MAX_COUNTED}, e.g. [3, 1, 4, 1, 5, 2, 0, 2].`,
-      ),
+    values: listField(
+      z
+        .array(z.int().min(0).max(MAX_COUNTED))
+        .min(1)
+        .max(MAX_VALUES)
+        .describe(
+          `Integers from 0 to ${MAX_COUNTED}, e.g. [3, 1, 4, 1, 5, 2, 0, 2].`,
+        ),
+      'number',
+    ),
   }),
+  main: 'values',
   examples: [{ values: [3, 1, 4, 1, 5, 2, 0, 2] }],
   code: {
     pseudocode: `

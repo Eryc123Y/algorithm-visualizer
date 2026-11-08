@@ -83,12 +83,12 @@ export const findAlgorithm = (id: string): Algorithm | undefined =>
   algorithms.find((a) => a.id === id);
 
 /**
- * Runs the module with `id` on `input` (see `runModule`); an unknown id is
- * an `UNKNOWN_ALGORITHM` error at `$.id`.
+ * Runs the module with `id` on `input`, or on its first example (see
+ * `runModule`); an unknown id is an `UNKNOWN_ALGORITHM` error at `$.id`.
  */
 export function runAlgorithm(
   id: string,
-  input: unknown,
+  input?: unknown,
 ): Result<AlgorithmRun, readonly Diagnostic[]> {
   const algorithm = findAlgorithm(id);
   if (algorithm === undefined)

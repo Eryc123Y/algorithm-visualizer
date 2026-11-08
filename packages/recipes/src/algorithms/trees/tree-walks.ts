@@ -9,18 +9,22 @@ import { z } from 'zod';
 
 import { defineAlgorithm, type Algorithm } from '../../algorithm.ts';
 import { callStack } from '../../call-stack.ts';
+import { listField } from '../../notation/schema.ts';
 
 /** Most entries of a level order, so the tree fits on one screen. */
 export const MAX_LEVEL_ORDER = 31;
 
 const TreeInput = z.strictObject({
-  levelOrder: z
-    .array(z.number().nullable())
-    .min(1)
-    .max(MAX_LEVEL_ORDER)
-    .describe(
-      'The tree in level order, null for gaps, e.g. [4, 2, 6, 1, 3, null, 7].',
-    ),
+  levelOrder: listField(
+    z
+      .array(z.number().nullable())
+      .min(1)
+      .max(MAX_LEVEL_ORDER)
+      .describe(
+        'The tree in level order, null for gaps, e.g. [4, 2, 6, 1, 3, null, 7].',
+      ),
+    'level',
+  ),
 });
 type TreeInput = z.output<typeof TreeInput>;
 
@@ -96,6 +100,7 @@ function treeWalk(order: Order): Algorithm<TreeInput> {
     topic: 'trees',
     summary: DESCRIPTION[order],
     input: TreeInput,
+    main: 'levelOrder',
     examples: [{ levelOrder: [4, 2, 6, 1, 3, null, 7] }],
     code: code(order),
     run({ levelOrder }, outer) {

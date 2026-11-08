@@ -250,8 +250,8 @@ describe('min-heap and max-heap', () => {
         { from: values, index: 1.5, value: 0 },
         '$.input.index',
       ],
-      ['min-heap.pop', { from: {} }, '$.input.from'],
-      ['min-heap.pop', { from: { array: 3 } }, '$.input.from'],
+      ['min-heap.pop', { from: {} }, '$.input.from.array'],
+      ['min-heap.pop', { from: { array: 3 } }, '$.input.from.array'],
       ['min-heap', { from: values, ops: [{ op: 'zap' }] }, '$.input.ops[0].op'],
     ];
     for (const [id, input, path] of bad)
@@ -262,10 +262,11 @@ describe('min-heap and max-heap', () => {
   });
 
   it('says what forms `from` takes when it has neither', () => {
+    const forms =
+      'from must be up to 32 numbers to push, or { array } of up to 32 numbers that already is a heap';
+    expect(runError('min-heap.pop', { from: 3 }).message).toBe(forms);
     for (const from of [{}, { array: 3 }, Array.from({ length: 33 }, () => 1)])
-      expect(runError('min-heap.pop', { from }).message).toBe(
-        'from must be up to 32 numbers to push, or { array } of up to 32 numbers that already is a heap',
-      );
+      expect(runError('min-heap.pop', { from }).hint).toBe(forms);
   });
 
   it('holds at most 32 values, so `after` can always start the next call', () => {

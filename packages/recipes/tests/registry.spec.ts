@@ -92,8 +92,10 @@ describe.each(algorithms.map((a) => [a.id, a] as const))(
     });
 
     it('has an input schema that converts to JSON Schema', () => {
+      // An object, or one first among the forms of an input that may also
+      // be its main field alone (ADR 0032).
       const schema = z.toJSONSchema(algorithm.input, { io: 'input' });
-      expect(schema.type).toBe('object');
+      expect(schema.type ?? schema.anyOf?.[0]?.type).toBe('object');
     });
 
     it('shows its code in every language, with the same anchors', () => {

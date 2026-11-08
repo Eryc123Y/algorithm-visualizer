@@ -20,6 +20,7 @@ import {
   type Structure,
 } from '../../structure.ts';
 import { silentHandle, silentTrace, type Trace } from '../../trace.ts';
+import { listField } from '../../notation/schema.ts';
 
 export type HeapOrder = 'min' | 'max';
 
@@ -321,12 +322,15 @@ function start(from: HeapFrom, o: Order): HeapState {
 }
 
 const Values = z.array(z.number()).max(MAX_SIZE);
+/** Values, also in the list notation, described as `description`. */
+const values = (description: string) =>
+  listField(Values.describe(description), 'number');
 const From = z
   .union(
     [
-      Values.describe('Values pushed one by one to build the heap.'),
+      values('Values pushed one by one to build the heap.'),
       z.strictObject({
-        array: Values.describe('An array that already is a heap.'),
+        array: values('An array that already is a heap.'),
       }),
     ],
     {
