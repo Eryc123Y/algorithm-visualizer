@@ -16,6 +16,7 @@ import {
   Group,
   isElement,
   LIMITS,
+  Place,
   PointerName,
   Scalar,
 } from '../common.ts';
@@ -46,6 +47,7 @@ export const TreeDecl = z
   .strictObject({
     kind: z.literal('tree'),
     label: z.string().max(LIMITS.textLength).optional(),
+    place: Place.optional(),
     binary: z
       .boolean()
       .describe(
@@ -61,6 +63,7 @@ export const TreeDeclInput = z
   .strictObject({
     kind: z.literal('tree'),
     label: z.string().max(LIMITS.textLength).optional(),
+    place: Place.optional(),
     binary: z
       .boolean()
       .optional()

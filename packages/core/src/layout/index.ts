@@ -21,6 +21,7 @@ import {
   type LayoutFonts,
   type LayoutOptions,
 } from './options.ts';
+import { arrangeStructures, type FigureColumn } from './placement.ts';
 import type { Scene, SceneItem } from './scene.ts';
 
 export * from './array.ts';
@@ -36,6 +37,7 @@ export * from './stack.ts';
 export * from './tree.ts';
 export * from './node-tree.ts';
 export * from './options.ts';
+export * from './placement.ts';
 export * from './scene.ts';
 
 /** Metrics of one structure, tagged with its kind. */
@@ -128,9 +130,61 @@ export function measureTrace(
   return metrics;
 }
 
+/** A column's items and size; `x` is where the next column may start. */
+interface ColumnLayout {
+  readonly items: readonly SceneItem[];
+  readonly width: number;
+  readonly height: number;
+}
+
+/**
+ * Lays out the structures of one column top to bottom from `origin`,
+ * skipping any the state lacks.
+ */
+function layoutColumn(
+  vis: Visualization,
+  state: VisualizationState,
+  measured: SceneMetrics,
+  column: FigureColumn,
+  origin: { readonly x: number; readonly y: number },
+  o: LayoutOptions,
+): ColumnLayout {
+  const items: SceneItem[] = [];
+  let y = origin.y;
+  let width = 0;
+  let first = true;
+  for (const name of column.names) {
+    const decl = vis.structures[name]!;
+    const entry = state[name];
+    const m =
+      measured[name] ?? (entry && measureStructure(entry, decl, o.fonts));
+    if (entry === undefined || m === undefined) continue;
+    if (!first) y += o.structureGap;
+    first = false;
+
+    const block = layoutOf(entry.kind, {
+      name,
+      title: decl.label ?? name,
+      decl,
+      state: entry.state,
+      metrics: m.metrics,
+      origin: { x: origin.x, y },
+      region: column.region,
+      options: o,
+    } as Parameters<(typeof runtimes)[typeof entry.kind]['layout']>[0]);
+    // A loop, not push(...items): spreading a large array overflows the stack.
+    for (const item of block.items) items.push(item);
+    width = Math.max(width, block.width);
+    y += block.height;
+  }
+  return { items, width, height: y - origin.y };
+}
+
 /**
  * Lays out one state. `metrics` default to the state's own; metrics passed
- * in must have been measured with `options.fonts`.
+ * in must have been measured with `options.fonts`. Structures go in the
+ * columns of `arrangeStructures` (ADR 0029): a second column starts after
+ * the widest block of the first, plus `columnGap`.
  */
 export function layoutState(
   vis: Visualization,
@@ -141,38 +195,29 @@ export function layoutState(
   const o = options;
   const measured = metrics ?? measureState(vis, state, o.fonts);
   const items: SceneItem[] = [];
-  let y = o.padding;
+  let x = o.padding;
   let width = 0;
-  let first = true;
+  let height = 0;
 
-  for (const [name, decl] of Object.entries(vis.structures)) {
-    const entry = state[name];
-    const m =
-      measured[name] ?? (entry && measureStructure(entry, decl, o.fonts));
-    if (entry === undefined || m === undefined) continue;
-    if (!first) y += o.structureGap;
-    first = false;
-
-    const title = decl.label ?? name;
-    const origin = { x: o.padding, y };
-    const block = layoutOf(entry.kind, {
-      name,
-      title,
-      decl,
-      state: entry.state,
-      metrics: m.metrics,
-      origin,
-      options: o,
-    } as Parameters<(typeof runtimes)[typeof entry.kind]['layout']>[0]);
-    // A loop, not push(...items): spreading a large array overflows the stack.
-    for (const item of block.items) items.push(item);
-    width = Math.max(width, block.width);
-    y += block.height;
+  for (const column of arrangeStructures(vis.structures, o.layout)) {
+    if (x > o.padding) x += o.columnGap;
+    const laid = layoutColumn(
+      vis,
+      state,
+      measured,
+      column,
+      { x, y: o.padding },
+      o,
+    );
+    for (const item of laid.items) items.push(item);
+    x += laid.width;
+    width = x - o.padding;
+    height = Math.max(height, laid.height);
   }
 
   return {
     width: width + 2 * o.padding,
-    height: y + o.padding,
+    height: o.padding + height + o.padding,
     title: vis.title ?? 'Visualization',
     items,
   };

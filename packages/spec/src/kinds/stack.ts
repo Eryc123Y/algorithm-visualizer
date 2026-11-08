@@ -5,7 +5,7 @@
  */
 import { z } from 'zod';
 
-import { Element, ElementInput, LIMITS } from '../common.ts';
+import { Element, ElementInput, LIMITS, Place } from '../common.ts';
 import { typesOf, type KindSpec } from './kind.ts';
 import {
   elementFieldIds,
@@ -21,6 +21,7 @@ export const StackDecl = z
   .strictObject({
     kind: z.literal('stack'),
     label: z.string().max(LIMITS.textLength).optional(),
+    place: Place.optional(),
     initial: Elements.describe('Elements from bottom to top.'),
   })
   .describe('A stack (last in, first out).');

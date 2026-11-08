@@ -68,33 +68,43 @@ describe.each(['all', ...kindNames])('generated documents (%s)', (kind) => {
     'lay out and paint every frame inside a scene of constant size',
     () => {
       fc.assert(
-        fc.property(dice, fc.boolean(), (values, bare) => {
-          const built = build(new Dice(values), only);
-          if (!built.expected.ok) return;
-          const loaded = loadTrace(built.doc);
-          if (!loaded.ok) throw new Error(JSON.stringify(loaded.error));
-          const trace = loaded.value;
-          const layout = layoutTrace(trace, bare ? bareLayoutOptions : {});
-          // Nodes placed by hand may overlap, as their author put them.
-          const manual = new Set(
-            Object.entries(trace.visualization.structures)
-              .filter(([, d]) => d.kind === 'graph' && d.layout === 'manual')
-              .map(([name]) => name),
-          );
-          const first = layout.sceneAt(0);
-          for (let i = 0; i <= trace.length; i++) {
-            const scene = layout.sceneAt(i);
-            expect([scene.width, scene.height], `frame ${i} size`).toEqual([
-              first.width,
-              first.height,
-            ]);
-            expect(sceneProblems(scene), `frame ${i}`).toEqual([]);
-            expect(overlapProblems(scene, manual), `frame ${i}`).toEqual([]);
-            expect(fitProblems(scene), `frame ${i}`).toEqual([]);
-            const svg = renderSvg(scene, { theme: i % 2 ? 'dark' : 'light' });
-            expect(svg, `frame ${i} svg`).not.toMatch(/NaN|undefined|Infinity/);
-          }
-        }),
+        fc.property(
+          dice,
+          fc.boolean(),
+          fc.constantFrom('wide' as const, 'narrow' as const),
+          (values, bare, figure) => {
+            const built = build(new Dice(values), only);
+            if (!built.expected.ok) return;
+            const loaded = loadTrace(built.doc);
+            if (!loaded.ok) throw new Error(JSON.stringify(loaded.error));
+            const trace = loaded.value;
+            const layout = layoutTrace(trace, {
+              ...(bare ? bareLayoutOptions : {}),
+              layout: figure,
+            });
+            // Nodes placed by hand may overlap, as their author put them.
+            const manual = new Set(
+              Object.entries(trace.visualization.structures)
+                .filter(([, d]) => d.kind === 'graph' && d.layout === 'manual')
+                .map(([name]) => name),
+            );
+            const first = layout.sceneAt(0);
+            for (let i = 0; i <= trace.length; i++) {
+              const scene = layout.sceneAt(i);
+              expect([scene.width, scene.height], `frame ${i} size`).toEqual([
+                first.width,
+                first.height,
+              ]);
+              expect(sceneProblems(scene), `frame ${i}`).toEqual([]);
+              expect(overlapProblems(scene, manual), `frame ${i}`).toEqual([]);
+              expect(fitProblems(scene), `frame ${i}`).toEqual([]);
+              const svg = renderSvg(scene, { theme: i % 2 ? 'dark' : 'light' });
+              expect(svg, `frame ${i} svg`).not.toMatch(
+                /NaN|undefined|Infinity/,
+              );
+            }
+          },
+        ),
         params,
       );
     },

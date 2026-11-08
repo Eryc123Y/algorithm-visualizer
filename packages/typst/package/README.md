@@ -29,7 +29,7 @@ The algoviz engine runs inside the package as a WebAssembly plugin, so nothing e
 ## One step: `algoviz`
 
 ```typ
-#algoviz(source, input, step: -1, theme: "light", strict: false,
+#algoviz(source, input, step: -1, theme: "light", layout: auto, strict: false,
   width: auto, height: auto, fit: "contain", alt: auto)
 ```
 
@@ -42,6 +42,7 @@ The algoviz engine runs inside the package as a WebAssembly plugin, so nothing e
   A section alone (`"insert-5"`) or a range (`"2..5"`) names several frames, so use it with `algoviz-series`.
 
 - **`theme`** is `"light"`, `"dark"` or `"print"`.
+- **`layout`** says where the structures an algorithm keeps besides its main one go, such as Dijkstra's priority queue or a call stack: `"narrow"`, the default here, puts them below the main structure, for a column of notes; `"wide"` puts them beside it. `algoviz-slides` draws wide by default.
 - **`width`, `height`, `fit` and `alt`** are passed to `image`. `alt` defaults to the narration of the step.
 
 `algoviz` returns an image, so it goes into `figure`, `grid`, `box` and the rest like any image. At its natural size, one pixel of the figure is 0.75 pt.
@@ -68,8 +69,8 @@ Every algorithm of the algoviz registry is available, with the input its schema 
 ## Several steps: `algoviz-series`
 
 ```typ
-#algoviz-series(source, input, steps: auto, theme: "light", strict: false,
-  width: auto, height: auto, fit: "contain")
+#algoviz-series(source, input, steps: auto, theme: "light", layout: auto,
+  strict: false, width: auto, height: auto, fit: "contain")
 ```
 
 It returns an array of images, one per frame, each with its step's narration as `alt`. `steps: auto` means every frame; otherwise give one selector or an array of them, in any order. Sections and ranges count too, and the frames come out in timeline order, without repeats.
@@ -90,7 +91,7 @@ All figures of a document share one canvas, the largest of its frames. They ther
 
 ```typ
 #algoviz-slides(only, source, input, steps: auto, start: 1, theme: "light",
-  strict: false, width: auto, height: auto, fit: "contain")
+  layout: auto, strict: false, width: auto, height: auto, fit: "contain")
 ```
 
 It steps through a series in a slide deck, one frame per subslide, with your slide framework's own `only`. All frames share one box, sized by the first, so nothing moves from subslide to subslide. With [touying](https://typst.app/universe/package/touying):
@@ -157,7 +158,7 @@ Arguments of the wrong type, such as a number for `theme` or a misspelt argument
 
 ## The engine's data: `algoviz-figures`
 
-`algoviz-figures(source, input, steps: auto, theme: "light")` returns the engine's answer as a dictionary, for captions and custom layouts:
+`algoviz-figures(source, input, steps: auto, theme: "light", layout: auto)` returns the engine's answer as a dictionary, for captions and custom layouts:
 
 ```typ
 #let series = algoviz-figures("bst.delete", (from: (8, 3, 10, 1, 6), key: 3), steps: (0, -1))

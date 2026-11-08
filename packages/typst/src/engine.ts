@@ -7,8 +7,8 @@
  * asks for one frame (`step`) or a series (`steps`) in a theme. The engine
  * keeps the last few prepared documents, so further figures of a document
  * cost only their own layout and painting. Layout is pure (ADR 0003), so the
- * cache never changes a figure. Its key is the JSON of the source and the
- * theme, so each entry holds a copy of its document's text as well as the
+ * cache never changes a figure. Its key is the JSON of the source, the
+ * theme and the layout, so each entry holds a copy of its document's text as well as the
  * prepared trace; eight entries stay small for documents of the registry's
  * size.
  */
@@ -20,6 +20,7 @@ import {
   prepareFigures,
   type Figure,
   type PreparedFigures,
+  type SeriesOptions,
   type ThemeName,
 } from '@algoviz/svg';
 
@@ -41,6 +42,8 @@ const requestSchema = z
     steps: z.array(selector).optional(),
     /** A built-in theme name; `light` by default. */
     theme: z.string().optional(),
+    /** `wide` (default) or `narrow`: where side structures go (ADR 0029). */
+    layout: z.string().optional(),
   })
   .superRefine((request, ctx) => {
     const issue = (message: string, path: PropertyKey[] = []) =>
@@ -89,9 +92,10 @@ function prepare(
     if (!run.ok) return run;
     document = run.value.document;
   }
-  // prepareFigures checks the name, as Typst passes any text.
+  // prepareFigures checks the names, as Typst passes any text.
   return prepareFigures(document, {
     theme: (request.theme ?? 'light') as ThemeName,
+    layout: (request.layout ?? 'wide') as NonNullable<SeriesOptions['layout']>,
   });
 }
 
@@ -109,6 +113,7 @@ export function createEngine(cacheSize = CACHE_SIZE): Engine {
       input: request.input,
       document: request.document,
       theme: request.theme ?? 'light',
+      layout: request.layout ?? 'wide',
     });
     const hit = cache.get(key);
     if (hit !== undefined) {

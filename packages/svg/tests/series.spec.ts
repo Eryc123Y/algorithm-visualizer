@@ -169,6 +169,62 @@ describe('exportFigures', () => {
     });
   });
 
+  describe('layout (ADR 0029)', () => {
+    // An array with a stack in the side panel.
+    const sided = {
+      version: '0.4',
+      structures: {
+        a: { kind: 'array', initial: [3, 1, 2] },
+        calls: { kind: 'stack', initial: ['sort'], place: 'side' },
+      },
+      steps: [{ actions: [{ target: 'a', type: 'swap', i: 0, j: 1 }] }],
+    };
+    const sizeOf = (options: Parameters<typeof prepareScenes>[1]) => {
+      const prepared = prepareScenes(sided, options);
+      if (!prepared.ok) throw new Error(JSON.stringify(prepared.error));
+      const frames = prepared.value.scenes();
+      if (!frames.ok) throw new Error(JSON.stringify(frames.error));
+      return frames.value.map((f) => [f.width, f.height]);
+    };
+
+    it('is wide by default: the side panel is beside, every frame one canvas', () => {
+      const wide = sizeOf({});
+      const narrow = sizeOf({ layout: 'narrow' });
+      expect(sizeOf({ layout: 'wide' })).toEqual(wide);
+      expect(new Set(wide.map(String)).size).toBe(1);
+      expect(new Set(narrow.map(String)).size).toBe(1);
+      expect(wide[0]![0]).toBeGreaterThan(narrow[0]![0]!);
+      expect(wide[0]![1]).toBeLessThan(narrow[0]![1]!);
+    });
+
+    it('reaches exportFigures and renderSeries', () => {
+      const wide = exportFigures(sided, { steps: [1] });
+      const narrow = exportFigures(sided, { steps: [1], layout: 'narrow' });
+      if (!wide.ok || !narrow.ok) throw new Error('export failed');
+      expect(wide.value.figures[0]!.width).toBeGreaterThan(
+        narrow.value.figures[0]!.width,
+      );
+      const loaded = loadTrace(sided);
+      if (!loaded.ok) throw new Error('load failed');
+      const [series] = renderSeries(loaded.value, [1], { layout: 'narrow' });
+      expect(series!.svg).toBe(narrow.value.figures[0]!.svg);
+    });
+
+    it('reports an unknown layout, as other languages may pass one', () => {
+      expect(prepareScenes(sided, { layout: 'square' as never })).toEqual({
+        ok: false,
+        error: [
+          {
+            code: 'UNKNOWN_LAYOUT',
+            path: '$.layout',
+            message: 'No layout named "square"',
+            hint: 'Layouts: wide, narrow.',
+          },
+        ],
+      });
+    });
+  });
+
   it("reports the document's errors", () => {
     const result = exportFigures({ version: '0.2', structures: {} });
     expect(result.ok).toBe(false);

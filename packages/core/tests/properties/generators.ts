@@ -46,9 +46,12 @@ const positions = (r: Dice, n: number) =>
 // Declarations
 
 export function declaration(kind: StructureKindName, r: Dice): StructureDecl {
-  const label = r.chance(0.2)
-    ? { label: r.pick(['L', 'a long label for a structure', 'é']) }
-    : {};
+  const label = {
+    ...(r.chance(0.2)
+      ? { label: r.pick(['L', 'a long label for a structure', 'é']) }
+      : {}),
+    ...(r.chance(0.3) ? { place: r.pick(['main', 'side'] as const) } : {}),
+  };
   switch (kind) {
     case 'array':
       return {

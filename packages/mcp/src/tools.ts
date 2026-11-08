@@ -108,11 +108,18 @@ export const tools: readonly ToolDefinition[] = [
         'Frame number (negative counts from the end) or a selector of one frame, e.g. "relax#2". Default -1.',
       ),
       theme: z.enum(['light', 'dark']).optional().describe('Default "light".'),
+      layout: z
+        .enum(['wide', 'narrow'])
+        .optional()
+        .describe(
+          'Where structures with "place": "side" go: beside the others ("wide", default, as in the player) or below them ("narrow", as in a column of notes).',
+        ),
     }),
-    run({ document, frame, theme }) {
+    run({ document, frame, theme, layout }) {
       const result = render(document, {
         ...(frame === undefined ? {} : { frame }),
         ...(theme === undefined ? {} : { theme }),
+        ...(layout === undefined ? {} : { layout }),
       });
       return result.ok ? { text: result.value.svg } : failure(result.error);
     },

@@ -1,0 +1,144 @@
+{
+  "description": "A structure placed on the side, and one placed explicitly in the main column; place is kept in the canonical form (ADR 0029).",
+  "input": {
+    "version": "0.4",
+    "structures": {
+      "a": {
+        "kind": "array",
+        "initial": [3, 1, 2]
+      },
+      "calls": {
+        "kind": "stack",
+        "label": "call stack",
+        "initial": [],
+        "place": "side"
+      },
+      "out": {
+        "kind": "array",
+        "initial": [],
+        "place": "main"
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "calls",
+            "type": "push",
+            "element": "sort a[0..2]"
+          },
+          {
+            "target": "a",
+            "type": "compare",
+            "i": 0,
+            "j": 1
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "a",
+            "type": "swap",
+            "i": 0,
+            "j": 1
+          },
+          {
+            "target": "out",
+            "type": "insert",
+            "index": 0,
+            "element": 1
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "calls",
+            "type": "pop"
+          }
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "version": "0.4",
+    "structures": {
+      "a": {
+        "kind": "array",
+        "initial": [
+          {
+            "id": "e0",
+            "value": 3
+          },
+          {
+            "id": "e1",
+            "value": 1
+          },
+          {
+            "id": "e2",
+            "value": 2
+          }
+        ]
+      },
+      "calls": {
+        "kind": "stack",
+        "label": "call stack",
+        "place": "side",
+        "initial": []
+      },
+      "out": {
+        "kind": "array",
+        "place": "main",
+        "initial": []
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "calls",
+            "type": "push",
+            "element": {
+              "id": "e0",
+              "value": "sort a[0..2]"
+            }
+          },
+          {
+            "target": "a",
+            "type": "compare",
+            "i": 0,
+            "j": 1
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "a",
+            "type": "swap",
+            "i": 0,
+            "j": 1
+          },
+          {
+            "target": "out",
+            "type": "insert",
+            "index": 0,
+            "element": {
+              "id": "e0",
+              "value": 1
+            }
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "calls",
+            "type": "pop"
+          }
+        ]
+      }
+    ]
+  }
+}

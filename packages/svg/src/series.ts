@@ -6,11 +6,13 @@
  * prepared with `prepareFigures` and draws figures from them (ADR 0026).
  */
 import {
+  defaultLayoutOptions,
   layoutTrace,
   loadTrace,
   selectFrame,
   selectorOf,
   selectSeries,
+  type FigureLayout,
   type Scene,
   type Trace,
 } from '@algoviz/core';
@@ -50,7 +52,15 @@ export interface FigureSeries {
 export interface SeriesOptions {
   /** A theme name or a full theme, e.g. from `createTheme`. Default `'light'`. */
   readonly theme?: SvgTheme | ThemeName;
+  /**
+   * Where structures declared with `place: "side"` go (ADR 0029): beside
+   * the main ones (`'wide'`, the default) or below them (`'narrow'`).
+   */
+  readonly layout?: FigureLayout;
 }
+
+/** The figure layouts, for checking a name from another language. */
+const LAYOUTS: readonly FigureLayout[] = ['wide', 'narrow'];
 
 export interface ExportOptions extends SeriesOptions {
   /** Selectors of ADR 0020, as text or frame numbers. None means every frame. */
@@ -115,7 +125,11 @@ type Framer = (frames: readonly number[]) => readonly SceneFrame[];
  * canvas over every frame, keeping the scenes that call wants; later calls
  * lay out only their own frames.
  */
-function framerOf(trace: Trace, theme: SvgTheme): Framer {
+function framerOf(
+  trace: Trace,
+  theme: SvgTheme,
+  layout: FigureLayout = defaultLayoutOptions.layout,
+): Framer {
   let measured:
     | {
         readonly layout: ReturnType<typeof layoutTrace>;
@@ -128,18 +142,18 @@ function framerOf(trace: Trace, theme: SvgTheme): Framer {
     const kept = new Map<number, Scene>();
     if (measured === undefined) {
       const wanted = new Set(frames);
-      const layout = layoutTrace(trace, { fonts: theme.fontMetrics });
+      const laid = layoutTrace(trace, { fonts: theme.fontMetrics, layout });
       let width = 0;
       let height = 0;
       for (let f = 0; f <= trace.length; f++) {
-        const scene = layout.sceneAt(f);
+        const scene = laid.sceneAt(f);
         width = Math.max(width, scene.width);
         height = Math.max(height, scene.height);
         if (wanted.has(f)) kept.set(f, scene);
       }
-      measured = { layout, width, height };
+      measured = { layout: laid, width, height };
     }
-    const { layout, width, height } = measured;
+    const { layout: laidOut, width, height } = measured;
     return frames.map((frame) => {
       // Frame f is the state after step f - 1; frame 0 has no step.
       const narration =
@@ -150,7 +164,11 @@ function framerOf(trace: Trace, theme: SvgTheme): Framer {
         width,
         height,
         ...(narration === undefined ? {} : { narration }),
-        scene: { ...(kept.get(frame) ?? layout.sceneAt(frame)), width, height },
+        scene: {
+          ...(kept.get(frame) ?? laidOut.sceneAt(frame)),
+          width,
+          height,
+        },
       };
     });
   };
@@ -186,13 +204,18 @@ export function renderSeries(
       throw new RangeError(`Frame ${frame} is not in [0, ${trace.length}]`);
   if (frames.length === 0) return [];
   const theme = resolveTheme(options.theme);
-  return framerOf(trace, theme)(frames).map((f) => figureOf(f, theme));
+  return framerOf(
+    trace,
+    theme,
+    options.layout,
+  )(frames).map((f) => figureOf(f, theme));
 }
 
 /**
  * Loads a document once, for scenes of any of its frames, laid out on one
- * canvas in the theme's fonts. Errors are the document's diagnostics, or
- * `UNKNOWN_THEME` at `$.theme`; the selectors report theirs at `$`. Nothing
+ * canvas in the theme's fonts and the given layout. Errors are the
+ * document's diagnostics, `UNKNOWN_THEME` at `$.theme` or `UNKNOWN_LAYOUT`
+ * at `$.layout`; the selectors report theirs at `$`. Nothing
  * is laid out until a scene is asked for. Every painter's series is built
  * on it, so SVG and TikZ figures share positions and canvas.
  */
@@ -201,7 +224,7 @@ export function prepareScenes(
   options: SeriesOptions = {},
 ): Result<PreparedScenes, readonly Diagnostic[]> {
   // Callers from other languages, such as the Typst plugin, pass any text.
-  const { theme } = options;
+  const { theme, layout } = options;
   if (typeof theme === 'string' && !Object.hasOwn(themes, theme))
     return err([
       {
@@ -211,12 +234,21 @@ export function prepareScenes(
         hint: `Themes: ${Object.keys(themes).join(', ')}.`,
       },
     ]);
+  if (layout !== undefined && !LAYOUTS.includes(layout))
+    return err([
+      {
+        code: 'UNKNOWN_LAYOUT',
+        path: '$.layout',
+        message: `No layout named ${JSON.stringify(layout)}`,
+        hint: `Layouts: ${LAYOUTS.join(', ')}.`,
+      },
+    ]);
   const loaded = loadTrace(document);
   if (!loaded.ok) return loaded;
   const trace = loaded.value;
   const doc = trace.visualization;
   const resolved = resolveTheme(theme);
-  const frame = framerOf(trace, resolved);
+  const frame = framerOf(trace, resolved, layout);
   return ok({
     frames: trace.length + 1,
     theme: resolved,

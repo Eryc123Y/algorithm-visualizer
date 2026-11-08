@@ -411,3 +411,55 @@ describe('slides.tex as a handout', () => {
     expect(handout[3]).toBe(reference.at(-1));
   });
 });
+
+describe('layout (ADR 0029)', () => {
+  const figure = (keys = '') =>
+    `\\algoviz${keys === '' ? '' : `[${keys}]`}{bubble-sort}{"values": [3, 1, 2]}`;
+  const layouts = (dir: string) =>
+    calls(dir).map((c) => /--layout=(\S+)/.exec(c)?.[1]);
+
+  it('is narrow in notes, and the key sets it; each layout has its own figure', () => {
+    const dir = workspace();
+    const file = document(
+      dir,
+      'layout-notes',
+      [
+        figure(),
+        figure('layout=wide'),
+        // Cached: the same figures again.
+        figure('layout=narrow'),
+        figure('layout=wide'),
+        `\\algovizset{layout=wide}${figure()}`,
+        `\\algovizset{layout=auto}${figure('step=0')}`,
+      ].join('\n\n'),
+    );
+    expect(errors(tex(dir, file, 'unrestricted'))).toEqual([]);
+    expect(layouts(dir)).toEqual(['narrow', 'wide', 'narrow']);
+  });
+
+  it('is wide in Beamer, and narrow in beamerarticle notes', () => {
+    const dir = workspace();
+    const slides = beamer(
+      dir,
+      'layout-slides',
+      `\\begin{frame}${figure()}\\end{frame}\\begin{frame}${figure('step=0, layout=narrow')}\\end{frame}`,
+    );
+    expect(errors(tex(dir, slides, 'unrestricted'))).toEqual([]);
+    const notes = source(
+      dir,
+      'layout-article',
+      '\\documentclass{article}\\usepackage{beamerarticle}',
+      `\\begin{frame}${figure('step=1')}\\end{frame}`,
+    );
+    expect(errors(tex(dir, notes, 'unrestricted'))).toEqual([]);
+    expect(layouts(dir)).toEqual(['wide', 'narrow', 'narrow']);
+  });
+
+  it('refuses another value', () => {
+    const dir = workspace();
+    const file = document(dir, 'layout-bad', figure('layout=square'));
+    expect(tex(dir, file, 'unrestricted')).toMatch(
+      /Key 'algoviz\/layout' accepts only a fixed set of choices/,
+    );
+  });
+});

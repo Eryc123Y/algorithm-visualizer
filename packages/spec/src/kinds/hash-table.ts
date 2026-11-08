@@ -16,6 +16,7 @@ import {
   Index,
   isElement,
   LIMITS,
+  Place,
   Scalar,
 } from '../common.ts';
 import { typesOf, type DeclIssue, type IdRef, type KindSpec } from './kind.ts';
@@ -32,6 +33,7 @@ export const HashTableDecl = z
   .strictObject({
     kind: z.literal('hashTable'),
     label: z.string().max(LIMITS.textLength).optional(),
+    place: Place.optional(),
     buckets: z
       .array(z.array(Element).max(LIMITS.elementsPerStructure))
       .min(1)
@@ -44,6 +46,7 @@ export const HashTableDeclInput = z
   .strictObject({
     kind: z.literal('hashTable'),
     label: z.string().max(LIMITS.textLength).optional(),
+    place: Place.optional(),
     size: z
       .int()
       .min(1)

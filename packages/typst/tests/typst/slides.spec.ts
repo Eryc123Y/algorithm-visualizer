@@ -96,7 +96,7 @@ describe('algoviz-slides with a stand-in only', () => {
   it('gives frame k subslide start + k − 1, and the last one its subslide on', () => {
     const parts = slides(`"bst.delete", ${BST}, steps: (0, 1, -1)`);
     const document = documentOf('bst.delete', bstInput);
-    const svg = exported(document, [0, 1, -1], 'light');
+    const svg = exported(document, [0, 1, -1], 'light', 'wide');
     expect(parts.map((p) => p.kind)).toEqual([
       'hidden',
       'frame',
@@ -112,7 +112,7 @@ describe('algoviz-slides with a stand-in only', () => {
   it('starts at start, and takes the steps of algoviz-series', () => {
     const parts = slides(`"bst.delete", ${BST}, steps: "delete-3", start: 3`);
     const document = documentOf('bst.delete', bstInput);
-    const svg = exported(document, ['delete-3'], 'light');
+    const svg = exported(document, ['delete-3'], 'light', 'wide');
     const frames = parts.filter((p) => p.kind === 'frame');
     expect(frames.map((p) => p.svg)).toEqual(svg);
     expect(frames.map((p) => p.subslides)).toEqual([
@@ -124,7 +124,7 @@ describe('algoviz-slides with a stand-in only', () => {
   it('draws every frame by default, with its narration and the sizes given', () => {
     const parts = slides(`"bst.delete", ${BST}, theme: "print", width: 40%`);
     const document = documentOf('bst.delete', bstInput);
-    const svg = exported(document, [], 'print');
+    const svg = exported(document, [], 'print', 'wide');
     const frames = parts.filter((p) => p.kind === 'frame');
     expect(frames.map((p) => p.svg)).toEqual(svg);
     // Typst keeps 40% as a relative length, 40% + 0pt.
@@ -134,13 +134,36 @@ describe('algoviz-slides with a stand-in only', () => {
     expect(frames[1]!.alt).toBe(run.value.document.steps[0]!.meta?.narration);
   });
 
+  it('draws wide by default, as slides have room, and takes layout', () => {
+    // An array with a stack in the side panel (ADR 0029).
+    const sided = {
+      version: '0.4',
+      structures: {
+        a: { kind: 'array', initial: [3, 1, 2] },
+        calls: { kind: 'stack', initial: ['sort'], place: 'side' },
+      },
+      steps: [{ actions: [{ target: 'a', type: 'swap', i: 0, j: 1 }] }],
+    };
+    writeFileSync(join(installed!.root, 'sided.json'), JSON.stringify(sided));
+    const frames = (args: string) =>
+      slides(args)
+        .filter((p) => p.kind === 'frame')
+        .map((p) => p.svg);
+    expect(frames('json("/sided.json")')).toEqual(
+      exported(sided, [], 'light', 'wide'),
+    );
+    expect(frames('json("/sided.json"), layout: "narrow"')).toEqual(
+      exported(sided, [], 'light', 'narrow'),
+    );
+  });
+
   it('draws a series of one frame as its image, on every subslide', () => {
     const parts = slides(`"bst.delete", ${BST}, steps: "delete-3/copy"`);
     const document = documentOf('bst.delete', bstInput);
     expect(parts).toEqual([
       {
         kind: 'image',
-        svg: exported(document, ['delete-3/copy'], 'light')[0],
+        svg: exported(document, ['delete-3/copy'], 'light', 'wide')[0],
         alt: expect.any(String) as string,
       },
     ]);
@@ -238,12 +261,12 @@ describe('decks', () => {
   // Every frame of Dijkstra; the range on the second subslide, after a
   // subslide with the text alone; a section in the print theme.
   const expected = [
-    ...exported(dijkstra, [], 'light').map((svg) => [svg]),
+    ...exported(dijkstra, [], 'light', 'wide').map((svg) => [svg]),
     [],
-    ...exported(dijkstra, ['extract#3..improve#5'], 'light').map((svg) => [
-      svg,
-    ]),
-    ...exported(bst, ['delete-3'], 'print').map((svg) => [svg]),
+    ...exported(dijkstra, ['extract#3..improve#5'], 'light', 'wide').map(
+      (svg) => [svg],
+    ),
+    ...exported(bst, ['delete-3'], 'print', 'wide').map((svg) => [svg]),
   ];
 
   it.for(['slides-polylux.typ', 'slides-touying.typ'])(
@@ -270,9 +293,9 @@ describe('decks', () => {
     expect(deck).toContain('handout: true');
     writeFileSync(join(installed!.root, 'handout.typ'), deck);
     expect(pagesOf('handout.typ', installed!.root)).toEqual([
-      [exported(dijkstra, [-1], 'light')[0]],
-      [exported(dijkstra, ['improve#5'], 'light')[0]],
-      [exported(bst, [-1], 'print')[0]],
+      [exported(dijkstra, [-1], 'light', 'wide')[0]],
+      [exported(dijkstra, ['improve#5'], 'light', 'wide')[0]],
+      [exported(bst, [-1], 'print', 'wide')[0]],
     ]);
   });
 });

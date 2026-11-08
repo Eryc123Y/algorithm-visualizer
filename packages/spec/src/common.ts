@@ -199,6 +199,18 @@ export const AnchoredSource = z
   .describe('The code of the algorithm in one language, with its anchors.');
 export type AnchoredSource = z.infer<typeof AnchoredSource>;
 
+/**
+ * Where a structure goes in a figure (ADR 0029). The output's layout
+ * decides what "side" means: right of the main structures in a wide
+ * figure, below them in a narrow one.
+ */
+export const Place = z
+  .enum(['main', 'side'])
+  .describe(
+    'Where the structure goes: "main" (default) with the main picture, or "side" for an auxiliary structure such as a queue, a call stack or a table of results. Side structures go right of the main ones in wide figures (slides, the player) and below them in narrow ones (notes).',
+  );
+export type Place = z.infer<typeof Place>;
+
 /** An element with an explicit id: a cell, a stack entry, a list node, … */
 export const Element = z
   .strictObject({ id: ElementId, value: Scalar })

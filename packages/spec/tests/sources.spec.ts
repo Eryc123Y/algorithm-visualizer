@@ -199,8 +199,8 @@ describe('meta.at', () => {
 });
 
 describe('version 0.3', () => {
-  it('is the newest version, and dates sources and anchors', () => {
-    expect(PROTOCOL_VERSIONS.at(-1)).toBe('0.3');
+  it('dates sources and anchors', () => {
+    expect(PROTOCOL_VERSIONS).toContain('0.3');
     expect(
       PROTOCOL_FEATURES.filter((f) => f.since === '0.3').map((f) => f.name),
     ).toEqual(['sources', 'anchors']);

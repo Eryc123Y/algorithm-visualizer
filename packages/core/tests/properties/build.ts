@@ -54,7 +54,8 @@ export function build(r: Dice, only?: readonly string[]): Built {
   for (let k = 0, count = 1 + r.int(3); k < count; k++)
     structures[`s${k}`] = declaration(r.pick(kinds) as never, r);
   const declared = parseVisualization({
-    version: '0.1',
+    // 0.4: declarations may have `place` (ADR 0029).
+    version: '0.4',
     structures,
     steps: [],
   });
@@ -140,7 +141,7 @@ export function build(r: Dice, only?: readonly string[]): Built {
   }
 
   return {
-    doc: { version: '0.1', structures, steps },
+    doc: { version: '0.4', structures, steps },
     expected,
     final: entries,
     problems,

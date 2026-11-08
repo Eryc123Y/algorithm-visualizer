@@ -36,7 +36,7 @@ An algoviz document is JSON that describes a step-by-step visualization of an al
 }
 ```
 
-- `version` is the protocol version, `"major.minor"`. Write the oldest version that has every feature you use: `"0.3"` if the document has `sources` (code in several languages, below), `"0.2"` if any step has a name or the document has sections, and `"0.1"` otherwise.
+- `version` is the protocol version, `"major.minor"`. Write the oldest version that has every feature you use: `"0.4"` if a structure has `place` (below), `"0.3"` if the document has `sources` (code in several languages, below), `"0.2"` if any step has a name or the document has sections, and `"0.1"` otherwise.
 - `title` and `source` are optional. `source.code` is the code being taught; `meta.line` (1-based) highlights a line of it. Without `source`, leave out `line`. To show the code in pseudocode and Python, give `sources` instead (below).
 - `structures` maps names to declarations (at most 16). Names are identifiers: letters, digits and `_`, not starting with a digit, e.g. `arr`, `dist`, `call_stack`.
 - `steps` is the timeline. Each step has `actions` (applied in order, possibly none) and optional `meta`:
@@ -198,6 +198,53 @@ Readers choose between pseudocode and Python in the player, which keeps the fram
         "at": "found",
         "narration": "Found 7 at index 1."
       }
+    }
+  ]
+}
+```
+
+## Main and side structures
+
+Draw what the algorithm keeps besides its main structure: Dijkstra's priority queue, BFS's queue, a call stack, a table of results. Give each such auxiliary structure `"place": "side"`; the others are `"main"`, the default. This needs `"version": "0.4"`.
+
+- In a wide figure (the player, slides) side structures form a column right of the main ones. In a narrow figure (a column of notes) they go below them. The output chooses; the document only says which structures are auxiliary.
+- Within the main and the side column, structures keep their declaration order. Declare the main structure first.
+- Keep on the main side what lines up with the main structure, such as a buffer array whose cells sit under the array's.
+
+```json
+{
+  "version": "0.4",
+  "title": "Depth-first search, the first two calls",
+  "structures": {
+    "g": {
+      "kind": "graph",
+      "nodes": ["A", "B", "C"],
+      "edges": [
+        ["A", "B"],
+        ["A", "C"]
+      ]
+    },
+    "calls": {
+      "kind": "stack",
+      "label": "call stack",
+      "initial": [],
+      "place": "side"
+    }
+  },
+  "steps": [
+    {
+      "actions": [
+        { "target": "calls", "type": "push", "element": "visit A" },
+        { "target": "g", "type": "visit", "node": "A" }
+      ],
+      "meta": { "narration": "Visit A." }
+    },
+    {
+      "actions": [
+        { "target": "calls", "type": "push", "element": "visit B" },
+        { "target": "g", "type": "visit", "node": "B" }
+      ],
+      "meta": { "narration": "B is new: go deeper and visit it." }
     }
   ]
 }

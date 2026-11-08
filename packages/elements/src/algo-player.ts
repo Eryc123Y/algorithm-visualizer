@@ -36,6 +36,7 @@ import {
   loadTrace,
   sectionAt,
   stepNameAt,
+  type FigureLayout,
   type LayoutFonts,
   type LayoutOptions,
   type Trace,
@@ -111,6 +112,7 @@ export class AlgoPlayer extends LitElement {
   static override properties = {
     src: { type: String },
     mode: { type: String, reflect: true },
+    layout: { type: String },
     once: { type: Boolean },
     motion: { type: String },
     visualization: { attribute: false },
@@ -137,6 +139,12 @@ export class AlgoPlayer extends LitElement {
   declare visualization: unknown;
   /** `interactive` (default) or `display`: animation only, no chrome. */
   declare mode: PlayerMode;
+  /**
+   * Where structures declared with `place: "side"` go (ADR 0029): beside
+   * the others (`wide`, the default) or below them (`narrow`), for a
+   * narrow column. Any other value draws wide.
+   */
+  declare layout: FigureLayout;
   /** In display mode, play once instead of looping. */
   declare once: boolean;
   /** Cell movement; defaults to `arc` when interactive, `linear` in display. */
@@ -198,6 +206,7 @@ export class AlgoPlayer extends LitElement {
     super();
     this.src = undefined;
     this.mode = 'interactive';
+    this.layout = 'wide';
     this.once = false;
     this.motion = undefined;
     this.visualization = undefined;
@@ -322,6 +331,12 @@ export class AlgoPlayer extends LitElement {
         else if (!this.autoplay) this.#controller.pause();
       }
     }
+    if (
+      changed.has('layout') &&
+      this.trace !== null &&
+      changed.get('layout') !== undefined
+    )
+      this.#relayout();
     // A theme with other fonts needs room for its own text (ADR 0024).
     if (
       this.trace !== null &&
@@ -575,6 +590,7 @@ export class AlgoPlayer extends LitElement {
   #layoutOptions(): LayoutOptions {
     return {
       ...(this.#isDisplay ? bareLayoutOptions : defaultLayoutOptions),
+      layout: this.layout === 'narrow' ? 'narrow' : 'wide',
       fonts: this.#sceneTheme().fontMetrics,
     };
   }

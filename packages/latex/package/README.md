@@ -48,17 +48,20 @@ The package runs the `algoviz` command through shell escape, as `minted` runs Py
 
 ## Keys
 
-| Key               | Default                | Meaning                                                                        |
-| ----------------- | ---------------------- | ------------------------------------------------------------------------------ |
-| `step`            | `-1`                   | The frame to draw (below).                                                     |
-| `steps`           | none                   | A series of frames, one per slide in Beamer ([Slides](#slides)).               |
-| `start`           | `+`                    | The slide of a series' first frame ([Slides](#slides)).                        |
-| `theme`           | `light`                | `light`, `dark` or `print`.                                                    |
-| `width`, `height` | natural                | The figure's size. With both, the figure fits inside both and keeps its shape. |
-| `scale`           | `1`                    | A factor on the natural size.                                                  |
-| `value font`      | `\normalfont`          | The font of values in cells and nodes, indices, edge labels and pointers.      |
-| `label font`      | `\normalfont\sffamily` | The font of titles and labels such as "top".                                   |
-| `algorithm`       | none                   | With `\algovizfile`: the file is this algorithm's input, not a document.       |
+| Key               | Default                 | Meaning                                                                          |
+| ----------------- | ----------------------- | -------------------------------------------------------------------------------- |
+| `step`            | `-1`                    | The frame to draw (below).                                                       |
+| `steps`           | none                    | A series of frames, one per slide in Beamer ([Slides](#slides)).                 |
+| `start`           | `+`                     | The slide of a series' first frame ([Slides](#slides)).                          |
+| `theme`           | `light`                 | `light`, `dark` or `print`.                                                      |
+| `layout`          | `narrow`, Beamer `wide` | Where structures beside the main one go, such as a queue: below it or beside it. |
+| `width`, `height` | natural                 | The figure's size. With both, the figure fits inside both and keeps its shape.   |
+| `scale`           | `1`                     | A factor on the natural size.                                                    |
+| `value font`      | `\normalfont`           | The font of values in cells and nodes, indices, edge labels and pointers.        |
+| `label font`      | `\normalfont\sffamily`  | The font of titles and labels such as "top".                                     |
+| `algorithm`       | none                    | With `\algovizfile`: the file is this algorithm's input, not a document.         |
+
+An algorithm's figure draws what it keeps besides its main structure, such as Dijkstra's priority queue or a call stack. `layout=narrow` puts those structures below the main one, which suits a column of notes; `layout=wide` puts them beside it, which suits a slide. The default is `wide` in the `beamer` class and `narrow` everywhere else, `beamerarticle` notes included; `layout=auto` goes back to it.
 
 At its natural size, a figure's values come out at 1.25 times the size of the text around it, and its labels at three quarters of it. A figure is never wider than the line, unless `width` or `height` says otherwise. Every figure of one run of an algorithm has the same canvas, so figures of different steps drawn at the same scale line up.
 
@@ -117,7 +120,7 @@ The input of `\algoviz` is JSON, as TeX reads it:
 
 ## The cache
 
-Each figure is kept in `_algoviz/` under the MD5 of everything that changes its drawing: the input or the file's contents, the algorithm, the step, the theme, the file format and the package version.
+Each figure is kept in `_algoviz/` under the MD5 of everything that changes its drawing: the input or the file's contents, the algorithm, the step, the theme, the layout, the file format and the package version.
 
 - A figure found there is drawn without running anything, so the next runs of a document cost only TikZ's time.
 - Fonts and sizes are applied when the figure is drawn, so changing them makes no new figure.

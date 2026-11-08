@@ -7,7 +7,8 @@
       "enum": [
         "0.1",
         "0.2",
-        "0.3"
+        "0.3",
+        "0.4"
       ],
       "description": "Protocol version, \"major.minor\": the oldest version that has every feature the document uses."
     },
@@ -98,6 +99,14 @@
               "label": {
                 "type": "string",
                 "maxLength": 2000
+              },
+              "place": {
+                "type": "string",
+                "enum": [
+                  "main",
+                  "side"
+                ],
+                "description": "Where the structure goes: \"main\" (default) with the main picture, or \"side\" for an auxiliary structure such as a queue, a call stack or a table of results. Side structures go right of the main ones in wide figures (slides, the player) and below them in narrow ones (notes)."
               },
               "view": {
                 "description": "How to draw the array: \"row\" (default) or \"tree\", a complete binary tree where index i has children 2i+1 and 2i+2, as for heaps.",
@@ -190,6 +199,14 @@
                 "type": "string",
                 "maxLength": 2000
               },
+              "place": {
+                "type": "string",
+                "enum": [
+                  "main",
+                  "side"
+                ],
+                "description": "Where the structure goes: \"main\" (default) with the main picture, or \"side\" for an auxiliary structure such as a queue, a call stack or a table of results. Side structures go right of the main ones in wide figures (slides, the player) and below them in narrow ones (notes)."
+              },
               "initial": {
                 "anyOf": [
                   {
@@ -273,6 +290,14 @@
                 "type": "string",
                 "maxLength": 2000
               },
+              "place": {
+                "type": "string",
+                "enum": [
+                  "main",
+                  "side"
+                ],
+                "description": "Where the structure goes: \"main\" (default) with the main picture, or \"side\" for an auxiliary structure such as a queue, a call stack or a table of results. Side structures go right of the main ones in wide figures (slides, the player) and below them in narrow ones (notes)."
+              },
               "initial": {
                 "anyOf": [
                   {
@@ -355,6 +380,14 @@
               "label": {
                 "type": "string",
                 "maxLength": 2000
+              },
+              "place": {
+                "type": "string",
+                "enum": [
+                  "main",
+                  "side"
+                ],
+                "description": "Where the structure goes: \"main\" (default) with the main picture, or \"side\" for an auxiliary structure such as a queue, a call stack or a table of results. Side structures go right of the main ones in wide figures (slides, the player) and below them in narrow ones (notes)."
               },
               "doubly": {
                 "description": "Also keep `prev` pointers (default false).",
@@ -446,6 +479,14 @@
               "label": {
                 "type": "string",
                 "maxLength": 2000
+              },
+              "place": {
+                "type": "string",
+                "enum": [
+                  "main",
+                  "side"
+                ],
+                "description": "Where the structure goes: \"main\" (default) with the main picture, or \"side\" for an auxiliary structure such as a queue, a call stack or a table of results. Side structures go right of the main ones in wide figures (slides, the player) and below them in narrow ones (notes)."
               },
               "binary": {
                 "description": "Default false, or true with `levelOrder`.",
@@ -562,6 +603,14 @@
               "label": {
                 "type": "string",
                 "maxLength": 2000
+              },
+              "place": {
+                "type": "string",
+                "enum": [
+                  "main",
+                  "side"
+                ],
+                "description": "Where the structure goes: \"main\" (default) with the main picture, or \"side\" for an auxiliary structure such as a queue, a call stack or a table of results. Side structures go right of the main ones in wide figures (slides, the player) and below them in narrow ones (notes)."
               },
               "directed": {
                 "description": "Default false.",
@@ -758,6 +807,14 @@
                 "type": "string",
                 "maxLength": 2000
               },
+              "place": {
+                "type": "string",
+                "enum": [
+                  "main",
+                  "side"
+                ],
+                "description": "Where the structure goes: \"main\" (default) with the main picture, or \"side\" for an auxiliary structure such as a queue, a call stack or a table of results. Side structures go right of the main ones in wide figures (slides, the player) and below them in narrow ones (notes)."
+              },
               "rows": {
                 "type": "integer",
                 "minimum": 0,
@@ -891,6 +948,14 @@
               "label": {
                 "type": "string",
                 "maxLength": 2000
+              },
+              "place": {
+                "type": "string",
+                "enum": [
+                  "main",
+                  "side"
+                ],
+                "description": "Where the structure goes: \"main\" (default) with the main picture, or \"side\" for an auxiliary structure such as a queue, a call stack or a table of results. Side structures go right of the main ones in wide figures (slides, the player) and below them in narrow ones (notes)."
               },
               "size": {
                 "description": "Number of buckets; at least the length of `initial`.",
@@ -3944,6 +4009,6 @@
       ]
     }
   },
-  "$id": "urn:algoviz:schema:visualization:0.3",
+  "$id": "urn:algoviz:schema:visualization:0.4",
   "title": "Visualization"
 }

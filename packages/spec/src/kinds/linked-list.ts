@@ -15,6 +15,7 @@ import {
   ElementInput,
   Index,
   LIMITS,
+  Place,
   PointerName,
   Scalar,
 } from '../common.ts';
@@ -32,6 +33,7 @@ import {
 const shape = {
   kind: z.literal('linkedList'),
   label: z.string().max(LIMITS.textLength).optional(),
+  place: Place.optional(),
   doubly: z
     .boolean()
     .optional()
