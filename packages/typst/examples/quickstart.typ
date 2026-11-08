@@ -9,8 +9,8 @@
 )
 
 #figure(
-  algoviz("dijkstra", (graph: graph, source: "A"), step: "relax#3"),
-  caption: [Dijkstra's algorithm from A, at its third relaxation.],
+  algoviz("dijkstra", (graph: graph, source: "A"), step: "improve#3"),
+  caption: [Dijkstra's algorithm from A: the edge from B improves C from 7 to 5.],
 )
 
 // The last frame is the default.

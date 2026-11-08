@@ -1,5 +1,6 @@
 % Slides with algoviz figures. Compile with shell escape:
 %   latexmk -pdf -shell-escape slides.tex
+% steps= makes one slide per frame of a series, all in one picture.
 % Inside a frame, write the # of a step as \#, or make the frame fragile.
 \documentclass{beamer}
 \usepackage{algoviz}
@@ -7,19 +8,33 @@
 
 \begin{document}
 
-\begin{frame}{Dijkstra's algorithm: the second relaxation}
+% steps without a value is every frame of the run.
+\begin{frame}{Dijkstra's algorithm, step by step}
   \centering
-  \algovizfile[algorithm=dijkstra, step=relax\#2]{graph.json}
+  \algovizfile[algorithm=dijkstra, steps]{graph.json}
 \end{frame}
 
+% A range of steps. After \pause, the series starts on the next slide.
+\begin{frame}{Settling $a$}
+  The queue hands out $a$, at distance $3$, and relaxes its edges.
+  \pause
+
+  \centering
+  \algovizfile[algorithm=dijkstra, steps=extract\#3..improve\#5,
+    height=0.6\textheight]{graph.json}
+\end{frame}
+
+% step= is one figure, on every slide of its frame.
 \begin{frame}[fragile]{Dijkstra's algorithm: the last relaxation}
   \centering
   \algovizfile[algorithm=dijkstra, step=relax#6]{graph.json}
 \end{frame}
 
-\begin{frame}{Heapsort, in the dark theme}
+% A section of a run, in the print theme.
+\begin{frame}{Deleting $3$ from a binary search tree}
   \centering
-  \algoviz[step=-1, theme=dark]{heapsort}{"values": [4, 10, 3, 5, 1]}
+  \algoviz[steps=delete-3, theme=print]{bst.delete}{
+    "from": [8, 3, 10, 1, 6, 4, 7], "key": 3}
 \end{frame}
 
 \end{document}

@@ -4,53 +4,31 @@
  * plugin and an engine built from this checkout. Run with
  * `npm run test:typst`; it needs `typst` on PATH.
  */
-import { spawnSync } from 'node:child_process';
-import {
-  copyFileSync,
-  mkdirSync,
-  mkdtempSync,
-  readdirSync,
-  readFileSync,
-  rmSync,
-  writeFileSync,
-} from 'node:fs';
-import { tmpdir } from 'node:os';
+import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { algorithms, runAlgorithm } from '@algoviz/recipes';
 import type { Diagnostic } from '@algoviz/spec';
-import { exportFigures, type ThemeName } from '@algoviz/svg';
+import { exportFigures } from '@algoviz/svg';
 
-import { buildEngine } from '../../scripts/engine.ts';
 import { instantiatePlugin } from '../../scripts/host.ts';
+import {
+  examples,
+  exported,
+  frameworksMissing,
+  installPackage,
+  packageDir,
+  spec,
+  type Installed,
+} from './install.ts';
 
-const here = (path: string) => fileURLToPath(new URL(path, import.meta.url));
-const packageDir = here('../../package');
-const examples = here('../../examples');
-const manifest = readFileSync(join(packageDir, 'typst.toml'), 'utf8');
-const field = (name: string) =>
-  new RegExp(`^${name}\\s*=\\s*"([^"]+)"`, 'm').exec(manifest)![1]!;
-const spec = `@local/${field('name')}:${field('version')}`;
-
+let installed: Installed | undefined;
 let tmp = '';
-let packages: string;
-let root: string;
+let root = '';
 
-function typst(args: readonly string[]) {
-  const result = spawnSync(
-    'typst',
-    [...args, '--package-path', packages, '--ignore-system-fonts'],
-    { encoding: 'utf8', maxBuffer: 1 << 28 },
-  );
-  if (result.error !== undefined)
-    throw new Error(
-      `test:typst needs the typst command: ${result.error.message}`,
-    );
-  return result;
-}
+const typst = (args: readonly string[]) => installed!.typst(args);
 
 /** Evaluates Typst code with the package imported. */
 function run(code: string) {
@@ -71,17 +49,6 @@ function failure(code: string): string {
   return result.stderr;
 }
 
-/** The SVG `algoviz export` draws for a document. */
-function exported(
-  document: unknown,
-  steps: readonly (string | number)[],
-  theme: ThemeName,
-): string[] {
-  const series = exportFigures(document, { steps, theme });
-  if (!series.ok) throw new Error(JSON.stringify(series.error));
-  return series.value.figures.map((f) => f.svg);
-}
-
 function documentOf(id: string, input: unknown): unknown {
   const run = runAlgorithm(id, input);
   if (!run.ok) throw new Error(JSON.stringify(run.error));
@@ -89,27 +56,23 @@ function documentOf(id: string, input: unknown): unknown {
 }
 
 beforeAll(async () => {
-  tmp = mkdtempSync(join(tmpdir(), 'algoviz-typst-'));
-  packages = join(tmp, 'packages');
-  root = join(tmp, 'root');
-  const installed = join(packages, 'local', field('name'), field('version'));
-  mkdirSync(installed, { recursive: true });
-  mkdirSync(root);
-  for (const file of ['typst.toml', 'lib.typ', 'plugin.wasm', 'OFL.txt'])
-    copyFileSync(join(packageDir, file), join(installed, file));
-  const { bytecode } = await buildEngine();
-  writeFileSync(join(installed, 'engine.bc'), bytecode);
+  installed = await installPackage();
+  ({ tmp, root } = installed);
 });
 
 // A run stopped early may leave the directory in the system's tmpdir.
-afterAll(() => {
-  if (tmp !== '') rmSync(tmp, { recursive: true, force: true });
-});
+afterAll(() => installed?.remove());
 
 describe('the examples', () => {
   const files = readdirSync(examples).filter((f) => f.endsWith('.typ'));
+  // Slide decks need polylux or touying, which Typst may fail to download;
+  // they are then skipped with the reason.
+  const missing = frameworksMissing();
+  const unavailable = (file: string) =>
+    missing !== undefined && file.startsWith('slides-');
 
-  it.each(files)('%s compiles without warnings', (file) => {
+  it.for(files)('%s compiles without warnings', (file, ctx) => {
+    if (unavailable(file)) ctx.skip(missing);
     const result = typst([
       'compile',
       '--root',
@@ -128,7 +91,9 @@ describe('the examples', () => {
           .stdout,
       ) as unknown;
     const errors = 'query(<algoviz-error>).map(m => m.value.map(d => d.code))';
-    for (const file of files.filter((f) => f !== 'errors.typ')) {
+    for (const file of files.filter(
+      (f) => f !== 'errors.typ' && !unavailable(f),
+    )) {
       expect(query(file, errors), file).toEqual([]);
       expect(query(file, 'query(image).len()'), file).toBeGreaterThan(1);
     }

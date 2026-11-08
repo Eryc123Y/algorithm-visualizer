@@ -6,6 +6,7 @@
 %%   \algovizfile[algorithm=dijkstra]{graph.json}    an input in a file
 %%   \algovizinput{figure.tex}                       made by algoviz export
 %%   \algovizset{theme=print, width=\linewidth}
+%%   \algoviz[steps=0..-1]{dijkstra}{...}            Beamer overlays (ADR 0028)
 %%
 %% The package runs the algoviz command through shell escape, as minted
 %% runs Pygments, and keeps the figures it writes in a cache directory.
@@ -64,6 +65,19 @@
     there~in~hexadecimal.~Put~the~input~in~a~JSON~file~and~use~
     \iow_char:N\\algovizfile[algorithm=#1]{file.json}.
   }
+\msg_new:nnnn { algoviz } { bad-start }
+  { start~takes~+~or~a~slide~number,~not~'#1'. }
+  {
+    +,~the~default,~starts~a~series~on~the~next~step~of~Beamer's~
+    incremental~count,~as~<+>~does;~a~number~such~as~2~starts~it~on~
+    that~slide.
+  }
+\msg_new:nnnn { algoviz } { no-overlays }
+  { A~series~of~#1~frames~needs~Beamer~for~its~overlays,~so~only~its~last~frame~is~drawn. }
+  {
+    steps=~draws~one~frame~per~slide~in~a~Beamer~frame.~For~several~
+    frames~side~by~side,~use~one~\iow_char:N\\algoviz~per~frame~with~step=.
+  }
 \msg_new:nnnn { algoviz } { format }
   { The~figure~'#1'~has~format~#2,~but~this~package~reads~format~#3. }
   {
@@ -82,6 +96,9 @@
 \tl_new:N \l__algoviz_command_tl
 \str_new:N \l__algoviz_cache_str
 \tl_new:N \l__algoviz_step_tl
+\tl_new:N \l__algoviz_steps_tl
+\bool_new:N \l__algoviz_series_bool
+\str_new:N \l__algoviz_start_str
 \tl_new:N \l__algoviz_theme_tl
 \tl_new:N \l__algoviz_algorithm_tl
 \dim_new:N \l__algoviz_width_dim
@@ -89,6 +106,20 @@
 \fp_new:N \l__algoviz_scale_fp
 \tl_new:N \l__algoviz_value_font_tl
 \tl_new:N \l__algoviz_label_font_tl
+
+% The slide of a series' first frame: + for Beamer's incremental count, as
+% <+> takes it, or a slide number, short enough for TeX's integers.
+\regex_const:Nn \c__algoviz_start_regex { \A (\+ | [1-9] [0-9]{0,3}) \Z }
+\str_new:N \l__algoviz_tmp_str
+\cs_new_protected:Npn \__algoviz_set_start:n #1
+  {
+    \str_set:Nn \l__algoviz_tmp_str {#1}
+    \regex_match:NVTF \c__algoviz_start_regex \l__algoviz_tmp_str
+      { \str_set_eq:NN \l__algoviz_start_str \l__algoviz_tmp_str }
+      { \msg_error:nnV { algoviz } { bad-start } \l__algoviz_tmp_str }
+  }
+\cs_generate_variant:Nn \regex_match:NnTF { NV }
+\cs_generate_variant:Nn \msg_error:nnn { nnV }
 
 \keys_define:nn { algoviz }
   {
@@ -98,8 +129,21 @@
     cachedir .str_set:N = \l__algoviz_cache_str ,
     cachedir .initial:n = _algoviz ,
     cachedir .usage:n = preamble ,
-    step .tl_set:N = \l__algoviz_step_tl ,
+    % step and steps replace each other: the last one set applies.
+    step .code:n =
+      {
+        \tl_set:Nn \l__algoviz_step_tl {#1}
+        \bool_set_false:N \l__algoviz_series_bool
+      } ,
     step .initial:n = -1 ,
+    steps .code:n =
+      {
+        \tl_set:Nn \l__algoviz_steps_tl {#1}
+        \bool_set_true:N \l__algoviz_series_bool
+      } ,
+    steps .default:n = ,
+    start .code:n = \__algoviz_set_start:n {#1} ,
+    start .initial:n = + ,
     theme .tl_set:N = \l__algoviz_theme_tl ,
     theme .initial:n = light ,
     algorithm .tl_set:N = \l__algoviz_algorithm_tl ,
@@ -138,11 +182,32 @@
 \dim_new:N \g__algoviz_size_dim
 \str_new:N \l__algoviz_current_str
 
+% The figures of the file being read, each {colours}{drawing}, and the
+% largest canvas among them (ADR 0028). A file holds one figure, or every
+% figure of a series.
+\bool_new:N \l__algoviz_reading_bool
+\seq_new:N \l__algoviz_frames_seq
+\fp_new:N \l__algoviz_canvas_width_fp
+\fp_new:N \l__algoviz_canvas_height_fp
+\tl_new:N \l__algoviz_frame_tl
+
 % #1 format, #2 width, #3 height (scene units), #4 colours, #5 drawing.
+% While a file is read, it keeps the figure for \__algoviz_draw_frames:;
+% called on its own, it draws the figure at once.
 \cs_new_protected:cpn { algoviz@figure } #1#2#3#4#5
   {
     \int_compare:nNnTF {#1} = { \c__algoviz_format_int }
-      { \__algoviz_draw:nnnn {#2} {#3} {#4} {#5} }
+      {
+        \bool_if:NTF \l__algoviz_reading_bool
+          {
+            \fp_set:Nn \l__algoviz_canvas_width_fp
+              { max ( \l__algoviz_canvas_width_fp , #2 ) }
+            \fp_set:Nn \l__algoviz_canvas_height_fp
+              { max ( \l__algoviz_canvas_height_fp , #3 ) }
+            \seq_put_right:Nn \l__algoviz_frames_seq { {#4} {#5} }
+          }
+          { \__algoviz_draw:nnnn {#2} {#3} {#4} {#5} }
+      }
       {
         \msg_error:nneee { algoviz } { format }
           { \l__algoviz_current_str } {#1}
@@ -194,14 +259,92 @@
   }
 
 \cs_new_protected:Npn \__algoviz_draw:nnnn #1#2#3#4
+  { \__algoviz_picture:nnn {#1} {#2} { #3 #4 } }
+
+% A picture of the canvas #1 by #2, drawing #3.
+\cs_new_protected:Npn \__algoviz_picture:nnn #1#2#3
   {
     \__algoviz_unit:nn {#1} {#2}
     \begin{tikzpicture} [ x = \algoviz@u , y = -\algoviz@u ]
       \useasboundingbox (0,0) rectangle (#1,#2);
       #3
-      #4
     \end{tikzpicture}
   }
+\cs_generate_variant:Nn \__algoviz_picture:nnn { ee }
+
+% Beamer, or beamerarticle notes made from the same frames, have overlays.
+\bool_new:N \g__algoviz_overlays_bool
+\hook_gput_code:nnn { begindocument } { algoviz }
+  {
+    \bool_lazy_or:nnT
+      { \IfClassLoadedTF { beamer } { \c_true_bool } { \c_false_bool } }
+      { \IfPackageLoadedTF { beamerarticle } { \c_true_bool } { \c_false_bool } }
+      { \bool_gset_true:N \g__algoviz_overlays_bool }
+  }
+
+% The figures read from a file: one is a figure; several share one picture,
+% one frame per slide in Beamer, and the last frame elsewhere (ADR 0028).
+\cs_new_protected:Npn \__algoviz_draw_frames:
+  {
+    \int_case:nnF { \seq_count:N \l__algoviz_frames_seq }
+      {
+        { 0 } { }
+        { 1 } { \__algoviz_draw_last: }
+      }
+      {
+        \bool_if:NTF \g__algoviz_overlays_bool
+          {
+            \__algoviz_picture:een
+              { \fp_use:N \l__algoviz_canvas_width_fp }
+              { \fp_use:N \l__algoviz_canvas_height_fp }
+              {
+                \seq_map_indexed_function:NN \l__algoviz_frames_seq
+                  \__algoviz_overlay:nn
+              }
+          }
+          {
+            \msg_warning:nne { algoviz } { no-overlays }
+              { \seq_count:N \l__algoviz_frames_seq }
+            \__algoviz_draw_last:
+          }
+      }
+  }
+
+% The last figure read, alone in its picture.
+\cs_new_protected:Npn \__algoviz_draw_last:
+  {
+    \seq_get_right:NN \l__algoviz_frames_seq \l__algoviz_frame_tl
+    \__algoviz_picture:een
+      { \fp_use:N \l__algoviz_canvas_width_fp }
+      { \fp_use:N \l__algoviz_canvas_height_fp }
+      { \exp_last_unbraced:NV \use:nn \l__algoviz_frame_tl }
+  }
+
+% Frame #1 of the series, #2 its {colours}{drawing}, on its slides: frame k
+% on slide start + k - 1, or on the next step of Beamer's incremental count
+% for start=+; the last frame from its slide on. Handouts, transparencies
+% and beamerarticle show the last frame. Colours are numbered per figure,
+% so each frame keeps its own in a scope.
+\cs_new_protected:Npn \__algoviz_overlay:nn #1#2
+  {
+    \__algoviz_only:en { \__algoviz_spec:n {#1} }
+      { \begin{scope} \use:nn #2 \end{scope} }
+  }
+\cs_new_protected:Npn \__algoviz_only:nn #1#2 { \only < #1 > {#2} }
+\cs_generate_variant:Nn \__algoviz_only:nn { e }
+
+% An overlay specification, with Beamer's colons, which expl3 reads as
+% letters.
+\cs_new:Npn \__algoviz_spec:n #1
+  {
+    \str_if_eq:VnTF \l__algoviz_start_str { + }
+      { + }
+      { \int_eval:n { \l__algoviz_start_str + #1 - 1 } }
+    \int_compare:nNnTF {#1} < { \seq_count:N \l__algoviz_frames_seq }
+      { | handout \c_colon_str 0 | trans \c_colon_str 0 | article \c_colon_str 0 }
+      { - | handout \c_colon_str 1 | trans \c_colon_str 1 | article \c_colon_str 1 }
+  }
+\cs_generate_variant:Nn \str_if_eq:nnTF { Vn }
 
 \cs_new_protected:cpn { algoviz@color } #1#2
   { \definecolor { algoviz@c #1 } { HTML } {#2} }
@@ -271,13 +414,25 @@
       }
   }
 
-% Reads a figure file, with @ as a letter for its macros.
+% Reads a figure file, with @ as a letter for its macros, then draws its
+% figures. The blank line between two figures of a series is a \par, which
+% must not end the paragraph the picture is in, so \par does nothing while
+% the file is read; drawing gets it back.
 \cs_new_protected:Npn \__algoviz_input:n #1
   {
     \group_begin:
       \str_set:Nn \l__algoviz_current_str {#1}
+      \bool_set_true:N \l__algoviz_reading_bool
+      \seq_clear:N \l__algoviz_frames_seq
+      \fp_zero:N \l__algoviz_canvas_width_fp
+      \fp_zero:N \l__algoviz_canvas_height_fp
       \char_set_catcode_letter:N \@
+      \cs_set_eq:NN \__algoviz_saved_par: \par
+      \cs_set_eq:NN \par \scan_stop:
       \file_input:n {#1}
+      \cs_set_eq:NN \par \__algoviz_saved_par:
+      \bool_set_false:N \l__algoviz_reading_bool
+      \__algoviz_draw_frames:
     \group_end:
   }
 \cs_generate_variant:Nn \__algoviz_input:n { V }
@@ -332,6 +487,7 @@
 % ---------------------------------------------------------------------------
 
 \str_new:N \l__algoviz_step_str
+\str_new:N \l__algoviz_steps_str
 \str_new:N \l__algoviz_theme_str
 \str_new:N \l__algoviz_id_str
 \str_new:N \l__algoviz_input_str
@@ -377,7 +533,6 @@
           { \__algoviz_hint:n {#3} }
       }
   }
-\cs_generate_variant:Nn \regex_match:NnTF { NV }
 
 \cs_new:Npn \__algoviz_hint:n #1
   {
@@ -387,7 +542,15 @@
           {
             A~step~is~a~selector,~such~as~relax\iow_char:N\#3~or~
             insert-5/relax.~Write~relax\iow_char:N\\\iow_char:N\#3~inside~
-            macro~definitions~and~Beamer~frames.
+            macro~definitions~and~Beamer~frames.~For~several~frames,~use~
+            steps=.
+          }
+        { steps }
+          {
+            steps~takes~selectors~separated~by~commas,~such~as~
+            relax\iow_char:N\#1..-1~or~\iow_char:N\{0,~insert-5\iow_char:N\}.~
+            Write~\iow_char:N\\\iow_char:N\#~inside~macro~definitions~and~
+            Beamer~frames.
           }
         { theme } { Themes~are~named~light,~dark~or~print. }
         { algorithm~id } { Algorithm~ids~are~written~like~dijkstra~or~bst.delete. }
@@ -401,26 +564,64 @@
       }
   }
 
-% The keys of one figure, with its step and theme as strings.
+% The keys of one figure, with its step or steps and its theme as strings.
+% Selectors have no spaces, so the spaces of a list such as {0, -1} go.
 \cs_new_protected:Npn \__algoviz_options:n #1
   {
     \keys_set:nn { algoviz } {#1}
     \__algoviz_to_str:NV \l__algoviz_step_str \l__algoviz_step_tl
+    \__algoviz_to_str:NV \l__algoviz_steps_str \l__algoviz_steps_tl
+    \str_remove_all:Nn \l__algoviz_steps_str { ~ }
     \__algoviz_to_str:NV \l__algoviz_theme_str \l__algoviz_theme_tl
   }
 
-% Runs #1 once the step, the theme and the cache directory are checked.
+% Runs #1 once the step or steps, the theme and the cache directory are
+% checked. Steps may be empty, for every frame.
 \cs_new_protected:Npn \__algoviz_checked:n #1
   {
-    \__algoviz_check:NNnn \c__algoviz_step_regex \l__algoviz_step_str { step }
+    \bool_if:NTF \l__algoviz_series_bool
       {
-        \__algoviz_check:NNnn \c__algoviz_theme_regex \l__algoviz_theme_str
-          { theme }
+        \str_if_empty:NTF \l__algoviz_steps_str
+          { \__algoviz_checked_rest:n {#1} }
           {
-            \__algoviz_check:NNnn \c__algoviz_path_regex \l__algoviz_cache_str
-              { cache~directory } {#1}
+            \__algoviz_check:NNnn \c__algoviz_step_regex \l__algoviz_steps_str
+              { steps } { \__algoviz_checked_rest:n {#1} }
           }
       }
+      {
+        \__algoviz_check:NNnn \c__algoviz_step_regex \l__algoviz_step_str
+          { step } { \__algoviz_checked_rest:n {#1} }
+      }
+  }
+\cs_new_protected:Npn \__algoviz_checked_rest:n #1
+  {
+    \__algoviz_check:NNnn \c__algoviz_theme_regex \l__algoviz_theme_str
+      { theme }
+      {
+        \__algoviz_check:NNnn \c__algoviz_path_regex \l__algoviz_cache_str
+          { cache~directory } {#1}
+      }
+  }
+
+% What the figure shows, for the cache key: a step, or steps: and a list.
+% Steps have no colon, so the two never meet.
+\cs_new:Npn \__algoviz_selection:
+  {
+    \bool_if:NTF \l__algoviz_series_bool
+      { steps \c_colon_str \l__algoviz_steps_str }
+      { \l__algoviz_step_str }
+  }
+
+% The command line's selection: --step, and --one-file for a series.
+\cs_new:Npn \__algoviz_step_option:
+  {
+    \bool_if:NTF \l__algoviz_series_bool
+      {
+        \str_if_empty:NF \l__algoviz_steps_str
+          { \c_space_tl --step= \l__algoviz_steps_str }
+        \c_space_tl --one-file
+      }
+      { \c_space_tl --step= \l__algoviz_step_str }
   }
 
 % ---------------------------------------------------------------------------
@@ -439,7 +640,7 @@
               {
                 algoviz~tikz~\int_use:N \c__algoviz_format_int \c_space_tl
                 \c__algoviz_version_str ; #2 ;
-                \l__algoviz_step_str ; \l__algoviz_theme_str
+                \__algoviz_selection: ; \l__algoviz_theme_str
               }
           }
       }
@@ -467,7 +668,7 @@
     \str_set:Ne \l__algoviz_call_str
       {
         \l__algoviz_command_tl \c_space_tl export \c_space_tl #1
-        \c_space_tl --step= \l__algoviz_step_str
+        \__algoviz_step_option:
         \c_space_tl --theme= \l__algoviz_theme_str
         \c_space_tl --format=tikz
         \c_space_tl --out=" \l__algoviz_cache_str "
@@ -498,7 +699,6 @@
       }
   }
 \cs_generate_variant:Nn \sys_shell_now:n { e }
-\cs_generate_variant:Nn \msg_error:nnn { nnV }
 
 % The longest input, in hexadecimal digits, that goes on a command line:
 % within cmd.exe's 8191 characters with the rest of the call on Windows,

@@ -564,3 +564,91 @@ describe('algoviz export --error-file safety', () => {
     expect(files(out).filter((f) => !f.endsWith('.tex'))).toEqual([]);
   });
 });
+
+describe('algoviz export --one-file', () => {
+  it('writes a series into one TikZ file, the figures in timeline order', () => {
+    const [single, series] = [outDir(), outDir()];
+    const steps = ['--step', 'relax#3,improve#2,-1', '--format', 'tikz'];
+    run('export', 'dijkstra', '--input', inputFile, ...steps, '--out', single);
+    const result = run(
+      'export',
+      'dijkstra',
+      '--input',
+      inputFile,
+      ...steps,
+      '--one-file',
+      '--out',
+      series,
+    );
+    expect(result).toMatchObject({ code: 0, err: '' });
+    expect(files(series)).toEqual(['dijkstra.tex']);
+    const path = join(series, 'dijkstra.tex');
+    expect(result.out.split('\n')).toEqual([
+      `${path}  improve#2`,
+      `${path}  relax#3`,
+      `${path}  done`,
+    ]);
+    // The figures `export` writes one by one, separated by blank lines.
+    const figures = files(single).map((f) =>
+      readFileSync(join(single, f), 'utf8'),
+    );
+    expect(figures).toHaveLength(3);
+    expect(readFileSync(path, 'utf8')).toBe(figures.join('\n'));
+    expect(
+      readFileSync(path, 'utf8').match(/^\\algoviz@figure\{/gm),
+    ).toHaveLength(3);
+  });
+
+  it('writes every frame without --step, under the name given', () => {
+    const out = outDir();
+    const result = run(
+      'export',
+      bstFile,
+      '--format=tikz',
+      '--one-file',
+      `--out=${out}`,
+      '--name=all.tex',
+    );
+    expect(result.code).toBe(0);
+    expect(files(out)).toEqual(['all.tex']);
+    expect(result.out.split('\n')).toHaveLength(14);
+    expect(
+      readFileSync(join(out, 'all.tex'), 'utf8').match(/^\\algoviz@figure/gm),
+    ).toHaveLength(14);
+  });
+
+  it('refuses SVG, a name per frame, and the flag outside export', () => {
+    const svg = run('export', bstFile, '--one-file', '--out', outDir());
+    expect(svg.code).toBe(2);
+    expect(svg.err).toContain('--one-file needs --format tikz');
+    const frame = run(
+      'export',
+      bstFile,
+      '--format=tikz',
+      '--one-file',
+      '--name={frame}',
+      '--out',
+      outDir(),
+    );
+    expect(frame.code).toBe(2);
+    expect(frame.err).toContain('leave out {frame} and {step}');
+    expect(run('validate', bstFile, '--one-file').err).toContain(
+      '--one-file only applies to export',
+    );
+  });
+
+  it('writes nothing when a step fails', () => {
+    const out = outDir();
+    const result = run(
+      'export',
+      bstFile,
+      '--step=0,nope',
+      '--format=tikz',
+      '--one-file',
+      '--out',
+      out,
+    );
+    expect(result.code).toBe(1);
+    expect(existsSync(out)).toBe(false);
+  });
+});

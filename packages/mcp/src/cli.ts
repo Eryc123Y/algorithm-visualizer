@@ -7,7 +7,8 @@
  *   algoviz inspect <file> [frame …]
  *   algoviz render <file> [--frame f] [--theme dark] [--out frame.svg]
  *   algoviz export <file> [--step s …] [--theme t] [--format svg|tikz]
- *                  [--out dir] [--name pattern] [--error-file file]
+ *                  [--one-file] [--out dir] [--name pattern]
+ *                  [--error-file file]
  *   algoviz export <id> --input <json|file> [the same options]
  *   algoviz export <id> --input-hex <hex> [the same options]
  *
@@ -37,6 +38,7 @@ import { readDocument } from './document.ts';
 import {
   DEFAULT_PATTERN,
   FORMAT_EXTENSIONS,
+  ONE_FILE_PATTERN,
   figureFiles,
   patternProblem,
   type FigureFormat,
@@ -49,8 +51,8 @@ const USAGE = `Usage:
   algoviz inspect <file> [frame …]       State at frames (default: the last)
   algoviz render <file> [--frame f] [--theme light|dark] [--out file.svg]
   algoviz export <file> [--step s …] [--theme light|dark|print]
-                 [--format svg|tikz] [--out dir] [--name pattern]
-                 [--error-file file]
+                 [--format svg|tikz] [--one-file] [--out dir]
+                 [--name pattern] [--error-file file]
                                          Write frames as SVG or TikZ figures
   algoviz export <id> --input <json|file> [the same options]
                                          Run an algorithm, then export
@@ -65,9 +67,11 @@ Render takes one frame. Export takes any number: --step may repeat or list
 them with commas, and every frame is the default. It names files with
 {name}, {frame} and {step} (default "${DEFAULT_PATTERN}") and writes them to the
 --out directory (default: the current one). --format tikz writes .tex files
-for the algoviz LaTeX package. --input-hex takes the input as hexadecimal
-UTF-8, for programs that cannot quote JSON for a shell, and --error-file
-also writes any error to a file, which a successful export removes.`;
+for the algoviz LaTeX package, and --one-file writes all of them into one
+file, named "{name}" by default, for Beamer overlays. --input-hex takes the
+input as hexadecimal UTF-8, for programs that cannot quote JSON for a shell,
+and --error-file also writes any error to a file, which a successful export
+removes.`;
 
 class UsageError extends Error {}
 
@@ -92,6 +96,8 @@ interface Options {
   name?: string;
   format?: string;
   errorFile?: string;
+  /** Export only: every figure in one TikZ file (ADR 0028). */
+  oneFile?: boolean;
   help?: boolean;
 }
 
@@ -103,6 +109,7 @@ const EXPORT_ONLY = {
   name: '--name',
   format: '--format',
   errorFile: '--error-file',
+  oneFile: '--one-file',
 };
 
 /**
@@ -129,6 +136,7 @@ function parse(argv: readonly string[]) {
     else if (flag === '--name') values.name = take();
     else if (flag === '--theme') values.theme = take();
     else if (flag === '--out' || flag === '-o') values.out = take();
+    else if (arg === '--one-file') values.oneFile = true;
     else if (arg === '--help' || arg === '-h') values.help = true;
     else if (/^-(?!\d)./.test(arg))
       throw new UsageError(`Unknown option ${arg}`);
@@ -276,8 +284,9 @@ function exportCommand(rest: readonly string[], values: Options): ToolResult {
     throw new UsageError(
       `--out names a directory, not a file such as "${out}"; name the files with --name`,
     );
-  const pattern = values.name ?? DEFAULT_PATTERN;
-  const problem = patternProblem(pattern, format);
+  const oneFile = values.oneFile === true;
+  const pattern = values.name ?? (oneFile ? ONE_FILE_PATTERN : DEFAULT_PATTERN);
+  const problem = patternProblem(pattern, format, oneFile);
   if (problem !== undefined) throw new UsageError(problem);
 
   const document = exportSource(source, values);
@@ -293,20 +302,35 @@ function exportCommand(rest: readonly string[], values: Options): ToolResult {
       : source === '-'
         ? 'figure'
         : basename(source, extname(source));
-  const files = figureFiles(series.value, { name, pattern, format });
+  const files = figureFiles(series.value, {
+    name,
+    pattern,
+    format,
+    oneFile,
+  });
   if (!files.ok) throw new UsageError(files.error);
 
+  // The figures of each file, in timeline order: one per file, or every
+  // figure in one with --one-file.
+  const contents = new Map<string, string[]>();
+  for (const { file, figure } of files.value)
+    contents.set(file, [
+      ...(contents.get(file) ?? []),
+      figure.text.replace(/\n$/, ''),
+    ]);
   try {
     mkdirSync(out, { recursive: true });
-    const lines = files.value.map(({ file, figure }) => {
+    for (const [file, texts] of contents) {
       const path = join(out, file);
       // A whole file or none: the LaTeX package takes a figure file that
-      // exists for a finished one.
+      // exists for a finished one. Blank lines separate the figures.
       const partial = `${path}.part`;
-      writeFileSync(partial, `${figure.text.replace(/\n$/, '')}\n`);
+      writeFileSync(partial, `${texts.join('\n\n')}\n`);
       renameSync(partial, path);
-      return `${path}  ${figure.selector}`;
-    });
+    }
+    const lines = files.value.map(
+      ({ file, figure }) => `${join(out, file)}  ${figure.selector}`,
+    );
     return { text: lines.join('\n') };
   } catch (e) {
     return {

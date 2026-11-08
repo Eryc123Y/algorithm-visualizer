@@ -201,3 +201,71 @@
     theme: _theme("algoviz-figures", theme),
   ))
 }
+
+/// Slides that step through a series, one frame per subslide, with a slide
+/// framework's own `only` (ADR 0028). All frames share one box, sized by
+/// the first, so the box keeps its size on every subslide.
+///
+/// - only (function): The framework's `only`, such as polylux's or
+///   touying's: it takes a subslide number or a string such as "3-", and a
+///   body.
+/// - source (str, dictionary): As for `algoviz`.
+/// - steps (auto, int, str, array): As for `algoviz-series`.
+/// - start (int): The subslide of the first frame. The last frame stays from
+///   its subslide on. A series of one frame is the image alone, on every
+///   subslide, whatever `start` says.
+/// - theme, strict, width, height, fit: As for `algoviz`.
+/// -> content
+#let algoviz-slides(
+  only,
+  source,
+  ..args,
+  steps: auto,
+  start: 1,
+  theme: "light",
+  strict: false,
+  width: auto,
+  height: auto,
+  fit: "contain",
+) = {
+  if type(only) != function {
+    panic(
+      "algoviz-slides: the first argument is the slide framework's `only`, such as polylux's or touying's, not "
+        + repr(type(only)),
+    )
+  }
+  if type(start) != int or start < 1 {
+    panic(
+      "algoviz-slides: `start` takes a subslide number from 1, not "
+        + repr(start),
+    )
+  }
+  let request = _source("algoviz-slides", source, args)
+  let response = _render(request + (
+    steps: _selectors("algoviz-slides", steps),
+    theme: _theme("algoviz-slides", theme),
+  ))
+  if not response.ok {
+    return _failure("algoviz-slides", response.diagnostics, strict)
+  }
+  let figures = response.figures
+  if figures.len() == 1 {
+    return _image(figures.first(), width, height, fit, auto)
+  }
+  // Each frame resolves its size against the same region as the hidden
+  // copy, so relative sizes such as `height: 70%` give one size for all.
+  let last = figures.len() - 1
+  box({
+    hide(_image(figures.first(), width, height, fit, none))
+    for (k, figure) in figures.enumerate() {
+      let subslides = if k == last { str(start + k) + "-" } else { start + k }
+      place(top + left, only(subslides, _image(
+        figure,
+        width,
+        height,
+        fit,
+        auto,
+      )))
+    }
+  })
+}

@@ -118,3 +118,41 @@ describe('patternProblem', () => {
     expect(patternProblem('.svg')).toMatch(/empty/);
   });
 });
+
+describe('figureFiles in one file', () => {
+  const one = (pattern?: string) => {
+    const result = figureFiles(series, {
+      name: 'doc',
+      format: 'tikz',
+      oneFile: true,
+      ...(pattern === undefined ? {} : { pattern }),
+    });
+    return result.ok
+      ? result.value.map((f) => [f.file, f.figure.frame])
+      : result.error;
+  };
+
+  it('puts every figure in one file, named {name} by default', () => {
+    expect(one()).toEqual([
+      ['doc.tex', 0],
+      ['doc.tex', 3],
+      ['doc.tex', 11],
+    ]);
+    expect(one('relax-{name}.tex')).toEqual([
+      ['relax-doc.tex', 0],
+      ['relax-doc.tex', 3],
+      ['relax-doc.tex', 11],
+    ]);
+  });
+
+  it('refuses {frame}, {step} and SVG, which need a file per figure', () => {
+    expect(one('{name}-{frame}')).toBe(
+      'The name "{name}-{frame}" names a file per frame; --one-file writes one file, so leave out {frame} and {step}',
+    );
+    expect(one('{step}')).toMatch(/leave out \{frame\} and \{step\}/);
+    expect(patternProblem('{name}', 'svg', true)).toBe(
+      '--one-file needs --format tikz: an SVG file holds one figure',
+    );
+    expect(patternProblem('{name}', 'tikz', true)).toBeUndefined();
+  });
+});

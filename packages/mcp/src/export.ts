@@ -1,11 +1,15 @@
 /**
- * File names for exported figures (ADR 0025, 0027): a pattern whose
- * placeholders `{name}`, `{frame}` and `{step}` are filled in per figure.
- * Writing the files is the command line's job; this part stays pure.
+ * File names for exported figures (ADR 0025, 0027, 0028): a pattern whose
+ * placeholders `{name}`, `{frame}` and `{step}` are filled in per figure,
+ * or one name for a whole series in one TikZ file. Writing the files is the
+ * command line's job; this part stays pure.
  */
 import { err, ok, type Result } from '@algoviz/spec';
 
 export const DEFAULT_PATTERN = '{name}-{frame}';
+
+/** The default name of a series written into one file (`--one-file`). */
+export const ONE_FILE_PATTERN = '{name}';
 
 const PLACEHOLDERS: readonly string[] = ['name', 'frame', 'step'];
 
@@ -30,6 +34,11 @@ export interface FileNameOptions {
   readonly pattern?: string;
   /** Default `svg`. */
   readonly format?: FigureFormat;
+  /**
+   * Every figure in one file (TikZ only, ADR 0028): the pattern names that
+   * file, `{name}` by default, and cannot use `{frame}` or `{step}`.
+   */
+  readonly oneFile?: boolean;
 }
 
 export interface FigureFile<F extends NamedFrame> {
@@ -46,7 +55,10 @@ const extensionOf = (format: FigureFormat) =>
 export function patternProblem(
   pattern: string,
   format: FigureFormat = 'svg',
+  oneFile = false,
 ): string | undefined {
+  if (oneFile && format !== 'tikz')
+    return '--one-file needs --format tikz: an SVG file holds one figure';
   if (/[/\\]/.test(pattern))
     return `The name "${pattern}" contains a path separator; choose the directory with --out`;
   for (const [, key] of pattern.matchAll(/\{([^}]*)\}/g))
@@ -56,6 +68,8 @@ export function patternProblem(
     return `The name "${pattern}" has a brace outside {name}, {frame} and {step}`;
   if (pattern.replace(extensionOf(format), '') === '')
     return 'The name is empty';
+  if (oneFile && /\{(?:frame|step)\}/.test(pattern))
+    return `The name "${pattern}" names a file per frame; --one-file writes one file, so leave out {frame} and {step}`;
   return undefined;
 }
 
@@ -68,15 +82,25 @@ const stepPart = (selector: string) => selector.replace(/[/#]/g, '_');
 /**
  * A file name for each figure of a series. `{frame}` is padded with zeros
  * to the width of the document's last frame number, so files sort in
- * timeline order. The error is a message about the pattern.
+ * timeline order. With `oneFile`, every figure gets the same file. The error
+ * is a message about the pattern.
  */
 export function figureFiles<F extends NamedFrame>(
   series: { readonly frames: number; readonly figures: readonly F[] },
-  { name, pattern = DEFAULT_PATTERN, format = 'svg' }: FileNameOptions,
+  {
+    name,
+    format = 'svg',
+    oneFile = false,
+    pattern = oneFile ? ONE_FILE_PATTERN : DEFAULT_PATTERN,
+  }: FileNameOptions,
 ): Result<readonly FigureFile<F>[], string> {
-  const problem = patternProblem(pattern, format);
+  const problem = patternProblem(pattern, format, oneFile);
   if (problem !== undefined) return err(problem);
-  if (series.figures.length > 1 && !/\{(?:frame|step)\}/.test(pattern))
+  if (
+    !oneFile &&
+    series.figures.length > 1 &&
+    !/\{(?:frame|step)\}/.test(pattern)
+  )
     return err(
       `The name "${pattern}" gives every figure the same file; add {frame} or {step}`,
     );
