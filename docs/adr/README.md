@@ -33,5 +33,6 @@ Each file records one architectural decision: the context, what we decided, and 
 | [0027](0027-latex-package.md)                       | The LaTeX package draws TikZ figures from a standalone command       | Accepted                            |
 | [0028](0028-slides.md)                              | Slides step through a series, one overlay per frame                  | Accepted                            |
 | [0029](0029-auxiliary-structures.md)                | Figures place auxiliary structures beside the main one               | Accepted                            |
+| [0030](0030-built-in-themes.md)                     | Built-in themes are named and work in every output                   | Accepted                            |
 
 Template: Status · Context · Decision · Consequences.
