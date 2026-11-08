@@ -161,6 +161,6 @@ Shell escape lets a document run programs, so compile documents from others with
 
 ## Not yet
 
-- **Custom themes**, beyond the three built-in ones, come with roadmap 1.6.
+- **Custom themes** made with `createTheme` reach the player and the library; a theme file for the command, so that they reach LaTeX too, is future work.
 
 `algoviz` is a working name. The package, its licence and its publishing to CTAN wait for the project's 1.0 release.

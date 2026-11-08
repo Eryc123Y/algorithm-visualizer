@@ -9,7 +9,7 @@ An MCP server that lets models write, check and render algoviz visualizations, a
 | `algoviz_guide`        | The authoring guide: the document format, and each structure kind with its actions and an example |
 | `algoviz_validate`     | Checks a document, replaying every step; errors have a code, a JSON path, a message and a hint    |
 | `algoviz_inspect`      | The state of every structure at chosen frames, to check that a document does what was meant       |
-| `algoviz_render`       | One frame as a standalone SVG                                                                     |
+| `algoviz_render`       | One frame as a standalone SVG, in any built-in theme (`theme`)                                    |
 | `algoviz_list_recipes` | Ready-made visualizations: id, title, topic, summary and the JSON Schema of each one's input      |
 | `algoviz_run_recipe`   | Builds a recipe's document from its `id` and `input`                                              |
 | `algoviz_show`         | Shows a valid document to the user as an interactive player, in clients that display MCP Apps     |
