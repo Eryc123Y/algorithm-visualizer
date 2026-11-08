@@ -40,6 +40,7 @@ An algorithm counts as covered only when all of the following hold:
 
 - it is tested against an independent reference implementation, and property tests run it on random inputs;
 - every step has a narration and points at a code line in every language;
+- its figures draw the auxiliary structures the algorithm keeps besides its main one, such as Dijkstra's priority queue, BFS's queue, Kruskal's sorted edges and disjoint sets, or the call stack where recursion matters, placed next to the main structure so the figure reads well in notes, slides and the player;
 - its documents pass validation, and its figures were checked visually (gallery or browser);
 - data structures meet the per-operation checks of ADR 0018: frame 0 is the starting state, chained runs agree with composed ones, and the same input gives the same document.
 
