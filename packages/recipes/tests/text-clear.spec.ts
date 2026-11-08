@@ -197,3 +197,46 @@ describe('text clear of edges in the registry examples', () => {
     expect(gap(diagonal)).toBeLessThan(CLEAR + 4 + 2);
   });
 });
+
+describe('pointer bands in the registry (ADR 0031)', () => {
+  it('insertion sort: key sits higher in the first and last frames', () => {
+    const algo = algorithms.find((a) => a.id === 'insertion-sort')!;
+    const run = runAlgorithm('insertion-sort', algo.examples[0]);
+    if (!run.ok) throw new Error('insertion-sort');
+    const trace = loadTrace(run.value.document);
+    if (!trace.ok) throw new Error('insertion-sort');
+    const layout = layoutTrace(trace.value, { layout: 'narrow' });
+    const keyY = (f: number) => {
+      const cell = layout
+        .sceneAt(f)
+        .items.find((i) => i.type === 'box' && i.key.startsWith('key/'));
+      if (cell === undefined || cell.type !== 'box') throw new Error('key');
+      return cell.y;
+    };
+    const last = trace.value.length;
+    expect(keyY(0)).toBe(keyY(last));
+    expect(keyY(last)).toBeLessThan(keyY(1));
+    // Every frame keeps the one canvas.
+    const sizes = new Set(
+      Array.from({ length: last + 1 }, (_, f) => {
+        const s = layout.sceneAt(f);
+        return `${s.width}x${s.height}`;
+      }),
+    );
+    expect(sizes.size).toBe(1);
+  });
+
+  it('heapsort: the sorted part has no edges', () => {
+    const algo = algorithms.find((a) => a.id === 'heapsort')!;
+    const run = runAlgorithm('heapsort', algo.examples[0]);
+    if (!run.ok) throw new Error('heapsort');
+    const trace = loadTrace(run.value.document);
+    if (!trace.ok) throw new Error('heapsort');
+    const scene = layoutTrace(trace.value).sceneAt(trace.value.length);
+    expect(
+      scene.items.filter(
+        (i) => i.type === 'edge' && i.key.includes('heap-edge'),
+      ),
+    ).toEqual([]);
+  });
+});

@@ -104,16 +104,20 @@ export function layoutArrayHeap({
       text: '(empty)',
       fontSize: o.indexFontSize,
     });
+  // A settled element is out of the heap (ADR 0031): no edge links it.
+  const settled = (i: number) =>
+    state.marks.settled.includes(state.data[i]!.id);
   for (let i = 1; i < state.data.length; i++)
-    items.push(
-      treeEdge(
-        `${name}/heap-edge/${i}`,
-        centre((i - 1) >> 1),
-        centre(i),
-        shape,
-        o,
-      ),
-    );
+    if (!settled(i) && !settled((i - 1) >> 1))
+      items.push(
+        treeEdge(
+          `${name}/heap-edge/${i}`,
+          centre((i - 1) >> 1),
+          centre(i),
+          shape,
+          o,
+        ),
+      );
   // Every edge the shape ever has, so an index keeps its place as the
   // heap grows and shrinks.
   const lines = Array.from(

@@ -92,6 +92,7 @@ export function layoutLinkedList({
   metrics,
   origin,
   options: o,
+  pointersShown,
 }: LayoutInput<LinkedListDecl, LinkedListState, LinkedListMetrics>): Block {
   const width = cellWidthFor(metrics.valueWidth, o);
   const height = o.cellHeight;
@@ -202,16 +203,16 @@ export function layoutLinkedList({
   items.push(...pointerItems(name, bySlot, (k) => x(k) + width / 2, bottom, o));
 
   const slots = Math.max(1, metrics.slots);
+  // The band below the nodes is open only over the frames with pointers.
+  const band = Math.max(pointerAreaHeight(metrics.pointerRows, o), 8) - 8;
+  const open = pointersShown !== false;
   return {
     items,
     width: Math.max(
       slots * pitch - LINK_GAP + 2 * overhang,
       titleWidth(title, o),
     ),
-    height:
-      top -
-      origin.y +
-      height +
-      Math.max(pointerAreaHeight(metrics.pointerRows, o), 8),
+    height: top - origin.y + height + 8 + (open ? band : 0),
+    ...(open || band === 0 ? {} : { reserved: band }),
   };
 }
