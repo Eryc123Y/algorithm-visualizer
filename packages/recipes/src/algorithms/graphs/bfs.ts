@@ -72,6 +72,7 @@ export const bfs = defineAlgorithm({
     const graph = trace.add('g', declareGraph(g, false, { from: s }));
     const queue = trace.add('queue', {
       kind: 'queue',
+      label: 'Q',
       place: 'side',
       initial: [],
     });

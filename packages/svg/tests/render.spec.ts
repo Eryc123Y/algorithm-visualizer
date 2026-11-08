@@ -59,7 +59,9 @@ describe('renderSvg', () => {
           {
             version: '0.1',
             title: 'a < b & "c"',
-            structures: { arr: { kind: 'array', initial: ['<b>', "it's"] } },
+            structures: {
+              arr: { kind: 'array', label: 'arr', initial: ['<b>', "it's"] },
+            },
             steps: [],
           },
           0,

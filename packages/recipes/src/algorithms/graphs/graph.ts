@@ -135,6 +135,8 @@ export function declareGraph(
   const ids = edgeIds(g);
   return {
     kind: 'graph',
+    // The graph's name in the pseudocode, as its caption.
+    label: 'G',
     directed: g.directed ?? false,
     // Layers count from the first node, so it goes first.
     ...(layered === undefined

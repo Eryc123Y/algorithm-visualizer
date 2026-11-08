@@ -8,7 +8,7 @@ import type { AlgoPlayer } from '../src/index.ts';
 const doc = {
   version: '0.1',
   source: { code: 'compare(a, b)\nswap(a, b)' },
-  structures: { arr: { kind: 'array', initial: [2, 1] } },
+  structures: { arr: { kind: 'array', label: 'arr', initial: [2, 1] } },
   steps: [
     {
       actions: [{ target: 'arr', type: 'compare', i: 0, j: 1 }],

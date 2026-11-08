@@ -149,7 +149,7 @@ describe('exportFigures', () => {
     const dark = figuresOf(doc, { steps: [1], theme: 'dark' })[0]!.svg;
     const custom = figuresOf(doc, {
       steps: [1],
-      theme: createTheme('light', { title: '#123456' }),
+      theme: createTheme('light', { index: '#123456' }),
     })[0]!.svg;
     expect(dark).not.toBe(light);
     expect(custom).toContain('#123456');

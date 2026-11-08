@@ -201,6 +201,46 @@ describe('multiple structures', () => {
   });
 });
 
+describe('captions', () => {
+  const titles = (scene: Scene) =>
+    scene.items.flatMap((i) =>
+      i.type === 'text' && i.role === 'title' ? [i.text] : [],
+    );
+  const lone = (label?: string) =>
+    layoutTrace(
+      mustLoad({
+        version: '0.1',
+        structures: {
+          arr: { kind: 'array', initial: [1, 2], ...(label ? { label } : {}) },
+        },
+        steps: [],
+      }),
+    ).sceneAt(0);
+
+  it('leaves a lone structure without a label uncaptioned', () => {
+    const scene = lone();
+    expect(titles(scene)).toEqual([]);
+    // The cells start where the title row would have: under the indices.
+    expect(boxes(scene)[0]!.y).toBeLessThan(boxes(lone('values'))[0]!.y);
+  });
+
+  it('captions a lone structure that has a label', () => {
+    expect(titles(lone('values'))).toEqual(['values']);
+  });
+
+  it('captions every structure of a figure with several, by label or id', () => {
+    const trace = mustLoad({
+      version: '0.1',
+      structures: {
+        a: { kind: 'array', initial: [1] },
+        b: { kind: 'array', label: 'output', initial: [2] },
+      },
+      steps: [],
+    });
+    expect(titles(layoutTrace(trace).sceneAt(0))).toEqual(['a', 'output']);
+  });
+});
+
 describe('bare layout', () => {
   it('draws only cells and pointers, starting right below the padding', () => {
     const trace = mustLoad(

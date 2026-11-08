@@ -12,7 +12,8 @@ export const lightTheme: SvgTheme = {
   tex: { value: 'normal', label: 'sf' },
   radius: 8,
   background: null,
-  shadow: 'rgba(20, 45, 38, 0.10)',
+  // Painters cannot blur, so an offset shadow is a ledge under each cell.
+  shadow: null,
   title: '#1f2a26',
   index: '#66736d',
   pointer: { line: '#0f7b6c', fill: '#0f7b6c', text: '#ffffff' },
@@ -26,7 +27,7 @@ export const lightTheme: SvgTheme = {
     },
     default: {
       fill: '#ffffff',
-      stroke: '#c9d3cf',
+      stroke: '#b8c2be',
       strokeWidth: 1.25,
       dash: null,
       text: '#1f2a26',
@@ -77,8 +78,9 @@ export const lightTheme: SvgTheme = {
     default: { stroke: '#9aa7a2', width: 1.75, opacity: 1 },
     link: { stroke: '#6b7772', width: 1.5, opacity: 1 },
     highlight: { stroke: '#d08a18', width: 3, opacity: 1 },
-    selected: { stroke: '#0f7b6c', width: 3.5, opacity: 1 },
-    rejected: { stroke: '#c9d3cf', width: 1.25, opacity: 0.6 },
+    // Green, as settled cells: what is in the result. Teal is for pointers.
+    selected: { stroke: '#2f7d4f', width: 3.5, opacity: 1 },
+    rejected: { stroke: '#c9d3cf', width: 1.25, opacity: 1 },
   },
   labelHalo: '#ffffff',
 };
@@ -154,7 +156,7 @@ export const darkTheme: SvgTheme = {
     default: { stroke: '#5f6f69', width: 1.75, opacity: 1 },
     link: { stroke: '#8a9590', width: 1.5, opacity: 1 },
     highlight: { stroke: '#e9a53a', width: 3, opacity: 1 },
-    selected: { stroke: '#4fc4b0', width: 3.5, opacity: 1 },
+    selected: { stroke: '#3f9a63', width: 3.5, opacity: 1 },
     rejected: { stroke: '#34433e', width: 1.25, opacity: 0.7 },
   },
   labelHalo: '#151b19',

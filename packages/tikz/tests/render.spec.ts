@@ -72,6 +72,21 @@ const box = (
   ...over,
 });
 
+/**
+ * A theme with a translucent shadow, translucent rejected edges and the
+ * light theme's earlier borders, so the tests below see every kind of path
+ * a theme can ask for.
+ */
+const shadowed = createTheme('light', {
+  shadow: 'rgba(20, 45, 38, 0.10)',
+  cell: { default: { stroke: '#c9d3cf' } },
+  edge: { rejected: { opacity: 0.6 } },
+});
+
+/** `renderTikz` in the shadowed theme unless the options name another. */
+const tikzOf = (scene: Scene, options: Parameters<typeof renderTikz>[1] = {}) =>
+  renderTikz(scene, { theme: shadowed, ...options });
+
 describe('renderTikz', () => {
   it('calls \\algoviz@figure with the format, the canvas and the drawing', () => {
     const tikz = renderTikz(sceneOf(), { comments: ['Frame 3, relax#2.'] });
@@ -108,11 +123,11 @@ describe('renderTikz', () => {
   });
 
   it('draws a cell as its shadow, its body and its text', () => {
-    const tikz = renderTikz(sceneOf(box()));
+    const tikz = tikzOf(sceneOf(box()));
     const c = colours(tikz);
     const [shadow, body, text, ...rest] = drawing(tikz);
     expect(rest).toEqual([]);
-    // The light theme's shadow is translucent, 2 units below the cell.
+    // The shadow is translucent, 2 units below the cell.
     expect(shadow).toMatch(
       /^\\path\[fill=(algoviz@c\d+),fill opacity=0\.1,rounded corners=8\\algoviz@u\] \(20,42\) rectangle \+\+\(52,52\);$/,
     );
@@ -138,22 +153,22 @@ describe('renderTikz', () => {
   });
 
   it('marks roles with the theme’s borders, dashes and check marks', () => {
-    const compare = drawing(renderTikz(sceneOf(box({ role: 'compare' }))));
+    const compare = drawing(tikzOf(sceneOf(box({ role: 'compare' }))));
     expect(compare[1]).toContain('line width=2.5\\algoviz@u');
-    const swap = drawing(renderTikz(sceneOf(box({ role: 'swap' }))));
+    const swap = drawing(tikzOf(sceneOf(box({ role: 'swap' }))));
     expect(swap[1]).toContain('dash pattern=on 5\\algoviz@u off 3\\algoviz@u');
-    const visited = drawing(renderTikz(sceneOf(box({ role: 'visited' }))));
+    const visited = drawing(tikzOf(sceneOf(box({ role: 'visited' }))));
     expect(visited[1]).toContain(
       'dash pattern=on 2\\algoviz@u off 2.5\\algoviz@u',
     );
-    const settled = drawing(renderTikz(sceneOf(box({ role: 'settled' }))));
+    const settled = drawing(tikzOf(sceneOf(box({ role: 'settled' }))));
     expect(settled[2]).toMatch(
       /^\\path\[draw=algoviz@c\d+,line width=1\.75\\algoviz@u,line cap=round,line join=round\] \(57,50\) -- \(60\.5,53\.5\) -- \(66\.5,46\.5\);$/,
     );
   });
 
   it('draws nodes as circles, or stadiums when wide, with labels outside', () => {
-    const tikz = renderTikz(
+    const tikz = tikzOf(
       sceneOf(
         {
           type: 'node',
@@ -204,7 +219,7 @@ describe('renderTikz', () => {
   });
 
   it('draws edges in scene coordinates, heads and all', () => {
-    const tikz = renderTikz(
+    const tikz = tikzOf(
       sceneOf({
         type: 'edge',
         key: 'g/A-B',
@@ -233,7 +248,7 @@ describe('renderTikz', () => {
   it('turns rotated shapes the way SVG does', () => {
     // An edge pointing straight down: SVG rotates the unit line by 90°.
     const down = drawing(
-      renderTikz(
+      tikzOf(
         sceneOf({
           type: 'edge',
           key: 'e',
@@ -251,7 +266,7 @@ describe('renderTikz', () => {
     // A self-loop turned to the right (90°): its curve starts below the
     // node's point and bulges to the right, as in the SVG.
     const loop = drawing(
-      renderTikz(
+      tikzOf(
         sceneOf({
           type: 'edge',
           key: 'l',
@@ -274,7 +289,7 @@ describe('renderTikz', () => {
 
   it('draws routed edges as one path through their bends', () => {
     const lines = drawing(
-      renderTikz(
+      tikzOf(
         sceneOf({
           type: 'edge',
           key: 'r',
@@ -295,7 +310,7 @@ describe('renderTikz', () => {
   });
 
   it('sets titles in the label font and indices in the value font', () => {
-    const tikz = renderTikz(
+    const tikz = tikzOf(
       sceneOf(
         {
           type: 'text',
@@ -326,7 +341,7 @@ describe('renderTikz', () => {
   });
 
   it('draws badges and arrows, with room on the badge', () => {
-    const tikz = renderTikz(
+    const tikz = tikzOf(
       sceneOf(
         {
           type: 'badge',

@@ -110,7 +110,7 @@ describe('role cues that do not rely on colour', () => {
     expect(renderSvg(cell('default'), { theme: 'print' })).not.toContain(
       'rgba',
     );
-    expect(renderSvg(cell('default'), { theme: 'light' })).toContain('rgba');
+    expect(renderSvg(cell('default'), { theme: 'dark' })).toContain('rgba');
   });
 });
 
