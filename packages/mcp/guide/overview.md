@@ -253,7 +253,7 @@ Draw what the algorithm keeps besides its main structure: Dijkstra's priority qu
 
 ## Marks
 
-Besides data, structures carry marks that colour elements.
+Besides data, structures carry marks that colour elements. A document never names colours or fonts: marks are roles, and the reader picks a theme that draws them, `light` by default, in the player, `algoviz_render` and every other output.
 
 - **Transient** marks (`compare`, `highlight`, `peek`, `depend`, and the mark `swap` leaves) last for their step only. Repeat them in the next step to keep them.
 - **Persistent** marks (`pointer`, `settle`, `visit`, `group`, `annotate`, `markEdge`) stay until changed. Remove a pointer with `"index": null` or `"node": null`; clear graph, table and hash table marks with `resetMarks`.

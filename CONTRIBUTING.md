@@ -50,7 +50,7 @@ Run from the repository root.
 | `npm run check`                             | Typecheck, lint, format check and unit tests (what CI runs first)   |
 | `npm run generate:schema -w @algoviz/spec`  | Regenerate `packages/spec/schema/visualization.schema.json`         |
 | `npm run gallery -- out.html [file.json …]` | Render every frame of fixtures or documents to one page, for review |
-| `npm run generate:fonts`                    | Regenerate the bundled fonts' metrics and outlines (ADR 0024)       |
+| `npm run generate:fonts`                    | Regenerate the fonts' metrics, outlines and web fonts (ADR 0030)    |
 | `npm run build -w @algoviz/typst`           | Build the Typst package's engine bytecode (Node only)               |
 | `npm run build:plugin -w @algoviz/typst`    | Rebuild the Typst plugin; needs rustup and LLVM 23 (ADR 0026)       |
 | `npm run build:standalone -w @algoviz/mcp`  | Build the standalone `algoviz` executable; needs rustup (ADR 0027)  |
@@ -75,6 +75,16 @@ Kinds are plug-ins (ADR 0012). Use an existing kind of similar shape as the mode
 3. **Tests:** add conformance fixtures (valid replays with hand-computed states, invalid documents with expected error paths); scene invariants then run on them automatically. Check the result with `npm run gallery`.
 4. **Guide:** add `packages/mcp/guide/kinds/<kind>.md` with the declaration, a table row for every action and a complete example. Tests fail until every action is listed and the example validates.
 5. **Recipes and evals:** the recorder picks up the new actions by itself; add a recipe if a classic algorithm uses the kind, and an eval task in `evals/` that needs it.
+
+## Adding a theme
+
+Themes are data (ADR 0009, 0030); the painters and the player need no code of their own.
+
+1. **Figure:** an `SvgTheme` in `packages/svg/src/themes/`, added to `themes` in `packages/svg/src/theme.ts`. It names its faces (`fontMetrics`, `fonts`), the TeX families of its text (`tex`), and paints its `background` if its paper is dark.
+2. **Fonts:** a face the bundle lacks goes into `scripts/font-sources.ts`, `scripts/fonts.ts` (metrics and outlines) and `scripts/web-fonts.ts` (the player's WOFF2), from a pinned file under the SIL Open Font License whose Reserved Font Names, if any, are not the name the subsets carry. Run `npm run generate:fonts` and review the diff.
+3. **Chrome:** its `--algo-*` values in `chromeThemes` (`packages/elements/src/chrome.ts`); a theme without them does not compile.
+4. **Names:** the playground's Theme menu (`apps/playground/src/App.vue`) and the theme lists of the READMEs.
+5. **Tests** pick it up from `themes`: contrast, the colour-independent cues, SVG, TikZ, Typst and LaTeX, and the axe scan. Look at it with the contact sheet of every kind in the browser or `npm run gallery`.
 
 ## Adding an algorithm
 

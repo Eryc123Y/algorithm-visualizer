@@ -133,14 +133,29 @@ A document is the JSON format algoviz draws from: its structures, and a timeline
 
 ## Themes
 
-- `"light"` is the default.
-- `"print"` is greyscale.
-- `"dark"` is meant for dark pages. Its background is transparent, so put it on a dark page or block.
+Every function takes `theme:`, and every theme works in notes, in series and on slides. The figures look the same as in the player and in `algoviz export`, because the package draws their text with the theme's own fonts.
 
-To change a default for a whole document, use `with`:
+| `theme`           | 中文            | Look                                                                              |
+| ----------------- | --------------- | --------------------------------------------------------------------------------- |
+| `"light"`         | 默认            | The default                                                                       |
+| `"dark"`          | 深色            | Light on dark, with its own background                                            |
+| `"print"`         | 打印            | Greyscale, for handouts                                                           |
+| `"textbook"`      | 课本批注        | Black ink, highlighter and pens on a textbook figure, in STIX Two Text            |
+| `"textbook-dark"` | 课本批注 · 夜间 | The same page in night mode                                                       |
+| `"blocks"`        | 积木教具        | Bold classroom blocks, in Lexend                                                  |
+| `"blocks-dark"`   | 积木教具 · 夜间 | The same blocks on a dark mat                                                     |
+| `"answer-sheet"`  | 答题卡          | Red printed frames and pencil marks, in Noto Sans; prints well in black and white |
+| `"turbo-c"`       | 机房 Turbo C    | The blue Turbo C screen, in the pixel font DotGothic16                            |
 
 ```typ
-#let algoviz = algoviz.with(theme: "print")
+#algoviz("dijkstra", (graph: graph, source: "A"), step: "relax#3", theme: "textbook")
+```
+
+The night themes and Turbo C paint their own background, so they read on white paper too; the light ones are transparent. To change the theme of a whole document, use `with`:
+
+```typ
+#let algoviz = algoviz.with(theme: "textbook")
+#let algoviz-series = algoviz-series.with(theme: "textbook")
 ```
 
 ## Errors
@@ -192,4 +207,4 @@ There is no time limit. For very long documents, `algoviz export` writes the SVG
 
 ## Licence
 
-The package's licence will be chosen before it is published. The bundled fonts, JetBrains Mono and Inter, whose outlines draw the figures' text, are under the SIL Open Font License 1.1 (`OFL.txt`).
+The package's licence will be chosen before it is published. The bundled fonts, whose outlines draw the figures' text (JetBrains Mono, Inter, STIX Two Text, Lexend, Noto Sans, Noto Sans Mono and DotGothic16), are under the SIL Open Font License 1.1 (`OFL.txt`).

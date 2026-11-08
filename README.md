@@ -168,6 +168,35 @@ For a purely visual animation without any teaching chrome, use display mode: it 
 
 Display mode also accepts `once` (play a single time) and `motion` (`linear` · `arc`).
 
+## Themes
+
+Every output draws in the same nine built-in themes, and every theme works in every output: the player, SVG, the Typst and LaTeX packages, slides and print. Pick one by name; `light` is the default everywhere ([ADR 0030](docs/adr/0030-built-in-themes.md)).
+
+| Theme           | 中文            | For                                                                                       |
+| --------------- | --------------- | ----------------------------------------------------------------------------------------- |
+| `light`         | 默认            | The default: web pages, notes and slides                                                  |
+| `dark`          | 深色            | Dark pages and slides                                                                     |
+| `print`         | 打印            | Greyscale handouts; every role keeps a cue that is not colour                             |
+| `textbook`      | 课本批注        | A textbook figure marked up with highlighter and pens; reads naturally in Typst and LaTeX |
+| `textbook-dark` | 课本批注 · 夜间 | The same page in a reader's night mode                                                    |
+| `blocks`        | 积木教具        | Classroom blocks in bold colours, for introductory classes and slides                     |
+| `blocks-dark`   | 积木教具 · 夜间 | The same blocks on a dark mat                                                             |
+| `answer-sheet`  | 答题卡          | An exam answer sheet: red printed frames, pencil marks; prints well in black and white    |
+| `turbo-c`       | 机房 Turbo C    | The blue Turbo C screen of university computer labs, in the sixteen CGA colours           |
+
+| Output            | How to pick a theme                                                                                                |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `<algo-player>`   | `theme="textbook"`; `theme="auto"` (light or dark by the reader's colour scheme); `theme="textbook textbook-dark"` |
+| `algoviz` command | `algoviz export … --theme blocks`, `algoviz render … --theme dark`                                                 |
+| MCP               | the render tool's `theme`                                                                                          |
+| Typst             | `#algoviz("dijkstra", input, theme: "textbook")`, and in `algoviz-series`, `algoviz-figures`, `algoviz-slides`     |
+| LaTeX             | `\algoviz[theme=answer-sheet]{…}{…}`, or `\algovizset{theme=answer-sheet}` for the whole document                  |
+| `@algoviz/svg`    | `renderSvg(scene, { theme: 'turbo-c' })`, `exportFigures(doc, { theme: 'turbo-c' })`                               |
+
+- **Fonts.** Each theme names its typefaces, all under the SIL Open Font License. Standalone SVG and Typst draw text as outlines of the bundled faces, so a figure looks the same everywhere. The player loads the theme's web fonts from beside its script. LaTeX sets text in the document's own fonts, in the family the theme names: serif for the textbook themes, sans serif for blocks, typewriter for Turbo C. Chinese and other CJK text is drawn by the reader's or the document's fonts.
+- **Night themes** (`dark`, `textbook-dark`, `blocks-dark`, `turbo-c`) paint their own background, so they stay legible on white paper; the light ones take the page's colour. A player set to `auto` or to a day-and-night pair prints in its day theme.
+- **Your own.** `createTheme('textbook', { cell: { compare: { fill: '#ffd' } } })` derives a theme from any built-in one, for the player's `customTheme` and the library calls. The player's chrome takes CSS custom properties such as `--algo-accent`.
+
 ## Packages
 
 | Package                                  | Status    | Purpose                                                            |

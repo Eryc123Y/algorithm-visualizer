@@ -44,7 +44,7 @@ Only these wait for the owner; everything else, including ADRs and merges, goes 
 ## Don't
 
 - Push to `main` directly, force-push, or rewrite published history.
-- Commit `apps/playground/theme-lab.html`, `apps/playground/src/theme-lab/` or `.claude/`. The theme lab goes away with roadmap item 1.6.
+- Commit `.claude/`.
 - Copy pseudocode from CLRS. Write it in CLRS conventions, in our own words.
 - Leave the roadmap out of date.
 

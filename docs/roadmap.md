@@ -63,25 +63,25 @@ Everything later builds on these, so they come first. The ADRs are accepted (#13
     - call stacks for merge sort, quicksort, the tree walks and topological sort;
     - side panels for the existing auxiliaries (BFS's queue, DFS's stack, insertion sort's key, the bracket stack, Floyd–Warshall's table).
   - The quality bar in the requirements now asks for this, so every Phase 2 entry meets it too.
-- [~] **1.6 Built-in themes** _ADR_ [ADR 0030](adr/0030-built-in-themes.md). ADR 0030, then three PRs: the themes and their fonts in the painters, Typst and LaTeX; the player's chrome, web fonts and language menu; the documentation and the lab's removal.
-  - Turn every theme-lab direction into a named built-in theme next to light, dark and print.
-  - Keep the current light theme as the default, and refine it where it looks unnatural: a design pass with the frontend-design skill and a design subagent.
-  - Every theme is tested on every kind and output (contrast, print, the Typst and LaTeX packages).
-  - The README and the docs site show how to switch themes.
-  - The playground's Theme menu lists every built-in theme.
-  - The player's code-language switcher becomes a dropdown menu instead of a row of buttons (the owner's request, 2026-11-08).
-  - Delete the lab, keeping a copy outside the repository.
-  - Before-and-after screenshots go in the PR and the report.
+- [x] **1.6 Built-in themes** _ADR_ [ADR 0030](adr/0030-built-in-themes.md) (#51). ADR 0030, then three PRs:
+  - the themes and their fonts in the painters, Typst and LaTeX: `textbook`, `textbook-dark`, `blocks`, `blocks-dark`, `answer-sheet` and `turbo-c` next to `light`, `dark` and `print`; the default refined with a design pass; captions as the code names structures (#53);
+  - the player's chrome per theme, its web fonts, day-and-night pairs, the language menu as a `<select>`, and the playground's Theme menu with every theme (#54);
+  - the documentation of themes in every output, and the lab's removal, kept outside the repository (#55).
+  - The documentation site shows themes once it exists (3.4).
 - [ ] **1.7 Painter fixes** found during theme work:
   - check marks on graph and tree nodes stick out of the circle;
   - radii in the code panel and buttons are hard-coded instead of theme tokens;
   - edge weight labels sit on edges that cross them (the weight 15 in the Dijkstra and Kruskal examples);
   - the heap view keeps elements past the heap size linked into the tree, where CLRS draws them apart;
-  - a highlighted vertex that is already settled no longer shows that it is settled (Dijkstra relaxing an edge back to a finished vertex).
+  - a highlighted vertex that is already settled no longer shows that it is settled (Dijkstra relaxing an edge back to a finished vertex);
+  - node notes overlap edges: the ranks of the disjoint sets, and Dijkstra's distances, which also sit at uneven angles (found in the design pass of 1.6);
+  - in the heap view, the index under a node sits on its child edges;
+  - pointer rows reserved for a whole trace leave a blank band in frames without pointers, such as the last frame of insertion sort.
 - [ ] **1.9 Algorithm and input everywhere** _ADR_ (added 2026-11-08 after the owner set the goal of the lowest cost of use, now in the requirements' purpose). People and models give an algorithm and its input, not a document, in every output.
   - The player takes an algorithm and its input, as the teaching-website use case asks, the standalone bundle included. The ADR weighs carrying the registry in the bundle against loading it on demand.
   - Shorter input notations where people already have one, such as a graph written `A-B 4, B-C 2`, accepted alike by the command line, MCP, the player and the Typst and LaTeX packages.
   - Measured before and after: the concepts a user must know and the input they write for a set of typical tasks.
+- [ ] **1.10 Figures that fill a slide** _ADR_ (found in 1.6). In Beamer and in Typst slides a figure is drawn at its natural size, at most the line's width, so wide figures (Kruskal's, the wide layout) come out small on a slide. By default a slide figure should fill the frame's width and a share of its height, keeping its shape; the ADR amends ADR 0027 and 0028.
 
 ## Phase 2: CLRS coverage
 
