@@ -31,5 +31,6 @@ Each file records one architectural decision: the context, what we decided, and 
 | [0025](0025-exporting-figures.md)                   | Figures are exported as a series of SVG files that share one canvas  | Accepted                            |
 | [0026](0026-typst-package.md)                       | The Typst package runs the engine in QuickJS in a Wasm plugin        | Accepted                            |
 | [0027](0027-latex-package.md)                       | The LaTeX package draws TikZ figures from a standalone command       | Accepted                            |
+| [0028](0028-slides.md)                              | Slides step through a series, one overlay per frame                  | Accepted                            |
 
 Template: Status · Context · Decision · Consequences.
