@@ -138,6 +138,7 @@ function layoutHeapView(
     items,
     width,
     height: rowTop + row.height - origin.y,
+    ...(row.reserved === undefined ? {} : { reserved: row.reserved }),
   };
 }
 
@@ -201,13 +202,13 @@ function layoutArrayRow(
 
   const cellsWidth =
     metrics.slots === 0 ? 0 : metrics.slots * pitch - o.cellGap;
+  // The band below the cells is open only over the frames with pointers.
+  const band = pointerAreaHeight(metrics.pointerRows, o);
+  const open = input.pointersShown !== false;
   return {
     items,
     width: Math.max(cellsWidth + 2 * overhang, titleWidth(title, o)),
-    height:
-      titleRow +
-      indexRow +
-      o.cellHeight +
-      pointerAreaHeight(metrics.pointerRows, o),
+    height: titleRow + indexRow + o.cellHeight + (open ? band : 0),
+    ...(open || band === 0 ? {} : { reserved: band }),
   };
 }
