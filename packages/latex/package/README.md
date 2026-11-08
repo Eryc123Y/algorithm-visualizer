@@ -8,10 +8,7 @@ The figures are drawn with TikZ, so their text is set in your document's fonts a
 \documentclass{article}
 \usepackage{algoviz}
 \begin{document}
-\algoviz[step=improve#3]{dijkstra}{
-  "graph": {"nodes": ["A", "B", "C", "D"],
-            "edges": [["A", "B", 4], ["B", "C", 1], ["A", "C", 7], ["C", "D", 2]]},
-  "source": "A"}
+\algoviz[step=improve#3]{dijkstra}{A-B 4, B-C 1, A-C 7, C-D 2}
 \end{document}
 ```
 
@@ -38,9 +35,9 @@ The package runs the `algoviz` command through shell escape, as `minted` runs Py
 
 | Command                                     | Draws                                                                           |
 | ------------------------------------------- | ------------------------------------------------------------------------------- |
-| `\algoviz[keys]{id}{input}`                 | a step of a registry algorithm, run on the input, given as JSON                 |
+| `\algoviz[keys]{id}{input}`                 | a step of a registry algorithm, run on the input ([The input](#the-input))      |
 | `\algovizfile[keys]{doc.json}`              | a step of an algoviz document in a JSON file                                    |
-| `\algovizfile[algorithm=id, keys]{in.json}` | a step of an algorithm whose input is in a JSON file                            |
+| `\algovizfile[algorithm=id, keys]{in.json}` | a step of an algorithm whose input is in a file                                 |
 | `\algovizinput[keys]{figure.tex}`           | a figure or series made by `algoviz export --format tikz`, without shell escape |
 | `\algovizset{keys}`                         | sets keys for the figures that follow, in the current group                     |
 
@@ -111,7 +108,25 @@ In a Beamer frame, `steps` turns a figure into overlays: one slide per frame of 
 
 ## The input
 
-The input of `\algoviz` is JSON, as TeX reads it:
+The input of `\algoviz` is a notation, or JSON ([ADR 0032](../../../docs/adr/0032-algorithm-and-input.md)):
+
+```latex
+\algoviz{insertion-sort}{5 2 4 6 1 3}                     % a list
+\algoviz{dijkstra}{A-B 4, B-C 1, A-C 7, C-D 2}            % a graph, from its first node
+\algoviz{topological-sort}{shirt->tie, tie->jacket, socks} % a directed graph
+\algoviz{inorder-tree-walk}{[4, 2, 6, 1, 3, null, 7]}     % a tree in level order
+\algoviz{bst}{"from": "8 3 10 1 6", "ops": "insert 4, delete 3"}
+\algoviz{dijkstra}{"graph": "A-B 4, B-C 1", "source": "C"}
+\algoviz{kruskal}{}                                        % the first example
+```
+
+- **Lists** are numbers separated by commas or spaces, optionally in brackets; a level order writes `null` for a gap.
+- **Graphs** are edge lists: `-` joins an undirected edge and `->` a directed one, a number after a space is the weight, and a name alone is a node without edges. Names are letters, digits and `_`. Write the edges on several lines if you like, but separate them with commas, since TeX turns a line break into a space.
+- **Operations** of a data structure are written as exercises write them: `insert 4, delete 3`.
+- An input that needs only one thing may be that thing alone, such as a sort's values or a graph algorithm's graph, which then starts at its first node; `"source"` (`"root"` for Prim) picks another. Empty braces run the algorithm on its first example.
+- Anything that starts with `{`, `[` or `"` is JSON, with the structured forms that `algoviz recipes` lists, such as `"graph": {"nodes": [...], "edges": [["A", "B", 4], ...]}`. A notation error names the token and its position: `INVALID_NOTATION at $.input: Expected a weight or "," after "B-C", not "x" (character 12)`.
+
+As TeX reads it:
 
 - The outer braces of an object may be left out: `{"source": "A", ...}` and `"source": "A", ...` are the same.
 - Line breaks and repeated spaces are fine.

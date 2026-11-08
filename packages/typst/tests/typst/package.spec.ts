@@ -145,6 +145,56 @@ describe('figures in Typst', () => {
     );
   });
 
+  it('take inputs in notations, as the main field alone, or none (ADR 0032)', () => {
+    const graph = {
+      nodes: ['A', 'B', 'C', 'D'],
+      edges: [
+        ['A', 'B', 4],
+        ['B', 'C', 1],
+        ['A', 'C', 7],
+        ['C', 'D', 2],
+      ],
+    };
+    const dijkstra = documentOf('dijkstra', { graph, source: 'A' });
+    const sort = documentOf('insertion-sort', { values: [5, 2, 4, 6, 1, 3] });
+    const bst = documentOf('bst', {
+      from: [8, 3, 10, 1, 6],
+      ops: [
+        { op: 'insert', key: 4 },
+        { op: 'delete', key: 3 },
+      ],
+    });
+    const [notation, field, alone, ops, example] = evaluate(
+      `(
+        str(algoviz("dijkstra", "A-B 4, B-C 1, A-C 7, C-D 2", step: "improve#3").source),
+        str(algoviz("dijkstra", (graph: "A-B 4, B-C 1, A-C 7, C-D 2", source: "A"), step: "improve#3").source),
+        str(algoviz("insertion-sort", (5, 2, 4, 6, 1, 3), step: 4).source),
+        str(algoviz("bst", (from: "8 3 10 1 6", ops: "insert 4, delete 3")).source),
+        str(algoviz("dijkstra", step: 2).source),
+      )`,
+    ) as string[];
+    expect(notation).toBe(exported(dijkstra, ['improve#3'], 'light')[0]);
+    expect(field).toBe(notation);
+    expect(alone).toBe(exported(sort, [4], 'light')[0]);
+    expect(ops).toBe(exported(bst, [-1], 'light')[0]);
+    expect(example).toBe(
+      exported(documentOf('dijkstra', undefined), [2], 'light')[0],
+    );
+    expect(
+      evaluate('algoviz-figures("dijkstra", "A-B 4, B-C x")'),
+    ).toMatchObject({
+      ok: false,
+      diagnostics: [
+        {
+          code: 'INVALID_NOTATION',
+          path: '$.input',
+          message:
+            'Expected a weight or "," after "B-C", not "x" (character 12)',
+        },
+      ],
+    });
+  });
+
   it('draw a series in timeline order, on one canvas', () => {
     const input = { from: [8, 3, 10, 1, 6], key: 3 };
     writeFileSync(join(root, 'input.json'), JSON.stringify(input));
@@ -257,7 +307,7 @@ describe('errors', () => {
   });
 
   it('stop compilation for arguments of the wrong type', () => {
-    expect(failure('algoviz("dijkstra")')).toContain(
+    expect(failure('algoviz("dijkstra", (:), (:))')).toContain(
       'takes its input as the second argument',
     );
     expect(failure('algoviz("{}")')).toContain('json(');

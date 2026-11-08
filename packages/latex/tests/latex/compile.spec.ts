@@ -32,6 +32,14 @@ import {
   type Engine,
 } from './helpers.ts';
 
+/** Whether the `count` cached figures of `dir` are one drawing. */
+function sameFigures(dir: string, count: number): boolean {
+  const figures = cached(dir).map((f) =>
+    readFileSync(join(dir, '_algoviz', f), 'utf8'),
+  );
+  return figures.length === count && new Set(figures).size === 1;
+}
+
 // The notes make five figures: two of Dijkstra, two of bubble sort and one
 // of a document.
 const NOTES_FIGURES = 5;
@@ -107,8 +115,57 @@ describe('the package', () => {
       ].join('\n\n'),
     );
     expect(errors(tex(dir, file, 'unrestricted'))).toEqual([]);
-    expect(calls(dir)).toHaveLength(1);
+    // The command adds the braces (ADR 0032): two inputs as written, one
+    // drawing.
+    expect(sameFigures(dir, 2)).toBe(true);
     expect(pdfText(join(dir, 'input.pdf'))).toContain('%');
+  });
+
+  it('takes notations, the main field alone, and no input (ADR 0032)', () => {
+    const dir = workspace();
+    const graph =
+      '{"nodes": ["A", "B", "C", "D"], "edges": [["A", "B", 4], ["B", "C", 1], ["A", "C", 7], ["C", "D", 2]]}';
+    const file = document(
+      dir,
+      'notations',
+      [
+        '\\algoviz[step=improve\\#3]{dijkstra}{A-B 4, B-C 1, A-C 7, C-D 2}',
+        `\\algoviz[step=improve\\#3]{dijkstra}{"graph": ${graph}, "source": "A"}`,
+        '\\algoviz[step=improve\\#3]{dijkstra}{"graph": "A-B 4,\n  B-C 1, A-C 7, C-D 2"}',
+      ].join('\n\n'),
+    );
+    expect(errors(tex(dir, file, 'unrestricted'))).toEqual([]);
+    expect(sameFigures(dir, 3)).toBe(true);
+
+    const more = workspace();
+    const others = document(
+      more,
+      'others',
+      [
+        '\\algoviz{insertion-sort}{5 2 4 6 1 3}',
+        '\\algoviz{bst}{"from": "8 3 10 1 6", "ops": "insert 4, delete 3"}',
+        '\\algoviz{inorder-tree-walk}{[4, 2, 6, 1, 3, null, 7]}',
+        '\\algoviz{kruskal}{}',
+      ].join('\n\n'),
+    );
+    expect(errors(tex(more, others, 'unrestricted'))).toEqual([]);
+    expect(cached(more)).toHaveLength(4);
+  });
+
+  it('shows a notation error with its token', () => {
+    const dir = workspace();
+    const file = document(
+      dir,
+      'bad-notation',
+      '\\algoviz{dijkstra}{A-B 4, B-C x}',
+    );
+    const text = tex(dir, file, 'unrestricted');
+    expect(text).toContain(
+      'Package algoviz Error: algoviz could not make the figure: INVALID_NOTATION',
+    );
+    const pdf = pdfText(join(dir, 'bad-notation.pdf'));
+    expect(pdf).toContain('INVALID_NOTATION');
+    expect(pdf).toContain('character 12');
   });
 
   it('passes JSON escapes in strings through TeX', () => {

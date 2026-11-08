@@ -788,13 +788,10 @@
     \group_begin:
       \__algoviz_options:n {#1}
       \__algoviz_to_str:Nn \l__algoviz_id_str {#2}
+      % The command reads the text (ADR 0032): JSON, an object without its
+      % braces, which TeX takes off, or a notation such as A-B 4, B-C 2;
+      % empty text runs the algorithm's first example.
       \__algoviz_to_str:Nn \l__algoviz_input_str {#3}
-      % The braces of an object may be left out, as TeX takes them off.
-      \regex_match:nVF { \A [\[\{] } \l__algoviz_input_str
-        {
-          \str_set:Ne \l__algoviz_input_str
-            { \c_left_brace_str \l__algoviz_input_str \c_right_brace_str }
-        }
       \__algoviz_checked:n
         {
           \__algoviz_check:NNnn \c__algoviz_id_regex \l__algoviz_id_str
@@ -818,7 +815,6 @@
         }
     \group_end:
   }
-\cs_generate_variant:Nn \regex_match:nnTF { nV }
 
 \NewDocumentCommand \algovizfile { O{} m }
   {

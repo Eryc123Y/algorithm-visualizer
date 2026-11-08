@@ -5,20 +5,9 @@
 #set page(paper: "presentation-16-9", margin: 1.5cm)
 #set text(size: 20pt)
 
-#let input = (
-  graph: (
-    nodes: ("s", "a", "b", "c", "t"),
-    edges: (
-      ("s", "a", 4),
-      ("s", "b", 1),
-      ("b", "a", 2),
-      ("a", "c", 1),
-      ("b", "c", 5),
-      ("c", "t", 3),
-    ),
-  ),
-  source: "s",
-)
+// The graph, as an edge list; Dijkstra's algorithm starts at its first
+// node, s.
+#let input = "s-a 4, s-b 1, b-a 2, a-c 1, b-c 5, c-t 3"
 
 // polylux's own `only` shows each frame on its subslide.
 #slide[
