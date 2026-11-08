@@ -68,7 +68,7 @@ Everything later builds on these, so they come first. The ADRs are accepted (#13
   - the player's chrome per theme, its web fonts, day-and-night pairs, the language menu as a `<select>`, and the playground's Theme menu with every theme (#54);
   - the documentation of themes in every output, and the lab's removal, kept outside the repository (#55).
   - The documentation site shows themes once it exists (3.4).
-- [~] **1.7 Painter fixes** found during theme work. _ADR_ [ADR 0031](adr/0031-painter-fixes.md) for the three that change a recorded decision, then three PRs: text clear of lines and settled under every mark; pointer bands and the heap's sorted part; radii in the chrome.
+- [x] **1.7 Painter fixes** found during theme work. _ADR_ [ADR 0031](adr/0031-painter-fixes.md) (#56) for the three that change a recorded decision, then three PRs: text clear of lines and settled under every mark (#57); pointer bands and the heap's sorted part (#58); radii in the chrome (#59).
   - check marks on graph and tree nodes stick out of the circle;
   - radii in the code panel and buttons are hard-coded instead of theme tokens;
   - edge weight labels sit on edges that cross them (the weight 15 in the Dijkstra and Kruskal examples);
