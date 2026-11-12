@@ -71,8 +71,8 @@ A figure's unit comes from the first of these that applies:
 
 ### Tests
 
-- **`npm run test:latex`**: a Beamer deck at 4:3 and 16:9, with pdfLaTeX and LuaLaTeX, draws figures whose bounding boxes, read from the PDF, fit the slide box and touch one of its sides: a wide figure (Kruskal), a tall one (Dijkstra) and a narrow one (binary search). `width`, `height` and `scale` give the sizes above, a series is the size of its figure alone, and an article with `beamerarticle` and a plain article give the figures the sizes they had before.
-- **`npm run test:typst`**: `algoviz-slides` in polylux 0.4.0 and touying 0.8.0 decks with the same three figures: each page's image fits the slide box and touches one side; `width`, `height`, `fit` and relative lengths; a series and a one-frame series; the page count does not change.
+- **`npm run test:latex`**: figure files of known canvases (wide, tall, narrow and upright) in Beamer frames at 4:3 and 16:9 are measured in a box, whose size TeX writes to the log: each fits the slide box, touches one of its sides and keeps its shape. `width`, `height` and `scale` give the sizes above, a series is the size of its figure alone, a column's figure fills the column, and a plain article and `beamerarticle` notes give the sizes of ADR 0027. Kruskal's, Dijkstra's and binary search's figures, made by the command, fill a 16:9 slide in pdfLaTeX and LuaLaTeX.
+- **`npm run test:typst`**: `algoviz-slides` with a stand-in `only` that calls each frame's `layout` with a chosen region: every frame of a series alike, fitting the slide box and touching a side; `width`, `height` (lengths, ratios, relative lengths), `fit`, unbounded regions, a one-frame series and the errors for other types. Decks with polylux 0.4.0 and touying 0.8.0 draw the three registry figures inside the slide box that `layout` reports there, and the example decks keep their pages.
 - **By hand**: the example decks before and after, compared in the pull request.
 
 ### Rejected
