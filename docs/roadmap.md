@@ -155,7 +155,7 @@ Each entry is one registry module, or one per operation for data structures. Eac
 - [x] Edmonds–Karp maximum flow (#93)
 - [x] bipartite matching (#94)
 - [x] Hopcroft–Karp (#95)
-- [x] stable matching (Gale–Shapley) (#PR)
+- [x] stable matching (Gale–Shapley) (#96)
 - [ ] Hungarian algorithm
 
 **VII Selected topics**
