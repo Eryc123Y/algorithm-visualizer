@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { loadTrace, type TreeData } from '@algoviz/core';
+import {
+  loadTrace,
+  type BTreeData,
+  type PlaneData,
+  type TreeData,
+} from '@algoviz/core';
 
 import { grade } from '../src/grade.ts';
 import { tasks } from '../src/tasks.ts';
@@ -62,14 +67,20 @@ describe('eval tasks', () => {
                   ? { cells: data }
                   : decl.kind === 'tree'
                     ? treeDecl(data as TreeData)
-                    : decl.kind === 'graph' || decl.kind === 'linkedList'
-                      ? {}
-                      : { initial: data };
+                    : decl.kind === 'btree'
+                      ? {
+                          nodes: (data as BTreeData).nodes,
+                          root: (data as BTreeData).root,
+                        }
+                      : decl.kind === 'plane'
+                        ? { ...(data as PlaneData) }
+                        : decl.kind === 'graph' || decl.kind === 'linkedList'
+                          ? {}
+                          : { initial: data };
           return [name, { ...decl, ...solved }];
         }),
       );
       const result = grade(task, {
-        // Side panels and priority queues need 0.4 (ADR 0029).
         version: '1.0',
         structures,
         steps: Array.from({ length: task.minSteps }, (_, k) => ({

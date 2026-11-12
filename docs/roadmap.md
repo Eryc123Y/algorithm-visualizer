@@ -195,7 +195,7 @@ Recipes that exist beyond CLRS stay: bubble and selection sort, binary search, l
 Independent of Phase 2, so the two can interleave.
 
 - [x] **3.1 Streamable HTTP transport** for the MCP server, next to stdio. The server and the MCP App page must run on Workers. [ADR 0039](adr/0039-http-transport.md) (#121, #123).
-- [x] **3.2 Cloudflare Worker** with a "Deploy to Cloudflare" button. It is stateless and rate-limited, and its README shows how to connect Claude and other clients. `apps/worker` (#124); deploying waits for the owner: a public repository or a manual `wrangler deploy`, and a Worker name.
+- [x] **3.2 Cloudflare Worker** with a "Deploy to Cloudflare" button. It is stateless and rate-limited, and its README shows how to connect Claude and other clients. `apps/worker` (#124); it is named `algoviz-mcp`; deploying waits for the owner: a public repository or a manual `wrangler deploy`.
 - [x] **3.3 Share links.** _ADR_ [ADR 0040](adr/0040-share-links.md) (#122), amended by [ADR 0041](adr/0041-share-link-limits.md) (#125), then the codec, the MCP links and the share page `apps/site` (#126). A player page that reads a compressed document, or an algorithm and its input, from the URL fragment. MCP tools return the link alongside the document.
 - [x] **3.4 Documentation site** on Cloudflare Pages, generated from the registry. It is grouped structure → operation, with the player and the export snippets for every algorithm. `apps/site`: a page per module with its player, step names and snippets (web, Typst, LaTeX, CLI, MCP, share link), the catalogue by topic, and the themes; deploying waits for the owner's domain (#127).
 
@@ -209,6 +209,9 @@ Independent of Phase 2, so the two can interleave.
   - Evals cover the new kinds.
   - Bundle sizes are measured.
   - The README and the guide are up to date.
+  - Split in two, since the last run must follow 4.2:
+    - part 1 (#132): evals for root lists, `btree`, list `move`, array patterns, `plane` and the priority queue in the side panel; `npm run sizes` and [the sizes](sizes.md);
+    - part 2, after 4.2: the README and the guide, deep fuzz, the full E2E suite and the Typst, LaTeX, standalone and Worker tests.
 
 ## After 1.0
 
