@@ -26,9 +26,9 @@ describe('linkedList move (ADR 0036)', () => {
     );
     const move = { type: 'move', from: 2, to: 0 };
     const { version: _, ...content } = doc('0.7', [move]);
-    expect(minimumVersion(content as Omit<VisualizationInput, 'version'>)).toBe(
-      '0.7',
-    );
+    expect(
+      minimumVersion(content as unknown as Omit<VisualizationInput, 'version'>),
+    ).toBe('0.7');
     expect(parseVisualization(doc('0.7', [move])).ok).toBe(true);
     const old = parseVisualization(doc('0.6', [move]));
     expect(old.ok ? [] : old.error.map((e) => e.code)).toEqual([
@@ -52,8 +52,8 @@ describe('linkedList move (ADR 0036)', () => {
     const { version: _, ...content } = doc('0.1', [
       { type: 'link', from: 0, to: 2 },
     ]);
-    expect(minimumVersion(content as Omit<VisualizationInput, 'version'>)).toBe(
-      '0.1',
-    );
+    expect(
+      minimumVersion(content as unknown as Omit<VisualizationInput, 'version'>),
+    ).toBe('0.1');
   });
 });
