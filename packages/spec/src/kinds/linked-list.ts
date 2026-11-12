@@ -4,7 +4,8 @@
  *
  * Positions refer to the row, from the left (0). Links are independent of
  * the row, so a reversal can be shown one pointer at a time. `insert` only
- * places a node; wire it in with `link`, as the code being taught would.
+ * places a node and `move` only moves one along the row (ADR 0036); wire
+ * them in with `link`, as the code being taught would.
  *
  * Marks: `highlight` lasts one step; `visit`, `settle` and `pointer` persist.
  */
@@ -77,6 +78,11 @@ const actions = <E extends z.ZodType>(element: E) =>
     z
       .strictObject({ type: z.literal('set'), index: Index, value: Scalar })
       .describe('Change a node value.'),
+    z
+      .strictObject({ type: z.literal('move'), from: Index, to: Index })
+      .describe(
+        'Move the node at row position `from` to position `to`; the nodes between shift one place. Links do not change: relink with `link` in the same step. Needs version 0.7.',
+      ),
     z
       .strictObject({
         type: z.literal('link'),

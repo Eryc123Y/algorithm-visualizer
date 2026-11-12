@@ -1,0 +1,11 @@
+{
+  "description": "move on a linked list needs protocol version 0.7.",
+  "input": {
+    "version": "0.6",
+    "structures": { "l": { "kind": "linkedList", "initial": [4, 2, 7, 1] } },
+    "steps": [
+      { "actions": [{ "target": "l", "type": "move", "from": 2, "to": 0 }] }
+    ]
+  },
+  "expectedErrors": [{ "code": "VERSION_TOO_OLD", "path": "$.version" }]
+}

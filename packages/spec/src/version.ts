@@ -21,6 +21,7 @@ export const PROTOCOL_VERSIONS = [
   '0.4',
   '0.5',
   '0.6',
+  '0.7',
 ] as const;
 
 /** A protocol version this package reads. */
@@ -157,19 +158,26 @@ export interface ProtocolFeature<V extends string = ProtocolVersion> {
 /** An action of a document, as written, with the kind of its target. */
 type ActionOf = Content['steps'][number]['actions'][number];
 
-/** Whether some action on a tree of the document passes `test`. */
-const anyTreeAction = (
+/** Whether some action on a structure of `kind` passes `test`. */
+const anyActionOn = (
   d: Content,
+  kind: string,
   test: (action: Record<string, unknown>) => boolean,
 ): boolean =>
   d.steps.some((step) =>
     step.actions.some(
       (action: ActionOf) =>
         Object.hasOwn(d.structures, action.target) &&
-        d.structures[action.target]!.kind === 'tree' &&
+        d.structures[action.target]!.kind === kind &&
         test(action),
     ),
   );
+
+/** Whether some action on a tree of the document passes `test`. */
+const anyTreeAction = (
+  d: Content,
+  test: (action: Record<string, unknown>) => boolean,
+): boolean => anyActionOn(d, 'tree', test);
 
 /**
  * Features added after the first protocol version, with the version that
@@ -257,6 +265,11 @@ export const PROTOCOL_FEATURES: readonly ProtocolFeature[] = [
         d,
         (a) => a['type'] === 'markEdge' || a['type'] === 'labelEdge',
       ),
+  },
+  {
+    name: 'list moves',
+    since: '0.7',
+    usedBy: (d) => anyActionOn(d, 'linkedList', (a) => a['type'] === 'move'),
   },
   {
     name: 'B-trees',

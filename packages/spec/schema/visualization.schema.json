@@ -10,7 +10,8 @@
         "0.3",
         "0.4",
         "0.5",
-        "0.6"
+        "0.6",
+        "0.7"
       ],
       "description": "Protocol version, \"major.minor\": the oldest version that has every feature the document uses."
     },
@@ -2195,6 +2196,39 @@
                         "type",
                         "index",
                         "value",
+                        "target"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "move"
+                        },
+                        "from": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991,
+                          "description": "Zero-based position."
+                        },
+                        "to": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991,
+                          "description": "Zero-based position."
+                        },
+                        "target": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+                          "description": "Name of the structure this action applies to."
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "from",
+                        "to",
                         "target"
                       ],
                       "additionalProperties": false
@@ -5030,6 +5064,6 @@
       ]
     }
   },
-  "$id": "urn:algoviz:schema:visualization:0.6",
+  "$id": "urn:algoviz:schema:visualization:0.7",
   "title": "Visualization"
 }
