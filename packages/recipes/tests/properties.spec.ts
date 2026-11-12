@@ -527,9 +527,9 @@ recipe(
         { minLength: 1, maxLength: 8 },
       ),
     )
-    // Keep one key, so that every select of rank 1 has one to find.
+    // Keep the first key, so that every select of rank 1 has one to find.
     .map(([from, ops]) => ({
-      from: [from[0]!, ...from.slice(1)],
+      from,
       ops: ops.map((o) =>
         o.op === 'delete' && o.key === from[0] ? { ...o, key: o.key + 101 } : o,
       ),

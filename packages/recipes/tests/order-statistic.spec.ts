@@ -10,6 +10,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { Trace, TreeState } from '@algoviz/core';
 
+import { ordinal } from '../src/structures/red-black/order-statistic-tree.ts';
 import { fuzz, replay, runError, runOk, stateOf } from './helpers.ts';
 import {
   drawnShape,
@@ -99,6 +100,51 @@ describe('order-statistic-tree', () => {
     expect(sizeProblems(stateOf(trace, 'T', 'tree', 1))).toEqual([]);
   });
 
+  it('names its steps, the fixups’ at the line that calls them', () => {
+    const steps = (id: string, input: object) =>
+      runOk(id, input).document.steps.map((s) => [s.meta?.id, s.meta?.at]);
+    expect(
+      steps('order-statistic-tree.insert', { from: [1, 2], key: 3 }),
+    ).toEqual([
+      ['go', 'go'],
+      ['go', 'go'],
+      ['new', 'new'],
+      ['case-3', 'fixup'],
+      ['fixed', 'fixup'],
+    ]);
+    expect(
+      steps('order-statistic-tree.delete', { from: SAMPLE, key: 17 }).map(
+        ([id]) => id,
+      ),
+    ).toContain('update');
+    // Every climb from a node to its parent is one `up` step.
+    const rank = steps('order-statistic-tree.rank', { from: SAMPLE, key: 38 });
+    const ids = rank.map(([id]) => id);
+    expect(ids.filter((id) => id === 'up')).toHaveLength(
+      ids.filter((id) => id === 'find').length - 1,
+    );
+    expect(ids.at(-1)).toBe('rank');
+  });
+
+  it('writes ordinals', () => {
+    expect([1, 2, 3, 4, 11, 12, 13, 21, 22, 23, 111, 112].map(ordinal)).toEqual(
+      [
+        '1st',
+        '2nd',
+        '3rd',
+        '4th',
+        '11th',
+        '12th',
+        '13th',
+        '21st',
+        '22nd',
+        '23rd',
+        '111th',
+        '112th',
+      ],
+    );
+  });
+
   it('refuses ranks outside the tree', () => {
     expect(
       runError('order-statistic-tree.select', { from: SAMPLE, i: 0 }).message,
@@ -127,7 +173,7 @@ describe('order-statistic-tree', () => {
       }),
       fc.record({
         op: fc.constant('select'),
-        i: fc.integer({ min: 1, max: 4 }),
+        i: fc.integer({ min: 1, max: 40 }),
       }),
     );
     fc.assert(
@@ -140,20 +186,30 @@ describe('order-statistic-tree', () => {
         (from, ops) => {
           const ref = new RefTree<number>((a, b) => a < b);
           for (const key of from) ref.insert(key);
-          const expected = ops.map((o) => {
+          // A select asks for a rank the tree has at that point: i modulo
+          // its size; an empty tree has none, and that call is dropped.
+          const calls: typeof ops = [];
+          const expected = ops.flatMap((o) => {
+            if (o.op === 'select') {
+              const keys = ref.keys();
+              if (keys.length === 0) return [];
+              const i = ((o.i - 1) % keys.length) + 1;
+              calls.push({ op: 'select', i });
+              return [keys[i - 1]];
+            }
+            calls.push(o);
             if (o.op === 'insert') ref.insert(o.key);
             else if (o.op === 'delete') ref.delete(o.key);
-            else if (o.op === 'rank') {
+            else {
               const k = ref.keys().indexOf(o.key);
-              return k < 0 ? null : k + 1;
-            } else return ref.keys()[o.i - 1] ?? 'refused';
-            return null;
+              return [k < 0 ? null : k + 1];
+            }
+            return [null];
           });
-          // A select beyond the keys is refused; leave such runs out.
-          if (expected.includes('refused')) return;
+          if (calls.length === 0) return;
           const { document, results } = runOk('order-statistic-tree', {
             from,
-            ops,
+            ops: calls,
           });
           expect(results).toEqual(expected);
           const trace = replay(document);

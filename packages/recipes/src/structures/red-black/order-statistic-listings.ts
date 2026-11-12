@@ -53,6 +53,7 @@ export const OS_RANK = listing('rank', {
         return r  // @rank
   `,
   python: `
+    # size(x) is x.size, or 0 for None, as in select
     def rank(T, key):
         x = T.root
         while x and key != x.key:  # @find
@@ -95,6 +96,7 @@ export const OS_INSERT = listing('insert', {
         x.size = x.left.size + x.right.size + 1
   `,
   python: `
+    # size(x) is x.size, or 0 for None, as in select
     def insert(T, key):
         if search(T.root, key):
             return  # already in the tree: no size changes  # @present
@@ -153,6 +155,7 @@ export const OS_DELETE = listing('delete', {
             RB-DELETE-FIXUP(T, x)  // as for red–black trees  // @fixup
   `,
   python: `
+    # size(x) is x.size, or 0 for None, as in select
     def delete(T, key):
         z = T.root
         while z and key != z.key:  # @find

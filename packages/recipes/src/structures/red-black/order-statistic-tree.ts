@@ -131,23 +131,25 @@ function rank(t: State, key: number, run: Run<number>): Applied<State> {
   let r = (fieldOf(t, nodeOf(t, x).left) ?? 0) + 1;
   step(
     'start',
-    `${keysBelow(r - 1)} below ${key} on its left come before it: it is the ${ordinal(r)} in its own subtree.`,
+    `${key} has ${keysBelow(r - 1)} on its left, so it is the ${ordinal(r)} in its own subtree.`,
   );
   on.pointer({ name: 'y', node: x });
   for (let y = x; y !== t.root;) {
     const p = nodeOf(t, y).parent!;
-    const pk = nodeOf(t, p).key;
+    const [yk, pk] = [nodeOf(t, y).key, nodeOf(t, p).key];
     if (sideOf(t, y) === 'right') {
-      const before = (fieldOf(t, nodeOf(t, p).left) ?? 0) + 1;
-      r += before;
+      const left = fieldOf(t, nodeOf(t, p).left) ?? 0;
+      r += left + 1;
       step(
         'add',
-        `${nodeOf(t, y).key} is a right child: ${pk} and the ${keysBelow(before - 1)} on its left come before it too, so ${key} is the ${ordinal(r)} so far.`,
+        `${yk} is a right child, so its parent ${pk} and the ${keysBelow(left)} on ${pk}'s left come before ${key} too: ${key} is the ${ordinal(r)} so far.`,
       );
+      on.highlight({ nodes: [p] });
+      step('up', `Go up to ${pk}.`);
     } else
       step(
         'up',
-        `${nodeOf(t, y).key} is a left child: nothing on ${pk}'s side comes before it. Go up to ${pk}.`,
+        `${yk} is a left child, so ${pk} and its right subtree come after ${key}: nothing to add. Go up to ${pk}.`,
       );
     on.pointer({ name: 'y', node: p }).highlight({ nodes: [p] });
     y = p;
