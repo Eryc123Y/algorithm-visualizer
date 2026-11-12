@@ -1509,6 +1509,41 @@ recipe(
 );
 
 recipe(
+  'johnson',
+  fc
+    .tuple(
+      fc.integer({ min: 1, max: 8 }),
+      fc.array(
+        fc.tuple(fc.nat(7), fc.nat(7), fc.integer({ min: -3, max: 9 })),
+        { maxLength: 16 },
+      ),
+    )
+    .map(([n, raw]) => {
+      const nodes = Array.from({ length: n }, (_, k) => `v${k}`);
+      const seen = new Set<string>();
+      const edges = raw.flatMap(([a, b, w]): [string, string, number][] => {
+        const key = `${a % n} ${b % n}`;
+        if (seen.has(key)) return [];
+        seen.add(key);
+        return [[nodes[a % n]!, nodes[b % n]!, w]];
+      });
+      return { directed: true, nodes, edges };
+    }),
+  (graph) => runOk('johnson', { graph }).document,
+  (trace, g) => {
+    // Either a negative cycle is reported, or every row of D is filled
+    // with 0 on its diagonal.
+    const rows = steps(trace, 'row');
+    if (rows === 0) expect(steps(trace, 'cycle')).toBe(1);
+    else {
+      expect(rows).toBe(g.nodes.length);
+      const D = stateOf(trace, 'D', 'table').data;
+      g.nodes.forEach((_, i) => expect(D[i]![i]).toBe('0'));
+    }
+  },
+);
+
+recipe(
   'transitive-closure',
   graphs(nonNegative, { minNodes: 1 }),
   (graph) => runOk('transitive-closure', { graph }).document,
