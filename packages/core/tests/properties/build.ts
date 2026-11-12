@@ -9,7 +9,7 @@ import {
   type StructureDecl,
   type TargetedAction,
   type VisualizationInput,
-} from '@algoviz/spec';
+} from '@algomotion/spec';
 
 import {
   applyAction,

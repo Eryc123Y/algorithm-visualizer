@@ -7,7 +7,7 @@
  * run's calls, since every structure is declared before the first step).
  * Keys are distinct; `from` and `after` are the forest notation.
  */
-import type { StructureDeclInput, TreeNode } from '@algoviz/spec';
+import type { StructureDeclInput, TreeNode } from '@algomotion/spec';
 import { z } from 'zod';
 
 import { parseIn } from '../../notation/error.ts';

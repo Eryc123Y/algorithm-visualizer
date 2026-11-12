@@ -5,7 +5,7 @@ import {
   type BTreeData,
   type PlaneData,
   type TreeData,
-} from '@algoviz/core';
+} from '@algomotion/core';
 
 import { grade } from '../src/grade.ts';
 import { tasks } from '../src/tasks.ts';

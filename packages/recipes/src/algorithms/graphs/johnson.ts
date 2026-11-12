@@ -7,7 +7,7 @@
  * Dijkstra can run from every vertex; each result is then shifted back.
  * Edges are taken as directed; a negative cycle is reported.
  */
-import { LIMITS } from '@algoviz/spec';
+import { LIMITS } from '@algomotion/spec';
 import { z } from 'zod';
 
 import { defineAlgorithm } from '../../algorithm.ts';

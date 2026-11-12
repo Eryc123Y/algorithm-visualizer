@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { layoutTrace, loadTrace } from '@algoviz/core';
-import { createTheme, paintScene } from '@algoviz/svg';
+import { layoutTrace, loadTrace } from '@algomotion/core';
+import { createTheme, paintScene } from '@algomotion/svg';
 
 import { SceneStage } from '../src/stage.ts';
 

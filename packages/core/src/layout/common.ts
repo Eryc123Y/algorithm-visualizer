@@ -2,8 +2,8 @@
  * Geometry helpers shared by the layouts of all kinds, so that titles,
  * cells and pointer badges look the same everywhere.
  */
-import { textWidth, type FontMetrics } from '@algoviz/fonts';
-import type { Scalar } from '@algoviz/spec';
+import { textWidth, type FontMetrics } from '@algomotion/fonts';
+import type { Scalar } from '@algomotion/spec';
 
 import type { LayoutOptions } from './options.ts';
 import type { ElementRole, SceneItem } from './scene.ts';

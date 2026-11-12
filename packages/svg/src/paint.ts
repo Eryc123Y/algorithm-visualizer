@@ -17,14 +17,14 @@ import type {
   SceneItem,
   SceneNode,
   SceneText,
-} from '@algoviz/core';
+} from '@algomotion/core';
 import {
   TITLE_TRACKING,
   edgeLabelBox,
   labelSegment,
   noteBox,
-} from '@algoviz/core';
-import { textWidth } from '@algoviz/fonts';
+} from '@algomotion/core';
+import { textWidth } from '@algomotion/fonts';
 
 import { descentOf } from './descent.ts';
 import { num } from './format.ts';

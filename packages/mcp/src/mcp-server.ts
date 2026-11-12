@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
  * Runs the MCP server: over stdio for clients such as Claude Desktop or
- * Claude Code (`algoviz-mcp`), or over Streamable HTTP
- * (`algoviz-mcp --http [--host 127.0.0.1] [--port 8787]`, ADR 0039). Bound
+ * Claude Code (`algomotion-mcp`), or over Streamable HTTP
+ * (`algomotion-mcp --http [--host 127.0.0.1] [--port 8787]`, ADR 0039). Bound
  * to this machine, HTTP serves only pages and hosts on it.
  */
 import { StdioServerTransport } from '@modelcontextprotocol/server/stdio';
@@ -26,7 +26,7 @@ try {
   shareUrl = shareBaseFromEnv(process.env);
   if (shareUrl !== undefined) checkShareUrl(shareUrl);
 } catch (e) {
-  process.stderr.write(`algoviz-mcp: ${(e as Error).message}\n`);
+  process.stderr.write(`algomotion-mcp: ${(e as Error).message}\n`);
   process.exit(2);
 }
 
@@ -41,5 +41,5 @@ else {
     shareUrl,
   });
   const serving = await serveHttp(handler, args);
-  process.stderr.write(`algoviz MCP server on ${serving.url}mcp\n`);
+  process.stderr.write(`algomotion MCP server on ${serving.url}mcp\n`);
 }

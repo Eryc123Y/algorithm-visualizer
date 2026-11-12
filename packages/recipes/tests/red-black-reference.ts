@@ -5,7 +5,7 @@
  * nothing of the recipes' model or engine. `shape` gives a tree as nested
  * [key, colour, left, right] for comparing with what a document draws.
  */
-import type { TreeState } from '@algoviz/core';
+import type { TreeState } from '@algomotion/core';
 
 interface RNode<K> {
   key: K;

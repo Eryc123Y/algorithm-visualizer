@@ -15,7 +15,7 @@
  * that is clear. NIL leaves, root lists and pointers above linked roots
  * (ADR 0034) are drawn by tree-extras.ts.
  */
-import type { TreeDecl } from '@algoviz/spec';
+import type { TreeDecl } from '@algomotion/spec';
 
 import type { Block, LayoutInput } from '../kind.ts';
 import { isNilSlot, type NilSlot, type TreeState } from '../kinds/tree.ts';

@@ -1,5 +1,5 @@
 /**
- * The algoviz MCP server as a Cloudflare Worker (ADR 0039, roadmap 3.2):
+ * The algomotion MCP server as a Cloudflare Worker (ADR 0039, roadmap 3.2):
  * Streamable HTTP at `/mcp`, stateless, with the guide and the player page
  * built in. Each client IP may make `RATE_LIMITER`'s number of requests per
  * period; past it the answer is 429 with `Retry-After`. `/` describes the
@@ -8,7 +8,7 @@
  * The Worker's entry, `worker.ts`, exports only the handler, as workerd
  * requires; this module holds what tests need.
  */
-import type { HttpHandler } from '@algoviz/mcp';
+import type { HttpHandler } from '@algomotion/mcp';
 
 /** The Workers Rate Limiting binding, as far as the Worker uses it. */
 export interface RateLimiter {
@@ -22,7 +22,7 @@ export interface Env {
    * The share page's address, such as `https://example.org/play/`, for
    * share links (ADR 0040). Absent: the tools make no links.
    */
-  readonly ALGOVIZ_SHARE_URL?: string;
+  readonly ALGOMOTION_SHARE_URL?: string;
 }
 
 /**
@@ -34,7 +34,7 @@ export type HandlerSource = HttpHandler | ((env: Env) => HttpHandler);
 /** Seconds a client should wait after a 429: the binding's period. */
 export const RETRY_AFTER_SECONDS = 60;
 
-const INFO = `algoviz MCP server
+const INFO = `algomotion MCP server
 
 This is a Model Context Protocol server for step-by-step algorithm
 visualizations. Connect an MCP client to this address with /mcp at the
@@ -56,7 +56,7 @@ export function createWorker(source: HandlerSource) {
       made = source(env);
     } catch (e) {
       // The operator reads this in the Worker's logs; callers learn nothing.
-      console.error(`algoviz: ${(e as Error).message}`);
+      console.error(`algomotion: ${(e as Error).message}`);
     }
     return made;
   };

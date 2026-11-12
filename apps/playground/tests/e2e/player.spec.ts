@@ -2,8 +2,8 @@
  * The interactive player in the playground: every example drawn correctly
  * at any frame, however it is reached, and every control.
  */
-import type { AlgoPlayer } from '@algoviz/elements';
-import { themeNames } from '@algoviz/svg';
+import type { AlgoPlayer } from '@algomotion/elements';
+import { themeNames } from '@algomotion/svg';
 
 import { examples } from '../../src/samples/examples';
 import {

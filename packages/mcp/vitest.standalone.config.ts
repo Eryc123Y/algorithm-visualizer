@@ -1,7 +1,13 @@
 import { defineConfig } from 'vitest/config';
 
 // Resolve workspace packages to their TypeScript sources.
-const conditions = ['@algoviz/source', 'import', 'module', 'node', 'default'];
+const conditions = [
+  '@algomotion/source',
+  'import',
+  'module',
+  'node',
+  'default',
+];
 
 // The standalone executable's tests build it, which needs the Rust
 // toolchain: npm run test:standalone.

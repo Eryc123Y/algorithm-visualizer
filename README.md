@@ -1,6 +1,8 @@
-# algoviz (working name)
+# algomotion
 
 An AI-native library for step-by-step visualizations of algorithms and data structures, for developers and teachers.
+
+The project was called algoviz until [ADR 0044](docs/adr/0044-the-name-algomotion.md); earlier ADRs and pull requests use that name.
 
 A visualization is a declarative JSON document: the structures involved and a timeline of steps, each applying actions such as `compare` or `swap`. People write it with code, LLMs write it directly, and the library validates it and renders it as an interactive player, a static image, or a figure in Typst or LaTeX.
 
@@ -41,12 +43,12 @@ Shorthands keep documents short: `"initial": [5, 3, 8]` generates element ids, a
 
 ## Recipes
 
-`@algoviz/recipes` holds ready-made visualizations of classic algorithms and data structures, and a typed recorder for producing documents from running code.
+`@algomotion/recipes` holds ready-made visualizations of classic algorithms and data structures, and a typed recorder for producing documents from running code.
 
 Every algorithm, and every operation of a data structure, is a module of one registry ([ADR 0019](docs/adr/0019-algorithm-registry.md)) with a stable id, a Zod input schema, examples, and its code in pseudocode and Python. `runAlgorithm(id, input)` checks the input, records the run and validates the document:
 
 ```ts
-import { runAlgorithm, Recorder } from '@algoviz/recipes';
+import { runAlgorithm, Recorder } from '@algomotion/recipes';
 
 // Delete 3 from the tree that inserting these keys builds.
 const run = runAlgorithm('bst.delete', { from: [8, 3, 10, 1, 6], key: 3 });
@@ -98,32 +100,32 @@ INVALID_NOTATION at $.input.graph: Expected a weight or "," after "B-C", not "x"
 ```
 
 ```sh
-algoviz run dijkstra 'A-B 4, B-C 1, A-C 7, C-D 2'
-algoviz run bst '"from": [8, 3, 10, 1, 6], "ops": "insert 4, delete 3"'
-algoviz run insertion-sort        # the first example
+algomotion run dijkstra 'A-B 4, B-C 1, A-C 7, C-D 2'
+algomotion run bst '"from": [8, 3, 10, 1, 6], "ops": "insert 4, delete 3"'
+algomotion run insertion-sort        # the first example
 ```
 
 On the command line, an input is JSON, a JSON object with its outer braces left out, or else a notation; `--input` also takes a file.
 
-MCP, the `algoviz` command line and the playground's example menu read the registry, grouped by topic.
+MCP, the `algomotion` command line and the playground's example menu read the registry, grouped by topic.
 
 ## For models
 
-[`@algoviz/mcp`](packages/mcp) lets a model write documents: it reads a guide written for models, validates its document (every step is replayed, and each error says where and why), inspects the state at any frame to check the result, and renders frames to SVG. In clients that display MCP Apps, `algoviz_show` then opens the interactive player right in the conversation. For a ready-made algorithm a model writes no document at all: `algoviz_show { "recipe": "dijkstra", "input": "A-B 4, B-C 1, A-C 7" }` shows it, and `algoviz_render` and `algoviz_inspect` take a recipe the same way. With the address of a share page set (`ALGOVIZ_SHARE_URL`), `algoviz_show` and `algoviz_run_recipe` also return a share link, which opens the visualization in any browser: the link carries the recipe and its input, or the whole document compressed, after the `#`, so no server ever stores it ([ADR 0040](docs/adr/0040-share-links.md)). `apps/site` builds the share page, with the documentation. The same tools work as the `algoviz` command line. [`evals/`](evals) measures how well models do on 28 undergraduate tasks, each checked for what a correct visualization must show.
+[`@algomotion/mcp`](packages/mcp) lets a model write documents: it reads a guide written for models, validates its document (every step is replayed, and each error says where and why), inspects the state at any frame to check the result, and renders frames to SVG. In clients that display MCP Apps, `algomotion_show` then opens the interactive player right in the conversation. For a ready-made algorithm a model writes no document at all: `algomotion_show { "recipe": "dijkstra", "input": "A-B 4, B-C 1, A-C 7" }` shows it, and `algomotion_render` and `algomotion_inspect` take a recipe the same way. With the address of a share page set (`ALGOMOTION_SHARE_URL`), `algomotion_show` and `algomotion_run_recipe` also return a share link, which opens the visualization in any browser: the link carries the recipe and its input, or the whole document compressed, after the `#`, so no server ever stores it ([ADR 0040](docs/adr/0040-share-links.md)). `apps/site` builds the share page, with the documentation. The same tools work as the `algomotion` command line. [`evals/`](evals) measures how well models do on 28 undergraduate tasks, each checked for what a correct visualization must show.
 
 ## Figures
 
-`algoviz export` writes chosen steps of a document as standalone SVG files, ready for notes, handouts and slides ([ADR 0025](docs/adr/0025-exporting-figures.md)). Text is drawn as glyph outlines of the bundled fonts, so a figure looks the same in a browser, in Typst and after conversion for LaTeX. Every figure of a document has the same size, so a series of steps lines up at one scale, even when its figures are exported one at a time.
+`algomotion export` writes chosen steps of a document as standalone SVG files, ready for notes, handouts and slides ([ADR 0025](docs/adr/0025-exporting-figures.md)). Text is drawn as glyph outlines of the bundled fonts, so a figure looks the same in a browser, in Typst and after conversion for LaTeX. Every figure of a document has the same size, so a series of steps lines up at one scale, even when its figures are exported one at a time.
 
 ```sh
 # Every frame of a document: doc-00.svg, doc-01.svg, …
-algoviz export doc.json --out figures
+algomotion export doc.json --out figures
 
 # Run an algorithm on an input, without writing a document first
-algoviz export dijkstra --input 'A-B 4, B-C 1, A-C 7, C-D 2' --step improve#3 --out figures
+algomotion export dijkstra --input 'A-B 4, B-C 1, A-C 7, C-D 2' --step improve#3 --out figures
 
 # Several steps, in the print theme, named after their steps
-algoviz export bst.delete --input '"from": "8 3 10 1 6", "key": 3' \
+algomotion export bst.delete --input '"from": "8 3 10 1 6", "key": 3' \
   --step delete-3 --theme print --name '{name}-{step}'
 ```
 
@@ -133,49 +135,49 @@ A figure draws the structures an algorithm keeps besides its main one, such as D
 
 `--format tikz` writes the same figures as TikZ in `.tex` files, with text left to the fonts of the LaTeX document that includes them ([ADR 0027](docs/adr/0027-latex-package.md)). The command also builds as a standalone 2 MB executable that needs no Node.js; see [the CLI's README](packages/mcp/README.md#without-nodejs).
 
-In Typst, [the algoviz package](packages/typst/package/README.md) draws the same figures from inside a document, with the engine running in a WebAssembly plugin, so students need nothing but Typst ([ADR 0026](docs/adr/0026-typst-package.md)):
+In Typst, [the algomotion package](packages/typst/package/README.md) draws the same figures from inside a document, with the engine running in a WebAssembly plugin, so students need nothing but Typst ([ADR 0026](docs/adr/0026-typst-package.md)):
 
 ```typ
-#import "@preview/algoviz:0.1.0": algoviz, algoviz-series
+#import "@preview/algomotion:0.1.0": algomotion, algomotion-series
 
-#algoviz("dijkstra", "A-B 4, B-C 1, A-C 7, C-D 2", step: "relax#3")
-#grid(columns: 3, ..algoviz-series("bst.delete", (from: "8 3 10 1 6", key: 3)))
+#algomotion("dijkstra", "A-B 4, B-C 1, A-C 7, C-D 2", step: "relax#3")
+#grid(columns: 3, ..algomotion-series("bst.delete", (from: "8 3 10 1 6", key: 3)))
 ```
 
 The package is not on Typst Universe yet; its README says how to use it as a local package until it is.
 
-In LaTeX, [the algoviz package](packages/latex/package/README.md) draws them with TikZ, so their text is set in the document's own fonts ([ADR 0027](docs/adr/0027-latex-package.md)). It runs the `algoviz` command through shell escape, as `minted` does, and caches every figure, so later runs need no shell escape:
+In LaTeX, [the algomotion package](packages/latex/package/README.md) draws them with TikZ, so their text is set in the document's own fonts ([ADR 0027](docs/adr/0027-latex-package.md)). It runs the `algomotion` command through shell escape, as `minted` does, and caches every figure, so later runs need no shell escape:
 
 ```latex
-\usepackage{algoviz}
+\usepackage{algomotion}
 
-\algoviz[step=relax#3]{dijkstra}{A-B 4, B-C 1, A-C 7, C-D 2}
-\algoviz{bst}{"from": "8 3 10 1 6", "ops": "insert 4, delete 3"}
-\algovizfile[step=delete-3/copy, theme=print, width=0.6\linewidth]{bst-delete.json}
+\algomotion[step=relax#3]{dijkstra}{A-B 4, B-C 1, A-C 7, C-D 2}
+\algomotion{bst}{"from": "8 3 10 1 6", "ops": "insert 4, delete 3"}
+\algomotionfile[step=delete-3/copy, theme=print, width=0.6\linewidth]{bst-delete.json}
 ```
 
-The package is not on CTAN yet; its README says how to use it, and how to build the standalone `algoviz` it calls, until it is.
+The package is not on CTAN yet; its README says how to use it, and how to build the standalone `algomotion` it calls, until it is.
 
-In slides, a series steps through one frame per overlay, all in one picture ([ADR 0028](docs/adr/0028-slides.md)): `steps` in a Beamer frame, and `algoviz-slides` with polylux's or touying's own `only` in Typst. A slide figure fills the frame's width and three quarters of its height, keeping its shape; `height` gives another share ([ADR 0033](docs/adr/0033-slide-figures-fill-the-frame.md)).
+In slides, a series steps through one frame per overlay, all in one picture ([ADR 0028](docs/adr/0028-slides.md)): `steps` in a Beamer frame, and `algomotion-slides` with polylux's or touying's own `only` in Typst. A slide figure fills the frame's width and three quarters of its height, keeping its shape; `height` gives another share ([ADR 0033](docs/adr/0033-slide-figures-fill-the-frame.md)).
 
 ```latex
 \begin{frame}{Dijkstra's algorithm}
-  \algovizfile[algorithm=dijkstra, steps]{graph.json}   % one slide per frame
+  \algomotionfile[algorithm=dijkstra, steps]{graph.json}   % one slide per frame
 \end{frame}
 ```
 
 ```typ
-#algoviz-slides(only, "dijkstra", "A-B 4, B-C 1, A-C 7, C-D 2", steps: "relax#1..-1")
+#algomotion-slides(only, "dijkstra", "A-B 4, B-C 1, A-C 7, C-D 2", steps: "relax#1..-1")
 ```
 
-In code, `exportFigures(document, { steps, theme, layout })` from `@algoviz/svg` returns the same figures as strings, and `selectSeries` from `@algoviz/core` the frames that selectors name. `prepareFigures(document, { theme, layout })` loads a document once and then draws a figure of any frame, or any series, on demand.
+In code, `exportFigures(document, { steps, theme, layout })` from `@algomotion/svg` returns the same figures as strings, and `selectSeries` from `@algomotion/core` the frames that selectors name. `prepareFigures(document, { theme, layout })` loads a document once and then draws a figure of any frame, or any series, on demand.
 
 ## Embedding
 
-Build the standalone bundle with `npm run build -w @algoviz/elements`, then name an algorithm and give its input ([ADR 0032](docs/adr/0032-algorithm-and-input.md)):
+Build the standalone bundle with `npm run build -w @algomotion/elements`, then name an algorithm and give its input ([ADR 0032](docs/adr/0032-algorithm-and-input.md)):
 
 ```html
-<script type="module" src="algoviz-player.js"></script>
+<script type="module" src="algomotion-player.js"></script>
 
 <algo-player algorithm="insertion-sort" input="5 2 4 6 1 3"></algo-player>
 <algo-player
@@ -187,7 +189,7 @@ Build the standalone bundle with `npm run build -w @algoviz/elements`, then name
 
 `algorithm` is any id of the registry ([Recipes](#recipes)), and `input` takes JSON, an object without its outer braces, or a notation ([Inputs](#inputs)). Without `input`, the algorithm runs on its first example. With `algorithm`, `src` or an inline `<script type="application/json">` may hold the input instead, and the `input` property takes any value, such as an object. An input that does not fit shows in the player, with the token where it went wrong, and fires `algo-error`.
 
-The registry is a second file of the bundle, `algoviz-recipes.js`, which the player loads from next to itself the first time a player has `algorithm`: 396 kB, 120 kB gzipped, on top of the player's 348 kB (106 kB) ([sizes](docs/sizes.md)). Keep the two files together under these names. A page that shows only documents never loads it:
+The registry is a second file of the bundle, `algomotion-recipes.js`, which the player loads from next to itself the first time a player has `algorithm`: 396 kB, 120 kB gzipped, on top of the player's 348 kB (106 kB) ([sizes](docs/sizes.md)). Keep the two files together under these names. A page that shows only documents never loads it:
 
 ```html
 <algo-player theme="auto">
@@ -229,14 +231,14 @@ Every output draws in the same nine built-in themes, and every theme works in ev
 | `answer-sheet`  | 答题卡          | An exam answer sheet: red printed frames, pencil marks; prints well in black and white    |
 | `turbo-c`       | 机房 Turbo C    | The blue Turbo C screen of university computer labs, in the sixteen CGA colours           |
 
-| Output            | How to pick a theme                                                                                                |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `<algo-player>`   | `theme="textbook"`; `theme="auto"` (light or dark by the reader's colour scheme); `theme="textbook textbook-dark"` |
-| `algoviz` command | `algoviz export … --theme blocks`, `algoviz render … --theme dark`                                                 |
-| MCP               | the render tool's `theme`                                                                                          |
-| Typst             | `#algoviz("dijkstra", input, theme: "textbook")`, and in `algoviz-series`, `algoviz-figures`, `algoviz-slides`     |
-| LaTeX             | `\algoviz[theme=answer-sheet]{…}{…}`, or `\algovizset{theme=answer-sheet}` for the whole document                  |
-| `@algoviz/svg`    | `renderSvg(scene, { theme: 'turbo-c' })`, `exportFigures(doc, { theme: 'turbo-c' })`                               |
+| Output               | How to pick a theme                                                                                                        |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `<algo-player>`      | `theme="textbook"`; `theme="auto"` (light or dark by the reader's colour scheme); `theme="textbook textbook-dark"`         |
+| `algomotion` command | `algomotion export … --theme blocks`, `algomotion render … --theme dark`                                                   |
+| MCP                  | the render tool's `theme`                                                                                                  |
+| Typst                | `#algomotion("dijkstra", input, theme: "textbook")`, and in `algomotion-series`, `algomotion-figures`, `algomotion-slides` |
+| LaTeX                | `\algomotion[theme=answer-sheet]{…}{…}`, or `\algomotionset{theme=answer-sheet}` for the whole document                    |
+| `@algomotion/svg`    | `renderSvg(scene, { theme: 'turbo-c' })`, `exportFigures(doc, { theme: 'turbo-c' })`                                       |
 
 - **Fonts.** Each theme names its typefaces, all under the SIL Open Font License. Standalone SVG and Typst draw text as outlines of the bundled faces, so a figure looks the same everywhere. The player loads the theme's web fonts from beside its script. LaTeX sets text in the document's own fonts, in the family the theme names: serif for the textbook themes, sans serif for blocks, typewriter for Turbo C. Chinese and other CJK text is drawn by the reader's or the document's fonts.
 - **Night themes** (`dark`, `textbook-dark`, `blocks-dark`, `turbo-c`) paint their own background, so they stay legible on white paper; the light ones take the page's colour. A player set to `auto` or to a day-and-night pair prints in its day theme.
@@ -244,24 +246,24 @@ Every output draws in the same nine built-in themes, and every theme works in ev
 
 ## Documentation site
 
-[`apps/site`](apps/site) builds the documentation from the registry: a page for every algorithm and every operation of a data structure, grouped by topic and by structure. Each page has its player, the names of its steps, and the same run as a snippet for a web page, Typst, LaTeX, the command line, MCP and a share link. A themes page shows every theme and how each output picks one. The site also holds the share page, and is built for Cloudflare Pages (`npm run build -w @algoviz/site`; deploying waits for the owner's domain).
+[`apps/site`](apps/site) builds the documentation from the registry: a page for every algorithm and every operation of a data structure, grouped by topic and by structure. Each page has its player, the names of its steps, and the same run as a snippet for a web page, Typst, LaTeX, the command line, MCP and a share link. A themes page shows every theme and how each output picks one. The site also holds the share page, and is built for Cloudflare Pages (`npm run build -w @algomotion/site`; deploying waits for the owner's domain).
 
 ## Packages
 
 Every package reads and writes protocol 1.0, the frozen form of the document format ([ADR 0043](docs/adr/0043-protocol-1-0.md)). A 1.x version only adds to it, and documents that say a 0.x version, from before the freeze, are read as 1.0. The JSON Schema is [`packages/spec/schema/visualization.schema.json`](packages/spec/schema/visualization.schema.json).
 
-| Package                                  | Status    | Purpose                                                            |
-| ---------------------------------------- | --------- | ------------------------------------------------------------------ |
-| [`@algoviz/spec`](packages/spec)         | Available | Protocol schemas, types, validation and JSON Schema                |
-| [`@algoviz/fonts`](packages/fonts)       | Available | Metrics and outlines of the bundled fonts, and text measurement    |
-| [`@algoviz/core`](packages/core)         | Available | Structure kinds, reducers, timeline engine and layout to scenes    |
-| [`@algoviz/svg`](packages/svg)           | Available | Standalone SVG figures with text as glyph outlines (no DOM needed) |
-| [`@algoviz/tikz`](packages/tikz)         | Available | TikZ figures for the LaTeX package, from the SVG painter's shapes  |
-| [`@algoviz/elements`](packages/elements) | Available | `<algo-player>`: interactive, animated player (Lit Web Component)  |
-| [`@algoviz/recipes`](packages/recipes)   | Available | Typed recorder and visualizations of classic algorithms            |
-| [`@algoviz/mcp`](packages/mcp)           | Available | MCP server, MCP App and CLI: guide, validation, inspection, export |
-| [`algoviz` for Typst](packages/typst)    | Local     | Typst package: figures and slides, via a Wasm plugin               |
-| [`algoviz` for LaTeX](packages/latex)    | Local     | LaTeX package: TikZ figures in the document's fonts, via the CLI   |
+| Package                                     | Status    | Purpose                                                            |
+| ------------------------------------------- | --------- | ------------------------------------------------------------------ |
+| [`@algomotion/spec`](packages/spec)         | Available | Protocol schemas, types, validation and JSON Schema                |
+| [`@algomotion/fonts`](packages/fonts)       | Available | Metrics and outlines of the bundled fonts, and text measurement    |
+| [`@algomotion/core`](packages/core)         | Available | Structure kinds, reducers, timeline engine and layout to scenes    |
+| [`@algomotion/svg`](packages/svg)           | Available | Standalone SVG figures with text as glyph outlines (no DOM needed) |
+| [`@algomotion/tikz`](packages/tikz)         | Available | TikZ figures for the LaTeX package, from the SVG painter's shapes  |
+| [`@algomotion/elements`](packages/elements) | Available | `<algo-player>`: interactive, animated player (Lit Web Component)  |
+| [`@algomotion/recipes`](packages/recipes)   | Available | Typed recorder and visualizations of classic algorithms            |
+| [`@algomotion/mcp`](packages/mcp)           | Available | MCP server, MCP App and CLI: guide, validation, inspection, export |
+| [`algomotion` for Typst](packages/typst)    | Local     | Typst package: figures and slides, via a Wasm plugin               |
+| [`algomotion` for LaTeX](packages/latex)    | Local     | LaTeX package: TikZ figures in the document's fonts, via the CLI   |
 
 ## Design
 

@@ -36,12 +36,12 @@ const UPRIGHT: Canvas = { width: 200, height: 400 };
 function figureFile(dir: string, name: string, canvas: Canvas, frames = 1) {
   const figure = (k: number) =>
     [
-      `\\algoviz@figure{2}{${canvas.width}}{${canvas.height}}{%`,
-      '\\algoviz@fonts{normal}{sf}%',
-      '\\algoviz@color{1}{1F2A26}%',
+      `\\algomotion@figure{2}{${canvas.width}}{${canvas.height}}{%`,
+      '\\algomotion@fonts{normal}{sf}%',
+      '\\algomotion@color{1}{1F2A26}%',
       '}{%',
-      `\\path[draw=algoviz@c1] (0,0) rectangle (${canvas.width},${canvas.height});`,
-      `\\algoviz@text{10,20}{l}{12}{0}{label}{algoviz@c1}{}{F${k}}`,
+      `\\path[draw=algomotion@c1] (0,0) rectangle (${canvas.width},${canvas.height});`,
+      `\\algomotion@text{10,20}{l}{12}{0}{label}{algomotion@c1}{}{F${k}}`,
       '}%',
     ].join('\n');
   writeFileSync(
@@ -60,7 +60,7 @@ interface Measured {
   readonly size: number;
 }
 
-const PREAMBLE = String.raw`\usepackage{algoviz}
+const PREAMBLE = String.raw`\usepackage{algomotion}
 \makeatletter
 \newcommand\measure[2]{\sbox0{#2}\typeout{SIZE:#1:\strip@pt\wd0:\strip@pt\ht0:\strip@pt\linewidth:\strip@pt\textheight:\f@size}\usebox0}
 \makeatother`;
@@ -142,7 +142,7 @@ describe.each([
       beamer,
       frames(
         Object.keys(CANVASES).map(
-          (name) => `\\measure{${name}}{\\algovizinput{${name}.tex}}`,
+          (name) => `\\measure{${name}}{\\algomotioninput{${name}.tex}}`,
         ),
       ),
     );
@@ -165,15 +165,15 @@ describe.each([
       'keys',
       beamer,
       frames([
-        String.raw`\measure{height}{\algovizinput[height=.5\textheight]{wide.tex}}`,
-        String.raw`\measure{height-narrow}{\algovizinput[height=.5\textheight]{narrow.tex}}`,
-        String.raw`\measure{width}{\algovizinput[width=.5\linewidth]{tall.tex}}`,
-        String.raw`\measure{width-upright}{\algovizinput[width=.9\linewidth]{upright.tex}}`,
-        String.raw`\measure{both}{\algovizinput[width=3cm, height=3cm]{tall.tex}}`,
-        String.raw`\measure{scale}{\algovizinput[scale=1]{narrow.tex}}`,
-        String.raw`\measure{scale2}{\algovizinput[scale=0.5]{tall.tex}}`,
-        String.raw`\algovizset{scale=1}\measure{unset}{\algovizinput[scale]{narrow.tex}}`,
-        String.raw`\algovizset{height=2cm}\measure{zero}{\algovizinput[height=0pt]{tall.tex}}`,
+        String.raw`\measure{height}{\algomotioninput[height=.5\textheight]{wide.tex}}`,
+        String.raw`\measure{height-narrow}{\algomotioninput[height=.5\textheight]{narrow.tex}}`,
+        String.raw`\measure{width}{\algomotioninput[width=.5\linewidth]{tall.tex}}`,
+        String.raw`\measure{width-upright}{\algomotioninput[width=.9\linewidth]{upright.tex}}`,
+        String.raw`\measure{both}{\algomotioninput[width=3cm, height=3cm]{tall.tex}}`,
+        String.raw`\measure{scale}{\algomotioninput[scale=1]{narrow.tex}}`,
+        String.raw`\measure{scale2}{\algomotioninput[scale=0.5]{tall.tex}}`,
+        String.raw`\algomotionset{scale=1}\measure{unset}{\algomotioninput[scale]{narrow.tex}}`,
+        String.raw`\algomotionset{height=2cm}\measure{zero}{\algomotioninput[height=0pt]{tall.tex}}`,
       ]),
     );
     const by = Object.fromEntries(sizes.map((m) => [m.label, m]));
@@ -236,9 +236,9 @@ describe.each([
       'series-deck',
       beamer,
       frames([
-        String.raw`\measure{one}{\algovizinput{tall.tex}}`,
-        String.raw`\measure{series}{\algovizinput{series.tex}}`,
-        String.raw`\begin{columns}\column{.4\textwidth}\measure{column}{\algovizinput{narrow.tex}}\end{columns}`,
+        String.raw`\measure{one}{\algomotioninput{tall.tex}}`,
+        String.raw`\measure{series}{\algomotioninput{series.tex}}`,
+        String.raw`\begin{columns}\column{.4\textwidth}\measure{column}{\algomotioninput{narrow.tex}}\end{columns}`,
       ]),
     );
     // Beamer typesets the frame once per slide of the series.
@@ -254,10 +254,10 @@ describe.each([
 describe('notes keep the sizes of ADR 0027', () => {
   const dir = canvasWorkspace();
   const body = [
-    String.raw`\measure{wide}{\algovizinput{wide.tex}}`,
-    String.raw`\measure{narrow}{\algovizinput{narrow.tex}}`,
-    String.raw`\measure{height}{\algovizinput[height=5cm]{wide.tex}}`,
-    String.raw`\measure{scale}{\algovizinput[scale=0.5]{tall.tex}}`,
+    String.raw`\measure{wide}{\algomotioninput{wide.tex}}`,
+    String.raw`\measure{narrow}{\algomotioninput{narrow.tex}}`,
+    String.raw`\measure{height}{\algomotioninput[height=5cm]{wide.tex}}`,
+    String.raw`\measure{scale}{\algomotioninput[scale=0.5]{tall.tex}}`,
   ].join('\n\n');
 
   it.for([
@@ -294,7 +294,7 @@ describe.each<Engine>(['pdflatex', 'lualatex'])(
         dir,
         'registry',
         '\\documentclass[aspectratio=169]{beamer}',
-        frames(ids.map((id) => `\\measure{${id}}{\\algoviz{${id}}{}}`)),
+        frames(ids.map((id) => `\\measure{${id}}{\\algomotion{${id}}{}}`)),
         (file) => latexmk(dir, file, engine),
       );
       expect(calls(dir)).toHaveLength(3);

@@ -1,13 +1,13 @@
 {
-  "name": "@algoviz/mcp",
+  "name": "@algomotion/mcp",
   "version": "0.0.0",
   "private": true,
-  "description": "An MCP server and CLI that let LLMs write, check and render algoviz visualizations.",
+  "description": "An MCP server and CLI that let LLMs write, check and render algomotion visualizations.",
   "type": "module",
   "sideEffects": false,
   "exports": {
     ".": {
-      "@algoviz/source": "./src/index.ts",
+      "@algomotion/source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     }
@@ -20,25 +20,25 @@
   "scripts": {
     "build": "tsc --build tsconfig.lib.json && vite build --config vite.app.config.ts",
     "build:app": "vite build --config vite.app.config.ts",
-    "build:standalone": "node --conditions=@algoviz/source scripts/build-standalone.ts",
+    "build:standalone": "node --conditions=@algomotion/source scripts/build-standalone.ts",
     "test:standalone": "vitest run --config vitest.standalone.config.ts"
   },
   "dependencies": {
-    "@algoviz/core": "*",
-    "@algoviz/recipes": "*",
-    "@algoviz/spec": "*",
-    "@algoviz/svg": "*",
-    "@algoviz/tikz": "*",
+    "@algomotion/core": "*",
+    "@algomotion/recipes": "*",
+    "@algomotion/spec": "*",
+    "@algomotion/svg": "*",
+    "@algomotion/tikz": "*",
     "@modelcontextprotocol/ext-apps": "^2.0.3",
     "@modelcontextprotocol/server": "^2.3.1",
     "zod": "^4.6.7"
   },
   "bin": {
-    "algoviz": "./dist/algoviz.js",
-    "algoviz-mcp": "./dist/mcp-server.js"
+    "algomotion": "./dist/algomotion.js",
+    "algomotion-mcp": "./dist/mcp-server.js"
   },
   "devDependencies": {
-    "@algoviz/elements": "^0.0.0",
+    "@algomotion/elements": "^0.0.0",
     "@modelcontextprotocol/client": "^2.3.1"
   }
 }

@@ -1,6 +1,6 @@
-# @algoviz/typst
+# @algomotion/typst
 
-The algoviz Typst package and its build ([ADR 0026](../../docs/adr/0026-typst-package.md)). Typst runs plugins in WebAssembly, so the package runs the engine (`@algoviz/spec`, `fonts`, `core`, `svg` and `recipes`) as JavaScript in QuickJS-ng, compiled to WebAssembly. Its figures are the SVG of `algoviz export`, byte for byte.
+The algomotion Typst package and its build ([ADR 0026](../../docs/adr/0026-typst-package.md)). Typst runs plugins in WebAssembly, so the package runs the engine (`@algomotion/spec`, `fonts`, `core`, `svg` and `recipes`) as JavaScript in QuickJS-ng, compiled to WebAssembly. Its figures are the SVG of `algomotion export`, byte for byte.
 
 | Path        | What                                                                                                                                                                              |
 | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -13,15 +13,15 @@ The algoviz Typst package and its build ([ADR 0026](../../docs/adr/0026-typst-pa
 
 ## Building
 
-- `npm run build -w @algoviz/typst` writes `package/engine.bc`: it bundles `src/main.ts` with Vite and compiles the bundle to QuickJS bytecode by running `plugin.wasm` in Node. It needs only Node; run it after changing the engine. The root `npm run build` runs it too.
-- `npm run build:plugin -w @algoviz/typst` rebuilds `package/plugin.wasm` from `plugin/`. It needs rustup, which installs the Rust version pinned in `plugin/rust-toolchain.toml`, and clang from LLVM 23 with the wasm32 target (Homebrew's `llvm`, or set `CC_wasm32_unknown_unknown`). Crates come from `plugin/Cargo.lock`, and paths are remapped, so the same toolchain gives the same bytes in any checkout (the committed file was built with clang 23.1.5 from Homebrew). Commit `plugin.wasm` with every change to `plugin/`.
-- `npm run build:plugin -w @algoviz/typst -- --check` rebuilds and says whether the committed `plugin.wasm` matches.
+- `npm run build -w @algomotion/typst` writes `package/engine.bc`: it bundles `src/main.ts` with Vite and compiles the bundle to QuickJS bytecode by running `plugin.wasm` in Node. It needs only Node; run it after changing the engine. The root `npm run build` runs it too.
+- `npm run build:plugin -w @algomotion/typst` rebuilds `package/plugin.wasm` from `plugin/`. It needs rustup, which installs the Rust version pinned in `plugin/rust-toolchain.toml`, and clang from LLVM 23 with the wasm32 target (Homebrew's `llvm`, or set `CC_wasm32_unknown_unknown`). Crates come from `plugin/Cargo.lock`, and paths are remapped, so the same toolchain gives the same bytes in any checkout (the committed file was built with clang 23.1.5 from Homebrew). Commit `plugin.wasm` with every change to `plugin/`.
+- `npm run build:plugin -w @algomotion/typst -- --check` rebuilds and says whether the committed `plugin.wasm` matches.
 
 ## How a figure is made
 
 1. Typst loads `plugin.wasm` and calls `load` with `engine.bc` once, through `plugin.transition`.
 2. Each figure is a call of `render` with a JSON request: `{ "algorithm": "dijkstra", "input": …, "step": "relax#3", "theme": "light" }`, or `{ "document": … }` with `step` or `steps`.
-3. The plugin passes the text to `renderRequest`, defined by `src/main.ts`. The entry runs the algorithm with `runAlgorithm`, loads the document with `prepareFigures` from `@algoviz/svg`, and keeps it for later requests.
+3. The plugin passes the text to `renderRequest`, defined by `src/main.ts`. The entry runs the algorithm with `runAlgorithm`, loads the document with `prepareFigures` from `@algomotion/svg`, and keeps it for later requests.
 4. The answer is `{ "ok": true, "frames": n, "figures": [{ frame, selector, width, height, narration, svg }] }`, or `{ "ok": false, "diagnostics": […] }`.
 
 QuickJS's stack limit (192 KiB) stops deep recursion at about 600 levels with a `RangeError`, before Typst's wasmi reaches its limit of 1,000 nested WebAssembly calls and traps. The entry reports any exception as an `ENGINE_ERROR` diagnostic. The clock QuickJS asks for always reads 0, so `Date` and the seed of `Math.random` are the same on every run, and the plugin stays pure.

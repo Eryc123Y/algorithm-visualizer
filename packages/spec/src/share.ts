@@ -357,8 +357,8 @@ function checkVersion(
     return fail(
       'INVALID_LINK',
       '$.v',
-      `The link was made by a newer algoviz (link format ${v}); this page reads format ${SHARE_LINK_VERSION}`,
-      'Open the link with a newer algoviz share page.',
+      `The link was made by a newer algomotion (link format ${v}); this page reads format ${SHARE_LINK_VERSION}`,
+      'Open the link with a newer algomotion share page.',
     );
   return ok(undefined);
 }

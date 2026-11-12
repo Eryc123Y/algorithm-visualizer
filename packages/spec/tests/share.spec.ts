@@ -199,7 +199,7 @@ describe('readShareFragment', () => {
     expect(error.message).toMatch(message);
   });
 
-  it('says that a newer version comes from a newer algoviz', async () => {
+  it('says that a newer version comes from a newer algomotion', async () => {
     const error = await failure('v=2&alg=bfs');
     expect(error.code).toBe('INVALID_LINK');
     expect(error.message).toMatch(/newer/);

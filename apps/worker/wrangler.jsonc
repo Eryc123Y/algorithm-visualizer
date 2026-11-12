@@ -2,7 +2,7 @@
 // address; a copy deployed to another account may pick its own (README).
 {
   "$schema": "../../node_modules/wrangler/config-schema.json",
-  "name": "algoviz-mcp",
+  "name": "algomotion-mcp",
   "main": "dist/worker.js",
   "compatibility_date": "2026-10-01",
   "no_bundle": true,
@@ -19,8 +19,8 @@
     },
   ],
   // Share links (ADR 0040): set the address of your share page, the
-  // site's play/ page, and algoviz_show and algoviz_run_recipe return a
+  // site's play/ page, and algomotion_show and algomotion_run_recipe return a
   // link to it. Without it they make none.
-  // "vars": { "ALGOVIZ_SHARE_URL": "https://example.org/play/" },
+  // "vars": { "ALGOMOTION_SHARE_URL": "https://example.org/play/" },
   "observability": { "enabled": false },
 }

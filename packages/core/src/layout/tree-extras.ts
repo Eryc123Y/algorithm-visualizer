@@ -21,7 +21,7 @@
  *        [NIL]
  * ```
  */
-import { textWidth } from '@algoviz/fonts';
+import { textWidth } from '@algomotion/fonts';
 
 import {
   isNilSlot,

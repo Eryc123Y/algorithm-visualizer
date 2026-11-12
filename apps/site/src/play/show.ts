@@ -11,7 +11,7 @@ import {
   type Diagnostic,
   type Result,
   type ShareContent,
-} from '@algoviz/spec';
+} from '@algomotion/spec';
 
 /** The parts of the page that show what a link holds. */
 export interface PlayPage {
@@ -32,7 +32,7 @@ interface Player extends HTMLElement {
   theme: string;
 }
 
-const PAGE_TITLE = 'algoviz player';
+const PAGE_TITLE = 'algomotion player';
 
 /** The last fragment asked for; an earlier one still reading is dropped. */
 let latest = 0;
@@ -81,7 +81,7 @@ function show(read: Read, page: PlayPage, request: number): void {
     () => {
       const title = titleOf(content);
       if (request === latest && title !== undefined)
-        doc.title = `${title} · algoviz`;
+        doc.title = `${title} · algomotion`;
     },
     { once: true },
   );

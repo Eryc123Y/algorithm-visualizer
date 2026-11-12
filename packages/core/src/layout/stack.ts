@@ -11,7 +11,7 @@
  *  └───────┘
  * ```
  */
-import type { StackDecl } from '@algoviz/spec';
+import type { StackDecl } from '@algomotion/spec';
 
 import type { Block, LayoutInput } from '../kind.ts';
 import type { StackState } from '../kinds/stack.ts';

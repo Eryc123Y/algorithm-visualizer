@@ -1,17 +1,17 @@
 {
-  "name": "@algoviz/latex",
+  "name": "@algomotion/latex",
   "version": "0.0.0",
   "private": true,
-  "description": "The algoviz LaTeX package: figures drawn with TikZ in the document's fonts, made by the algoviz command (ADR 0027).",
+  "description": "The algomotion LaTeX package: figures drawn with TikZ in the document's fonts, made by the algomotion command (ADR 0027).",
   "type": "module",
   "scripts": {
     "test:latex": "vitest run --config vitest.latex.config.ts"
   },
   "devDependencies": {
-    "@algoviz/core": "*",
-    "@algoviz/mcp": "*",
-    "@algoviz/recipes": "*",
-    "@algoviz/svg": "*",
-    "@algoviz/tikz": "*"
+    "@algomotion/core": "*",
+    "@algomotion/mcp": "*",
+    "@algomotion/recipes": "*",
+    "@algomotion/svg": "*",
+    "@algomotion/tikz": "*"
   }
 }

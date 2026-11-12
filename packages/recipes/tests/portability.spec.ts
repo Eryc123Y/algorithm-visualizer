@@ -1,6 +1,6 @@
 /**
  * The engine also runs in QuickJS: the Typst plugin (ADR 0026) and the
- * standalone `algoviz` (ADR 0027), which have no Intl. A call that needs
+ * standalone `algomotion` (ADR 0027), which have no Intl. A call that needs
  * it gives other text there than in Node, so figures, recipe lists and
  * guides would differ between outputs. None of the code they run may
  * use it.

@@ -2,7 +2,7 @@
  * Checks a document the way a player would load it, and reports what an
  * author needs to fix or improve.
  */
-import { isCodeLine, type Trace } from '@algoviz/core';
+import { isCodeLine, type Trace } from '@algomotion/core';
 import {
   formatErrors,
   formatPath,
@@ -10,7 +10,7 @@ import {
   upgradeDocument,
   type Diagnostic,
   type Visualization,
-} from '@algoviz/spec';
+} from '@algomotion/spec';
 
 import { loadDocument, readDocument } from './document.ts';
 

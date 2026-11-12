@@ -1,8 +1,8 @@
 [package]
-name = "algoviz-typst-plugin"
+name = "algomotion-typst-plugin"
 version = "0.1.0"
 edition = "2024"
-description = "The algoviz engine in QuickJS-ng, as a Typst WebAssembly plugin (ADR 0026)."
+description = "The algomotion engine in QuickJS-ng, as a Typst WebAssembly plugin (ADR 0026)."
 publish = false
 
 [lib]

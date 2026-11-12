@@ -11,7 +11,7 @@ import {
   printList,
   runAlgorithm,
   type StructuredGraph,
-} from '@algoviz/recipes';
+} from '@algomotion/recipes';
 
 type Fields = Readonly<Record<string, unknown>>;
 

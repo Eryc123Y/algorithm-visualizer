@@ -15,7 +15,7 @@
  */
 import { mkdirSync, writeFileSync } from 'node:fs';
 
-import { advanceRuns, encodePath } from '@algoviz/fonts/encode';
+import { advanceRuns, encodePath } from '@algomotion/fonts/encode';
 import opentype, { type Font } from 'opentype.js';
 
 import {

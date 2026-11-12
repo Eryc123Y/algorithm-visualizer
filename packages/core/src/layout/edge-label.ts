@@ -3,7 +3,7 @@
  * `labelSide` names (else above), far enough out to clear the line. Layouts
  * use it to keep labels apart; painters use it to draw them, so both agree.
  */
-import { textWidth, type FontMetrics } from '@algoviz/fonts';
+import { textWidth, type FontMetrics } from '@algomotion/fonts';
 
 import { CLEAR, clearance, noteBox, type Obstacles } from './notes.ts';
 import type { SceneEdge, SceneItem } from './scene.ts';

@@ -1,9 +1,9 @@
 /**
  * Errors found while replaying a trace. They complement the static protocol
- * errors from @algoviz/spec: an action can be well-formed yet invalid at its
+ * errors from @algomotion/spec: an action can be well-formed yet invalid at its
  * point in the timeline, e.g. an index past the current end of an array.
  */
-import type { Diagnostic } from '@algoviz/spec';
+import type { Diagnostic } from '@algomotion/spec';
 
 export type EngineErrorCode =
   /** An index is outside the structure's current bounds. */

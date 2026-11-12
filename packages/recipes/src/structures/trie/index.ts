@@ -6,7 +6,7 @@
  * alphabetical order, since the shape does not depend on their order.
  * Nodes that end a word are settled.
  */
-import type { TreeNode } from '@algoviz/spec';
+import type { TreeNode } from '@algomotion/spec';
 import { z } from 'zod';
 
 import type { Handle } from '../../recorder.ts';

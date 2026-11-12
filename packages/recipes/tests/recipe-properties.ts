@@ -7,13 +7,18 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 
-import { layoutTrace, loadTrace, type Scene, type Trace } from '@algoviz/core';
-import { formatErrors, type VisualizationInput } from '@algoviz/spec';
-import { renderSvg } from '@algoviz/svg';
+import {
+  layoutTrace,
+  loadTrace,
+  type Scene,
+  type Trace,
+} from '@algomotion/core';
+import { formatErrors, type VisualizationInput } from '@algomotion/spec';
+import { renderSvg } from '@algomotion/svg';
 
 export const runs = Number(process.env['FUZZ_RUNS'] ?? 40);
 
-// The shared scene checks of @algoviz/core's tests, by relative path. A
+// The shared scene checks of @algomotion/core's tests, by relative path. A
 // computed specifier keeps TypeScript from pulling core's sources into this
 // project (TS6307); the cast restates the function's signature.
 const sceneCheck = new URL('../../core/tests/scene-check.ts', import.meta.url);

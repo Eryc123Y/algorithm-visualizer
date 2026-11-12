@@ -3,7 +3,7 @@
  * The player itself is left undefined here, so the tests see the
  * properties the page sets; the E2E tests run the real player.
  */
-import { shareFragment } from '@algoviz/spec';
+import { shareFragment } from '@algomotion/spec';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { showFragment, type PlayPage } from '../../src/play/show.ts';
@@ -18,7 +18,7 @@ const doc = {
 let page: PlayPage;
 
 beforeEach(() => {
-  document.title = 'algoviz player';
+  document.title = 'algomotion player';
   document.body.innerHTML = `
     <section id="intro"></section>
     <section id="problem"><ul id="errors"></ul></section>
@@ -57,7 +57,7 @@ describe('the share page', () => {
     expect(page.intro.hidden).toBe(false);
     expect(page.problem.hidden).toBe(true);
     expect(player()).toBeNull();
-    expect(document.title).toBe('algoviz player');
+    expect(document.title).toBe('algomotion player');
   });
 
   it('plays a document', async () => {
@@ -73,9 +73,9 @@ describe('the share page', () => {
     expect(page.intro.hidden).toBe(true);
     expect(page.problem.hidden).toBe(true);
     // The title waits for the player to accept the document.
-    expect(document.title).toBe('algoviz player');
+    expect(document.title).toBe('algomotion player');
     load();
-    expect(document.title).toBe('Two <b>pushes</b> · algoviz');
+    expect(document.title).toBe('Two <b>pushes</b> · algomotion');
   });
 
   it('plays an algorithm on its input', async () => {
@@ -87,7 +87,7 @@ describe('the share page', () => {
     expect(p.hasAttribute('frame')).toBe(false);
     expect(p.theme).toBe('auto');
     load();
-    expect(document.title).toBe('dijkstra · algoviz');
+    expect(document.title).toBe('dijkstra · algomotion');
   });
 
   it('keeps a document’s title out of the tab until it validates, without control or direction characters', async () => {
@@ -97,9 +97,9 @@ describe('the share page', () => {
     };
     await showFragment(await fragmentOf({ document: titled }), page);
     player()!.dispatchEvent(new CustomEvent('algo-error'));
-    expect(document.title).toBe('algoviz player');
+    expect(document.title).toBe('algomotion player');
     load();
-    expect(document.title).toBe('gnp.exe Sort · algoviz');
+    expect(document.title).toBe('gnp.exe Sort · algomotion');
   });
 
   it('ignores a load from a player a later link replaced', async () => {
@@ -107,7 +107,7 @@ describe('the share page', () => {
     const first = player()!;
     await showFragment('#v=1&alg=bfs', page);
     first.dispatchEvent(new CustomEvent('algo-load'));
-    expect(document.title).toBe('algoviz player');
+    expect(document.title).toBe('algomotion player');
   });
 
   it('shows an unexpected failure as an error, not a stale player', async () => {
@@ -149,12 +149,12 @@ describe('the share page', () => {
     expect(items[0]!.textContent).toContain('INVALID_LINK');
     expect(items[0]!.textContent).toContain('given twice');
     expect(page.errors.querySelector('img')).toBeNull();
-    expect(document.title).toBe('algoviz player');
+    expect(document.title).toBe('algomotion player');
   });
 
   it('shows a version error with its hint', async () => {
     await showFragment('#v=9&alg=bfs', page);
-    expect(page.errors.textContent).toMatch(/newer algoviz/);
+    expect(page.errors.textContent).toMatch(/newer algomotion/);
     expect(page.errors.textContent).toMatch(/Open the link with a newer/);
   });
 

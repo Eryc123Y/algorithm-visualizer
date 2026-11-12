@@ -6,8 +6,8 @@
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
 
-import { isCodeLine } from '@algoviz/core';
-import { parseVisualization, StepName } from '@algoviz/spec';
+import { isCodeLine } from '@algomotion/core';
+import { parseVisualization, StepName } from '@algomotion/spec';
 
 import {
   algorithms,

@@ -2,11 +2,11 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "tsBuildInfoFile": "../../node_modules/.tmp/mcp.app.tsbuildinfo",
-    // The player page algoviz_show opens, run in a browser.
+    // The player page algomotion_show opens, run in a browser.
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "types": [],
     "noEmit": true,
-    "customConditions": ["@algoviz/source"]
+    "customConditions": ["@algomotion/source"]
   },
   "include": ["app"]
 }

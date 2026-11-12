@@ -2,7 +2,7 @@ import fc from 'fast-check';
 import { Window } from 'happy-dom';
 import { describe, expect, it } from 'vitest';
 
-import { layoutTrace, loadTrace, type Trace } from '@algoviz/core';
+import { layoutTrace, loadTrace, type Trace } from '@algomotion/core';
 
 import {
   createTheme,

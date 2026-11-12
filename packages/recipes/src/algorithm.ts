@@ -3,7 +3,7 @@
  * registry (ADR 0019): its id, what it is, its input schema, examples, its
  * code in every language and how it records a run.
  */
-import type { AnchoredSource } from '@algoviz/spec';
+import type { AnchoredSource } from '@algomotion/spec';
 import type { z } from 'zod';
 
 import { withMainField } from './notation/schema.ts';

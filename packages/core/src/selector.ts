@@ -21,7 +21,7 @@ import {
   type Diagnostic,
   type Result,
   type Section,
-} from '@algoviz/spec';
+} from '@algomotion/spec';
 
 export type SelectorErrorCode =
   /** The text is not a selector. */

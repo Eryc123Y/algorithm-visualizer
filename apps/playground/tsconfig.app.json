@@ -11,7 +11,7 @@
     "noFallthroughCasesInSwitch": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "customConditions": ["@algoviz/source"]
+    "customConditions": ["@algomotion/source"]
   },
   "include": ["src/**/*.ts", "src/**/*.vue"],
   "exclude": ["src/**/*.spec.ts"]

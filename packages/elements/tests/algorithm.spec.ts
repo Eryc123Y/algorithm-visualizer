@@ -1,7 +1,7 @@
 /** A player that takes an algorithm and its input (ADR 0032). */
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { runAlgorithm } from '@algoviz/recipes';
+import { runAlgorithm } from '@algomotion/recipes';
 
 import '../src/define.ts';
 import type { AlgoPlayer } from '../src/index.ts';

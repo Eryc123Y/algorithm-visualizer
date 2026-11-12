@@ -1,7 +1,7 @@
 /**
  * Runs the eval tasks against a Claude model through the API.
  *
- *   node --conditions=@algoviz/source evals/src/run.ts [options]
+ *   node --conditions=@algomotion/source evals/src/run.ts [options]
  *
  *   --model <id>         default claude-opus-5-5
  *   --mode tools|oneshot tools (default): the MCP tools in an agent loop;

@@ -134,23 +134,23 @@ describe('checkVersion', () => {
       expect(checkVersion(version)).toBeUndefined();
   });
 
-  it('rejects a newer minor version with a hint to update algoviz', () => {
+  it('rejects a newer minor version with a hint to update algomotion', () => {
     const error = checkVersion('1.1');
     expect(error).toMatchObject({
       code: 'UNSUPPORTED_VERSION',
       path: '$.version',
     });
     expect(error?.message).toContain('newer');
-    expect(error?.hint).toContain('Update algoviz');
+    expect(error?.hint).toContain('Update algomotion');
     // Minor versions only add, so an older reader can show the document if
     // it uses nothing new.
     expect(error?.hint).toContain(`set "version" to "${PROTOCOL_VERSION}"`);
   });
 
-  it('rejects a newer major version with a hint to update algoviz', () => {
+  it('rejects a newer major version with a hint to update algomotion', () => {
     const error = checkVersion('2.0');
     expect(error).toMatchObject({ code: 'UNSUPPORTED_VERSION' });
-    expect(error?.hint).toContain('Update algoviz');
+    expect(error?.hint).toContain('Update algomotion');
     // A major version may change meanings, so relabelling is no fix.
     expect(error?.hint).not.toContain('set "version"');
   });

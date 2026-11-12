@@ -2,15 +2,15 @@ import { readFileSync } from 'node:fs';
 
 import { describe, expect, it } from 'vitest';
 
-import { algorithms, runAlgorithm } from '@algoviz/recipes';
-import { exportFigures } from '@algoviz/svg';
+import { algorithms, runAlgorithm } from '@algomotion/recipes';
+import { exportFigures } from '@algomotion/svg';
 
 import { createEngine, respond, type Response } from '../src/engine.ts';
 
 const dijkstra = algorithms.find((a) => a.id === 'dijkstra')!.examples[0];
 const bst = { from: [8, 3, 10, 1, 6], key: 3 };
 
-/** What `algoviz export` draws for an algorithm and its input. */
+/** What `algomotion export` draws for an algorithm and its input. */
 function exported(
   id: string,
   input: unknown,
@@ -33,7 +33,7 @@ function codes(response: Response) {
 }
 
 describe('createEngine', () => {
-  it('draws every frame of an algorithm run, as algoviz export does', () => {
+  it('draws every frame of an algorithm run, as algomotion export does', () => {
     const response = createEngine().render({
       algorithm: 'dijkstra',
       input: dijkstra,

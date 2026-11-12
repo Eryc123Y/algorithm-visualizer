@@ -15,7 +15,7 @@ import {
   textWidth,
   type FontMetrics,
   type FontOutlines,
-} from '@algoviz/fonts';
+} from '@algomotion/fonts';
 
 import { num } from './format.ts';
 import type { SvgNode } from './paint.ts';

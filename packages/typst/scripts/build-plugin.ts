@@ -1,6 +1,6 @@
 /**
  * Builds the Typst plugin, package/plugin.wasm, from the Rust crate in
- * plugin/ (ADR 0026). Run with `npm run build:plugin -w @algoviz/typst`;
+ * plugin/ (ADR 0026). Run with `npm run build:plugin -w @algomotion/typst`;
  * add `-- --check` to rebuild and compare with the committed file instead.
  *
  * Needs rustup, which installs the Rust version pinned in
@@ -25,7 +25,7 @@ const output = fileURLToPath(
 const target = join(crate, 'target');
 const built = join(
   target,
-  'wasm32-unknown-unknown/release/algoviz_typst_plugin.wasm',
+  'wasm32-unknown-unknown/release/algomotion_typst_plugin.wasm',
 );
 
 /** Runs a command and returns its standard output, or fails the build. */

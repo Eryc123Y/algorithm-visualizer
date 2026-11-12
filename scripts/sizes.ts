@@ -51,7 +51,13 @@ async function buildElementsForApps(outDir: string): Promise<void> {
     logLevel: 'warn',
     root: at('packages/elements'),
     resolve: {
-      conditions: ['@algoviz/source', 'browser', 'import', 'module', 'default'],
+      conditions: [
+        '@algomotion/source',
+        'browser',
+        'import',
+        'module',
+        'default',
+      ],
     },
     build: {
       outDir,
@@ -73,26 +79,29 @@ async function buildElementsForApps(outDir: string): Promise<void> {
   });
 }
 
-const APP_DIR = at('node_modules/.cache/algoviz-sizes/elements');
+const APP_DIR = at('node_modules/.cache/algomotion-sizes/elements');
 
 async function buildAll(): Promise<void> {
   const steps: [string, () => unknown][] = [
     [
       'the elements and the CDN bundle',
-      () => run('npm', ['run', 'build', '-w', '@algoviz/elements']),
+      () => run('npm', ['run', 'build', '-w', '@algomotion/elements']),
     ],
     ['the elements for apps', () => buildElementsForApps(APP_DIR)],
     [
       'the Typst engine',
-      () => run('npm', ['run', 'build', '-w', '@algoviz/typst']),
+      () => run('npm', ['run', 'build', '-w', '@algomotion/typst']),
     ],
-    ['the Worker', () => run('npm', ['run', 'build', '-w', '@algoviz/worker'])],
-    ['the site', () => run('npm', ['run', 'build', '-w', '@algoviz/site'])],
+    [
+      'the Worker',
+      () => run('npm', ['run', 'build', '-w', '@algomotion/worker']),
+    ],
+    ['the site', () => run('npm', ['run', 'build', '-w', '@algomotion/site'])],
   ];
   if (hasCargo())
     steps.push([
       'the standalone executable',
-      () => run('npm', ['run', 'build:standalone', '-w', '@algoviz/mcp']),
+      () => run('npm', ['run', 'build:standalone', '-w', '@algomotion/mcp']),
     ]);
   else console.warn('cargo not found: the standalone executable is left out.');
   for (const [name, step] of steps) {
@@ -110,17 +119,17 @@ function rows(): Row[] {
   const cdn = at('packages/elements/dist/cdn');
   const typst = at('packages/typst/package');
   const site = at('apps/site/dist');
-  const exe = platform() === 'win32' ? 'algoviz.exe' : 'algoviz';
+  const exe = platform() === 'win32' ? 'algomotion.exe' : 'algomotion';
   return [
     {
-      name: 'CDN `algoviz-player.js`',
+      name: 'CDN `algomotion-player.js`',
       note: 'the `<algo-player>` element with Lit and the engine, as a `<script type="module">` loads it',
-      size: measure(join(cdn, 'algoviz-player.js')),
+      size: measure(join(cdn, 'algomotion-player.js')),
     },
     {
-      name: 'CDN `algoviz-recipes.js`',
+      name: 'CDN `algomotion-recipes.js`',
       note: 'the registry, loaded on first use of `algorithm` (ADR 0032)',
-      size: measure(join(cdn, 'algoviz-recipes.js')),
+      size: measure(join(cdn, 'algomotion-recipes.js')),
     },
     {
       name: 'CDN `fonts/`',
@@ -128,7 +137,7 @@ function rows(): Row[] {
       size: measure(join(cdn, 'fonts'), ext('.woff2')),
     },
     {
-      name: '`@algoviz/elements` in an app',
+      name: '`@algomotion/elements` in an app',
       note: 'the `define` entry minified by Vite, without the registry chunk',
       size: measure(APP_DIR, (f) => f.endsWith('.js') && f !== 'recipes.js'),
     },

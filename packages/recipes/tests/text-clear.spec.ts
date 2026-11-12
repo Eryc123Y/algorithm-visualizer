@@ -5,7 +5,7 @@
  */
 import { describe, expect, it } from 'vitest';
 
-import { textWidth } from '@algoviz/fonts';
+import { textWidth } from '@algomotion/fonts';
 import { algorithms, runAlgorithm } from '../src/index.ts';
 
 import {
@@ -23,7 +23,7 @@ import {
   type Scene,
   type SceneNode,
   type SceneText,
-} from '@algoviz/core';
+} from '@algomotion/core';
 
 const font = defaultFonts.value;
 

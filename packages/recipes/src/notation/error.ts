@@ -11,8 +11,8 @@ export const INVALID_NOTATION = 'INVALID_NOTATION';
  * Keys of a custom Zod issue's `params` that `inputDiagnostics` reads: the
  * diagnostic's code and its hint.
  */
-export const CODE_PARAM = 'algovizCode';
-export const HINT_PARAM = 'algovizHint';
+export const CODE_PARAM = 'algomotionCode';
+export const HINT_PARAM = 'algomotionHint';
 
 /** A text that breaks its notation, at a position in it. */
 export class NotationError extends Error {

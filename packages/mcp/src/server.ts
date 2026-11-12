@@ -12,7 +12,7 @@ import {
   kindNames,
   visualizationJsonSchema,
   type ShareContent,
-} from '@algoviz/spec';
+} from '@algomotion/spec';
 import { z } from 'zod';
 
 import { guide, guideSection } from './guide.ts';
@@ -22,7 +22,7 @@ import { PLAYER_URI, playerHtml, showSource } from './show.ts';
 import { sourceArgs } from './source.ts';
 import { FrameSelectorArg, tools } from './tools.ts';
 
-export const SERVER_NAME = 'algoviz';
+export const SERVER_NAME = 'algomotion';
 export const SERVER_VERSION = '0.0.0';
 
 const readOnly = {
@@ -41,7 +41,7 @@ export interface ServerOptions {
   readonly hideInternalErrors?: boolean;
   /**
    * The share page's address, such as `https://example.org/play/`
-   * (ADR 0040). With it, algoviz_show and algoviz_run_recipe return a
+   * (ADR 0040). With it, algomotion_show and algomotion_run_recipe return a
    * share link; without it, no tool does. No address is assumed.
    */
   readonly shareUrl?: string | undefined;
@@ -130,7 +130,7 @@ export function createServer(options: ServerOptions = {}): McpServer {
 
   registerAppTool(
     server,
-    'algoviz_show',
+    'algomotion_show',
     {
       title: 'Show to the user',
       description:
@@ -160,7 +160,7 @@ export function createServer(options: ServerOptions = {}): McpServer {
     PLAYER_URI,
     {
       title: 'Player',
-      description: 'The interactive player that algoviz_show opens.',
+      description: 'The interactive player that algomotion_show opens.',
       mimeType: RESOURCE_MIME_TYPE,
     },
     quiet((uri: URL) => ({
@@ -174,10 +174,11 @@ export function createServer(options: ServerOptions = {}): McpServer {
   if (!full.ok) throw new Error('The guide failed to load');
   server.registerResource(
     'guide',
-    'algoviz://guide',
+    'algomotion://guide',
     {
       title: 'Authoring guide',
-      description: 'How to write algoviz documents, with every structure kind.',
+      description:
+        'How to write algomotion documents, with every structure kind.',
       mimeType: 'text/markdown',
     },
     quiet((uri: URL) => ({
@@ -189,7 +190,7 @@ export function createServer(options: ServerOptions = {}): McpServer {
   for (const kind of kindNames)
     server.registerResource(
       `guide-${kind}`,
-      `algoviz://guide/${kind}`,
+      `algomotion://guide/${kind}`,
       {
         title: `Guide: ${kind}`,
         description: `The ${kind} structure kind: declaration, actions and an example.`,
@@ -207,7 +208,7 @@ export function createServer(options: ServerOptions = {}): McpServer {
     );
   server.registerResource(
     'schema',
-    'algoviz://schema',
+    'algomotion://schema',
     {
       title: 'JSON Schema',
       description: 'JSON Schema (draft 2020-12) of the document format.',

@@ -1,9 +1,9 @@
 /**
  * Grading a submitted document against its task, and summarizing a run.
  */
-import { loadTrace } from '@algoviz/core';
-import { readDocument, lint } from '@algoviz/mcp';
-import type { Diagnostic } from '@algoviz/spec';
+import { loadTrace } from '@algomotion/core';
+import { readDocument, lint } from '@algomotion/mcp';
+import type { Diagnostic } from '@algomotion/spec';
 
 import type { EvalTask } from './tasks.ts';
 

@@ -8,7 +8,7 @@ import type {
   StructureDecl,
   StructureKindName,
   TargetedAction,
-} from '@algoviz/spec';
+} from '@algomotion/spec';
 
 import type {
   ArrayState,

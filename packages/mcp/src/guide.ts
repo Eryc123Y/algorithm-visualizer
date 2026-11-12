@@ -10,7 +10,7 @@ import {
   type Diagnostic,
   type Result,
   type StructureKindName,
-} from '@algoviz/spec';
+} from '@algomotion/spec';
 
 import { readGuideFile } from './guide-files.ts';
 

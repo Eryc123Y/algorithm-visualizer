@@ -1,17 +1,17 @@
-# Writing algoviz visualizations
+# Writing algomotion visualizations
 
-An algoviz document is JSON that describes a step-by-step visualization of an algorithm: the data structures involved, and a timeline of steps that change them. A player shows one frame per step, with the narration and the current source line.
+An algomotion document is JSON that describes a step-by-step visualization of an algorithm: the data structures involved, and a timeline of steps that change them. A player shows one frame per step, with the narration and the current source line.
 
 ## Recipes first
 
-A recipe from `algoviz_list_recipes` covers most classic algorithms and single operations on data structures. When one matches the request, don't write a document: run the recipe, or show and draw it by name, with its input written short.
+A recipe from `algomotion_list_recipes` covers most classic algorithms and single operations on data structures. When one matches the request, don't write a document: run the recipe, or show and draw it by name, with its input written short.
 
 - A list: `"5 2 4 6 1 3"`, or `"[4, 2, 6, null, 7]"` for a tree in level order.
 - A graph: `"A-B 4, B-C 2, A-C 7"`. `-` is an undirected edge and `->` a directed one, a number after a space is the weight, and a name alone is a node with no edges.
 - Operations on a data structure: `"insert 4, delete 3"`, each with its arguments in order.
 - An input with one needed field may be that field alone, such as the graph for `"dijkstra"`, which then starts at the first node; give `{ "graph": "…", "source": "C" }` to start elsewhere. Without an input, a recipe runs on its first example.
 
-`algoviz_show` with `{ "recipe": "dijkstra", "input": "A-B 4, B-C 1, A-C 7" }` shows the run to the user without a document to copy; `algoviz_render` and `algoviz_inspect` take `recipe` and `input` the same way. A notation error quotes the token and its position, such as `INVALID_NOTATION at $.input.graph: Expected a weight or "," after "B-C", not "x" (character 12)`.
+`algomotion_show` with `{ "recipe": "dijkstra", "input": "A-B 4, B-C 1, A-C 7" }` shows the run to the user without a document to copy; `algomotion_render` and `algomotion_inspect` take `recipe` and `input` the same way. A notation error quotes the token and its position, such as `INVALID_NOTATION at $.input.graph: Expected a weight or "," after "B-C", not "x" (character 12)`.
 
 ## Document
 
@@ -101,7 +101,7 @@ Names let people and tools refer to a step by what it does rather than by its nu
 }
 ```
 
-A selector names frames, in `algoviz_inspect`, `algoviz_render` and `algoviz_show`, and in the player's `frame` attribute:
+A selector names frames, in `algomotion_inspect`, `algomotion_render` and `algomotion_show`, and in the player's `frame` attribute:
 
 | Selector              | Frames                                                                                                                  |
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------- |
@@ -264,7 +264,7 @@ Draw what the algorithm keeps besides its main structure: Dijkstra's priority qu
 
 ## Marks
 
-Besides data, structures carry marks that colour elements. A document never names colours or fonts: marks are roles, and the reader picks a theme that draws them, `light` by default, in the player, `algoviz_render` and every other output.
+Besides data, structures carry marks that colour elements. A document never names colours or fonts: marks are roles, and the reader picks a theme that draws them, `light` by default, in the player, `algomotion_render` and every other output.
 
 - **Transient** marks (`compare`, `highlight`, `peek`, `depend`, and the mark `swap` leaves) last for their step only. Repeat them in the next step to keep them.
 - **Persistent** marks (`pointer`, `settle`, `visit`, `group`, `annotate`, `markEdge`, `labelEdge`, a plane's `select`, `label` and `line`) stay until changed. Remove a pointer with `"index": null` or `"node": null`; clear graph, table and hash table marks with `resetMarks`.

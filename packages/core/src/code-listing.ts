@@ -3,7 +3,7 @@
  * line a step points at in each: `meta.line` in the single `source`, or
  * the line of the step's anchor `meta.at` in each entry of `sources`.
  */
-import type { AnchoredSource, Source, StepMeta } from '@algoviz/spec';
+import type { AnchoredSource, Source, StepMeta } from '@algomotion/spec';
 
 /** The code of a document in one language. */
 export interface CodeListing {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import type { Figure, FigureSeries } from '@algoviz/svg';
+import type { Figure, FigureSeries } from '@algomotion/svg';
 
 import { DEFAULT_PATTERN, figureFiles, patternProblem } from '../src/index.ts';
 

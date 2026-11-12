@@ -1,20 +1,20 @@
 {
-  "name": "@algoviz/site",
+  "name": "@algomotion/site",
   "version": "0.0.0",
   "private": true,
   "description": "The static site: the documentation, generated from the registry, and the share page (ADR 0040).",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && node --conditions=@algoviz/source scripts/build-pages.ts",
+    "build": "vite build && node --conditions=@algomotion/source scripts/build-pages.ts",
     "preview": "vite preview",
-    "test:e2e": "NODE_OPTIONS=--conditions=@algoviz/source playwright test"
+    "test:e2e": "NODE_OPTIONS=--conditions=@algomotion/source playwright test"
   },
   "dependencies": {
-    "@algoviz/elements": "*",
-    "@algoviz/recipes": "*",
-    "@algoviz/spec": "*",
-    "@algoviz/svg": "*",
+    "@algomotion/elements": "*",
+    "@algomotion/recipes": "*",
+    "@algomotion/spec": "*",
+    "@algomotion/svg": "*",
     "zod": "^4.6.7"
   },
   "devDependencies": {

@@ -6,8 +6,8 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 
-import type { Trace } from '@algoviz/core';
-import type { VisualizationInput } from '@algoviz/spec';
+import type { Trace } from '@algomotion/core';
+import type { VisualizationInput } from '@algomotion/spec';
 
 import { fuzz, replay, runError, runOk, stateOf } from './helpers.ts';
 import { recipe } from './recipe-properties.ts';

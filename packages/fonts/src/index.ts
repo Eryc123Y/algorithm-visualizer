@@ -1,5 +1,5 @@
 /**
- * The fonts algoviz bundles (ADR 0024, 0030): metrics that layout measures
+ * The fonts algomotion bundles (ADR 0024, 0030): metrics that layout measures
  * text with, outlines that standalone SVG draws text with, and `textWidth`.
  *
  * Code is under the project's licence. The generated faces are derived

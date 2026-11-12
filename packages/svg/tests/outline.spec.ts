@@ -1,13 +1,13 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 
-import { defaultFonts, type Scene } from '@algoviz/core';
+import { defaultFonts, type Scene } from '@algomotion/core';
 import {
   interSemiBold,
   jetbrainsMonoSemiBold,
   jetbrainsMonoSemiBoldOutlines,
   textWidth,
-} from '@algoviz/fonts';
+} from '@algomotion/fonts';
 
 import {
   bundledOutlines,

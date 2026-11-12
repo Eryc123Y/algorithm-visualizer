@@ -4,7 +4,7 @@
  * or one name for a whole series in one TikZ file. Writing the files is the
  * command line's job; this part stays pure.
  */
-import { err, ok, type Result } from '@algoviz/spec';
+import { err, ok, type Result } from '@algomotion/spec';
 
 export const DEFAULT_PATTERN = '{name}-{frame}';
 

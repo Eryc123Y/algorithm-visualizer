@@ -1,5 +1,5 @@
 /**
- * <algo-player>: an embeddable player for algoviz documents (ADR 0006, 0010,
+ * <algo-player>: an embeddable player for algomotion documents (ADR 0006, 0010,
  * 0011).
  *
  * Modes:
@@ -48,14 +48,19 @@ import {
   type LayoutOptions,
   type Trace,
   type TraceLayout,
-} from '@algoviz/core';
-import { formatErrors, ok, type Diagnostic, type Section } from '@algoviz/spec';
+} from '@algomotion/core';
+import {
+  formatErrors,
+  ok,
+  type Diagnostic,
+  type Section,
+} from '@algomotion/spec';
 import {
   paintScene,
   resolveTheme,
   type SvgTheme,
   type ThemeName,
-} from '@algoviz/svg';
+} from '@algomotion/svg';
 
 import { codeLines } from './code-panel.ts';
 import { documentOf } from './content.ts';

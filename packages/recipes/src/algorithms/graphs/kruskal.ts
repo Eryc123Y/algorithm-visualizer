@@ -8,7 +8,7 @@
  * taken as undirected; a disconnected graph gives a minimum spanning
  * forest.
  */
-import { LIMITS } from '@algoviz/spec';
+import { LIMITS } from '@algomotion/spec';
 import { z } from 'zod';
 
 import { defineAlgorithm } from '../../algorithm.ts';

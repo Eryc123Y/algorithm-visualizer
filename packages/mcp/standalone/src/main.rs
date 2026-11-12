@@ -1,4 +1,4 @@
-//! The standalone `algoviz` command (ADR 0027): the CLI of `@algoviz/mcp`,
+//! The standalone `algomotion` command (ADR 0027): the CLI of `@algomotion/mcp`,
 //! bundled and compiled to QuickJS bytecode, run by QuickJS-ng with a few
 //! functions for files and output. No Node.js is needed.
 //!
@@ -28,7 +28,7 @@ use std::{
 use rquickjs::{Context, Ctx, Error, Exception, Function, Module, Object, Runtime, Value};
 
 /// The CLI, compiled by `build.rs`.
-static BYTECODE: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/algoviz.bc"));
+static BYTECODE: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/algomotion.bc"));
 
 /// Beyond this, QuickJS throws "out of memory" instead of growing.
 const MEMORY_LIMIT: usize = 1 << 30;
@@ -38,7 +38,7 @@ const THREAD_STACK: usize = 16 << 20;
 /// QuickJS's own limit, below the thread's stack, so deep recursion in a
 /// long document throws a `RangeError` instead of overflowing the stack.
 const STACK_LIMIT: usize = 12 << 20;
-/// The exit code of a bug in algoviz (`EX_SOFTWARE` in sysexits.h).
+/// The exit code of a bug in algomotion (`EX_SOFTWARE` in sysexits.h).
 const INTERNAL_ERROR: u8 = 70;
 
 /// The message of a JavaScript exception, with its stack when it has one.
@@ -158,7 +158,7 @@ fn main() -> ExitCode {
     match result {
         Ok(code) => ExitCode::from(u8::try_from(code).unwrap_or(1)),
         Err(message) => {
-            eprintln!("Internal error in algoviz: {message}");
+            eprintln!("Internal error in algomotion: {message}");
             ExitCode::from(INTERNAL_ERROR)
         }
     }

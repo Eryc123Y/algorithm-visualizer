@@ -2,8 +2,8 @@
  * Checks of code in pseudocode and Python (ADR 0017), shared by the tests
  * of snippets and of the registry.
  */
-import { highlightCode, isCodeLine } from '@algoviz/core';
-import type { AnchoredSource } from '@algoviz/spec';
+import { highlightCode, isCodeLine } from '@algomotion/core';
+import type { AnchoredSource } from '@algomotion/spec';
 
 import type { Language } from '../src/snippet.ts';
 

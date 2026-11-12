@@ -4,7 +4,7 @@
  * returns the new data, or `undefined` if the action must be rejected.
  * Marks are left to the invariants.
  */
-import { LIMITS, type Scalar, type StructureDecl } from '@algoviz/spec';
+import { LIMITS, type Scalar, type StructureDecl } from '@algomotion/spec';
 
 import {
   applyBTreeModel,

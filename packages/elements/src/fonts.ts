@@ -33,10 +33,10 @@ export function linkFonts(
   doc: Document | undefined = globalThis.document,
 ): void {
   if (href === null || doc === undefined) return;
-  if (doc.head.querySelector('link[data-algoviz-fonts]') !== null) return;
+  if (doc.head.querySelector('link[data-algomotion-fonts]') !== null) return;
   const link = doc.createElement('link');
   link.rel = 'stylesheet';
   link.href = href;
-  link.dataset['algovizFonts'] = '';
+  link.dataset['algomotionFonts'] = '';
   doc.head.append(link);
 }

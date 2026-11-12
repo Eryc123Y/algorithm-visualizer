@@ -1,6 +1,6 @@
 [package]
-# "algoviz" is a working name: the owner picks the final one (roadmap 4.1).
-name = "algoviz"
+# "algomotion" is a working name: the owner picks the final one (roadmap 4.1).
+name = "algomotion"
 version = "0.1.0"
 entrypoint = "lib.typ"
 compiler = "0.15.0"

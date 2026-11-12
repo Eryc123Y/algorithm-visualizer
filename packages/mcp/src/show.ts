@@ -3,14 +3,14 @@
  * support MCP Apps: the tool checks the document and hands it to the
  * player page, which the host draws in the conversation.
  */
-import { formatErrors } from '@algoviz/spec';
+import { formatErrors } from '@algomotion/spec';
 
 import { loadDocument, resolveFrame, type FrameSelector } from './document.ts';
 import { readPlayerFile } from './player-file.ts';
 import { sourceOf, type SourceArgs } from './source.ts';
 import { formatReport, validate } from './validate.ts';
 
-export const PLAYER_URI = 'ui://algoviz/player.html';
+export const PLAYER_URI = 'ui://algomotion/player.html';
 
 /** What the player page receives as the tool's structured result. */
 export interface ShowContent {

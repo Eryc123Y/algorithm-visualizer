@@ -8,7 +8,7 @@ import {
   type Result,
   type StackAction,
   type StackDecl,
-} from '@algoviz/spec';
+} from '@algomotion/spec';
 
 import type { ReduceError } from '../errors.ts';
 import type { StructureKind, StructureState } from '../kind.ts';

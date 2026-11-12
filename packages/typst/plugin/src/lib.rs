@@ -1,4 +1,4 @@
-//! The algoviz Typst plugin (ADR 0026): QuickJS-ng running the algoviz
+//! The algomotion Typst plugin (ADR 0026): QuickJS-ng running the algomotion
 //! engine, behind the functions of `wasm-minimal-protocol`.
 //!
 //! - `compile(source)` returns QuickJS bytecode of the engine bundle. The

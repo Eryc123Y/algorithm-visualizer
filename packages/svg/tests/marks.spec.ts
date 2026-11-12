@@ -5,7 +5,7 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 
-import type { ElementRole, Scene, SceneNode } from '@algoviz/core';
+import type { ElementRole, Scene, SceneNode } from '@algomotion/core';
 
 import { paintScene, themeNames, themes, type SvgNode } from '../src/index.ts';
 import { inkDepth } from './glyph-depth.ts';

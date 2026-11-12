@@ -11,13 +11,13 @@ import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import { selectFrame } from '@algoviz/core';
-import { findAlgorithm, runAlgorithm } from '@algoviz/recipes';
-import { themeNames } from '@algoviz/svg';
+import { selectFrame } from '@algomotion/core';
+import { findAlgorithm, runAlgorithm } from '@algomotion/recipes';
+import { themeNames } from '@algomotion/svg';
 
 import { main } from '../src/cli.ts';
 
-const dir = mkdtempSync(join(tmpdir(), 'algoviz-export-'));
+const dir = mkdtempSync(join(tmpdir(), 'algomotion-export-'));
 let outs = 0;
 /** A fresh output directory, not created yet. */
 const outDir = () => join(dir, `out-${++outs}`);
@@ -51,7 +51,7 @@ const files = (d: string) => readdirSync(d).toSorted();
 const sizeOf = (svg: string) =>
   /^<svg [^>]*width="([\d.]+)" height="([\d.]+)"/.exec(svg)!.slice(1);
 
-describe('algoviz export', () => {
+describe('algomotion export', () => {
   it('writes every frame of a document, named {name}-{frame}', () => {
     const out = outDir();
     const result = run('export', bstFile, '--out', out);
@@ -172,7 +172,7 @@ describe('algoviz export', () => {
       svgs.add(readFileSync(join(out, 'bst-03.svg'), 'utf8'));
       const tikz = readFileSync(join(out, 'bst-03.tex'), 'utf8');
       expect(tikz).toMatch(
-        /^\\algoviz@fonts\{(normal|rm|sf|tt)\}\{(normal|rm|sf|tt)\}%$/m,
+        /^\\algomotion@fonts\{(normal|rm|sf|tt)\}\{(normal|rm|sf|tt)\}%$/m,
       );
     }
     expect(svgs.size).toBe(themeNames.length);
@@ -252,7 +252,7 @@ describe('algoviz export', () => {
   });
 });
 
-describe('algoviz export errors', () => {
+describe('algomotion export errors', () => {
   it('reports a step that matches nothing, and writes nothing', () => {
     const out = outDir();
     const { code, err } = run(
@@ -362,14 +362,14 @@ describe('algoviz export errors', () => {
   });
 
   it('lists export in the usage', () => {
-    expect(run().out).toContain('algoviz export');
+    expect(run().out).toContain('algomotion export');
     expect(run().out).toContain('[--layout wide|narrow]');
   });
 });
 
 const hex = (text: string) => Buffer.from(text, 'utf8').toString('hex');
 
-describe('algoviz export --format tikz', () => {
+describe('algomotion export --format tikz', () => {
   it('writes .tex figures for the LaTeX package', () => {
     const out = outDir();
     const result = run(
@@ -386,9 +386,9 @@ describe('algoviz export --format tikz', () => {
     expect(files(out)).toEqual(['dijkstra-11.tex']);
     expect(result.out).toBe(`${join(out, 'dijkstra-11.tex')}  relax#3`);
     const tikz = readFileSync(join(out, 'dijkstra-11.tex'), 'utf8');
-    expect(tikz).toMatch(/^% algoviz figure for LaTeX, format 2: /);
+    expect(tikz).toMatch(/^% algomotion figure for LaTeX, format 2: /);
     expect(tikz).toContain('% Frame 11, relax#3.\n');
-    expect(tikz).toMatch(/^\\algoviz@figure\{2\}\{[\d.]+\}\{[\d.]+\}\{%$/m);
+    expect(tikz).toMatch(/^\\algomotion@figure\{2\}\{[\d.]+\}\{[\d.]+\}\{%$/m);
     expect(tikz.endsWith('}%\n')).toBe(true);
   });
 
@@ -430,7 +430,7 @@ describe('algoviz export --format tikz', () => {
         join(tikzOut, file.replace(/\.svg$/, '.tex')),
         'utf8',
       );
-      expect(tikz).toContain(`\\algoviz@figure{2}{${w}}{${h}}{%`);
+      expect(tikz).toContain(`\\algomotion@figure{2}{${w}}{${h}}{%`);
     }
   });
 
@@ -448,7 +448,7 @@ describe('algoviz export --format tikz', () => {
   });
 });
 
-describe('algoviz export --input-hex', () => {
+describe('algomotion export --input-hex', () => {
   it('takes the input as hexadecimal UTF-8', () => {
     const [plain, encoded] = [outDir(), outDir()];
     const input = JSON.stringify(dijkstraInput);
@@ -509,7 +509,7 @@ describe('algoviz export --input-hex', () => {
   });
 });
 
-describe('algoviz export --error-file', () => {
+describe('algomotion export --error-file', () => {
   it('writes the diagnostics of a failed export', () => {
     const out = outDir();
     const errors = join(out, 'deep', 'fig.err');
@@ -602,7 +602,7 @@ describe('algoviz export --error-file', () => {
   });
 });
 
-describe('algoviz export --error-file safety', () => {
+describe('algomotion export --error-file safety', () => {
   it('refuses to name a file the command reads, and leaves it alone', () => {
     const copy = join(outDir(), 'doc.json');
     mkdirSync(join(copy, '..'), { recursive: true });
@@ -642,7 +642,7 @@ describe('algoviz export --error-file safety', () => {
   });
 });
 
-describe('algoviz export --one-file', () => {
+describe('algomotion export --one-file', () => {
   it('writes a series into one TikZ file, the figures in timeline order', () => {
     const [single, series] = [outDir(), outDir()];
     const steps = ['--step', 'relax#3,improve#2,-1', '--format', 'tikz'];
@@ -672,7 +672,7 @@ describe('algoviz export --one-file', () => {
     expect(figures).toHaveLength(3);
     expect(readFileSync(path, 'utf8')).toBe(figures.join('\n'));
     expect(
-      readFileSync(path, 'utf8').match(/^\\algoviz@figure\{/gm),
+      readFileSync(path, 'utf8').match(/^\\algomotion@figure\{/gm),
     ).toHaveLength(3);
   });
 
@@ -690,7 +690,9 @@ describe('algoviz export --one-file', () => {
     expect(files(out)).toEqual(['all.tex']);
     expect(result.out.split('\n')).toHaveLength(14);
     expect(
-      readFileSync(join(out, 'all.tex'), 'utf8').match(/^\\algoviz@figure/gm),
+      readFileSync(join(out, 'all.tex'), 'utf8').match(
+        /^\\algomotion@figure/gm,
+      ),
     ).toHaveLength(14);
   });
 

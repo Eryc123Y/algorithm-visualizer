@@ -169,8 +169,8 @@ export function checkVersion(
         ? ` If the document uses nothing added after ${reads.newest}, set "version" to "${reads.newest}".`
         : '';
     return error(
-      `Protocol version ${quote(version)} is newer than this copy of algoviz can read`,
-      `This copy reads ${range}. Update algoviz to show this document.${relabel}`,
+      `Protocol version ${quote(version)} is newer than this copy of algomotion can read`,
+      `This copy reads ${range}. Update algomotion to show this document.${relabel}`,
     );
   }
   // A version of a major version this reader knows, which never existed.
@@ -181,7 +181,7 @@ export function checkVersion(
     return error(`There is no protocol version ${quote(version)}`, fix);
   // An older major version with no upgrade this reader knows.
   return error(
-    `Protocol version ${quote(version)} is older than this copy of algoviz can read`,
+    `Protocol version ${quote(version)} is older than this copy of algomotion can read`,
     `This copy reads ${range}, and cannot upgrade older documents.`,
   );
 }

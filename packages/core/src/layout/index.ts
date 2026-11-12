@@ -9,7 +9,7 @@ import type {
   StructureDecl,
   StructureKindName,
   Visualization,
-} from '@algoviz/spec';
+} from '@algomotion/spec';
 
 import type { Block } from '../kind.ts';
 import type { KindedState, VisualizationState } from '../kinds/index.ts';

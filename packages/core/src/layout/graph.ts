@@ -17,7 +17,7 @@
  * antiparallel edges are spread apart, with their labels outside the pair;
  * a self-loop sits on top of its node.
  */
-import type { GraphDecl } from '@algoviz/spec';
+import type { GraphDecl } from '@algomotion/spec';
 
 import type { Block, LayoutInput } from '../kind.ts';
 import type { GraphEdgeState, GraphState } from '../kinds/graph.ts';

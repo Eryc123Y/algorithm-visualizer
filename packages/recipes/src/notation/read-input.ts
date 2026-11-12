@@ -10,7 +10,7 @@
  *    notation, such as `5 2 4 6 1 3` or `A-B 4, B-C 2`;
  * 5. empty text is no input, so the algorithm runs on its first example.
  */
-import { err, ok, type Diagnostic, type Result } from '@algoviz/spec';
+import { err, ok, type Diagnostic, type Result } from '@algomotion/spec';
 
 export function readInput(
   text: string,

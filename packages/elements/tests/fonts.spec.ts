@@ -4,7 +4,7 @@ import { defaultFontsUrl, linkFonts } from '../src/fonts.ts';
 
 const links = () => [
   ...document.head.querySelectorAll<HTMLLinkElement>(
-    'link[data-algoviz-fonts]',
+    'link[data-algomotion-fonts]',
   ),
 ];
 
@@ -18,12 +18,12 @@ describe('the player’s web fonts (ADR 0030)', () => {
   });
 
   it('links the stylesheet into the document head once', () => {
-    linkFonts('https://example.test/algoviz/fonts/fonts.css');
-    linkFonts('https://example.test/algoviz/fonts/fonts.css');
+    linkFonts('https://example.test/algomotion/fonts/fonts.css');
+    linkFonts('https://example.test/algomotion/fonts/fonts.css');
     expect(links()).toHaveLength(1);
     expect(links()[0]!.rel).toBe('stylesheet');
     expect(links()[0]!.href).toBe(
-      'https://example.test/algoviz/fonts/fonts.css',
+      'https://example.test/algomotion/fonts/fonts.css',
     );
   });
 

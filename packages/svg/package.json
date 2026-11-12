@@ -1,13 +1,13 @@
 {
-  "name": "@algoviz/svg",
+  "name": "@algomotion/svg",
   "version": "0.0.0",
   "private": true,
-  "description": "Renders algoviz scenes to standalone SVG strings, without a DOM.",
+  "description": "Renders algomotion scenes to standalone SVG strings, without a DOM.",
   "type": "module",
   "sideEffects": false,
   "exports": {
     ".": {
-      "@algoviz/source": "./src/index.ts",
+      "@algomotion/source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     }
@@ -19,8 +19,8 @@
     "build": "tsc --build tsconfig.lib.json"
   },
   "dependencies": {
-    "@algoviz/core": "*",
-    "@algoviz/fonts": "*",
-    "@algoviz/spec": "*"
+    "@algomotion/core": "*",
+    "@algomotion/fonts": "*",
+    "@algomotion/spec": "*"
   }
 }

@@ -4,7 +4,7 @@
  */
 import { describe, expect, it } from 'vitest';
 
-import { textWidth } from '@algoviz/fonts';
+import { textWidth } from '@algomotion/fonts';
 
 import {
   clearance,

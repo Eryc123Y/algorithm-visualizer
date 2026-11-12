@@ -16,7 +16,7 @@ import {
 export default defineConfig({
   resolve: {
     conditions: [
-      '@algoviz/source',
+      '@algomotion/source',
       'workerd',
       'worker',
       'browser',

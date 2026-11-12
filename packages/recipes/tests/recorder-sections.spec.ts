@@ -1,4 +1,4 @@
-import { parseVisualization } from '@algoviz/spec';
+import { parseVisualization } from '@algomotion/spec';
 import { describe, expect, it } from 'vitest';
 
 import { Recorder } from '../src/index.ts';

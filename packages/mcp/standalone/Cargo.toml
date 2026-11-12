@@ -1,12 +1,12 @@
 [package]
-name = "algoviz-standalone"
+name = "algomotion-standalone"
 version = "0.1.0"
 edition = "2024"
-description = "The algoviz command without Node.js: the CLI's JavaScript in QuickJS-ng (ADR 0027)."
+description = "The algomotion command without Node.js: the CLI's JavaScript in QuickJS-ng (ADR 0027)."
 publish = false
 
 [[bin]]
-name = "algoviz"
+name = "algomotion"
 path = "src/main.rs"
 
 [dependencies]

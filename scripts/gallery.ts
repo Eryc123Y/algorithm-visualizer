@@ -6,9 +6,9 @@
  */
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 
-import { layoutTrace, loadTrace } from '@algoviz/core';
-import { formatErrors } from '@algoviz/spec';
-import { renderSvg, type ThemeName } from '@algoviz/svg';
+import { layoutTrace, loadTrace } from '@algomotion/core';
+import { formatErrors } from '@algomotion/spec';
+import { renderSvg, type ThemeName } from '@algomotion/svg';
 
 const [out = 'gallery.html', ...files] = process.argv.slice(2);
 const root = new URL('../conformance/', import.meta.url);
@@ -61,7 +61,7 @@ const sections = documents.map(([name, doc]) => {
 
 writeFileSync(
   out,
-  `<!doctype html><meta charset="utf-8"><title>algoviz gallery</title><style>
+  `<!doctype html><meta charset="utf-8"><title>algomotion gallery</title><style>
 body{font:12px system-ui;margin:16px;background:#eceeed}h2{font-size:13px;margin:16px 0 6px}
 .row{display:flex;flex-wrap:wrap;gap:6px}figure{margin:0;padding:8px;background:#fff;border-radius:6px}
 figure.dark{background:#151b19;color:#9aa8a1}figcaption{color:#667;max-width:320px}pre{color:#b42318}

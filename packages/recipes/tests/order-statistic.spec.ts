@@ -8,7 +8,7 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 
-import type { Trace, TreeState } from '@algoviz/core';
+import type { Trace, TreeState } from '@algomotion/core';
 
 import { ordinal } from '../src/structures/red-black/order-statistic-tree.ts';
 import { fuzz, replay, runError, runOk, stateOf } from './helpers.ts';

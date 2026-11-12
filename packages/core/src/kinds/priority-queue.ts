@@ -13,7 +13,7 @@ import {
   type PriorityQueueAction,
   type PriorityQueueDecl,
   type Result,
-} from '@algoviz/spec';
+} from '@algomotion/spec';
 
 import type { ReduceError } from '../errors.ts';
 import type { StructureKind, StructureState } from '../kind.ts';

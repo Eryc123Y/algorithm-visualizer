@@ -5,8 +5,8 @@
  * glyph outlines of the bundled fonts, so it looks the same without them
  * (ADR 0024).
  */
-import type { Scene } from '@algoviz/core';
-import type { FontOutlines } from '@algoviz/fonts';
+import type { Scene } from '@algomotion/core';
+import type { FontOutlines } from '@algomotion/fonts';
 
 import { bundledOutlines, glyphLookup, type GlyphLookup } from './outline.ts';
 import { escapeXml, num, paintScene, serializeNode } from './paint.ts';

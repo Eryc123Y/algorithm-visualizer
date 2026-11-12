@@ -1,10 +1,10 @@
-import { loadTrace, type KindedState, type Trace } from '@algoviz/core';
+import { loadTrace, type KindedState, type Trace } from '@algomotion/core';
 import type {
   Diagnostic,
   StructureKindName,
   VisualizationInput,
-} from '@algoviz/spec';
-import { formatErrors } from '@algoviz/spec';
+} from '@algomotion/spec';
+import { formatErrors } from '@algomotion/spec';
 
 import { runAlgorithm, type AlgorithmRun } from '../src/index.ts';
 

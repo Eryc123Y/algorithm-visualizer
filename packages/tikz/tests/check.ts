@@ -47,8 +47,8 @@ export function drawingOf(tikz: string): string[] {
 /** The colours a figure file defines, by name. */
 function definitions(tikz: string): Map<string, string> {
   return new Map(
-    [...tikz.matchAll(/^\\algoviz@color\{(\d+)\}\{([0-9A-F]{6})\}%$/gm)].map(
-      (m) => [`algoviz@c${m[1]}`, m[2]!],
+    [...tikz.matchAll(/^\\algomotion@color\{(\d+)\}\{([0-9A-F]{6})\}%$/gm)].map(
+      (m) => [`algomotion@c${m[1]}`, m[2]!],
     ),
   );
 }
@@ -58,7 +58,7 @@ function pathStyle(options: string, colours: Map<string, string>): string {
   const o = new Map(
     options.split(',').map((option) => {
       const [key, value = ''] = option.split('=');
-      return [key!, value.replace(/\\algoviz@u/g, '')] as const;
+      return [key!, value.replace(/\\algomotion@u/g, '')] as const;
     }),
   );
   const colour = (key: string) => colours.get(o.get(key)!) ?? `?${o.get(key)}`;
@@ -88,7 +88,7 @@ export function tikzShapes(tikz: string): Shape[] {
   const colours = definitions(tikz);
   return drawingOf(tikz).map((line): Shape => {
     const text =
-      /^\\algoviz@text\{(-?[\d.]+),(-?[\d.]+)\}\{[lcr]\}\{([\d.]+)\}\{[\d.]+\}\{(value|label)\}\{([^}]*)\}\{(?:([^,}]*),([\d.]+)\\algoviz@u)?\}\{(.*)\}$/.exec(
+      /^\\algomotion@text\{(-?[\d.]+),(-?[\d.]+)\}\{[lcr]\}\{([\d.]+)\}\{[\d.]+\}\{(value|label)\}\{([^}]*)\}\{(?:([^,}]*),([\d.]+)\\algomotion@u)?\}\{(.*)\}$/.exec(
         line,
       );
     if (text !== null) {
@@ -134,7 +134,7 @@ export function tikzShapes(tikz: string): Shape[] {
     }
     if (/^\(-?[\d.]+,-?[\d.]+\) rectangle \(/.test(body))
       return { kind: 'rect', points: pointsOf(body), style };
-    const circle = /circle\[radius=(-?[\d.]+)\\algoviz@u\];$/.exec(body);
+    const circle = /circle\[radius=(-?[\d.]+)\\algomotion@u\];$/.exec(body);
     if (circle !== null)
       return {
         kind: 'circle',
@@ -407,29 +407,29 @@ export function wellFormedProblems(tikz: string): string[] {
   const problems: string[] = [];
   if (/NaN|undefined|Infinity/.test(tikz)) problems.push('not a number');
   const head =
-    /^\\algoviz@figure\{2\}\{([\d.]+)\}\{([\d.]+)\}\{%\n\\algoviz@fonts\{(?:normal|rm|sf|tt)\}\{(?:normal|rm|sf|tt)\}%$/m.exec(
+    /^\\algomotion@figure\{2\}\{([\d.]+)\}\{([\d.]+)\}\{%\n\\algomotion@fonts\{(?:normal|rm|sf|tt)\}\{(?:normal|rm|sf|tt)\}%$/m.exec(
       tikz,
     );
   if (head === null)
-    return [...problems, 'no \\algoviz@figure and \\algoviz@fonts lines'];
+    return [...problems, 'no \\algomotion@figure and \\algomotion@fonts lines'];
   const [width, height] = [Number(head[1]), Number(head[2])];
   const defined = new Set(
-    [...tikz.matchAll(/^\\algoviz@color\{(\d+)\}\{[0-9A-F]{6}\}%$/gm)].map(
-      (m) => `algoviz@c${m[1]}`,
+    [...tikz.matchAll(/^\\algomotion@color\{(\d+)\}\{[0-9A-F]{6}\}%$/gm)].map(
+      (m) => `algomotion@c${m[1]}`,
     ),
   );
-  for (const used of tikz.matchAll(/algoviz@c\d+/g))
+  for (const used of tikz.matchAll(/algomotion@c\d+/g))
     if (!defined.has(used[0]))
       problems.push(`colour ${used[0]} is not defined`);
   for (const line of drawingOf(tikz)) {
     const text =
-      /^\\algoviz@text\{[^}]*\}\{[lcr]\}\{[\d.]+\}\{[\d.]+\}\{(?:value|label)\}\{algoviz@c\d+\}\{(?:algoviz@c\d+,[\d.]+\\algoviz@u)?\}\{(.*)\}$/.exec(
+      /^\\algomotion@text\{[^}]*\}\{[lcr]\}\{[\d.]+\}\{[\d.]+\}\{(?:value|label)\}\{algomotion@c\d+\}\{(?:algomotion@c\d+,[\d.]+\\algomotion@u)?\}\{(.*)\}$/.exec(
         line,
       );
     const rest =
       text !== null
         ? text[1]!.replace(TEXT_COMMAND, '')
-        : /^\\path\[[^\]]*\] [^\\]*(?:\\algoviz@u[^\\]*)?;$/.test(line)
+        : /^\\path\[[^\]]*\] [^\\]*(?:\\algomotion@u[^\\]*)?;$/.test(line)
           ? ''
           : line;
     if (/[\\{}#$%&_^~]/.test(rest)) problems.push(`not well formed: ${line}`);

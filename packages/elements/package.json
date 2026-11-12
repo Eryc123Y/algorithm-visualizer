@@ -1,8 +1,8 @@
 {
-  "name": "@algoviz/elements",
+  "name": "@algomotion/elements",
   "version": "0.0.0",
   "private": true,
-  "description": "Web Components for algoviz: the <algo-player> interactive player.",
+  "description": "Web Components for algomotion: the <algo-player> interactive player.",
   "type": "module",
   "sideEffects": [
     "./src/define.ts",
@@ -11,17 +11,17 @@
   ],
   "exports": {
     ".": {
-      "@algoviz/source": "./src/index.ts",
+      "@algomotion/source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
     "./define": {
-      "@algoviz/source": "./src/define.ts",
+      "@algomotion/source": "./src/define.ts",
       "types": "./dist/define.d.ts",
       "default": "./dist/define.js"
     },
     "./fonts.css": {
-      "@algoviz/source": "./src/fonts/fonts.css",
+      "@algomotion/source": "./src/fonts/fonts.css",
       "default": "./dist/fonts/fonts.css"
     }
   },
@@ -32,10 +32,10 @@
     "build": "tsc --build tsconfig.lib.json && vite build --config vite.cdn.config.ts"
   },
   "dependencies": {
-    "@algoviz/core": "*",
-    "@algoviz/recipes": "*",
-    "@algoviz/spec": "*",
-    "@algoviz/svg": "*",
+    "@algomotion/core": "*",
+    "@algomotion/recipes": "*",
+    "@algomotion/spec": "*",
+    "@algomotion/svg": "*",
     "lit": "^3.3.1"
   }
 }

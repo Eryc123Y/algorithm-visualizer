@@ -12,8 +12,8 @@
  * Elements are keyed by id and the link into each element by its id too,
  * so an element moved to another bucket glides there with its arrow.
  */
-import { textWidth } from '@algoviz/fonts';
-import type { HashTableDecl } from '@algoviz/spec';
+import { textWidth } from '@algomotion/fonts';
+import type { HashTableDecl } from '@algomotion/spec';
 
 import type { Block, LayoutInput } from '../kind.ts';
 import type { HashTableState } from '../kinds/hash-table.ts';

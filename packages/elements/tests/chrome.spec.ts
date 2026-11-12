@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { themeNames } from '@algoviz/svg';
+import { themeNames } from '@algomotion/svg';
 
 import {
   chromeDeclarations,

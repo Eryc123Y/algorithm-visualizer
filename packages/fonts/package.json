@@ -1,19 +1,19 @@
 {
-  "name": "@algoviz/fonts",
+  "name": "@algomotion/fonts",
   "version": "0.0.0",
   "private": true,
-  "description": "Metrics and glyph outlines of the fonts algoviz bundles, and text measurement. No DOM or Node.js APIs.",
+  "description": "Metrics and glyph outlines of the fonts algomotion bundles, and text measurement. No DOM or Node.js APIs.",
   "license": "MIT AND OFL-1.1",
   "type": "module",
   "sideEffects": false,
   "exports": {
     ".": {
-      "@algoviz/source": "./src/index.ts",
+      "@algomotion/source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
     "./encode": {
-      "@algoviz/source": "./src/encode.ts",
+      "@algomotion/source": "./src/encode.ts",
       "types": "./dist/encode.d.ts",
       "default": "./dist/encode.js"
     }

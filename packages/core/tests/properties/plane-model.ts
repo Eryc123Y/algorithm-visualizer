@@ -5,7 +5,7 @@
  * the ADR's table rather than from the reducer; and the invariants every
  * state keeps.
  */
-import type { StructureDecl } from '@algoviz/spec';
+import type { StructureDecl } from '@algomotion/spec';
 
 import type { PlaneState } from '../../src/index.ts';
 import type { Dice } from './random.ts';

@@ -1,20 +1,20 @@
 /**
  * The ready-made visualizations a model can run: every module of the
- * registry of @algoviz/recipes (ADR 0019), in one list with one shape.
+ * registry of @algomotion/recipes (ADR 0019), in one list with one shape.
  */
 import {
   algorithms,
   runModule,
   type Algorithm,
   type Topic,
-} from '@algoviz/recipes';
+} from '@algomotion/recipes';
 import {
   err,
   ok,
   type Diagnostic,
   type Result,
   type VisualizationInput,
-} from '@algoviz/spec';
+} from '@algomotion/spec';
 import { z } from 'zod';
 
 /** One entry of the catalogue, as MCP and the CLI show it. */

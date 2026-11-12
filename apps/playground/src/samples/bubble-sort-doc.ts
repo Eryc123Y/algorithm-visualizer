@@ -1,7 +1,7 @@
 /**
  * The bubble sort sample with source code, line numbers and variables.
  */
-import type { VisualizationInput } from '@algoviz/spec';
+import type { VisualizationInput } from '@algomotion/spec';
 
 import { bubbleSort } from './bubble-sort';
 

@@ -6,8 +6,8 @@
 import fc from 'fast-check';
 import { beforeAll, describe, expect, it } from 'vitest';
 
-import { algorithms, runAlgorithm } from '@algoviz/recipes';
-import { exportFigures, themes, type ThemeName } from '@algoviz/svg';
+import { algorithms, runAlgorithm } from '@algomotion/recipes';
+import { exportFigures, themes, type ThemeName } from '@algomotion/svg';
 
 import type { Response } from '../src/engine.ts';
 import { buildEngine } from '../scripts/engine.ts';
@@ -36,7 +36,7 @@ function render(instance: PluginInstance, request: unknown): Response {
   return JSON.parse(decoder.decode(output)) as Response;
 }
 
-/** The SVG of each figure `algoviz export` draws for a run. */
+/** The SVG of each figure `algomotion export` draws for a run. */
 function exportedSvg(
   id: string,
   input: unknown,

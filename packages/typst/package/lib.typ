@@ -1,7 +1,7 @@
-// algoviz for Typst: step-by-step figures of algorithms and data structures.
+// algomotion for Typst: step-by-step figures of algorithms and data structures.
 //
-// The algoviz engine runs inside a WebAssembly plugin (QuickJS-ng), so a
-// figure is the same SVG that `algoviz export` writes, with text drawn as
+// The algomotion engine runs inside a WebAssembly plugin (QuickJS-ng), so a
+// figure is the same SVG that `algomotion export` writes, with text drawn as
 // outlines of the bundled fonts.
 
 // The engine, loaded once. Typst memoizes the transition, so editors and
@@ -99,7 +99,7 @@
 
 // What the engine reported, as a box in place of the figure, or as a
 // compile error when `strict` is true. The box holds the diagnostics as
-// metadata labelled <algoviz-error>, so `query(<algoviz-error>)` lists them.
+// metadata labelled <algomotion-error>, so `query(<algomotion-error>)` lists them.
 #let _failure(name, diagnostics, strict) = {
   let line(d) = (
     d.code + " at " + d.path + ": " + d.message
@@ -116,7 +116,7 @@
     fill: rgb("#fef3f2"),
     {
       set text(size: 0.85em, fill: rgb("#7a271a"))
-      [#metadata(diagnostics) <algoviz-error>]
+      [#metadata(diagnostics) <algomotion-error>]
       strong(name + ": no figure")
       for d in diagnostics {
         linebreak()
@@ -147,12 +147,12 @@
 // `auto` (ADR 0033): room is left for a title and a line or two of text.
 #let _slide-height = 75%
 
-// Checks a size argument of `algoviz-slides`: auto, a length, a ratio or
+// Checks a size argument of `algomotion-slides`: auto, a length, a ratio or
 // a relative length such as `100% - 2cm`.
 #let _slide-side(name, value) = {
   if value != auto and type(value) not in (length, ratio, relative) {
     panic(
-      "algoviz-slides: `"
+      "algomotion-slides: `"
         + name
         + "` takes a length or a ratio such as 60%, not "
         + repr(type(value)),
@@ -233,7 +233,7 @@
 /// - width, height, fit, alt: As for `image`; `alt` defaults to the step's
 ///   narration.
 /// -> content
-#let algoviz(
+#let algomotion(
   source,
   ..args,
   step: -1,
@@ -245,16 +245,16 @@
   fit: "contain",
   alt: auto,
 ) = {
-  let request = _source("algoviz", source, args)
+  let request = _source("algomotion", source, args)
   let response = _render(request + (
-    step: _selector("algoviz", "step", step),
-    theme: _theme("algoviz", theme),
-    layout: _layout("algoviz", layout, "narrow"),
+    step: _selector("algomotion", "step", step),
+    theme: _theme("algomotion", theme),
+    layout: _layout("algomotion", layout, "narrow"),
   ))
   if response.ok {
     _image(response.figures.first(), width, height, fit, alt)
   } else {
-    _failure("algoviz", response.diagnostics, strict)
+    _failure("algomotion", response.diagnostics, strict)
   }
 }
 
@@ -262,11 +262,11 @@
 /// document share one canvas, so they share one scale at one width.
 ///
 /// - steps (auto, int, str, array): `auto` for every frame, or the
-///   selectors of `algoviz`'s `step`; a section such as "insert-5" or a
+///   selectors of `algomotion`'s `step`; a section such as "insert-5" or a
 ///   range such as "2..5" names several frames.
-/// - theme, layout, strict, width, height, fit: As for `algoviz`.
+/// - theme, layout, strict, width, height, fit: As for `algomotion`.
 /// -> array
-#let algoviz-series(
+#let algomotion-series(
   source,
   ..args,
   steps: auto,
@@ -277,16 +277,16 @@
   height: auto,
   fit: "contain",
 ) = {
-  let request = _source("algoviz-series", source, args)
+  let request = _source("algomotion-series", source, args)
   let response = _render(request + (
-    steps: _selectors("algoviz-series", steps),
-    theme: _theme("algoviz-series", theme),
-    layout: _layout("algoviz-series", layout, "narrow"),
+    steps: _selectors("algomotion-series", steps),
+    theme: _theme("algomotion-series", theme),
+    layout: _layout("algomotion-series", layout, "narrow"),
   ))
   if response.ok {
     response.figures.map(f => _image(f, width, height, fit, auto))
   } else {
-    (_failure("algoviz-series", response.diagnostics, strict),)
+    (_failure("algomotion-series", response.diagnostics, strict),)
   }
 }
 
@@ -294,20 +294,20 @@
 /// figures: ((frame:, selector:, width:, height:, narration:, svg:), ..))`,
 /// or `(ok: false, diagnostics: ((code:, path:, message:, hint:), ..))`.
 /// For captions, custom layouts and slides. `layout` is "narrow" by
-/// default, as for `algoviz`.
+/// default, as for `algomotion`.
 /// -> dictionary
-#let algoviz-figures(
+#let algomotion-figures(
   source,
   ..args,
   steps: auto,
   theme: "light",
   layout: auto,
 ) = {
-  let request = _source("algoviz-figures", source, args)
+  let request = _source("algomotion-figures", source, args)
   _render(request + (
-    steps: _selectors("algoviz-figures", steps),
-    theme: _theme("algoviz-figures", theme),
-    layout: _layout("algoviz-figures", layout, "narrow"),
+    steps: _selectors("algomotion-figures", steps),
+    theme: _theme("algomotion-figures", theme),
+    layout: _layout("algomotion-figures", layout, "narrow"),
   ))
 }
 
@@ -318,12 +318,12 @@
 /// - only (function): The framework's `only`, such as polylux's or
 ///   touying's: it takes a subslide number or a string such as "3-", and a
 ///   body.
-/// - source (str, dictionary): As for `algoviz`.
-/// - steps (auto, int, str, array): As for `algoviz-series`.
+/// - source (str, dictionary): As for `algomotion`.
+/// - steps (auto, int, str, array): As for `algomotion-series`.
 /// - start (int): The subslide of the first frame. The last frame stays from
 ///   its subslide on. A series of one frame is the image alone, on every
 ///   subslide, whatever `start` says.
-/// - layout (auto, str): As for `algoviz`, but "wide" by default, as slides
+/// - layout (auto, str): As for `algomotion`, but "wide" by default, as slides
 ///   have room beside the main structure.
 /// - width, height (auto, length, ratio, relative): The box the figure fills
 ///   on the slide (ADR 0033). `auto` is the region's width and three
@@ -332,9 +332,9 @@
 /// - fit (str): "contain", the default, keeps the figure's shape and makes
 ///   it as large as fits in the box; "cover" and "stretch" make it the box,
 ///   as `image` does.
-/// - theme, strict: As for `algoviz`.
+/// - theme, strict: As for `algomotion`.
 /// -> content
-#let algoviz-slides(
+#let algomotion-slides(
   only,
   source,
   ..args,
@@ -349,26 +349,26 @@
 ) = {
   if type(only) != function {
     panic(
-      "algoviz-slides: the first argument is the slide framework's `only`, such as polylux's or touying's, not "
+      "algomotion-slides: the first argument is the slide framework's `only`, such as polylux's or touying's, not "
         + repr(type(only)),
     )
   }
   if type(start) != int or start < 1 {
     panic(
-      "algoviz-slides: `start` takes a subslide number from 1, not "
+      "algomotion-slides: `start` takes a subslide number from 1, not "
         + repr(start),
     )
   }
   _slide-side("width", width)
   _slide-side("height", height)
-  let request = _source("algoviz-slides", source, args)
+  let request = _source("algomotion-slides", source, args)
   let response = _render(request + (
-    steps: _selectors("algoviz-slides", steps),
-    theme: _theme("algoviz-slides", theme),
-    layout: _layout("algoviz-slides", layout, "wide"),
+    steps: _selectors("algomotion-slides", steps),
+    theme: _theme("algomotion-slides", theme),
+    layout: _layout("algomotion-slides", layout, "wide"),
   ))
   if not response.ok {
-    return _failure("algoviz-slides", response.diagnostics, strict)
+    return _failure("algomotion-slides", response.diagnostics, strict)
   }
   let figures = response.figures
   if figures.len() == 1 {

@@ -6,8 +6,8 @@
  */
 import { describe, expect, it } from 'vitest';
 
-import type { GraphState } from '@algoviz/core';
-import type { VisualizationInput } from '@algoviz/spec';
+import type { GraphState } from '@algomotion/core';
+import type { VisualizationInput } from '@algomotion/spec';
 
 import type { GraphInput } from '../src/index.ts';
 import { replay, runError, runOk, stateOf } from './helpers.ts';

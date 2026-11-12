@@ -1,13 +1,13 @@
 {
-  "name": "@algoviz/spec",
+  "name": "@algomotion/spec",
   "version": "0.0.0",
   "private": true,
-  "description": "Protocol schemas, types and validation for algoviz traces.",
+  "description": "Protocol schemas, types and validation for algomotion traces.",
   "type": "module",
   "sideEffects": false,
   "exports": {
     ".": {
-      "@algoviz/source": "./src/index.ts",
+      "@algomotion/source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },

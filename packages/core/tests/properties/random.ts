@@ -4,7 +4,7 @@
  * from a generator seeded by the list, so short lists still make long
  * documents, and shrinking replaces numbers with simpler ones (zeros).
  */
-import type { Scalar } from '@algoviz/spec';
+import type { Scalar } from '@algomotion/spec';
 
 /** How many cases each property runs: FUZZ_RUNS=5000 for a deep run. */
 export const RUNS = Number(process.env['FUZZ_RUNS'] ?? 60);

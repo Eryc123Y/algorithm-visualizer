@@ -1,6 +1,6 @@
 /**
  * Writes package/engine.bc, the engine as QuickJS bytecode for the
- * committed plugin (ADR 0026). Run with `npm run build -w @algoviz/typst`.
+ * committed plugin (ADR 0026). Run with `npm run build -w @algomotion/typst`.
  */
 import { writeFile } from 'node:fs/promises';
 import { relative } from 'node:path';

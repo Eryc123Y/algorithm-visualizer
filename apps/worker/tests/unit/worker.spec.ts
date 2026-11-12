@@ -4,7 +4,7 @@
  */
 import { describe, expect, it, vi } from 'vitest';
 
-import { createHttpHandler } from '@algoviz/mcp';
+import { createHttpHandler } from '@algomotion/mcp';
 
 import {
   createWorker,
@@ -65,7 +65,7 @@ describe('the Worker', () => {
     const res = await worker.fetch(post(), {});
     expect(res.status).toBe(200);
     expect(await res.json()).toMatchObject({
-      result: { serverInfo: { name: 'algoviz' } },
+      result: { serverInfo: { name: 'algomotion' } },
     });
   });
 
@@ -115,7 +115,7 @@ describe('share links (ADR 0040)', () => {
       jsonrpc: '2.0',
       id: 2,
       method: 'tools/call',
-      params: { name: 'algoviz_show', arguments: { recipe: 'bfs' } },
+      params: { name: 'algomotion_show', arguments: { recipe: 'bfs' } },
     }),
   });
   const texts = async (res: Response) => {
@@ -125,12 +125,12 @@ describe('share links (ADR 0040)', () => {
     return body.result.content.map((c) => c.text);
   };
 
-  it('come from ALGOVIZ_SHARE_URL in the environment', async () => {
+  it('come from ALGOMOTION_SHARE_URL in the environment', async () => {
     // A fresh Worker: it makes its handler from the first request's env.
     vi.resetModules();
     const { default: fresh } = await import('../../src/worker.ts');
     const res = await fresh.fetch(show.clone(), {
-      ALGOVIZ_SHARE_URL: 'https://example.org/play/',
+      ALGOMOTION_SHARE_URL: 'https://example.org/play/',
     });
     expect(res.status).toBe(200);
     expect((await texts(res))[1]).toMatch(
@@ -140,7 +140,7 @@ describe('share links (ADR 0040)', () => {
 
   it('are left out without it', async () => {
     const w = createWorker((env) =>
-      createHttpHandler({ shareUrl: env.ALGOVIZ_SHARE_URL }),
+      createHttpHandler({ shareUrl: env.ALGOMOTION_SHARE_URL }),
     );
     const res = await w.fetch(show.clone(), {});
     expect(await texts(res)).toHaveLength(1);
@@ -149,15 +149,15 @@ describe('share links (ADR 0040)', () => {
   it('answer 500 without details when the address is wrong', async () => {
     const error = vi.spyOn(console, 'error').mockImplementation(() => {});
     const w = createWorker((env) =>
-      createHttpHandler({ shareUrl: env.ALGOVIZ_SHARE_URL }),
+      createHttpHandler({ shareUrl: env.ALGOMOTION_SHARE_URL }),
     );
     const res = await w.fetch(show.clone(), {
-      ALGOVIZ_SHARE_URL: 'example.org/play/',
+      ALGOMOTION_SHARE_URL: 'example.org/play/',
     });
     expect(res.status).toBe(500);
     expect(await res.text()).not.toContain('example.org');
     expect(error).toHaveBeenCalledWith(
-      expect.stringContaining('ALGOVIZ_SHARE_URL'),
+      expect.stringContaining('ALGOMOTION_SHARE_URL'),
     );
     error.mockRestore();
   });

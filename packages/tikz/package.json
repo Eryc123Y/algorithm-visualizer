@@ -1,13 +1,13 @@
 {
-  "name": "@algoviz/tikz",
+  "name": "@algomotion/tikz",
   "version": "0.0.0",
   "private": true,
-  "description": "Renders algoviz scenes as TikZ for LaTeX, with the document's fonts (ADR 0027).",
+  "description": "Renders algomotion scenes as TikZ for LaTeX, with the document's fonts (ADR 0027).",
   "type": "module",
   "sideEffects": false,
   "exports": {
     ".": {
-      "@algoviz/source": "./src/index.ts",
+      "@algomotion/source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     }
@@ -19,11 +19,11 @@
     "build": "tsc --build tsconfig.lib.json"
   },
   "dependencies": {
-    "@algoviz/core": "*",
-    "@algoviz/spec": "*",
-    "@algoviz/svg": "*"
+    "@algomotion/core": "*",
+    "@algomotion/spec": "*",
+    "@algomotion/svg": "*"
   },
   "devDependencies": {
-    "@algoviz/recipes": "*"
+    "@algomotion/recipes": "*"
   }
 }

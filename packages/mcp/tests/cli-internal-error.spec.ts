@@ -11,7 +11,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { main } from '../src/cli.ts';
 
-vi.mock('@algoviz/tikz', () => ({
+vi.mock('@algomotion/tikz', () => ({
   exportTikzFigures: () => {
     throw new TypeError('boom');
   },
@@ -19,7 +19,10 @@ vi.mock('@algoviz/tikz', () => ({
 
 describe('an internal error', () => {
   it('is written to the error file and thrown', () => {
-    const errors = join(mkdtempSync(join(tmpdir(), 'algoviz-bug-')), 'x.err');
+    const errors = join(
+      mkdtempSync(join(tmpdir(), 'algomotion-bug-')),
+      'x.err',
+    );
     expect(() =>
       main(
         [
@@ -37,7 +40,7 @@ describe('an internal error', () => {
       ),
     ).toThrow('boom');
     expect(readFileSync(errors, 'utf8')).toBe(
-      'Internal error in algoviz: boom\n',
+      'Internal error in algomotion: boom\n',
     );
   });
 });

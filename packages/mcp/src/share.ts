@@ -2,15 +2,15 @@
  * Share links in tool results (ADR 0040): what a result links to, and the
  * text item that carries the link. The server makes links only when it
  * knows the share page's address, which no code assumes: it comes from
- * `ALGOVIZ_SHARE_URL` or the `shareUrl` option.
+ * `ALGOMOTION_SHARE_URL` or the `shareUrl` option.
  */
-import { writeInput } from '@algoviz/recipes';
-import { checkShareBase, shareLink, type ShareContent } from '@algoviz/spec';
+import { writeInput } from '@algomotion/recipes';
+import { checkShareBase, shareLink, type ShareContent } from '@algomotion/spec';
 
 import { readDocument, type FrameSelector } from './document.ts';
 import type { SourceArgs } from './source.ts';
 
-export const SHARE_URL_VARIABLE = 'ALGOVIZ_SHARE_URL';
+export const SHARE_URL_VARIABLE = 'ALGOMOTION_SHARE_URL';
 
 /** The share page's address from the environment; empty is none. */
 export function shareBaseFromEnv(
@@ -69,7 +69,7 @@ export async function shareText(
   if (base === undefined || content === undefined) return undefined;
   const link = await shareLink(base, content);
   if (link.ok)
-    return `Share link (opens it in the algoviz player in any browser): ${link.value}`;
+    return `Share link (opens it in the algomotion player in any browser): ${link.value}`;
   const [first] = link.error;
   return `No share link. ${first?.message ?? 'The link could not be made'}. Give the user the document instead, or show a recipe, whose link carries only its input.`;
 }

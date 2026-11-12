@@ -8,7 +8,7 @@
  * `data` (the structure's contents) and `marks` (annotations that only
  * affect how it is drawn).
  */
-import type { Result } from '@algoviz/spec';
+import type { Result } from '@algomotion/spec';
 
 import type { ReduceError } from './errors.ts';
 import type { LayoutFonts, LayoutOptions, Region } from './layout/options.ts';

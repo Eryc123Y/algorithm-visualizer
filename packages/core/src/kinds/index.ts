@@ -7,7 +7,7 @@ import {
   type StructureDecl,
   type StructureKindName,
   type TargetedAction,
-} from '@algoviz/spec';
+} from '@algomotion/spec';
 
 import type { ReduceError } from '../errors.ts';
 import { runtimes, type CoreTypeMap } from '../registry.ts';

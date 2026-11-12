@@ -69,7 +69,7 @@ export function page({
   <body>
     <a class="skip" href="#main">Skip to the content</a>
     <header class="bar">
-      <a class="mark" href="${root || './'}">algoviz</a>
+      <a class="mark" href="${root || './'}">algomotion</a>
       <nav aria-label="Site">
         <a href="${root}#catalog">Algorithms</a>
         <a href="${root}themes/">Themes</a>
@@ -80,7 +80,7 @@ export function page({
 ${body}
     </main>
     <footer>
-      Generated from the algoviz registry. Every figure is drawn by algoviz’s own engine.
+      Generated from the algomotion registry. Every figure is drawn by algomotion’s own engine.
     </footer>
   </body>
 </html>

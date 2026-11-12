@@ -9,7 +9,7 @@ import { addCopyButtons, filterCatalog } from '../../src/docs/enhance.ts';
 describe('copy buttons', () => {
   beforeEach(() => {
     document.body.innerHTML = `
-      <section class="snippet" data-snippet="cli"><h3>On the command line</h3><pre><code>algoviz export x</code></pre></section>
+      <section class="snippet" data-snippet="cli"><h3>On the command line</h3><pre><code>algomotion export x</code></pre></section>
       <section class="snippet" data-snippet="link"><h3>As a share link</h3><pre><code>../play/#v=1&amp;alg=x</code></pre></section>`;
   });
 
@@ -33,7 +33,7 @@ describe('copy buttons', () => {
     buttons[1]!.click();
     await vi.waitFor(() => expect(copied).toHaveLength(2));
     expect(copied).toEqual([
-      'algoviz export x',
+      'algomotion export x',
       'https://example.org/play/#v=1&alg=x',
     ]);
     await vi.waitFor(() => expect(buttons[0]!.textContent).toBe('Copied'));

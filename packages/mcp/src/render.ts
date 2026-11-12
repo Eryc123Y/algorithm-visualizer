@@ -1,9 +1,9 @@
 /**
  * One frame of a document as a standalone SVG image.
  */
-import { layoutTrace, type FigureLayout } from '@algoviz/core';
-import { ok, type Diagnostic, type Result } from '@algoviz/spec';
-import { renderSvg, themes, type ThemeName } from '@algoviz/svg';
+import { layoutTrace, type FigureLayout } from '@algomotion/core';
+import { ok, type Diagnostic, type Result } from '@algomotion/spec';
+import { renderSvg, themes, type ThemeName } from '@algomotion/svg';
 
 import { loadDocument, resolveFrame, type FrameSelector } from './document.ts';
 

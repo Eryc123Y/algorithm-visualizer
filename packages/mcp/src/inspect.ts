@@ -9,8 +9,8 @@ import {
   stepNameAt,
   type FrameRange,
   type Trace,
-} from '@algoviz/core';
-import { err, ok, type Diagnostic, type Result } from '@algoviz/spec';
+} from '@algomotion/core';
+import { err, ok, type Diagnostic, type Result } from '@algomotion/spec';
 
 import { loadDocument, resolveFrames, type FrameSelector } from './document.ts';
 

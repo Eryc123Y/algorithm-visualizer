@@ -10,8 +10,8 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 
-import type { GraphState, Trace, TreeState } from '@algoviz/core';
-import type { VisualizationInput } from '@algoviz/spec';
+import type { GraphState, Trace, TreeState } from '@algomotion/core';
+import type { VisualizationInput } from '@algomotion/spec';
 
 import {
   runAlgorithm,

@@ -5,8 +5,8 @@
  */
 import { describe, expect, it } from 'vitest';
 
-import * as recipes from '@algoviz/recipes';
-import { Recorder } from '@algoviz/recipes';
+import * as recipes from '@algomotion/recipes';
+import { Recorder } from '@algomotion/recipes';
 
 import { grade } from '../src/grade.ts';
 import { tasks } from '../src/tasks.ts';

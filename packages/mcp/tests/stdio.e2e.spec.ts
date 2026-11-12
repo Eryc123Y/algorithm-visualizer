@@ -11,7 +11,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 const src = (file: string) =>
   fileURLToPath(new URL(`../src/${file}`, import.meta.url));
-const node = ['--conditions=@algoviz/source'];
+const node = ['--conditions=@algomotion/source'];
 
 type Content = { type: string; text: string }[];
 const textOf = (result: Record<string, unknown>) =>
@@ -32,13 +32,13 @@ describe('the MCP server over stdio', () => {
   afterAll(() => client.close());
 
   it('introduces itself', () => {
-    expect(client.getServerVersion()?.name).toBe('algoviz');
-    expect(client.getInstructions()).toContain('algoviz_validate');
+    expect(client.getServerVersion()?.name).toBe('algomotion');
+    expect(client.getInstructions()).toContain('algomotion_validate');
   });
 
   it('serves the workflow a model follows: guide, write, fix, check, render', async () => {
     const guide = await client.callTool({
-      name: 'algoviz_guide',
+      name: 'algomotion_guide',
       arguments: { kinds: ['stack'] },
     });
     expect(textOf(guide)).toContain('## stack');
@@ -55,7 +55,7 @@ describe('the MCP server over stdio', () => {
       ],
     };
     const invalid = await client.callTool({
-      name: 'algoviz_validate',
+      name: 'algomotion_validate',
       arguments: { document: draft },
     });
     expect(invalid.isError).toBe(true);
@@ -72,20 +72,20 @@ describe('the MCP server over stdio', () => {
       ],
     };
     const valid = await client.callTool({
-      name: 'algoviz_validate',
+      name: 'algomotion_validate',
       arguments: { document: JSON.stringify(fixed) },
     });
     expect(textOf(valid)).toBe('Valid: s (stack); 2 steps, frames 0–2.');
 
     const inspected = await client.callTool({
-      name: 'algoviz_inspect',
+      name: 'algomotion_inspect',
       arguments: { document: fixed, frames: [1, -1] },
     });
     expect(textOf(inspected)).toContain('"data":[{"id":"e0","value":1}]');
     expect(textOf(inspected)).toContain('narration: Pop.');
 
     const drawn = await client.callTool({
-      name: 'algoviz_render',
+      name: 'algomotion_render',
       arguments: { document: fixed, frame: 1, theme: 'dark' },
     });
     expect(textOf(drawn)).toMatch(/^<svg [^>]*viewBox="0 0 \d+/);
@@ -94,13 +94,16 @@ describe('the MCP server over stdio', () => {
   it('runs a recipe whose document validates', async () => {
     const listed = JSON.parse(
       textOf(
-        await client.callTool({ name: 'algoviz_list_recipes', arguments: {} }),
+        await client.callTool({
+          name: 'algomotion_list_recipes',
+          arguments: {},
+        }),
       ),
     ) as { id: string }[];
     expect(listed.map((r) => r.id)).toContain('kruskal');
     expect(listed.map((r) => r.id)).toContain('bst.delete');
     const doc = await client.callTool({
-      name: 'algoviz_run_recipe',
+      name: 'algomotion_run_recipe',
       arguments: {
         id: 'kruskal',
         input: {
@@ -116,7 +119,7 @@ describe('the MCP server over stdio', () => {
       },
     });
     const valid = await client.callTool({
-      name: 'algoviz_validate',
+      name: 'algomotion_validate',
       arguments: { document: textOf(doc) },
     });
     expect(textOf(valid)).toMatch(
@@ -126,7 +129,7 @@ describe('the MCP server over stdio', () => {
 
   it('reports bad recipe arguments without crashing', async () => {
     const result = await client.callTool({
-      name: 'algoviz_run_recipe',
+      name: 'algomotion_run_recipe',
       arguments: {
         id: 'linear-probing.insert',
         input: { from: { size: 3, keys: [1.5] }, key: 1 },
@@ -138,7 +141,7 @@ describe('the MCP server over stdio', () => {
   });
 
   it('serves resources and the prompt', async () => {
-    const schema = await client.readResource({ uri: 'algoviz://schema' });
+    const schema = await client.readResource({ uri: 'algomotion://schema' });
     expect(
       JSON.parse((schema.contents[0] as { text: string }).text),
     ).toHaveProperty('$id');
@@ -154,20 +157,20 @@ describe('the share page address', () => {
   it('stops the server at start when it is not a page’s address', () => {
     const run = spawnSync(process.execPath, [...node, src('mcp-server.ts')], {
       encoding: 'utf8',
-      env: { ...process.env, ALGOVIZ_SHARE_URL: 'example.org/play/' },
+      env: { ...process.env, ALGOMOTION_SHARE_URL: 'example.org/play/' },
       input: '',
       timeout: 30_000,
     });
     expect(run.status).toBe(2);
     expect(run.stderr).toMatch(
-      /^algoviz-mcp: ALGOVIZ_SHARE_URL: The share page's address must be an absolute URL/,
+      /^algomotion-mcp: ALGOMOTION_SHARE_URL: The share page's address must be an absolute URL/,
     );
   });
 });
 
 describe('the CLI as a command', () => {
   const run = (args: string[], input?: string) =>
-    spawnSync(process.execPath, [...node, src('algoviz.ts'), ...args], {
+    spawnSync(process.execPath, [...node, src('algomotion.ts'), ...args], {
       input,
       encoding: 'utf8',
     });

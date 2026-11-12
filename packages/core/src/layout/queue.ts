@@ -2,7 +2,7 @@
  * Layout for the `queue` kind: a row inside an open pipe, with "front" and
  * "back" markers below the ends.
  */
-import type { QueueDecl } from '@algoviz/spec';
+import type { QueueDecl } from '@algomotion/spec';
 
 import type { Block, LayoutInput } from '../kind.ts';
 import type { QueueState } from '../kinds/queue.ts';

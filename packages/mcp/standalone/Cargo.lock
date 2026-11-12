@@ -3,7 +3,7 @@
 version = 4
 
 [[package]]
-name = "algoviz-standalone"
+name = "algomotion-standalone"
 version = "0.1.0"
 dependencies = [
  "rquickjs",

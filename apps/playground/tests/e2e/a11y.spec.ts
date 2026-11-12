@@ -6,9 +6,9 @@
 import AxeBuilder from '@axe-core/playwright';
 import type { Page } from '@playwright/test';
 
-import { themeNames } from '@algoviz/svg';
+import { themeNames } from '@algomotion/svg';
 
-import type { AlgoPlayer } from '@algoviz/elements';
+import type { AlgoPlayer } from '@algomotion/elements';
 
 import { expect, test } from './fixtures';
 

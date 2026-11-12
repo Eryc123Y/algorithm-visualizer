@@ -2,7 +2,13 @@ import { defineConfig } from 'vitest/config';
 
 // The Typst tests need the `typst` command, so they run apart from
 // `npm run check`: `npm run test:typst`.
-const conditions = ['@algoviz/source', 'import', 'module', 'node', 'default'];
+const conditions = [
+  '@algomotion/source',
+  'import',
+  'module',
+  'node',
+  'default',
+];
 
 export default defineConfig({
   resolve: { conditions },

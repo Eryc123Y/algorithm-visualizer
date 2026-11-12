@@ -7,7 +7,7 @@
  * minimum cut, whose capacity equals the flow. Edges are taken as
  * directed, weights as capacities.
  */
-import { LIMITS } from '@algoviz/spec';
+import { LIMITS } from '@algomotion/spec';
 import { z } from 'zod';
 
 import { defineAlgorithm } from '../../algorithm.ts';

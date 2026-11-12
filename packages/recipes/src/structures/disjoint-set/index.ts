@@ -8,7 +8,7 @@
  * element of rank above 0 is annotated with it; a rank stops changing once
  * its element is no longer a root, as in CLRS.
  */
-import type { TreeNode } from '@algoviz/spec';
+import type { TreeNode } from '@algomotion/spec';
 import { z } from 'zod';
 
 import type { Handle } from '../../recorder.ts';

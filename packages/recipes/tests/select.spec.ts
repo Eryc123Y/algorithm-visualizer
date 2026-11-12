@@ -8,7 +8,7 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 
-import type { VisualizationInput } from '@algoviz/spec';
+import type { VisualizationInput } from '@algomotion/spec';
 
 import { ordinal } from '../src/algorithms/searching/randomized-select.ts';
 import { fuzz, replay, runError, runOk, stateOf } from './helpers.ts';

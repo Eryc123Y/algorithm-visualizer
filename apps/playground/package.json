@@ -1,5 +1,5 @@
 {
-  "name": "@algoviz/playground",
+  "name": "@algomotion/playground",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -7,18 +7,18 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test:e2e": "NODE_OPTIONS=--conditions=@algoviz/source playwright test"
+    "test:e2e": "NODE_OPTIONS=--conditions=@algomotion/source playwright test"
   },
   "dependencies": {
-    "@algoviz/core": "*",
-    "@algoviz/elements": "*",
-    "@algoviz/recipes": "*",
-    "@algoviz/spec": "*",
-    "@algoviz/svg": "*",
+    "@algomotion/core": "*",
+    "@algomotion/elements": "*",
+    "@algomotion/recipes": "*",
+    "@algomotion/spec": "*",
+    "@algomotion/svg": "*",
     "vue": "^3.5.43"
   },
   "devDependencies": {
-    "@algoviz/mcp": "^0.0.0",
+    "@algomotion/mcp": "^0.0.0",
     "@axe-core/playwright": "^4.13.0",
     "@modelcontextprotocol/client": "^2.3.1",
     "@modelcontextprotocol/ext-apps": "^2.0.3"

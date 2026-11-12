@@ -7,7 +7,7 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 
-import type { LinkedListState, Trace } from '@algoviz/core';
+import type { LinkedListState, Trace } from '@algomotion/core';
 
 import { fuzz, replay, runError, runOk, stateOf } from './helpers.ts';
 

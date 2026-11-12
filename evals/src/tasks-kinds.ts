@@ -12,7 +12,7 @@ import type {
   PriorityQueueState,
   Trace,
   TreeState,
-} from '@algoviz/core';
+} from '@algomotion/core';
 
 import {
   anyTrack,

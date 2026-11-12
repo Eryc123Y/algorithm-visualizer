@@ -1,5 +1,5 @@
-import { loadTrace } from '@algoviz/core';
-import { algorithms, TOPICS } from '@algoviz/recipes';
+import { loadTrace } from '@algomotion/core';
+import { algorithms, TOPICS } from '@algomotion/recipes';
 import { describe, expect, it } from 'vitest';
 
 import { inspect, formatInspect } from '../src/inspect.ts';
@@ -305,11 +305,11 @@ describe('tools', () => {
   it('have unique, prefixed names', () => {
     const names = tools.map((t) => t.name);
     expect(new Set(names).size).toBe(names.length);
-    for (const name of names) expect(name).toMatch(/^algoviz_[a-z_]+$/);
+    for (const name of names) expect(name).toMatch(/^algomotion_[a-z_]+$/);
   });
 
   it('check arguments before running', () => {
-    const result = callTool('algoviz_inspect', {
+    const result = callTool('algomotion_inspect', {
       document: doc,
       frames: 'last',
     });
@@ -318,12 +318,16 @@ describe('tools', () => {
   });
 
   it('mark invalid documents as errors', () => {
-    expect(callTool('algoviz_validate', { document: {} }).isError).toBe(true);
-    expect(callTool('algoviz_validate', { document: doc }).isError).toBe(false);
+    expect(callTool('algomotion_validate', { document: {} }).isError).toBe(
+      true,
+    );
+    expect(callTool('algomotion_validate', { document: doc }).isError).toBe(
+      false,
+    );
   });
 
   it('return recipe documents as JSON', () => {
-    const result = callTool('algoviz_run_recipe', {
+    const result = callTool('algomotion_run_recipe', {
       id: 'binary-search',
       input: { values: [1, 3, 5], target: 3 },
     });
@@ -332,7 +336,7 @@ describe('tools', () => {
 
   it('let the recipe check its input, whatever JSON it is', () => {
     for (const input of [[1, 2], 3, null]) {
-      const result = callTool('algoviz_run_recipe', { id: 'bst', input });
+      const result = callTool('algomotion_run_recipe', { id: 'bst', input });
       expect(result.isError).toBe(true);
       expect(result.text).toMatch(/^INVALID_SHAPE at \$\.input/);
     }

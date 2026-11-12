@@ -1,17 +1,17 @@
 # Evals
 
-Can a model turn a teacher's request into a correct algoviz document? These evals measure that, so that changes to the protocol, the guide, the error messages and the MCP tools can be judged by how much they help.
+Can a model turn a teacher's request into a correct algomotion document? These evals measure that, so that changes to the protocol, the guide, the error messages and the MCP tools can be judged by how much they help.
 
 Each task is a request such as "Dijkstra's shortest paths from S on this graph" with a check of what a correct visualization must show: here, that the final frame annotates every node with its true distance. Checks look at states, not at names or wording, so any faithful document passes. Every task has a reference solution in `tests/references.ts`, and the tests make sure each check accepts its reference and rejects every other task's.
 
 ## Running against the API
 
 ```sh
-node --conditions=@algoviz/source evals/src/run.ts --model claude-opus-5-5
-node --conditions=@algoviz/source evals/src/run.ts --model claude-haiku-4-5 --mode oneshot --tasks dijkstra,lcs
+node --conditions=@algomotion/source evals/src/run.ts --model claude-opus-5-5
+node --conditions=@algomotion/source evals/src/run.ts --model claude-haiku-4-5 --mode oneshot --tasks dijkstra,lcs
 ```
 
-- `--mode tools` (default) gives the model the MCP tools (`algoviz_guide`, `algoviz_validate`, `algoviz_inspect`) and a `submit_document` tool, with the MCP server's instructions as the system prompt. It measures the whole loop: reading the guide, writing, fixing errors, checking.
+- `--mode tools` (default) gives the model the MCP tools (`algomotion_guide`, `algomotion_validate`, `algomotion_inspect`) and a `submit_document` tool, with the MCP server's instructions as the system prompt. It measures the whole loop: reading the guide, writing, fixing errors, checking.
 - `--mode oneshot` puts the full guide in the system prompt and takes the first reply. It measures how learnable the format is without feedback.
 - `--recipes` also offers the recipe tools. Off by default, since a matching recipe makes a task trivial.
 - `--effort`, `--tasks`, `--concurrency` and `--out` do what they say.
@@ -23,16 +23,16 @@ Credentials come from the environment, as for any Anthropic SDK client. Results 
 Agents that run shell commands, such as Claude Code subagents, can use the same tools through `src/agent.ts`, which logs every call in the same format:
 
 ```sh
-node --conditions=@algoviz/source evals/src/agent.ts <run-dir> <task> guide
-node --conditions=@algoviz/source evals/src/agent.ts <run-dir> <task> validate doc.json
-node --conditions=@algoviz/source evals/src/agent.ts <run-dir> <task> inspect doc.json -1
-node --conditions=@algoviz/source evals/src/agent.ts <run-dir> <task> submit doc.json
+node --conditions=@algomotion/source evals/src/agent.ts <run-dir> <task> guide
+node --conditions=@algomotion/source evals/src/agent.ts <run-dir> <task> validate doc.json
+node --conditions=@algomotion/source evals/src/agent.ts <run-dir> <task> inspect doc.json -1
+node --conditions=@algomotion/source evals/src/agent.ts <run-dir> <task> submit doc.json
 ```
 
 Then grade the run:
 
 ```sh
-node --conditions=@algoviz/source evals/src/report.ts <run-dir>
+node --conditions=@algomotion/source evals/src/report.ts <run-dir>
 ```
 
 ## Reading a report

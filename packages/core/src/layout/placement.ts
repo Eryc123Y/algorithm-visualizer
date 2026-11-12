@@ -8,7 +8,7 @@
  * only on the declarations and the layout, never on sizes, so it is the
  * same in every frame of a trace.
  */
-import type { StructureDecl } from '@algoviz/spec';
+import type { StructureDecl } from '@algomotion/spec';
 
 import type { FigureLayout, Region } from './options.ts';
 

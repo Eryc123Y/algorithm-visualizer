@@ -20,13 +20,13 @@ export const paths = (() => {
     root,
     crate,
     target,
-    bundle: join(target, 'algoviz.js'),
+    bundle: join(target, 'algomotion.js'),
     out: join(root, 'dist', 'standalone'),
     executable: join(
       root,
       'dist',
       'standalone',
-      process.platform === 'win32' ? 'algoviz.exe' : 'algoviz',
+      process.platform === 'win32' ? 'algomotion.exe' : 'algomotion',
     ),
   };
 })();
@@ -40,7 +40,7 @@ export async function bundleStandalone(): Promise<string> {
     root,
     logLevel: 'silent',
     resolve: {
-      conditions: ['@algoviz/source', 'module', 'import', 'default'],
+      conditions: ['@algomotion/source', 'module', 'import', 'default'],
       alias: [
         { find: /^node:fs$/, replacement: join(js, 'fs.ts') },
         { find: /^node:path$/, replacement: join(js, 'path.ts') },
@@ -53,7 +53,11 @@ export async function bundleStandalone(): Promise<string> {
       minify: true,
       target: 'es2023',
       reportCompressedSize: false,
-      lib: { entry: join(js, 'main.ts'), formats: ['es'], fileName: 'algoviz' },
+      lib: {
+        entry: join(js, 'main.ts'),
+        formats: ['es'],
+        fileName: 'algomotion',
+      },
     },
   });
   const outputs = (

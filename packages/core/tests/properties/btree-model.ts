@@ -5,7 +5,11 @@
  * pass to the node that stays when a merge or shrink removes one, and the
  * invariants every state keeps.
  */
-import { MAX_NODE_KEYS, type Scalar, type StructureDecl } from '@algoviz/spec';
+import {
+  MAX_NODE_KEYS,
+  type Scalar,
+  type StructureDecl,
+} from '@algomotion/spec';
 
 import type { BTreeState } from '../../src/index.ts';
 import type { Dice } from './random.ts';

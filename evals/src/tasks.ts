@@ -3,8 +3,8 @@
  * what a correct visualization must show. Checks look at states, not at
  * names or wording, so any faithful document passes.
  */
-import type { GraphState, Trace } from '@algoviz/core';
-import type { Scalar, StructureKindName } from '@algoviz/spec';
+import type { GraphState, Trace } from '@algomotion/core';
+import type { Scalar, StructureKindName } from '@algomotion/spec';
 
 import {
   anyTrack,

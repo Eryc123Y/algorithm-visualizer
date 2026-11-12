@@ -14,48 +14,48 @@ npm run dev                       # start the playground
 
 This is an npm workspaces monorepo.
 
-| Path                 | Package               | Purpose                                                                                                                      |
-| -------------------- | --------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `packages/spec/`     | `@algoviz/spec`       | Protocol: Zod schemas, inferred types, parsing and validation. No DOM or Node.js APIs.                                       |
-| `packages/fonts/`    | `@algoviz/fonts`      | Metrics and outlines of the bundled fonts (OFL), and text measurement. No DOM or Node.js APIs.                               |
-| `packages/core/`     | `@algoviz/core`       | Structure kinds, reducers, the timeline engine and layout to scenes. No DOM or Node.js APIs.                                 |
-| `packages/svg/`      | `@algoviz/svg`        | Scene → standalone SVG string. No DOM or Node.js APIs.                                                                       |
-| `packages/tikz/`     | `@algoviz/tikz`       | Scene → TikZ for the LaTeX package, from the SVG painter's shapes (ADR 0027). No DOM or Node.js.                             |
-| `packages/elements/` | `@algoviz/elements`   | `<algo-player>` Web Component (Lit) and a standalone CDN bundle.                                                             |
-| `packages/recipes/`  | `@algoviz/recipes`    | Typed recorder and classic algorithms, each tested against a reference implementation.                                       |
-| `packages/typst/`    | `@algoviz/typst`      | The Typst package: the engine in QuickJS-ng inside a WebAssembly plugin (ADR 0026).                                          |
-| `packages/latex/`    | `@algoviz/latex`      | The LaTeX package: `algoviz.sty`, which draws TikZ figures made by the `algoviz` command (ADR 0027).                         |
-| `apps/playground/`   | `@algoviz/playground` | Vite + Vue app for demos and, later, documentation.                                                                          |
-| `apps/site/`         | `@algoviz/site`       | The static site for Cloudflare Pages: the documentation, generated from the registry, and the share page `play/` (ADR 0040). |
-| `conformance/`       | —                     | Language-agnostic JSON fixtures every implementation must pass.                                                              |
-| `docs/adr/`          | —                     | Architecture decision records. Read these before changing the design.                                                        |
+| Path                 | Package                  | Purpose                                                                                                                      |
+| -------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| `packages/spec/`     | `@algomotion/spec`       | Protocol: Zod schemas, inferred types, parsing and validation. No DOM or Node.js APIs.                                       |
+| `packages/fonts/`    | `@algomotion/fonts`      | Metrics and outlines of the bundled fonts (OFL), and text measurement. No DOM or Node.js APIs.                               |
+| `packages/core/`     | `@algomotion/core`       | Structure kinds, reducers, the timeline engine and layout to scenes. No DOM or Node.js APIs.                                 |
+| `packages/svg/`      | `@algomotion/svg`        | Scene → standalone SVG string. No DOM or Node.js APIs.                                                                       |
+| `packages/tikz/`     | `@algomotion/tikz`       | Scene → TikZ for the LaTeX package, from the SVG painter's shapes (ADR 0027). No DOM or Node.js.                             |
+| `packages/elements/` | `@algomotion/elements`   | `<algo-player>` Web Component (Lit) and a standalone CDN bundle.                                                             |
+| `packages/recipes/`  | `@algomotion/recipes`    | Typed recorder and classic algorithms, each tested against a reference implementation.                                       |
+| `packages/typst/`    | `@algomotion/typst`      | The Typst package: the engine in QuickJS-ng inside a WebAssembly plugin (ADR 0026).                                          |
+| `packages/latex/`    | `@algomotion/latex`      | The LaTeX package: `algomotion.sty`, which draws TikZ figures made by the `algomotion` command (ADR 0027).                   |
+| `apps/playground/`   | `@algomotion/playground` | Vite + Vue app for demos and, later, documentation.                                                                          |
+| `apps/site/`         | `@algomotion/site`       | The static site for Cloudflare Pages: the documentation, generated from the registry, and the share page `play/` (ADR 0040). |
+| `conformance/`       | —                        | Language-agnostic JSON fixtures every implementation must pass.                                                              |
+| `docs/adr/`          | —                        | Architecture decision records. Read these before changing the design.                                                        |
 
-Workspace packages expose their TypeScript sources through the `@algoviz/source` export condition. The playground, Vitest and the type checker use it, so nothing needs to be built before development or tests. Published consumers get `dist/`.
+Workspace packages expose their TypeScript sources through the `@algomotion/source` export condition. The playground, Vitest and the type checker use it, so nothing needs to be built before development or tests. Published consumers get `dist/`.
 
 ## Commands
 
 Run from the repository root.
 
-| Command                                     | Purpose                                                                         |
-| ------------------------------------------- | ------------------------------------------------------------------------------- |
-| `npm run dev`                               | Start the playground dev server                                                 |
-| `npm run build`                             | Type-check and build every workspace                                            |
-| `npm run typecheck`                         | Type-check every project (`vue-tsc --build`)                                    |
-| `npm run lint` / `lint:fix`                 | ESLint                                                                          |
-| `npm run format` / `format:check`           | Prettier                                                                        |
-| `npm test` / `test:watch` / `test:coverage` | Unit tests for all workspaces (Vitest)                                          |
-| `npm run test:e2e`                          | Playwright tests against the production builds of the playground and the site   |
-| `npm run test:typst`                        | The Typst package in the `typst` command (needs Typst 0.15)                     |
-| `npm run test:standalone`                   | Build the standalone `algoviz` and compare it with the Node CLI                 |
-| `npm run test:latex`                        | Compile the LaTeX package's examples and cases (needs TeX Live)                 |
-| `npm run check`                             | Typecheck, lint, format check and unit tests (what CI runs first)               |
-| `npm run generate:schema -w @algoviz/spec`  | Regenerate `packages/spec/schema/visualization.schema.json`                     |
-| `npm run gallery -- out.html [file.json …]` | Render every frame of fixtures or documents to one page, for review             |
-| `npm run generate:fonts`                    | Regenerate the fonts' metrics, outlines and web fonts (ADR 0030)                |
-| `npm run build -w @algoviz/typst`           | Build the Typst package's engine bytecode (Node only)                           |
-| `npm run build:plugin -w @algoviz/typst`    | Rebuild the Typst plugin; needs rustup and LLVM 23 (ADR 0026)                   |
-| `npm run build:standalone -w @algoviz/mcp`  | Build the standalone `algoviz` executable; needs rustup (ADR 0027)              |
-| `npm run sizes` / `sizes -- --write`        | Build what users download and report its sizes ([docs/sizes.md](docs/sizes.md)) |
+| Command                                       | Purpose                                                                         |
+| --------------------------------------------- | ------------------------------------------------------------------------------- |
+| `npm run dev`                                 | Start the playground dev server                                                 |
+| `npm run build`                               | Type-check and build every workspace                                            |
+| `npm run typecheck`                           | Type-check every project (`vue-tsc --build`)                                    |
+| `npm run lint` / `lint:fix`                   | ESLint                                                                          |
+| `npm run format` / `format:check`             | Prettier                                                                        |
+| `npm test` / `test:watch` / `test:coverage`   | Unit tests for all workspaces (Vitest)                                          |
+| `npm run test:e2e`                            | Playwright tests against the production builds of the playground and the site   |
+| `npm run test:typst`                          | The Typst package in the `typst` command (needs Typst 0.15)                     |
+| `npm run test:standalone`                     | Build the standalone `algomotion` and compare it with the Node CLI              |
+| `npm run test:latex`                          | Compile the LaTeX package's examples and cases (needs TeX Live)                 |
+| `npm run check`                               | Typecheck, lint, format check and unit tests (what CI runs first)               |
+| `npm run generate:schema -w @algomotion/spec` | Regenerate `packages/spec/schema/visualization.schema.json`                     |
+| `npm run gallery -- out.html [file.json …]`   | Render every frame of fixtures or documents to one page, for review             |
+| `npm run generate:fonts`                      | Regenerate the fonts' metrics, outlines and web fonts (ADR 0030)                |
+| `npm run build -w @algomotion/typst`          | Build the Typst package's engine bytecode (Node only)                           |
+| `npm run build:plugin -w @algomotion/typst`   | Rebuild the Typst plugin; needs rustup and LLVM 23 (ADR 0026)                   |
+| `npm run build:standalone -w @algomotion/mcp` | Build the standalone `algomotion` executable; needs rustup (ADR 0027)           |
+| `npm run sizes` / `sizes -- --write`          | Build what users download and report its sizes ([docs/sizes.md](docs/sizes.md)) |
 
 The pre-commit hook runs ESLint and Prettier on staged files. Run `npm run check` before pushing.
 
@@ -90,7 +90,7 @@ Themes are data (ADR 0009, 0030); the painters and the player need no code of th
 
 ## Adding an algorithm
 
-Every algorithm, and every operation of a data structure, is a module of the registry in `@algoviz/recipes` (ADR 0019, ADR 0022). MCP, the command line and the playground read the registry, so a module needs no other changes.
+Every algorithm, and every operation of a data structure, is a module of the registry in `@algomotion/recipes` (ADR 0019, ADR 0022). MCP, the command line and the playground read the registry, so a module needs no other changes.
 
 1. **Module:** add `packages/recipes/src/algorithms/<topic>/<id>.ts` and export the module made by `defineAlgorithm`:
    - a kebab-case `id`, a `title`, a `topic`, a one-sentence `summary`;
@@ -112,7 +112,7 @@ Every algorithm, and every operation of a data structure, is a module of the reg
 - E2E tests live in `apps/playground/tests/e2e/` and `apps/site/tests/e2e/`, and run against production builds: the playground, the standalone `<algo-player>` bundle in a plain page, and the site, on a desktop and a phone. The site's tests open its pages and crafted share links, and fail on any script they run, any element they add, and any violation of the page's Content Security Policy. They check what the player draws against the engine's scene for each frame, fail on any console error, and scan for accessibility problems with axe. Run them with `npm run test:e2e`; to use a Chromium that is already installed, set `PLAYWRIGHT_CHROMIUM=/path/to/chromium`.
 - The Typst package's tests in `packages/typst/tests/typst/` compile its examples and call its functions with the `typst` command, so they run apart from `npm run check`: `npm run test:typst`. Run them when the package, its plugin or the engine's output changes. The slide decks need polylux and touying, which Typst downloads from Typst Universe the first time; without them, those tests are skipped with the reason.
 - The standalone executable's tests in `packages/mcp/tests/standalone/` build it with the Rust toolchain and compare every registry example's figures with the Node CLI's: `npm run test:standalone`. `npm run check` runs its JavaScript in a bare V8 context instead (`tests/standalone-bundle.spec.ts`). Run them when the CLI, the engine's output or `packages/mcp/standalone/` changes.
-- The LaTeX package's tests in `packages/latex/tests/latex/` compile its examples and error cases with pdfLaTeX, LuaLaTeX and XeLaTeX through `latexmk`, so they need TeX Live 2024 or later and run apart from `npm run check`: `npm run test:latex`. They call the Node CLI from source, or the executable that `ALGOVIZ_COMMAND` names. Run them when the package, the TikZ painter or the CLI changes.
+- The LaTeX package's tests in `packages/latex/tests/latex/` compile its examples and error cases with pdfLaTeX, LuaLaTeX and XeLaTeX through `latexmk`, so they need TeX Live 2024 or later and run apart from `npm run check`: `npm run test:latex`. They call the Node CLI from source, or the executable that `ALGOMOTION_COMMAND` names. Run them when the package, the TikZ painter or the CLI changes.
 - The Worker's tests in `apps/worker/tests/local/` build it and run it in wrangler's local runtime (workerd, from npm), then list and call the tools with the MCP SDK's client over HTTP and check the rate limit: `npm run test:worker`. They need no Cloudflare account and deploy nothing. Run them when the Worker, the HTTP transport or the server's resources change; `npm run check` runs the Worker's unit tests in Node.
 - Generative (property-based) tests live in `packages/core/tests/properties/` and `packages/recipes/tests/properties.spec.ts`. They run a few dozen random cases by default; run them deeper before a release with `FUZZ_RUNS=5000 npx vitest run --project core --project recipes`, and replay a failure with the `FUZZ_SEED` it prints.
 

@@ -1,5 +1,5 @@
 /**
- * Reducer for the `array` kind. See @algoviz/spec for the action schemas and
+ * Reducer for the `array` kind. See @algomotion/spec for the action schemas and
  * their documented mark semantics.
  */
 import {
@@ -11,7 +11,7 @@ import {
   type ElementId,
   LIMITS,
   type Result,
-} from '@algoviz/spec';
+} from '@algomotion/spec';
 
 import type { ReduceError } from '../errors.ts';
 import {

@@ -11,7 +11,7 @@ import {
   readInput,
   runAlgorithm,
   writeInput,
-} from '@algoviz/recipes';
+} from '@algomotion/recipes';
 
 import { shortInput } from '../../src/docs/short-input.ts';
 

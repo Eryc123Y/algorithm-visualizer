@@ -4,7 +4,7 @@
  * `// @swap` in pseudocode. Markers are stripped from the shown code and
  * become anchors, so line numbers are never written by hand.
  */
-import { AnchorName, LIMITS, type AnchoredSource } from '@algoviz/spec';
+import { AnchorName, LIMITS, type AnchoredSource } from '@algomotion/spec';
 
 import { dedent } from './source.ts';
 

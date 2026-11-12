@@ -6,7 +6,7 @@
  *
  * Needs TeX Live 2024 or later with latexmk, pdftotext and pdffonts. The
  * command is the Node CLI from source, or the executable that
- * ALGOVIZ_COMMAND names, such as packages/mcp/dist/standalone/algoviz.
+ * ALGOMOTION_COMMAND names, such as packages/mcp/dist/standalone/algomotion.
  * Run with npm run test:latex.
  */
 import { spawnSync } from 'node:child_process';
@@ -15,7 +15,7 @@ import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import { themeNames } from '@algoviz/svg';
+import { themeNames } from '@algomotion/svg';
 
 import {
   cached,
@@ -35,7 +35,7 @@ import {
 /** Whether the `count` cached figures of `dir` are one drawing. */
 function sameFigures(dir: string, count: number): boolean {
   const figures = cached(dir).map((f) =>
-    readFileSync(join(dir, '_algoviz', f), 'utf8'),
+    readFileSync(join(dir, '_algomotion', f), 'utf8'),
   );
   return figures.length === count && new Set(figures).size === 1;
 }
@@ -49,7 +49,7 @@ describe.each<Engine>(['pdflatex', 'lualatex', 'xelatex'])(
   (engine) => {
     const dir = workspace();
 
-    it('compiles, calling algoviz once per figure', () => {
+    it('compiles, calling algomotion once per figure', () => {
       const text = latexmk(dir, 'notes.tex', engine);
       expect(errors(text)).toEqual([]);
       expect(existsSync(join(dir, 'notes.pdf'))).toBe(true);
@@ -58,7 +58,7 @@ describe.each<Engine>(['pdflatex', 'lualatex', 'xelatex'])(
       // Every call is a TikZ export through the package's checked arguments.
       for (const call of calls(dir))
         expect(call).toMatch(
-          /^export .* --format=tikz --out=_algoviz --name=[0-9a-f]{32} --error-file=_algoviz\/[0-9a-f]{32}\.err$/,
+          /^export .* --format=tikz --out=_algomotion --name=[0-9a-f]{32} --error-file=_algomotion\/[0-9a-f]{32}\.err$/,
         );
     });
 
@@ -95,9 +95,9 @@ describe('the package', () => {
       dir,
       'hash',
       [
-        '\\algoviz[step=swap#2]{bubble-sort}{"values": [3, 1, 2]}',
-        '\\algoviz[step=swap\\#2]{bubble-sort}{"values": [3, 1, 2]}',
-        '\\newcommand\\fig{\\algoviz[step=swap##2]{bubble-sort}{"values": [3, 1, 2]}}\\fig',
+        '\\algomotion[step=swap#2]{bubble-sort}{"values": [3, 1, 2]}',
+        '\\algomotion[step=swap\\#2]{bubble-sort}{"values": [3, 1, 2]}',
+        '\\newcommand\\fig{\\algomotion[step=swap##2]{bubble-sort}{"values": [3, 1, 2]}}\\fig',
       ].join('\n\n'),
     );
     expect(errors(tex(dir, file, 'unrestricted'))).toEqual([]);
@@ -110,8 +110,8 @@ describe('the package', () => {
       dir,
       'input',
       [
-        '\\algoviz{balanced-brackets}{{"text": "(a\\%b)"}}',
-        '\\algoviz{balanced-brackets}{"text": "(a\\%b)"}',
+        '\\algomotion{balanced-brackets}{{"text": "(a\\%b)"}}',
+        '\\algomotion{balanced-brackets}{"text": "(a\\%b)"}',
       ].join('\n\n'),
     );
     expect(errors(tex(dir, file, 'unrestricted'))).toEqual([]);
@@ -129,9 +129,9 @@ describe('the package', () => {
       dir,
       'notations',
       [
-        '\\algoviz[step=improve\\#3]{dijkstra}{A-B 4, B-C 1, A-C 7, C-D 2}',
-        `\\algoviz[step=improve\\#3]{dijkstra}{"graph": ${graph}, "source": "A"}`,
-        '\\algoviz[step=improve\\#3]{dijkstra}{"graph": "A-B 4,\n  B-C 1, A-C 7, C-D 2"}',
+        '\\algomotion[step=improve\\#3]{dijkstra}{A-B 4, B-C 1, A-C 7, C-D 2}',
+        `\\algomotion[step=improve\\#3]{dijkstra}{"graph": ${graph}, "source": "A"}`,
+        '\\algomotion[step=improve\\#3]{dijkstra}{"graph": "A-B 4,\n  B-C 1, A-C 7, C-D 2"}',
       ].join('\n\n'),
     );
     expect(errors(tex(dir, file, 'unrestricted'))).toEqual([]);
@@ -142,10 +142,10 @@ describe('the package', () => {
       more,
       'others',
       [
-        '\\algoviz{insertion-sort}{5 2 4 6 1 3}',
-        '\\algoviz{bst}{"from": "8 3 10 1 6", "ops": "insert 4, delete 3"}',
-        '\\algoviz{inorder-tree-walk}{[4, 2, 6, 1, 3, null, 7]}',
-        '\\algoviz{kruskal}{}',
+        '\\algomotion{insertion-sort}{5 2 4 6 1 3}',
+        '\\algomotion{bst}{"from": "8 3 10 1 6", "ops": "insert 4, delete 3"}',
+        '\\algomotion{inorder-tree-walk}{[4, 2, 6, 1, 3, null, 7]}',
+        '\\algomotion{kruskal}{}',
       ].join('\n\n'),
     );
     expect(errors(tex(more, others, 'unrestricted'))).toEqual([]);
@@ -157,11 +157,11 @@ describe('the package', () => {
     const file = document(
       dir,
       'bad-notation',
-      '\\algoviz{dijkstra}{A-B 4, B-C x}',
+      '\\algomotion{dijkstra}{A-B 4, B-C x}',
     );
     const text = tex(dir, file, 'unrestricted');
     expect(text).toContain(
-      'Package algoviz Error: algoviz could not make the figure: INVALID_NOTATION',
+      'Package algomotion Error: algomotion could not make the figure: INVALID_NOTATION',
     );
     const pdf = pdfText(join(dir, 'bad-notation.pdf'));
     expect(pdf).toContain('INVALID_NOTATION');
@@ -174,14 +174,14 @@ describe('the package', () => {
       dir,
       'escapes',
       [
-        '\\algoviz{balanced-brackets}{"text": "(\\u0041[\\n])"}',
-        '\\algoviz{balanced-brackets}{"text": "(A[\\n])"}',
+        '\\algomotion{balanced-brackets}{"text": "(\\u0041[\\n])"}',
+        '\\algomotion{balanced-brackets}{"text": "(A[\\n])"}',
       ].join('\n\n'),
     );
     expect(errors(tex(dir, file, 'unrestricted'))).toEqual([]);
     // The escape of A is A: two calls, one drawing.
     const figures = cached(dir).map((f) =>
-      readFileSync(join(dir, '_algoviz', f), 'utf8'),
+      readFileSync(join(dir, '_algomotion', f), 'utf8'),
     );
     expect(figures).toHaveLength(2);
     expect(figures[0]).toBe(figures[1]);
@@ -190,7 +190,7 @@ describe('the package', () => {
   it('sizes figures by width, height or scale', () => {
     const dir = workspace();
     const fig = (keys: string) =>
-      `\\algoviz[${keys}]{bubble-sort}{"values": [3, 1, 2]}`;
+      `\\algomotion[${keys}]{bubble-sort}{"values": [3, 1, 2]}`;
     const file = document(
       dir,
       'sizes',
@@ -215,7 +215,7 @@ describe('the package', () => {
   it('reads a file whose name starts with -', () => {
     const dir = workspace();
     copyFileSync(join(dir, 'bst-delete.json'), join(dir, '-bst.json'));
-    const file = document(dir, 'dash', '\\algovizfile[step=0]{-bst.json}');
+    const file = document(dir, 'dash', '\\algomotionfile[step=0]{-bst.json}');
     expect(errors(tex(dir, file, 'unrestricted'))).toEqual([]);
     expect(calls(dir)).toEqual([
       expect.stringMatching(/^export \.\/-bst\.json /),
@@ -228,7 +228,7 @@ describe('the package', () => {
     const name = document(
       dir,
       'name',
-      '\\algovizfile[algorithm=dijkstra]{a!b.json}',
+      '\\algomotionfile[algorithm=dijkstra]{a!b.json}',
     );
     expect(tex(dir, name, 'unrestricted')).toContain(
       "The file name 'a!b.json' has characters that it cannot have.",
@@ -236,13 +236,13 @@ describe('the package', () => {
     const cache = document(
       dir,
       'cache',
-      '\\algoviz{bubble-sort}{"values": [2, 1]}',
+      '\\algomotion{bubble-sort}{"values": [2, 1]}',
     );
     writeFileSync(
       join(dir, cache),
       readFileSync(join(dir, cache), 'utf8').replace(
-        '\\usepackage{algoviz}',
-        '\\usepackage[cachedir={a;b}]{algoviz}',
+        '\\usepackage{algomotion}',
+        '\\usepackage[cachedir={a;b}]{algomotion}',
       ),
     );
     spawnSync(
@@ -260,7 +260,7 @@ describe('the package', () => {
     expect(calls(dir)).toEqual([]);
   });
 
-  it('draws figures that algoviz export made by hand', () => {
+  it('draws figures that algomotion export made by hand', () => {
     const dir = workspace();
     spawnSync(
       'sh',
@@ -273,7 +273,7 @@ describe('the package', () => {
     const file = document(
       dir,
       'by-hand',
-      '\\algovizinput[width=5cm]{figures/relax.tex}',
+      '\\algomotioninput[width=5cm]{figures/relax.tex}',
     );
     expect(errors(tex(dir, file, 'off'))).toEqual([]);
     expect(calls(dir)).toEqual([]);
@@ -283,9 +283,9 @@ describe('the package', () => {
     const dir = workspace();
     writeFileSync(
       join(dir, 'old.tex'),
-      '\\algoviz@figure{1}{100}{40}{%\n\\algoviz@color{1}{1F2A26}%\n}{%\n}%\n',
+      '\\algomotion@figure{1}{100}{40}{%\n\\algomotion@color{1}{1F2A26}%\n}{%\n}%\n',
     );
-    const file = document(dir, 'old-format', '\\algovizinput{old.tex}');
+    const file = document(dir, 'old-format', '\\algomotioninput{old.tex}');
     expect(tex(dir, file, 'off')).toContain(
       "The figure 'old.tex' has format 1, but this package reads format 2.",
     );
@@ -296,11 +296,11 @@ describe('the package', () => {
     const file = document(
       dir,
       'bad-step',
-      '\\algoviz[step=nope]{bubble-sort}{"values": [2, 1]}',
+      '\\algomotion[step=nope]{bubble-sort}{"values": [2, 1]}',
     );
     const text = tex(dir, file, 'unrestricted');
     expect(text).toContain(
-      'Package algoviz Error: algoviz could not make the figure: NO_MATCH',
+      'Package algomotion Error: algomotion could not make the figure: NO_MATCH',
     );
     const pdf = pdfText(join(dir, 'bad-step.pdf'));
     expect(pdf).toContain('NO_MATCH');
@@ -316,9 +316,9 @@ describe('the package', () => {
       dir,
       'shell',
       [
-        '\\algoviz[step={a;b}]{bubble-sort}{"values": [2, 1]}',
-        '\\algoviz[theme={x y}]{bubble-sort}{"values": [2, 1]}',
-        '\\algoviz{bubble-sort; rm}{"values": [2, 1]}',
+        '\\algomotion[step={a;b}]{bubble-sort}{"values": [2, 1]}',
+        '\\algomotion[theme={x y}]{bubble-sort}{"values": [2, 1]}',
+        '\\algomotion{bubble-sort; rm}{"values": [2, 1]}',
       ].join('\n\n'),
     );
     const text = tex(dir, file, 'unrestricted');
@@ -337,7 +337,7 @@ describe('the package', () => {
     const file = document(
       dir,
       'off',
-      '\\algoviz{bubble-sort}{"values": [2, 1]}',
+      '\\algomotion{bubble-sort}{"values": [2, 1]}',
     );
     const text = tex(dir, file, 'off');
     expect(text).toContain(
@@ -346,15 +346,15 @@ describe('the package', () => {
     expect(pdfText(join(dir, 'off.pdf'))).toContain('shell escape is off');
   });
 
-  it('says when restricted shell escape does not run algoviz', () => {
+  it('says when restricted shell escape does not run algomotion', () => {
     const dir = workspace();
     const file = document(
       dir,
       'restricted',
-      '\\algoviz{bubble-sort}{"values": [2, 1]}',
+      '\\algomotion{bubble-sort}{"values": [2, 1]}',
     );
     const text = tex(dir, file, 'restricted');
-    expect(text).toContain('Restricted shell escape did not run algoviz');
+    expect(text).toContain('Restricted shell escape did not run algomotion');
     expect(calls(dir)).toEqual([]);
   });
 
@@ -363,13 +363,13 @@ describe('the package', () => {
     const file = document(
       dir,
       'missing',
-      '\\algoviz{bubble-sort}{"values": [2, 1]}',
+      '\\algomotion{bubble-sort}{"values": [2, 1]}',
     );
     writeFileSync(
       join(dir, file),
       readFileSync(join(dir, file), 'utf8').replace(
-        '\\usepackage{algoviz}',
-        '\\usepackage[command=algoviz-that-is-not-installed]{algoviz}',
+        '\\usepackage{algomotion}',
+        '\\usepackage[command=algomotion-that-is-not-installed]{algomotion}',
       ),
     );
     spawnSync('pdflatex', ['-shell-escape', '-interaction=nonstopmode', file], {
@@ -379,7 +379,7 @@ describe('the package', () => {
     });
     const text = log(dir, file);
     expect(text).toContain(
-      "Package algoviz Error: The command 'algoviz-that-is-not-installed' made no figure.",
+      "Package algomotion Error: The command 'algomotion-that-is-not-installed' made no figure.",
     );
     expect(pdfText(join(dir, 'missing.pdf'))).toContain('Is it installed?');
   });
@@ -387,7 +387,7 @@ describe('the package', () => {
   it('draws every built-in theme in the families it names (ADR 0030)', () => {
     const dir = workspace();
     const figure = (theme: string) =>
-      `\\algoviz[theme=${theme}, step=3]{bubble-sort}{"values": [3, 1, 2]}`;
+      `\\algomotion[theme=${theme}, step=3]{bubble-sort}{"values": [3, 1, 2]}`;
     const file = document(dir, 'themes', themeNames.map(figure).join('\n\n'));
     for (const engine of ['pdflatex', 'lualatex', 'xelatex'] as const)
       expect(
@@ -414,7 +414,7 @@ describe('the package', () => {
     expect(
       fonts(
         'override',
-        `\\algovizset{value font=\\sffamily, label font=\\sffamily}\n${figure('turbo-c')}`,
+        `\\algomotionset{value font=\\sffamily, label font=\\sffamily}\n${figure('turbo-c')}`,
       ),
     ).not.toMatch(/LMMono|CMTT|lmmono/i);
   });
@@ -426,8 +426,8 @@ describe('the package', () => {
       'symbols',
       // ∞ in a node label, and Greek and ∅ in a bracket text.
       [
-        '\\algoviz[step=0]{dijkstra}{"graph": {"nodes": ["A", "B"], "edges": [["A", "B", 1]]}, "source": "A"}',
-        '\\algoviz{balanced-brackets}{"text": "(αβ)∅[x]"}',
+        '\\algomotion[step=0]{dijkstra}{"graph": {"nodes": ["A", "B"], "edges": [["A", "B", 1]]}, "source": "A"}',
+        '\\algomotion{balanced-brackets}{"text": "(αβ)∅[x]"}',
       ].join('\n\n'),
     );
     for (const engine of ['pdflatex', 'lualatex', 'xelatex'] as const) {

@@ -7,7 +7,7 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 
-import { queueOrder, type Trace } from '@algoviz/core';
+import { queueOrder, type Trace } from '@algomotion/core';
 
 import { algorithms, runAlgorithm, type GraphInput } from '../src/index.ts';
 import { fuzz, replay, runError, runOk, stateOf } from './helpers.ts';

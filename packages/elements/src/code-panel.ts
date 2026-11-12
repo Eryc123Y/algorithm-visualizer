@@ -1,14 +1,14 @@
 /**
  * Lines of the source panel: the code highlighted by `highlightCode` from
- * @algoviz/core, one `.line` per source line, with the current step's line
+ * @algomotion/core, one `.line` per source line, with the current step's line
  * marked. Token colours are the `--algo-code-*` custom properties.
  * Procedure names in pseudocode are set in small capitals, as in CLRS
  * (ADR 0017).
  */
 import { html, nothing, type TemplateResult } from 'lit';
 
-import { highlightCode, type CodeLine, type CodeToken } from '@algoviz/core';
-import type { Source } from '@algoviz/spec';
+import { highlightCode, type CodeLine, type CodeToken } from '@algomotion/core';
+import type { Source } from '@algomotion/spec';
 
 // A loaded document keeps its source object, so each source is highlighted once.
 const highlighted = new WeakMap<Source, readonly CodeLine[]>();

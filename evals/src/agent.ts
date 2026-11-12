@@ -3,14 +3,14 @@
  * commands (e.g. coding agents) instead of calling MCP tools. Every call is
  * logged to the run directory, like the API runner's calls.
  *
- *   node --conditions=@algoviz/source evals/src/agent.ts <run> <task> guide [kind …]
+ *   node --conditions=@algomotion/source evals/src/agent.ts <run> <task> guide [kind …]
  *   … <run> <task> validate <file>
  *   … <run> <task> inspect <file> [frame …]
  *   … <run> <task> submit <file>
  */
 import { readFileSync } from 'node:fs';
 
-import type { ToolResult } from '@algoviz/mcp';
+import type { ToolResult } from '@algomotion/mcp';
 
 import { findTask } from './tasks.ts';
 import { loggedCall, submit } from './log.ts';
@@ -41,16 +41,16 @@ switch (command) {
     result = loggedCall(
       run,
       task,
-      'algoviz_guide',
+      'algomotion_guide',
       rest.length > 0 ? { kinds: rest } : {},
     );
     break;
   case 'validate':
-    result = loggedCall(run, task, 'algoviz_validate', { document: file() });
+    result = loggedCall(run, task, 'algomotion_validate', { document: file() });
     break;
   case 'inspect': {
     const frames = rest.slice(1).map(Number);
-    result = loggedCall(run, task, 'algoviz_inspect', {
+    result = loggedCall(run, task, 'algomotion_inspect', {
       document: file(),
       ...(frames.length > 0 ? { frames } : {}),
     });

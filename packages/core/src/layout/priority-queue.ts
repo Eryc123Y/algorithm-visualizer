@@ -35,7 +35,7 @@ import type {
   PriorityItem,
   PriorityKey,
   PriorityQueueDecl,
-} from '@algoviz/spec';
+} from '@algomotion/spec';
 
 import type { Block, LayoutInput } from '../kind.ts';
 import {

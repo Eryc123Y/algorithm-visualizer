@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import { loadTrace } from '@algoviz/core';
+import { loadTrace } from '@algomotion/core';
 
 import { bubbleSort } from '@/samples/bubble-sort';
 import { bubbleSortDocument } from '@/samples/bubble-sort-doc';
-import { algorithms, TOPICS } from '@algoviz/recipes';
+import { algorithms, TOPICS } from '@algomotion/recipes';
 
 import { exampleGroups, examples } from '@/samples/examples';
 

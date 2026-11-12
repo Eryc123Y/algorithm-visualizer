@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { prepareFigures } from '@algoviz/svg';
+import { prepareFigures } from '@algomotion/svg';
 
 import {
   exportTikzFigures,
@@ -68,7 +68,7 @@ describe('exportTikzFigures', () => {
       sizes.value.map((f) => [f.width, f.height]),
     );
     // The last frame is the widest, and frame 0 shares its canvas.
-    const head = /\\algoviz@figure\{2\}\{([\d.]+)\}\{([\d.]+)\}/;
+    const head = /\\algomotion@figure\{2\}\{([\d.]+)\}\{([\d.]+)\}/;
     expect(head.exec(all[0]!.tikz)!.slice(1)).toEqual(
       head.exec(all[4]!.tikz)!.slice(1),
     );

@@ -24,7 +24,9 @@ export async function bundleEngine(): Promise<string> {
     root: paths.root,
     logLevel: 'silent',
     // Workspace packages resolve to their TypeScript sources.
-    resolve: { conditions: ['@algoviz/source', 'module', 'import', 'default'] },
+    resolve: {
+      conditions: ['@algomotion/source', 'module', 'import', 'default'],
+    },
     define: { 'process.env.NODE_ENV': JSON.stringify('production') },
     build: {
       write: false,

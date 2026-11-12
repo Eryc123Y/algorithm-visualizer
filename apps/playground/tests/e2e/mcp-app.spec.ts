@@ -1,12 +1,12 @@
 /**
- * The MCP App end to end: a real MCP client calls algoviz_show and reads
+ * The MCP App end to end: a real MCP client calls algomotion_show and reads
  * the player page from the server, and a minimal host (AppBridge) shows
  * the page in a sandboxed iframe, as a chat client would.
  */
 import { readFileSync } from 'node:fs';
 
-import { createServer, PLAYER_URI } from '@algoviz/mcp';
-import { runAlgorithm } from '@algoviz/recipes';
+import { createServer, PLAYER_URI } from '@algomotion/mcp';
+import { runAlgorithm } from '@algomotion/recipes';
 import { Client, InMemoryTransport } from '@modelcontextprotocol/client';
 import type { Page } from '@playwright/test';
 
@@ -39,7 +39,7 @@ test.afterAll(() => client.close());
 const callShow = async (args: Record<string, unknown>) =>
   JSON.parse(
     JSON.stringify(
-      await client.callTool({ name: 'algoviz_show', arguments: args }),
+      await client.callTool({ name: 'algomotion_show', arguments: args }),
     ),
   ) as Record<string, unknown>;
 

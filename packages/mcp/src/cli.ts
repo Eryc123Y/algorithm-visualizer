@@ -2,19 +2,19 @@
  * The MCP tools as a command line, for people and for agents that run
  * commands rather than MCP tools:
  *
- *   algoviz guide [kind …]
- *   algoviz validate <file>
- *   algoviz inspect <file> [frame …]
- *   algoviz render <file> [--frame f] [--theme t] [--layout narrow]
+ *   algomotion guide [kind …]
+ *   algomotion validate <file>
+ *   algomotion inspect <file> [frame …]
+ *   algomotion render <file> [--frame f] [--theme t] [--layout narrow]
  *                  [--out frame.svg]
- *   algoviz export <file> [--step s …] [--theme t] [--layout l] [--format svg|tikz]
+ *   algomotion export <file> [--step s …] [--theme t] [--layout l] [--format svg|tikz]
  *                  [--one-file] [--out dir] [--name pattern]
  *                  [--error-file file]
- *   algoviz export <id> --input <input|file> [the same options]
- *   algoviz export <id> --input-hex <hex> [the same options]
+ *   algomotion export <id> --input <input|file> [the same options]
+ *   algomotion export <id> --input-hex <hex> [the same options]
  *
- *   algoviz recipes
- *   algoviz run <id> [input] [--out doc.json]
+ *   algomotion recipes
+ *   algomotion run <id> [input] [--out doc.json]
  *
  * An input is JSON, a JSON object without its braces, or a notation such
  * as "5 2 4 6 1 3" or "A-B 4, B-C 2" (ADR 0032).
@@ -33,16 +33,21 @@ import {
 } from 'node:fs';
 import { basename, dirname, extname, join } from 'node:path';
 
-import type { FigureLayout } from '@algoviz/core';
-import { readInput, runAlgorithm } from '@algoviz/recipes';
-import { formatErrors, ok, type Diagnostic, type Result } from '@algoviz/spec';
+import type { FigureLayout } from '@algomotion/core';
+import { readInput, runAlgorithm } from '@algomotion/recipes';
+import {
+  formatErrors,
+  ok,
+  type Diagnostic,
+  type Result,
+} from '@algomotion/spec';
 import {
   exportFigures,
   isThemeName,
   themeNames,
   type ThemeName,
-} from '@algoviz/svg';
-import { exportTikzFigures } from '@algoviz/tikz';
+} from '@algomotion/svg';
+import { exportTikzFigures } from '@algomotion/tikz';
 
 import { readDocument } from './document.ts';
 import {
@@ -56,22 +61,22 @@ import {
 import { callTool, type ToolResult } from './tools.ts';
 
 const USAGE = `Usage:
-  algoviz guide [kind …]                 Authoring guide (all kinds by default)
-  algoviz validate <file>                Check a document
-  algoviz inspect <file> [frame …]       State at frames (default: the last)
-  algoviz render <file> [--frame f] [--theme t]
-                 [--layout wide|narrow] [--out file.svg]
-  algoviz export <file> [--step s …] [--theme t]
-                 [--layout wide|narrow] [--format svg|tikz] [--one-file]
-                 [--out dir]
-                 [--name pattern] [--error-file file]
-                                         Write frames as SVG or TikZ figures
-  algoviz export <id> --input <input|file> [the same options]
-                                         Run an algorithm, then export
-  algoviz recipes                        List ready-made visualizations
-  algoviz run <id> [input] [--out file.json]
-                                         Run one, e.g. run dijkstra
-                                         'A-B 4, B-C 1, A-C 7'
+  algomotion guide [kind …]                 Authoring guide (all kinds by default)
+  algomotion validate <file>                Check a document
+  algomotion inspect <file> [frame …]       State at frames (default: the last)
+  algomotion render <file> [--frame f] [--theme t]
+                    [--layout wide|narrow] [--out file.svg]
+  algomotion export <file> [--step s …] [--theme t]
+                    [--layout wide|narrow] [--format svg|tikz] [--one-file]
+                    [--out dir]
+                    [--name pattern] [--error-file file]
+                                            Write frames as SVG or TikZ figures
+  algomotion export <id> --input <input|file> [the same options]
+                                            Run an algorithm, then export
+  algomotion recipes                        List ready-made visualizations
+  algomotion run <id> [input] [--out file.json]
+                                            Run one, e.g. run dijkstra
+                                            'A-B 4, B-C 1, A-C 7'
 
 An input is JSON, a JSON object without its outer braces, or a notation:
 a list "5 2 4 6 1 3", a graph "A-B 4, B-C 2" ("->" for directed edges),
@@ -85,7 +90,7 @@ Render takes one frame. Export takes any number: --step may repeat or list
 them with commas, and every frame is the default. It names files with
 {name}, {frame} and {step} (default "${DEFAULT_PATTERN}") and writes them to the
 --out directory (default: the current one). --format tikz writes .tex files
-for the algoviz LaTeX package, and --one-file writes all of them into one
+for the algomotion LaTeX package, and --one-file writes all of them into one
 file, named "{name}" by default, for Beamer overlays. --layout says where
 structures declared with "place": "side" go: beside the others (wide, the
 default) or below them (narrow, for a column of notes). --input-hex takes the
@@ -393,19 +398,22 @@ function dispatch(
   };
   switch (command) {
     case 'guide':
-      return callTool('algoviz_guide', rest.length > 0 ? { kinds: rest } : {});
+      return callTool(
+        'algomotion_guide',
+        rest.length > 0 ? { kinds: rest } : {},
+      );
     case 'validate':
-      return callTool('algoviz_validate', { document: needFile() });
+      return callTool('algomotion_validate', { document: needFile() });
     case 'inspect': {
       // Numbers stay text: selectors read "-1" as well as "relax#2".
       const frames = rest.slice(1);
-      return callTool('algoviz_inspect', {
+      return callTool('algomotion_inspect', {
         document: needFile(),
         ...(frames.length > 0 ? { frames } : {}),
       });
     }
     case 'render':
-      return callTool('algoviz_render', {
+      return callTool('algomotion_render', {
         document: needFile(),
         ...(values.frame === undefined ? {} : { frame: values.frame }),
         ...(values.theme === undefined ? {} : { theme: values.theme }),
@@ -414,13 +422,13 @@ function dispatch(
           : { layout: layoutOf(values.layout) }),
       });
     case 'recipes':
-      return callTool('algoviz_list_recipes', {});
+      return callTool('algomotion_list_recipes', {});
     case 'run': {
       const [id, text] = rest;
       if (id === undefined) throw new UsageError(`${command} needs an id`);
       const input = readInput(text ?? '');
       if (!input.ok) return failure(input.error);
-      return callTool('algoviz_run_recipe', { id, input: input.value });
+      return callTool('algomotion_run_recipe', { id, input: input.value });
     }
     default:
       throw new UsageError(`Unknown command "${command}"`);
@@ -491,7 +499,7 @@ export function main(
       // A bug: the error file says so, and the exception goes on up.
       recordError(
         errorFile,
-        `Internal error in algoviz: ${e instanceof Error ? e.message : String(e)}`,
+        `Internal error in algomotion: ${e instanceof Error ? e.message : String(e)}`,
       );
       throw e;
     }

@@ -1,10 +1,10 @@
 /**
- * The page algoviz_show opens in an MCP Apps host: an <algo-player> that
+ * The page algomotion_show opens in an MCP Apps host: an <algo-player> that
  * takes its document from the tool result, follows the host's theme, and
  * tells the model which frame the user is looking at: its number, its
  * step's name and section (ADR 0020), and its narration.
  */
-import { AlgoPlayer } from '@algoviz/elements';
+import { AlgoPlayer } from '@algomotion/elements';
 import { App, type McpUiHostContext } from '@modelcontextprotocol/ext-apps';
 
 // The page is one file in the host's sandbox, with no fonts beside it, so
@@ -52,7 +52,7 @@ function say(text: string, error = false): void {
   status.setAttribute('role', error ? 'alert' : 'status');
 }
 
-const app = new App({ name: 'algoviz player', version: '0.0.0' });
+const app = new App({ name: 'algomotion player', version: '0.0.0' });
 let shown: Shown | null = null;
 /** A model context update waiting for the user to stay on a frame. */
 let pending: ReturnType<typeof setTimeout> | undefined;

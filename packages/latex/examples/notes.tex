@@ -1,8 +1,8 @@
-% Lecture notes with algoviz figures. Compile with shell escape:
+% Lecture notes with algomotion figures. Compile with shell escape:
 %   latexmk -pdf -shell-escape notes.tex     (or -pdflua, -pdfxe)
-% The figures are kept in _algoviz/, so later runs need no shell escape.
+% The figures are kept in _algomotion/, so later runs need no shell escape.
 \documentclass[11pt]{article}
-\usepackage{algoviz}
+\usepackage{algomotion}
 \usepackage{amsmath}
 
 \begin{document}
@@ -15,7 +15,7 @@ to $F$ from $14$ to $11$. The graph is written as a list of weighted
 edges, and the algorithm starts at its first node, $A$:
 
 \begin{center}
-  \algoviz[step=improve#6]{dijkstra}{A-B 7, A-C 9, B-C 10, B-D 15, C-D 11,
+  \algomotion[step=improve#6]{dijkstra}{A-B 7, A-C 9, B-C 10, B-D 15, C-D 11,
     D-E 6, A-F 14, C-F 2, E-F 9}
 \end{center}
 
@@ -23,7 +23,7 @@ The input can also come from a file, here drawn in the print theme at a
 given width:
 
 \begin{center}
-  \algovizfile[algorithm=dijkstra, step=-1, theme=print, width=0.55\linewidth]{graph.json}
+  \algomotionfile[algorithm=dijkstra, step=-1, theme=print, width=0.55\linewidth]{graph.json}
 \end{center}
 
 \section*{Sorting}
@@ -32,19 +32,19 @@ Bubble sort swaps neighbours that are out of order; this is its second
 swap. Figures of one run share one scale.
 
 \begin{center}
-  \algoviz[step=swap#2]{bubble-sort}{5 1 4 2 8}
+  \algomotion[step=swap#2]{bubble-sort}{5 1 4 2 8}
   \par\medskip
-  \algoviz[step=-1]{bubble-sort}{5 1 4 2 8}
+  \algomotion[step=-1]{bubble-sort}{5 1 4 2 8}
 \end{center}
 
 \section*{Deleting from a binary search tree}
 
 A document made beforehand, for example with
-\texttt{algoviz run bst.delete} or by a model, is drawn with
-\verb|\algovizfile|. Deleting $3$ copies its successor $4$ into its node:
+\texttt{algomotion run bst.delete} or by a model, is drawn with
+\verb|\algomotionfile|. Deleting $3$ copies its successor $4$ into its node:
 
 \begin{center}
-  \algovizfile[step=delete-3/copy]{bst-delete.json}
+  \algomotionfile[step=delete-3/copy]{bst-delete.json}
 \end{center}
 
 \end{document}

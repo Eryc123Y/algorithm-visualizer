@@ -32,7 +32,7 @@ import {
   type StructureDeclInput,
   type StructureKindName,
   type VisualizationInput,
-} from '@algoviz/spec';
+} from '@algomotion/spec';
 
 type ActionInputOf<K extends StructureKindName> = KindTypeMap[K]['actionInput'];
 

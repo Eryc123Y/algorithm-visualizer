@@ -4,14 +4,14 @@
  * it through the engine. A page that imports a single module runs it with
  * `runModule`, without loading the registry.
  */
-import { loadTrace } from '@algoviz/core';
+import { loadTrace } from '@algomotion/core';
 import {
   err,
   ok,
   type Diagnostic,
   type Result,
   type VisualizationInput,
-} from '@algoviz/spec';
+} from '@algomotion/spec';
 
 import { sourcesOf, type Algorithm, type OpResult } from './algorithm.ts';
 import { inputDiagnostics } from './notation/issues.ts';

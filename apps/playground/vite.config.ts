@@ -8,7 +8,7 @@ export default defineConfig({
   plugins: [
     vue({
       template: {
-        // <algo-*> are Web Components from @algoviz/elements.
+        // <algo-*> are Web Components from @algomotion/elements.
         compilerOptions: { isCustomElement: (tag) => tag.startsWith('algo-') },
       },
     }),
@@ -20,6 +20,6 @@ export default defineConfig({
     },
     // Resolve workspace packages to their TypeScript sources, so the
     // playground never needs them to be built first.
-    conditions: ['@algoviz/source', ...defaultClientConditions],
+    conditions: ['@algomotion/source', ...defaultClientConditions],
   },
 });

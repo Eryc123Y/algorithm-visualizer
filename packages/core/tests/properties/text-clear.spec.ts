@@ -3,7 +3,7 @@
  * an edge label crosses an edge only when every place it may take does,
  * and notes sit their gap outside their node. Run deeper with FUZZ_RUNS.
  */
-import { textWidth } from '@algoviz/fonts';
+import { textWidth } from '@algomotion/fonts';
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 

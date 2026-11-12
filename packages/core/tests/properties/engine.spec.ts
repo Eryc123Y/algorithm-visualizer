@@ -3,8 +3,8 @@
  * every kind, built against the evolving state so that most actions are
  * valid and some are not. Run deeper with FUZZ_RUNS=5000.
  */
-import { kindNames } from '@algoviz/spec';
-import { renderSvg } from '@algoviz/svg';
+import { kindNames } from '@algomotion/spec';
+import { renderSvg } from '@algomotion/svg';
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 
