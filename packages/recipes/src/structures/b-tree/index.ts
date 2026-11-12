@@ -54,7 +54,7 @@ const keysText = z
 const keysArray = z
   .array(z.union([z.number(), z.string().regex(/^[A-Za-z0-9]{1,8}$/)]))
   .transform((ks) =>
-    ks.every((k) => typeof k === 'string') ? keyValues(ks as string[]) : ks,
+    ks.every((k) => typeof k === 'string') ? keyValues(ks) : ks,
   );
 const Keys = z
   .union([keysText, keysArray])
