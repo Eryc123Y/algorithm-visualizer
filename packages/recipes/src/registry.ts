@@ -11,6 +11,7 @@ import { editDistance } from './algorithms/dynamic-programming/edit-distance.ts'
 import { knapsack } from './algorithms/dynamic-programming/knapsack.ts';
 import { lcs } from './algorithms/dynamic-programming/lcs.ts';
 import { huffman } from './algorithms/greedy/huffman.ts';
+import { greedySetCover } from './algorithms/greedy/greedy-set-cover.ts';
 import { bellmanFord } from './algorithms/graphs/bellman-ford.ts';
 import { bfs } from './algorithms/graphs/bfs.ts';
 import { dfs } from './algorithms/graphs/dfs.ts';
@@ -126,6 +127,7 @@ export const algorithms: readonly Algorithm[] = [
   editDistance,
   knapsack,
   huffman,
+  greedySetCover,
   naiveStringMatcher,
   rabinKarp,
   finiteAutomatonMatcher,
