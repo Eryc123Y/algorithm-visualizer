@@ -27,6 +27,11 @@ import {
   type KnapsackItem,
 } from '../src/index.ts';
 import { runError, runOk, stateOf } from './helpers.ts';
+import {
+  drawnShape,
+  RefTree,
+  redBlackProblems,
+} from './red-black-reference.ts';
 
 const runs = Number(process.env['FUZZ_RUNS'] ?? 40);
 
@@ -452,6 +457,56 @@ recipe(
       });
       expect(Math.abs(l! - r!)).toBeLessThanOrEqual(1);
       expect(tree.marks.notes[node.id]).toBe(`h=${h.get(node.id)}`);
+    }
+  },
+);
+
+/** Keys to start from and up to 8 insertions or deletions (ADR 0034). */
+const redBlackRuns = fc
+  .tuple(
+    keys(24),
+    fc.array(
+      fc.record({
+        op: fc.constantFrom('insert', 'delete'),
+        key: smallInt,
+      }),
+      { minLength: 1, maxLength: 8 },
+    ),
+  )
+  .map(([from, ops]) => ({ from, ops }));
+
+recipe(
+  'red-black-tree',
+  redBlackRuns,
+  (input) => runOk('red-black-tree', input).document,
+  (trace, { from, ops }) => {
+    const ref = new RefTree<number>((a, b) => a < b);
+    for (const key of from) ref.insert(key);
+    for (const { op, key } of ops)
+      if (op === 'insert') ref.insert(key);
+      else ref.delete(key);
+    const tree = stateOf(trace, 'T', 'tree');
+    expect(drawnShape(tree)).toEqual(ref.shape());
+    expect(
+      redBlackProblems(tree, (a, b) => (a as number) < (b as number)),
+    ).toEqual([]);
+    // Each operation ends with a red–black tree and no pointer left over.
+    const sections = trace.visualization.sections ?? [];
+    for (const { start } of sections.slice(1)) {
+      const before = stateOf(trace, 'T', 'tree', start);
+      expect(
+        redBlackProblems(before, (a, b) => (a as number) < (b as number)),
+      ).toEqual([]);
+    }
+    // The successor's pointer goes once it has moved up.
+    expect(Object.keys(tree.marks.pointers)).not.toContain('y');
+    // Every frame, also in the middle of a deletion, draws one search
+    // tree: the moves of a step leave no stray root behind.
+    for (let k = 0; k <= trace.length; k++) {
+      const at = stateOf(trace, 'T', 'tree', k);
+      expect(at.data.roots.length, `frame ${k}`).toBeLessThanOrEqual(1);
+      const keys = inorder(at) as number[];
+      expect(keys, `frame ${k}`).toEqual(ascending(keys));
     }
   },
 );

@@ -66,7 +66,7 @@ The registry holds these modules, by topic ([ADR 0022](docs/adr/0022-registry-de
 - **Sorting:** `insertion-sort`, `merge-sort`, `heapsort`, `quicksort`, `counting-sort`, `bubble-sort`, `selection-sort`.
 - **Searching:** `binary-search`.
 - **Lists:** `reverse-linked-list`, `balanced-brackets`.
-- **Trees:** `bst` (search, insert, delete), `avl` (insert), `inorder-tree-walk`, `preorder-tree-walk`, `postorder-tree-walk`, `trie` (insert, search), `disjoint-set` (union, find-set).
+- **Trees:** `bst` (search, insert, delete), `avl` (insert), `red-black-tree` (insert, delete), `inorder-tree-walk`, `preorder-tree-walk`, `postorder-tree-walk`, `trie` (insert, search), `disjoint-set` (union, find-set).
 - **Heaps:** `min-heap` (push, pop, decrease-key), `max-heap` (push, pop, increase-key).
 - **Hashing:** `hash-chaining` and `linear-probing`, each with insert and search.
 - **Graphs:** `bfs`, `dfs`, `topological-sort`, `dijkstra`, `bellman-ford`, `prim`, `kruskal`, `floyd-warshall`.
