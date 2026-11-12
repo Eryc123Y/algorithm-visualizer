@@ -160,7 +160,7 @@ Each entry is one registry module, or one per operation for data structures. Eac
 
 **VII Selected topics**
 
-- [~] move-to-front (S7, [ADR 0036](adr/0036-linked-list-move.md))
+- [x] move-to-front (S7, [ADR 0036](adr/0036-linked-list-move.md), #80, #81)
 - [ ] LUP decomposition
 - [ ] FFT
 - [ ] Euclid and extended Euclid
