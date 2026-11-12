@@ -24,7 +24,7 @@ Each file records one architectural decision: the context, what we decided, and 
 | [0018](0018-operation-recipes.md)                   | Data-structure operations are recipes that start from a given state        | Accepted, partly superseded by 0019 |
 | [0019](0019-algorithm-registry.md)                  | Every algorithm is a module in one registry                                | Accepted, refined by 0022           |
 | [0020](0020-step-names-and-sections.md)             | Steps have names and documents have sections                               | Accepted                            |
-| [0021](0021-protocol-versioning.md)                 | The protocol version says what a reader must understand                    | Accepted                            |
+| [0021](0021-protocol-versioning.md)                 | The protocol version says what a reader must understand                    | Accepted, applied by 0043           |
 | [0022](0022-registry-details.md)                    | Registry details: traces, structure modules, ids and sorting               | Accepted                            |
 | [0023](0023-remaining-modules.md)                   | The remaining recipes as registry modules: ids, inputs, procedures         | Accepted                            |
 | [0024](0024-text-measurement-and-fonts.md)          | Text is measured with bundled font metrics and outlined in SVG             | Accepted                            |
@@ -46,5 +46,6 @@ Each file records one architectural decision: the context, what we decided, and 
 | [0040](0040-share-links.md)                         | Share links carry their content in the URL fragment                        | Accepted, amended by 0041           |
 | [0041](0041-share-link-limits.md)                   | Share links: tighter reader limits, a stricter base, own origin            | Accepted                            |
 | [0042](0042-arrows-and-badges-clear-of-text.md)     | Table arrows join only touching cells; point labels avoid badges first     | Accepted                            |
+| [0043](0043-protocol-1-0.md)                        | The protocol is 1.0: 0.9 as it stands, read with 0.x upgraded              | Accepted                            |
 
 Template: Status · Context · Decision · Consequences.
