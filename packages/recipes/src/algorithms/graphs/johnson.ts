@@ -7,6 +7,7 @@
  * Dijkstra can run from every vertex; each result is then shifted back.
  * Edges are taken as directed; a negative cycle is reported.
  */
+import { LIMITS } from '@algoviz/spec';
 import { z } from 'zod';
 
 import { defineAlgorithm } from '../../algorithm.ts';
@@ -159,12 +160,21 @@ export const johnson = defineAlgorithm({
         Number((w + h.get(u)! - h.get(v)!).toPrecision(12)),
       ]),
     );
-    trace.step(
-      'reweight',
-      `Reweight every edge (u, v) to w + h(u) − h(v), which is never negative, since h(v) is at most h(u) + w. Every path between two vertices changes by the same amount, so the shortest ones stay shortest. Then remove ${s}.`,
-    );
-    for (const { id } of edges)
-      graph.setWeight({ edge: id, weight: num(hat.get(id)!) });
+    // A step holds at most 100 actions; with many parallel edges, the
+    // new weights take more than one, and the last also removes s.
+    const per = LIMITS.actionsPerStep - 1;
+    const many = edges.length > per;
+    for (let i = 0; i === 0 || i < edges.length; i += per) {
+      const last = i + per >= edges.length;
+      trace.step(
+        'reweight',
+        i === 0
+          ? `Reweight every edge (u, v) to w + h(u) − h(v), which is never negative, since h(v) is at most h(u) + w. Every path between two vertices changes by the same amount, so the shortest ones stay shortest.${many ? '' : ` Then remove ${s}.`}`
+          : `Reweight more of the ${edges.length} edges${last ? `, then remove ${s}` : ''}.`,
+      );
+      for (const { id } of edges.slice(i, i + per))
+        graph.setWeight({ edge: id, weight: num(hat.get(id)!) });
+    }
     graph.removeNode({ node: s });
 
     const adj = adjacency(g);
@@ -194,7 +204,7 @@ export const johnson = defineAlgorithm({
           const c = d.get(x)! + hat.get(edge)!;
           if (!done.has(v) && c < d.get(v)!) {
             d.set(v, c);
-            improved.push(v);
+            if (!improved.includes(v)) improved.push(v);
           }
         }
         trace.step(

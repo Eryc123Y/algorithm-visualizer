@@ -134,12 +134,44 @@ describe('johnson', () => {
       ['0', '−1'],
       ['∞', '0'],
     ]);
+    // Each edge of a bundle improves b; it is named once.
+    const bundle = runOk('johnson', { graph: 'a->b 3, a->b 2, a->b 1' });
+    expect(
+      bundle.document.steps.map((s) => s.meta?.narration ?? '').join(' '),
+    ).not.toMatch(/b, b/);
     const decimals = runOk('johnson', {
       graph: 'a->b 0.1, b->c 0.2, a->c 0.3, c->a -0.25',
     });
     const g = stateOf(replay(decimals.document), 'g', 'graph');
     for (const e of g.data.edges)
       expect(String(e.weight).startsWith('−'), e.id).toBe(false);
+  });
+
+  it('keeps every step within its action limit with 200 edges', () => {
+    // 8 vertices in a ring, each edge 25 times, of weights 1 to 25 and a
+    // −1 in each bundle: more new weights than one step may set.
+    const nodes = Array.from({ length: 8 }, (_, k) => `v${k}`);
+    const edges = nodes.flatMap((v, k) =>
+      Array.from({ length: 25 }, (_, m): Edge => [
+        v,
+        nodes[(k + 1) % 8]!,
+        m === 24 ? -1 : m + 1,
+      ]),
+    );
+    const { document, results } = runOk('johnson', {
+      graph: { directed: true, nodes, edges },
+    });
+    expect(results).toEqual([false]);
+    const positive = edges.map(([a, b, w]): Edge => [a, b, Math.abs(w)]);
+    const run = runOk('johnson', {
+      graph: { directed: true, nodes, edges: positive },
+    });
+    for (const { steps } of [document, run.document])
+      for (const step of steps)
+        expect(step.actions.length).toBeLessThanOrEqual(100);
+    expect(stateOf(replay(run.document), 'D', 'table').data).toEqual(
+      floyd(nodes, positive)!.map((row) => row.map(shown)),
+    );
   });
 
   it('reports a negative cycle, and refuses more than 8 vertices', () => {
