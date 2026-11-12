@@ -47,11 +47,16 @@ export const offlineCaching = defineAlgorithm({
       .min(1)
       .max(MAX_CACHE)
       .optional()
-      .describe(`How many blocks the cache holds, 1 to ${MAX_CACHE}; 3 by default.`),
+      .describe(
+        `How many blocks the cache holds, 1 to ${MAX_CACHE}; 3 by default.`,
+      ),
   }),
   main: 'requests',
   examples: [
-    { requests: ['a', 'b', 'c', 'd', 'a', 'd', 'e', 'a', 'd', 'b', 'a', 'c'], k: 3 },
+    {
+      requests: ['a', 'b', 'c', 'd', 'a', 'd', 'e', 'a', 'd', 'b', 'a', 'c'],
+      k: 3,
+    },
   ],
   code: {
     pseudocode: `
@@ -112,9 +117,13 @@ export const offlineCaching = defineAlgorithm({
     requests.forEach((block, i) => {
       const slot = cache.indexOf(block);
       if (slot >= 0) {
-        trace.step('check', `Request ${i}, ${block}: it is in the cache, a hit.`, {
-          vars: { i, misses },
-        });
+        trace.step(
+          'check',
+          `Request ${i}, ${block}: it is in the cache, a hit.`,
+          {
+            vars: { i, misses },
+          },
+        );
         R.pointer({ name: 'i', index: i }).highlight({ indices: [i] });
         C.highlight({ indices: [slot] });
         return;
