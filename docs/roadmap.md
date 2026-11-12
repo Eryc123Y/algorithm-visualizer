@@ -148,7 +148,7 @@ Each entry is one registry module, or one per operation for data structures. Eac
 - [x] Floyd–Warshall
 - [x] Prim
 - [x] Kruskal
-- [ ] strongly connected components
+- [x] strongly connected components (#86)
 - [ ] DAG shortest paths
 - [ ] transitive closure
 - [ ] Johnson

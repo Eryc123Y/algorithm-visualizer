@@ -1598,6 +1598,27 @@ recipe(
   },
 );
 
+recipe(
+  'strongly-connected-components',
+  graphs(nonNegative, { minNodes: 1 }),
+  (graph) => runOk('strongly-connected-components', { graph }).document,
+  (trace, g) => {
+    // Every vertex is in exactly one listed component.
+    const listed = valuesOf(trace, 'components').map(String);
+    const counted = listed.reduce(
+      (n, c) =>
+        n +
+        (c.includes('…')
+          ? Number(/\((\d+)\)/.exec(c)![1])
+          : c.split(' ').length),
+      0,
+    );
+    expect(counted).toBe(g.nodes.length);
+    expect(steps(trace, 'assign')).toBe(g.nodes.length);
+    expect(steps(trace, 'finish')).toBe(g.nodes.length);
+  },
+);
+
 describe('topological-sort input checks', () => {
   it(
     'refuses a graph with a cycle, and only such a graph',
