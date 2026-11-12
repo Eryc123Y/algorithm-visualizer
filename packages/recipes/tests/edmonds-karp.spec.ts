@@ -93,7 +93,53 @@ describe('edmonds-karp', () => {
     );
   });
 
+  it('keeps every step within its action limit on the largest networks', () => {
+    // 40 nodes, 190 edges: s to 19 left vertices and 19 right vertices to
+    // t, of capacity 1e9, and 152 edges of capacity 1 between, each left
+    // vertex to 8 right ones. The cut is the 152 middle edges, more marks
+    // than one step may hold, as the 190 labels are more than one may set.
+    const left = Array.from({ length: 19 }, (_, i) => `l${i}`);
+    const right = Array.from({ length: 19 }, (_, i) => `r${i}`);
+    const edges: Edge[] = [
+      ...left.map((v): Edge => ['s', v, 1e9]),
+      ...left.flatMap((v, i) =>
+        Array.from({ length: 8 }, (_, m): Edge => [v, right[(i + m) % 19]!, 1]),
+      ),
+      ...right.map((v): Edge => [v, 't', 1e9]),
+    ];
+    const { document, results } = runOk('edmonds-karp', {
+      graph: { directed: true, nodes: ['s', ...left, ...right, 't'], edges },
+    });
+    expect(results).toEqual([152]);
+    for (const step of document.steps)
+      expect(step.actions.length).toBeLessThanOrEqual(100);
+    const g = stateOf(replay(document), 'g', 'graph');
+    expect(
+      g.data.edges.filter((e) => g.marks.edgeMarks[e.id] === 'selected'),
+    ).toHaveLength(152);
+  });
+
+  it('adds parallel edges, and finds no flow to a sink it cannot reach', () => {
+    expect(
+      runOk('edmonds-karp', { graph: 'a->b 3, a->b 2, b->c 4' }).results,
+    ).toEqual([4]);
+    expect(runOk('edmonds-karp', { graph: 'a->b 3, c' }).results).toEqual([0]);
+    // The sink is by default the last node that is not the source.
+    expect(
+      runOk('edmonds-karp', { graph: 'a->b 2', source: 'b' }).results,
+    ).toEqual([0]);
+  });
+
   it('refuses capacities that are not whole numbers, and a sink that is the source', () => {
+    expect(runError('edmonds-karp', { graph: 'a->b -1' }).message).toMatch(
+      /whole numbers/,
+    );
+    expect(
+      runError('edmonds-karp', { graph: 'a->b 1', sink: 'z' }).message,
+    ).toMatch(/not a node/);
+    expect(runError('edmonds-karp', { graph: 'a' }).message).toMatch(
+      /different/,
+    );
     expect(runError('edmonds-karp', { graph: 'a->b 1.5' }).message).toMatch(
       /whole numbers/,
     );

@@ -7,6 +7,7 @@
  * minimum cut, whose capacity equals the flow. Edges are taken as
  * directed, weights as capacities.
  */
+import { LIMITS } from '@algoviz/spec';
 import { z } from 'zod';
 
 import { defineAlgorithm } from '../../algorithm.ts';
@@ -18,6 +19,9 @@ import {
   startOf,
   type GraphInput,
 } from './graph.ts';
+
+/** Most actions a step may hold. */
+const MAX_ACTIONS = LIMITS.actionsPerStep;
 
 /** A residual move: along edge `k` forward, or back against it. */
 interface Step {
@@ -95,7 +99,8 @@ export const edmondsKarp = defineAlgorithm({
   run(input, trace) {
     const g: GraphInput = { ...graphOf(input.graph), directed: true };
     const s = startOf(g, input.source);
-    const t = input.sink ?? g.nodes.at(-1)!;
+    // By default the last node that is not the source.
+    const t = input.sink ?? [...g.nodes].reverse().find((v) => v !== s) ?? s;
     if (!g.nodes.includes(t))
       throw new RangeError(`"${t}" is not a node of the graph`);
     if (s === t)
@@ -110,13 +115,21 @@ export const edmondsKarp = defineAlgorithm({
     });
     const flow = cap.map(() => 0);
     const label = (k: number) => `${flow[k]}/${cap[k]}`;
-    const graph = trace.add('g', declareGraph(g, false, { from: s }));
+    // Each edge starts labelled 0/c in the declaration: a step holds at
+    // most 100 actions, and a network may have 200 edges.
+    const decl = declareGraph(g, false, { from: s });
+    const graph = trace.add('g', {
+      ...decl,
+      edges: g.edges.map(([from, to], k) => ({
+        id: ids[k]!,
+        from,
+        to,
+        weight: label(k),
+      })),
+    });
     trace.step(
       'start',
       `Start with no flow: every edge carries 0 of its capacity. Send flow from ${s} to ${t}.`,
-    );
-    g.edges.forEach((_, k) =>
-      graph.setWeight({ edge: ids[k]!, weight: label(k) }),
     );
     graph.pointer({ name: 's', node: s }).pointer({ name: 't', node: t });
 
@@ -148,17 +161,30 @@ export const edmondsKarp = defineAlgorithm({
       if (!seen.has(t)) {
         trace.step(
           'done',
-          `No path is left from ${s} to ${t} in the residual network: the flow, ${total}, is maximum. The vertices still reachable from ${s} form a minimum cut, and the edges leaving them are full.`,
+          `No path is left from ${s} to ${t} in the residual network: the flow, ${total}, is maximum. The vertices still reachable from ${s} form a minimum cut: the edges leaving them are full, and those coming into them carry nothing.`,
         );
         graph
           .resetMarks()
           .pointer({ name: 's', node: s })
           .pointer({ name: 't', node: t });
         for (const v of seen) graph.group({ node: v, group: 0 });
-        g.edges.forEach(([a, b], k) => {
-          if (seen.has(a) && !seen.has(b))
-            graph.markEdge({ edge: ids[k]!, mark: 'selected' });
-        });
+        // The edges leaving the cut, marked in the room this step has
+        // left (a step holds at most 100 actions), the rest in more steps.
+        const leaving = g.edges.flatMap(([a, b], k) =>
+          seen.has(a) && !seen.has(b) ? [ids[k]!] : [],
+        );
+        const room = MAX_ACTIONS - 3 - seen.size;
+        leaving
+          .slice(0, room)
+          .forEach((edge) => graph.markEdge({ edge, mark: 'selected' }));
+        for (let i = room; i < leaving.length; i += MAX_ACTIONS) {
+          trace.step(
+            'done',
+            `More of the ${leaving.length} edges leaving the cut, all full.`,
+          );
+          for (const edge of leaving.slice(i, i + MAX_ACTIONS))
+            graph.markEdge({ edge, mark: 'selected' });
+        }
         return { results: [total] };
       }
       const path: (Step & { from: string; to: string; room: number })[] = [];
@@ -178,12 +204,14 @@ export const edmondsKarp = defineAlgorithm({
         .resetMarks()
         .pointer({ name: 's', node: s })
         .pointer({ name: 't', node: t });
-      graph.highlight({ nodes: [s, ...path.map((m) => m.to)] });
+      // Forward edges are marked; edges the path goes back along are
+      // only highlighted, as their flow is cancelled, not refused.
+      graph.highlight({
+        nodes: [s, ...path.map((m) => m.to)],
+        edges: path.filter((m) => !m.forward).map((m) => ids[m.k]!),
+      });
       for (const m of path)
-        graph.markEdge({
-          edge: ids[m.k]!,
-          mark: m.forward ? 'selected' : 'rejected',
-        });
+        if (m.forward) graph.markEdge({ edge: ids[m.k]!, mark: 'selected' });
       for (const m of path) flow[m.k] = flow[m.k]! + (m.forward ? c : -c);
       total += c;
       trace.step(
