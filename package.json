@@ -24,7 +24,8 @@
     "check": "npm run typecheck && npm run lint && npm run format:check && npm run test",
     "prepare": "husky",
     "gallery": "node --conditions=@algoviz/source scripts/gallery.ts",
-    "generate:fonts": "node --conditions=@algoviz/source scripts/fonts.ts"
+    "generate:fonts": "node --conditions=@algoviz/source scripts/fonts.ts",
+    "test:worker": "npm run test:worker -w @algoviz/worker"
   },
   "devDependencies": {
     "@anthropic-ai/sdk": "^0.131.0",
@@ -68,6 +69,7 @@
     "packages/latex",
     "packages/elements",
     "apps/playground",
-    "apps/site"
+    "apps/site",
+    "apps/worker"
   ]
 }

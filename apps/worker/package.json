@@ -1,0 +1,19 @@
+{
+  "name": "@algoviz/worker",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The algoviz MCP server as a Cloudflare Worker: Streamable HTTP, stateless and rate-limited.",
+  "type": "module",
+  "scripts": {
+    "build": "npm run build:app -w @algoviz/mcp && vite build",
+    "dev": "wrangler dev",
+    "test:worker": "npm run build && vitest run --config vitest.worker.config.ts"
+  },
+  "dependencies": {
+    "@algoviz/mcp": "*"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/client": "^2.3.1",
+    "wrangler": "4.154.0"
+  }
+}

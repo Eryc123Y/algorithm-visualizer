@@ -39,6 +39,9 @@
     },
     {
       "path": "./apps/site"
+    },
+    {
+      "path": "./apps/worker"
     }
   ]
 }
