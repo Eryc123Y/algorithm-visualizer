@@ -39,5 +39,7 @@ Each file records one architectural decision: the context, what we decided, and 
 | [0033](0033-slide-figures-fill-the-frame.md)        | Slide figures fill the frame                                         | Accepted                            |
 | [0034](0034-tree-additions.md)                      | Trees get root order, NIL slots, named notes, edge marks, root lists | Accepted                            |
 | [0035](0035-btree-kind.md)                          | B-trees get a kind of their own, with keys that move between nodes   | Accepted                            |
+| [0036](0036-linked-list-move.md)                    | A linked-list node can move along the row                            | Accepted                            |
+| [0037](0037-array-pattern.md)                       | An array can carry a pattern aligned under it                        | Accepted                            |
 
 Template: Status · Context · Decision · Consequences.
