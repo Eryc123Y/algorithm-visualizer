@@ -4,18 +4,19 @@ Nodes in a row with explicit `next` (and `prev`) pointers: insertion, deletion, 
 
 Declaration: `{ "kind": "linkedList", "initial": [1, 2, 3], "doubly"?: false, "circular"?: false, "label"?: "…" }`. Each initial node links to the next (and back, if doubly linked); the last one links to null, or to the first if circular.
 
-| Action      | Fields                 | Effect                                                                                     |
-| ----------- | ---------------------- | ------------------------------------------------------------------------------------------ |
-| `insert`    | `index`, `element`     | Place a new, unlinked node at row position `index`. Wire it in with `link`.                |
-| `remove`    | `index`                | Remove a node; links to it become null.                                                    |
-| `set`       | `index`, `value`       | Change a node's value.                                                                     |
-| `link`      | `from`, `to`, `field`? | Set node `from`'s `field` (`"next"` by default, or `"prev"`) to node `to`, or `null`.      |
-| `pointer`   | `name`, `index`        | Point a named arrow (`"head"`, `"prev"`, `"curr"`) at a node; `null` removes it. Persists. |
-| `highlight` | `indices`              | Highlight nodes (this step).                                                               |
-| `visit`     | `index`                | Mark a node as visited. Persists.                                                          |
-| `settle`    | `index`                | Mark a node as final or found. Persists.                                                   |
+| Action      | Fields                 | Effect                                                                                                                    |
+| ----------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `insert`    | `index`, `element`     | Place a new, unlinked node at row position `index`. Wire it in with `link`.                                               |
+| `remove`    | `index`                | Remove a node; links to it become null.                                                                                   |
+| `set`       | `index`, `value`       | Change a node's value.                                                                                                    |
+| `move`      | `from`, `to`           | Move node `from` to row position `to`; the nodes between shift. Links stay: relink with `link`. Needs `"version": "0.7"`. |
+| `link`      | `from`, `to`, `field`? | Set node `from`'s `field` (`"next"` by default, or `"prev"`) to node `to`, or `null`.                                     |
+| `pointer`   | `name`, `index`        | Point a named arrow (`"head"`, `"prev"`, `"curr"`) at a node; `null` removes it. Persists.                                |
+| `highlight` | `indices`              | Highlight nodes (this step).                                                                                              |
+| `visit`     | `index`                | Mark a node as visited. Persists.                                                                                         |
+| `settle`    | `index`                | Mark a node as final or found. Persists.                                                                                  |
 
-Row positions shift when nodes are inserted or removed, like an array.
+Row positions shift when nodes are inserted, removed or moved, like an array. Actions apply in order, so a `link` after a `move` in the same step counts positions in the new row: to move 7 to the front of `4 2 7 1`, use `move` from 2 to 0 (the row is now `7 4 2 1`), `link` from 2 to 3 (2 to 1), `link` from 0 to 1 (7 to 4), and point `head` at 0. Visits, settled marks and pointers stay on their nodes.
 
 ```json
 {

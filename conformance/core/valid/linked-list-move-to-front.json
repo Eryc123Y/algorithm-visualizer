@@ -1,0 +1,51 @@
+{
+  "description": "move takes a node along the row with its id, marks and pointers; links stay until link relinks them, here in the same step, so 7 moves to the front of 4 2 7 1.",
+  "input": {
+    "version": "0.7",
+    "structures": { "l": { "kind": "linkedList", "initial": [4, 2, 7, 1] } },
+    "steps": [
+      {
+        "actions": [
+          { "target": "l", "type": "pointer", "name": "head", "index": 0 },
+          { "target": "l", "type": "visit", "index": 2 },
+          { "target": "l", "type": "highlight", "indices": [2, 3] }
+        ]
+      },
+      {
+        "actions": [
+          { "target": "l", "type": "highlight", "indices": [1, 2] },
+          { "target": "l", "type": "move", "from": 2, "to": 0 },
+          { "target": "l", "type": "link", "from": 2, "to": 3 },
+          { "target": "l", "type": "link", "from": 0, "to": 1 },
+          { "target": "l", "type": "pointer", "name": "head", "index": 0 }
+        ]
+      }
+    ]
+  },
+  "expectedLength": 2,
+  "expectedFrames": [
+    {
+      "index": 2,
+      "state": {
+        "l": {
+          "kind": "linkedList",
+          "state": {
+            "data": [
+              { "id": "e2", "value": 7, "next": "e0", "prev": null },
+              { "id": "e0", "value": 4, "next": "e1", "prev": null },
+              { "id": "e1", "value": 2, "next": "e3", "prev": null },
+              { "id": "e3", "value": 1, "next": null, "prev": null }
+            ],
+            "doubly": false,
+            "marks": {
+              "highlight": [2, 0],
+              "visited": ["e2"],
+              "settled": [],
+              "pointers": { "head": "e2" }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

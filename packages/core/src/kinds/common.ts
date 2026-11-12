@@ -103,6 +103,19 @@ export const afterRemove =
   (k) =>
     k === at ? undefined : k > at ? k - 1 : k;
 
+/**
+ * Positions after the element at `from` moves to `to` (ADR 0036): those
+ * between shift one place towards `from`.
+ */
+export const afterMove =
+  (from: number, to: number): Reindex =>
+  (k) => {
+    if (k === from) return to;
+    if (from < to && k > from && k <= to) return k - 1;
+    if (from > to && k >= to && k < from) return k + 1;
+    return k;
+  };
+
 /** Moves positions with their elements, dropping those that are gone. */
 export const reindex = (positions: readonly number[], f: Reindex): number[] =>
   positions.flatMap((k) => {

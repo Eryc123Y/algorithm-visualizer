@@ -17,6 +17,7 @@ import type { ReduceError } from '../errors.ts';
 import type { StructureKind } from '../kind.ts';
 import {
   afterInsert,
+  afterMove,
   afterRemove,
   checkCapacity,
   checkRange,
@@ -121,6 +122,16 @@ function reduceList(s: LinkedListState, a: LinkedListAction): Reduced {
         visited: s.marks.visited.filter((id) => id !== gone),
         settled: s.marks.settled.filter((id) => id !== gone),
         pointers,
+      });
+    }
+    case 'move': {
+      // Links and id-kept marks stay; only the row and its highlights move.
+      const bad = range(n, [['from'], a.from], [['to'], a.to]);
+      if (bad) return err(bad);
+      const moved = s.data[a.from]!;
+      const rest = s.data.filter((_, k) => k !== a.from);
+      return next(insertAt(rest, a.to, moved), {
+        highlight: reindex(s.marks.highlight, afterMove(a.from, a.to)),
       });
     }
     case 'set': {

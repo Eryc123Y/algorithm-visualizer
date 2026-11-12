@@ -172,7 +172,7 @@ Each entry is one registry module, or one per operation for data structures. Eac
 
 Recipes that exist beyond CLRS stay: bubble and selection sort, binary search, list reversal, bracket matching, AVL, trie, binary heap run, edit distance and 0/1 knapsack.
 
-**Structure additions** (each _ADR_; S1–S5 share [ADR 0034](adr/0034-tree-additions.md) for `tree`, protocol `0.5`, done in #67; S6 in [ADR 0035](adr/0035-btree-kind.md), protocol `0.6`, done in #75):
+**Structure additions** (each _ADR_; S1–S5 share [ADR 0034](adr/0034-tree-additions.md) for `tree`, protocol `0.5`, done in #67; S6 in [ADR 0035](adr/0035-btree-kind.md), protocol `0.6`, done in #75; S7 in [ADR 0036](adr/0036-linked-list-move.md), protocol `0.7`, done in #80):
 
 | #   | Addition                                                                    | Needed by                                          |
 | --- | --------------------------------------------------------------------------- | -------------------------------------------------- |
