@@ -16,7 +16,6 @@ import {
   maxDegree,
   minimumRoot,
   nodeOf,
-  subtree,
   valueOf,
   withNode,
   type Entry,
@@ -27,6 +26,8 @@ import {
 export interface FibState {
   readonly heap: FibHeap;
   readonly unions: number;
+  /** Cells of A the last CONSOLIDATE wrote, which the next operation blanks. */
+  readonly aCells: number;
 }
 
 export interface FibRun {
@@ -34,6 +35,8 @@ export interface FibRun {
   readonly on: Handle<'tree'>;
   readonly A?: Handle<'array'>;
   readonly H2?: Handle<'tree'>;
+  /** Where a silent run records how many cells of A it needs. */
+  readonly reach?: { cells: number };
 }
 
 const key = (h: FibHeap, id: string) => keyText(nodeOf(h, id).key);
@@ -169,7 +172,7 @@ export function union(
     on.pointer({ name: 'min', node: other.min });
     heap = { ...heap, min: other.min };
   }
-  return { heap, unions: s.unions + 1 };
+  return { ...s, heap, unions: s.unions + 1 };
 }
 
 /** The root right of `id` in the circular root list. */
@@ -223,8 +226,10 @@ export function extractMin(
   );
   on.removeNode({ node: z }).pointer({ name: 'min', node: next });
   h = { ...h, roots: left, nodes, min: next };
+  // D(n) counts z too: CLRS decrements H.n after CONSOLIDATE.
+  const done = consolidate(h, run, s.heap.nodes.size);
   return {
-    state: { ...s, heap: consolidate(h, run) },
+    state: { ...s, heap: done.heap, aCells: done.cells },
     key: nodeOf(s.heap, z).key,
   };
 }
@@ -232,17 +237,27 @@ export function extractMin(
 const showDegree = (on: Handle<'tree'>, id: string, d: number | null) =>
   on.annotate({ node: id, field: 'deg', text: d === null ? null : `d=${d}` });
 
-/** CONSOLIDATE: links roots of equal degree until no two are left. */
-function consolidate(start: FibHeap, run: FibRun): FibHeap {
+/**
+ * CONSOLIDATE: links roots of equal degree until no two are left. Returns
+ * the heap and how many cells of A it used: D(n) + 1 for a heap the
+ * operations built, more for a hand-written forest whose degrees break
+ * the bound, which A is declared big enough for (see `auxiliary`).
+ */
+function consolidate(
+  start: FibHeap,
+  run: FibRun,
+  n: number,
+): { heap: FibHeap; cells: number } {
   const { on, step, A } = run;
   if (A === undefined) throw new Error('CONSOLIDATE needs the array A');
   let h = start;
-  const D = maxDegree(h.nodes.size);
+  const D = maxDegree(n);
   step(
     'array',
-    `Consolidate: make an array A of ${D + 1} empty entries, one for each degree up to D(${h.nodes.size}) = ${D}, and go through the roots.`,
+    `Consolidate: start an array A with an empty entry for each degree up to D(${n}) = ${D}, and go through the roots.`,
   );
-  const slots: (string | null)[] = Array.from({ length: D + 1 }, () => null);
+  const slots: (string | null)[] = [];
+  let cells = D + 1;
   for (let d = 0; d <= D; d++) A.set({ index: d, value: '' });
   for (const r of h.roots) showDegree(on, r, degree(h, r));
   // Round the circular list once, starting at min, as CLRS does.
@@ -253,7 +268,7 @@ function consolidate(start: FibHeap, run: FibRun): FibHeap {
     let d = degree(h, x);
     step('root', `Next root: ${key(h, x)}, of degree ${d}.`);
     on.pointer({ name: 'x', node: x }).highlight({ nodes: [x] });
-    while (slots[d] !== null) {
+    while ((slots[d] ?? null) !== null) {
       let y = slots[d]!;
       const same = `A[${d}] holds ${key(h, y)}, which also has degree ${d}`;
       if (nodeOf(h, x).key > nodeOf(h, y).key) [x, y] = [y, x];
@@ -280,8 +295,11 @@ function consolidate(start: FibHeap, run: FibRun): FibHeap {
     step('store', `A[${d}] = ${key(h, x)}.`);
     A.set({ index: d, value: nodeOf(h, x).key }).highlight({ indices: [d] });
     slots[d] = x;
+    cells = Math.max(cells, d + 1);
   }
-  const order = slots.filter((r): r is string => r !== null);
+  if (run.reach !== undefined)
+    run.reach.cells = Math.max(run.reach.cells, cells);
+  const order = slots.filter((r): r is string => r !== null && r !== undefined);
   h = { ...h, roots: order };
   const min = minimumRoot(h)!;
   step(
@@ -293,7 +311,7 @@ function consolidate(start: FibHeap, run: FibRun): FibHeap {
     showDegree(on, r, null);
   });
   on.pointer({ name: 'x', node: null }).pointer({ name: 'min', node: min });
-  return { ...h, min };
+  return { heap: { ...h, min }, cells };
 }
 
 /** CUT: `x` leaves its parent for the root list, just left of `min`. */
@@ -390,7 +408,3 @@ export function decreaseKey(
 export function deleteKey(s: FibState, k: number, run: FibRun): FibState {
   return extractMin(decreaseKey(s, k, -Infinity, run), run).state;
 }
-
-/** Every node of a heap in preorder, for checks. */
-export const allNodes = (h: FibHeap): string[] =>
-  h.roots.flatMap((r) => subtree(h, r));

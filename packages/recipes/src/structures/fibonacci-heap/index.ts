@@ -14,16 +14,12 @@ import { parseIn } from '../../notation/error.ts';
 import type { Handle } from '../../recorder.ts';
 import {
   defineStructure,
+  MAX_SIZE,
   operationsOf,
   type Call,
   type Sides,
 } from '../../structure.ts';
-import {
-  afterFirstStep,
-  silentHandle,
-  silentTrace,
-  type Trace,
-} from '../../trace.ts';
+import { afterFirstStep, silentHandle, type Trace } from '../../trace.ts';
 import { stepsOf } from '../red-black/engine.ts';
 import {
   DELETE_STANDS,
@@ -96,8 +92,10 @@ const treesOf = (from: From) =>
 /** The heap a forest describes, checked; at most 32 keys. */
 function heapOf(from: From, prefix = 'n'): FibHeap {
   const h = buildHeap(treesOf(from), prefix);
-  if (h.nodes.size > 32)
-    throw new RangeError(`A heap holds at most 32 keys, not ${h.nodes.size}`);
+  if (h.nodes.size > MAX_SIZE)
+    throw new RangeError(
+      `A heap holds at most ${MAX_SIZE} keys, not ${h.nodes.size}`,
+    );
   return h;
 }
 
@@ -121,7 +119,10 @@ const sidesOf = (sides: Sides) => ({
   ...(sides['H2'] === undefined ? {} : { H2: sides['H2'] as Handle<'tree'> }),
 });
 
-/** The run of one operation, with the heap's marks shown from its first step. */
+/**
+ * The run of one operation, with the heap's marks shown from its first
+ * step, which also blanks the cells of A an earlier CONSOLIDATE left.
+ */
 function runOf(
   s: FibState,
   trace: Trace,
@@ -130,9 +131,21 @@ function runOf(
   listing: Parameters<typeof stepsOf>[1],
   stands: Readonly<Record<string, string>> = {},
 ): FibRun {
-  const shown = afterFirstStep(trace, () => showHeap(on, s.heap));
-  return { step: stepsOf(shown, listing, stands), on, ...sidesOf(sides) };
+  const { A, H2 } = sidesOf(sides);
+  const shown = afterFirstStep(trace, () => {
+    showHeap(on, s.heap);
+    for (let d = 0; d < s.aCells; d++) A?.set({ index: d, value: '' });
+  });
+  return {
+    step: stepsOf(shown, listing, stands),
+    on,
+    ...(A === undefined ? {} : { A }),
+    ...(H2 === undefined ? {} : { H2 }),
+  };
 }
+
+/** The state an operation starts from: A's old cells are blanked by then. */
+const fresh = (s: FibState): FibState => ({ ...s, aCells: 0 });
 
 const silentRun = (): FibRun => ({
   step: () => undefined,
@@ -141,21 +154,27 @@ const silentRun = (): FibRun => ({
   H2: silentHandle('tree'),
 });
 
-/** The calls a run makes, applied silently, for the largest heap it reaches. */
-function largest(from: From, calls: readonly Call[]): number {
-  let s: FibState = { heap: heapOf(from), unions: 0 };
+/**
+ * How many cells A needs for the calls a run makes, applied silently:
+ * D(n) + 1 for the largest heap the run reaches, or more when a
+ * hand-written forest has a root of greater degree than D(n).
+ */
+function cellsOfA(from: From, calls: readonly Call[]): number {
+  let s: FibState = { heap: heapOf(from), unions: 0, aCells: 0 };
   let most = s.heap.nodes.size;
-  const run = silentRun();
+  const reach = { cells: 0 };
+  const run = { ...silentRun(), reach };
   for (const call of calls) {
     try {
       s = apply(s, call, run);
-    } catch {
-      // The real run reports it; the size so far is enough.
+    } catch (e) {
+      // A refused call: the real run reports it, and stops there too.
+      if (!(e instanceof RangeError)) throw e;
       break;
     }
     most = Math.max(most, s.heap.nodes.size);
   }
-  return most;
+  return Math.max(maxDegree(most) + 1, reach.cells);
 }
 
 function apply(s: FibState, call: Call, run: FibRun): FibState {
@@ -200,7 +219,7 @@ export const fibonacciHeap = defineStructure<FibState, From, 'tree'>({
       ],
     },
   ],
-  start: (from) => ({ heap: heapOf(from), unions: 0 }),
+  start: (from) => ({ heap: heapOf(from), unions: 0, aCells: 0 }),
   describe: (s) => printHeap(s.heap),
   declare: (s) => declareHeap(s.heap),
   auxiliary(from, calls) {
@@ -209,11 +228,10 @@ export const fibonacciHeap = defineStructure<FibState, From, 'tree'>({
     if (first !== undefined)
       sides['H2'] = declareHeap(secondHeap(treesOf(first['with'] as From), 0));
     if (calls.some((c) => c.op === 'extract-min' || c.op === 'delete')) {
-      const D = maxDegree(largest(from, calls));
       sides['A'] = {
         kind: 'array',
         place: 'side',
-        initial: Array.from({ length: D + 1 }, () => ''),
+        initial: Array.from({ length: cellsOfA(from, calls) }, () => ''),
       };
     }
     return sides;
@@ -232,7 +250,7 @@ export const fibonacciHeap = defineStructure<FibState, From, 'tree'>({
       code: FIB_INSERT,
       titleOf: ({ key }) => `insert ${key}`,
       apply: (s, { key }, trace, on, sides) => ({
-        state: insert(s, key, runOf(s, trace, on, sides, FIB_INSERT)),
+        state: insert(fresh(s), key, runOf(s, trace, on, sides, FIB_INSERT)),
         result: null,
       }),
     }),
@@ -254,7 +272,7 @@ export const fibonacciHeap = defineStructure<FibState, From, 'tree'>({
       titleOf: () => 'union',
       apply: (s, args, trace, on, sides) => ({
         state: union(
-          s,
+          fresh(s),
           treesOf(args.with),
           runOf(s, trace, on, sides, FIB_UNION),
         ),
@@ -278,7 +296,7 @@ export const fibonacciHeap = defineStructure<FibState, From, 'tree'>({
       titleOf: () => 'extract-min',
       apply: (s, _, trace, on, sides) => {
         const { state, key } = extractMin(
-          s,
+          fresh(s),
           runOf(s, trace, on, sides, FIB_EXTRACT_MIN),
         );
         return { state, result: key };
@@ -309,7 +327,7 @@ export const fibonacciHeap = defineStructure<FibState, From, 'tree'>({
       titleOf: ({ key, to }) => `decrease ${key} to ${to}`,
       apply: (s, { key, to }, trace, on, sides) => ({
         state: decreaseKey(
-          s,
+          fresh(s),
           key,
           to,
           runOf(s, trace, on, sides, FIB_DECREASE_KEY),
@@ -328,7 +346,7 @@ export const fibonacciHeap = defineStructure<FibState, From, 'tree'>({
       titleOf: ({ key }) => `delete ${key}`,
       apply: (s, { key }, trace, on, sides) => ({
         state: deleteKey(
-          s,
+          fresh(s),
           key,
           runOf(s, trace, on, sides, FIB_DELETE, DELETE_STANDS),
         ),
@@ -337,5 +355,3 @@ export const fibonacciHeap = defineStructure<FibState, From, 'tree'>({
     }),
   ],
 });
-
-export { silentTrace };

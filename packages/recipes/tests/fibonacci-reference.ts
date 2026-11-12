@@ -112,17 +112,15 @@ export class RefFibHeap {
   }
 
   #consolidate(): void {
-    const n = this.size;
-    const phi = (1 + Math.sqrt(5)) / 2;
-    const D = n <= 1 ? 0 : Math.floor(Math.log(n) / Math.log(phi) + 1e-9);
-    const A: (RNode | null)[] = Array.from({ length: D + 1 }, () => null);
+    // A grows as needed: a hand-written forest may break the bound D(n).
+    const A: (RNode | null)[] = [];
     // Once round the circular list, from min.
     const from = this.roots.indexOf(this.min!);
     const round = [...this.roots.slice(from), ...this.roots.slice(0, from)];
     for (const w of round) {
       let x = w;
       let d = x.children.length;
-      while (A[d] !== null) {
+      while ((A[d] ?? null) !== null) {
         let y = A[d]!;
         if (x.key > y.key) [x, y] = [y, x];
         this.roots.splice(this.roots.indexOf(y), 1);
@@ -134,7 +132,7 @@ export class RefFibHeap {
       }
       A[d] = x;
     }
-    this.roots = A.filter((r): r is RNode => r !== null);
+    this.roots = A.filter((r): r is RNode => r !== null && r !== undefined);
     this.min = this.roots.reduce((m, r) => (r.key < m.key ? r : m));
   }
 

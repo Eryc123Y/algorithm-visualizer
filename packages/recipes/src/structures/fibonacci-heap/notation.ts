@@ -20,6 +20,7 @@ export function parseForest(text: string): Entry[] {
   const skip = () => {
     while (at < text.length && SEPARATOR.test(text[at]!)) at++;
   };
+  let depth = 0;
   const forest = (closing: boolean): Entry[] => {
     const trees: Entry[] = [];
     for (;;) {
@@ -48,8 +49,11 @@ export function parseForest(text: string): Entry[] {
       at++;
     }
     if (text[at] !== '(') return marked ? { key, marked } : { key };
+    // A heap holds at most 32 keys, so deeper brackets are a mistake.
+    if (++depth > 32) throw new NotationError('Brackets nest too deep', at);
     at++;
     const children = forest(true);
+    depth--;
     if (children.length === 0)
       throw new NotationError(`${quoted('()')} has no children`, at - 1);
     return { key, ...(marked ? { marked } : {}), children };

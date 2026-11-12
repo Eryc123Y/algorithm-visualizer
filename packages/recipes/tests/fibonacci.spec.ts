@@ -135,6 +135,27 @@ describe('fibonacci-heap', () => {
     expect(values.data.nodes.some((n) => n.value === '-∞')).toBe(true);
   });
 
+  it('consolidates a hand-written forest whose degrees break D(n)', () => {
+    // After 0 goes, n = 4 and D(4) = 2, but the root 1 has degree 3.
+    const from = '0 1(2 3 4) 5';
+    const { document, after } = runOk('fibonacci-heap.extract-min', { from });
+    const ref = RefFibHeap.parse(from);
+    ref.extractMin();
+    expect(after).toBe(ref.print());
+    const A = stateOf(replay(document), 'A', 'array');
+    expect(A.data.length).toBeGreaterThanOrEqual(4);
+  });
+
+  it('blanks A when the next operation starts', () => {
+    const { document } = runOk('fibonacci-heap', {
+      from: '3 7 9 12',
+      ops: [{ op: 'extract-min' }, { op: 'insert', key: 1 }],
+    });
+    const trace = replay(document);
+    const values = stateOf(trace, 'A', 'array').data.map((e) => e.value);
+    expect(values.every((v) => v === '')).toBe(true);
+  });
+
   it('refuses what a heap cannot do', () => {
     const msg = (id: string, input: object) => runError(id, input).message;
     expect(msg('fibonacci-heap.extract-min', { from: '' })).toMatch(/empty/);
@@ -162,6 +183,10 @@ describe('fibonacci-heap', () => {
     expect(msg('fibonacci-heap.insert', { from: '5(', key: 1 })).toMatch(
       /not closed/,
     );
+    const deep = `${'1('.repeat(40)}2${')'.repeat(40)}`;
+    expect(msg('fibonacci-heap.insert', { from: deep, key: 0 })).toMatch(
+      /nest too deep/,
+    );
   });
 
   it('agrees with the reference on random runs', () => {
@@ -175,6 +200,12 @@ describe('fibonacci-heap', () => {
         by: fc.integer({ min: 1, max: 30 }),
       }),
       fc.record({ op: fc.constant('delete'), key }),
+      fc.record({
+        op: fc.constant('union'),
+        keys: fc.uniqueArray(fc.integer({ min: 100, max: 160 }), {
+          maxLength: 6,
+        }),
+      }),
     );
     fc.assert(
       fc.property(
@@ -193,6 +224,13 @@ describe('fibonacci-heap', () => {
               if (held.has(c.key) || held.size >= 32) continue;
               ref.insert(c.key);
               ops.push({ op: 'insert', key: c.key });
+              expected.push(null);
+            } else if (c.op === 'union') {
+              const other = new RefFibHeap();
+              for (const k of c.keys) if (!held.has(k)) other.insert(k);
+              if (held.size + other.size > 32) continue;
+              ops.push({ op: 'union', with: other.print() });
+              ref.union(other);
               expected.push(null);
             } else if (c.op === 'extract-min') {
               if (held.size === 0) continue;
