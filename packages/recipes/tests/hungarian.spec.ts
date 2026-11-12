@@ -3,9 +3,9 @@
  * matching: the weight it finds is the greatest. Its trace keeps the
  * algorithm's own promises at every frame: the labels are feasible
  * (h(l) + h(r) ≥ w(l, r) for every pair), the graph's edges are exactly
- * the tight pairs, the equality subgraph, and the matched edges are among
- * them. At the end the matching is perfect and its weight equals the sum
- * of the labels.
+ * the tight pairs, the equality subgraph, with no pair twice; and the
+ * matched edges share no vertex and never get fewer. At the end the
+ * matching is perfect and its weight equals the sum of the labels.
  */
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
@@ -54,8 +54,15 @@ function checkTrace(w: Matrix) {
   const trace = replay(document);
   const at = (v: string) =>
     LEFT.includes(v) ? LEFT.indexOf(v) : RIGHT.indexOf(v);
+  let size = 0;
   for (let f = 1; f <= trace.length; f++) {
     const g = stateOf(trace, 'g', 'graph', f);
+    const ends = g.data.edges
+      .filter((e) => g.marks.edgeMarks[e.id] === 'selected')
+      .flatMap((e) => [e.from, e.to]);
+    expect(new Set(ends).size).toBe(ends.length);
+    expect(ends.length / 2).toBeGreaterThanOrEqual(size);
+    size = ends.length / 2;
     const h = (v: string) => Number(g.marks.notes[v]!.replace('−', '-'));
     for (let i = 0; i < n; i++)
       for (let j = 0; j < n; j++)
@@ -111,6 +118,27 @@ describe('hungarian', () => {
       }),
       fuzz,
     );
+  });
+
+  it('gives a pair that leaves the equality subgraph and comes back a new id', () => {
+    // Found by search: no matrix up to 4 × 4 does this.
+    const w = [
+      [6, 8, -8, -8, 1],
+      [4, 7, 10, 6, 7],
+      [8, -8, 9, -9, -2],
+      [-2, -2, 8, 0, -5],
+      [-7, 9, 8, 4, 1],
+    ];
+    const { results, weight } = checkTrace(w);
+    expect(results).toEqual([best(w)]);
+    expect(weight).toBe(best(w));
+    const added = runOk('hungarian', { weights: w }).document.steps.flatMap(
+      (s) =>
+        s.actions.flatMap((a) =>
+          a.type === 'addEdge' ? [(a as { edge: { id: string } }).edge.id] : [],
+        ),
+    );
+    expect(added.some((id) => id.endsWith('.2'))).toBe(true);
   });
 
   it('keeps every step within its action limit at 6 × 6', () => {
