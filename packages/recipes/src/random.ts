@@ -38,6 +38,10 @@ export function seededRandom(seed: number): Random {
   };
   return {
     next,
-    int: (lo, hi) => lo + Math.floor(next() * (hi - lo + 1)),
+    int(lo, hi) {
+      if (!(Number.isInteger(lo) && Number.isInteger(hi) && lo <= hi))
+        throw new RangeError(`No integer lies from ${lo} to ${hi}`);
+      return lo + Math.floor(next() * (hi - lo + 1));
+    },
   };
 }

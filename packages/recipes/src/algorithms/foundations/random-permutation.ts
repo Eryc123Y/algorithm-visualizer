@@ -93,7 +93,7 @@ export const randomPermutation = defineAlgorithm({
     }
     trace.step(
       'done',
-      `a is a uniformly random order of the values: [${a.join(', ')}].`,
+      `a is now [${a.join(', ')}]: one of the ${n}! orders of the values, each equally likely.`,
     );
     arr.pointer({ name: 'i', index: null }).pointer({ name: 'j', index: null });
   },
