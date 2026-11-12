@@ -30,12 +30,13 @@ Each file records one architectural decision: the context, what we decided, and 
 | [0024](0024-text-measurement-and-fonts.md)          | Text is measured with bundled font metrics and outlined in SVG       | Accepted                            |
 | [0025](0025-exporting-figures.md)                   | Figures are exported as a series of SVG files that share one canvas  | Accepted                            |
 | [0026](0026-typst-package.md)                       | The Typst package runs the engine in QuickJS in a Wasm plugin        | Accepted                            |
-| [0027](0027-latex-package.md)                       | The LaTeX package draws TikZ figures from a standalone command       | Accepted                            |
-| [0028](0028-slides.md)                              | Slides step through a series, one overlay per frame                  | Accepted                            |
+| [0027](0027-latex-package.md)                       | The LaTeX package draws TikZ figures from a standalone command       | Accepted, partly superseded by 0033 |
+| [0028](0028-slides.md)                              | Slides step through a series, one overlay per frame                  | Accepted, partly superseded by 0033 |
 | [0029](0029-auxiliary-structures.md)                | Figures place auxiliary structures beside the main one               | Accepted                            |
 | [0030](0030-built-in-themes.md)                     | Built-in themes are named and work in every output                   | Accepted                            |
 | [0031](0031-painter-fixes.md)                       | Marks, notes and pointer bands that read in every frame              | Accepted                            |
 | [0032](0032-algorithm-and-input.md)                 | Every output takes an algorithm and its input, in short notations    | Accepted                            |
+| [0033](0033-slide-figures-fill-the-frame.md)        | Slide figures fill the frame                                         | Accepted                            |
 | [0034](0034-tree-additions.md)                      | Trees get root order, NIL slots, named notes, edge marks, root lists | Accepted                            |
 
 Template: Status · Context · Decision · Consequences.

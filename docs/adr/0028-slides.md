@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted
+Accepted; how `algoviz-slides` sizes its frames is superseded by ADR 0033
 
 ## Context
 
