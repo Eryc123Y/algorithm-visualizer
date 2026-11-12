@@ -56,6 +56,31 @@ describe('transitive-closure', () => {
     expect(results).toEqual([9]);
   });
 
+  it('takes undirected edges one way, and keeps self-loops on the diagonal', () => {
+    const one = runOk('transitive-closure', {
+      graph: { directed: false, nodes: ['a', 'b'], edges: [['a', 'b']] },
+    });
+    expect(stateOf(replay(one.document), 't', 'table').data).toEqual([
+      [1, 1],
+      [0, 1],
+    ]);
+    expect(one.results).toEqual([1]);
+    const loop = runOk('transitive-closure', { graph: 'a->a, a->b' });
+    expect(stateOf(replay(loop.document), 't', 'table').data).toEqual([
+      [1, 1],
+      [0, 1],
+    ]);
+  });
+
+  it('closes a ring of 40, every vertex reaching every other', () => {
+    const ring = Array.from(
+      { length: 40 },
+      (_, k) => `v${k}->v${(k + 1) % 40}`,
+    );
+    const { results } = runOk('transitive-closure', { graph: ring.join(', ') });
+    expect(results).toEqual([40 * 39]);
+  });
+
   it('agrees with a search from every vertex', () => {
     fc.assert(
       fc.property(graphs, ({ nodes, edges }) => {

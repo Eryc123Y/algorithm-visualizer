@@ -40,7 +40,9 @@ export const transitiveClosure = defineAlgorithm({
       TRANSITIVE-CLOSURE(G, n)
           for i = 0 to n - 1
               for j = 0 to n - 1
-                  t[i][j] = 1 if i == j or G has the edge (i, j), else 0  // @start
+                  if i = j or (i, j) is an edge of G
+                      t[i][j] = 1  // @start
+                  else t[i][j] = 0
           for k = 0 to n - 1  // @through
               for i = 0 to n - 1
                   for j = 0 to n - 1
@@ -48,13 +50,14 @@ export const transitiveClosure = defineAlgorithm({
           return t  // @done
     `,
     python: `
-      def transitive_closure(g):
-          n = len(g)
-          t = [[int(i == j or g.has_edge(i, j)) for j in range(n)] for i in range(n)]  # @start
+      def transitive_closure(a):
+          # a[i][j] is 1 when (i, j) is an edge
+          n = len(a)
+          t = [[int(i == j or a[i][j]) for j in range(n)] for i in range(n)]  # @start
           for k in range(n):  # @through
               for i in range(n):
                   for j in range(n):
-                      t[i][j] = t[i][j] or (t[i][k] and t[k][j])  # @update
+                      t[i][j] = t[i][j] | (t[i][k] & t[k][j])  # @update
           return t  # @done
     `,
   },
@@ -70,14 +73,14 @@ export const transitiveClosure = defineAlgorithm({
     const table = trace.add('t', {
       kind: 'table',
       place: 'side',
-      label: 't, reaches',
+      label: 't',
       initial: t.map((row) => [...row]),
       rowLabels: [...g.nodes],
       columnLabels: [...g.nodes],
     });
     trace.step(
       'start',
-      'Start from the edges: 1 where an edge leads from the row to the column, and on the diagonal, since every vertex reaches itself; 0 elsewhere.',
+      `Start from the edges: 1 where an edge leads from the row to the column, and on the diagonal, since every vertex reaches itself; 0 elsewhere.${input.graph.directed === true ? '' : ' Each edge is taken one way, as it is listed.'}`,
     );
     for (let k = 0; k < n; k++) {
       const via = g.nodes[k]!;
