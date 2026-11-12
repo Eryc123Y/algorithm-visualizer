@@ -3,13 +3,20 @@
  * what a correct visualization must show. Checks look at states, not at
  * names or wording, so any faithful document passes.
  */
-import type { Trace } from '@algoviz/core';
+import type { GraphState, Trace } from '@algoviz/core';
 import type { Scalar, StructureKindName } from '@algoviz/spec';
 
 import {
   anyTrack,
   expect,
+  graphIs,
   hasCycle,
+  maxGain,
+  num,
+  nums,
+  rejected,
+  selected,
+  str,
   inorder,
   listOrder,
   nodeIds,
@@ -24,6 +31,7 @@ import {
   values,
   type Track,
 } from './checks.ts';
+import { kindTasks } from './tasks-kinds.ts';
 
 export interface EvalTask {
   readonly id: string;
@@ -35,11 +43,6 @@ export interface EvalTask {
   /** Problems with what the document shows; empty if it is correct. */
   check(trace: Trace): string[];
 }
-
-/** A value as a number; numeric strings count, null does not. */
-const num = (v: Scalar): number => (v === null ? NaN : Number(v));
-const nums = (vs: readonly Scalar[]) => vs.map(num);
-const str = (vs: readonly Scalar[]) => vs.map((v) => String(v));
 
 /** An array that starts as `input` and ends sorted ascending. */
 const sortsArray =
@@ -132,11 +135,6 @@ const redRed = (s: Track<'tree'>['first']) =>
       n.children.some((c) => c !== null && treeNode(s, c)?.color === 'red'),
   );
 
-type GraphState = Track<'graph'>['first'];
-const selected = (s: GraphState) =>
-  s.data.edges.filter((e) => s.marks.edgeMarks[e.id] === 'selected');
-const rejected = (s: GraphState) =>
-  s.data.edges.filter((e) => s.marks.edgeMarks[e.id] === 'rejected');
 /** Weights of selected edges in the order they were first selected. */
 function selectionOrder(states: readonly GraphState[]): number[] {
   const seen = new Set<string>();
@@ -171,10 +169,6 @@ const noneStartSolved = (
   isAnswer = (v: Scalar) => !blank(v) && num(v) !== 0,
 ) => last.every((v, k) => !isAnswer(v) || first[k] !== v);
 
-/** Most of `count(state)` gained in one step: 1 when added one at a time. */
-const maxGain = <S>(states: readonly S[], count: (s: S) => number) =>
-  Math.max(0, ...states.slice(1).map((s, i) => count(s) - count(states[i]!)));
-
 const isMaxHeap = (xs: readonly number[]) =>
   xs.every((x, i) => i === 0 || xs[Math.floor((i - 1) / 2)]! >= x);
 
@@ -191,37 +185,6 @@ function lcsTable(a: string, b: string): number[][] {
           : Math.max(L[i - 1]![j]!, L[i]![j - 1]!);
   return L;
 }
-
-/** A graph whose nodes and edges are exactly these (by endpoints). */
-function graphIs(
-  t: Track<'graph'>,
-  nodes: readonly string[],
-  edges: readonly (readonly [string, string, number?])[],
-  directed: boolean,
-): string[] {
-  const g = t.first;
-  const key = (a: string, b: string) =>
-    directed ? `${a}>${b}` : [a, b].sort().join('|');
-  const want = edges.map(([a, b, w]) => `${key(a, b)}:${w ?? ''}`).sort();
-  const got = g.data.edges
-    .map(
-      (e) =>
-        `${key(e.from, e.to)}:${typeof e.weight === 'number' ? e.weight : ''}`,
-    )
-    .sort();
-  return [
-    ...expect(
-      g.directed === directed,
-      directed ? 'is not directed' : 'is directed',
-    ),
-    ...expect(
-      same(sortedNodes(g), [...nodes].sort()),
-      `has nodes ${JSON.stringify(sortedNodes(g))}`,
-    ),
-    ...expect(same(got, want), `has edges ${JSON.stringify(got)}`),
-  ];
-}
-const sortedNodes = (g: Track<'graph'>['first']) => [...nodeIds(g)].sort();
 
 export const tasks: readonly EvalTask[] = [
   {
@@ -1009,6 +972,7 @@ export const tasks: readonly EvalTask[] = [
         );
       }),
   },
+  ...kindTasks,
 ];
 
 export const findTask = (id: string) => tasks.find((t) => t.id === id);
