@@ -6,6 +6,7 @@
  * as properties and attributes, and errors are written as text.
  */
 import {
+  err,
   readShareFragment,
   type Diagnostic,
   type ShareContent,
@@ -41,9 +42,25 @@ export async function showFragment(
   page: PlayPage,
 ): Promise<void> {
   const request = ++latest;
-  const read = await readShareFragment(fragment);
+  let read: Awaited<ReturnType<typeof readShareFragment>>;
+  try {
+    read = await readShareFragment(fragment);
+  } catch (e) {
+    read = err([internalError(e)]);
+  }
   if (request !== latest) return;
+  try {
+    show(read, page, request);
+  } catch (e) {
+    show(err([internalError(e)]), page, request);
+  }
+}
 
+function show(
+  read: Awaited<ReturnType<typeof readShareFragment>>,
+  page: PlayPage,
+  request: number,
+): void {
   page.stage.replaceChildren();
   page.errors.replaceChildren();
   page.intro.hidden = !(read.ok && read.value === undefined);
@@ -56,10 +73,28 @@ export async function showFragment(
     return;
   }
   if (read.value === undefined) return;
-  page.stage.append(createPlayer(doc, read.value));
-  const title = titleOf(read.value);
-  if (title !== undefined) doc.title = `${title} · algoviz`;
+  const content = read.value;
+  const player = createPlayer(doc, content);
+  // Name the tab only once the player has accepted the content.
+  player.addEventListener(
+    'algo-load',
+    () => {
+      const title = titleOf(content);
+      if (request === latest && title !== undefined)
+        doc.title = `${title} · algoviz`;
+    },
+    { once: true },
+  );
+  page.stage.append(player);
 }
+
+/** A failure of the page itself, which should never happen. */
+const internalError = (e: unknown): Diagnostic => ({
+  code: 'INTERNAL',
+  path: '$',
+  message: `The page failed: ${e instanceof Error ? e.message : String(e)}`,
+  hint: 'Reload the page; if it fails again, the link may be fine but this page is not.',
+});
 
 /** A player for the content, set up before it connects. */
 function createPlayer(doc: Document, content: ShareContent): Player {
@@ -76,17 +111,27 @@ function createPlayer(doc: Document, content: ShareContent): Player {
   return player;
 }
 
-/** A document's title, or the algorithm's id. */
+/**
+ * A document's title, or the algorithm's id, for the tab: without control
+ * or direction characters, which could make it read as something else.
+ */
 function titleOf(content: ShareContent): string | undefined {
-  if (!('document' in content)) return content.algorithm;
-  const doc = content.document;
-  const title =
-    typeof doc === 'object' && doc !== null && 'title' in doc
-      ? doc.title
-      : undefined;
-  return typeof title === 'string' && title.trim() !== ''
-    ? title.slice(0, 120)
-    : undefined;
+  const doc = 'document' in content ? content.document : undefined;
+  const raw =
+    'algorithm' in content
+      ? content.algorithm
+      : typeof doc === 'object' && doc !== null && 'title' in doc
+        ? doc.title
+        : undefined;
+  if (typeof raw !== 'string') return undefined;
+  const title = raw
+    .replace(
+      /[\u0000-\u001f\u007f-\u009f\u061c\u200e\u200f\u202a-\u202e\u2066-\u2069]/g,
+      '',
+    )
+    .trim()
+    .slice(0, 120);
+  return title === '' ? undefined : title;
 }
 
 function errorItem(doc: Document, error: Diagnostic): HTMLLIElement {

@@ -18,5 +18,9 @@
       "simple": { "limit": 60, "period": 60 },
     },
   ],
+  // Share links (ADR 0040): set the address of your share page, the
+  // site's play/ page, and algoviz_show and algoviz_run_recipe return a
+  // link to it. Without it they make none.
+  // "vars": { "ALGOVIZ_SHARE_URL": "https://example.org/play/" },
   "observability": { "enabled": false },
 }

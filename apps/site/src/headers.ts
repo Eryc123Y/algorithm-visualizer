@@ -51,3 +51,16 @@ export function headersFile(): string {
     ].join('\n');
   return `${block('/*', SITE_HEADERS)}\n\n${block('/assets/*', ASSET_HEADERS)}\n`;
 }
+
+const CHARSET = '<meta charset="utf-8" />';
+
+/**
+ * A page with the policy in a `<meta>` right after its charset, which
+ * must come first: the policy then covers every script and style.
+ */
+export function withPolicy(html: string, page: string): string {
+  if (!html.includes(CHARSET))
+    throw new Error(`${page} must start its <head> with ${CHARSET}`);
+  const meta = `<meta http-equiv="Content-Security-Policy" content="${CONTENT_SECURITY_POLICY}" />`;
+  return html.replace(CHARSET, () => `${CHARSET}\n    ${meta}`);
+}

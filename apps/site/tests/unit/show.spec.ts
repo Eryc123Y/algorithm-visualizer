@@ -4,7 +4,7 @@
  * properties the page sets; the E2E tests run the real player.
  */
 import { shareFragment } from '@algoviz/spec';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { showFragment, type PlayPage } from '../../src/play/show.ts';
 
@@ -40,6 +40,9 @@ interface Player extends HTMLElement {
 
 const player = () => page.stage.querySelector<Player>('algo-player');
 
+/** What the real player does once its content validated. */
+const load = () => player()!.dispatchEvent(new CustomEvent('algo-load'));
+
 async function fragmentOf(
   content: Parameters<typeof shareFragment>[0],
 ): Promise<string> {
@@ -69,6 +72,9 @@ describe('the share page', () => {
     expect(p.theme).toBe('dark');
     expect(page.intro.hidden).toBe(true);
     expect(page.problem.hidden).toBe(true);
+    // The title waits for the player to accept the document.
+    expect(document.title).toBe('algoviz player');
+    load();
     expect(document.title).toBe('Two <b>pushes</b> · algoviz');
   });
 
@@ -80,7 +86,43 @@ describe('the share page', () => {
     expect(p.input).toBe('A-B 4');
     expect(p.hasAttribute('frame')).toBe(false);
     expect(p.theme).toBe('auto');
+    load();
     expect(document.title).toBe('dijkstra · algoviz');
+  });
+
+  it('keeps a document’s title out of the tab until it validates, without control or direction characters', async () => {
+    const titled = {
+      ...doc,
+      title: '\u202Egnp.exe\u202C\u0007 Sort\u200F\n',
+    };
+    await showFragment(await fragmentOf({ document: titled }), page);
+    player()!.dispatchEvent(new CustomEvent('algo-error'));
+    expect(document.title).toBe('algoviz player');
+    load();
+    expect(document.title).toBe('gnp.exe Sort · algoviz');
+  });
+
+  it('ignores a load from a player a later link replaced', async () => {
+    await showFragment(await fragmentOf({ document: doc }), page);
+    const first = player()!;
+    await showFragment('#v=1&alg=bfs', page);
+    first.dispatchEvent(new CustomEvent('algo-load'));
+    expect(document.title).toBe('algoviz player');
+  });
+
+  it('shows an unexpected failure as an error, not a stale player', async () => {
+    await showFragment('#v=1&alg=bfs', page);
+    const create = vi
+      .spyOn(document, 'createElement')
+      .mockImplementationOnce(() => {
+        throw new Error('no custom elements');
+      });
+    await showFragment('#v=1&alg=dfs', page);
+    create.mockRestore();
+    expect(player()).toBeNull();
+    expect(page.problem.hidden).toBe(false);
+    expect(page.errors.textContent).toContain('INTERNAL');
+    expect(page.errors.textContent).toContain('no custom elements');
   });
 
   it('leaves the input out for the first example', async () => {

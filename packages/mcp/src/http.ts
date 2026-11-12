@@ -36,7 +36,8 @@ export interface HttpOptions {
   readonly allowedHosts?: readonly string[];
   /**
    * The share page's address, for share links (ADR 0040); none by
-   * default. Checked here, once, so a bad address fails at start.
+   * default. Checked here, once, so a bad address fails at start. A
+   * `server` of your own sets its own, so this one is then unused.
    */
   readonly shareUrl?: string | undefined;
   /** The server for each request; `createServer` hiding internal errors by default. */

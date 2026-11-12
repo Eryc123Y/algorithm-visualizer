@@ -103,9 +103,27 @@ describe('shareFragment', () => {
     });
   });
 
-  it('refuses a document that is not JSON', async () => {
-    const result = await shareFragment({ document: undefined });
-    expect(result.ok).toBe(false);
+  it('refuses a document that is not JSON, without throwing', async () => {
+    const cyclic: Record<string, unknown> = {};
+    cyclic['self'] = cyclic;
+    for (const document of [
+      undefined,
+      1n,
+      cyclic,
+      {
+        toJSON: () => {
+          throw new Error('no');
+        },
+      },
+    ]) {
+      const result = await shareFragment({ document });
+      expect(result.ok).toBe(false);
+      if (result.ok) continue;
+      expect(result.error[0]).toMatchObject({
+        code: 'INVALID_LINK',
+        path: '$.doc',
+      });
+    }
   });
 
   it('keeps every character of an input', async () => {
@@ -132,6 +150,16 @@ describe('readShareFragment', () => {
       algorithm: 'bfs',
       frame: '2',
     });
+  });
+
+  it('skips unknown keys without decoding them, bare ones too', async () => {
+    expect(await read('v=1&alg=bfs&future=%&flag&%ZZ=1')).toEqual({
+      algorithm: 'bfs',
+    });
+  });
+
+  it('reads a known key written with percent-encoding', async () => {
+    expect(await read('%76=1&%61lg=bfs')).toEqual({ algorithm: 'bfs' });
   });
 
   it('reads + as a plus sign', async () => {
@@ -191,6 +219,22 @@ describe('readShareFragment', () => {
     }
   });
 
+  it('refuses an input longer than any writer makes', async () => {
+    const at = await read(
+      `v=1&alg=a&in=${'x'.repeat(SHARE_LIMITS.inputLength)}`,
+    );
+    expect(at).toMatchObject({ algorithm: 'a' });
+    const error = await failure(
+      `v=1&alg=a&in=${'x'.repeat(SHARE_LIMITS.inputLength + 1)}`,
+    );
+    expect(error).toMatchObject({ code: 'LINK_TOO_LARGE', path: '$.in' });
+  });
+
+  it('says what went wrong when DEFLATE gives no reason', async () => {
+    const error = await failure('v=1&doc=AAAA');
+    expect(error.message).toMatch(/raw DEFLATE$/);
+  });
+
   it('refuses compressed text that is not UTF-8 or not JSON', async () => {
     const latin1 = await deflate(new Uint8Array([0x7b, 0xff, 0x7d]));
     expect((await failure(`v=1&doc=${latin1}`)).message).toMatch(/UTF-8/);
@@ -213,11 +257,12 @@ describe('readShareFragment', () => {
   });
 
   it('stops inflating a document past its limit', async () => {
-    // 17 MiB of spaces compress to about 17 KB.
+    // 5 MiB of spaces compress to about 5 KB.
+    expect(SHARE_LIMITS.documentBytes).toBe(4 * 1024 * 1024);
     const bomb = await deflate(
       new Uint8Array(SHARE_LIMITS.documentBytes + (1 << 20)).fill(0x20),
     );
-    expect(bomb.length).toBeLessThan(40_000);
+    expect(bomb.length).toBeLessThan(10_000);
     const error = await failure(`v=1&doc=${bomb}`);
     expect(error.code).toBe('LINK_TOO_LARGE');
     expect(error.path).toBe('$.doc');
@@ -253,6 +298,26 @@ describe('shareLink', () => {
     expect(link.error[0]!.message).toContain('16,384');
   });
 
+  it('stops compressing a document that cannot fit', async () => {
+    // Random digits: about 3.3 bits each, so 1 MB stays far too large.
+    let x = 11;
+    const noise = Array.from({ length: 1_000_000 }, () => {
+      x = (x * 48271) % 2147483647;
+      return String(x % 10);
+    }).join('');
+    const link = await shareLink(base, { document: { noise } });
+    expect(link.ok).toBe(false);
+    if (link.ok) return;
+    expect(link.error[0]).toMatchObject({ code: 'LINK_TOO_LARGE', path: '$' });
+    expect(link.error[0]!.message).toContain('16,384');
+  });
+
+  it('fits a document whose link is just under the limit', async () => {
+    const doc = { title: 'x'.repeat(100) };
+    const link = await shareLink(base, { document: doc });
+    expect(link.ok).toBe(true);
+  });
+
   it('makes a link of exactly the limit', async () => {
     const prefix = `${base}#v=1&alg=a&in=`;
     const input = 'x'.repeat(SHARE_LIMITS.linkLength - prefix.length);
@@ -283,6 +348,11 @@ describe('checkShareBase', () => {
     ['javascript:alert(1)', /http/],
     ['https://example.org/play/#x', /fragment/],
     ['https://example.org/play/#', /fragment/],
+    ['https://user:pass@example.org/play/', /user name/],
+    ['https://example.org@evil.example/play/', /user name/],
+    ['https://example.org\\play/', /backslash/],
+    ['https://example.org/pl\u0007ay/', /control/],
+    ['https:///play/', /absolute/],
   ])('refuses %j', (base, message) => {
     const result = checkShareBase(base);
     expect(result.ok).toBe(false);

@@ -7,28 +7,21 @@ import { fileURLToPath, URL } from 'node:url';
 
 import { defaultClientConditions, defineConfig, type Plugin } from 'vite';
 
-import { CONTENT_SECURITY_POLICY, headersFile } from './src/headers.ts';
+import { headersFile, withPolicy } from './src/headers.ts';
 
 const page = (path: string) => fileURLToPath(new URL(path, import.meta.url));
 
 /**
- * The pages' security headers: the policy as each page's first `<meta>`
- * (only in the build: the dev server needs its own scripts and socket),
- * and every header in `_headers`.
+ * The pages' security headers: the policy in a `<meta>` right after the
+ * charset, before anything it governs (only in the build: the dev server
+ * needs its own scripts and socket), and every header in `_headers`.
  */
 const securityHeaders = (): Plugin => ({
   name: 'algoviz:security-headers',
   apply: 'build',
-  transformIndexHtml: () => [
-    {
-      tag: 'meta',
-      attrs: {
-        'http-equiv': 'Content-Security-Policy',
-        content: CONTENT_SECURITY_POLICY,
-      },
-      injectTo: 'head-prepend',
-    },
-  ],
+  transformIndexHtml(html, { filename }) {
+    return withPolicy(html, filename);
+  },
   generateBundle() {
     this.emitFile({
       type: 'asset',
@@ -47,6 +40,8 @@ export default defineConfig({
   plugins: [securityHeaders()],
   build: {
     target: 'es2022',
+    // Every asset as a file: the policy allows no data: URLs.
+    assetsInlineLimit: 0,
     rollupOptions: {
       input: { play: page('play/index.html') },
     },

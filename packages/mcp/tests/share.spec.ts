@@ -150,7 +150,7 @@ describe('with a share page', () => {
     expect(result.isError).toBeFalsy();
     const [, second] = texts(result);
     expect(second).toMatch(
-      /^No share link\. The link would be [\d,]+ characters long, over the limit of 16,384/,
+      /^No share link\. The link would be longer than 16,384 characters/,
     );
     expect(second).toMatch(/recipe/);
   });

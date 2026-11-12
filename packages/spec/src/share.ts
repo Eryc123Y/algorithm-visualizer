@@ -22,10 +22,12 @@ export const SHARE_LIMITS = {
   linkLength: 16_384,
   /** The longest fragment a reader takes: Chrome's longest URL. */
   fragmentLength: 2_097_152,
-  /** The most bytes a document may inflate to. */
-  documentBytes: 16 * 1024 * 1024,
+  /** The most bytes a document may inflate to (ADR 0041). */
+  documentBytes: 4 * 1024 * 1024,
   /** The longest `alg`, `frame` or `theme`. */
   textLength: 200,
+  /** The longest `in` (ADR 0041). */
+  inputLength: 65_536,
 } as const;
 
 export type ShareErrorCode =
@@ -59,14 +61,40 @@ type Shared<T> = Promise<Result<T, readonly ShareDiagnostic[]>>;
 // --- Writing ------------------------------------------------------------------
 
 /** The fragment of a link, without its `#`. */
-export async function shareFragment(content: ShareContent): Shared<string> {
+export function shareFragment(content: ShareContent): Shared<string> {
+  return fragmentWithin(content, Infinity);
+}
+
+/**
+ * The fragment, made only while it can stay within `room` characters: a
+ * document stops compressing once its compressed form cannot fit, so one
+ * far too large for a link costs little.
+ */
+async function fragmentWithin(
+  content: ShareContent,
+  room: number,
+): Shared<string> {
   const pairs: [string, string][] = [['v', String(SHARE_LINK_VERSION)]];
   if ('document' in content) {
-    const json = JSON.stringify(content.document) as string | undefined;
+    // JSON.stringify gives undefined for undefined or a function, and
+    // throws for a BigInt or a cycle.
+    let json: string | undefined;
+    try {
+      json = JSON.stringify(content.document);
+    } catch (e) {
+      return fail(
+        'INVALID_LINK',
+        '$.doc',
+        `The document is not JSON${reason(e)}`,
+      );
+    }
     if (json === undefined)
       return fail('INVALID_LINK', '$.doc', 'The document is not JSON');
-    const packed = await deflate(json);
+    // "v=1&doc=" and base64url's four characters for every three bytes.
+    const maxBytes = Math.floor(((room - 8) * 3) / 4);
+    const packed = await deflate(json, maxBytes);
     if (!packed.ok) return packed;
+    if (packed.value === undefined) return tooLong();
     pairs.push(['doc', packed.value]);
   } else {
     pairs.push(['alg', content.algorithm]);
@@ -98,18 +126,22 @@ export async function shareLink(
 ): Shared<string> {
   const page = checkShareBase(base);
   if (!page.ok) return page;
-  const fragment = await shareFragment(content);
+  const fragment = await fragmentWithin(
+    content,
+    SHARE_LIMITS.linkLength - page.value.length - 1,
+  );
   if (!fragment.ok) return fragment;
   const link = `${page.value}#${fragment.value}`;
-  if (link.length > SHARE_LIMITS.linkLength)
-    return fail(
-      'LINK_TOO_LARGE',
-      '$',
-      `The link would be ${thousands(link.length)} characters long, over the limit of ${thousands(SHARE_LIMITS.linkLength)} for share links`,
-      'Share the document as a file instead, or a recipe and its input, whose link carries only the input.',
-    );
-  return ok(link);
+  return link.length > SHARE_LIMITS.linkLength ? tooLong() : ok(link);
 }
+
+const tooLong = () =>
+  fail(
+    'LINK_TOO_LARGE',
+    '$',
+    `The link would be longer than ${thousands(SHARE_LIMITS.linkLength)} characters, the limit for share links`,
+    'Share the document as a file instead, or a recipe and its input, whose link carries only the input.',
+  );
 
 /**
  * Checks the address of a share page: an absolute `http:` or `https:`
@@ -120,6 +152,13 @@ export function checkShareBase(
 ): Result<string, readonly ShareDiagnostic[]> {
   const hint =
     'Give the address of the share page, such as https://example.org/play/.';
+  if (/[\u0000-\u001f\u007f]/.test(base))
+    return fail(
+      'INVALID_LINK',
+      '$',
+      "The share page's address must not contain control characters",
+      hint,
+    );
   const scheme = /^([A-Za-z][A-Za-z0-9+.-]*):/.exec(base)?.[1];
   if (scheme !== undefined && !/^https?$/i.test(scheme))
     return fail(
@@ -140,6 +179,20 @@ export function checkShareBase(
       'INVALID_LINK',
       '$',
       "The share page's address must not contain spaces",
+      hint,
+    );
+  if (base.includes('\\'))
+    return fail(
+      'INVALID_LINK',
+      '$',
+      "The share page's address must not contain a backslash, which browsers read as /",
+      hint,
+    );
+  if (/^https?:\/\/[^/?#]*@/i.test(base))
+    return fail(
+      'INVALID_LINK',
+      '$',
+      "The share page's address must not hold a user name or password",
       hint,
     );
   if (base.includes('#'))
@@ -219,6 +272,12 @@ export async function readShareFragment(
     );
   if (algorithm === '')
     return fail('INVALID_LINK', '$.alg', '`alg` is empty: name an algorithm');
+  if (input !== undefined && input.length > SHARE_LIMITS.inputLength)
+    return fail(
+      'LINK_TOO_LARGE',
+      '$.in',
+      `\`in\` is ${thousands(input.length)} characters long; a share page reads inputs of up to ${thousands(SHARE_LIMITS.inputLength)}`,
+    );
   return ok({
     algorithm,
     ...(input === undefined ? {} : { input }),
@@ -226,7 +285,11 @@ export async function readShareFragment(
   });
 }
 
-/** The fragment's keys and values, decoded; unknown keys are dropped. */
+/**
+ * The fragment's known keys and their values, decoded. A pair whose key
+ * is unknown is skipped before its value is decoded, bare or not, so a
+ * newer link's extra keys never stop an older reader (ADR 0041).
+ */
 function readPairs(
   text: string,
 ): Result<Map<Key, string>, readonly ShareDiagnostic[]> {
@@ -234,25 +297,24 @@ function readPairs(
   for (const pair of text.split('&')) {
     if (pair === '') continue;
     const at = pair.indexOf('=');
+    const key = decodeKey(at < 0 ? pair : pair.slice(0, at));
+    if (key === undefined) continue;
     if (at < 0)
       return fail(
         'INVALID_LINK',
         '$',
         `Expected key=value in the link, not ${quote(pair)}`,
       );
-    let key: string;
     let value: string;
     try {
-      key = decodeURIComponent(pair.slice(0, at));
       value = decodeURIComponent(pair.slice(at + 1));
     } catch {
       return fail(
         'INVALID_LINK',
-        `$.${pair.slice(0, Math.min(at, 20))}`,
-        `${quote(pair.slice(0, 60))} has malformed percent-encoding`,
+        `$.${key}`,
+        `\`${key}\` has malformed percent-encoding`,
       );
     }
-    if (!isKey(key)) continue;
     if (pairs.has(key))
       return fail(
         'INVALID_LINK',
@@ -262,6 +324,16 @@ function readPairs(
     pairs.set(key, value);
   }
   return ok(pairs);
+}
+
+/** A known key, decoded; undefined for any other. */
+function decodeKey(raw: string): Key | undefined {
+  try {
+    const key = decodeURIComponent(raw);
+    return isKey(key) ? key : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 const isKey = (key: string): key is Key =>
@@ -328,11 +400,19 @@ const noStreams = () =>
     'This JavaScript runtime cannot compress or inflate documents: it has no CompressionStream',
   );
 
-async function deflate(json: string): Shared<string> {
+/** base64url of the compressed JSON; undefined past `maxBytes`. */
+async function deflate(
+  json: string,
+  maxBytes: number,
+): Shared<string | undefined> {
   if (!web.CompressionStream || !web.TextEncoder) return noStreams();
   const bytes = new web.TextEncoder().encode(json);
-  const packed = await pipe(new web.CompressionStream('deflate-raw'), bytes);
-  return ok(toBase64url(packed ?? new Uint8Array()));
+  const packed = await pipe(
+    new web.CompressionStream('deflate-raw'),
+    bytes,
+    maxBytes,
+  );
+  return ok(packed === undefined ? undefined : toBase64url(packed));
 }
 
 async function inflate(payload: string): Shared<unknown> {
@@ -361,7 +441,7 @@ async function inflate(payload: string): Shared<unknown> {
     return fail(
       'INVALID_LINK',
       '$.doc',
-      `\`doc\` is not a document compressed with raw DEFLATE: ${e instanceof Error ? e.message : String(e)}`,
+      `\`doc\` is not a document compressed with raw DEFLATE${reason(e)}`,
       'Copy the whole link: a link cut short or changed by hand no longer holds its document.',
     );
   }
@@ -387,7 +467,7 @@ async function inflate(payload: string): Shared<unknown> {
     return fail(
       'INVALID_LINK',
       '$.doc',
-      `\`doc\` does not hold JSON: ${e instanceof Error ? e.message : String(e)}`,
+      `\`doc\` does not hold JSON${reason(e)}`,
     );
   }
 }
@@ -474,6 +554,12 @@ function fail(
   return err([
     { code, path, message, ...(hint === undefined ? {} : { hint }) },
   ]);
+}
+
+/** ": why", from an error, or nothing when it gives no reason. */
+function reason(e: unknown): string {
+  const text = e instanceof Error ? e.message : String(e);
+  return text.trim() === '' ? '' : `: ${text}`;
 }
 
 /** 16384 as "16,384", without Intl, which the Typst plugin lacks. */

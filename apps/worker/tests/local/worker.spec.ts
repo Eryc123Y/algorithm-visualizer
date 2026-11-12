@@ -122,3 +122,59 @@ describe('the Worker in workerd', () => {
     expect((await as('192.0.2.2')).status).toBe(405);
   });
 });
+
+describe('share links in workerd (ADR 0040)', () => {
+  let shared: Awaited<ReturnType<typeof unstable_startWorker>>;
+  beforeAll(async () => {
+    shared = await unstable_startWorker({
+      config: fileURLToPath(new URL('../../wrangler.jsonc', import.meta.url)),
+      build: { bundle: false },
+      bindings: {
+        ALGOVIZ_SHARE_URL: {
+          type: 'plain_text',
+          value: 'https://example.org/play/',
+        },
+      },
+      dev: {
+        server: { hostname: '127.0.0.1', port: 0 },
+        inspector: false,
+        remote: false,
+        watch: false,
+      },
+    });
+    await shared.ready;
+  });
+  afterAll(async () => {
+    await shared?.dispose();
+  });
+
+  it('links a recipe and a compressed document', async () => {
+    const client = new Client({ name: 'local-test', version: '0' });
+    await client.connect(
+      new StreamableHTTPClientTransport(new URL('/mcp', await shared.url)),
+    );
+    const texts = (r: Awaited<ReturnType<Client['callTool']>>) =>
+      (r.content as { text: string }[]).map((c) => c.text);
+    const recipe = await client.callTool({
+      name: 'algoviz_show',
+      arguments: { recipe: 'bfs', input: 'A-B, B-C' },
+    });
+    expect(texts(recipe)[1]).toMatch(
+      /: https:\/\/example\.org\/play\/#v=1&alg=bfs&in=A-B%2C%20B-C$/,
+    );
+    const document = await client.callTool({
+      name: 'algoviz_show',
+      arguments: {
+        document: {
+          version: '0.1',
+          structures: { s: { kind: 'stack', initial: [] } },
+          steps: [{ actions: [{ target: 's', type: 'push', element: 1 }] }],
+        },
+      },
+    });
+    expect(texts(document)[1]).toMatch(
+      /: https:\/\/example\.org\/play\/#v=1&doc=[A-Za-z0-9_-]+$/,
+    );
+    await client.close();
+  });
+});
