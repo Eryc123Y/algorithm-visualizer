@@ -102,15 +102,23 @@ describe('the Worker in workerd', () => {
     expect(big.status).toBe(413);
   });
 
-  it('answers 429 with Retry-After once a client passes the limit', async () => {
+  // Last, since it spends a client's allowance for the minute. It sends
+  // 130 requests, over twice the limit, so that even a window that rolls
+  // over mid-loop counts more than 60 in one of its halves.
+  it('answers 429 with Retry-After once a client passes the limit, per client', async () => {
+    const as = (ip: string) =>
+      fetch(mcp(), { method: 'GET', headers: { 'cf-connecting-ip': ip } });
     const statuses: number[] = [];
     let retry: string | null = null;
-    for (let k = 0; k < 70; k++) {
-      const res = await fetch(mcp(), { method: 'GET' });
+    for (let k = 0; k < 130; k++) {
+      const res = await as('192.0.2.1');
       statuses.push(res.status);
       if (res.status === 429) retry = res.headers.get('retry-after');
     }
     expect(statuses).toContain(429);
+    expect(statuses.slice(0, 60).every((s) => s === 405)).toBe(true);
     expect(retry).toBe('60');
+    // Another client still has its own allowance.
+    expect((await as('192.0.2.2')).status).toBe(405);
   });
 });

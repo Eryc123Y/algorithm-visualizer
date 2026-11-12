@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "npm run build:app -w @algoviz/mcp && vite build",
-    "dev": "npm run build && wrangler dev",
+    "dev": "wrangler dev",
     "test:worker": "npm run build && vitest run --config vitest.worker.config.ts"
   },
   "dependencies": {
