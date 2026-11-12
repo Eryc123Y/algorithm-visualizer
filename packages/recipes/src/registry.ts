@@ -47,6 +47,7 @@ import {
 } from './algorithms/trees/tree-walks.ts';
 import { finiteAutomatonMatcher } from './algorithms/strings/finite-automaton.ts';
 import { kmp } from './algorithms/strings/kmp.ts';
+import { randomPermutation } from './algorithms/foundations/random-permutation.ts';
 import { recursionTree } from './algorithms/foundations/recursion-tree.ts';
 import { suffixArray } from './algorithms/strings/suffix-array.ts';
 import { strassen } from './algorithms/foundations/strassen.ts';
@@ -141,6 +142,7 @@ export const algorithms: readonly Algorithm[] = [
   modularExponentiation,
   strassen,
   recursionTree,
+  randomPermutation,
 ];
 
 /** The module with `id`, if there is one. */
