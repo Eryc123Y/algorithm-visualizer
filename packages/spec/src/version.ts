@@ -22,6 +22,7 @@ export const PROTOCOL_VERSIONS = [
   '0.5',
   '0.6',
   '0.7',
+  '0.8',
 ] as const;
 
 /** A protocol version this package reads. */
@@ -264,6 +265,19 @@ export const PROTOCOL_FEATURES: readonly ProtocolFeature[] = [
       anyTreeAction(
         d,
         (a) => a['type'] === 'markEdge' || a['type'] === 'labelEdge',
+      ),
+  },
+  {
+    name: 'array patterns',
+    since: '0.8',
+    usedBy: (d) =>
+      Object.values(d.structures).some(
+        (s) => s.kind === 'array' && s.pattern !== undefined,
+      ) ||
+      anyActionOn(
+        d,
+        'array',
+        (a) => a['type'] === 'align' || a['type'] === 'check',
       ),
   },
   {

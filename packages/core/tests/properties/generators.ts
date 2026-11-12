@@ -55,15 +55,34 @@ export function declaration(kind: StructureKindName, r: Dice): StructureDecl {
     ...(r.chance(0.3) ? { place: r.pick(['main', 'side'] as const) } : {}),
   };
   switch (kind) {
-    case 'array':
+    case 'array': {
+      const initial = elements(r, r.int(9 * r.scale));
+      // Now and then a pattern under the text, of values often from it.
+      if (r.chance(0.2)) {
+        const pattern = Array.from({ length: 1 + r.int(3) }, (_, j) => ({
+          id: `q${j}`,
+          value:
+            initial.length > 0 && r.chance(0.8)
+              ? r.pick(initial).value
+              : r.value(),
+        }));
+        return {
+          kind,
+          ...label,
+          initial,
+          pattern,
+          ...(r.chance(0.5) ? { shift: r.int(initial.length + 1) } : {}),
+        };
+      }
       return {
         kind,
         ...label,
         ...(r.chance(0.3)
           ? { view: r.pick(['row', 'tree', 'heap'] as const) }
           : {}),
-        initial: elements(r, r.int(9 * r.scale)),
+        initial,
       };
+    }
     case 'stack':
     case 'queue':
       return { kind, ...label, initial: elements(r, r.int(6 * r.scale)) };
@@ -259,6 +278,25 @@ function priorityQueueAction(s: PriorityQueueState, r: Dice): Fields {
 
 function arrayAction(s: ArrayState, r: Dice): Fields {
   const n = s.data.length;
+  const p = s.pattern;
+  if (p !== undefined && r.chance(0.6)) {
+    const m = p.elements.length;
+    if (r.chance(0.6)) return { type: 'check', j: r.index(m) };
+    const shift = r.index(n + 1);
+    // Usually the true count of leading matches; sometimes any count.
+    let k = 0;
+    while (
+      k < m &&
+      shift + k < n &&
+      p.elements[k]!.value === s.data[shift + k]!.value
+    )
+      k++;
+    return {
+      type: 'align',
+      shift,
+      ...(r.chance(0.7) ? { matched: r.chance(0.8) ? k : r.int(m + 2) } : {}),
+    };
+  }
   switch (r.int(8)) {
     case 0:
       return { type: 'set', index: r.index(n), value: r.value() };

@@ -37,7 +37,21 @@ export interface ArrayMarks {
   readonly settled: readonly ElementId[];
 }
 
-export type ArrayState = StructureState<readonly ArrayElement[], ArrayMarks>;
+/** A pattern aligned under the text (ADR 0037). */
+export interface ArrayPattern {
+  readonly elements: readonly ArrayElement[];
+  /** Text position under the pattern's first element. */
+  readonly shift: number;
+  /** Pattern positions known to match the text above, in this alignment. */
+  readonly matched: readonly number[];
+  /** The pattern position compared in this step, or null. */
+  readonly compared: number | null;
+}
+
+export type ArrayState = StructureState<readonly ArrayElement[], ArrayMarks> & {
+  /** Present when the array declares a pattern. */
+  readonly pattern?: ArrayPattern;
+};
 
 type Reduced = Result<ArrayState, ReduceError>;
 
@@ -51,7 +65,80 @@ const withData = (s: ArrayState, data: readonly ArrayElement[]): Reduced =>
   ok({ data, marks: s.marks });
 
 const withMarks = (s: ArrayState, marks: Partial<ArrayMarks>): Reduced =>
-  ok({ data: s.data, marks: { ...s.marks, ...marks } });
+  ok({ ...s, marks: { ...s.marks, ...marks } });
+
+/** Actions that move or change the text, which a pattern fixes. */
+const CHANGES_TEXT: ReadonlySet<string> = new Set([
+  'set',
+  'swap',
+  'insert',
+  'remove',
+]);
+
+const noPattern = (): ReduceError => ({
+  code: 'INVALID_OPERATION',
+  path: [],
+  message: 'This array has no pattern',
+  hint: 'Declare one with `pattern` (version 0.8).',
+});
+
+/** `align`: the pattern moves, and its first `matched` elements match. */
+function align(
+  s: ArrayState,
+  p: ArrayPattern,
+  shift: number,
+  matched: number,
+): Reduced {
+  const n = s.data.length;
+  const m = p.elements.length;
+  const bad =
+    checkRange(s, n + 1, [['shift'], shift]) ??
+    checkLimit('the pattern', m, m + 1, [['matched'], matched]);
+  if (bad) return err(bad);
+  if (shift + matched > n)
+    return err({
+      code: 'OUT_OF_RANGE',
+      path: ['matched'],
+      message: `${matched} pattern elements at shift ${shift} reach past the end of the text of ${n}`,
+      hint: `At shift ${shift}, at most ${n - shift} can match.`,
+    });
+  for (let j = 0; j < matched; j++) {
+    const [pv, tv] = [p.elements[j]!.value, s.data[shift + j]!.value];
+    if (pv !== tv)
+      return err({
+        code: 'INVALID_OPERATION',
+        path: ['matched'],
+        message: `Pattern element ${j} (${JSON.stringify(pv)}) is not text element ${shift + j} (${JSON.stringify(tv)}), so the first ${matched} do not match`,
+        hint: 'Give the number of leading pattern elements that equal the text under them.',
+      });
+  }
+  const pattern: ArrayPattern = {
+    ...p,
+    shift,
+    matched: Array.from({ length: matched }, (_, j) => j),
+    compared: null,
+  };
+  return ok({ ...s, pattern });
+}
+
+/** `check`: pattern element `j` against the text above it. */
+function check(s: ArrayState, p: ArrayPattern, j: number): Reduced {
+  const m = p.elements.length;
+  const bad = checkLimit('the pattern', m, m, [['j'], j]);
+  if (bad) return err(bad);
+  const at = p.shift + j;
+  if (at >= s.data.length)
+    return err({
+      code: 'OUT_OF_RANGE',
+      path: ['j'],
+      message: `Pattern element ${j} is at text position ${at}, past the end of the text of ${s.data.length}`,
+      hint: 'Check only the pattern elements under the text.',
+    });
+  const equal = p.elements[j]!.value === s.data[at]!.value;
+  const matched =
+    equal && !p.matched.includes(j) ? [...p.matched, j] : p.matched;
+  return ok({ ...s, pattern: { ...p, matched, compared: j } });
+}
 
 /**
  * Marks after a change of shape: this step's marks follow their elements;
@@ -70,6 +157,13 @@ const moveMarks = (m: ArrayMarks, f: Reindex, length: number): ArrayMarks => ({
 
 function reduceArray(s: ArrayState, a: ArrayAction): Reduced {
   const n = s.data.length;
+  if (s.pattern !== undefined && CHANGES_TEXT.has(a.type))
+    return err({
+      code: 'INVALID_OPERATION',
+      path: [],
+      message: 'The text is fixed while a pattern is aligned under it',
+      hint: 'Use an array without a pattern to change its elements.',
+    });
   // Most actions address existing positions (< n); insert and pointer may
   // also address the position one past the end (<= n).
 
@@ -163,6 +257,14 @@ function reduceArray(s: ArrayState, a: ArrayAction): Reduced {
       if (s.marks.settled.includes(id)) return ok(s);
       return withMarks(s, { settled: [...s.marks.settled, id] });
     }
+    case 'align':
+      return s.pattern === undefined
+        ? err(noPattern())
+        : align(s, s.pattern, a.shift, a.matched ?? 0);
+    case 'check':
+      return s.pattern === undefined
+        ? err(noPattern())
+        : check(s, s.pattern, a.j);
     default: {
       const unreachable: never = a;
       return unreachable;
@@ -180,15 +282,33 @@ export const arrayKind: StructureKind<ArrayDecl, ArrayState, ArrayAction> = {
       pointers: {},
       settled: [],
     },
-  }),
-  beginStep: (s) =>
-    s.marks.compare === null &&
-    s.marks.swapped === null &&
-    s.marks.highlight.length === 0
-      ? s
+    ...(decl.pattern === undefined
+      ? {}
       : {
-          data: s.data,
-          marks: { ...s.marks, compare: null, swapped: null, highlight: [] },
-        },
+          pattern: {
+            elements: decl.pattern,
+            shift: decl.shift ?? 0,
+            matched: [],
+            compared: null,
+          },
+        }),
+  }),
+  beginStep: (s) => {
+    const marksClear =
+      s.marks.compare === null &&
+      s.marks.swapped === null &&
+      s.marks.highlight.length === 0;
+    const compared = s.pattern?.compared ?? null;
+    if (marksClear && compared === null) return s;
+    return {
+      ...s,
+      marks: marksClear
+        ? s.marks
+        : { ...s.marks, compare: null, swapped: null, highlight: [] },
+      ...(s.pattern === undefined || compared === null
+        ? {}
+        : { pattern: { ...s.pattern, compared: null } }),
+    };
+  },
   reduce: reduceArray,
 };

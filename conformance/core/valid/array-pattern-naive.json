@@ -1,0 +1,99 @@
+{
+  "description": "The naive matcher's checks at shifts 0 and 2 of a a b in a c a a b c: a mismatch, then an occurrence; the matches stay until the next align, and the compare mark lasts a step.",
+  "input": {
+    "version": "0.8",
+    "structures": {
+      "T": {
+        "kind": "array",
+        "initial": ["a", "c", "a", "a", "b", "c"],
+        "pattern": ["a", "a", "b"]
+      }
+    },
+    "steps": [
+      { "actions": [{ "target": "T", "type": "check", "j": 0 }] },
+      { "actions": [{ "target": "T", "type": "check", "j": 1 }] },
+      { "actions": [{ "target": "T", "type": "align", "shift": 2 }] },
+      {
+        "actions": [
+          { "target": "T", "type": "check", "j": 0 },
+          { "target": "T", "type": "check", "j": 1 },
+          { "target": "T", "type": "check", "j": 2 }
+        ]
+      },
+      { "actions": [{ "target": "T", "type": "settle", "index": 2 }] }
+    ]
+  },
+  "expectedLength": 5,
+  "expectedFrames": [
+    {
+      "index": 2,
+      "state": {
+        "T": {
+          "kind": "array",
+          "state": {
+            "data": [
+              { "id": "e0", "value": "a" },
+              { "id": "e1", "value": "c" },
+              { "id": "e2", "value": "a" },
+              { "id": "e3", "value": "a" },
+              { "id": "e4", "value": "b" },
+              { "id": "e5", "value": "c" }
+            ],
+            "marks": {
+              "compare": null,
+              "swapped": null,
+              "highlight": [],
+              "pointers": {},
+              "settled": []
+            },
+            "pattern": {
+              "elements": [
+                { "id": "p0", "value": "a" },
+                { "id": "p1", "value": "a" },
+                { "id": "p2", "value": "b" }
+              ],
+              "shift": 0,
+              "matched": [0],
+              "compared": 1
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 5,
+      "state": {
+        "T": {
+          "kind": "array",
+          "state": {
+            "data": [
+              { "id": "e0", "value": "a" },
+              { "id": "e1", "value": "c" },
+              { "id": "e2", "value": "a" },
+              { "id": "e3", "value": "a" },
+              { "id": "e4", "value": "b" },
+              { "id": "e5", "value": "c" }
+            ],
+            "marks": {
+              "compare": null,
+              "swapped": null,
+              "highlight": [],
+              "pointers": {},
+              "settled": ["e2"]
+            },
+            "pattern": {
+              "elements": [
+                { "id": "p0", "value": "a" },
+                { "id": "p1", "value": "a" },
+                { "id": "p2", "value": "b" }
+              ],
+              "shift": 2,
+              "matched": [0, 1, 2],
+              "compared": null
+            }
+          }
+        }
+      }
+    }
+  ]
+}

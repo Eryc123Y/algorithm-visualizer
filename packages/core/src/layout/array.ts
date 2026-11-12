@@ -11,11 +11,15 @@
  *   (i)           (j)          ← pointer badges; several at one index stack
  *   (lo)                         below the first, which alone has the arrow
  * ```
+ *
+ * With a pattern (ADR 0037), its indices and its row come between the
+ * text and the pointers, shifted so that pattern element 0 sits under
+ * text position `shift`; the pointers then point at a column of both.
  */
 import type { ArrayDecl } from '@algoviz/spec';
 
 import type { Block, LayoutInput } from '../kind.ts';
-import type { ArrayState } from '../kinds/array.ts';
+import type { ArrayPattern, ArrayState } from '../kinds/array.ts';
 import { layoutArrayHeap } from './array-heap.ts';
 import {
   badgeOverhang,
@@ -31,7 +35,7 @@ import {
   titleRowHeight,
   titleWidth,
 } from './common.ts';
-import type { LayoutFonts } from './options.ts';
+import type { LayoutFonts, LayoutOptions } from './options.ts';
 import type { BoxRole, SceneItem } from './scene.ts';
 
 /** Sizes an array needs; merged over all frames so the layout stays stable. */
@@ -54,13 +58,17 @@ export function measureArray(
   const perIndex = new Map<number, number>();
   for (const index of Object.values(state.marks.pointers))
     perIndex.set(index, (perIndex.get(index) ?? 0) + 1);
+  const pattern = state.pattern;
   return {
     slots: Math.max(
       state.data.length,
+      pattern === undefined ? 0 : pattern.shift + pattern.elements.length,
       ...[...perIndex.keys()].map((i) => i + 1),
     ),
     valueWidth: maxWidth(
-      state.data.map((e) => formatScalar(e.value)),
+      [...state.data, ...(pattern?.elements ?? [])].map((e) =>
+        formatScalar(e.value),
+      ),
       fonts.value,
     ),
     pointerRows: Math.max(0, ...perIndex.values()),
@@ -80,12 +88,73 @@ export const mergeArrayMetrics = (
 
 function roleOf(state: ArrayState, index: number, id: string): BoxRole {
   const { compare, swapped, highlight, settled } = state.marks;
+  const p = state.pattern;
+  // A text cell over the compared or a matched pattern element.
+  const under = (j: number) => p !== undefined && p.shift + j === index;
   if (compare !== null && compare.includes(index)) return 'compare';
+  if (p?.compared != null && under(p.compared)) return 'compare';
   if (swapped !== null && swapped.includes(index)) return 'swap';
   if (highlight.includes(index)) return 'highlight';
+  if (p?.matched.some(under) === true) return 'highlight';
   if (settled.includes(id)) return 'settled';
   return 'default';
 }
+
+/** Space between the text row and the pattern's index row. */
+const PATTERN_GAP = 6;
+
+/** The pattern's index labels and cells, starting at `top`. */
+function patternItems(
+  name: string,
+  p: ArrayPattern,
+  left: (column: number) => number,
+  cellWidth: number,
+  top: number,
+  o: LayoutOptions,
+): SceneItem[] {
+  const indexRow = indexRowHeight(o);
+  const cellsTop = top + indexRow;
+  return p.elements.flatMap((e, j): SceneItem[] => {
+    const x = left(p.shift + j);
+    const role: BoxRole =
+      p.compared === j
+        ? 'compare'
+        : p.matched.includes(j)
+          ? 'highlight'
+          : 'default';
+    const cell: SceneItem = {
+      type: 'box',
+      key: `${name}/pattern/${e.id}`,
+      x,
+      y: cellsTop,
+      width: cellWidth,
+      height: o.cellHeight,
+      role,
+      text: formatScalar(e.value),
+      fontSize: o.valueFontSize,
+    };
+    if (!o.showIndices) return [cell];
+    return [
+      {
+        type: 'text',
+        key: `${name}/pattern-index/${j}`,
+        x: x + cellWidth / 2,
+        y: top + indexRow / 2,
+        anchor: 'middle',
+        role: 'index',
+        text: String(j),
+        fontSize: o.indexFontSize,
+      },
+      cell,
+    ];
+  });
+}
+
+/** Height of the pattern's rows under the text, if it has a pattern. */
+const patternHeight = (decl: ArrayDecl, o: LayoutOptions) =>
+  decl.pattern === undefined
+    ? 0
+    : PATTERN_GAP + indexRowHeight(o) + o.cellHeight;
 
 export function layoutArray(
   input: LayoutInput<ArrayDecl, ArrayState, ArrayMetrics>,
@@ -158,7 +227,10 @@ function layoutArrayRow(
   const titleRow = titleRowHeight(o);
   const indexRow = indexRowHeight(o);
   const cellsTop = origin.y + titleRow + indexRow;
-  const cellsBottom = cellsTop + o.cellHeight;
+  const textBottom = cellsTop + o.cellHeight;
+  const below = patternHeight(input.decl, o);
+  // Pointers go under the pattern, if there is one.
+  const cellsBottom = textBottom + below;
 
   const items: SceneItem[] = titleItems(name, title, origin, o);
   state.data.forEach((element, index) => {
@@ -190,6 +262,17 @@ function layoutArrayRow(
       fontSize: o.valueFontSize,
     });
   });
+  if (state.pattern !== undefined)
+    items.push(
+      ...patternItems(
+        name,
+        state.pattern,
+        (column) => cellsLeft + column * pitch,
+        cellWidth,
+        textBottom + PATTERN_GAP,
+        o,
+      ),
+    );
   items.push(
     ...pointerItems(
       name,
@@ -208,7 +291,7 @@ function layoutArrayRow(
   return {
     items,
     width: Math.max(cellsWidth + 2 * overhang, titleWidth(title, o)),
-    height: titleRow + indexRow + o.cellHeight + (open ? band : 0),
+    height: titleRow + indexRow + o.cellHeight + below + (open ? band : 0),
     ...(open || band === 0 ? {} : { reserved: band }),
   };
 }
