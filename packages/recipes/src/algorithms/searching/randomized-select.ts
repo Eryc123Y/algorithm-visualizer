@@ -88,7 +88,7 @@ export const randomizedSelect = defineAlgorithm({
   input: SelectInput.extend({ seed: seedField }),
   main: 'values',
   examples: [
-    { values: [5, 3, 8, 1, 9, 2, 7], i: 3, seed: 1 },
+    { values: [5, 3, 8, 1, 9, 2, 7], i: 3, seed: 2 },
     { values: [12, 4, 30, 7, 19, 25, 1, 16, 9], i: 5, seed: 2 },
   ],
   code: {
@@ -138,7 +138,7 @@ ${PARTITION_CODE.python}`,
           { vars: { p, r, i } },
         );
         calls.push(`call-${p}-${r}`, call);
-        arr.settle({ index: p }).highlight({ indices: [p] });
+        arr.settle({ index: p }).pointer({ name: 'answer', index: p });
         break;
       }
       const q = partition(p, r, call);
@@ -149,7 +149,7 @@ ${PARTITION_CODE.python}`,
           `The pivot ${a[q]} is the ${ordinal(k)} smallest of a[${p}..${r}], the one wanted: it is the answer, the ${ordinal(target)} smallest.`,
           { vars: { p, r, i, k, q } },
         );
-        arr.highlight({ indices: [q] });
+        arr.pointer({ name: 'answer', index: q });
         break;
       }
       const left = i < k;
