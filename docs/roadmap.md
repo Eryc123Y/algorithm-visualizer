@@ -126,7 +126,7 @@ Each entry is one registry module, or one per operation for data structures. Eac
 - [ ] matrix-chain multiplication
 - [ ] optimal BST
 - [ ] activity selection
-- [ ] Huffman codes (S1, S4)
+- [x] Huffman codes (S1, S4) (#74)
 - [ ] offline caching
 - [ ] dynamic tables and binary counter (amortized analysis)
 
