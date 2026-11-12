@@ -164,7 +164,7 @@ Each entry is one registry module, or one per operation for data structures. Eac
 - [x] LUP decomposition (#98)
 - [x] FFT (#99)
 - [x] Euclid and extended Euclid (#100)
-- [x] modular exponentiation (#PR)
+- [x] modular exponentiation (#101)
 - [x] string matching: naive, Rabin–Karp, finite automaton, KMP (S9, [ADR 0037](adr/0037-array-pattern.md), #82, #83)
 - [ ] suffix array
 - [ ] approximation: vertex cover, TSP tour, set cover
