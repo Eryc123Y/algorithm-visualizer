@@ -151,7 +151,8 @@ describe('a series file in Beamer', () => {
     ]);
     compile(
       'together',
-      '\\begin{frame}\\algovizset{start=1}\\algovizinput{series.tex}\\algovizinput{other.tex}\\end{frame}',
+      // Side by side, so each takes less than half the line (ADR 0033).
+      '\\begin{frame}\\algovizset{start=1, width=.45\\linewidth}\\algovizinput{series.tex}\\algovizinput{other.tex}\\end{frame}',
     );
     const together = pages(join(dir, 'together.pdf'));
     expect(together).toHaveLength(3);
@@ -333,7 +334,7 @@ function oneAtATime(dir: string): string {
   ];
   writeFileSync(
     join(dir, 'reference.tex'),
-    `\\documentclass{beamer}\n\\usepackage{algoviz}\n\\algovizset{height=0.72\\textheight}\n\\begin{document}\n${body.join('\n')}\n\\end{document}\n`,
+    `\\documentclass{beamer}\n\\usepackage{algoviz}\n\\begin{document}\n${body.join('\n')}\n\\end{document}\n`,
   );
   return 'reference.tex';
 }

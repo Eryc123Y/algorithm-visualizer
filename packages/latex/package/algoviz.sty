@@ -109,7 +109,9 @@
 \tl_new:N \l__algoviz_algorithm_tl
 \dim_new:N \l__algoviz_width_dim
 \dim_new:N \l__algoviz_height_dim
-\fp_new:N \l__algoviz_scale_fp
+% Empty when scale is not given: the slide box in Beamer, the natural
+% size elsewhere (ADR 0033).
+\tl_new:N \l__algoviz_scale_tl
 \tl_new:N \l__algoviz_value_font_tl
 \tl_new:N \l__algoviz_label_font_tl
 % The families the figure's theme sets values and labels in (ADR 0030),
@@ -170,8 +172,10 @@
     width .initial:n = 0pt ,
     height .dim_set:N = \l__algoviz_height_dim ,
     height .initial:n = 0pt ,
-    scale .fp_set:N = \l__algoviz_scale_fp ,
-    scale .initial:n = 1 ,
+    % Without a value, the default again.
+    scale .tl_set:N = \l__algoviz_scale_tl ,
+    scale .initial:n = ,
+    scale .default:n = ,
     % Empty: the family the figure's theme names.
     value~font .tl_set:N = \l__algoviz_value_font_tl ,
     value~font .initial:n = ,
@@ -236,47 +240,79 @@
   }
 \cs_generate_variant:Nn \msg_error:nnnnn { nneee }
 
-% The unit: from width or height when given, keeping the figure's shape;
-% otherwise the natural size times scale, but never wider than the line.
+% The unit of a canvas #1 by #2 (ADR 0027, 0033), from the first rule that
+% applies: width or height fits the figure inside the box of the sides
+% given, whose other side is the slide box's in Beamer and unbounded
+% elsewhere; scale is the natural size times scale; in Beamer the figure
+% fits the slide box, the line by three quarters of the text height;
+% elsewhere it has its natural size. The natural size is never wider than
+% the line.
+\fp_const:Nn \c__algoviz_slide_height_fp { 0.75 }
+\bool_new:N \g__algoviz_slides_bool
 \cs_new_protected:Npn \__algoviz_unit:nn #1#2
   {
     \bool_lazy_or:nnTF
       { \dim_compare_p:nNn \l__algoviz_width_dim > \c_zero_dim }
       { \dim_compare_p:nNn \l__algoviz_height_dim > \c_zero_dim }
       {
-        \fp_set:Nn \l__algoviz_unit_fp { inf }
-        \dim_compare:nNnT \l__algoviz_width_dim > \c_zero_dim
-          {
-            \fp_set:Nn \l__algoviz_unit_fp
-              {
-                min ( \l__algoviz_unit_fp ,
-                  \dim_to_fp:n { \l__algoviz_width_dim } / (#1) )
-              }
-          }
-        \dim_compare:nNnT \l__algoviz_height_dim > \c_zero_dim
-          {
-            \fp_set:Nn \l__algoviz_unit_fp
-              {
-                min ( \l__algoviz_unit_fp ,
-                  \dim_to_fp:n { \l__algoviz_height_dim } / (#2) )
-              }
-          }
+        \__algoviz_fit:nnnn {#1} {#2}
+          { \l__algoviz_width_dim } { \l__algoviz_height_dim }
       }
       {
-        \fp_set:Nn \l__algoviz_unit_fp
-          { \l__algoviz_scale_fp * \f@size / \c__algoviz_units_per_size_fp }
-        % Never wider than the line, where there is one.
-        \dim_compare:nNnT \linewidth > \c_zero_dim
+        \tl_if_empty:NTF \l__algoviz_scale_tl
           {
-            \fp_set:Nn \l__algoviz_unit_fp
-              {
-                min ( \l__algoviz_unit_fp ,
-                  \dim_to_fp:n { \linewidth } / (#1) )
-              }
+            \bool_if:NTF \g__algoviz_slides_bool
+              { \__algoviz_fit:nnnn {#1} {#2} { 0pt } { 0pt } }
+              { \__algoviz_natural:nn { 1 } {#1} }
           }
+          { \__algoviz_natural:Vn \l__algoviz_scale_tl {#1} }
       }
     \dim_set:Nn \algoviz@u { \fp_to_dim:n { \l__algoviz_unit_fp } }
   }
+
+% The largest unit at which a canvas #1 by #2 fits a box #3 by #4. A side
+% of 0pt is the slide box's in Beamer, and unbounded elsewhere.
+\cs_new_protected:Npn \__algoviz_fit:nnnn #1#2#3#4
+  {
+    \fp_set:Nn \l__algoviz_unit_fp { inf }
+    \__algoviz_fit_side:nnn {#1} {#3} { \linewidth }
+    \__algoviz_fit_side:nnn {#2} {#4}
+      { \fp_to_dim:n { \c__algoviz_slide_height_fp * \textheight } }
+    % A box without a bounded side, as where there is no line.
+    \fp_compare:nNnT \l__algoviz_unit_fp = { inf }
+      { \__algoviz_natural:nn { 1 } {#1} }
+  }
+
+% One side: the canvas's #1 units in the length #2, or in the slide box's
+% #3 when #2 is 0pt in Beamer; nothing for an unbounded or empty side.
+\cs_new_protected:Npn \__algoviz_fit_side:nnn #1#2#3
+  {
+    \dim_compare:nNnTF {#2} > \c_zero_dim
+      { \__algoviz_fit_unit:nn {#1} {#2} }
+      {
+        \bool_if:NT \g__algoviz_slides_bool
+          {
+            \dim_compare:nNnT {#3} > \c_zero_dim
+              { \__algoviz_fit_unit:nn {#1} {#3} }
+          }
+      }
+  }
+\cs_new_protected:Npn \__algoviz_fit_unit:nn #1#2
+  {
+    \fp_set:Nn \l__algoviz_unit_fp
+      { min ( \l__algoviz_unit_fp , \dim_to_fp:n {#2} / (#1) ) }
+  }
+
+% The natural size times #1, never wider than the line, for a canvas #2
+% units wide.
+\cs_new_protected:Npn \__algoviz_natural:nn #1#2
+  {
+    \fp_set:Nn \l__algoviz_unit_fp
+      { (#1) * \f@size / \c__algoviz_units_per_size_fp }
+    \dim_compare:nNnT \linewidth > \c_zero_dim
+      { \__algoviz_fit_unit:nn {#2} { \linewidth } }
+  }
+\cs_generate_variant:Nn \__algoviz_natural:nn { V }
 
 \cs_new_protected:Npn \__algoviz_draw:nnnn #1#2#3#4
   { \__algoviz_picture:nnn {#1} {#2} { #3 #4 } }
@@ -303,7 +339,10 @@
       { \IfPackageLoadedTF { beamerarticle } { \c_true_bool } { \c_false_bool } }
       { \bool_gset_true:N \g__algoviz_overlays_bool }
     \IfClassLoadedT { beamer }
-      { \str_gset:Nn \g__algoviz_default_layout_str { wide } }
+      {
+        \str_gset:Nn \g__algoviz_default_layout_str { wide }
+        \bool_gset_true:N \g__algoviz_slides_bool
+      }
   }
 
 % The layout of a figure: the key's, or the document's default.

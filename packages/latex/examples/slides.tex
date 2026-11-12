@@ -2,9 +2,10 @@
 %   latexmk -pdf -shell-escape slides.tex
 % steps= makes one slide per frame of a series, all in one picture.
 % Inside a frame, write the # of a step as \#, or make the frame fragile.
+% A figure fills the line and three quarters of the frame's height; height=
+% gives another share.
 \documentclass{beamer}
 \usepackage{algoviz}
-\algovizset{height=0.72\textheight}
 
 \begin{document}
 
