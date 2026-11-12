@@ -123,7 +123,7 @@ Each entry is one registry module, or one per operation for data structures. Eac
 
 - [x] LCS
 - [x] rod cutting (#115)
-- [ ] matrix-chain multiplication
+- [x] matrix-chain multiplication (#116)
 - [ ] optimal BST
 - [ ] activity selection
 - [x] Huffman codes (S1, S4) (#74)
