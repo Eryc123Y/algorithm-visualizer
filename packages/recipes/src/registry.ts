@@ -9,6 +9,7 @@ import { err, type Diagnostic, type Result } from '@algoviz/spec';
 import type { Algorithm } from './algorithm.ts';
 import { editDistance } from './algorithms/dynamic-programming/edit-distance.ts';
 import { knapsack } from './algorithms/dynamic-programming/knapsack.ts';
+import { optimalBst } from './algorithms/dynamic-programming/optimal-bst.ts';
 import { rodCutting } from './algorithms/dynamic-programming/rod-cutting.ts';
 import { lcs } from './algorithms/dynamic-programming/lcs.ts';
 import { huffman } from './algorithms/greedy/huffman.ts';
@@ -150,6 +151,7 @@ export const algorithms: readonly Algorithm[] = [
   editDistance,
   knapsack,
   rodCutting,
+  optimalBst,
   huffman,
   greedySetCover,
   naiveStringMatcher,
