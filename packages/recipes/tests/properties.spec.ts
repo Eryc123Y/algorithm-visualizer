@@ -1543,6 +1543,19 @@ recipe(
   },
 );
 
+recipe(
+  'transitive-closure',
+  graphs(nonNegative, { minNodes: 1 }),
+  (graph) => runOk('transitive-closure', { graph }).document,
+  (trace, g) => {
+    // The diagonal is 1, and every edge's entry is 1.
+    const t = stateOf(trace, 't', 'table').data;
+    g.nodes.forEach((_, i) => expect(t[i]![i]).toBe(1));
+    for (const [u, v] of g.edges)
+      expect(t[g.nodes.indexOf(u)]![g.nodes.indexOf(v)]).toBe(1);
+  },
+);
+
 describe('topological-sort input checks', () => {
   it(
     'refuses a graph with a cycle, and only such a graph',

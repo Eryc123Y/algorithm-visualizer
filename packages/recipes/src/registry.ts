@@ -17,6 +17,7 @@ import { dfs } from './algorithms/graphs/dfs.ts';
 import { dagShortestPaths } from './algorithms/graphs/dag-shortest-paths.ts';
 import { dijkstra } from './algorithms/graphs/dijkstra.ts';
 import { floydWarshall } from './algorithms/graphs/floyd-warshall.ts';
+import { transitiveClosure } from './algorithms/graphs/transitive-closure.ts';
 import { johnson } from './algorithms/graphs/johnson.ts';
 import { kruskal } from './algorithms/graphs/kruskal.ts';
 import { prim } from './algorithms/graphs/prim.ts';
@@ -100,6 +101,7 @@ export const algorithms: readonly Algorithm[] = [
   prim,
   kruskal,
   floydWarshall,
+  transitiveClosure,
   johnson,
   lcs,
   editDistance,
