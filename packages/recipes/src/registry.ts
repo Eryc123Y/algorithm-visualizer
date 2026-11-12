@@ -77,6 +77,8 @@ import { hashChaining } from './structures/hashing/chaining.ts';
 import { doubleHashing } from './structures/hashing/double-hashing.ts';
 import { linearProbing } from './structures/hashing/linear-probing.ts';
 import { quadraticProbing } from './structures/hashing/quadratic-probing.ts';
+import { linkedList } from './structures/elementary/linked-list.ts';
+import { queue } from './structures/elementary/queue.ts';
 import { stack } from './structures/elementary/stack.ts';
 import { fibonacciHeap } from './structures/fibonacci-heap/index.ts';
 import { maxHeap, minHeap } from './structures/heap/index.ts';
@@ -104,6 +106,8 @@ export const algorithms: readonly Algorithm[] = [
   moveToFront,
   balancedBrackets,
   ...stack.modules,
+  ...queue.modules,
+  ...linkedList.modules,
   ...bst.modules,
   ...avl.modules,
   ...redBlackTree.modules,
