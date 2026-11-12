@@ -19,7 +19,7 @@ Declaration: `{ "kind": "plane", "points": [{ "id": "a", "x": 0, "y": 0 }, { "id
 | `pointer`       | `name`, `point`        | A named badge under a point; `null` removes it. Persists.                                         |
 | `line`          | `name`, `x`            | A named vertical line at `x`, such as `"sweep"` or `"l"`; `null` removes it. At most 8. Persists. |
 
-Marks go with the point or segment they name when it is removed.
+Marks go with the point or segment they name when it is removed. Labels are 1 to 16 characters; line names up to 12, with no control characters or space at either end; pointer names are letters, digits and `_`, starting with a letter or `_`. `highlight` needs `points`, `segments` or both. A point drawn as compared beats highlighted, which beats settled, which beats visited. Keep points visibly apart: two points closer than about a fortieth of the drawing's span overlap. Coordinates or counts out of range are refused as an invalid shape or action, as in other kinds.
 
 ```json
 {

@@ -96,6 +96,23 @@ describe('plane (ADR 0038)', () => {
     expect(
       errorsOf(doc({ points: [{ id: 'a', x: 2e6, y: 0 }] })),
     ).toMatchObject([{ code: 'INVALID_SHAPE' }]);
+    // At most 64 points.
+    expect(
+      errorsOf(
+        doc({
+          points: Array.from({ length: 65 }, (_, k) => ({
+            id: `q${k}`,
+            x: k,
+            y: 0,
+          })),
+        }),
+      ),
+    ).toMatchObject([{ code: 'INVALID_SHAPE', path: at('points') }]);
+    // Line names have no control characters or end spaces.
+    for (const name of ['l\r', 'l ', ' l'])
+      expect(
+        errorsOf(doc({ points }, [{ type: 'line', name, x: 1 }])),
+      ).toMatchObject([{ code: 'INVALID_ACTION' }]);
   });
 
   it('reads its actions, and needs a field for a highlight', () => {
