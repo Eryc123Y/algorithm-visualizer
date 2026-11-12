@@ -10,6 +10,7 @@ import type { Algorithm } from './algorithm.ts';
 import { editDistance } from './algorithms/dynamic-programming/edit-distance.ts';
 import { knapsack } from './algorithms/dynamic-programming/knapsack.ts';
 import { matrixChain } from './algorithms/dynamic-programming/matrix-chain.ts';
+import { optimalBst } from './algorithms/dynamic-programming/optimal-bst.ts';
 import { rodCutting } from './algorithms/dynamic-programming/rod-cutting.ts';
 import { lcs } from './algorithms/dynamic-programming/lcs.ts';
 import { huffman } from './algorithms/greedy/huffman.ts';
@@ -152,6 +153,7 @@ export const algorithms: readonly Algorithm[] = [
   knapsack,
   rodCutting,
   matrixChain,
+  optimalBst,
   huffman,
   greedySetCover,
   naiveStringMatcher,
