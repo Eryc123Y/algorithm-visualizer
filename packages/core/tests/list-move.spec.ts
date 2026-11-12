@@ -79,6 +79,22 @@ describe('linkedList move', () => {
       ),
     );
     expect(s.marks.highlight).toEqual([0, 3, 1]);
+    // Forwards: the ends of the range and positions on both sides of it.
+    const forwards = listAt(
+      mustLoad(
+        doc(
+          [
+            [
+              { type: 'highlight', indices: [0, 1, 2, 4, 5] },
+              { type: 'move', from: 1, to: 4 },
+            ],
+          ],
+          [10, 11, 12, 13, 14, 15],
+        ),
+      ),
+    );
+    expect(forwards.marks.highlight).toEqual([0, 4, 1, 3, 5]);
+    expect(row(forwards)).toBe('10 12 13 14 11 15');
   });
 
   it('refuses positions outside the row', () => {

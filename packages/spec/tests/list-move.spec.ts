@@ -41,11 +41,13 @@ describe('linkedList move (ADR 0036)', () => {
       const r = parseVisualization(doc('0.7', [action]));
       return r.ok ? [] : r.error.map((e) => e.code);
     };
-    expect(codes({ type: 'move', from: 1 })).not.toEqual([]);
-    expect(codes({ type: 'move', from: 1, to: -1 })).not.toEqual([]);
-    expect(codes({ type: 'move', from: 1, to: 0, field: 'next' })).not.toEqual(
-      [],
-    );
+    expect(codes({ type: 'move', from: 1 })).toEqual(['INVALID_ACTION']);
+    expect(codes({ type: 'move', from: 1, to: -1 })).toEqual([
+      'INVALID_ACTION',
+    ]);
+    expect(codes({ type: 'move', from: 1, to: 0, field: 'next' })).toEqual([
+      'INVALID_ACTION',
+    ]);
   });
 
   it('leaves documents without a move at their version', () => {
