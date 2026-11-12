@@ -15,6 +15,7 @@ import { rodCutting } from './algorithms/dynamic-programming/rod-cutting.ts';
 import { lcs } from './algorithms/dynamic-programming/lcs.ts';
 import { activitySelection } from './algorithms/greedy/activity-selection.ts';
 import { huffman } from './algorithms/greedy/huffman.ts';
+import { offlineCaching } from './algorithms/greedy/offline-caching.ts';
 import { greedySetCover } from './algorithms/greedy/greedy-set-cover.ts';
 import { bellmanFord } from './algorithms/graphs/bellman-ford.ts';
 import { bfs } from './algorithms/graphs/bfs.ts';
@@ -157,6 +158,7 @@ export const algorithms: readonly Algorithm[] = [
   optimalBst,
   activitySelection,
   huffman,
+  offlineCaching,
   greedySetCover,
   naiveStringMatcher,
   rabinKarp,
