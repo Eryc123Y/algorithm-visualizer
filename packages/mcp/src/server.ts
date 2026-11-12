@@ -41,29 +41,39 @@ export const INTERNAL_ERROR_TEXT = 'Internal error';
 
 export function createServer(options: ServerOptions = {}): McpServer {
   const hide = options.hideInternalErrors === true;
-  /** A tool callback that, when hiding, answers a throw with the bare text. */
+  const failed = {
+    content: [{ type: 'text' as const, text: INTERNAL_ERROR_TEXT }],
+    isError: true as const,
+  };
+  /**
+   * A tool callback that, when hiding, answers a throw or a rejection with
+   * the bare text.
+   */
   const guarded =
     <A, R>(run: (args: A) => R) =>
-    (
-      args: A,
-    ): R | { content: { type: 'text'; text: string }[]; isError: true } => {
+    (args: A): R | typeof failed | Promise<Awaited<R> | typeof failed> => {
       if (!hide) return run(args);
       try {
-        return run(args);
+        const result = run(args);
+        return result instanceof Promise ? result.catch(() => failed) : result;
       } catch {
-        return {
-          content: [{ type: 'text', text: INTERNAL_ERROR_TEXT }],
-          isError: true,
-        };
+        return failed;
       }
     };
-  /** A resource callback that, when hiding, throws a bare error instead. */
+  /** A resource or prompt callback that, when hiding, fails with the bare text. */
   const quiet =
     <A extends unknown[], R>(read: (...args: A) => R) =>
     (...args: A): R => {
       if (!hide) return read(...args);
       try {
-        return read(...args);
+        const result = read(...args);
+        return (
+          result instanceof Promise
+            ? result.catch(() => {
+                throw new Error(INTERNAL_ERROR_TEXT);
+              })
+            : result
+        ) as R;
       } catch {
         throw new Error(INTERNAL_ERROR_TEXT);
       }
@@ -82,13 +92,14 @@ export function createServer(options: ServerOptions = {}): McpServer {
         inputSchema: t.input,
         annotations: readOnly,
       },
-      guarded((args: Record<string, unknown>) => {
-        const result = t.run(args);
-        return {
+      guarded((args: Record<string, unknown>) =>
+        // Through a promise, so that a tool that ever turns async is
+        // guarded the same way.
+        Promise.resolve(t.run(args)).then((result) => ({
           content: [{ type: 'text' as const, text: result.text }],
           ...(result.isError ? { isError: true } : {}),
-        };
-      }),
+        })),
+      ),
     );
 
   registerAppTool(
@@ -143,11 +154,11 @@ export function createServer(options: ServerOptions = {}): McpServer {
       description: 'How to write algoviz documents, with every structure kind.',
       mimeType: 'text/markdown',
     },
-    (uri) => ({
+    quiet((uri: URL) => ({
       contents: [
         { uri: uri.href, mimeType: 'text/markdown', text: full.value },
       ],
-    }),
+    })),
   );
   for (const kind of kindNames)
     server.registerResource(
@@ -176,7 +187,7 @@ export function createServer(options: ServerOptions = {}): McpServer {
       description: 'JSON Schema (draft 2020-12) of the document format.',
       mimeType: 'application/schema+json',
     },
-    (uri) => ({
+    quiet((uri: URL) => ({
       contents: [
         {
           uri: uri.href,
@@ -184,7 +195,7 @@ export function createServer(options: ServerOptions = {}): McpServer {
           text: JSON.stringify(visualizationJsonSchema()),
         },
       ],
-    }),
+    })),
   );
 
   server.registerPrompt(
@@ -199,14 +210,14 @@ export function createServer(options: ServerOptions = {}): McpServer {
           .describe('What to show, e.g. "insertion sort on [4, 2, 5, 1]".'),
       },
     },
-    ({ request }) => ({
+    quiet(({ request }: { request: string }) => ({
       messages: [
         {
           role: 'user',
-          content: { type: 'text', text: visualizeRequest(request) },
+          content: { type: 'text' as const, text: visualizeRequest(request) },
         },
       ],
-    }),
+    })),
   );
 
   return server;

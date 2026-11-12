@@ -6,6 +6,7 @@
  */
 import { spawn, type ChildProcess } from 'node:child_process';
 import { request as httpRequest } from 'node:http';
+import { connect } from 'node:net';
 import { fileURLToPath } from 'node:url';
 
 import {
@@ -250,6 +251,85 @@ describe('the request rules', () => {
   });
 });
 
+describe('the limits a slow or odd request meets', () => {
+  it('counts reading the body in the time budget', async () => {
+    const quick = createHttpHandler({ timeoutMs: 50 });
+    const drip = new Request(URL_, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        accept: 'application/json, text/event-stream',
+      },
+      body: new ReadableStream({
+        start(c) {
+          c.enqueue(new TextEncoder().encode('{"jsonrpc":'));
+          // …and never the rest.
+        },
+      }),
+      duplex: 'half',
+    });
+    expect((await quick.fetch(drip)).status).toBe(504);
+  });
+
+  it('says its answers vary by Origin when origins are listed', async () => {
+    const listed = createHttpHandler({
+      allowedOrigins: ['https://app.example'],
+    });
+    for (const origin of ['https://app.example', 'https://evil.example'])
+      expect(
+        (await listed.fetch(post(initialize, { origin }))).headers.get('vary'),
+      ).toContain('Origin');
+    expect(
+      (await createHttpHandler().fetch(post(initialize))).headers.get('vary') ??
+        '',
+    ).not.toContain('Origin');
+  });
+
+  it('hides a tool that rejects as well as one that throws', async () => {
+    const guide = tools.find((t) => t.name === 'algoviz_guide')!;
+    const spy = vi
+      .spyOn(guide, 'run')
+      .mockImplementation(
+        () => Promise.reject(new Error('at /Users/someone/x.ts')) as never,
+      );
+    try {
+      const client = new Client({ name: 't', version: '0' });
+      const [a, b] = InMemoryTransport.createLinkedPair();
+      await createServer({ hideInternalErrors: true }).connect(a);
+      await client.connect(b);
+      const result = await client.callTool({
+        name: 'algoviz_guide',
+        arguments: {},
+      });
+      expect(JSON.stringify(result)).not.toContain('/Users/someone');
+      await client.close();
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  it('serves a client on the 2026 revision through the SDK’s handler', async () => {
+    const handler = createHttpHandler();
+    const client = new Client(
+      { name: 'modern', version: '0' },
+      { versionNegotiation: { mode: { pin: '2026-07-28' } } },
+    );
+    await client.connect(
+      new StreamableHTTPClientTransport(new URL(URL_), {
+        fetch: (input, init) => handler.fetch(new Request(input, init)),
+      }),
+    );
+    const { tools: listed } = await client.listTools();
+    expect(listed.map((t) => t.name)).toContain('algoviz_show');
+    const result = await client.callTool({
+      name: 'algoviz_list_recipes',
+      arguments: {},
+    });
+    expect(result.isError).toBeFalsy();
+    await client.close();
+  });
+});
+
 /** Every tool, called with arguments that succeed and that fail. */
 const CALLS: { name: string; arguments: Record<string, unknown> }[] = [
   { name: 'algoviz_guide', arguments: { kinds: ['stack'] } },
@@ -344,6 +424,35 @@ describe('algoviz-mcp --http on a real socket', () => {
   afterAll(async () => {
     await client.close();
     await server.close();
+  });
+
+  /** Sends raw bytes and returns the status line of the answer. */
+  const raw = (text: string) =>
+    new Promise<string>((resolve, reject) => {
+      const { hostname, port } = new URL(server.url);
+      const socket = connect(Number(port), hostname, () => socket.end(text));
+      let said = '';
+      socket.on('data', (d: Buffer) => (said += d.toString()));
+      socket.on('end', () => resolve(said.split('\r\n')[0]!));
+      socket.on('error', reject);
+    });
+
+  it('survives a malformed Host and an absolute request target', async () => {
+    expect(
+      await raw('GET /mcp HTTP/1.1\r\nHost: a b\r\nConnection: close\r\n\r\n'),
+    ).toMatch(/ 40[03] /);
+    expect(
+      await raw(
+        'POST //localhost/mcp HTTP/1.1\r\nHost: evil.example\r\nContent-Length: 0\r\nConnection: close\r\n\r\n',
+      ),
+    ).toMatch(/ 400 /);
+    expect(
+      await raw(
+        'POST /mcp HTTP/1.1\r\nHost: evil.example\r\nContent-Length: 0\r\nConnection: close\r\n\r\n',
+      ),
+    ).toMatch(/ 403 /);
+    // Still serving.
+    expect((await client.listTools()).tools.length).toBeGreaterThan(5);
   });
 
   it('lists and calls the tools through the network', async () => {

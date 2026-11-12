@@ -20,14 +20,25 @@ export interface Serving {
   close(): Promise<void>;
 }
 
-function toRequest(req: IncomingMessage, base: string): Request {
+/**
+ * The web request for a Node one, or null if its target is not a path:
+ * the URL keeps the host it was reached at, and takes only the path and
+ * query from the request line, so `//other/x` cannot change the host.
+ */
+function toRequest(req: IncomingMessage, base: string): Request | null {
+  const target = req.url ?? '/';
+  if (!target.startsWith('/') || target.startsWith('//')) return null;
+  const url = new URL(base);
+  const query = target.indexOf('?');
+  url.pathname = query < 0 ? target : target.slice(0, query);
+  url.search = query < 0 ? '' : target.slice(query);
   const headers = new Headers();
   for (const [name, value] of Object.entries(req.headers))
     if (value !== undefined)
       headers.set(name, Array.isArray(value) ? value.join(', ') : value);
   const method = req.method ?? 'GET';
   const hasBody = method !== 'GET' && method !== 'HEAD';
-  return new Request(new URL(req.url ?? '/', base), {
+  return new Request(url, {
     method,
     headers,
     ...(hasBody
@@ -39,15 +50,27 @@ function toRequest(req: IncomingMessage, base: string): Request {
   });
 }
 
+/** How long a request may take to arrive, and how many sockets at once. */
+const LIMITS = { headersMs: 10_000, requestMs: 30_000, connections: 256 };
+
 /** Listens on `host:port` and answers every request with `handler`. */
 export function serveHttp(
   handler: HttpHandler,
   { host, port }: ServeOptions,
 ): Promise<Serving> {
+  // The URL's origin is where the server listens; Host stays a header,
+  // which the handler checks.
+  const listening = {
+    base: `http://${host.includes(':') ? `[${host}]` : host}`,
+  };
   const server = createServer((req, res) => {
-    const base = `http://${req.headers.host ?? host}`;
-    handler
-      .fetch(toRequest(req, base))
+    Promise.resolve()
+      .then(() => {
+        const request = toRequest(req, listening.base);
+        return request === null
+          ? new Response('Bad request', { status: 400 })
+          : handler.fetch(request);
+      })
       .then(async (response) => {
         res.writeHead(response.status, Object.fromEntries(response.headers));
         if (response.body === null) return void res.end();
@@ -58,15 +81,23 @@ export function serveHttp(
         res.end();
       });
   });
+  server.headersTimeout = LIMITS.headersMs;
+  server.requestTimeout = LIMITS.requestMs;
+  server.maxConnections = LIMITS.connections;
+  // A request Node cannot parse never reaches the handler.
+  server.on('clientError', (_error, socket) => {
+    if (socket.writable) socket.end('HTTP/1.1 400 Bad Request\r\n\r\n');
+    else socket.destroy();
+  });
   return new Promise((resolve, reject) => {
     server.once('error', reject);
     server.listen(port, host, () => {
       const address = server.address();
       const actual =
         typeof address === 'object' && address !== null ? address.port : port;
-      const shown = host.includes(':') ? `[${host}]` : host;
+      listening.base = `http://${host.includes(':') ? `[${host}]` : host}:${actual}`;
       resolve({
-        url: `http://${shown}:${actual}/`,
+        url: `${listening.base}/`,
         close: () =>
           new Promise<void>((done, fail) =>
             server.close((e) => (e ? fail(e) : done())),

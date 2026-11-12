@@ -43,5 +43,6 @@ Each file records one architectural decision: the context, what we decided, and 
 | [0037](0037-array-pattern.md)                       | An array can carry a pattern aligned under it                              | Accepted                            |
 | [0038](0038-plane-kind.md)                          | Points and segments get a kind of their own: `plane`                       | Accepted                            |
 | [0039](0039-http-transport.md)                      | The MCP server speaks Streamable HTTP, statelessly, on Node and on Workers | Accepted                            |
+| [0040](0040-share-links.md)                         | Share links carry their content in the URL fragment                        | Accepted                            |
 
 Template: Status · Context · Decision · Consequences.

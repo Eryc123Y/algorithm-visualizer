@@ -93,6 +93,15 @@ async function readBody(
   return new TextDecoder().decode(bytes);
 }
 
+/** The hostname of a `Host` value, lower case and without its port; null if malformed. */
+function hostnameOf(host: string): string | null {
+  try {
+    return new URL(`http://${host}`).hostname.replace(/^\[|\]$/g, '');
+  } catch {
+    return null;
+  }
+}
+
 /** Whether a header lists `application/json`, ignoring parameters. */
 const isJson = (type: string | null) =>
   type !== null &&
@@ -139,7 +148,6 @@ export function createHttpHandler(options: HttpOptions = {}): HttpHandler {
       : {
           'access-control-allow-origin': allowed === '*' ? '*' : origin,
           'access-control-expose-headers': 'Retry-After',
-          ...(allowed === '*' ? {} : { vary: 'Origin' }),
         };
 
   /** Serves a 2025-era request with a fresh server and a JSON-only transport. */
@@ -153,7 +161,7 @@ export function createHttpHandler(options: HttpOptions = {}): HttpHandler {
     try {
       return await transport.handleRequest(request, { parsedBody: body });
     } finally {
-      void server.close();
+      server.close().catch(() => undefined);
     }
   }
 
@@ -171,19 +179,18 @@ export function createHttpHandler(options: HttpOptions = {}): HttpHandler {
       return rpcError(400, -32700, 'Parse error');
     }
     // The body is read: hand the parsed form on with a fresh request.
+    const headers = new Headers(request.headers);
+    headers.delete('content-length');
     const again = new Request(request.url, {
       method: 'POST',
-      headers: request.headers,
+      headers,
       body: text,
     });
-    const work = (await isLegacyRequest(again, body, {
+    return (await isLegacyRequest(again, body, {
       maxRequestBodySize: maxBody,
     }))
       ? legacy(again, body)
       : modern.fetch(again, { parsedBody: body });
-    return within(work, timeoutMs, () =>
-      rpcError(504, -32603, 'Request took too long'),
-    );
   }
 
   async function route(request: Request): Promise<Response> {
@@ -192,9 +199,11 @@ export function createHttpHandler(options: HttpOptions = {}): HttpHandler {
     if (origin !== null && !originOk(origin))
       return plain(403, 'Origin not allowed');
     if (options.allowedHosts !== undefined) {
-      const host = url.hostname.replace(/^\[|\]$/g, '');
-      const hosts = options.allowedHosts.map((h) => h.replace(/^\[|\]$/g, ''));
-      if (!hosts.includes(host)) return plain(403, 'Host not allowed');
+      // The Host header itself: the URL's host can come from the request line.
+      const host = hostnameOf(request.headers.get('host') ?? url.host);
+      const hosts = options.allowedHosts.map(hostnameOf);
+      if (host === null || !hosts.includes(host))
+        return plain(403, 'Host not allowed');
     }
     if (url.pathname !== path) return plain(404, 'Not found');
     if (request.method === 'OPTIONS')
@@ -208,7 +217,10 @@ export function createHttpHandler(options: HttpOptions = {}): HttpHandler {
       });
     if (request.method !== 'POST')
       return plain(405, 'Method not allowed', { allow: ALLOW_METHODS });
-    return serve(request);
+    // The budget covers reading the body, so a slow one cannot hold on.
+    return within(serve(request), timeoutMs, () =>
+      rpcError(504, -32603, 'Request took too long'),
+    );
   }
 
   return {
@@ -220,10 +232,12 @@ export function createHttpHandler(options: HttpOptions = {}): HttpHandler {
       } catch {
         response = rpcError(500, -32603, 'Internal error');
       }
-      if (origin === null || !originOk(origin)) return response;
       const headers = new Headers(response.headers);
-      for (const [name, value] of Object.entries(cors(origin)))
-        headers.set(name, value);
+      // The answer depends on Origin unless every origin gets the same one.
+      if (allowed !== '*') headers.append('vary', 'Origin');
+      if (origin !== null && originOk(origin))
+        for (const [name, value] of Object.entries(cors(origin)))
+          headers.set(name, value);
       return new Response(response.body, {
         status: response.status,
         statusText: response.statusText,

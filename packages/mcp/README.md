@@ -60,7 +60,7 @@ node packages/mcp/dist/mcp-server.js --http --port 8787
 claude mcp add --transport http algoviz http://127.0.0.1:8787/mcp
 ```
 
-The transport is stateless: every POST gets one JSON answer, and there are no sessions. It refuses bodies over 1 MiB (413), anything but JSON (415), paths other than `/mcp` (404) and methods other than POST (405), gives up after 10 seconds (504), and answers an unexpected failure with a bare "Internal error". `createHttpHandler(options)` from `@algoviz/mcp` is the same server as a web-standard `{ fetch }` handler, for Workers, Deno or Bun; its options set the path, the limits, the allowed origins and the allowed hosts.
+The transport is stateless: every POST gets one JSON answer, and there are no sessions. It refuses bodies over 1 MiB (413), anything but JSON (415), paths other than `/mcp` (404) and methods other than POST (405), gives up after 10 seconds, the body's arrival included (504), and answers an unexpected failure with a bare "Internal error". The Node server also allows 10 seconds for headers and 30 for a whole request, and 256 connections at once. `createHttpHandler(options)` from `@algoviz/mcp` is the same server as a web-standard `{ fetch }` handler, for Workers, Deno or Bun; its options set the path, the limits, the allowed origins and the allowed hosts.
 
 The command line offers the same tools:
 
