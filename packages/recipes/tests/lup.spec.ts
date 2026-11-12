@@ -93,7 +93,9 @@ describe('lup-decomposition', () => {
         }
         expect(ats).not.toContain('singular');
         const { cells, pi } = factors(document);
-        expect([...pi].sort()).toEqual(Array.from({ length: n }, (_, i) => i));
+        expect([...pi].sort((x, y) => x - y)).toEqual(
+          Array.from({ length: n }, (_, i) => i),
+        );
         const l = (i: number, j: number) =>
           i === j ? fromInt(1) : i > j ? cells[i]![j]! : fromInt(0);
         const u = (i: number, j: number) =>
@@ -155,6 +157,44 @@ describe('lup-decomposition', () => {
       /column 2 at or below the diagonal is 0/,
     );
     expect(runOk('lup-decomposition', { a: '0' }).results).toEqual([0]);
+  });
+
+  it('takes A alone, solves 1 × 1, and skips solving when A is singular', () => {
+    expect(runOk('lup-decomposition', '5').results).toEqual([5]);
+    const one = runOk('lup-decomposition', { a: '4', b: '2' });
+    expect(stateOf(replay(one.document), 'S', 'table').data[0]![2]).toBe('1/2');
+    const singular = runOk('lup-decomposition', { a: '1 2; 2 4', b: '1 2' });
+    expect(singular.results).toEqual([0]);
+    expect(singular.document.steps.at(-1)!.meta?.narration).toMatch(
+      /nothing to substitute/,
+    );
+    expect(
+      singular.document.steps
+        .map((s) => s.meta?.at)
+        .filter((x) => x === 'forward'),
+    ).toEqual([]);
+  });
+
+  it('marks no exchange when every pivot is in place', () => {
+    const { document, results } = runOk('lup-decomposition', {
+      a: '4 1; 2 3',
+    });
+    expect(results).toEqual([10]);
+    expect(document.steps.map((s) => s.meta?.at)).toEqual([
+      'start',
+      'pivot',
+      'multipliers',
+      'update',
+      'pivot',
+      'done',
+    ]);
+    expect(document.steps[1]!.meta?.narration).toMatch(/already in place/);
+    // π and A after the first column: L's 1/2 and the complement 5/2.
+    const after = stateOf(replay(document), 'A', 'table', 4).data;
+    expect(after).toEqual([
+      ['4', '1'],
+      ['1/2', '5/2'],
+    ]);
   });
 
   it('reads b, and refuses one of the wrong length', () => {
