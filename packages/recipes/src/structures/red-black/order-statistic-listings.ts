@@ -153,6 +153,10 @@ export const OS_DELETE = listing('delete', {
             v.size = v.left.size + v.right.size + 1
         if lost == BLACK  // @done
             RB-DELETE-FIXUP(T, x)  // as for red–black trees  // @fixup
+
+    LEFT-ROTATE(T, x)  // as for red–black trees, then:
+        y.size = x.size  // y takes x's place, and x's subtree
+        x.size = x.left.size + x.right.size + 1
   `,
   python: `
     # size(x) is x.size, or 0 for None, as in select
@@ -187,6 +191,11 @@ export const OS_DELETE = listing('delete', {
             v = v.p
         if lost == BLACK:  # @done
             delete_fixup(T, x, xp)  # as for red-black trees  # @fixup
+
+    def rotate(T, x, side):
+        y = rb_rotate(T, x, side)  # as for red-black trees
+        y.size = x.size
+        x.size = size(x.left) + size(x.right) + 1
   `,
 });
 

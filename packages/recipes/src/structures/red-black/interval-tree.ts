@@ -119,24 +119,34 @@ const INTERVALS_FORM =
 /** Reads `[a, b] [c, d] …`, throwing a NotationError at a bad token. */
 export function parseIntervals(text: string): [number, number][] {
   const out: [number, number][] = [];
-  const pattern = /\[([^\]]*)\]|[^\s,]+/g;
+  const pattern = /\[([^\]]*)\]|\[[^\]]*$|[^\s,[]+/g;
   for (const match of text.matchAll(pattern)) {
     const at = match.index;
+    const token = match[0];
+    if (token.startsWith('[') && !token.endsWith(']'))
+      throw new NotationError(
+        `Expected "]" to end the interval ${quoted(token)}`,
+        at + token.length,
+      );
     if (match[1] === undefined)
       throw new NotationError(
-        `Expected an interval in brackets, not ${quoted(match[0])}`,
+        `Expected an interval in brackets, not ${quoted(token)}`,
         at,
       );
-    const parts = match[1].split(/[\s,]+/).filter((p) => p !== '');
-    if (parts.length !== 2)
+    // Two endpoints, apart by spaces or one comma.
+    const inner = match[1];
+    const parts = [...inner.matchAll(/[^\s,]+/g)];
+    const commas = inner.split(',').length - 1;
+    if (parts.length !== 2 || commas > 1 || /^\s*,|,\s*$/.test(inner))
       throw new NotationError(
-        `An interval has two endpoints: ${quoted(match[0])}`,
+        `An interval is two endpoints, such as [16, 21], not ${quoted(token)}`,
         at,
       );
-    out.push([
-      numberAt(parts[0]!, at + 1, 'a number'),
-      numberAt(parts[1]!, at + 1, 'a number'),
-    ]);
+    out.push(
+      parts.map((part) =>
+        numberAt(part[0], at + 1 + part.index, 'an endpoint'),
+      ) as [number, number],
+    );
   }
   return out;
 }

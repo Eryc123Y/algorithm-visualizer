@@ -126,6 +126,27 @@ describe('interval-tree', () => {
       [25, 30],
     ]);
     expect(() => parseIntervals('[1,2] 3')).toThrow(/in brackets/);
+    expect(parseIntervals('[-5 -1] [0.5,2][3,4]')).toEqual([
+      [-5, -1],
+      [0.5, 2],
+      [3, 4],
+    ]);
+    expect(parseIntervals('')).toEqual([]);
+    const at = (text: string) => {
+      try {
+        parseIntervals(text);
+      } catch (e) {
+        return (e as { at: number }).at;
+      }
+      return undefined;
+    };
+    expect(at('[1, abc]')).toBe(4);
+    expect(at('[ abc, 1]')).toBe(2);
+    expect(() => parseIntervals('[1,,2]')).toThrow(/two endpoints/);
+    expect(() => parseIntervals('[,1,2]')).toThrow(/two endpoints/);
+    expect(() => parseIntervals('[]')).toThrow(/two endpoints/);
+    expect(() => parseIntervals('[1,2')).toThrow(/Expected "]"/);
+    expect(() => parseIntervals('[1,2]x')).toThrow(/in brackets/);
     expect(() => parseIntervals('[1,2,3]')).toThrow(/two endpoints/);
     expect(
       runOk('interval-tree.search', { from: '[16,21] [8,9]', interval: [8, 8] })
@@ -135,6 +156,29 @@ describe('interval-tree', () => {
       runError('interval-tree.search', { from: SAMPLE, interval: [5, 4] })
         .message,
     ).toMatch(/low ≤ high/);
+  });
+
+  it('starts from a level order with every max shown from the first step', () => {
+    const from = {
+      levelOrder: [
+        [16, 21],
+        [8, 9],
+        [25, 30],
+        [5, 8],
+        [15, 23],
+      ],
+      red: [
+        [5, 8],
+        [15, 23],
+      ],
+    };
+    const { document } = runOk('interval-tree.search', {
+      from,
+      interval: [-3.5, -1],
+    });
+    const trace = replay(document);
+    expect(maxProblems(stateOf(trace, 'T', 'tree', 1))).toEqual([]);
+    expect(stateOf(trace, 'T', 'tree', 1).marks.namedNotes).not.toEqual({});
   });
 
   it('agrees with a scan and the reference on random runs', () => {
