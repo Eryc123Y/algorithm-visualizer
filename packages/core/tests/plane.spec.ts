@@ -159,6 +159,83 @@ describe('plane', () => {
     expect(errorsOf(doc([lines]))).toEqual([
       { code: 'LIMIT_EXCEEDED', path: '$.steps[0].actions[8].name' },
     ]);
+    // 64 points, and 128 segments among 17 of them, are the most.
+    const many = Array.from({ length: 64 }, (_, k) => ({
+      id: `q${k}`,
+      x: k % 8,
+      y: Math.floor(k / 8),
+    }));
+    expect(
+      errorsOf({
+        version: '0.9',
+        structures: { P: { kind: 'plane', points: many } },
+        steps: [
+          {
+            actions: [
+              {
+                target: 'P',
+                type: 'addPoint',
+                point: { id: 'z', x: 9, y: 9 },
+              },
+            ],
+          },
+        ],
+      }),
+    ).toEqual([
+      { code: 'LIMIT_EXCEEDED', path: '$.steps[0].actions[0].point' },
+    ]);
+    const seventeen = many.slice(0, 17);
+    const pairs = seventeen
+      .flatMap((a, i) => seventeen.slice(i + 1).map((b) => [a.id, b.id]))
+      .slice(0, 128);
+    expect(
+      errorsOf({
+        version: '0.9',
+        structures: {
+          P: {
+            kind: 'plane',
+            points: seventeen,
+            segments: pairs.map(([from, to], k) => ({ id: `s${k}`, from, to })),
+          },
+        },
+        steps: [
+          {
+            actions: [
+              {
+                target: 'P',
+                type: 'addSegment',
+                segment: { id: 'z', from: 'q15', to: 'q16' },
+              },
+            ],
+          },
+        ],
+      }),
+    ).toEqual([
+      { code: 'LIMIT_EXCEEDED', path: '$.steps[0].actions[0].segment' },
+    ]);
+  });
+
+  it('keeps each label in one place while lines and segments come and go', () => {
+    const trace = mustLoad(
+      doc([
+        [{ type: 'line', name: 'sweep', x: 0 }],
+        [{ type: 'line', name: 'sweep', x: 3 }],
+        [{ type: 'addSegment', segment: { id: 'bc', from: 'b', to: 'c' } }],
+        [{ type: 'line', name: 'sweep', x: null }],
+      ]),
+    );
+    const layout = layoutTrace(trace);
+    for (const id of ['a', 'b', 'c']) {
+      const angles = [0, 1, 2, 3, 4].map(
+        (k) =>
+          (
+            layout
+              .sceneAt(k)
+              .items.find((i) => i.key === `P/point/${id}`) as SceneNode
+          ).labelAngle ?? 0,
+      );
+      expect(new Set(angles).size, id).toBe(1);
+    }
   });
 
   it('draws points where they are, y up, in one region for every frame', () => {

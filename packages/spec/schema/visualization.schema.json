@@ -5555,7 +5555,7 @@
                         },
                         "name": {
                           "type": "string",
-                          "pattern": "^[^\\s][^\\n]{0,11}$",
+                          "pattern": "^[^\\s\\p{Cc}](?:[^\\p{Cc}]{0,10}[^\\s\\p{Cc}])?$",
                           "description": "A line name of up to 12 characters, e.g. \"sweep\", \"l\" or \"l + δ\"."
                         },
                         "x": {

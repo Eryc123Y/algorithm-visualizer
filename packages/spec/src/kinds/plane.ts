@@ -122,7 +122,8 @@ const PointRef = ElementId.describe('A point id.');
 const SegmentRef = ElementId.describe('A segment id.');
 const LineName = z
   .string()
-  .regex(/^[^\s][^\n]{0,11}$/)
+  // No control characters, and no space at either end.
+  .regex(/^[^\s\p{Cc}](?:[^\p{Cc}]{0,10}[^\s\p{Cc}])?$/u)
   .refine(isSafeKey, {
     message: 'Line names may not be the names of object properties',
   })

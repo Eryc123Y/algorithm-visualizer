@@ -39,6 +39,23 @@ export interface PlaneMetrics {
   /** Widest pointer name, in em, and most pointers at one point. */
   readonly pointerWidth: number;
   readonly pointerRows: number;
+  /**
+   * Every point, segment and line position of the trace, so that labels
+   * keep one place in every frame, clear of all of them.
+   */
+  readonly points: readonly (readonly [string, number, number])[];
+  readonly links: readonly (readonly [string, string])[];
+  readonly lineXs: readonly number[];
+}
+
+/** `a` and then what `b` adds, by key, in order. */
+function union<T>(
+  a: readonly T[],
+  b: readonly T[],
+  key: (t: T) => string,
+): T[] {
+  const seen = new Set(a.map(key));
+  return [...a, ...b.filter((t) => !seen.has(key(t)))];
 }
 
 const labelOf = (p: { id: string; label?: string | undefined }) =>
@@ -72,6 +89,9 @@ export function measurePlane(
     ),
     pointerWidth: maxWidth(Object.keys(state.marks.pointers), fonts.value),
     pointerRows: Math.max(0, ...perPoint.values()),
+    points: state.data.points.map((p) => [p.id, p.x, p.y] as const),
+    links: state.data.segments.map((x) => [x.from, x.to] as const),
+    lineXs: [...new Set(Object.values(state.marks.lines))],
   };
 }
 
@@ -86,6 +106,9 @@ export const mergePlaneMetrics = (
   labelWidth: Math.max(a.labelWidth, b.labelWidth),
   pointerWidth: Math.max(a.pointerWidth, b.pointerWidth),
   pointerRows: Math.max(a.pointerRows, b.pointerRows),
+  points: union(a.points, b.points, ([id]) => id),
+  links: union(a.links, b.links, ([f, t]) => `${f} ${t}`),
+  lineXs: union(a.lineXs, b.lineXs, String),
 });
 
 /** The region drawn: the bounds padded by a tenth, at least 1 unit. */
@@ -109,6 +132,49 @@ function segmentRole(m: PlaneState['marks'], id: string): EdgeRole {
   if (m.highlight.includes(id)) return 'highlight';
   if (m.selected.includes(id)) return 'selected';
   return 'default';
+}
+
+type Spot = { readonly x: number; readonly y: number };
+type Line = readonly [Spot, Spot];
+
+/**
+ * Each point's label direction for the whole trace: the first that
+ * clears every segment, line position, axis and point of the trace and
+ * the labels placed before it, points in the order they appear.
+ */
+function labelAngles(
+  m: PlaneMetrics,
+  at: (x: number, y: number) => Spot,
+  axes: readonly Line[],
+  font: number,
+): Map<string, number> {
+  const r = regionOf(m);
+  const where = new Map(m.points.map(([id, x, y]) => [id, at(x, y)]));
+  const lines: Line[] = [
+    ...axes,
+    ...m.lineXs.map((x): Line => [at(x, r.y0), at(x, r.y1)]),
+    ...m.links.flatMap(([f, t]): Line[] => {
+      const [a, b] = [where.get(f), where.get(t)];
+      return a === undefined || b === undefined ? [] : [[a, b]];
+    }),
+  ];
+  const discs = [...where.values()].map((c) => ({ ...c, radius: RADIUS }));
+  const labelHalf = (m.labelWidth * font) / 2;
+  const placed: LabelBox[] = [];
+  const angles = new Map<string, number>();
+  for (const [id, c] of where) {
+    const outline = { ...c, radius: RADIUS, halfWidth: RADIUS };
+    const boxAt = (angle: number) =>
+      noteRegion(outline, angle, labelHalf, font);
+    const angle = clearestAngle([0, 45, 315, 90, 270, 135, 225, 180], boxAt, {
+      segments: lines,
+      discs: discs.filter((d) => d.x !== c.x || d.y !== c.y),
+      boxes: placed,
+    });
+    placed.push(boxAt(angle));
+    angles.set(id, angle);
+  }
+  return angles;
 }
 
 export function layoutPlane(
@@ -161,18 +227,13 @@ export function layoutPlane(
     fontSize: font,
   });
 
-  // Everything drawn as a line, which point labels keep clear of.
-  const segmentLines: (readonly [
-    { x: number; y: number },
-    { x: number; y: number },
-  ])[] = [];
+  // The axes, which point labels keep clear of with every segment and
+  // line of the trace.
+  const axisLines: Line[] = [];
   if (decl.axes === true) {
     const ax = r.x0 <= 0 && 0 <= r.x1 ? 0 : r.x0;
     const ay = r.y0 <= 0 && 0 <= r.y1 ? 0 : r.y0;
-    segmentLines.push(
-      [at(r.x0, ay), at(r.x1, ay)],
-      [at(ax, r.y0), at(ax, r.y1)],
-    );
+    axisLines.push([at(r.x0, ay), at(r.x1, ay)], [at(ax, r.y0), at(ax, r.y1)]);
     items.push(
       edge(
         `${name}/axis/x`,
@@ -195,7 +256,6 @@ export function layoutPlane(
     );
   }
   for (const [line, x] of Object.entries(state.marks.lines)) {
-    segmentLines.push([at(x, r.y0), at(x, r.y1)]);
     items.push(
       edge(
         `${name}/line/${line}`,
@@ -212,7 +272,6 @@ export function layoutPlane(
   const byId = new Map(state.data.points.map((p) => [p.id, at(p.x, p.y)]));
   for (const s of state.data.segments) {
     const [a, b] = [byId.get(s.from)!, byId.get(s.to)!];
-    segmentLines.push([a, b]);
     const length = Math.hypot(b.x - a.x, b.y - a.y);
     // Trimmed to the points' circles, unless the points nearly touch.
     const trim = length > 2 * RADIUS + 2 ? RADIUS / length : 0;
@@ -230,26 +289,10 @@ export function layoutPlane(
     );
   }
 
-  // Each label in the first direction that clears segments, points and
-  // the labels placed before it; points in order, so it is the same in
-  // every frame with the same segments.
-  const placed: LabelBox[] = [];
-  const labelHalf = (metrics.labelWidth * font) / 2;
-  const discs = state.data.points.map((p) => ({
-    ...byId.get(p.id)!,
-    radius: RADIUS,
-  }));
+  const angles = labelAngles(metrics, at, axisLines, font);
   for (const p of state.data.points) {
     const c = byId.get(p.id)!;
-    const outline = { ...c, radius: RADIUS, halfWidth: RADIUS };
-    const boxAt = (angle: number) =>
-      noteRegion(outline, angle, labelHalf, font);
-    const angle = clearestAngle([0, 45, 315, 90, 270, 135, 225, 180], boxAt, {
-      segments: segmentLines,
-      discs: discs.filter((d) => d.x !== c.x || d.y !== c.y),
-      boxes: placed,
-    });
-    placed.push(boxAt(angle));
+    const angle = angles.get(p.id) ?? 0;
     const role = pointRole(state.marks, p.id);
     const settled = role !== 'settled' && state.marks.settled.includes(p.id);
     items.push({
