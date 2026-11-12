@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted. Corrected while implementing it (#67): a circular root list's closing link is keyed `<tree>/root-wrap`, not `<tree>/root-link/wrap`, which a root with the id `wrap` would also have. Corrected for the Fibonacci heap: its `from` is the forest itself, so a list of keys is a root list of one-node trees in that order rather than keys inserted one by one, and a starting forest may mark a root, since EXTRACT-MIN can leave a marked child as a root, as in CLRS.
+Accepted. Corrected while implementing it (#67): a circular root list's closing link is keyed `<tree>/root-wrap`, not `<tree>/root-link/wrap`, which a root with the id `wrap` would also have. Corrected for the Fibonacci heap: its `from` is the forest itself, so a list of keys is a root list of one-node trees in that order rather than keys inserted one by one, and a starting forest may mark a root, since EXTRACT-MIN can leave a marked child as a root, as in CLRS. Corrected for Huffman codes: the module is in a new topic, `greedy`, as CLRS places it, and its codeword table has a row per character, which suits the side column.
 
 ## Context
 
