@@ -19,7 +19,7 @@ import { fitProblems, overlapProblems, sceneProblems } from './scene-check.ts';
 type Action = Record<string, unknown>;
 
 const doc = (steps: Action[][], extra: Record<string, unknown> = {}) => ({
-  version: '0.8',
+  version: '1.0',
   structures: {
     T: {
       kind: 'array',
@@ -130,7 +130,7 @@ describe('array pattern', () => {
     // An array without a pattern has nothing to align.
     expect(
       errorsOf({
-        version: '0.8',
+        version: '1.0',
         structures: { T: { kind: 'array', initial: [1, 2] } },
         steps: [{ actions: [{ target: 'T', type: 'check', j: 0 }] }],
       }),

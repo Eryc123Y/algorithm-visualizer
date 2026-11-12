@@ -12,7 +12,7 @@ import {
 } from '../src/index.ts';
 
 const doc = (array: Record<string, unknown>, actions: unknown[] = []) => ({
-  version: '0.8',
+  version: '1.0',
   structures: { T: { kind: 'array', initial: ['a', 'b', 'a', 'c'], ...array } },
   steps:
     actions.length === 0

@@ -25,7 +25,7 @@ const heap = (
   initial: number[] = [9, 7, 8, 3, 5, 6, 2],
   withSteps = true,
 ) => ({
-  version: '0.4',
+  version: '1.0',
   // A label, so the lone structure keeps its caption.
   structures: { h: { kind: 'array', label: 'h', view, initial } },
   steps: !withSteps

@@ -166,7 +166,7 @@ describe('share links in workerd (ADR 0040)', () => {
       name: 'algoviz_show',
       arguments: {
         document: {
-          version: '0.1',
+          version: '1.0',
           structures: { s: { kind: 'stack', initial: [] } },
           steps: [{ actions: [{ target: 's', type: 'push', element: 1 }] }],
         },

@@ -7,7 +7,7 @@
       "enum": [
         "1.0"
       ],
-      "description": "Protocol version, \"major.minor\": the oldest version that has every feature the document uses."
+      "description": "Protocol version, \"major.minor\": the oldest version that has every feature the document uses. Readers also accept a 0.x version and read the document as 1.0; this schema lists only the versions to write."
     },
     "title": {
       "type": "string",
@@ -180,7 +180,7 @@
                 "description": "Initial contents: either bare values like [5, 3, 8] (ids \"e0\", \"e1\", … are generated) or elements like [{ \"id\": \"a\", \"value\": 5 }]."
               },
               "pattern": {
-                "description": "A pattern drawn under the text at `shift`, for string matching: values (ids \"p0\", \"p1\", … are generated) or elements. Needs version 0.8.",
+                "description": "A pattern drawn under the text at `shift`, for string matching: values (ids \"p0\", \"p1\", … are generated) or elements.",
                 "anyOf": [
                   {
                     "minItems": 1,
@@ -247,7 +247,7 @@
                 ]
               },
               "shift": {
-                "description": "Text position under which the pattern starts, from 0 to the text length (default 0). Needs version 0.8.",
+                "description": "Text position under which the pattern starts, from 0 to the text length (default 0).",
                 "type": "integer",
                 "minimum": 0,
                 "maximum": 1000

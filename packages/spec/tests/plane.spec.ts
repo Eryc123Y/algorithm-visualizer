@@ -18,7 +18,7 @@ const points = [
 ];
 
 const doc = (plane: Record<string, unknown>, actions: unknown[] = []) => ({
-  version: '0.9',
+  version: '1.0',
   structures: { P: { kind: 'plane', ...plane } },
   steps:
     actions.length === 0

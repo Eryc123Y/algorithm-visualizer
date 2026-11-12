@@ -25,7 +25,7 @@ const points = [
 ];
 
 const doc = (steps: Action[][], extra: Record<string, unknown> = {}) => ({
-  version: '0.9',
+  version: '1.0',
   structures: { P: { kind: 'plane', points, ...extra } },
   steps: steps.map((actions) => ({
     actions: actions.map((a) => ({ target: 'P', ...a })),
@@ -167,7 +167,7 @@ describe('plane', () => {
     }));
     expect(
       errorsOf({
-        version: '0.9',
+        version: '1.0',
         structures: { P: { kind: 'plane', points: many } },
         steps: [
           {
@@ -190,7 +190,7 @@ describe('plane', () => {
       .slice(0, 128);
     expect(
       errorsOf({
-        version: '0.9',
+        version: '1.0',
         structures: {
           P: {
             kind: 'plane',

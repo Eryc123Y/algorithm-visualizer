@@ -70,7 +70,7 @@ describe('eval tasks', () => {
       );
       const result = grade(task, {
         // Side panels and priority queues need 0.4 (ADR 0029).
-        version: '0.4',
+        version: '1.0',
         structures,
         steps: Array.from({ length: task.minSteps }, (_, k) => ({
           actions: [],
@@ -144,7 +144,7 @@ describe('eval tasks', () => {
       meta: { narration },
     });
     const result = grade(task, {
-      version: '0.1',
+      version: '1.0',
       structures: { a: { kind: 'array', initial: [1, 3, 4, 7, 9, 11, 15] } },
       steps: [
         {
@@ -169,7 +169,7 @@ describe('eval tasks', () => {
       meta: { narration: `Set the answer to ${value}.` },
     });
     const result = grade(task, {
-      version: '0.1',
+      version: '1.0',
       structures: { t: { kind: 'table', rows: 5, columns: 6 } },
       steps: [1, 2, 3, 1, 2, 3].map(corner),
     });
@@ -185,7 +185,7 @@ describe('eval tasks', () => {
       meta: { narration },
     });
     const result = grade(task, {
-      version: '0.1',
+      version: '1.0',
       structures: {
         t: {
           kind: 'tree',
@@ -211,7 +211,7 @@ describe('eval tasks', () => {
       meta: { narration: `Colour ${node}.` },
     });
     const result = grade(task, {
-      version: '0.1',
+      version: '1.0',
       structures: {
         g: {
           kind: 'graph',
@@ -267,7 +267,7 @@ describe('eval tasks', () => {
       meta: { narration: `${key} mod 7 = ${key % 7}.` },
     });
     const result = grade(task, {
-      version: '0.1',
+      version: '1.0',
       structures: { h: { kind: 'hashTable', size: 7 } },
       steps: [15, 11, 27, 8, 12].map(insert),
     });
@@ -283,7 +283,7 @@ describe('eval tasks', () => {
       meta: { narration: `Insert ${key}.` },
     });
     const result = grade(task, {
-      version: '0.1',
+      version: '1.0',
       structures: { h: { kind: 'hashTable', size: 7 } },
       steps: [
         insert(15, 1),
@@ -304,7 +304,7 @@ describe('eval tasks', () => {
       meta: { narration: `Look ${k}.` },
     });
     const result = grade(task, {
-      version: '0.1',
+      version: '1.0',
       structures: { a: { kind: 'array', initial: [5, 2, 4, 6, 1, 3] } },
       steps: [
         {

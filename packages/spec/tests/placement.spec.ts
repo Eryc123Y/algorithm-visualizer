@@ -24,7 +24,7 @@ const DECLS = {
 
 const doc = (
   structures: Record<string, unknown>,
-  version = '0.4',
+  version = '1.0',
 ): Record<string, unknown> => ({ version, structures, steps: [] });
 
 const errorsOf = (input: unknown) => {
@@ -47,7 +47,7 @@ describe('place (ADR 0029)', () => {
   );
 
   it('is optional, and absent from the canonical form when not given', () => {
-    const result = parseVisualization(doc({ s: DECLS.array }, '0.1'));
+    const result = parseVisualization(doc({ s: DECLS.array }));
     expect(result.ok).toBe(true);
     if (result.ok)
       expect(result.value.structures['s']).not.toHaveProperty('place');

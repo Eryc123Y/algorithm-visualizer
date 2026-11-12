@@ -28,7 +28,7 @@ const doc = (
   initial: (number | string)[],
   steps: VisualizationInput['steps'],
 ): VisualizationInput => ({
-  version: '0.1',
+  version: '1.0',
   structures: { arr: { kind: 'array', initial } },
   steps,
 });
@@ -178,7 +178,7 @@ describe('cell roles', () => {
 describe('multiple structures', () => {
   it('stacks structures vertically in declaration order with their labels', () => {
     const trace = mustLoad({
-      version: '0.1',
+      version: '1.0',
       title: 'Two arrays',
       structures: {
         a: { kind: 'array', initial: [1] },
@@ -209,7 +209,7 @@ describe('captions', () => {
   const lone = (label?: string) =>
     layoutTrace(
       mustLoad({
-        version: '0.1',
+        version: '1.0',
         structures: {
           arr: { kind: 'array', initial: [1, 2], ...(label ? { label } : {}) },
         },
@@ -226,7 +226,7 @@ describe('captions', () => {
 
   it('leaves a lone graph uncaptioned too, on one canvas for every frame', () => {
     const trace = mustLoad({
-      version: '0.1',
+      version: '1.0',
       structures: {
         g: { kind: 'graph', nodes: ['A', 'B'], edges: [['A', 'B']] },
       },
@@ -243,7 +243,7 @@ describe('captions', () => {
 
   it('captions every structure of a figure with several, by label or id', () => {
     const trace = mustLoad({
-      version: '0.1',
+      version: '1.0',
       structures: {
         a: { kind: 'array', initial: [1] },
         b: { kind: 'array', label: 'output', initial: [2] },
@@ -257,7 +257,7 @@ describe('captions', () => {
 describe('tree notes and pointer badges (ADR 0031, Codex on #58)', () => {
   it('never turns a note to the left, where the badges go', () => {
     const trace = mustLoad({
-      version: '0.1',
+      version: '1.0',
       structures: {
         t: {
           kind: 'tree',
@@ -317,7 +317,7 @@ describe('bare layout', () => {
 describe('scene bounds', () => {
   it('keeps wide pointer badges and long titles inside the scene', () => {
     const trace = mustLoad({
-      version: '0.1',
+      version: '1.0',
       structures: {
         arr: {
           kind: 'array',
@@ -368,7 +368,7 @@ describe('layout with other fonts', () => {
     // A face of 2 em per character: "front" is 10 em wide.
     const wide = uniformFont(2);
     const trace = mustLoad({
-      version: '0.1',
+      version: '1.0',
       structures: { q: { kind: 'queue', initial: [1] } },
       steps: [],
     });

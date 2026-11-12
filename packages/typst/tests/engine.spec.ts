@@ -127,7 +127,7 @@ describe('createEngine', () => {
   it('draws in a layout, wide by default, and caches each layout apart', () => {
     // A stack in the side panel (ADR 0029).
     const document = {
-      version: '0.4',
+      version: '1.0',
       structures: {
         a: { kind: 'array', initial: [3, 1, 2] },
         calls: { kind: 'stack', initial: ['sort'], place: 'side' },
@@ -170,7 +170,7 @@ describe('errors', () => {
     expect(
       render({ algorithm: 'bst.delete', input: bst, layout: 'square' }),
     ).toEqual([['UNKNOWN_LAYOUT', '$.layout']]);
-    expect(render({ document: { version: '0.2' } })[0]).toEqual([
+    expect(render({ document: { version: '1.0' } })[0]).toEqual([
       'INVALID_SHAPE',
       '$.structures',
     ]);

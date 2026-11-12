@@ -79,7 +79,7 @@ const noPattern = (): ReduceError => ({
   code: 'INVALID_OPERATION',
   path: [],
   message: 'This array has no pattern',
-  hint: 'Declare one with `pattern` (version 0.8).',
+  hint: 'Declare one with `pattern`.',
 });
 
 /** `align`: the pattern moves, and its first `matched` elements match. */

@@ -214,7 +214,7 @@ describe('figures in Typst', () => {
 describe('layout (ADR 0029)', () => {
   // An array with a stack in the side panel.
   const sided = {
-    version: '0.4',
+    version: '1.0',
     structures: {
       a: { kind: 'array', initial: [3, 1, 2] },
       calls: { kind: 'stack', initial: ['sort'], place: 'side' },

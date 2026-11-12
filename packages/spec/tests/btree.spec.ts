@@ -12,7 +12,7 @@ import {
 } from '../src/index.ts';
 
 const doc = (decl: Record<string, unknown>, actions: unknown[] = []) => ({
-  version: '0.6',
+  version: '1.0',
   structures: { T: { kind: 'btree', ...decl } },
   steps: actions.length === 0 ? [] : [{ actions }],
 });

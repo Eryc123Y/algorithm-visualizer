@@ -9,7 +9,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { showFragment, type PlayPage } from '../../src/play/show.ts';
 
 const doc = {
-  version: '0.1',
+  version: '1.0',
   title: 'Two <b>pushes</b>',
   structures: { s: { kind: 'stack', initial: [] } },
   steps: [{ actions: [{ target: 's', type: 'push', element: 1 }] }],

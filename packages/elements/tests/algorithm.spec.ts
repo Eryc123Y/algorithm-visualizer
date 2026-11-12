@@ -151,7 +151,7 @@ describe('<algo-player algorithm>', () => {
     const el = document.createElement('algo-player');
     el.algorithm = 'bfs';
     el.visualization = {
-      version: '0.1',
+      version: '1.0',
       structures: { s: { kind: 'stack', initial: [] } },
       steps: [{ actions: [{ target: 's', type: 'push', element: 1 }] }],
     };

@@ -14,7 +14,7 @@ import {
 } from '../src/index.ts';
 
 const doc = {
-  version: '0.1',
+  version: '1.0',
   title: 'Push <b>1</b> & "2"',
   structures: { s: { kind: 'stack', initial: [] } },
   steps: [{ actions: [{ target: 's', type: 'push', value: 1 }] }],

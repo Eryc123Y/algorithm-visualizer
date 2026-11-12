@@ -81,7 +81,7 @@ const actions = <E extends z.ZodType>(element: E) =>
     z
       .strictObject({ type: z.literal('move'), from: Index, to: Index })
       .describe(
-        'Move the node at row position `from` to position `to`; the nodes between shift one place. Links do not change: relink with `link` in the same step. Needs version 0.7.',
+        'Move the node at row position `from` to position `to`; the nodes between shift one place. Links do not change: relink with `link` in the same step.',
       ),
     z
       .strictObject({

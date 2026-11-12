@@ -25,7 +25,7 @@ const step = (meta?: Meta) => ({
 });
 
 const doc = (extra: Record<string, unknown> = {}) => ({
-  version: '0.3',
+  version: '1.0',
   structures: { a: { kind: 'array', initial: [1, 2] } },
   steps: [step({ at: 'swap' }), step({ narration: 'Done.' })],
   sources,

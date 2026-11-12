@@ -13,7 +13,7 @@ const step = (id?: string) => ({
 });
 
 const doc = (extra: Partial<VisualizationInput> = {}, steps = 3) => ({
-  version: '0.2',
+  version: '1.0',
   structures: { a: { kind: 'array', initial: [1] } },
   steps: Array.from({ length: steps }, () => step()),
   ...extra,

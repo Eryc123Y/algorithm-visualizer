@@ -21,7 +21,7 @@ import {
 //            frame: 0   1                2              3                4
 // selector:         0   pass-1/compare   pass-1/swap    pass-2/compare   pass-2/swap
 const doc = {
-  version: '0.2',
+  version: '1.0',
   title: 'Two passes',
   structures: { a: { kind: 'array', initial: [3, 1, 2] } },
   sections: [
@@ -173,7 +173,7 @@ describe('exportFigures', () => {
   describe('layout (ADR 0029)', () => {
     // An array with a stack in the side panel.
     const sided = {
-      version: '0.4',
+      version: '1.0',
       structures: {
         a: { kind: 'array', initial: [3, 1, 2] },
         calls: { kind: 'stack', initial: ['sort'], place: 'side' },
@@ -227,7 +227,7 @@ describe('exportFigures', () => {
   });
 
   it("reports the document's errors", () => {
-    const result = exportFigures({ version: '0.2', structures: {} });
+    const result = exportFigures({ version: '1.0', structures: {} });
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.error[0]!.code).toBe('INVALID_SHAPE');
   });
@@ -307,7 +307,7 @@ describe('prepareFigures', () => {
       ok: false,
       error: [{ code: 'UNKNOWN_THEME', path: '$.theme' }],
     });
-    const invalid = prepareFigures({ version: '0.2', structures: {} });
+    const invalid = prepareFigures({ version: '1.0', structures: {} });
     expect(invalid.ok).toBe(false);
     if (!invalid.ok) expect(invalid.error[0]!.code).toBe('INVALID_SHAPE');
   });
@@ -374,7 +374,7 @@ describe('renderSeries', () => {
   it('puts every frame on the largest canvas of the trace', () => {
     // A trace whose first frame lacks a structure, so its scene is smaller.
     const two = traceOf({
-      version: '0.1',
+      version: '1.0',
       structures: {
         a: { kind: 'array', initial: [1, 2] },
         b: { kind: 'stack', initial: [7] },

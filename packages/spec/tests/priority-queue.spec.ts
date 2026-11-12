@@ -15,7 +15,7 @@ import {
 const doc = (
   structures: Record<string, unknown>,
   steps: unknown[] = [],
-  version = '0.4',
+  version = '1.0',
 ) => ({ version, structures, steps });
 
 const errorsOf = (input: unknown) => {

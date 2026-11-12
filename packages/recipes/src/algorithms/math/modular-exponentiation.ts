@@ -12,6 +12,7 @@
 import { z } from 'zod';
 
 import { defineAlgorithm } from '../../algorithm.ts';
+import { thousands } from './thousands.ts';
 
 /** Largest base and modulus. */
 export const MAX_MODULUS = 1_000_000_000;
@@ -30,7 +31,7 @@ export const modularExponentiation = defineAlgorithm({
       .min(0)
       .max(MAX_MODULUS)
       .describe(
-        `The base, a whole number from 0 to ${MAX_MODULUS.toLocaleString('en')}.`,
+        `The base, a whole number from 0 to ${thousands(MAX_MODULUS)}.`,
       ),
     b: z
       .int()
@@ -42,7 +43,7 @@ export const modularExponentiation = defineAlgorithm({
       .min(1)
       .max(MAX_MODULUS)
       .describe(
-        `The modulus, a whole number from 1 to ${MAX_MODULUS.toLocaleString('en')}.`,
+        `The modulus, a whole number from 1 to ${thousands(MAX_MODULUS)}.`,
       ),
   }),
   examples: [{ a: 7, b: 560, n: 561 }],

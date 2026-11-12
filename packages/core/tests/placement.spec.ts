@@ -65,7 +65,7 @@ const steps: VisualizationInput['steps'] = [
 
 /** An array, a stack in the side panel and a second main array. */
 const sided = (side = true) => ({
-  version: '0.4',
+  version: '1.0',
   structures: {
     a: { kind: 'array', initial: [5, 3, 8] },
     calls: {
@@ -124,7 +124,7 @@ describe('placement (ADR 0029)', () => {
   });
 
   it('lays out a document without side structures as before, in both layouts', () => {
-    const trace = mustLoad({ ...sided(false), version: '0.1' });
+    const trace = mustLoad({ ...sided(false), version: '1.0' });
     const before = layoutTrace(trace);
     for (const layout of ['wide', 'narrow'] as const) {
       const now = layoutTrace(trace, { layout });
@@ -183,7 +183,7 @@ describe('placement (ADR 0029)', () => {
     expect(arrangeStructures(structures, 'narrow')).toEqual([
       { region: 'main', names: ['a', 'out', 'calls'] },
     ]);
-    const plain = mustLoad({ ...sided(false), version: '0.1' });
+    const plain = mustLoad({ ...sided(false), version: '1.0' });
     for (const layout of ['wide', 'narrow'] as const)
       expect(arrangeStructures(plain.visualization.structures, layout)).toEqual(
         [{ region: 'main', names: ['a', 'calls', 'out'] }],

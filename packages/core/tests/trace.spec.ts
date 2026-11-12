@@ -26,7 +26,7 @@ function bubbleSort(values: number[]): VisualizationInput {
     });
   }
   return {
-    version: '0.1',
+    version: '1.0',
     structures: { arr: { kind: 'array', initial: values } },
     steps,
   };
@@ -92,7 +92,7 @@ describe('compileTrace', () => {
 
   it('explains out-of-range errors in terms of the current state', () => {
     const result = loadTrace({
-      version: '0.1',
+      version: '1.0',
       structures: { arr: { kind: 'array', initial: [1, 2, 3] } },
       steps: [{ actions: [{ target: 'arr', type: 'swap', i: 0, j: 3 }] }],
     });

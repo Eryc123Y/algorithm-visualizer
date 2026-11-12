@@ -68,7 +68,7 @@ test('a player showing errors', async ({ page }) => {
   await page.goto('/');
   await page
     .getByTestId('editor')
-    .fill('{"version": "0.1", "structures": {}, "steps": []}');
+    .fill('{"version": "1.0", "structures": {}, "steps": []}');
   await expect(page.getByTestId('player').getByRole('alert')).toBeVisible();
   expect(await scan(page)).toEqual([]);
 });

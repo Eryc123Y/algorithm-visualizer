@@ -6,7 +6,7 @@ import '../src/define.ts';
 import type { AlgoPlayer } from '../src/index.ts';
 
 const doc = {
-  version: '0.1',
+  version: '1.0',
   source: { code: 'compare(a, b)\nswap(a, b)' },
   structures: { arr: { kind: 'array', label: 'arr', initial: [2, 1] } },
   steps: [
@@ -118,7 +118,7 @@ describe('<algo-player>', () => {
     const el = await mount((e) => {
       e.visualization = {
         ...doc,
-        version: '0.3',
+        version: '1.0',
         source: undefined,
         sources: [
           {
@@ -184,7 +184,7 @@ describe('<algo-player>', () => {
       ];
     };
     const sided = {
-      version: '0.4',
+      version: '1.0',
       structures: {
         arr: { kind: 'array', initial: [2, 1] },
         calls: { kind: 'stack', initial: ['sort'], place: 'side' },

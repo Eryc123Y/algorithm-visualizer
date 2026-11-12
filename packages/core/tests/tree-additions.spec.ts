@@ -38,7 +38,7 @@ const errorsOf = (input: unknown) => {
 
 /** A document with one tree `t` and one step per list of actions. */
 const doc = (decl: Record<string, unknown>, steps: Action[][]) => ({
-  version: '0.5',
+  version: '1.0',
   structures: { t: { kind: 'tree', ...decl } },
   steps: steps.map((actions) => ({
     actions: actions.map((a) => ({ target: 't', ...a })),

@@ -12,6 +12,7 @@
 import { z } from 'zod';
 
 import { defineAlgorithm } from '../../algorithm.ts';
+import { thousands } from './thousands.ts';
 
 /**
  * Largest operand: at most 44 rows of calls, base included, for F43 and
@@ -23,7 +24,7 @@ const Operand = z
   .int()
   .min(0)
   .max(MAX_EUCLID)
-  .describe(`A whole number from 0 to ${MAX_EUCLID.toLocaleString('en')}.`);
+  .describe(`A whole number from 0 to ${thousands(MAX_EUCLID)}.`);
 
 const Input = z
   .strictObject({ a: Operand, b: Operand })

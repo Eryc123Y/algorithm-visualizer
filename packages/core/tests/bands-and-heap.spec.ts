@@ -26,7 +26,7 @@ const boxY = (scene: Scene, key: string) => {
 describe('pointer bands (ADR 0031)', () => {
   // `a` has a pointer in frames 1 and 2 only; `b` sits below it.
   const trace = mustLoad({
-    version: '0.1',
+    version: '1.0',
     structures: {
       a: { kind: 'array', initial: [3, 1, 2] },
       b: { kind: 'array', initial: [9] },
@@ -57,7 +57,7 @@ describe('pointer bands (ADR 0031)', () => {
   it('are closed in the frames before the first pointer', () => {
     const always = layoutTrace(
       mustLoad({
-        version: '0.1',
+        version: '1.0',
         structures: {
           a: { kind: 'array', initial: [1, 2] },
           b: { kind: 'array', initial: [9] },
@@ -76,7 +76,7 @@ describe('pointer bands (ADR 0031)', () => {
 
 describe('a heap view’s settled elements (ADR 0031)', () => {
   const trace = mustLoad({
-    version: '0.4',
+    version: '1.0',
     structures: {
       h: { kind: 'array', view: 'heap', initial: [5, 3, 4, 1, 2] },
     },
