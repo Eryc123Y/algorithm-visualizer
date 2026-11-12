@@ -47,6 +47,7 @@ import {
 } from './algorithms/trees/tree-walks.ts';
 import { finiteAutomatonMatcher } from './algorithms/strings/finite-automaton.ts';
 import { kmp } from './algorithms/strings/kmp.ts';
+import { recursionTree } from './algorithms/foundations/recursion-tree.ts';
 import { suffixArray } from './algorithms/strings/suffix-array.ts';
 import { strassen } from './algorithms/foundations/strassen.ts';
 import { lup } from './algorithms/math/lup.ts';
@@ -139,6 +140,7 @@ export const algorithms: readonly Algorithm[] = [
   extendedEuclid,
   modularExponentiation,
   strassen,
+  recursionTree,
 ];
 
 /** The module with `id`, if there is one. */
