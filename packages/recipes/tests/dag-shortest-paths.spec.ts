@@ -51,6 +51,10 @@ const dags = fc.integer({ min: 1, max: 10 }).chain((n) => {
   });
 });
 
+/** A distance as the module notes it. */
+const note = (d: number) =>
+  d === Infinity ? '∞' : d < 0 ? `−${-d}` : String(d);
+
 describe('dag-shortest-paths', () => {
   it('finds CLRS’s distances from s', () => {
     const { document } = runOk('dag-shortest-paths', {
@@ -74,7 +78,7 @@ describe('dag-shortest-paths', () => {
         const g = stateOf(replay(document), 'g', 'graph');
         for (const v of nodes) {
           const d = want.get(v)!;
-          expect(g.marks.notes[v], v).toBe(d === Infinity ? '∞' : String(d));
+          expect(g.marks.notes[v], v).toBe(note(d));
         }
         // One marked edge into each reachable vertex but the source,
         // and each is tight.
@@ -89,6 +93,36 @@ describe('dag-shortest-paths', () => {
       }),
       fuzz,
     );
+  });
+
+  it('takes the lighter of parallel edges, from a source in the middle', () => {
+    const { document } = runOk('dag-shortest-paths', {
+      graph: 'a->b 3, a->b 1, b->c 2, c->d -5',
+      source: 'b',
+    });
+    const g = stateOf(replay(document), 'g', 'graph');
+    expect(g.marks.notes).toEqual({ a: '∞', b: '0', c: '2', d: '−3' });
+  });
+
+  it('keeps long sums and decimals readable', () => {
+    const chain = Array.from(
+      { length: 39 },
+      (_, k) => `n${k}->n${k + 1} -1000000000`,
+    );
+    const long = stateOf(
+      replay(runOk('dag-shortest-paths', { graph: chain.join(', ') }).document),
+      'g',
+      'graph',
+    );
+    expect(long.marks.notes['n39']).toBe('−39000000000');
+    const decimals = stateOf(
+      replay(
+        runOk('dag-shortest-paths', { graph: 'a->b 0.1, b->c 0.2' }).document,
+      ),
+      'g',
+      'graph',
+    );
+    expect(decimals.marks.notes['c']).toBe('0.3');
   });
 
   it('refuses a graph with a cycle, naming it', () => {

@@ -14,7 +14,6 @@ import {
   Graph,
   graphOf,
   plus,
-  shown,
   startOf,
   type GraphInput,
 } from './graph.ts';
@@ -24,15 +23,26 @@ import { checkAcyclic } from './topological-sort.ts';
 export function topologicalOrder(g: GraphInput): string[] {
   const adj = adjacency(g);
   const seen = new Set<string>();
-  const order: string[] = [];
+  const finished: string[] = [];
   const visit = (u: string): void => {
     seen.add(u);
     for (const { to } of adj.get(u)!) if (!seen.has(to)) visit(to);
-    order.unshift(u);
+    finished.push(u);
   };
   for (const u of g.nodes) if (!seen.has(u)) visit(u);
-  return order;
+  return finished.reverse();
 }
+
+/**
+ * A distance for narrations and notes: ∞, or the number rounded to 12
+ * significant digits, so sums of decimals print as written, with a true
+ * minus sign, as `plus` writes them.
+ */
+const num = (x: number): string => {
+  if (x === Infinity) return '∞';
+  const r = Number(x.toPrecision(12));
+  return r < 0 ? `−${-r}` : String(r);
+};
 
 /** CLRS's Figure 22.6, with letters for its vertices. */
 export const DAG_EXAMPLE: z.output<typeof Graph> = {
@@ -74,12 +84,12 @@ export const dagShortestPaths = defineAlgorithm({
   code: {
     pseudocode: `
       DAG-SHORTEST-PATHS(G, w, s)
-          topologically sort the vertices of G  // @sort
+          put the vertices in an order where every edge goes forward  // @sort
           for each vertex v in G.V
               d[v] = ∞
               π[v] = NIL
           d[s] = 0  // @start
-          for each vertex u, in topological order  // @vertex
+          for each vertex u, taken in that order  // @vertex
               for each edge (u, v) in G.E
                   if d[u] + w(u, v) < d[v]  // @relax
                       d[v] = d[u] + w(u, v)  // @improve
@@ -120,26 +130,30 @@ export const dagShortestPaths = defineAlgorithm({
       `Sort the vertices topologically, by a depth-first search: ${order.join(', ')}. Every edge goes forward in this order.`,
     );
     trace.step('start', `Every distance is ∞, except ${s}'s, which is 0.`);
-    for (const v of g.nodes)
-      graph.annotate({ node: v, text: shown(d.get(v)!) });
+    for (const v of g.nodes) graph.annotate({ node: v, text: num(d.get(v)!) });
     order.forEach((u, k) => {
       const du = d.get(u)!;
+      if (du === Infinity) {
+        trace.step(
+          'vertex',
+          `${u} is next, but no path from ${s} reaches it: its edges improve nothing.`,
+        );
+        list.highlight({ indices: [k] });
+        graph.pointer({ name: 'u', node: u });
+        return;
+      }
       trace.step(
         'vertex',
-        du === Infinity
-          ? `${u} is next, but no path from ${s} reaches it: its edges improve nothing.`
-          : `${u} is next: every edge into it has been relaxed, so its distance ${du} is final. Relax the edges out of it.`,
+        `${u} is next: every edge into it has been relaxed, so its distance ${num(du)} is final. Relax the edges out of it.`,
       );
       list.highlight({ indices: [k] });
-      graph.pointer({ name: 'u', node: u });
-      if (du !== Infinity) graph.settle({ node: u });
-      if (du === Infinity) return;
+      graph.pointer({ name: 'u', node: u }).settle({ node: u });
       for (const { to: v, weight: w, edge } of adj.get(u)!) {
         const before = d.get(v)!;
         if (du + w >= before) {
           trace.step(
             'relax',
-            `${du} ${plus(w)} = ${du + w} is not less than ${shown(before)}: ${v} keeps its distance.`,
+            `${num(du)} ${plus(w)} = ${num(du + w)} is not less than ${num(before)}: ${v} keeps its distance.`,
           );
           graph.highlight({ nodes: [v], edges: [edge] });
           continue;
@@ -147,11 +161,11 @@ export const dagShortestPaths = defineAlgorithm({
         d.set(v, du + w);
         trace.step(
           'improve',
-          `${du} ${plus(w)} = ${du + w} is less than ${shown(before)}: ${v} improves to ${du + w}, through ${u}.`,
+          `${num(du)} ${plus(w)} = ${num(du + w)} is less than ${num(before)}: ${v} improves to ${num(du + w)}, through ${u}.`,
         );
         graph
           .highlight({ nodes: [v], edges: [edge] })
-          .annotate({ node: v, text: String(du + w) });
+          .annotate({ node: v, text: num(du + w) });
         const old = via.get(v);
         if (old !== undefined) graph.markEdge({ edge: old, mark: null });
         via.set(v, edge);
