@@ -105,7 +105,7 @@ Each entry is one registry module, or one per operation for data structures. Eac
 - [x] randomized quicksort (#108)
 - [x] radix sort (#109)
 - [x] bucket sort (#110)
-- [ ] randomized select
+- [x] randomized select (#111)
 - [ ] select (median of medians)
 
 **III Data structures**
