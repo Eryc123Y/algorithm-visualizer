@@ -1675,6 +1675,38 @@ recipe(
   },
 );
 
+recipe(
+  'hungarian',
+  fc.integer({ min: 1, max: 6 }).chain((n) =>
+    fc.array(
+      fc.array(fc.integer({ min: -30, max: 30 }), {
+        minLength: n,
+        maxLength: n,
+      }),
+      { minLength: n, maxLength: n },
+    ),
+  ),
+  (weights) => runOk('hungarian', { weights }).document,
+  (trace, weights) => {
+    // A perfect matching, weighing as much as the labels add up to.
+    const g = stateOf(trace, 'g', 'graph');
+    const matched = g.data.edges.filter(
+      (e) => g.marks.edgeMarks[e.id] === 'selected',
+    );
+    expect(matched).toHaveLength(weights.length);
+    const at = (v: string) => 'abcdefpqrstu'.indexOf(v) % 6;
+    const weight = matched.reduce(
+      (s, e) => s + weights[at(e.from)]![at(e.to)]!,
+      0,
+    );
+    const labels = Object.values(g.marks.notes).reduce(
+      (s, x) => s + Number(x.replace('−', '-')),
+      0,
+    );
+    expect(weight).toBe(labels);
+  },
+);
+
 describe('topological-sort input checks', () => {
   it(
     'refuses a graph with a cycle, and only such a graph',

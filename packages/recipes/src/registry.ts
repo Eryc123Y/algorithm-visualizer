@@ -20,6 +20,7 @@ import { edmondsKarp } from './algorithms/graphs/edmonds-karp.ts';
 import { bipartiteMatching } from './algorithms/graphs/bipartite-matching.ts';
 import { hopcroftKarp } from './algorithms/graphs/hopcroft-karp.ts';
 import { galeShapley } from './algorithms/graphs/gale-shapley.ts';
+import { hungarian } from './algorithms/graphs/hungarian.ts';
 import { floydWarshall } from './algorithms/graphs/floyd-warshall.ts';
 import { transitiveClosure } from './algorithms/graphs/transitive-closure.ts';
 import { johnson } from './algorithms/graphs/johnson.ts';
@@ -111,6 +112,7 @@ export const algorithms: readonly Algorithm[] = [
   bipartiteMatching,
   hopcroftKarp,
   galeShapley,
+  hungarian,
   lcs,
   editDistance,
   knapsack,
