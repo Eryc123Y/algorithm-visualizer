@@ -1767,3 +1767,72 @@ for (const id of [
       expect(shifts).toEqual(want);
     },
   );
+
+// Computational geometry (ADR 0038): points on a small grid, so that
+// collinear points and equal x happen.
+
+const gridPoints = (min: number, max: number) =>
+  fc
+    .uniqueArray(
+      fc.tuple(fc.integer({ min: 0, max: 8 }), fc.integer({ min: 0, max: 8 })),
+      { minLength: min, maxLength: max, selector: (p) => p.join() },
+    )
+    .filter((ps) =>
+      ps.some(
+        (p) =>
+          (ps[1]![0] - ps[0]![0]) * (p[1] - ps[0]![1]) -
+            (ps[1]![1] - ps[0]![1]) * (p[0] - ps[0]![0]) !==
+          0,
+      ),
+    );
+
+for (const id of ['graham-scan', 'jarvis-march'])
+  recipe(
+    id,
+    gridPoints(3, 24),
+    (points) => runOk(id, { points }).document,
+    (trace) => {
+      const P = stateOf(trace, 'P', 'plane');
+      // As many hull edges chosen as hull vertices settled.
+      expect(P.marks.selected.length).toBe(P.marks.settled.length);
+    },
+  );
+
+recipe(
+  'closest-pair',
+  gridPoints(2, 16),
+  (points) => runOk('closest-pair', { points }).document,
+  (trace) => {
+    const P = stateOf(trace, 'P', 'plane');
+    expect(P.marks.selected).toHaveLength(1);
+  },
+);
+
+recipe(
+  'any-segments-intersect',
+  fc.uniqueArray(
+    fc
+      .tuple(
+        fc.tuple(
+          fc.integer({ min: 0, max: 8 }),
+          fc.integer({ min: 0, max: 8 }),
+        ),
+        fc.tuple(
+          fc.integer({ min: 0, max: 8 }),
+          fc.integer({ min: 0, max: 8 }),
+        ),
+      )
+      .filter(([a, b]) => a[0] !== b[0]),
+    {
+      minLength: 1,
+      maxLength: 12,
+      selector: ([a, b]) => [a.join(), b.join()].sort().join(' '),
+    },
+  ),
+  (segments) => runOk('any-segments-intersect', { segments }).document,
+  (trace) => {
+    const P = stateOf(trace, 'P', 'plane');
+    // Either two segments are chosen, as the pair found, or none.
+    expect([0, 2]).toContain(P.marks.selected.length);
+  },
+);

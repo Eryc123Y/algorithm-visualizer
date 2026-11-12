@@ -73,6 +73,7 @@ The registry holds these modules, by topic ([ADR 0022](docs/adr/0022-registry-de
 - **Dynamic programming:** `lcs`, `edit-distance`, `knapsack`.
 - **Greedy algorithms:** `huffman`.
 - **String matching:** `naive-string-matcher`, `rabin-karp`, `finite-automaton-matcher`, `kmp`.
+- **Computational geometry:** `any-segments-intersect`, `graham-scan`, `jarvis-march`, `closest-pair`.
 
 A data structure has one module per operation, such as `bst.delete`, which starts from a structure the caller describes, and one for its sequence, such as `bst`, which runs up to 8 operations. `algorithms` lists every module.
 
