@@ -5,6 +5,10 @@
  * `roots` lists the roots of the forest left to right. Every structural
  * action keeps the forest valid: each node has at most one parent and there
  * are no cycles.
+ *
+ * Marks that hang on the shape (ADR 0034) follow it: a pointer at an empty
+ * slot (NIL) goes when the slot fills or its parent goes, and an edge's
+ * mark and label go when its lower end gets another parent or slot.
  */
 import {
   err,
@@ -18,7 +22,13 @@ import {
 
 import type { ReduceError } from '../errors.ts';
 import type { StructureKind } from '../kind.ts';
-import { checkCapacity, checkRange, notFound, without } from './common.ts';
+import {
+  checkCapacity,
+  checkRange,
+  insertAt,
+  notFound,
+  without,
+} from './common.ts';
 
 export interface TreeNodeState {
   readonly id: string;
@@ -32,14 +42,35 @@ export interface TreeData {
   readonly roots: readonly string[];
 }
 
+/** An empty child slot of a binary tree: the NIL leaf a pointer names. */
+export interface NilSlot {
+  readonly parent: string;
+  readonly slot: number;
+}
+
+/** What a tree pointer points at: a node id, or a NIL slot. */
+export type TreePointerTarget = string | NilSlot;
+
+export const isNilSlot = (target: TreePointerTarget): target is NilSlot =>
+  typeof target !== 'string';
+
 export interface TreeMarks {
   readonly highlight: readonly string[];
   readonly compare: readonly [string, string] | null;
   readonly visited: readonly string[];
   readonly settled: readonly string[];
   readonly groups: Readonly<Record<string, GroupIndexValue>>;
-  readonly pointers: Readonly<Record<string, string>>;
+  readonly pointers: Readonly<Record<string, TreePointerTarget>>;
+  /** The plain note of each node. */
   readonly notes: Readonly<Record<string, string>>;
+  /** Named notes by node, then by field, in the order first set. */
+  readonly namedNotes: Readonly<
+    Record<string, Readonly<Record<string, string>>>
+  >;
+  /** Marks of edges, by the edge's lower end. */
+  readonly edgeMarks: Readonly<Record<string, 'selected' | 'rejected'>>;
+  /** Labels of edges, by the edge's lower end. */
+  readonly edgeLabels: Readonly<Record<string, string | number>>;
 }
 
 export interface TreeState {
@@ -58,6 +89,9 @@ const emptyMarks: TreeMarks = {
   groups: {},
   pointers: {},
   notes: {},
+  namedNotes: {},
+  edgeMarks: {},
+  edgeLabels: {},
 };
 
 function init(decl: TreeDecl): TreeState {
@@ -191,7 +225,7 @@ const invalid = (
   ...(hint === undefined ? {} : { hint }),
 });
 
-function reduceTree(s: TreeState, a: TreeAction): Reduced {
+function reduceShape(s: TreeState, a: TreeAction): Reduced {
   const { data, marks, binary } = s;
   const has = (id: string) => data.nodes.some((n) => n.id === id);
   const node = (id: string) => data.nodes.find((n) => n.id === id);
@@ -209,6 +243,29 @@ function reduceTree(s: TreeState, a: TreeAction): Reduced {
     slot > 1
       ? invalid(['slot'], 'Binary tree nodes have slots 0 (left) and 1 (right)')
       : undefined;
+  const checkNil = (nil: NilSlot): ReduceError | undefined => {
+    if (!binary)
+      return invalid(
+        ['node'],
+        'Only binary trees have empty slots (NIL) to point at',
+        'Point at a node instead.',
+      );
+    if (!has(nil.parent))
+      return notFound(['node', 'parent'], nil.parent, 'node');
+    if (nil.slot > 1)
+      return invalid(
+        ['node', 'slot'],
+        'Binary tree nodes have slots 0 (left) and 1 (right)',
+      );
+    const child = node(nil.parent)!.children[nil.slot] ?? null;
+    return child === null
+      ? undefined
+      : invalid(
+          ['node', 'slot'],
+          `Slot ${nil.slot} of "${nil.parent}" holds "${child}", not NIL`,
+          `Point at "${child}" itself.`,
+        );
+  };
 
   switch (a.type) {
     case 'addNode': {
@@ -228,8 +285,14 @@ function reduceTree(s: TreeState, a: TreeAction): Reduced {
         color: a.node.color ?? null,
       };
       const added = { ...data, nodes: [...data.nodes, fresh] };
-      if (a.parent === null)
-        return result({ ...added, roots: [...added.roots, fresh.id] });
+      if (a.parent === null) {
+        const bad = rootSlotInRange(data.roots.length, a.slot);
+        if (bad) return err(bad);
+        return result({
+          ...added,
+          roots: insertAt(added.roots, a.slot ?? added.roots.length, fresh.id),
+        });
+      }
       const parent = node(a.parent)!;
       if (!binary) {
         const bad = slotInRange(parent, a.slot);
@@ -288,10 +351,15 @@ function reduceTree(s: TreeState, a: TreeAction): Reduced {
             Object.entries(marks.groups).filter(([id]) => keep(id)),
           ),
           pointers: Object.fromEntries(
-            Object.entries(marks.pointers).filter(([, id]) => keep(id)),
+            Object.entries(marks.pointers).filter(
+              ([, target]) => isNilSlot(target) || keep(target),
+            ),
           ),
           notes: Object.fromEntries(
             Object.entries(marks.notes).filter(([id]) => keep(id)),
+          ),
+          namedNotes: Object.fromEntries(
+            Object.entries(marks.namedNotes).filter(([id]) => keep(id)),
           ),
         },
       );
@@ -347,10 +415,16 @@ function reduceTree(s: TreeState, a: TreeAction): Reduced {
     case 'detach': {
       const bad = missing('node', a.node);
       if (bad) return err(bad);
-      if (data.roots.includes(a.node)) return ok(s);
+      // The roots other than the node: a slot counts among them.
+      const others = data.roots.filter((r) => r !== a.node);
+      const badSlot = rootSlotInRange(others.length, a.slot);
+      if (badSlot) return err(badSlot);
+      const isRoot = others.length < data.roots.length;
+      if (isRoot && a.slot === undefined) return ok(s);
+      const unhooked = isRoot ? data : unhook(data, a.node, binary);
       return result({
-        ...unhook(data, a.node, binary),
-        roots: [...data.roots, a.node],
+        ...unhooked,
+        roots: insertAt(others, a.slot ?? others.length, a.node),
       });
     }
     case 'rotate': {
@@ -448,7 +522,10 @@ function reduceTree(s: TreeState, a: TreeAction): Reduced {
       });
     }
     case 'pointer': {
-      const bad = missing('node', a.node);
+      const bad =
+        a.node !== null && isNilSlot(a.node)
+          ? checkNil(a.node)
+          : missing('node', a.node);
       if (bad) return err(bad);
       return result(data, {
         pointers:
@@ -460,11 +537,50 @@ function reduceTree(s: TreeState, a: TreeAction): Reduced {
     case 'annotate': {
       const bad = missing('node', a.node);
       if (bad) return err(bad);
+      if (a.field !== undefined) {
+        const current = marks.namedNotes[a.node] ?? {};
+        const next =
+          a.text === null
+            ? without(current, a.field)
+            : { ...current, [a.field]: a.text };
+        return result(data, {
+          namedNotes:
+            Object.keys(next).length === 0
+              ? without(marks.namedNotes, a.node)
+              : { ...marks.namedNotes, [a.node]: next },
+        });
+      }
       return result(data, {
         notes:
           a.text === null
             ? without(marks.notes, a.node)
             : { ...marks.notes, [a.node]: a.text },
+      });
+    }
+    case 'markEdge':
+    case 'labelEdge': {
+      const bad = missing('node', a.node);
+      if (bad) return err(bad);
+      if (data.roots.includes(a.node))
+        return err(
+          invalid(
+            ['node'],
+            `Node "${a.node}" is a root: there is no edge above it`,
+            'Name an edge by its lower end, a node with a parent.',
+          ),
+        );
+      if (a.type === 'markEdge')
+        return result(data, {
+          edgeMarks:
+            a.mark === null
+              ? without(marks.edgeMarks, a.node)
+              : { ...marks.edgeMarks, [a.node]: a.mark },
+        });
+      return result(data, {
+        edgeLabels:
+          a.label === null
+            ? without(marks.edgeLabels, a.node)
+            : { ...marks.edgeLabels, [a.node]: a.label },
       });
     }
     default: {
@@ -473,6 +589,61 @@ function reduceTree(s: TreeState, a: TreeAction): Reduced {
     }
   }
 }
+
+/** Where each node with a parent hangs: its parent, and its slot if binary. */
+function edgesOf(s: TreeState): Map<string, string> {
+  const edges = new Map<string, string>();
+  for (const node of s.data.nodes)
+    node.children.forEach((child, slot) => {
+      if (child !== null)
+        edges.set(child, s.binary ? `${node.id}/${slot}` : node.id);
+    });
+  return edges;
+}
+
+/**
+ * Drops the marks that hung on a shape that changed: NIL pointers whose
+ * slot filled or whose parent went, and the marks and labels of edges whose
+ * lower end got another parent or slot, became a root or went.
+ */
+function followShape(before: TreeState, after: TreeState): TreeState {
+  if (after.data === before.data) return after;
+  const { marks } = after;
+  const was = edgesOf(before);
+  const is = edgesOf(after);
+  const kept = (id: string) => is.has(id) && is.get(id) === was.get(id);
+  const slotOf = (nil: NilSlot) =>
+    after.data.nodes.find((n) => n.id === nil.parent)?.children[nil.slot];
+  const keepEdges = <V>(record: Readonly<Record<string, V>>) =>
+    Object.fromEntries(Object.entries(record).filter(([id]) => kept(id)));
+  return {
+    ...after,
+    marks: {
+      ...marks,
+      pointers: Object.fromEntries(
+        Object.entries(marks.pointers).filter(
+          ([, target]) => !isNilSlot(target) || slotOf(target) === null,
+        ),
+      ),
+      edgeMarks: keepEdges(marks.edgeMarks),
+      edgeLabels: keepEdges(marks.edgeLabels),
+    },
+  };
+}
+
+function reduceTree(s: TreeState, a: TreeAction): Reduced {
+  const reduced = reduceShape(s, a);
+  return reduced.ok ? ok(followShape(s, reduced.value)) : reduced;
+}
+
+/** A slot among `count` roots: 0 to `count`. */
+const rootSlotInRange = (
+  count: number,
+  slot: number | undefined,
+): ReduceError | undefined =>
+  slot === undefined
+    ? undefined
+    : checkRange('the roots', count, count + 1, [['slot'], slot]);
 
 export const treeKind: StructureKind<TreeDecl, TreeState, TreeAction> = {
   init,

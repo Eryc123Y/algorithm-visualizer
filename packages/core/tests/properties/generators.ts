@@ -144,7 +144,16 @@ function treeDecl(r: Dice, label: object): StructureDecl {
     else if (binary) parent.children[free] = node.id;
     else parent.children.push(node.id);
   });
-  return { kind: 'tree', ...label, binary, nodes, roots };
+  return {
+    kind: 'tree',
+    ...label,
+    binary,
+    nodes,
+    roots,
+    ...(r.chance(0.2)
+      ? { rootList: r.pick(['list', 'circular'] as const) }
+      : {}),
+  };
 }
 
 function graphDecl(r: Dice, label: object): StructureDecl {
@@ -356,7 +365,7 @@ function treeAction(s: TreeState, r: Dice): Fields {
   const node = () =>
     all.length === 0 || r.chance(0.03) ? 'missing' : r.pick(all);
   const slot = () => (s.binary ? r.int(r.chance(0.05) ? 3 : 2) : r.int(4));
-  switch (r.int(16)) {
+  switch (r.int(17)) {
     case 0:
     case 1:
     case 2:
@@ -381,7 +390,11 @@ function treeAction(s: TreeState, r: Dice): Fields {
         ...(s.binary || r.chance(0.5) ? { slot: slot() } : {}),
       };
     case 6:
-      return { type: 'detach', node: node() };
+      return {
+        type: 'detach',
+        node: node(),
+        ...(r.chance(0.5) ? { slot: r.int(s.data.roots.length + 2) } : {}),
+      };
     case 7:
     case 8:
       return {
@@ -415,7 +428,24 @@ function treeAction(s: TreeState, r: Dice): Fields {
         : {
             type: 'pointer',
             name: pointerName(r),
-            node: r.chance(0.2) ? null : node(),
+            node: r.chance(0.2)
+              ? null
+              : r.chance(0.3)
+                ? // A NIL slot (ADR 0034), often an empty one.
+                  { parent: node(), slot: r.int(r.chance(0.1) ? 3 : 2) }
+                : node(),
+          };
+    case 15:
+      return r.chance(0.5)
+        ? {
+            type: 'markEdge',
+            node: node(),
+            mark: r.pick(['selected', 'rejected', null]),
+          }
+        : {
+            type: 'labelEdge',
+            node: node(),
+            label: r.pick(['0', '1', 7, 'xxxxxxxxxxxxxxxx', null]),
           };
     default:
       return {
@@ -424,6 +454,7 @@ function treeAction(s: TreeState, r: Dice): Fields {
         text: r.chance(0.2)
           ? null
           : r.pick(['h=1', 'd=∞', '', 'x'.repeat(32), 'bf −1']),
+        ...(r.chance(0.4) ? { field: r.pick(['size', 'max', 'deg']) } : {}),
       };
   }
 }

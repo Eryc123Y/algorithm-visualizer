@@ -242,9 +242,36 @@ function treeProblems(s: TreeState): string[] {
     ...known(marks.visited, ids, 'visited'),
     ...known(marks.settled, ids, 'settled'),
     ...known(Object.keys(marks.groups), ids, 'group'),
-    ...known(Object.values(marks.pointers), ids, 'pointer'),
+    ...known(
+      Object.values(marks.pointers).filter((t) => typeof t === 'string'),
+      ids,
+      'pointer',
+    ),
     ...known(Object.keys(marks.notes), ids, 'note'),
+    ...known(Object.keys(marks.namedNotes), ids, 'named note'),
   );
+  // A NIL pointer names an empty slot of a node (ADR 0034).
+  for (const [name, target] of Object.entries(marks.pointers)) {
+    if (typeof target === 'string') continue;
+    const parent = nodes.find((n) => n.id === target.parent);
+    if (!s.binary) problems.push(`NIL pointer ${name} in a tree not binary`);
+    else if (parent === undefined)
+      problems.push(`NIL pointer ${name} under unknown ${target.parent}`);
+    else if ((parent.children[target.slot] ?? null) !== null)
+      problems.push(`NIL pointer ${name} at a filled slot`);
+  }
+  // Edge marks and labels sit on edges: their lower ends have parents.
+  const children = new Set(
+    nodes.flatMap((n) => n.children.filter((c) => c !== null)),
+  );
+  for (const id of [
+    ...Object.keys(marks.edgeMarks),
+    ...Object.keys(marks.edgeLabels),
+  ])
+    if (!children.has(id)) problems.push(`edge mark on ${id}, not a child`);
+  for (const [id, fields] of Object.entries(marks.namedNotes))
+    if (Object.keys(fields).length === 0)
+      problems.push(`empty named notes on ${id}`);
   return problems;
 }
 

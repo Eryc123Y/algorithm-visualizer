@@ -63,8 +63,8 @@ describe('place (ADR 0029)', () => {
 });
 
 describe('version 0.4', () => {
-  it('is the newest version, and dates placement', () => {
-    expect(PROTOCOL_VERSIONS.at(-1)).toBe('0.4');
+  it('is a version, and dates placement', () => {
+    expect(PROTOCOL_VERSIONS).toContain('0.4');
     expect(
       PROTOCOL_FEATURES.filter((f) => f.since === '0.4').map((f) => f.name),
     ).toContain('placement');

@@ -1,0 +1,198 @@
+{
+  "description": "A circular root list with min above its root, a cut child moved into the list and a root reordered (ADR 0034).",
+  "input": {
+    "version": "0.5",
+    "structures": {
+      "h": {
+        "kind": "tree",
+        "rootList": "circular",
+        "nodes": [
+          {
+            "id": "a",
+            "value": 3,
+            "children": ["b", "c"]
+          },
+          {
+            "id": "b",
+            "value": 18
+          },
+          {
+            "id": "c",
+            "value": 52
+          },
+          {
+            "id": "d",
+            "value": 7
+          },
+          {
+            "id": "e",
+            "value": 23
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "h",
+            "type": "pointer",
+            "name": "min",
+            "node": "a"
+          },
+          {
+            "target": "h",
+            "type": "annotate",
+            "node": "b",
+            "field": "mark",
+            "text": "marked"
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "h",
+            "type": "detach",
+            "node": "b",
+            "slot": 0
+          },
+          {
+            "target": "h",
+            "type": "annotate",
+            "node": "b",
+            "field": "mark",
+            "text": null
+          }
+        ]
+      }
+    ]
+  },
+  "expectedLength": 2,
+  "expectedFrames": [
+    {
+      "index": 1,
+      "state": {
+        "h": {
+          "kind": "tree",
+          "state": {
+            "data": {
+              "nodes": [
+                {
+                  "id": "a",
+                  "value": 3,
+                  "children": ["b", "c"],
+                  "color": null
+                },
+                {
+                  "id": "b",
+                  "value": 18,
+                  "children": [],
+                  "color": null
+                },
+                {
+                  "id": "c",
+                  "value": 52,
+                  "children": [],
+                  "color": null
+                },
+                {
+                  "id": "d",
+                  "value": 7,
+                  "children": [],
+                  "color": null
+                },
+                {
+                  "id": "e",
+                  "value": 23,
+                  "children": [],
+                  "color": null
+                }
+              ],
+              "roots": ["a", "d", "e"]
+            },
+            "marks": {
+              "highlight": [],
+              "compare": null,
+              "visited": [],
+              "settled": [],
+              "groups": {},
+              "pointers": {
+                "min": "a"
+              },
+              "notes": {},
+              "namedNotes": {
+                "b": {
+                  "mark": "marked"
+                }
+              },
+              "edgeMarks": {},
+              "edgeLabels": {}
+            },
+            "binary": false
+          }
+        }
+      }
+    },
+    {
+      "index": 2,
+      "state": {
+        "h": {
+          "kind": "tree",
+          "state": {
+            "data": {
+              "nodes": [
+                {
+                  "id": "a",
+                  "value": 3,
+                  "children": ["c"],
+                  "color": null
+                },
+                {
+                  "id": "b",
+                  "value": 18,
+                  "children": [],
+                  "color": null
+                },
+                {
+                  "id": "c",
+                  "value": 52,
+                  "children": [],
+                  "color": null
+                },
+                {
+                  "id": "d",
+                  "value": 7,
+                  "children": [],
+                  "color": null
+                },
+                {
+                  "id": "e",
+                  "value": 23,
+                  "children": [],
+                  "color": null
+                }
+              ],
+              "roots": ["b", "a", "d", "e"]
+            },
+            "marks": {
+              "highlight": [],
+              "compare": null,
+              "visited": [],
+              "settled": [],
+              "groups": {},
+              "pointers": {
+                "min": "a"
+              },
+              "notes": {},
+              "namedNotes": {},
+              "edgeMarks": {},
+              "edgeLabels": {}
+            },
+            "binary": false
+          }
+        }
+      }
+    }
+  ]
+}

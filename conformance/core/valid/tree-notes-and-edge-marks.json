@@ -1,0 +1,208 @@
+{
+  "description": "Named notes keep one note per field, in the order first set; edge marks and labels go when a rotation moves their edge.",
+  "input": {
+    "version": "0.5",
+    "structures": {
+      "t": {
+        "kind": "tree",
+        "binary": true,
+        "nodes": [
+          {
+            "id": "n8",
+            "value": 8,
+            "children": ["n3", "n10"],
+            "color": "black"
+          },
+          {
+            "id": "n3",
+            "value": 3,
+            "color": "red"
+          },
+          {
+            "id": "n10",
+            "value": 10,
+            "color": "red"
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "t",
+            "type": "annotate",
+            "node": "n8",
+            "field": "size",
+            "text": "s=3"
+          },
+          {
+            "target": "t",
+            "type": "annotate",
+            "node": "n8",
+            "field": "max",
+            "text": "max=10"
+          },
+          {
+            "target": "t",
+            "type": "annotate",
+            "node": "n8",
+            "text": "root"
+          },
+          {
+            "target": "t",
+            "type": "markEdge",
+            "node": "n3",
+            "mark": "selected"
+          },
+          {
+            "target": "t",
+            "type": "labelEdge",
+            "node": "n3",
+            "label": "0"
+          },
+          {
+            "target": "t",
+            "type": "labelEdge",
+            "node": "n10",
+            "label": "1"
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "t",
+            "type": "annotate",
+            "node": "n8",
+            "field": "size",
+            "text": null
+          },
+          {
+            "target": "t",
+            "type": "rotate",
+            "node": "n8",
+            "direction": "left"
+          }
+        ]
+      }
+    ]
+  },
+  "expectedLength": 2,
+  "expectedFrames": [
+    {
+      "index": 1,
+      "state": {
+        "t": {
+          "kind": "tree",
+          "state": {
+            "data": {
+              "nodes": [
+                {
+                  "id": "n8",
+                  "value": 8,
+                  "children": ["n3", "n10"],
+                  "color": "black"
+                },
+                {
+                  "id": "n3",
+                  "value": 3,
+                  "children": [null, null],
+                  "color": "red"
+                },
+                {
+                  "id": "n10",
+                  "value": 10,
+                  "children": [null, null],
+                  "color": "red"
+                }
+              ],
+              "roots": ["n8"]
+            },
+            "marks": {
+              "highlight": [],
+              "compare": null,
+              "visited": [],
+              "settled": [],
+              "groups": {},
+              "pointers": {},
+              "notes": {
+                "n8": "root"
+              },
+              "namedNotes": {
+                "n8": {
+                  "size": "s=3",
+                  "max": "max=10"
+                }
+              },
+              "edgeMarks": {
+                "n3": "selected"
+              },
+              "edgeLabels": {
+                "n3": "0",
+                "n10": "1"
+              }
+            },
+            "binary": true
+          }
+        }
+      }
+    },
+    {
+      "index": 2,
+      "state": {
+        "t": {
+          "kind": "tree",
+          "state": {
+            "data": {
+              "nodes": [
+                {
+                  "id": "n8",
+                  "value": 8,
+                  "children": ["n3", null],
+                  "color": "black"
+                },
+                {
+                  "id": "n3",
+                  "value": 3,
+                  "children": [null, null],
+                  "color": "red"
+                },
+                {
+                  "id": "n10",
+                  "value": 10,
+                  "children": ["n8", null],
+                  "color": "red"
+                }
+              ],
+              "roots": ["n10"]
+            },
+            "marks": {
+              "highlight": [],
+              "compare": null,
+              "visited": [],
+              "settled": [],
+              "groups": {},
+              "pointers": {},
+              "notes": {
+                "n8": "root"
+              },
+              "namedNotes": {
+                "n8": {
+                  "max": "max=10"
+                }
+              },
+              "edgeMarks": {
+                "n3": "selected"
+              },
+              "edgeLabels": {
+                "n3": "0"
+              }
+            },
+            "binary": true
+          }
+        }
+      }
+    }
+  ]
+}

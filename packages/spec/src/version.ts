@@ -14,7 +14,7 @@ import type { VisualizationInput } from './visualization.ts';
  * change appends a version here and adds its features to
  * `PROTOCOL_FEATURES`.
  */
-export const PROTOCOL_VERSIONS = ['0.1', '0.2', '0.3', '0.4'] as const;
+export const PROTOCOL_VERSIONS = ['0.1', '0.2', '0.3', '0.4', '0.5'] as const;
 
 /** A protocol version this package reads. */
 export type ProtocolVersion = (typeof PROTOCOL_VERSIONS)[number];
@@ -147,6 +147,23 @@ export interface ProtocolFeature<V extends string = ProtocolVersion> {
   readonly usedBy: (document: Content) => boolean;
 }
 
+/** An action of a document, as written, with the kind of its target. */
+type ActionOf = Content['steps'][number]['actions'][number];
+
+/** Whether some action on a tree of the document passes `test`. */
+const anyTreeAction = (
+  d: Content,
+  test: (action: Record<string, unknown>) => boolean,
+): boolean =>
+  d.steps.some((step) =>
+    step.actions.some(
+      (action: ActionOf) =>
+        Object.hasOwn(d.structures, action.target) &&
+        d.structures[action.target]!.kind === 'tree' &&
+        test(action),
+    ),
+  );
+
 /**
  * Features added after the first protocol version, with the version that
  * added each. A protocol change adds its entries here.
@@ -190,6 +207,56 @@ export const PROTOCOL_FEATURES: readonly ProtocolFeature[] = [
     usedBy: (d) =>
       Object.values(d.structures).some(
         (s) => s.kind === 'array' && s.view === 'heap',
+      ),
+  },
+  {
+    name: 'root slots',
+    since: '0.5',
+    usedBy: (d) =>
+      anyTreeAction(
+        d,
+        (a) =>
+          a['slot'] !== undefined &&
+          (a['type'] === 'detach' ||
+            (a['type'] === 'addNode' && a['parent'] === null)),
+      ),
+  },
+  {
+    name: 'NIL pointers',
+    since: '0.5',
+    usedBy: (d) =>
+      anyTreeAction(
+        d,
+        (a) =>
+          a['type'] === 'pointer' &&
+          typeof a['node'] === 'object' &&
+          a['node'] !== null,
+      ),
+  },
+  {
+    name: 'named notes',
+    since: '0.5',
+    usedBy: (d) =>
+      anyTreeAction(
+        d,
+        (a) => a['type'] === 'annotate' && a['field'] !== undefined,
+      ),
+  },
+  {
+    name: 'tree edge marks',
+    since: '0.5',
+    usedBy: (d) =>
+      anyTreeAction(
+        d,
+        (a) => a['type'] === 'markEdge' || a['type'] === 'labelEdge',
+      ),
+  },
+  {
+    name: 'root lists',
+    since: '0.5',
+    usedBy: (d) =>
+      Object.values(d.structures).some(
+        (s) => s.kind === 'tree' && s.rootList !== undefined,
       ),
   },
 ];

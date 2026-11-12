@@ -1,0 +1,53 @@
+{
+  "description": "A root slot counts the other roots: a root among three moves to 0, 1 or 2.",
+  "input": {
+    "version": "0.5",
+    "structures": {
+      "h": {
+        "kind": "tree",
+        "rootList": "circular",
+        "nodes": [
+          {
+            "id": "a",
+            "value": 3,
+            "children": ["b", "c"]
+          },
+          {
+            "id": "b",
+            "value": 18
+          },
+          {
+            "id": "c",
+            "value": 52
+          },
+          {
+            "id": "d",
+            "value": 7
+          },
+          {
+            "id": "e",
+            "value": 23
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "h",
+            "type": "detach",
+            "node": "a",
+            "slot": 3
+          }
+        ]
+      }
+    ]
+  },
+  "expectedErrors": [
+    {
+      "code": "OUT_OF_RANGE",
+      "path": "$.steps[0].actions[0].slot"
+    }
+  ]
+}

@@ -2,24 +2,42 @@
   "description": "addNode can give a red–black colour directly; without one the node has none.",
   "input": {
     "version": "0.1",
-    "structures": { "rb": { "kind": "tree", "binary": true } },
+    "structures": {
+      "rb": {
+        "kind": "tree",
+        "binary": true
+      }
+    },
     "steps": [
       {
         "actions": [
           {
             "target": "rb",
             "type": "addNode",
-            "node": { "id": "a", "value": 1, "color": "black" },
+            "node": {
+              "id": "a",
+              "value": 1,
+              "color": "black"
+            },
             "parent": null
           },
           {
             "target": "rb",
             "type": "addNode",
-            "node": { "id": "b", "value": 2, "color": "red" },
+            "node": {
+              "id": "b",
+              "value": 2,
+              "color": "red"
+            },
             "parent": "a",
             "slot": "right"
           },
-          { "target": "rb", "type": "addNode", "node": 0, "parent": "a" }
+          {
+            "target": "rb",
+            "type": "addNode",
+            "node": 0,
+            "parent": "a"
+          }
         ]
       }
     ]
@@ -62,7 +80,10 @@
               "settled": [],
               "groups": {},
               "pointers": {},
-              "notes": {}
+              "notes": {},
+              "namedNotes": {},
+              "edgeMarks": {},
+              "edgeLabels": {}
             },
             "binary": true
           }

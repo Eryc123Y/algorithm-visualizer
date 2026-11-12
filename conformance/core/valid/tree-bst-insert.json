@@ -132,7 +132,10 @@
               "settled": [],
               "groups": {},
               "pointers": {},
-              "notes": {}
+              "notes": {},
+              "namedNotes": {},
+              "edgeMarks": {},
+              "edgeLabels": {}
             },
             "binary": true
           }
@@ -163,7 +166,10 @@
               "settled": [],
               "groups": {},
               "pointers": {},
-              "notes": {}
+              "notes": {},
+              "namedNotes": {},
+              "edgeMarks": {},
+              "edgeLabels": {}
             },
             "binary": true
           }
@@ -200,7 +206,10 @@
               "settled": [],
               "groups": {},
               "pointers": {},
-              "notes": {}
+              "notes": {},
+              "namedNotes": {},
+              "edgeMarks": {},
+              "edgeLabels": {}
             },
             "binary": true
           }
@@ -245,7 +254,10 @@
               "pointers": {
                 "curr": "e0"
               },
-              "notes": {}
+              "notes": {},
+              "namedNotes": {},
+              "edgeMarks": {},
+              "edgeLabels": {}
             },
             "binary": true
           }
@@ -298,7 +310,10 @@
               },
               "notes": {
                 "e1": "h=2"
-              }
+              },
+              "namedNotes": {},
+              "edgeMarks": {},
+              "edgeLabels": {}
             },
             "binary": true
           }
@@ -351,7 +366,10 @@
               },
               "notes": {
                 "e1": "h=2"
-              }
+              },
+              "namedNotes": {},
+              "edgeMarks": {},
+              "edgeLabels": {}
             },
             "binary": true
           }
@@ -404,7 +422,10 @@
               "pointers": {},
               "notes": {
                 "e1": "h=2"
-              }
+              },
+              "namedNotes": {},
+              "edgeMarks": {},
+              "edgeLabels": {}
             },
             "binary": true
           }

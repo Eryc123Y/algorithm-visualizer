@@ -6,6 +6,8 @@
  */
 import { LIMITS, type Scalar, type StructureDecl } from '@algoviz/spec';
 
+import { applyTreeModel, initTreeModel, type TreeModel } from './tree-model.ts';
+
 type Element = { id: string; value: Scalar };
 type Item = Element & { key: number | null };
 type ListNode = Element & { next: string | null; prev: string | null };
@@ -16,7 +18,8 @@ export type ModelData =
   | { kind: 'linkedList'; doubly: boolean; nodes: ListNode[] }
   | { kind: 'table'; cells: Scalar[][] }
   | { kind: 'hashTable'; buckets: Element[][] }
-  | { kind: 'priorityQueue'; order: 'min' | 'max'; items: Item[] };
+  | { kind: 'priorityQueue'; order: 'min' | 'max'; items: Item[] }
+  | TreeModel;
 
 export type ModelKind = ModelData['kind'];
 export const modelled: readonly string[] = [
@@ -27,6 +30,7 @@ export const modelled: readonly string[] = [
   'table',
   'hashTable',
   'priorityQueue',
+  'tree',
 ];
 
 export function initModel(decl: StructureDecl): ModelData | undefined {
@@ -60,6 +64,8 @@ export function initModel(decl: StructureDecl): ModelData | undefined {
         order: decl.order ?? 'min',
         items: [...decl.initial],
       };
+    case 'tree':
+      return initTreeModel(decl);
     default:
       return undefined;
   }
@@ -75,6 +81,7 @@ const insertAt = <T>(xs: T[], i: number, x: T) => [
 
 export function applyModel(m: ModelData, a: A): ModelData | undefined {
   if (m.kind === 'priorityQueue') return applyPriorityQueue(m, a);
+  if (m.kind === 'tree') return applyTreeModel(m, a);
   switch (m.kind) {
     case 'array': {
       const xs = m.items;
@@ -342,6 +349,15 @@ export function dataOf(entry: { kind: string; state: unknown }): unknown {
       return { kind: 'hashTable', buckets: s['data'] };
     case 'priorityQueue':
       return { kind: 'priorityQueue', ...(s['data'] as object) };
+    case 'tree': {
+      const data = s['data'] as { nodes: unknown; roots: unknown };
+      return {
+        kind: 'tree',
+        binary: s['binary'],
+        nodes: data.nodes,
+        roots: data.roots,
+      };
+    }
     default:
       return { kind: entry.kind, items: s['data'] };
   }

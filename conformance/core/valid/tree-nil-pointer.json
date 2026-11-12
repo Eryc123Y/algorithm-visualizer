@@ -1,0 +1,226 @@
+{
+  "description": "A pointer at an empty slot (NIL, ADR 0034) stays while the slot is empty and goes when it fills.",
+  "input": {
+    "version": "0.5",
+    "structures": {
+      "t": {
+        "kind": "tree",
+        "binary": true,
+        "nodes": [
+          {
+            "id": "n8",
+            "value": 8,
+            "children": ["n3", "n10"],
+            "color": "black"
+          },
+          {
+            "id": "n3",
+            "value": 3,
+            "color": "red"
+          },
+          {
+            "id": "n10",
+            "value": 10,
+            "color": "red"
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "t",
+            "type": "pointer",
+            "name": "x",
+            "node": {
+              "parent": "n3",
+              "slot": "right"
+            }
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "t",
+            "type": "setColor",
+            "node": "n3",
+            "color": "black"
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "t",
+            "type": "addNode",
+            "node": {
+              "id": "n5",
+              "value": 5
+            },
+            "parent": "n3",
+            "slot": "right"
+          }
+        ]
+      }
+    ]
+  },
+  "expectedLength": 3,
+  "expectedFrames": [
+    {
+      "index": 1,
+      "state": {
+        "t": {
+          "kind": "tree",
+          "state": {
+            "data": {
+              "nodes": [
+                {
+                  "id": "n8",
+                  "value": 8,
+                  "children": ["n3", "n10"],
+                  "color": "black"
+                },
+                {
+                  "id": "n3",
+                  "value": 3,
+                  "children": [null, null],
+                  "color": "red"
+                },
+                {
+                  "id": "n10",
+                  "value": 10,
+                  "children": [null, null],
+                  "color": "red"
+                }
+              ],
+              "roots": ["n8"]
+            },
+            "marks": {
+              "highlight": [],
+              "compare": null,
+              "visited": [],
+              "settled": [],
+              "groups": {},
+              "pointers": {
+                "x": {
+                  "parent": "n3",
+                  "slot": 1
+                }
+              },
+              "notes": {},
+              "namedNotes": {},
+              "edgeMarks": {},
+              "edgeLabels": {}
+            },
+            "binary": true
+          }
+        }
+      }
+    },
+    {
+      "index": 2,
+      "state": {
+        "t": {
+          "kind": "tree",
+          "state": {
+            "data": {
+              "nodes": [
+                {
+                  "id": "n8",
+                  "value": 8,
+                  "children": ["n3", "n10"],
+                  "color": "black"
+                },
+                {
+                  "id": "n3",
+                  "value": 3,
+                  "children": [null, null],
+                  "color": "black"
+                },
+                {
+                  "id": "n10",
+                  "value": 10,
+                  "children": [null, null],
+                  "color": "red"
+                }
+              ],
+              "roots": ["n8"]
+            },
+            "marks": {
+              "highlight": [],
+              "compare": null,
+              "visited": [],
+              "settled": [],
+              "groups": {},
+              "pointers": {
+                "x": {
+                  "parent": "n3",
+                  "slot": 1
+                }
+              },
+              "notes": {},
+              "namedNotes": {},
+              "edgeMarks": {},
+              "edgeLabels": {}
+            },
+            "binary": true
+          }
+        }
+      }
+    },
+    {
+      "index": 3,
+      "state": {
+        "t": {
+          "kind": "tree",
+          "state": {
+            "data": {
+              "nodes": [
+                {
+                  "id": "n8",
+                  "value": 8,
+                  "children": ["n3", "n10"],
+                  "color": "black"
+                },
+                {
+                  "id": "n3",
+                  "value": 3,
+                  "children": [null, "n5"],
+                  "color": "black"
+                },
+                {
+                  "id": "n10",
+                  "value": 10,
+                  "children": [null, null],
+                  "color": "red"
+                },
+                {
+                  "id": "n5",
+                  "value": 5,
+                  "children": [null, null],
+                  "color": null
+                }
+              ],
+              "roots": ["n8"]
+            },
+            "marks": {
+              "highlight": [],
+              "compare": null,
+              "visited": [],
+              "settled": [],
+              "groups": {},
+              "pointers": {},
+              "notes": {},
+              "namedNotes": {},
+              "edgeMarks": {},
+              "edgeLabels": {}
+            },
+            "binary": true
+          }
+        }
+      }
+    }
+  ]
+}
