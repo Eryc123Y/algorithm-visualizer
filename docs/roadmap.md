@@ -134,7 +134,7 @@ Each entry is one registry module, or one per operation for data structures. Eac
 
 - [x] order-statistic tree (S3) (#69)
 - [x] interval tree (S3) (#70)
-- [ ] B-tree: search, insert, delete (S6)
+- [~] B-tree: search, insert, delete (S6, [ADR 0035](adr/0035-btree-kind.md))
 - [x] disjoint sets (union by rank, path compression)
 - [ ] Fibonacci heap: insert, union, extract-min, decrease-key, delete (S1, S3, S5)
 
