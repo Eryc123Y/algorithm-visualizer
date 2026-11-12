@@ -63,6 +63,8 @@ import { randomPermutation } from './algorithms/foundations/random-permutation.t
 import { recursionTree } from './algorithms/foundations/recursion-tree.ts';
 import { suffixArray } from './algorithms/strings/suffix-array.ts';
 import { strassen } from './algorithms/foundations/strassen.ts';
+import { binaryCounter } from './algorithms/amortized/binary-counter.ts';
+import { dynamicTable } from './algorithms/amortized/dynamic-table.ts';
 import { lup } from './algorithms/math/lup.ts';
 import { fft } from './algorithms/math/fft.ts';
 import { euclid, extendedEuclid } from './algorithms/math/euclid.ts';
@@ -177,6 +179,8 @@ export const algorithms: readonly Algorithm[] = [
   strassen,
   recursionTree,
   randomPermutation,
+  dynamicTable,
+  binaryCounter,
 ];
 
 /** The module with `id`, if there is one. */
