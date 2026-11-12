@@ -26,6 +26,7 @@ This is an npm workspaces monorepo.
 | `packages/typst/`    | `@algoviz/typst`      | The Typst package: the engine in QuickJS-ng inside a WebAssembly plugin (ADR 0026).                  |
 | `packages/latex/`    | `@algoviz/latex`      | The LaTeX package: `algoviz.sty`, which draws TikZ figures made by the `algoviz` command (ADR 0027). |
 | `apps/playground/`   | `@algoviz/playground` | Vite + Vue app for demos and, later, documentation.                                                  |
+| `apps/site/`         | `@algoviz/site`       | The static site for Cloudflare Pages: the share page `play/`, which plays share links (ADR 0040).    |
 | `conformance/`       | —                     | Language-agnostic JSON fixtures every implementation must pass.                                      |
 | `docs/adr/`          | —                     | Architecture decision records. Read these before changing the design.                                |
 
@@ -35,25 +36,25 @@ Workspace packages expose their TypeScript sources through the `@algoviz/source`
 
 Run from the repository root.
 
-| Command                                     | Purpose                                                             |
-| ------------------------------------------- | ------------------------------------------------------------------- |
-| `npm run dev`                               | Start the playground dev server                                     |
-| `npm run build`                             | Type-check and build every workspace                                |
-| `npm run typecheck`                         | Type-check every project (`vue-tsc --build`)                        |
-| `npm run lint` / `lint:fix`                 | ESLint                                                              |
-| `npm run format` / `format:check`           | Prettier                                                            |
-| `npm test` / `test:watch` / `test:coverage` | Unit tests for all workspaces (Vitest)                              |
-| `npm run test:e2e`                          | Playwright tests against the playground's production build          |
-| `npm run test:typst`                        | The Typst package in the `typst` command (needs Typst 0.15)         |
-| `npm run test:standalone`                   | Build the standalone `algoviz` and compare it with the Node CLI     |
-| `npm run test:latex`                        | Compile the LaTeX package's examples and cases (needs TeX Live)     |
-| `npm run check`                             | Typecheck, lint, format check and unit tests (what CI runs first)   |
-| `npm run generate:schema -w @algoviz/spec`  | Regenerate `packages/spec/schema/visualization.schema.json`         |
-| `npm run gallery -- out.html [file.json …]` | Render every frame of fixtures or documents to one page, for review |
-| `npm run generate:fonts`                    | Regenerate the fonts' metrics, outlines and web fonts (ADR 0030)    |
-| `npm run build -w @algoviz/typst`           | Build the Typst package's engine bytecode (Node only)               |
-| `npm run build:plugin -w @algoviz/typst`    | Rebuild the Typst plugin; needs rustup and LLVM 23 (ADR 0026)       |
-| `npm run build:standalone -w @algoviz/mcp`  | Build the standalone `algoviz` executable; needs rustup (ADR 0027)  |
+| Command                                     | Purpose                                                                       |
+| ------------------------------------------- | ----------------------------------------------------------------------------- |
+| `npm run dev`                               | Start the playground dev server                                               |
+| `npm run build`                             | Type-check and build every workspace                                          |
+| `npm run typecheck`                         | Type-check every project (`vue-tsc --build`)                                  |
+| `npm run lint` / `lint:fix`                 | ESLint                                                                        |
+| `npm run format` / `format:check`           | Prettier                                                                      |
+| `npm test` / `test:watch` / `test:coverage` | Unit tests for all workspaces (Vitest)                                        |
+| `npm run test:e2e`                          | Playwright tests against the production builds of the playground and the site |
+| `npm run test:typst`                        | The Typst package in the `typst` command (needs Typst 0.15)                   |
+| `npm run test:standalone`                   | Build the standalone `algoviz` and compare it with the Node CLI               |
+| `npm run test:latex`                        | Compile the LaTeX package's examples and cases (needs TeX Live)               |
+| `npm run check`                             | Typecheck, lint, format check and unit tests (what CI runs first)             |
+| `npm run generate:schema -w @algoviz/spec`  | Regenerate `packages/spec/schema/visualization.schema.json`                   |
+| `npm run gallery -- out.html [file.json …]` | Render every frame of fixtures or documents to one page, for review           |
+| `npm run generate:fonts`                    | Regenerate the fonts' metrics, outlines and web fonts (ADR 0030)              |
+| `npm run build -w @algoviz/typst`           | Build the Typst package's engine bytecode (Node only)                         |
+| `npm run build:plugin -w @algoviz/typst`    | Rebuild the Typst plugin; needs rustup and LLVM 23 (ADR 0026)                 |
+| `npm run build:standalone -w @algoviz/mcp`  | Build the standalone `algoviz` executable; needs rustup (ADR 0027)            |
 
 The pre-commit hook runs ESLint and Prettier on staged files. Run `npm run check` before pushing.
 
@@ -107,7 +108,7 @@ Every algorithm, and every operation of a data structure, is a module of the reg
 - Unit tests live in each workspace's `tests/` directory as `*.spec.ts`.
 - Type-level behaviour is tested with `expectTypeOf`; those assertions are enforced by `npm run typecheck`, not by Vitest.
 - Behaviour that other implementations must match belongs in `conformance/` as JSON fixtures (see its README).
-- E2E tests live in `apps/playground/tests/e2e/` and run against production builds: the playground, and the standalone `<algo-player>` bundle in a plain page. They check what the player draws against the engine's scene for each frame, fail on any console error, and scan for accessibility problems with axe. Run them with `npm run test:e2e`; to use a Chromium that is already installed, set `PLAYWRIGHT_CHROMIUM=/path/to/chromium`.
+- E2E tests live in `apps/playground/tests/e2e/` and `apps/site/tests/e2e/`, and run against production builds: the playground, the standalone `<algo-player>` bundle in a plain page, and the share page, on a desktop and a phone. The share page's tests open crafted links and fail on any script they run, any element they add, and any violation of the page's Content Security Policy. They check what the player draws against the engine's scene for each frame, fail on any console error, and scan for accessibility problems with axe. Run them with `npm run test:e2e`; to use a Chromium that is already installed, set `PLAYWRIGHT_CHROMIUM=/path/to/chromium`.
 - The Typst package's tests in `packages/typst/tests/typst/` compile its examples and call its functions with the `typst` command, so they run apart from `npm run check`: `npm run test:typst`. Run them when the package, its plugin or the engine's output changes. The slide decks need polylux and touying, which Typst downloads from Typst Universe the first time; without them, those tests are skipped with the reason.
 - The standalone executable's tests in `packages/mcp/tests/standalone/` build it with the Rust toolchain and compare every registry example's figures with the Node CLI's: `npm run test:standalone`. `npm run check` runs its JavaScript in a bare V8 context instead (`tests/standalone-bundle.spec.ts`). Run them when the CLI, the engine's output or `packages/mcp/standalone/` changes.
 - The LaTeX package's tests in `packages/latex/tests/latex/` compile its examples and error cases with pdfLaTeX, LuaLaTeX and XeLaTeX through `latexmk`, so they need TeX Live 2024 or later and run apart from `npm run check`: `npm run test:latex`. They call the Node CLI from source, or the executable that `ALGOVIZ_COMMAND` names. Run them when the package, the TikZ painter or the CLI changes.

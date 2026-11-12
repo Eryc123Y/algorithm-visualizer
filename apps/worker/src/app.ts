@@ -18,7 +18,18 @@ export interface RateLimiter {
 export interface Env {
   /** Absent in tests and local runs without the binding: no limit. */
   readonly RATE_LIMITER?: RateLimiter;
+  /**
+   * The share page's address, such as `https://example.org/play/`, for
+   * share links (ADR 0040). Absent: the tools make no links.
+   */
+  readonly ALGOVIZ_SHARE_URL?: string;
 }
+
+/**
+ * The MCP handler, or how to make it from the Worker's environment, which
+ * a Worker only gets with its first request.
+ */
+export type HandlerSource = HttpHandler | ((env: Env) => HttpHandler);
 
 /** Seconds a client should wait after a 429: the binding's period. */
 export const RETRY_AFTER_SECONDS = 60;
@@ -35,7 +46,20 @@ const clientKey = (request: Request) =>
   request.headers.get('cf-connecting-ip') ?? 'unknown';
 
 /** The Worker, around an MCP handler; separate so tests can give their own. */
-export function createWorker(handler: HttpHandler) {
+export function createWorker(source: HandlerSource) {
+  let made: HttpHandler | undefined =
+    typeof source === 'function' ? undefined : source;
+  /** The handler, made once; undefined when the configuration is wrong. */
+  const handlerFor = (env: Env): HttpHandler | undefined => {
+    if (made !== undefined || typeof source !== 'function') return made;
+    try {
+      made = source(env);
+    } catch (e) {
+      // The operator reads this in the Worker's logs; callers learn nothing.
+      console.error(`algoviz: ${(e as Error).message}`);
+    }
+    return made;
+  };
   return {
     async fetch(request: Request, env: Env): Promise<Response> {
       const { pathname } = new URL(request.url);
@@ -61,7 +85,13 @@ export function createWorker(handler: HttpHandler) {
             },
           });
       }
-      return handler.fetch(request);
+      const handler = handlerFor(env);
+      return handler === undefined
+        ? new Response('The server is misconfigured', {
+            status: 500,
+            headers: { 'content-type': 'text/plain; charset=utf-8' },
+          })
+        : handler.fetch(request);
     },
   };
 }

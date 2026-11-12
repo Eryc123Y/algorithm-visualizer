@@ -7,6 +7,11 @@ export * from './instructions.ts';
 export * from './recipes.ts';
 export * from './render.ts';
 export * from './server.ts';
+export {
+  checkShareUrl,
+  SHARE_URL_VARIABLE,
+  shareBaseFromEnv,
+} from './share.ts';
 export * from './show.ts';
 export * from './tools.ts';
 export * from './validate.ts';

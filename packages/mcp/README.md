@@ -28,6 +28,12 @@ The server also sends instructions for the workflow (recipe if one fits, otherwi
 
 `algoviz_show` is an [MCP App](https://modelcontextprotocol.io/extensions/apps): its result links to `ui://algoviz/player.html`, a page the client draws in the conversation. The page is an `<algo-player>` that takes the document from the tool result, follows the client's light or dark theme, asks for the height it needs, and tells the model which frame the user stopped on, with its step name, section and narration, so the model can answer questions about what the user sees. Clients without MCP Apps get the text result only.
 
+## Share links
+
+A share link opens a visualization in the player in any browser, with nothing installed ([ADR 0040](../../docs/adr/0040-share-links.md)). It carries a recipe and its input, `#v=1&alg=dijkstra&in=A-B%204%2C%20B-C%201`, or a whole document compressed, `#v=1&doc=…`, in the fragment of the share page's address, which browsers never send to a server.
+
+The server makes links only when it knows where the share page is, since no address is assumed: set `ALGOVIZ_SHARE_URL` to the page's address, such as `https://example.org/play/` (`createServer({ shareUrl })` in code). `algoviz_show` and `algoviz_run_recipe` then add a second text item with the link: a recipe's link names the recipe and its input, and a document's carries the document. A link longer than 16,384 characters is not made, and the item says so. An address that is not an absolute `http:` or `https:` URL, or that has a fragment, stops the server at start. The page is built by `apps/site` (`npm run build -w @algoviz/site`, then serve `apps/site/dist`).
+
 The page is built into one self-contained HTML file (`ui/player.html`, by `npm run build`), since clients load it in a sandbox with no network. `apps/playground/tests/e2e/mcp-app.spec.ts` runs it in a browser inside a minimal host.
 
 ## Using it
@@ -45,11 +51,14 @@ For Claude Desktop, in `claude_desktop_config.json`:
   "mcpServers": {
     "algoviz": {
       "command": "node",
-      "args": ["/path/to/algorithm-visualizer/packages/mcp/dist/mcp-server.js"]
+      "args": ["/path/to/algorithm-visualizer/packages/mcp/dist/mcp-server.js"],
+      "env": { "ALGOVIZ_SHARE_URL": "https://example.org/play/" }
     }
   }
 }
 ```
+
+The `env` entry is optional: it is the address of a share page you serve, for share links (see Share links above).
 
 ### Over HTTP
 
@@ -60,7 +69,7 @@ node packages/mcp/dist/mcp-server.js --http --port 8787
 claude mcp add --transport http algoviz http://127.0.0.1:8787/mcp
 ```
 
-The transport is stateless: every POST gets one JSON answer, and there are no sessions. It refuses bodies over 1 MiB (413), anything but JSON (415), paths other than `/mcp` (404) and methods other than POST (405), gives up after 10 seconds, the body's arrival included (504), and answers an unexpected failure with a bare "Internal error". The Node server also allows 10 seconds for headers and 30 for a whole request, and 256 connections at once. `createHttpHandler(options)` from `@algoviz/mcp` is the same server as a web-standard `{ fetch }` handler, for Workers, Deno or Bun; its options set the path, the limits, the allowed origins and the allowed hosts.
+The transport is stateless: every POST gets one JSON answer, and there are no sessions. It refuses bodies over 1 MiB (413), anything but JSON (415), paths other than `/mcp` (404) and methods other than POST (405), gives up after 10 seconds, the body's arrival included (504), and answers an unexpected failure with a bare "Internal error". The Node server also allows 10 seconds for headers and 30 for a whole request, and 256 connections at once. `createHttpHandler(options)` from `@algoviz/mcp` is the same server as a web-standard `{ fetch }` handler, for Workers, Deno or Bun; its options set the path, the limits, the allowed origins, the allowed hosts and the share page's address (`shareUrl`). `ALGOVIZ_SHARE_URL` works over HTTP as over stdio.
 
 The command line offers the same tools:
 

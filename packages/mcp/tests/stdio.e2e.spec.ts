@@ -150,6 +150,21 @@ describe('the MCP server over stdio', () => {
   });
 });
 
+describe('the share page address', () => {
+  it('stops the server at start when it is not a page’s address', () => {
+    const run = spawnSync(process.execPath, [...node, src('mcp-server.ts')], {
+      encoding: 'utf8',
+      env: { ...process.env, ALGOVIZ_SHARE_URL: 'example.org/play/' },
+      input: '',
+      timeout: 30_000,
+    });
+    expect(run.status).toBe(2);
+    expect(run.stderr).toMatch(
+      /^algoviz-mcp: ALGOVIZ_SHARE_URL: The share page's address must be an absolute URL/,
+    );
+  });
+});
+
 describe('the CLI as a command', () => {
   const run = (args: string[], input?: string) =>
     spawnSync(process.execPath, [...node, src('algoviz.ts'), ...args], {

@@ -9,12 +9,33 @@
  * trade places move along opposite arcs so they do not pass through each
  * other.
  */
-import { num, serializeNode, type PaintedScene } from '@algoviz/svg';
+import {
+  num,
+  serializeNode,
+  type PaintedScene,
+  type SvgNode,
+} from '@algoviz/svg';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
+/**
+ * Builds a painted node as SVG elements. Nothing is parsed as markup:
+ * text becomes text nodes and values become attributes, so labels from an
+ * untrusted document stay text, and pages can enforce Trusted Types
+ * (ADR 0040).
+ */
+function build(doc: Document, node: SvgNode): SVGElement {
+  const el = doc.createElementNS(SVG_NS, node.tag);
+  for (const [name, value] of Object.entries(node.attrs))
+    el.setAttribute(name, value);
+  if (node.text !== undefined) el.textContent = node.text;
+  for (const child of node.children ?? []) el.append(build(doc, child));
+  return el;
+}
+
 interface Entry {
   readonly el: SVGGElement;
+  /** The content's markup, kept only to tell whether it changed. */
   markup: string;
   x: number;
   y: number;
@@ -134,7 +155,7 @@ export class SceneStage {
       for (const [name, value] of Object.entries(item.attrs))
         entry.el.setAttribute(name, value);
       if (entry.markup !== markup) {
-        entry.el.innerHTML = markup;
+        entry.el.replaceChildren(build(svg.ownerDocument, item.node));
         entry.markup = markup;
       }
       const rotate =

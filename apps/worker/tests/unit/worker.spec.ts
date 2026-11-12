@@ -102,3 +102,63 @@ describe('the Worker', () => {
     expect(limit.keys).toEqual([]);
   });
 });
+
+describe('share links (ADR 0040)', () => {
+  const show = new Request('https://mcp.example/mcp', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      accept: 'application/json, text/event-stream',
+      'mcp-protocol-version': '2025-06-18',
+    },
+    body: JSON.stringify({
+      jsonrpc: '2.0',
+      id: 2,
+      method: 'tools/call',
+      params: { name: 'algoviz_show', arguments: { recipe: 'bfs' } },
+    }),
+  });
+  const texts = async (res: Response) => {
+    const body = (await res.json()) as {
+      result: { content: { text: string }[] };
+    };
+    return body.result.content.map((c) => c.text);
+  };
+
+  it('come from ALGOVIZ_SHARE_URL in the environment', async () => {
+    // A fresh Worker: it makes its handler from the first request's env.
+    vi.resetModules();
+    const { default: fresh } = await import('../../src/worker.ts');
+    const res = await fresh.fetch(show.clone(), {
+      ALGOVIZ_SHARE_URL: 'https://example.org/play/',
+    });
+    expect(res.status).toBe(200);
+    expect((await texts(res))[1]).toMatch(
+      /^Share link .*: https:\/\/example\.org\/play\/#v=1&alg=bfs$/,
+    );
+  });
+
+  it('are left out without it', async () => {
+    const w = createWorker((env) =>
+      createHttpHandler({ shareUrl: env.ALGOVIZ_SHARE_URL }),
+    );
+    const res = await w.fetch(show.clone(), {});
+    expect(await texts(res)).toHaveLength(1);
+  });
+
+  it('answer 500 without details when the address is wrong', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const w = createWorker((env) =>
+      createHttpHandler({ shareUrl: env.ALGOVIZ_SHARE_URL }),
+    );
+    const res = await w.fetch(show.clone(), {
+      ALGOVIZ_SHARE_URL: 'example.org/play/',
+    });
+    expect(res.status).toBe(500);
+    expect(await res.text()).not.toContain('example.org');
+    expect(error).toHaveBeenCalledWith(
+      expect.stringContaining('ALGOVIZ_SHARE_URL'),
+    );
+    error.mockRestore();
+  });
+});

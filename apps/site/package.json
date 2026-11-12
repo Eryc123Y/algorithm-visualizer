@@ -1,0 +1,22 @@
+{
+  "name": "@algoviz/site",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The static site: the share page that plays share links (ADR 0040).",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test:e2e": "NODE_OPTIONS=--conditions=@algoviz/source playwright test"
+  },
+  "dependencies": {
+    "@algoviz/elements": "*",
+    "@algoviz/recipes": "*",
+    "@algoviz/spec": "*",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.13.0"
+  }
+}

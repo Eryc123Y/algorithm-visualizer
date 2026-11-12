@@ -21,3 +21,4 @@ export {
   VisualizationInput,
   type Step,
 } from './visualization.ts';
+export * from './share.ts';

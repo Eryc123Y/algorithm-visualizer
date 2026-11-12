@@ -40,3 +40,18 @@ export function readInput(
     ]);
   return ok(text);
 }
+
+/**
+ * The text of an input that `readInput` reads back as the same value, for
+ * share links (ADR 0040): a string that it reads as itself, such as a
+ * notation, stays as it is, so links show `A-B 4, B-C 1`; anything else
+ * is written as JSON. No input is no text.
+ */
+export function writeInput(value: unknown): string | undefined {
+  if (value === undefined) return undefined;
+  if (typeof value === 'string') {
+    const read = readInput(value);
+    if (read.ok && read.value === value) return value;
+  }
+  return JSON.stringify(value);
+}

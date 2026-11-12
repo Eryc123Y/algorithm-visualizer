@@ -16,21 +16,30 @@ import {
   serveHttp,
 } from './http-node.ts';
 import { createServer } from './server.ts';
+import { checkShareUrl, shareBaseFromEnv } from './share.ts';
 
 let args;
+let shareUrl;
 try {
   args = parseServeArgs(process.argv.slice(2));
+  // Share links need the share page's address, which no code assumes.
+  shareUrl = shareBaseFromEnv(process.env);
+  if (shareUrl !== undefined) checkShareUrl(shareUrl);
 } catch (e) {
   process.stderr.write(`algoviz-mcp: ${(e as Error).message}\n`);
   process.exit(2);
 }
 
-if (!args.http) await createServer().connect(new StdioServerTransport());
+if (!args.http)
+  await createServer({ shareUrl }).connect(new StdioServerTransport());
 else {
   const local = isLocalHost(args.host);
-  const handler = createHttpHandler(
-    local ? { allowedOrigins: isLocalOrigin, allowedHosts: LOCAL_HOSTS } : {},
-  );
+  const handler = createHttpHandler({
+    ...(local
+      ? { allowedOrigins: isLocalOrigin, allowedHosts: LOCAL_HOSTS }
+      : {}),
+    shareUrl,
+  });
   const serving = await serveHttp(handler, args);
   process.stderr.write(`algoviz MCP server on ${serving.url}mcp\n`);
 }

@@ -16,6 +16,7 @@ import {
 } from '@modelcontextprotocol/server';
 
 import { createServer } from './server.ts';
+import { checkShareUrl } from './share.ts';
 
 export interface HttpOptions {
   /** The path that serves MCP; `/mcp` by default. */
@@ -33,6 +34,12 @@ export interface HttpOptions {
     '*' | readonly string[] | ((origin: string) => boolean);
   /** When given, the hostnames `Host` may name (port ignored). */
   readonly allowedHosts?: readonly string[];
+  /**
+   * The share page's address, for share links (ADR 0040); none by
+   * default. Checked here, once, so a bad address fails at start. A
+   * `server` of your own sets its own, so this one is then unused.
+   */
+  readonly shareUrl?: string | undefined;
   /** The server for each request; `createServer` hiding internal errors by default. */
   readonly server?: () => McpServer;
 }
@@ -126,8 +133,13 @@ export function createHttpHandler(options: HttpOptions = {}): HttpHandler {
   const maxBody = options.maxBodyBytes ?? DEFAULT_MAX_BODY_BYTES;
   const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   const allowed = options.allowedOrigins ?? '*';
+  const shareUrl =
+    options.shareUrl === undefined
+      ? undefined
+      : checkShareUrl(options.shareUrl);
   const makeServer =
-    options.server ?? (() => createServer({ hideInternalErrors: true }));
+    options.server ??
+    (() => createServer({ hideInternalErrors: true, shareUrl }));
   const modern = createMcpHandler(() => makeServer(), {
     legacy: 'reject',
     responseMode: 'json',
