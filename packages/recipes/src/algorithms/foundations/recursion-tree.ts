@@ -68,7 +68,10 @@ const Input = z
       ctx.addIssue({
         code: 'custom',
         path: ['n'],
-        message: `With n = ${n} the tree has ${recurrence.a ** depth} leaves over ${depth} levels; take a smaller n, so that it has at most ${MAX_LEAVES} leaves and ${MAX_DEPTH} levels`,
+        message:
+          depth > MAX_DEPTH
+            ? `With n = ${n} the tree is ${depth} levels deep; take a smaller n, so that it has at most ${MAX_DEPTH}`
+            : `With n = ${n} the tree has ${recurrence.a ** depth} leaves; take a smaller n, so that it has at most ${MAX_LEAVES}`,
       });
   });
 
@@ -196,8 +199,8 @@ export function growth({ a, b, d }: Recurrence): string {
     return `Each level costs ${ratio} of the one above, so the root's f(n) dominates: T(n) = Θ(${power(d)}).`;
   if (a === top)
     return d === 0
-      ? `Every level costs the same, over log${sub(b)} n + 1 levels: T(n) = Θ(lg n).`
-      : `Every level above the leaves costs ${power(d)}, over log${sub(b)} n levels: T(n) = Θ(${power(d)} lg n).`;
+      ? `Every level costs the same, 1, over log${sub(b)} n + 1 levels: T(n) = Θ(lg n).`
+      : `Every level costs the same, ${power(d)}, over log${sub(b)} n + 1 levels: T(n) = Θ(${power(d)} lg n).`;
   return `Each level costs ${ratio} times the one above, so the leaves dominate: T(n) = Θ(${leafPower(a, b)}).`;
 }
 

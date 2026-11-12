@@ -128,6 +128,31 @@ describe('recursion-tree', () => {
     ).toBe('$.input.recurrence.a');
   });
 
+  it('reads f(n) as n², n ^ 2 or n^2, and a missing a as 1', () => {
+    for (const text of ['T(n) = 4T(n/2) + n²', 'T(n)=4T(n/2)+n ^ 2'])
+      expect(lastNarration({ recurrence: text, n: 4 })).toContain(
+        'T(4) = 16 + 16 + 16 = 48',
+      );
+    expect(lastNarration('T(n) = T(n/2) + 1')).toContain('Θ(lg n)');
+    expect(runError('recursion-tree', 'T(n) = 2T(n/2) + n^4')).toMatchObject({
+      code: 'INVALID_NOTATION',
+    });
+  });
+
+  it('defaults n to the largest power of b with at most 16 leaves and 4 levels', () => {
+    expect(lastNarration('T(n) = 2T(n/2) + n')).toContain(
+      'T(16) = 16 + 16 + 16 + 16 + 16 = 80',
+    );
+    expect(lastNarration('T(n) = 3T(n/4) + n^2')).toContain('T(16) =');
+    expect(lastNarration('T(n) = T(n/2) + 1')).toContain('T(16) =');
+  });
+
+  it('says the levels cost the same, the leaves included, when a = b^d', () => {
+    expect(lastNarration(undefined)).toContain(
+      'Every level costs the same, n, over log₂ n + 1 levels',
+    );
+  });
+
   it('takes n as a power of b, with at most 32 leaves', () => {
     expect(
       runError('recursion-tree', { recurrence: 'T(n) = 2T(n/2) + n', n: 12 })
@@ -137,6 +162,10 @@ describe('recursion-tree', () => {
       runError('recursion-tree', { recurrence: 'T(n) = 4T(n/2) + n', n: 8 })
         .message,
     ).toContain('64 leaves');
+    expect(
+      runError('recursion-tree', { recurrence: 'T(n) = T(n/2) + 1', n: 1024 })
+        .message,
+    ).toContain('10 levels deep');
   });
 });
 

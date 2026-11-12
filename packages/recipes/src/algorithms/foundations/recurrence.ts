@@ -62,7 +62,7 @@ export function parseRecurrence(text: string): Recurrence {
       ? 0
       : cost === 'n'
         ? 1
-        : /^n\^\d$/.test(cost)
+        : /^n\^[0-3]$/.test(cost)
           ? Number(cost.slice(2))
           : cost === 'n²'
             ? 2
