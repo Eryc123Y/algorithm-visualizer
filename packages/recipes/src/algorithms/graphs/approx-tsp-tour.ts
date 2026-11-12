@@ -8,13 +8,21 @@
  * costs no more, by the triangle inequality; and removing an edge from the
  * best tour leaves a spanning tree, so the tree costs no more than it.
  *
- * The points are drawn where they are. Tree edges carry their lengths;
+ * The points are drawn where they are, scaled to fit, so points very close
+ * together beside far ones may overlap. Tree edges carry their lengths;
  * the tour's edges are added at the end, with the tree dimmed behind them.
+ * Distances are compared squared, exactly on integers, so ties go to the
+ * point given first.
  */
 import { z } from 'zod';
 
 import { defineAlgorithm } from '../../algorithm.ts';
-import { parsePoints, pointsField, type Pt } from '../geometry/common.ts';
+import {
+  dist2,
+  parsePoints,
+  pointsField,
+  type Pt,
+} from '../geometry/common.ts';
 
 /** Most points: a tree and a tour of 10 still read clearly. */
 export const MAX_TSP_POINTS = 10;
@@ -47,12 +55,17 @@ export const approxTspTour = defineAlgorithm({
           return the tour  // @done
     `,
     python: `
+      import math
+
       def approx_tsp_tour(points):
+          n = len(points)
           r = 0  # @start
-          parent = prim(points, r)  # @grow
-          children = {v: [] for v in range(len(points))}
-          for v, p in parent.items():
-              children[p].append(v)
+          tree, children = [r], {v: [] for v in range(n)}
+          cost = lambda e: math.dist(points[e[0]], points[e[1]])
+          while len(tree) < n:
+              u, v = min(((u, v) for v in range(n) if v not in tree for u in tree), key=cost)  # @grow
+              tree.append(v)
+              children[u].append(v)
           order = []
           def walk(v):
               order.append(v)  # @walk
@@ -90,13 +103,14 @@ export const approxTspTour = defineAlgorithm({
     const r = ps[0]!;
     trace.step(
       'start',
-      `Take ${r.id} as the root, and grow a minimum spanning tree from it by Prim's algorithm. Every pair of points is joined, at the distance between them.`,
+      `Take ${r.id} as the root, and grow a minimum spanning tree from it by Prim's algorithm, the cost of joining two points being the distance between them.`,
     );
     graph.pointer({ name: 'r', node: r.id });
 
     // Prim: the closest point to the tree joins it, a step each.
     const inTree = new Set([0]);
-    const best = ps.map((p) => dist(p, r));
+    // Squared distances: exact on integers, so equal distances tie.
+    const best = ps.map((p) => dist2(p, r));
     const via = ps.map(() => 0);
     const children: number[][] = ps.map(() => []);
     const treeEdges: string[] = [];
@@ -108,22 +122,27 @@ export const approxTspTour = defineAlgorithm({
       const u = via[v]!;
       inTree.add(v);
       children[u]!.push(v);
-      weight += best[v]!;
+      weight += Math.sqrt(best[v]!);
       const id = `${ps[u]!.id}-${ps[v]!.id}`;
       treeEdges.push(id);
       trace.step(
         'grow',
-        `${ps[v]!.id} is the closest point to the tree, ${show(best[v]!)} from ${ps[u]!.id}: add the edge ${ps[u]!.id}–${ps[v]!.id}.`,
+        `${ps[v]!.id} is the closest point to the tree, ${show(Math.sqrt(best[v]!))} from ${ps[u]!.id}: add the edge ${ps[u]!.id}–${ps[v]!.id}.`,
       );
       graph
         .addEdge({
-          edge: { id, from: ps[u]!.id, to: ps[v]!.id, weight: show(best[v]!) },
+          edge: {
+            id,
+            from: ps[u]!.id,
+            to: ps[v]!.id,
+            weight: show(Math.sqrt(best[v]!)),
+          },
         })
         .markEdge({ edge: id, mark: 'selected' })
         .highlight({ nodes: [ps[v]!.id] });
       for (let i = 0; i < n; i++)
-        if (!inTree.has(i) && dist(ps[i]!, ps[v]!) < best[i]!) {
-          best[i] = dist(ps[i]!, ps[v]!);
+        if (!inTree.has(i) && dist2(ps[i]!, ps[v]!) < best[i]!) {
+          best[i] = dist2(ps[i]!, ps[v]!);
           via[i] = v;
         }
     }

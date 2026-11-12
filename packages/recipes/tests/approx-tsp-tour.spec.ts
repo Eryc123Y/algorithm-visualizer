@@ -68,7 +68,17 @@ describe('approx-tsp-tour', () => {
     const { results } = runOk('approx-tsp-tour', {
       points: 'a(1, 7) b(2, 3) c(4, 6) d(5, 1) e(6, 4) f(8, 7) g(9, 2) h(3, 9)',
     });
-    expect(results[0]).toBeGreaterThan(0);
+    expect(results).toEqual([34.983]);
+  });
+
+  it('breaks a tie in distance for the point given first', () => {
+    // c and b are both 5 from a; c comes first, so it joins first.
+    const { document } = runOk('approx-tsp-tour', {
+      points: 'a(0, 0) c(0, 5) b(3, 4)',
+    });
+    const g = stateOf(replay(document), 'g', 'graph');
+    expect(g.marks.notes).toEqual({ a: '1', c: '2', b: '3' });
+    expect(document.steps[1]!.meta?.narration).toMatch(/^c is the closest/);
   });
 
   it('keeps every guarantee', () => {
@@ -111,10 +121,13 @@ describe('approx-tsp-tour', () => {
         expect(results[0]).toBeCloseTo(length, 2);
         expect(length).toBeLessThanOrEqual(2 * treeWeight + 1e-9);
         expect(length).toBeLessThanOrEqual(2 * shortestTour(ps) + 1e-9);
+        // The tour's edges join the points in that order, and back.
         if (n > 2)
           expect(
-            g.data.edges.filter((e) => e.id.startsWith('t:')),
-          ).toHaveLength(n);
+            g.data.edges
+              .filter((e) => e.id.startsWith('t:'))
+              .map((e) => `${e.from} ${e.to}`),
+          ).toEqual(tour.slice(1).map((v, k) => `${tour[k]} ${v}`));
       }),
       fuzz,
     );
