@@ -14,6 +14,7 @@ import { huffman } from './algorithms/greedy/huffman.ts';
 import { bellmanFord } from './algorithms/graphs/bellman-ford.ts';
 import { bfs } from './algorithms/graphs/bfs.ts';
 import { dfs } from './algorithms/graphs/dfs.ts';
+import { dagShortestPaths } from './algorithms/graphs/dag-shortest-paths.ts';
 import { dijkstra } from './algorithms/graphs/dijkstra.ts';
 import { floydWarshall } from './algorithms/graphs/floyd-warshall.ts';
 import { kruskal } from './algorithms/graphs/kruskal.ts';
@@ -94,6 +95,7 @@ export const algorithms: readonly Algorithm[] = [
   stronglyConnectedComponents,
   dijkstra,
   bellmanFord,
+  dagShortestPaths,
   prim,
   kruskal,
   floydWarshall,

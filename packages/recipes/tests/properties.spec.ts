@@ -1476,6 +1476,18 @@ recipe(
 );
 
 recipe(
+  'dag-shortest-paths',
+  withStart(graphs(anyWeight, { minNodes: 1, dag: true })),
+  ([graph, source]) => runOk('dag-shortest-paths', { graph, source }).document,
+  (trace, [g, s]) => {
+    // Each reachable vertex has its turn once, and its distance is
+    // annotated; the source's is 0.
+    expect(steps(trace, 'vertex')).toBe(g.nodes.length);
+    expect(stateOf(trace, 'g', 'graph').marks.notes[s]).toBe('0');
+  },
+);
+
+recipe(
   'strongly-connected-components',
   graphs(nonNegative, { minNodes: 1 }),
   (graph) => runOk('strongly-connected-components', { graph }).document,
