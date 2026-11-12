@@ -110,7 +110,7 @@ Each entry is one registry module, or one per operation for data structures. Eac
 
 **III Data structures**
 
-- [ ] stack, queue and linked-list operations (search, insert, delete)
+- [x] stack, queue and linked-list operations (search, insert, delete) (#114)
 - [x] separate chaining
 - [x] linear probing
 - [x] quadratic probing (#113)
