@@ -93,7 +93,7 @@ Each entry is one registry module, or one per operation for data structures. Eac
 - [x] insertion sort
 - [x] merge sort
 - [x] Strassen matrix multiplication (#87)
-- [ ] recursion trees for divide and conquer
+- [x] recursion trees for divide and conquer (#89)
 - [ ] random permutation (randomize in place)
 
 **II Sorting and order statistics**
