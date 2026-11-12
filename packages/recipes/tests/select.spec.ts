@@ -33,9 +33,10 @@ function pivotsOf(values: readonly number[], rank: number): number[] {
       const at = Math.floor((s + e) / 2);
       medians.push({ v: a[at]!, at });
     }
-    const pick = [...medians].sort((x, y) => x.v - y.v)[
+    const x = [...medians].sort((u, w) => u.v - w.v)[
       Math.floor((medians.length + 1) / 2) - 1
-    ]!;
+    ]!.v;
+    const pick = medians.find((g) => g.v === x)!;
     pivots.push(pick.v);
     [a[pick.at], a[r]] = [a[r]!, a[pick.at]!];
     // Lomuto's PARTITION.

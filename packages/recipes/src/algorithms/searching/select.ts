@@ -44,7 +44,7 @@ export const select = defineAlgorithm({
           for each group of 5 values of a[p..r], the last perhaps shorter
               sort the group, and add its median to the list m  // @group
           x = SELECT(m, 0, m.length - 1, ⌊(m.length + 1) / 2⌋)  // @medians
-          exchange x with a[r]  // @move
+          exchange a[r] with the first group's median equal to x  // @move
           q = PARTITION(a, p, r)
           k = q - p + 1
           if i == k  // @rank
@@ -70,10 +70,12 @@ export const select = defineAlgorithm({
               return a[p + i - 1]
           m = []
           for s in range(p, r + 1, 5):
-              a[s:min(s + 5, r + 1)] = sorted(a[s:min(s + 5, r + 1)])
-              m.append(a[(s + min(s + 4, r)) // 2])  # @group
-          x = select(m, 0, len(m) - 1, (len(m) + 1) // 2)  # @medians
-          t = a.index(x, p, r + 1)
+              e = min(s + 4, r)
+              a[s:e + 1] = sorted(a[s:e + 1])
+              m.append((a[(s + e) // 2], (s + e) // 2))  # @group
+          medians = [v for v, _ in m]
+          x = select(medians, 0, len(m) - 1, (len(m) + 1) // 2)  # @medians
+          t = next(t for v, t in m if v == x)
           a[t], a[r] = a[r], a[t]  # @move
           q = partition(a, p, r)
           k = q - p + 1
@@ -156,7 +158,9 @@ export const select = defineAlgorithm({
       }
 
       const sorted = [...m].sort((x, y) => x.value - y.value);
-      const pick = sorted[lowerMedian(m.length) - 1]!;
+      const x = sorted[lowerMedian(m.length) - 1]!.value;
+      // The first group whose median is x, as Python's next() finds it.
+      const pick = m.find((g) => g.value === x)!;
       trace.step(
         'medians',
         `The medians, sorted, are [${sorted.map((x) => x.value).join(', ')}]: their median, ${pick.value}, is the pivot x.`,
