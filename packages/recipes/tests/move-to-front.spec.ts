@@ -43,6 +43,16 @@ const costsOf = (trace: Trace) => {
   return t.data.slice(0, -1).map((row) => row[3]);
 };
 
+/** The table a run should end with: r, r − 1 and 2r − 1 per request. */
+function tableFor(requests: readonly (number | string)[], costs: number[]) {
+  const rows = requests.map((k, i) => {
+    const r = (costs[i]! + 1) / 2;
+    return [k, r, r - 1, 2 * r - 1];
+  });
+  const sum = (c: number) => rows.reduce((a, row) => a + (row[c] as number), 0);
+  return [...rows, ['total', sum(1), sum(2), sum(3)]];
+}
+
 describe('move-to-front', () => {
   it('moves each key to the front and counts 2r − 1 per request', () => {
     const { document, results } = runOk('move-to-front', {
@@ -81,7 +91,9 @@ describe('move-to-front', () => {
           });
           expect(results).toEqual([costs.reduce((a, b) => a + b, 0)]);
           const trace = replay(document);
-          expect(costsOf(trace)).toEqual(costs);
+          expect(stateOf(trace, 'cost', 'table').data).toEqual(
+            tableFor(requests.map(Number), costs),
+          );
           // From the first step, when head is set.
           for (let f = 1; f <= trace.length; f++) {
             const s = listOf(trace, f);
@@ -92,6 +104,19 @@ describe('move-to-front', () => {
       ),
       fuzz,
     );
+  });
+
+  it('serves words as it serves numbers', () => {
+    const list = ['a', 'b', 'c', 'd', 'e'];
+    const requests = ['e', 'd', 'e', 'a', 'c'];
+    const { costs, order } = reference(list, requests);
+    const { document, results } = runOk('move-to-front', { list, requests });
+    expect(results).toEqual([costs.reduce((a, b) => a + b, 0)]);
+    const trace = replay(document);
+    expect(stateOf(trace, 'cost', 'table').data).toEqual(
+      tableFor(requests, costs),
+    );
+    expect(walk(listOf(trace))).toEqual(order);
   });
 
   it('leaves the head where it is when it is requested', () => {
@@ -111,6 +136,13 @@ describe('move-to-front', () => {
     expect(
       runError('move-to-front', { list: '1 2 3', requests: '2 5' }).message,
     ).toMatch(/5 is requested but not in the list/);
+    // A number and the word that writes it are one key.
+    expect(
+      runError('move-to-front', { list: [1, '1'], requests: [1] }).message,
+    ).toMatch(/1 is in the list twice/);
+    expect(
+      runError('move-to-front', { list: [123456], requests: [123456] }).code,
+    ).toBe('INVALID_SHAPE');
     expect(
       runError('move-to-front', {
         list: '1 2 3 4 5 6 7 8 9 10 11 12 13',

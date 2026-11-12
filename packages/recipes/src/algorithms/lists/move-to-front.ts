@@ -14,7 +14,11 @@ import { MAX_LIST } from './reverse-linked-list.ts';
 /** Most requests one run serves. */
 export const MAX_REQUESTS = 32;
 
-const Key = z.union([z.number(), z.string().regex(/^[A-Za-z0-9]{1,8}$/)]);
+/** A key: a whole number or a short word, so that a node holds it. */
+const Key = z.union([
+  z.int().min(-9999).max(99999),
+  z.string().regex(/^[A-Za-z0-9]{1,8}$/),
+]);
 
 /** Keys are compared as they are written. */
 const keyOf = (k: number | string) => String(k);
@@ -123,7 +127,8 @@ export const moveToFront = defineAlgorithm({
         'request',
         `Request ${row + 1} of ${requests.length}: find ${k}, starting at the head, ${order[0]}.`,
       );
-      L.pointer({ name: 'head', index: 0 }).pointer({ name: 'x', index: 0 });
+      if (row === 0) L.pointer({ name: 'head', index: 0 });
+      L.pointer({ name: 'x', index: 0 });
       table.highlight({ cells: [[row, 0]] });
       const at = order.indexOf(k);
       for (let p = 0; p <= at; p++) {
