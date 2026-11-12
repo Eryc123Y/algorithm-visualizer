@@ -2087,3 +2087,35 @@ recipe(
     expect(String(y0).replace('−', '-')).toBe(String(sum));
   },
 );
+
+// Euclid and extended Euclid: pairs of whole numbers, not both 0.
+const euclidPairs = fc
+  .tuple(fc.nat(100_000), fc.nat(100_000))
+  .filter(([a, b]) => a > 0 || b > 0)
+  .map(([a, b]) => ({ a, b }));
+
+recipe(
+  'euclid',
+  euclidPairs,
+  (input) => runOk('euclid', input).document,
+  (trace, { a, b }) => {
+    // The last call's a divides both operands.
+    const rows = stateOf(trace, 'calls', 'table').data;
+    const d = Number(rows.at(-1)![0]);
+    expect(a % d).toBe(0);
+    expect(b % d).toBe(0);
+  },
+);
+
+recipe(
+  'extended-euclid',
+  euclidPairs,
+  (input) => runOk('extended-euclid', input).document,
+  (trace, { a, b }) => {
+    // The first row holds d, x and y with d = ax + by.
+    const [, , , d, x, y] = stateOf(trace, 'calls', 'table').data[0]!.map(
+      Number,
+    );
+    expect(a * x! + b * y!).toBe(d);
+  },
+);
