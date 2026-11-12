@@ -22,13 +22,13 @@ Set the variable `ALGOVIZ_SHARE_URL` to the address of a share page you serve (t
 
 ## Connecting clients
 
-Replace `https://YOUR-WORKER.YOUR-SUBDOMAIN.workers.dev` with the Worker's address.
+Replace `YOUR-SUBDOMAIN` with the account's `workers.dev` subdomain, or the whole address if the Worker has another name or a domain of its own.
 
-- **Claude (claude.ai and Claude Desktop):** Settings → Connectors → Add custom connector, with the URL `https://YOUR-WORKER.YOUR-SUBDOMAIN.workers.dev/mcp`. No authentication.
+- **Claude (claude.ai and Claude Desktop):** Settings → Connectors → Add custom connector, with the URL `https://algoviz-mcp.YOUR-SUBDOMAIN.workers.dev/mcp`. No authentication.
 - **Claude Code:**
 
   ```sh
-  claude mcp add --transport http algoviz https://YOUR-WORKER.YOUR-SUBDOMAIN.workers.dev/mcp
+  claude mcp add --transport http algoviz https://algoviz-mcp.YOUR-SUBDOMAIN.workers.dev/mcp
   ```
 
 - **Other clients** that speak Streamable HTTP take the same URL, for example in a `mcp.json`:
@@ -38,7 +38,7 @@ Replace `https://YOUR-WORKER.YOUR-SUBDOMAIN.workers.dev` with the Worker's addre
     "servers": {
       "algoviz": {
         "type": "http",
-        "url": "https://YOUR-WORKER.YOUR-SUBDOMAIN.workers.dev/mcp"
+        "url": "https://algoviz-mcp.YOUR-SUBDOMAIN.workers.dev/mcp"
       }
     }
   }
@@ -50,7 +50,7 @@ Replace `https://YOUR-WORKER.YOUR-SUBDOMAIN.workers.dev` with the Worker's addre
 
 From the repository root, with a Cloudflare account:
 
-1. Choose the Worker's name: replace the placeholder `algoviz-mcp-example` in `wrangler.jsonc`. The name becomes part of its `workers.dev` address.
+1. The Worker is named `algoviz-mcp` in `wrangler.jsonc`, so its address is `https://algoviz-mcp.YOUR-SUBDOMAIN.workers.dev`. Change the name there to deploy it under another.
 2. Optionally adjust the rate limit in `wrangler.jsonc` (`ratelimits`: `limit` requests per `period` seconds, 10 or 60; `namespace_id` is any integer unique in the account).
 3. Install, sign in and deploy:
 
