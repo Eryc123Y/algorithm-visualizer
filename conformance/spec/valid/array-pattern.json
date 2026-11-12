@@ -1,0 +1,85 @@
+{
+  "description": "A pattern of bare values under the text, at a shift; its ids are generated.",
+  "input": {
+    "version": "0.8",
+    "structures": {
+      "T": {
+        "kind": "array",
+        "initial": ["a", "c", "a", "a", "b", "c"],
+        "pattern": ["a", "a", "b"],
+        "shift": 2
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "T",
+            "type": "check",
+            "j": 0
+          }
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "version": "0.8",
+    "structures": {
+      "T": {
+        "kind": "array",
+        "initial": [
+          {
+            "id": "e0",
+            "value": "a"
+          },
+          {
+            "id": "e1",
+            "value": "c"
+          },
+          {
+            "id": "e2",
+            "value": "a"
+          },
+          {
+            "id": "e3",
+            "value": "a"
+          },
+          {
+            "id": "e4",
+            "value": "b"
+          },
+          {
+            "id": "e5",
+            "value": "c"
+          }
+        ],
+        "pattern": [
+          {
+            "id": "p0",
+            "value": "a"
+          },
+          {
+            "id": "p1",
+            "value": "a"
+          },
+          {
+            "id": "p2",
+            "value": "b"
+          }
+        ],
+        "shift": 2
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "T",
+            "type": "check",
+            "j": 0
+          }
+        ]
+      }
+    ]
+  }
+}

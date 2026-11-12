@@ -18,8 +18,15 @@ type Item = Element & { key: number | null };
 type ListNode = Element & { next: string | null; prev: string | null };
 type A = Record<string, unknown>;
 
+/** A pattern under an array's text (ADR 0037), without the step's marks. */
+type PatternModel = { elements: Element[]; shift: number; matched: number[] };
+
 export type ModelData =
-  | { kind: 'array' | 'stack' | 'queue'; items: Element[] }
+  | {
+      kind: 'array' | 'stack' | 'queue';
+      items: Element[];
+      pattern?: PatternModel;
+    }
   | { kind: 'linkedList'; doubly: boolean; nodes: ListNode[] }
   | { kind: 'table'; cells: Scalar[][] }
   | { kind: 'hashTable'; buckets: Element[][] }
@@ -43,6 +50,19 @@ export const modelled: readonly string[] = [
 export function initModel(decl: StructureDecl): ModelData | undefined {
   switch (decl.kind) {
     case 'array':
+      return {
+        kind: 'array',
+        items: [...decl.initial],
+        ...(decl.pattern === undefined
+          ? {}
+          : {
+              pattern: {
+                elements: [...decl.pattern],
+                shift: decl.shift ?? 0,
+                matched: [],
+              },
+            }),
+      };
     case 'stack':
     case 'queue':
       return { kind: decl.kind, items: [...decl.initial] };
@@ -96,7 +116,42 @@ export function applyModel(m: ModelData, a: A): ModelData | undefined {
     case 'array': {
       const xs = m.items;
       const n = xs.length;
+      const p = m.pattern;
+      // The text is fixed under a pattern.
+      if (
+        p !== undefined &&
+        ['set', 'swap', 'insert', 'remove'].includes(a['type'] as string)
+      )
+        return undefined;
       switch (a['type']) {
+        case 'align': {
+          if (p === undefined) return undefined;
+          const shift = a['shift'] as number;
+          const k = (a['matched'] as number | undefined) ?? 0;
+          if (shift > n || k > p.elements.length || shift + k > n)
+            return undefined;
+          for (let j = 0; j < k; j++)
+            if (p.elements[j]!.value !== xs[shift + j]!.value) return undefined;
+          return {
+            ...m,
+            pattern: { ...p, shift, matched: [...Array(k).keys()] },
+          };
+        }
+        case 'check': {
+          if (p === undefined) return undefined;
+          const j = a['j'] as number;
+          if (j >= p.elements.length || p.shift + j >= n) return undefined;
+          const same = p.elements[j]!.value === xs[p.shift + j]!.value;
+          return same && !p.matched.includes(j)
+            ? {
+                ...m,
+                pattern: {
+                  ...p,
+                  matched: [...p.matched, j].sort((x, y) => x - y),
+                },
+              }
+            : m;
+        }
         case 'set':
           if (!inRange(a['index'], n)) return undefined;
           return {
@@ -395,6 +450,23 @@ export function dataOf(entry: { kind: string; state: unknown }): unknown {
           edgeMarks: marks['edgeMarks'],
           edgeLabels: marks['edgeLabels'],
         },
+      };
+    }
+    case 'array': {
+      const p = s['pattern'] as
+        { elements: unknown; shift: unknown; matched: unknown } | undefined;
+      return {
+        kind: 'array',
+        items: s['data'],
+        ...(p === undefined
+          ? {}
+          : {
+              pattern: {
+                elements: p.elements,
+                shift: p.shift,
+                matched: p.matched,
+              },
+            }),
       };
     }
     default:

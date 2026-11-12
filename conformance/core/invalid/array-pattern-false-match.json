@@ -1,0 +1,23 @@
+{
+  "description": "align checks that the matched elements equal the text under them.",
+  "input": {
+    "version": "0.8",
+    "structures": {
+      "T": {
+        "kind": "array",
+        "initial": ["a", "c", "a", "a", "b", "c"],
+        "pattern": ["a", "a", "b"]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          { "target": "T", "type": "align", "shift": 0, "matched": 2 }
+        ]
+      }
+    ]
+  },
+  "expectedErrors": [
+    { "code": "INVALID_OPERATION", "path": "$.steps[0].actions[0].matched" }
+  ]
+}

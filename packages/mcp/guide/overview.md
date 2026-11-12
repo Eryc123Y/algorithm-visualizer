@@ -47,7 +47,7 @@ A recipe from `algoviz_list_recipes` covers most classic algorithms and single o
 }
 ```
 
-- `version` is the protocol version, `"major.minor"`. Write the oldest version that has every feature you use: `"0.7"` if a linked list uses `move`, `"0.6"` if a structure is a `btree`, `"0.5"` if a tree uses root slots, NIL pointers, named notes, edge marks or labels, or a root list (see `tree`), `"0.4"` if a structure has `place` (below), `"0.3"` if the document has `sources` (code in several languages, below), `"0.2"` if any step has a name or the document has sections, and `"0.1"` otherwise.
+- `version` is the protocol version, `"major.minor"`. Write the oldest version that has every feature you use: `"0.8"` if an array has a `pattern`, `"0.7"` if a linked list uses `move`, `"0.6"` if a structure is a `btree`, `"0.5"` if a tree uses root slots, NIL pointers, named notes, edge marks or labels, or a root list (see `tree`), `"0.4"` if a structure has `place` (below), `"0.3"` if the document has `sources` (code in several languages, below), `"0.2"` if any step has a name or the document has sections, and `"0.1"` otherwise.
 - `title` and `source` are optional. `source.code` is the code being taught; `meta.line` (1-based) highlights a line of it. Without `source`, leave out `line`. To show the code in pseudocode and Python, give `sources` instead (below).
 - `structures` maps names to declarations (at most 16). Names are identifiers: letters, digits and `_`, not starting with a digit, e.g. `arr`, `dist`, `call_stack`.
 - A structure's caption is its `label`, or else its name. A structure alone in its document gets no caption unless it has a `label`; give one only when it says more than the figure does, such as `"label": "call stack"`.

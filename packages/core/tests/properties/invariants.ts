@@ -5,6 +5,7 @@
  */
 import {
   queueOrder,
+  type ArrayState,
   type KindedState,
   type TreeState,
 } from '../../src/index.ts';
@@ -53,6 +54,28 @@ const known = (
     .filter((v) => !ids.has(v))
     .map((v) => `${what} refers to missing "${v}"`);
 
+/** A pattern stays within reach of the text, and its matches are real. */
+function patternProblems(s: ArrayState): string[] {
+  const p = s.pattern;
+  if (p === undefined) return [];
+  const n = s.data.length;
+  const m = p.elements.length;
+  const problems = [
+    ...unique(
+      [...s.data, ...p.elements].map((e) => e.id),
+      'text and pattern ids',
+    ),
+    ...within(p.matched, m, 'matched'),
+    ...within(p.compared === null ? [] : [p.compared], m, 'compared'),
+  ];
+  if (p.shift < 0 || p.shift > n)
+    problems.push(`shift ${p.shift} outside [0, ${n}]`);
+  for (const j of p.matched)
+    if (p.elements[j]?.value !== s.data[p.shift + j]?.value)
+      problems.push(`pattern ${j} is marked matched but differs from the text`);
+  return problems;
+}
+
 export function stateProblems(entry: KindedState): string[] {
   switch (entry.kind) {
     case 'btree':
@@ -72,6 +95,7 @@ export function stateProblems(entry: KindedState): string[] {
         // Pointers may also point one past the end.
         ...within(Object.values(marks.pointers), n + 1, 'pointer'),
         ...known(marks.settled, ids, 'settled'),
+        ...patternProblems(entry.state),
       ];
     }
     case 'stack':
