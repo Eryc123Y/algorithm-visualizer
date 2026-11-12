@@ -1,7 +1,8 @@
 /**
- * The static site (ADR 0040): for now the share page, `play/`. The build
- * is plain files under `dist/`, with relative URLs, so any static host
- * serves it at any path; `_headers` gives Cloudflare Pages its headers.
+ * The static site: the share page, `play/` (ADR 0040), and the script of
+ * the documentation pages, which `scripts/build-pages.ts` then writes from
+ * the registry (roadmap 3.4). The build is plain files under `dist/`, with
+ * relative URLs; `_headers` gives Cloudflare Pages its headers.
  */
 import { fileURLToPath, URL } from 'node:url';
 
@@ -42,8 +43,13 @@ export default defineConfig({
     target: 'es2022',
     // Every asset as a file: the policy allows no data: URLs.
     assetsInlineLimit: 0,
+    // The pages built from the registry find the docs script here.
+    manifest: true,
     rollupOptions: {
-      input: { play: page('play/index.html') },
+      input: {
+        play: page('play/index.html'),
+        docs: page('src/docs/main.ts'),
+      },
     },
   },
 });

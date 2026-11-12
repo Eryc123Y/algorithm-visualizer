@@ -14,21 +14,21 @@ npm run dev                       # start the playground
 
 This is an npm workspaces monorepo.
 
-| Path                 | Package               | Purpose                                                                                              |
-| -------------------- | --------------------- | ---------------------------------------------------------------------------------------------------- |
-| `packages/spec/`     | `@algoviz/spec`       | Protocol: Zod schemas, inferred types, parsing and validation. No DOM or Node.js APIs.               |
-| `packages/fonts/`    | `@algoviz/fonts`      | Metrics and outlines of the bundled fonts (OFL), and text measurement. No DOM or Node.js APIs.       |
-| `packages/core/`     | `@algoviz/core`       | Structure kinds, reducers, the timeline engine and layout to scenes. No DOM or Node.js APIs.         |
-| `packages/svg/`      | `@algoviz/svg`        | Scene → standalone SVG string. No DOM or Node.js APIs.                                               |
-| `packages/tikz/`     | `@algoviz/tikz`       | Scene → TikZ for the LaTeX package, from the SVG painter's shapes (ADR 0027). No DOM or Node.js.     |
-| `packages/elements/` | `@algoviz/elements`   | `<algo-player>` Web Component (Lit) and a standalone CDN bundle.                                     |
-| `packages/recipes/`  | `@algoviz/recipes`    | Typed recorder and classic algorithms, each tested against a reference implementation.               |
-| `packages/typst/`    | `@algoviz/typst`      | The Typst package: the engine in QuickJS-ng inside a WebAssembly plugin (ADR 0026).                  |
-| `packages/latex/`    | `@algoviz/latex`      | The LaTeX package: `algoviz.sty`, which draws TikZ figures made by the `algoviz` command (ADR 0027). |
-| `apps/playground/`   | `@algoviz/playground` | Vite + Vue app for demos and, later, documentation.                                                  |
-| `apps/site/`         | `@algoviz/site`       | The static site for Cloudflare Pages: the share page `play/`, which plays share links (ADR 0040).    |
-| `conformance/`       | —                     | Language-agnostic JSON fixtures every implementation must pass.                                      |
-| `docs/adr/`          | —                     | Architecture decision records. Read these before changing the design.                                |
+| Path                 | Package               | Purpose                                                                                                                      |
+| -------------------- | --------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `packages/spec/`     | `@algoviz/spec`       | Protocol: Zod schemas, inferred types, parsing and validation. No DOM or Node.js APIs.                                       |
+| `packages/fonts/`    | `@algoviz/fonts`      | Metrics and outlines of the bundled fonts (OFL), and text measurement. No DOM or Node.js APIs.                               |
+| `packages/core/`     | `@algoviz/core`       | Structure kinds, reducers, the timeline engine and layout to scenes. No DOM or Node.js APIs.                                 |
+| `packages/svg/`      | `@algoviz/svg`        | Scene → standalone SVG string. No DOM or Node.js APIs.                                                                       |
+| `packages/tikz/`     | `@algoviz/tikz`       | Scene → TikZ for the LaTeX package, from the SVG painter's shapes (ADR 0027). No DOM or Node.js.                             |
+| `packages/elements/` | `@algoviz/elements`   | `<algo-player>` Web Component (Lit) and a standalone CDN bundle.                                                             |
+| `packages/recipes/`  | `@algoviz/recipes`    | Typed recorder and classic algorithms, each tested against a reference implementation.                                       |
+| `packages/typst/`    | `@algoviz/typst`      | The Typst package: the engine in QuickJS-ng inside a WebAssembly plugin (ADR 0026).                                          |
+| `packages/latex/`    | `@algoviz/latex`      | The LaTeX package: `algoviz.sty`, which draws TikZ figures made by the `algoviz` command (ADR 0027).                         |
+| `apps/playground/`   | `@algoviz/playground` | Vite + Vue app for demos and, later, documentation.                                                                          |
+| `apps/site/`         | `@algoviz/site`       | The static site for Cloudflare Pages: the documentation, generated from the registry, and the share page `play/` (ADR 0040). |
+| `conformance/`       | —                     | Language-agnostic JSON fixtures every implementation must pass.                                                              |
+| `docs/adr/`          | —                     | Architecture decision records. Read these before changing the design.                                                        |
 
 Workspace packages expose their TypeScript sources through the `@algoviz/source` export condition. The playground, Vitest and the type checker use it, so nothing needs to be built before development or tests. Published consumers get `dist/`.
 
@@ -108,7 +108,7 @@ Every algorithm, and every operation of a data structure, is a module of the reg
 - Unit tests live in each workspace's `tests/` directory as `*.spec.ts`.
 - Type-level behaviour is tested with `expectTypeOf`; those assertions are enforced by `npm run typecheck`, not by Vitest.
 - Behaviour that other implementations must match belongs in `conformance/` as JSON fixtures (see its README).
-- E2E tests live in `apps/playground/tests/e2e/` and `apps/site/tests/e2e/`, and run against production builds: the playground, the standalone `<algo-player>` bundle in a plain page, and the share page, on a desktop and a phone. The share page's tests open crafted links and fail on any script they run, any element they add, and any violation of the page's Content Security Policy. They check what the player draws against the engine's scene for each frame, fail on any console error, and scan for accessibility problems with axe. Run them with `npm run test:e2e`; to use a Chromium that is already installed, set `PLAYWRIGHT_CHROMIUM=/path/to/chromium`.
+- E2E tests live in `apps/playground/tests/e2e/` and `apps/site/tests/e2e/`, and run against production builds: the playground, the standalone `<algo-player>` bundle in a plain page, and the site, on a desktop and a phone. The site's tests open its pages and crafted share links, and fail on any script they run, any element they add, and any violation of the page's Content Security Policy. They check what the player draws against the engine's scene for each frame, fail on any console error, and scan for accessibility problems with axe. Run them with `npm run test:e2e`; to use a Chromium that is already installed, set `PLAYWRIGHT_CHROMIUM=/path/to/chromium`.
 - The Typst package's tests in `packages/typst/tests/typst/` compile its examples and call its functions with the `typst` command, so they run apart from `npm run check`: `npm run test:typst`. Run them when the package, its plugin or the engine's output changes. The slide decks need polylux and touying, which Typst downloads from Typst Universe the first time; without them, those tests are skipped with the reason.
 - The standalone executable's tests in `packages/mcp/tests/standalone/` build it with the Rust toolchain and compare every registry example's figures with the Node CLI's: `npm run test:standalone`. `npm run check` runs its JavaScript in a bare V8 context instead (`tests/standalone-bundle.spec.ts`). Run them when the CLI, the engine's output or `packages/mcp/standalone/` changes.
 - The LaTeX package's tests in `packages/latex/tests/latex/` compile its examples and error cases with pdfLaTeX, LuaLaTeX and XeLaTeX through `latexmk`, so they need TeX Live 2024 or later and run apart from `npm run check`: `npm run test:latex`. They call the Node CLI from source, or the executable that `ALGOVIZ_COMMAND` names. Run them when the package, the TikZ painter or the CLI changes.

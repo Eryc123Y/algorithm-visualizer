@@ -14,6 +14,12 @@
     "vite.config.ts",
     "vitest.config.ts",
     "playwright.config.ts",
-    "src/headers.ts"
+    "scripts",
+    "src/headers.ts",
+    "src/docs/catalog.ts",
+    "src/docs/html.ts",
+    "src/docs/pages.ts",
+    "src/docs/short-input.ts",
+    "src/docs/snippets.ts"
   ]
 }

@@ -4,7 +4,14 @@
  * sections under the timeline.
  */
 import { html } from 'lit';
-import { styleMap } from 'lit/directives/style-map.js';
+import {
+  Directive,
+  directive,
+  PartType,
+  type ElementPart,
+  type PartInfo,
+} from 'lit/directive.js';
+import { noChange } from 'lit';
 
 import { parseSelector, selectFrames, type SelectorError } from '@algoviz/core';
 import {
@@ -64,6 +71,35 @@ export function openingFrame(
 }
 
 /**
+ * Sets an element's left edge and width through CSSOM. Lit's `styleMap`
+ * writes a style attribute on its first render, which a Content Security
+ * Policy without 'unsafe-inline' blocks, as the share page's does
+ * (ADR 0040); CSSOM is not blocked.
+ */
+class Place extends Directive {
+  constructor(info: PartInfo) {
+    super(info);
+    if (info.type !== PartType.ELEMENT)
+      throw new Error('place() goes on an element');
+  }
+
+  // The arguments only type the directive's call; update() uses them.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  render(_left: string, _width: string): unknown {
+    return noChange;
+  }
+
+  override update(part: ElementPart, [left, width]: [string, string]) {
+    const { style } = part.element as HTMLElement;
+    style.left = left;
+    style.width = width;
+    return noChange;
+  }
+}
+
+const place = directive(Place);
+
+/**
  * Each section as a stretch of the timeline under the slider, from its
  * first frame to its last, so its left edge marks where it starts. Pointer
  * users click a section to go to its first step; keyboard users press Page
@@ -82,7 +118,7 @@ export function sectionStrip(
         const end = sections[k + 1]?.start ?? length;
         return html`<span
           class="section ${s.id === current?.id ? 'current' : ''}"
-          style=${styleMap({ left: percent(s.start), width: percent(end - s.start) })}
+          ${place(percent(s.start), percent(end - s.start))}
           title=${s.title}
           @click=${() => seek(Math.min(s.start + 1, length))}
           ><span class="label">${s.title}</span></span

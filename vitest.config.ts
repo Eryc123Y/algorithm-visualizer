@@ -19,6 +19,7 @@ export default defineConfig({
       exclude: [
         'apps/playground/src/main.ts',
         'apps/site/src/play/main.ts',
+        'apps/site/src/docs/main.ts',
         '**/*.d.ts',
       ],
     },
