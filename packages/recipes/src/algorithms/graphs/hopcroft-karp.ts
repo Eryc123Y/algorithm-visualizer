@@ -104,7 +104,7 @@ export const hopcroftKarp = defineAlgorithm({
           'done',
           size === 0
             ? 'No augmenting path is left, and the matching is empty.'
-            : `The ${plural(size, 'marked edge')} form a maximum matching, found in ${plural(phase - 1, 'phase')}.`,
+            : `The ${plural(size, 'marked edge')} ${size === 1 ? 'forms' : 'form'} a maximum matching, found in ${plural(phase - 1, 'phase')}.`,
         );
         for (const v of noted) graph.annotate({ node: v, text: null });
         return { results: [size] };

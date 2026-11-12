@@ -47,6 +47,52 @@ const bipartite = fc
     });
   });
 
+/**
+ * The length of the shortest augmenting path for `mate`, by its own
+ * breadth-first search: from the free vertices of one colour, out by
+ * unmatched edges and back by matched ones, to a free vertex.
+ */
+function shortestAugmenting(
+  nodes: readonly string[],
+  edges: readonly Pair[],
+  mate: ReadonlyMap<string, string>,
+): number {
+  const adj = new Map(nodes.map((v) => [v, [] as string[]]));
+  for (const [a, b] of edges) {
+    adj.get(a)!.push(b);
+    adj.get(b)!.push(a);
+  }
+  const colour = new Map<string, number>();
+  for (const s of nodes) {
+    if (colour.has(s)) continue;
+    colour.set(s, 0);
+    const queue = [s];
+    while (queue.length > 0) {
+      const u = queue.shift()!;
+      for (const v of adj.get(u)!)
+        if (!colour.has(v)) {
+          colour.set(v, 1 - colour.get(u)!);
+          queue.push(v);
+        }
+    }
+  }
+  const dist = new Map<string, number>();
+  const queue = nodes.filter((v) => colour.get(v) === 0 && !mate.has(v));
+  for (const v of queue) dist.set(v, 0);
+  while (queue.length > 0) {
+    const u = queue.shift()!;
+    const d = dist.get(u)!;
+    for (const v of adj.get(u)!) {
+      // Odd steps leave by a matched edge, even ones by an unmatched one.
+      if ((mate.get(u) === v) !== (d % 2 === 1) || dist.has(v)) continue;
+      dist.set(v, d + 1);
+      if (d % 2 === 0 && !mate.has(v)) return d + 1;
+      queue.push(v);
+    }
+  }
+  return Infinity;
+}
+
 /** The paths each phase highlights, read from its `path` steps. */
 function phases(document: ReturnType<typeof runOk>['document']) {
   const out: string[][][] = [];
@@ -88,24 +134,36 @@ describe('hopcroft-karp', () => {
         const joined = new Set(
           edges.flatMap(([a, b]) => [`${a} ${b}`, `${b} ${a}`]),
         );
+        // Replay the phases on a matching of our own: each path is a
+        // shortest augmenting one, the paths are disjoint, and after a
+        // phase no augmenting path of its length is left (so the set was
+        // maximal).
         const found = phases(document);
-        let last = 0;
-        let size = 0;
+        const mate = new Map<string, string>();
         for (const paths of found) {
           const length = paths[0]!.length - 1;
-          expect(length).toBeGreaterThan(last);
-          last = length;
+          expect(length).toBe(shortestAugmenting(nodes, edges, mate));
           const seen = paths.flat();
           expect(new Set(seen).size).toBe(seen.length);
           for (const p of paths) {
             expect(p.length - 1).toBe(length);
-            p.slice(1).forEach((v, k) =>
-              expect(joined.has(`${p[k]} ${v}`)).toBe(true),
-            );
+            expect(mate.has(p[0]!) || mate.has(p.at(-1)!)).toBe(false);
+            p.slice(1).forEach((v, k) => {
+              expect(joined.has(`${p[k]} ${v}`)).toBe(true);
+              expect(mate.get(p[k]!) === v).toBe(k % 2 === 1);
+            });
           }
-          size += paths.length;
+          for (const p of paths)
+            for (let k = 0; k + 1 < p.length; k += 2) {
+              mate.set(p[k]!, p[k + 1]!);
+              mate.set(p[k + 1]!, p[k]!);
+            }
+          expect(shortestAugmenting(nodes, edges, mate)).toBeGreaterThan(
+            length,
+          );
         }
-        expect(size).toBe(want);
+        expect(shortestAugmenting(nodes, edges, mate)).toBe(Infinity);
+        expect(mate.size / 2).toBe(want);
         expect(found.length).toBeLessThanOrEqual(
           2 * Math.sqrt(nodes.length) + 2,
         );
@@ -120,6 +178,63 @@ describe('hopcroft-karp', () => {
       graph: 'a-p, b-q, c-r, d-s',
     });
     expect(phases(document).map((p) => p.length)).toEqual([4]);
+  });
+
+  it('notes each vertex’s layer, dropping layers past the shortest', () => {
+    // Phase 1 matches x–p and z–r; u's search in phase 2 reaches q in
+    // layer 3, so z, which would be in layer 4, has no note.
+    const { document } = runOk('hopcroft-karp', {
+      graph: 'x-p, z-r, u-p, x-q, x-r',
+    });
+    const trace = replay(document);
+    const layerSteps = document.steps.flatMap((s, k) =>
+      s.meta?.at === 'layer' ? [k + 1] : [],
+    );
+    const notes = (frame: number) =>
+      stateOf(trace, 'g', 'graph', frame).marks.notes;
+    expect(notes(layerSteps[0]!)).toEqual({
+      x: '0',
+      z: '0',
+      u: '0',
+      p: '1',
+      q: '1',
+      r: '1',
+    });
+    expect(notes(layerSteps[1]!)).toEqual({
+      u: '0',
+      p: '1',
+      x: '2',
+      q: '3',
+      r: '3',
+    });
+    expect(notes(trace.length)).toEqual({});
+  });
+
+  it('narrates each case', () => {
+    const said = (graph: string) =>
+      runOk('hopcroft-karp', { graph }).document.steps.map(
+        (s) => s.meta?.narration ?? '',
+      );
+    const one = said('a-p, b-p');
+    expect(one).toContain(
+      'b has no such path that shares no vertex with these. Match the pair, so the matching grows from 0 to 1.',
+    );
+    expect(one.at(-2)).toMatch(/reaches no free vertex on the right/);
+    expect(one.at(-1)).toBe(
+      'The 1 marked edge forms a maximum matching, found in 1 phase.',
+    );
+    const two = said('a-p, b-q, c-p, c-q, d-p');
+    expect(two).toContain(
+      'c d have no such path that shares no vertex with these. Match the 2 pairs at once, so the matching grows from 0 to 2.',
+    );
+    const long = said('x-p, z-r, u-p, x-q, x-r');
+    expect(long).toContain(
+      'Flip the path: its unmatched edges go in and its matched ones out, so the matching grows from 2 to 3.',
+    );
+    expect(long.at(-2)).toMatch(/every vertex on the left is matched/);
+    expect(said('a, b').at(-1)).toBe(
+      'No augmenting path is left, and the matching is empty.',
+    );
   });
 
   it('handles parallel edges, no edges and 40 vertices', () => {
@@ -145,6 +260,21 @@ describe('hopcroft-karp', () => {
     });
     expect(big.results).toEqual([20]);
     for (const step of big.document.steps)
+      expect(step.actions.length).toBeLessThanOrEqual(100);
+    // K10,20: the most edges a graph may have.
+    const full = Array.from({ length: 10 }, (_, i) =>
+      Array.from({ length: 20 }, (_, j): Pair => [`a${i}`, `b${j}`]),
+    ).flat();
+    const dense = runOk('hopcroft-karp', {
+      graph: {
+        nodes: [...full.map(([a]) => a), ...full.map(([, b]) => b)].filter(
+          (v, k, all) => all.indexOf(v) === k,
+        ),
+        edges: full,
+      },
+    });
+    expect(dense.results).toEqual([10]);
+    for (const step of dense.document.steps)
       expect(step.actions.length).toBeLessThanOrEqual(100);
   });
 
