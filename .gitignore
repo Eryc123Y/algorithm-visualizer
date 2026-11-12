@@ -61,3 +61,7 @@ packages/mcp/standalone/target/
 # Agent tools' local state and the worktrees they check out inside the repository
 .claude/
 .delta/
+
+# wrangler local state
+.wrangler/
+.dev.vars

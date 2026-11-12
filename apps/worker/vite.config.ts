@@ -15,7 +15,15 @@ import {
 
 export default defineConfig({
   resolve: {
-    conditions: ['@algoviz/source', 'workerd', 'worker', 'browser', 'module', 'import', 'default'],
+    conditions: [
+      '@algoviz/source',
+      'workerd',
+      'worker',
+      'browser',
+      'module',
+      'import',
+      'default',
+    ],
   },
   plugins: [embeddedGuide(), embeddedPlayer()],
   build: {
