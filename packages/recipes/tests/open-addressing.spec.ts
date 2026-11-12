@@ -10,6 +10,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { VisualizationInput } from '@algoviz/spec';
 
+import { findAlgorithm } from '../src/index.ts';
 import { fuzz, replay, runError, runOk, stateOf } from './helpers.ts';
 import { recipe } from './recipe-properties.ts';
 
@@ -142,12 +143,11 @@ describe.each(Object.keys(SEQUENCES) as Id[])('%s', (id) => {
 
   it('refuses a size whose sequence would miss slots, and a full table', () => {
     const bad = id === 'quadratic-probing' ? 6 : 9;
-    expect(
-      runError(`${id}.search`, { from: { size: bad, keys: [] }, key: 1 }),
-    ).toMatchObject({
-      code: 'INVALID_ARGUMENT',
-      path: '$.input',
-    });
+    for (const op of ['search', 'insert'])
+      for (const keys of [[], [1, 2]])
+        expect(
+          runError(`${id}.${op}`, { from: { size: bad, keys }, key: 1 }),
+        ).toMatchObject({ code: 'INVALID_ARGUMENT', path: '$.input' });
     const m = SIZES[id][1]!;
     const full = Array.from({ length: m }, (_, k) => k);
     expect(
@@ -158,6 +158,36 @@ describe.each(Object.keys(SEQUENCES) as Id[])('%s', (id) => {
 });
 
 describe('the examples', () => {
+  it('keeps keys near the largest safe integer on their sequences', () => {
+    const big = fc.integer({ min: -(2 ** 53 - 1), max: 2 ** 53 - 1 });
+    fc.assert(
+      fc.property(big, big, (k1, k2) => {
+        for (const id of Object.keys(SEQUENCES) as Id[]) {
+          const size = SIZES[id].at(-1)!;
+          const run = runOk(id, {
+            from: { size, keys: [k1] },
+            ops: [{ op: 'insert', key: k2 }],
+          });
+          expect(slotsAt(run.document)).toEqual(
+            reference(id, size, [k1, k2], []).end,
+          );
+        }
+      }),
+      fuzz,
+    );
+  });
+
+  it('writes the probe line of each table in Python', () => {
+    const python = (id: string) => findAlgorithm(id)!.code.python.code;
+    expect(python('quadratic-probing.insert')).toContain(
+      'q = (k + i * (i + 1) // 2) % m',
+    );
+    expect(python('double-hashing.search')).toContain('h2 = 1 + k % (m - 1)');
+    expect(python('double-hashing.search')).toContain(
+      'q = (k % m + i * h2) % m',
+    );
+  });
+
   it('quadratic probing jumps 1, 2 and 3 slots further to place 19', () => {
     const { document } = runOk('quadratic-probing.insert', {
       from: { size: 8, keys: [15, 11, 27, 8, 22] },
