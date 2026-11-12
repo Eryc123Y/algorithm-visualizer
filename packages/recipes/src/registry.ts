@@ -41,6 +41,7 @@ import { heapsort } from './algorithms/sorting/heapsort.ts';
 import { insertionSort } from './algorithms/sorting/insertion-sort.ts';
 import { mergeSort } from './algorithms/sorting/merge-sort.ts';
 import { quicksort } from './algorithms/sorting/quicksort.ts';
+import { radixSort } from './algorithms/sorting/radix-sort.ts';
 import { randomizedQuicksort } from './algorithms/sorting/randomized-quicksort.ts';
 import { selectionSort } from './algorithms/sorting/selection-sort.ts';
 import {
@@ -86,6 +87,7 @@ export const algorithms: readonly Algorithm[] = [
   quicksort,
   randomizedQuicksort,
   countingSort,
+  radixSort,
   bubbleSort,
   selectionSort,
   binarySearch,
