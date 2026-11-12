@@ -201,7 +201,7 @@ Independent of Phase 2, so the two can interleave.
 
 ## Phase 4: release 1.0
 
-- [ ] **4.1 Name** _owner_. Check availability on npm, Typst Universe and CTAN.
+- [ ] **4.1 Name** _owner_. Check availability on npm, Typst Universe and CTAN. The owner chose algomotion: _ADR_ [ADR 0044](adr/0044-the-name-algomotion.md), then the rename.
 - [x] **4.2 Freeze the protocol at 1.0** under 0.4's rules. Regenerate the JSON Schema and fixtures. _ADR_ [ADR 0043](adr/0043-protocol-1-0.md) (#130), then the code (#133): 1.0 is 0.9 as it stands, and 0.x documents are read as 1.0 with an `UPGRADED_VERSION` warning.
 - [ ] **4.3 Publish** _owner_: npm packages, the CDN bundle, the Typst package, the LaTeX package and the standalone executable.
 - [ ] **4.4 Release check.**
