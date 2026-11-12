@@ -1814,3 +1814,33 @@ describe('inputs outside the checked domain', () => {
     TIMEOUT,
   );
 });
+
+// String matching (ADR 0037): texts over a few letters, so that matches,
+// overlaps and spurious hits happen; every matcher finds every shift.
+
+const matchInput = fc
+  .tuple(
+    fc.string({ unit: fc.constantFrom('a', 'b'), minLength: 1, maxLength: 24 }),
+    fc.string({ unit: fc.constantFrom('a', 'b'), minLength: 1, maxLength: 10 }),
+  )
+  .filter(([text, pattern]) => pattern.length <= text.length)
+  .map(([text, pattern]) => ({ text, pattern }));
+
+for (const id of [
+  'naive-string-matcher',
+  'rabin-karp',
+  'finite-automaton-matcher',
+  'kmp',
+])
+  recipe(
+    id,
+    matchInput,
+    (input) => runOk(id, input).document,
+    (trace, { text, pattern }) => {
+      const want: number[] = [];
+      for (let s = 0; s + pattern.length <= text.length; s++)
+        if (text.startsWith(pattern, s)) want.push(s);
+      const shifts = stateOf(trace, 'shifts', 'array').data.map((e) => e.value);
+      expect(shifts).toEqual(want);
+    },
+  );
