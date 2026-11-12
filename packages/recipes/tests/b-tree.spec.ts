@@ -182,8 +182,10 @@ describe('b-tree', () => {
       key: 3,
     });
     expect((numbers.after as { tree: string }).tree).toBe(
-      runOk('b-tree.insert', { from: { t: 2, keys: '1 2 10 9' }, key: 3 }).after
-        .tree,
+      (
+        runOk('b-tree.insert', { from: { t: 2, keys: '1 2 10 9' }, key: 3 })
+          .after as { tree: string }
+      ).tree,
     );
   });
 
