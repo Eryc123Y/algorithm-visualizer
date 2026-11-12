@@ -2,8 +2,8 @@
  * Jarvis's march (ADR 0038; CLRS 3rd edition, 33.3). From the lowest
  * point, the next hull vertex is the point with every other point on its
  * left: a candidate is kept, and any point to its right, or in line and
- * farther, takes its place. Wrapping walks the right chain and then the
- * left chain, back to the start.
+ * farther, takes its place. The wrap goes counterclockwise, back to the
+ * start; CLRS's right and left chains are its two halves.
  */
 import { defineAlgorithm } from '../../algorithm.ts';
 import { cross, dist2, lowest, planeOf, show, type Pt } from './common.ts';
@@ -43,7 +43,9 @@ export const jarvisMarch = defineAlgorithm({
               for each point r of Q other than p and c
                   if r is right of the line from p to c, or on it and farther  // @better
                       c = r
-              append c to H; p = c  // @wrap
+              p = c
+              if p ≠ p0
+                  append p to H  // @wrap
           until p == p0
           return H  // @done
     `,
@@ -52,9 +54,9 @@ export const jarvisMarch = defineAlgorithm({
           p0 = min(Q, key=lambda p: (p.y, p.x))  # @p0
           hull, p = [p0], p0
           while True:
-              c = next(r for r in Q if r is not p)  # @candidate
+              c = first = next(r for r in Q if r is not p)  # @candidate
               for r in Q:
-                  if r is not p and r is not c and beats(p, c, r):  # @better
+                  if r is not p and r is not first and beats(p, c, r):  # @better
                       c = r
               if c is p0:
                   return hull  # @done

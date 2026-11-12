@@ -80,7 +80,7 @@ class Reader {
     if (m === null) return undefined;
     if (!NAME.test(m[0]))
       throw new NotationError(
-        `A name is at most 8 letters and digits, not ${quoted(m[0])}`,
+        `A name is at most 8 letters, digits and _, not ${quoted(m[0])}`,
         this.at,
       );
     this.at += m[0].length;
@@ -211,10 +211,16 @@ export function segmentsOf(raw: readonly SegmentInput[]): {
   segments: Seg[];
 } {
   const points: Pt[] = [];
+  // Point names skip the segments' names: they share one set of ids.
+  const pointName = namer(
+    raw.flatMap((s) => s.id ?? []),
+    'p',
+    0,
+  );
   const pointAt = ([x, y]: readonly [number, number]) => {
     const there = points.find((p) => p.x === x && p.y === y);
     if (there !== undefined) return there;
-    const p = { id: `p${points.length}`, x, y };
+    const p = { id: pointName(), x, y };
     points.push(p);
     return p;
   };

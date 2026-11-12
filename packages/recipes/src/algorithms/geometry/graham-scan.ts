@@ -75,6 +75,7 @@ export const grahamScan = defineAlgorithm({
           sort the rest by polar angle about p0, farthest only at an angle  // @sort
           S = an empty stack
           PUSH(p0, S); PUSH(p1, S); PUSH(p2, S)  // @start
+          let p1, …, pm be the rest, in that order
           for i = 3 to m
               while the turn from NEXT-TO-TOP(S) to TOP(S) to pi is not left  // @turn
                   POP(S)  // @pop

@@ -62,7 +62,7 @@ export const closestPair = defineAlgorithm({
           # X sorted by x, Y by y
           if len(X) <= 3:
               return min(dist(p, q) for p, q in pairs(X))  # @brute
-          mid = len(X) // 2
+          mid = (len(X) + 1) // 2
           l = X[mid - 1].x  # @divide
           XL, XR = X[:mid], X[mid:]
           YL = [p for p in Y if p in XL]
@@ -115,11 +115,11 @@ interface Ctx {
   found: number;
 }
 
-/** δ so far: the distance of the closest pair found. */
-const deltaOf = (ctx: Ctx) => ctx.best?.d ?? Infinity;
-
-/** Compares two points in a step, keeping them if they are closer. */
-function consider(ctx: Ctx, a: Pt, b: Pt, step: string, why: string): void {
+/**
+ * Compares two points in a step, keeping them as the closest pair so far
+ * if they are closer; returns their distance.
+ */
+function consider(ctx: Ctx, a: Pt, b: Pt, step: string, why: string): number {
   const { trace, P, best } = ctx;
   const d = Math.sqrt(dist2(a, b));
   const closer = best === undefined || d < best.d;
@@ -131,35 +131,43 @@ function consider(ctx: Ctx, a: Pt, b: Pt, step: string, why: string): void {
         : `, not closer than ${fmt(best.d)}.`;
   trace.step(step, `${why} ${a.id} and ${b.id} are ${fmt(d)} apart${verdict}`);
   P.compare({ points: [a.id, b.id] });
-  if (!closer) return;
-  if (best !== undefined) P.removeSegment({ id: `best${ctx.found}` });
+  if (!closer) return d;
+  if (best !== undefined) P.removeSegment({ id: `best-${ctx.found}` });
   ctx.found++;
-  const id = `best${ctx.found}`;
+  const id = `best-${ctx.found}`;
   P.addSegment({
     segment: { id, from: a.id, to: b.id, label: fmt(d) },
   }).select({ segment: id, on: true });
   ctx.best = { a, b, d };
+  return d;
 }
 
-/** One call: brute force, or divide, solve both halves and check the strip. */
+/**
+ * One call: brute force, or divide, solve both halves and check the
+ * strip; returns δ, the least distance among its points.
+ */
 function solve(
   ctx: Ctx,
   X: readonly Pt[],
   Y: readonly Pt[],
   parentLine: number | undefined,
-): void {
+): number {
   const { trace, P } = ctx;
   if (X.length <= 3) {
+    let least = Infinity;
     for (let i = 0; i < X.length; i++)
       for (let j = i + 1; j < X.length; j++)
-        consider(
-          ctx,
-          X[i]!,
-          X[j]!,
-          'brute',
-          `${X.length} points: compare every pair.`,
+        least = Math.min(
+          least,
+          consider(
+            ctx,
+            X[i]!,
+            X[j]!,
+            'brute',
+            `${X.length} points: compare every pair.`,
+          ),
         );
-    return;
+    return least;
   }
   const half = Math.ceil(X.length / 2);
   const l = X[half - 1]!.x;
@@ -170,24 +178,24 @@ function solve(
     `${X.length} points: split them at the line x = ${l}, the first ${half} in x order (${XL.map((p) => p.id).join(' ')}) on the left and ${X.length - half} on the right.`,
   );
   P.line({ name: 'l', x: l }).highlight({ points: XL.map((p) => p.id) });
-  solve(
+  const dl = solve(
     ctx,
     XL,
     Y.filter((p) => left.has(p)),
     l,
   );
-  solve(
+  const dr = solve(
     ctx,
     X.slice(half),
     Y.filter((p) => !left.has(p)),
     l,
   );
-  // The strip around the line, where a closer pair may cross it.
-  const delta = deltaOf(ctx);
+  // δ of the two halves; a closer pair would have to cross the line.
+  let delta = Math.min(dl, dr);
   const strip = Y.filter((p) => Math.abs(p.x - l) < delta);
   trace.step(
     'strip',
-    `Back at the ${X.length} points split at x = ${l}, with δ = ${fmt(delta)}: a closer pair would have to lie within δ of the line, where ${strip.length === 0 ? 'there is no point' : `the points are ${strip.map((p) => p.id).join(' ')}`}.`,
+    `Back at the ${X.length} points split at x = ${l}, with δ = ${fmt(delta)}, the least distance within either half: a closer pair would have to lie within δ of the line, where ${strip.length === 0 ? 'there is no point' : `the points are ${strip.map((p) => p.id).join(' ')}`}.`,
   );
   P.line({ name: 'l', x: l })
     .line({ name: 'l − δ', x: l - delta })
@@ -195,10 +203,14 @@ function solve(
   if (strip.length > 0) P.highlight({ points: strip.map((p) => p.id) });
   strip.forEach((p, i) => {
     for (const q of strip.slice(i + 1, i + 8)) {
-      if (q.y - p.y >= deltaOf(ctx)) break;
-      consider(ctx, p, q, 'compare', 'In the strip, in y order:');
+      if (q.y - p.y >= delta) break;
+      delta = Math.min(
+        delta,
+        consider(ctx, p, q, 'compare', 'In the strip, in y order:'),
+      );
     }
   });
   P.line({ name: 'l − δ', x: null }).line({ name: 'l + δ', x: null });
   if (parentLine !== undefined) P.line({ name: 'l', x: parentLine });
+  return delta;
 }

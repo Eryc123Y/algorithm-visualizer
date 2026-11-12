@@ -32,30 +32,33 @@ function hullOf(points: readonly P[]): string[] {
     .sort();
 }
 
-/** Whether any two of the segments meet, by testing every pair. */
-function anyMeet(segments: readonly [P, P][]): boolean {
-  const on = (a: P, b: P, p: P) =>
-    Math.min(a[0], b[0]) <= p[0] &&
-    p[0] <= Math.max(a[0], b[0]) &&
-    Math.min(a[1], b[1]) <= p[1] &&
-    p[1] <= Math.max(a[1], b[1]);
-  const meet = ([a, b]: [P, P], [c, d]: [P, P]) => {
-    const [d1, d2, d3, d4] = [
-      cross(c, d, a),
-      cross(c, d, b),
-      cross(a, b, c),
-      cross(a, b, d),
-    ];
-    if (d1 * d2 < 0 && d3 * d4 < 0) return true;
-    return (
-      (d1 === 0 && on(c, d, a)) ||
-      (d2 === 0 && on(c, d, b)) ||
-      (d3 === 0 && on(a, b, c)) ||
-      (d4 === 0 && on(a, b, d))
-    );
-  };
-  return segments.some((s, i) => segments.slice(i + 1).some((t) => meet(s, t)));
+/**
+ * Whether two segments meet, by solving for the crossing of their lines
+ * in exact fractions; parallel ones meet only if they lie on one line and
+ * their extents overlap. A different method from orientation tests.
+ */
+function meet([a, b]: [P, P], [c, d]: [P, P]): boolean {
+  const [rx, ry] = [b[0] - a[0], b[1] - a[1]];
+  const [sx, sy] = [d[0] - c[0], d[1] - c[1]];
+  const den = rx * sy - ry * sx;
+  const [qx, qy] = [c[0] - a[0], c[1] - a[1]];
+  if (den === 0) {
+    if (qx * ry - qy * rx !== 0) return false; // parallel, apart
+    // On one line: project onto it and compare extents.
+    const t = (p: P) => (p[0] - a[0]) * rx + (p[1] - a[1]) * ry;
+    const [t0, t1] = [t(c), t(d)].sort((m, n) => m - n);
+    return t0! <= rx * rx + ry * ry && t1! >= 0;
+  }
+  // a + t r = c + u s, with t = tn / den and u = un / den.
+  const tn = qx * sy - qy * sx;
+  const un = qx * ry - qy * rx;
+  const within = (n: number) =>
+    den > 0 ? 0 <= n && n <= den : den <= n && n <= 0;
+  return within(tn) && within(un);
 }
+
+const anyMeet = (segments: readonly [P, P][]) =>
+  segments.some((s, i) => segments.slice(i + 1).some((t) => meet(s, t)));
 
 const grid = (n: number) =>
   fc.tuple(fc.integer({ min: 0, max: n }), fc.integer({ min: 0, max: n }));
@@ -138,6 +141,39 @@ describe('geometry', () => {
       }),
       fuzz,
     );
+  });
+
+  it('takes any names the notation allows, even ones it would generate', () => {
+    fc.assert(
+      fc.property(
+        distinctPoints(4, 8).filter(notCollinear),
+        fc.shuffledSubarray(
+          ['p0', 'p1', 's1', 's2', 'best1', 'best-1', 'a', 'P'],
+          { minLength: 8, maxLength: 8 },
+        ),
+        (points, ids) => {
+          const named = points.map(([x, y], k) => ({
+            id: ids[k] ?? `q${k}`,
+            x,
+            y,
+          }));
+          for (const id of ['graham-scan', 'jarvis-march', 'closest-pair'])
+            runOk(id, {
+              points: named.filter((p) => /^[A-Za-z_]\w*$/.test(p.id)),
+            });
+        },
+      ),
+      fuzz,
+    );
+    // Named segments next to generated points.
+    const s = runOk('any-segments-intersect', {
+      segments: 'p0: (0, 0)-(4, 1), p1: (1, 3)-(6, 4), (5, 0)-(9, 2)',
+    });
+    expect(s.results).toEqual([false]);
+    const c = runOk('closest-pair', {
+      points: 'best1(0, 0) best2(5, 5) (6, 5) (20, 20) (30, 31)',
+    });
+    expect(c.results[0]).toBe(1);
   });
 
   it('reads points and segments in the notation', () => {
