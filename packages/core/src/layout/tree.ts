@@ -85,8 +85,12 @@ export interface TreeMetrics {
   readonly rootPointerRows: number;
   /** Widest name among them, in em of the value font. */
   readonly rootPointerWidth: number;
-  /** Widest edge label, in em of the value font; 0 without labels. */
+  /** Widest edge label, in em of the value font. */
   readonly edgeLabelWidth: number;
+  /** Whether any edge is ever labelled, even with an empty label. */
+  readonly hasEdgeLabels: boolean;
+  /** Whether any pointer ever names a NIL leaf. */
+  readonly hasNils: boolean;
 }
 
 /** A NIL leaf a pointer names, and where it goes. */
@@ -182,6 +186,8 @@ export function measureTree(
       Object.values(state.marks.edgeLabels).map(String),
       fonts.value,
     ),
+    hasEdgeLabels: Object.keys(state.marks.edgeLabels).length > 0,
+    hasNils: g.nils.size > 0,
   };
 }
 
@@ -200,6 +206,8 @@ export const mergeTreeMetrics = (
   rootPointerRows: Math.max(a.rootPointerRows, b.rootPointerRows),
   rootPointerWidth: Math.max(a.rootPointerWidth, b.rootPointerWidth),
   edgeLabelWidth: Math.max(a.edgeLabelWidth, b.edgeLabelWidth),
+  hasEdgeLabels: a.hasEdgeLabels || b.hasEdgeLabels,
+  hasNils: a.hasNils || b.hasNils,
 });
 
 function roleOf(state: TreeState, id: string): ElementRole {
@@ -229,8 +237,18 @@ export function layoutTree({
   );
   // Siblings share a level, so in non-binary trees each column also makes
   // room for the badges of the node right of it. In-order neighbours of a
-  // binary tree are never on the same level.
-  const pitchX = 2 * halfWidth + NODE_GAP_X + (state.binary ? 0 : pointerWidth);
+  // binary tree are never on the same level, but a NIL leaf, half a column
+  // out, may be 1.5 columns from a node on its level: the columns widen
+  // when that is too little for the NIL's badges (ADR 0034).
+  const box = nilBox(o);
+  const pitchX = state.binary
+    ? Math.max(
+        2 * halfWidth + NODE_GAP_X,
+        metrics.hasNils && pointerWidth > 0
+          ? Math.ceil((halfWidth + box.width / 2 + pointerWidth + 4) / 1.5)
+          : 0,
+      )
+    : 2 * halfWidth + NODE_GAP_X + pointerWidth;
   const pitchY = 2 * radius + NODE_GAP_Y;
   // Notes go above nodes, or above left or above right, whichever clears
   // the edges (ADR 0031); the block keeps room for any of them, measured
@@ -269,14 +287,12 @@ export function layoutTree({
   // gap away on the outer side (edge-label.ts); keep room for it beyond the
   // outermost nodes, above the roots and below the deepest level.
   const labelHalf = (metrics.edgeLabelWidth * o.indexFontSize) / 2;
-  const labelled = Object.keys(state.marks.edgeLabels).length > 0;
-  const [labelX, labelY] =
-    metrics.edgeLabelWidth > 0 || labelled
-      ? [
-          Math.ceil(4 + 2 * labelHalf + o.indexFontSize / 2),
-          Math.ceil(4 + labelHalf + o.indexFontSize),
-        ]
-      : [0, 0];
+  const [labelX, labelY] = metrics.hasEdgeLabels
+    ? [
+        Math.ceil(4 + 2 * labelHalf + o.indexFontSize / 2),
+        Math.ceil(4 + labelHalf + o.indexFontSize),
+      ]
+    : [0, 0];
   const margin = Math.max(
     noteOverhang,
     wrapMargin,
@@ -316,10 +332,9 @@ export function layoutTree({
       const edge = treeEdge(`${name}/edge/${child}`, from, to, shape, o);
       const label = own(edgeLabels, child);
       const mark = own(edgeMarks, child);
-      // Labels start on the outer side: left of a left child's edge.
-      const outer = (state.binary ? slot === 0 : to.x < from.x)
-        ? 'right'
-        : 'left';
+      // In binary trees labels start on the outer side: on screen, left of
+      // a left child's edge, which faces down to the left.
+      const outer = slot === 0 ? 'right' : 'left';
       items.push({
         ...edge,
         ...(mark === undefined ? {} : { role: mark }),
@@ -327,12 +342,11 @@ export function layoutTree({
           ? {}
           : {
               label: String(label),
-              ...(state.binary || to.x !== from.x ? { labelSide: outer } : {}),
+              ...(state.binary ? { labelSide: outer } : {}),
             }),
       } as SceneItem);
     });
 
-  const box = nilBox(o);
   const nilCentre = new Map(
     [...g.nils].map(([key, n]) => [key, at(n.column, n.depth)]),
   );

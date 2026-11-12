@@ -411,6 +411,52 @@ describe('layout of the additions', () => {
     expect(frames[1]!.items.some((i) => i.key.startsWith('t/nil'))).toBe(false);
   });
 
+  it('keeps a NIL leaf’s badges clear of the node beside it', () => {
+    // RB-DELETE-FIXUP's shape: x at NIL right of p, its sibling w left.
+    const [, scene] = scenes(
+      doc(
+        {
+          binary: true,
+          nodes: [
+            { id: 'p', value: 5, children: ['w', null] },
+            { id: 'w', value: 3 },
+          ],
+        },
+        [
+          [
+            { type: 'pointer', name: 'cursor', node: { parent: 'p', slot: 1 } },
+            { type: 'pointer', name: 'other', node: { parent: 'p', slot: 1 } },
+          ],
+        ],
+      ),
+    );
+    const w = item<SceneNode>(scene!, 't/element/w');
+    for (const key of ['t/pointer/cursor', 't/pointer/other']) {
+      const badge = item<SceneBadge>(scene!, key);
+      expect(badge.x - badge.width / 2, key).toBeGreaterThan(w.x + w.radius);
+    }
+    expect(clean(scene!)).toEqual([]);
+  });
+
+  it('keys the closing link apart from a root named wrap', () => {
+    const frames = scenes(
+      doc(
+        {
+          rootList: 'circular',
+          nodes: [
+            { id: 'wrap', value: 1 },
+            { id: 'b', value: 2 },
+          ],
+        },
+        [],
+      ),
+    );
+    expect(clean(frames[0]!)).toEqual([]);
+    expect(item<SceneEdge>(frames[0]!, 't/root-link/wrap').x2).toBeLessThan(
+      item<SceneNode>(frames[0]!, 't/element/b').x,
+    );
+  });
+
   it('joins named notes into one label, the plain note first', () => {
     const [, scene] = scenes(
       doc(bst, [
@@ -476,7 +522,7 @@ describe('layout of the additions', () => {
     expect(ac.x1).toBeGreaterThan(a!.x);
     expect(ac.x2).toBeLessThan(c!.x);
     expect(item<SceneEdge>(scene, 't/root-link/c').x2).toBeLessThan(d!.x);
-    const wrap = item<SceneEdge>(scene, 't/root-link/wrap');
+    const wrap = item<SceneEdge>(scene, 't/root-wrap');
     expect(wrap.x1).toBeGreaterThan(d!.x);
     expect(wrap.x2).toBeLessThan(a!.x);
     expect(Math.min(...wrap.via!.map((p) => p.y))).toBeLessThan(
@@ -496,7 +542,7 @@ describe('layout of the additions', () => {
 
   it('draws a plain list without the wrap link', () => {
     const [scene] = scenes(doc({ ...forest, rootList: 'list' }, []));
-    expect(scene!.items.some((i) => i.key === 't/root-link/wrap')).toBe(false);
+    expect(scene!.items.some((i) => i.key === 't/root-wrap')).toBe(false);
     expect(
       scene!.items.filter((i) => i.key.startsWith('t/root-link/')),
     ).toHaveLength(2);

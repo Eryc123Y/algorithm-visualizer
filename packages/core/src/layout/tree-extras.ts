@@ -3,8 +3,9 @@
  *
  * - NIL leaves that pointers name, as small boxes half a column beside
  *   their parent and one level down;
- * - the links of a root list between consecutive roots, and the link of a
- *   circular one from the last root, over the forest, back to the first;
+ * - the links of a root list between consecutive roots
+ *   (`<tree>/root-link/<left root>`), and the link of a circular one from
+ *   the last root, over the forest, back to the first (`<tree>/root-wrap`);
  * - pointers at the roots of a linked forest, lifted above their root so
  *   they do not sit on the list;
  * - the one label that joins a node's notes.
@@ -161,7 +162,7 @@ export function rootLinkItems(
     via?: readonly Point[],
   ): SceneItem => ({
     type: 'edge',
-    key: `${name}/root-link/${key}`,
+    key: key === '' ? `${name}/root-wrap` : `${name}/root-link/${key}`,
     x1: a.x,
     y1: a.y,
     x2: b.x,
@@ -181,7 +182,8 @@ export function rootLinkItems(
     const out = last.x + last.halfWidth + WRAP_GAP;
     const back = first.x - first.halfWidth - WRAP_GAP;
     items.push(
-      link('wrap', right(last), left(first), [
+      // Not `root-link/wrap`: a root may have the id `wrap`.
+      link('', right(last), left(first), [
         { x: out, y: last.y },
         { x: out, y: laneY },
         { x: back, y: laneY },

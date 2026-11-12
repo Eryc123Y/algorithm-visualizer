@@ -1,10 +1,10 @@
 /**
  * A plain model of the `tree` kind's data, written from the protocol's
  * descriptions (the MCP guide and ADR 0034) rather than from the reducer:
- * nodes with ordered child slots and the roots in order. It also says
- * which mark actions must be rejected, since some of them (NIL pointers,
- * edge marks) depend on the shape. Returns the new data, or `undefined`
- * if the action must be rejected.
+ * nodes with ordered child slots and the roots in order, and the marks
+ * that hang on the shape: pointers (at nodes or NIL slots), plain and
+ * named notes, and edge marks and labels, which go when their edge does.
+ * Returns the new model, or `undefined` if the action must be rejected.
  */
 import { LIMITS, type Scalar, type TreeDecl } from '@algoviz/spec';
 
@@ -15,11 +15,138 @@ export interface ModelNode {
   readonly color: 'red' | 'black' | null;
 }
 
+type NilTarget = { readonly parent: string; readonly slot: number };
+type Rec<V> = Readonly<Record<string, V>>;
+
+/** The marks the model follows; the order of keys is the order set. */
+export interface ModelMarks {
+  readonly pointers: Rec<string | NilTarget>;
+  readonly notes: Rec<string>;
+  readonly namedNotes: Rec<Rec<string>>;
+  readonly edgeMarks: Rec<string>;
+  readonly edgeLabels: Rec<string | number>;
+}
+
 export interface TreeModel {
   readonly kind: 'tree';
   readonly binary: boolean;
   readonly nodes: readonly ModelNode[];
   readonly roots: readonly string[];
+  readonly marks: ModelMarks;
+}
+
+/** Most named notes on one node (ADR 0034). */
+const NAMED_NOTES = 4;
+
+const emptyMarks: ModelMarks = {
+  pointers: {},
+  notes: {},
+  namedNotes: {},
+  edgeMarks: {},
+  edgeLabels: {},
+};
+
+const keep = <V>(r: Rec<V>, test: (key: string, value: V) => boolean) =>
+  Object.fromEntries(Object.entries(r).filter(([k, v]) => test(k, v)));
+
+const setOrDrop = <V>(r: Rec<V>, key: string, value: V | null): Rec<V> =>
+  value === null ? keep(r, (k) => k !== key) : { ...r, [key]: value };
+
+/** Each child's edge: its parent, and its slot in a binary tree. */
+const edgesOf = (m: TreeModel) =>
+  new Map(
+    m.nodes.flatMap((n) =>
+      n.children.flatMap((c, slot) =>
+        c === null ? [] : [[c, m.binary ? `${n.id}/${slot}` : n.id] as const],
+      ),
+    ),
+  );
+
+/**
+ * The marks after a change of shape from `before` to `after`: marks on
+ * removed nodes go, NIL pointers go when their slot is no longer empty,
+ * and edge marks and labels go when their edge changed.
+ */
+function followMarks(before: TreeModel, after: TreeModel): TreeModel {
+  const ids = new Set(after.nodes.map((n) => n.id));
+  const [was, is] = [edgesOf(before), edgesOf(after)];
+  const same = (id: string) => is.has(id) && is.get(id) === was.get(id);
+  const empty = (t: NilTarget) =>
+    after.nodes.find((n) => n.id === t.parent)?.children[t.slot] === null;
+  const m = after.marks;
+  return {
+    ...after,
+    marks: {
+      pointers: keep(m.pointers, (_, t) =>
+        typeof t === 'string' ? ids.has(t) : empty(t),
+      ),
+      notes: keep(m.notes, (id) => ids.has(id)),
+      namedNotes: keep(m.namedNotes, (id) => ids.has(id)),
+      edgeMarks: keep(m.edgeMarks, same),
+      edgeLabels: keep(m.edgeLabels, same),
+    },
+  };
+}
+
+/** Applies an action, then lets the marks follow the shape. */
+export function applyTreeModel(m: TreeModel, a: A): TreeModel | undefined {
+  const next = applyAction(m, a);
+  return next === undefined ? undefined : followMarks(m, next);
+}
+
+/** Sets a mark, or `undefined` if the action must be rejected. */
+function applyMark(m: TreeModel, a: A): TreeModel | undefined {
+  const marks = m.marks;
+  const node = a['node'] as string;
+  const set = (patch: Partial<ModelMarks>): TreeModel => ({
+    ...m,
+    marks: { ...marks, ...patch },
+  });
+  switch (a['type']) {
+    case 'pointer':
+      return set({
+        pointers: setOrDrop(
+          marks.pointers,
+          a['name'] as string,
+          a['node'] as string | NilTarget | null,
+        ),
+      });
+    case 'annotate': {
+      const text = a['text'] as string | null;
+      const field = a['field'] as string | undefined;
+      if (field === undefined)
+        return set({ notes: setOrDrop(marks.notes, node, text) });
+      const fields = marks.namedNotes[node] ?? {};
+      if (
+        text !== null &&
+        !Object.hasOwn(fields, field) &&
+        Object.keys(fields).length >= NAMED_NOTES
+      )
+        return undefined;
+      const next = setOrDrop(fields, field, text);
+      return set({
+        namedNotes: setOrDrop(
+          marks.namedNotes,
+          node,
+          Object.keys(next).length === 0 ? null : next,
+        ),
+      });
+    }
+    case 'markEdge':
+      return set({
+        edgeMarks: setOrDrop(marks.edgeMarks, node, a['mark'] as string | null),
+      });
+    case 'labelEdge':
+      return set({
+        edgeLabels: setOrDrop(
+          marks.edgeLabels,
+          node,
+          a['label'] as string | number | null,
+        ),
+      });
+    default:
+      return m;
+  }
 }
 
 type A = Record<string, unknown>;
@@ -37,6 +164,7 @@ export function initTreeModel(decl: TreeDecl): TreeModel {
       color: n.color ?? null,
     })),
     roots: [...decl.roots],
+    marks: emptyMarks,
   };
 }
 
@@ -52,7 +180,7 @@ const slotUpTo = (slot: unknown, max: number): number | undefined =>
     ? slot
     : undefined;
 
-export function applyTreeModel(m: TreeModel, a: A): TreeModel | undefined {
+function applyAction(m: TreeModel, a: A): TreeModel | undefined {
   const byId = new Map(m.nodes.map((n) => [n.id, n]));
   const has = (id: unknown): id is string =>
     typeof id === 'string' && byId.has(id);
@@ -252,22 +380,25 @@ export function applyTreeModel(m: TreeModel, a: A): TreeModel | undefined {
     case 'visit':
     case 'settle':
     case 'group':
-    case 'annotate':
       return has(a['node']) ? m : undefined;
+    case 'annotate':
+      return has(a['node']) ? applyMark(m, a) : undefined;
     case 'markEdge':
     case 'labelEdge':
-      return has(a['node']) && !m.roots.includes(a['node']) ? m : undefined;
+      return has(a['node']) && !m.roots.includes(a['node'])
+        ? applyMark(m, a)
+        : undefined;
     case 'pointer': {
       const target = a['node'];
-      if (target === null) return m;
-      if (typeof target === 'string') return has(target) ? m : undefined;
-      const { parent, slot } = target as { parent: string; slot: number };
+      if (target === null || typeof target === 'string')
+        return target === null || has(target) ? applyMark(m, a) : undefined;
+      const { parent, slot } = target as NilTarget;
       const p = byId.get(parent);
       return m.binary &&
         p !== undefined &&
         slot <= 1 &&
         p.children[slot] === null
-        ? m
+        ? applyMark(m, a)
         : undefined;
     }
     default:

@@ -454,7 +454,10 @@ function treeAction(s: TreeState, r: Dice): Fields {
         text: r.chance(0.2)
           ? null
           : r.pick(['h=1', 'd=∞', '', 'x'.repeat(32), 'bf −1']),
-        ...(r.chance(0.4) ? { field: r.pick(['size', 'max', 'deg']) } : {}),
+        // Six fields, so that a node reaches the cap of four.
+        ...(r.chance(0.4)
+          ? { field: r.pick(['size', 'max', 'deg', 'mark', 'h', 'rank']) }
+          : {}),
       };
   }
 }
