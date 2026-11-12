@@ -50,11 +50,14 @@ const keysText = z
       `Write ${KEYS_FORM}.`,
     ),
   );
+// Words that all read as numbers are numbers, however they are given.
+const keysArray = z
+  .array(z.union([z.number(), z.string().regex(/^[A-Za-z0-9]{1,8}$/)]))
+  .transform((ks) =>
+    ks.every((k) => typeof k === 'string') ? keyValues(ks as string[]) : ks,
+  );
 const Keys = z
-  .union([
-    keysText,
-    z.array(z.union([z.number(), z.string().regex(/^[A-Za-z0-9]{1,8}$/)])),
-  ])
+  .union([keysText, keysArray])
   .pipe(z.array(z.union([z.number(), z.string()])).max(MAX_SIZE));
 
 /** A tree in the notation, checked as text here and as a B-tree at start. */
@@ -64,7 +67,8 @@ const TreeText = z.string().superRefine((s, ctx) => {
 
 const FromSchema = z
   .union([
-    // A string with brackets and parentheses is a tree; else, keys.
+    // A string with parentheses is a tree; any other string is keys, so
+    // "[B A]" is the keys B and A, not a one-node tree.
     z
       .string()
       .refine((s) => s.includes('('))

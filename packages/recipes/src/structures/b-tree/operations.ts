@@ -73,7 +73,9 @@ export function search(b: BTree, k: KeyValue, run: BRun): boolean {
     if (isLeaf(n)) {
       step(
         'missing',
-        `${placeOf(n, k, i)}, and ${show(n)} is a leaf: ${String(k)} is not in the tree.`,
+        n.keys.length === 0
+          ? `The tree is empty: ${String(k)} is not in it.`
+          : `${placeOf(n, k, i)}, and ${show(n)} is a leaf: ${String(k)} is not in the tree.`,
       );
       on.pointer({ name: 'x', node: n.id });
       if (compared.length > 0)
@@ -284,7 +286,7 @@ function shrinkRoot(b: BTree, run: BRun): BTree {
  * at least t keys first, so a key can always leave a leaf.
  */
 export function remove(b: BTree, k: KeyValue, run: BRun): BTree {
-  return deleteFrom(b, b.root, k, run, null);
+  return deleteFrom(b, b.root, k, run, null, 'lift-pred');
 }
 
 /**
@@ -298,6 +300,8 @@ function deleteFrom(
   k: KeyValue,
   run: BRun,
   over: BKey | null,
+  /** The step that lifts the key: from the left subtree or the right. */
+  liftStep: 'lift-pred' | 'lift-succ',
 ): BTree {
   const { on, step } = run;
   const t = b.t;
@@ -310,7 +314,7 @@ function deleteFrom(
     if (here && isLeaf(n)) {
       if (over !== null) {
         step(
-          'lift',
+          liftStep,
           `${String(k)} leaves the leaf and rises into the place of ${String(over.value)}, which is gone.`,
         );
         on.pointer({ name: 'x', node: n.id }).lift({
@@ -338,7 +342,7 @@ function deleteFrom(
         on.pointer({ name: 'x', node: n.id }).highlight({
           keys: [key.id, pred.id],
         });
-        return deleteFrom(tree, y.id, pred.value, run, key);
+        return deleteFrom(tree, y.id, pred.value, run, key, 'lift-pred');
       }
       if (z.keys.length >= t) {
         const succ = extreme(tree, z.id, true);
@@ -349,7 +353,7 @@ function deleteFrom(
         on.pointer({ name: 'x', node: n.id }).highlight({
           keys: [key.id, succ.id],
         });
-        return deleteFrom(tree, z.id, succ.value, run, key);
+        return deleteFrom(tree, z.id, succ.value, run, key, 'lift-succ');
       }
       step(
         'case-2c',
@@ -397,7 +401,7 @@ function deleteFrom(
         target = n.children[at]!;
         step(
           'case-3b',
-          `${placeOf(n, k, i)}, so ${String(k)} would be under child ${i}, ${show(c)}, which has only t − 1 = ${t - 1} keys, and so do its siblings: merge it with its ${right !== undefined ? 'right' : 'left'} sibling and ${String(n.keys[at]!.value)} between them.`,
+          `${placeOf(n, k, i)}, so ${String(k)} would be under child ${i}, ${show(c)}, which has only t − 1 = ${t - 1} keys, and so ${left !== undefined && right !== undefined ? 'do both its siblings' : 'does its one sibling'}: merge it with its ${right !== undefined ? 'right' : 'left'} sibling and ${String(n.keys[at]!.value)} between them.`,
         );
         on.pointer({ name: 'x', node: n.id });
         tree = merge(tree, n.id, at, on);

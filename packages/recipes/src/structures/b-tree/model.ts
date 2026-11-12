@@ -115,6 +115,10 @@ export function buildTree(shape: NodeShape, t: number): BTree {
         `${show(s)} has ${n} key${n === 1 ? '' : 's'}; a node other than the root holds at least t − 1 = ${t - 1}`,
       );
     const kids = s.children ?? [];
+    if (root && n === 0 && kids.length > 0)
+      throw new RangeError(
+        `The root ${show(s)} has children but no keys; only an empty tree has a root without keys`,
+      );
     if (kids.length > 0 && kids.length !== n + 1)
       throw new RangeError(
         `${show(s)} has ${n} keys and ${kids.length} children; it needs ${n + 1}`,

@@ -13,9 +13,12 @@ export const TREE_FORM =
 
 const WORD = /^[A-Za-z0-9]{1,8}$/;
 
+/** Whether a token reads as a finite number. */
+const isNumber = (t: string) => NUMBER.test(t) && Number.isFinite(Number(t));
+
 /** The keys of a list, as numbers if every one is a number. */
 export function keyValues(tokens: readonly string[]): KeyValue[] {
-  return tokens.every((t) => NUMBER.test(t)) ? tokens.map(Number) : [...tokens];
+  return tokens.every(isNumber) ? tokens.map(Number) : [...tokens];
 }
 
 /** The tree `text` writes; throws a NotationError at a bad token. */
@@ -68,7 +71,7 @@ export function parseTree(text: string): NodeShape {
   if (at < text.length)
     throw new NotationError(`Unexpected ${quoted(text.slice(at, at + 8))}`, at);
   // One type for the whole tree: numbers only if every key is one.
-  const numeric = raw.every((t) => NUMBER.test(t));
+  const numeric = raw.every(isNumber);
   const shape = (r: Raw): NodeShape => ({
     keys: r.keys.map((k) => (numeric ? Number(k) : k)),
     ...(r.children.length === 0 ? {} : { children: r.children.map(shape) }),

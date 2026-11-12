@@ -93,10 +93,10 @@ export const BT_DELETE = listing('delete', {
                 remove k from x  // case 1  // @case-1
             elseif x.c[i].n ≥ t
                 k' = the greatest key below x.c[i]  // case 2a  // @case-2a
-                B-TREE-DELETE(x.c[i], k'); put k' in k's place  // @lift
+                B-TREE-DELETE(x.c[i], k'); put k' in k's place  // @lift-pred
             elseif x.c[i + 1].n ≥ t
                 k' = the least key below x.c[i + 1]  // case 2b  // @case-2b
-                B-TREE-DELETE(x.c[i + 1], k'); put k' in k's place
+                B-TREE-DELETE(x.c[i + 1], k'); put k' in k's place  // @lift-succ
             else
                 MERGE(x, i)  // case 2c: x.c[i] gets k and x.c[i + 1]  // @case-2c
                 B-TREE-DELETE(x.c[i], k)
@@ -121,10 +121,10 @@ export const BT_DELETE = listing('delete', {
                 x.keys.pop(i)  # case 1  # @case-1
             elif len(x.c[i].keys) >= t:
                 kp = greatest(x.c[i])  # case 2a  # @case-2a
-                delete(x.c[i], kp); x.keys[i] = kp  # @lift
+                delete(x.c[i], kp); x.keys[i] = kp  # @lift-pred
             elif len(x.c[i + 1].keys) >= t:
                 kp = least(x.c[i + 1])  # case 2b  # @case-2b
-                delete(x.c[i + 1], kp); x.keys[i] = kp
+                delete(x.c[i + 1], kp); x.keys[i] = kp  # @lift-succ
             else:
                 merge(x, i)  # case 2c  # @case-2c
                 delete(x.c[i], k)

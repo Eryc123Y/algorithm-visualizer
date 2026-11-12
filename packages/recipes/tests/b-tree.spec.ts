@@ -50,12 +50,12 @@ function bTreeProblems(s: BTreeState, t: number): string[] {
   };
   walk(s.data.root, 0, true);
   if (depths.size > 1) problems.push('leaves at different depths');
+  const less = (a: number | string, b: number | string) =>
+    typeof a === 'number' && typeof b === 'number'
+      ? a < b
+      : String(a) < String(b);
   for (let k = 1; k < keys.length; k++)
-    if (!(
-      String(keys[k - 1]) < String(keys[k]) ||
-      (keys[k - 1] as number) < (keys[k] as number)
-    ))
-      problems.push('keys out of order');
+    if (!less(keys[k - 1]!, keys[k]!)) problems.push('keys out of order');
   return problems;
 }
 
@@ -115,6 +115,34 @@ describe('b-tree', () => {
     expect(ids(replay(grown.document))).toContain('grow');
   });
 
+  it('reaches case 2b, both borrows and both merges', () => {
+    const cases: [string, string, string, string[]][] = [
+      [
+        '[M] ([A B] [N O P Q])',
+        'M',
+        '[N] ([A B] [O P Q])',
+        ['case-2b', 'lift-succ'],
+      ],
+      ['[M] ([A B] [N O P])', 'A', '[N] ([B M] [O P])', ['case-3a']],
+      ['[M] ([A B C] [N O])', 'N', '[C] ([A B] [M O])', ['case-3a']],
+      ['[M] ([A B] [N O])', 'N', '[A B M O]', ['case-3b', 'shrink']],
+      ['[M] ([A B] [N O])', 'A', '[B M N O]', ['case-3b', 'shrink']],
+    ];
+    for (const [tree, key, expected, names] of cases) {
+      const ref = new RefBTree(3);
+      for (const k of tree.replace(/[^A-Z]/g, '')) ref.insert(k);
+      const { document, after } = runOk('b-tree.delete', {
+        from: { t: 3, tree },
+        key,
+      });
+      expect((after as { tree: string }).tree, `${tree} − ${key}`).toBe(
+        expected,
+      );
+      const got = ids(replay(document));
+      for (const name of names) expect(got, `${tree} − ${key}`).toContain(name);
+    }
+  });
+
   it('searches, and says when a key is missing', () => {
     expect(runOk('b-tree.search', { from: CLRS, key: 'R' }).results).toEqual([
       true,
@@ -147,6 +175,16 @@ describe('b-tree', () => {
       /words/,
     );
     expect(msg({ from: '[P] ([A B] [Q R' })).toMatch(/not closed/);
+    expect(msg({ from: { t: 3, tree: '[] ([A B])' } })).toMatch(/no keys/);
+    // Numeric words are numbers, in a list as in a string.
+    const numbers = runOk('b-tree.insert', {
+      from: { t: 2, keys: ['1', '2', '10', '9'] },
+      key: 3,
+    });
+    expect((numbers.after as { tree: string }).tree).toBe(
+      runOk('b-tree.insert', { from: { t: 2, keys: '1 2 10 9' }, key: 3 }).after
+        .tree,
+    );
   });
 
   it('agrees with the reference on random runs', { timeout: 600_000 }, () => {
@@ -164,11 +202,14 @@ describe('b-tree', () => {
         (t, keys, ops) => {
           const ref = new RefBTree(t);
           for (const k of keys) ref.insert(k);
+          // The reference tree after each operation.
+          const snapshots: string[] = [];
           const expected = ops.map(({ op, key }) => {
-            if (op === 'search') return ref.has(key);
+            const result = op === 'search' ? ref.has(key) : null;
             if (op === 'insert') ref.insert(key);
-            else ref.delete(key);
-            return null;
+            if (op === 'delete') ref.delete(key);
+            snapshots.push(ref.print());
+            return result;
           });
           const { document, results, after } = runOk('b-tree', {
             from: { t, keys },
@@ -177,8 +218,15 @@ describe('b-tree', () => {
           expect(results).toEqual(expected);
           expect((after as { tree: string }).tree).toBe(ref.print());
           const trace = replay(document);
-          for (const { start } of (trace.visualization.sections ?? []).slice(1))
+          // Each operation is a section: the drawn tree at the start of
+          // the next one is the reference's after it, and a B-tree.
+          const sections = trace.visualization.sections ?? [];
+          expect(sections).toHaveLength(ops.length);
+          sections.slice(1).forEach(({ start }, k) => {
+            expect(drawn(treeOf(trace, start))).toBe(snapshots[k]);
             expect(bTreeProblems(treeOf(trace, start), t)).toEqual([]);
+          });
+          expect(drawn(treeOf(trace))).toBe(ref.print());
           expect(bTreeProblems(treeOf(trace), t)).toEqual([]);
         },
       ),
