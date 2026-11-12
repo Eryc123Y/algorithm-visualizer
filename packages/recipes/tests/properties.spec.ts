@@ -576,6 +576,42 @@ recipe(
 );
 
 recipe(
+  'b-tree',
+  fc.record({
+    from: fc.record({
+      t: fc.integer({ min: 2, max: 4 }),
+      keys: fc.uniqueArray(fc.integer({ min: 0, max: 60 }), { maxLength: 24 }),
+    }),
+    ops: fc.array(
+      fc.record({
+        op: fc.constantFrom('insert', 'delete', 'search'),
+        key: fc.integer({ min: 0, max: 60 }),
+      }),
+      { minLength: 1, maxLength: 8 },
+    ),
+  }),
+  (input) => runOk('b-tree', input).document,
+  (trace, { from, ops }) => {
+    const keys = new Set(from.keys);
+    for (const { op, key } of ops)
+      if (op === 'insert') keys.add(key);
+      else if (op === 'delete') keys.delete(key);
+    // An inorder walk of the drawn B-tree gives the keys in order.
+    const s = stateOf(trace, 'T', 'btree');
+    const byId = new Map(s.data.nodes.map((n) => [n.id, n]));
+    const walk = (id: string): unknown[] => {
+      const n = byId.get(id)!;
+      if (n.children.length === 0) return n.keys.map((k) => k.value);
+      return n.children.flatMap((c, i) => [
+        ...walk(c),
+        ...(i < n.keys.length ? [n.keys[i]!.value] : []),
+      ]);
+    };
+    expect(walk(s.data.root)).toEqual(ascending([...keys]));
+  },
+);
+
+recipe(
   'fibonacci-heap',
   fc
     .tuple(
