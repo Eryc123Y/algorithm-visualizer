@@ -9,36 +9,39 @@ import { describe, expect, it } from 'vitest';
 
 import {
   reverseBits,
-  root,
   showComplex,
   type Complex,
 } from '../src/algorithms/math/fft.ts';
 import { fuzz, replay, runError, runOk, stateOf } from './helpers.ts';
 
-/** The DFT by its definition. */
+/** The DFT by its definition, with ω_n = e^{2πi/n} worked out here. */
 function dft(a: readonly number[]): Complex[] {
   const n = a.length;
   return a.map((_, k) =>
     a.reduce(
       (y, aj, j) => {
-        const w = root((k * j) % n, n);
-        return { re: y.re + aj * w.re, im: y.im + aj * w.im };
+        const angle = (2 * Math.PI * ((k * j) % n)) / n;
+        return {
+          re: y.re + aj * Math.cos(angle),
+          im: y.im + aj * Math.sin(angle),
+        };
       },
       { re: 0, im: 0 },
     ),
   );
 }
 
-/** Reads what showComplex writes. */
+/** Reads what showComplex writes: `4`, `−2i`, `1+i`, `−0.414−7.243i`. */
 function parseComplex(text: string): Complex {
   const t = text.replaceAll('−', '-');
-  const m = /^(-?[\d.]+)?(?:([+-]?)([\d.]*)i)?$/.exec(t);
-  if (m === null || t === '') throw new Error(`Not a complex number: ${text}`);
-  const re = m[1] === undefined ? 0 : Number(m[1]);
-  const im = t.endsWith('i')
-    ? (m[2] === '-' ? -1 : 1) * (m[3] === '' ? 1 : Number(m[3]))
-    : 0;
-  return { re, im };
+  if (!t.endsWith('i')) return { re: Number(t), im: 0 };
+  const body = t.slice(0, -1);
+  const coefficient = (s: string) =>
+    s === '' || s === '+' ? 1 : s === '-' ? -1 : Number(s);
+  // The sign between the parts is the last one past the first character.
+  const k = Math.max(body.lastIndexOf('+'), body.lastIndexOf('-'));
+  if (k <= 0) return { re: 0, im: coefficient(body) };
+  return { re: Number(body.slice(0, k)), im: coefficient(body.slice(k)) };
 }
 
 const polynomials = fc
@@ -92,7 +95,34 @@ describe('fft', () => {
     );
   });
 
+  it('uses ω_n = e^{2πi/n}, as CLRS does', () => {
+    // x evaluated at the 4th roots of unity 1, i, −1, −i.
+    const { document } = runOk('fft', { coefficients: '0 1 0 0' });
+    expect(
+      stateOf(replay(document), 'T', 'table').data.map((row) => row[1]),
+    ).toEqual(['1', 'i', '−1', '−i']);
+  });
+
+  it('narrates one and two coefficients', () => {
+    const said = (coefficients: string) =>
+      runOk('fft', { coefficients }).document.steps.map((s) => [
+        s.meta?.at,
+        s.meta?.narration,
+      ]);
+    expect(said('7').map(([at]) => at)).toEqual(['copy', 'done']);
+    const two = said('3 5');
+    expect(two.map(([at]) => at)).toEqual([
+      'copy',
+      'stage',
+      'butterfly',
+      'done',
+    ]);
+    expect(two[0]![1]).toMatch(/whose 1 bit is/);
+    expect(two[2]![1]).toMatch(/u = A\[0\] = 3, so A\[0\] = u \+ t = 8/);
+  });
+
   it('writes complex numbers to three decimals', () => {
+    expect(showComplex({ re: 0, im: 1 })).toBe('i');
     expect(showComplex({ re: 4, im: 0 })).toBe('4');
     expect(showComplex({ re: -1, im: 2.41421356 })).toBe('−1+2.414i');
     expect(showComplex({ re: 0, im: -1 })).toBe('−i');
@@ -102,6 +132,9 @@ describe('fft', () => {
       { re: -1, im: 2.414 },
       { re: 0, im: -1 },
       { re: 3.5, im: -0.25 },
+      { re: 0, im: -2 },
+      { re: 0, im: 0.5 },
+      { re: -1, im: 1 },
     ])
       expect(parseComplex(showComplex(z))).toEqual(z);
   });
@@ -114,5 +147,6 @@ describe('fft', () => {
       runError('fft', { coefficients: Array<number>(32).fill(1) }).message,
     ).toMatch(/power of 2/);
     expect(runError('fft', { coefficients: '1 100' }).message).toMatch(/99/);
+    expect(runError('fft', { coefficients: '1 2.5' }).message).toMatch(/2\.5/);
   });
 });

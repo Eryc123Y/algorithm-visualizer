@@ -163,7 +163,7 @@ export const fft = defineAlgorithm({
       'copy',
       n === 1
         ? 'One coefficient: the transform of a constant is itself.'
-        : `Copy each coefficient a_k to A[rev(k)], the index whose ${bits} bits are those of k reversed: then each stage combines neighbouring blocks.`,
+        : `Copy each coefficient a_k to A[rev(k)], the index whose ${bits === 1 ? '1 bit is that of k, which reversed is itself' : `${bits} bits are those of k reversed`}: then each stage combines neighbouring blocks. Values are shown to three decimals.`,
     );
     for (let k = 0; k < n; k++) {
       const r = reverseBits(k, bits);
@@ -189,7 +189,7 @@ export const fft = defineAlgorithm({
           A[hi] = minus(u, t);
           trace.step(
             'butterfly',
-            `Butterfly on A[${lo}] and A[${hi}] with ω = ω_${m}^${j} = ${showComplex(w)}: t = ω A[${hi}] = ${showComplex(t)}, so A[${lo}] = u + t = ${showComplex(A[lo])} and A[${hi}] = u − t = ${showComplex(A[hi])}.`,
+            `Butterfly on A[${lo}] and A[${hi}] with ω = ω_${m}^${j} = ${showComplex(w)}: t = ω A[${hi}] = ${showComplex(t)} and u = A[${lo}] = ${showComplex(u)}, so A[${lo}] = u + t = ${showComplex(A[lo])} and A[${hi}] = u − t = ${showComplex(A[hi])}.`,
             { vars: { s, m, k, j } },
           );
           table
