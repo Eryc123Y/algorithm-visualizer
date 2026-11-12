@@ -1,7 +1,7 @@
 {
   "description": "Tree additions of protocol 0.5 (ADR 0034): a root list, root slots, a NIL slot given as left or right, named notes, edge marks and labels.",
   "input": {
-    "version": "0.5",
+    "version": "1.0",
     "structures": {
       "h": {
         "kind": "tree",
@@ -84,7 +84,7 @@
     ]
   },
   "expected": {
-    "version": "0.5",
+    "version": "1.0",
     "structures": {
       "h": {
         "kind": "tree",

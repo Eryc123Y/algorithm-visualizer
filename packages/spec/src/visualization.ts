@@ -191,7 +191,7 @@ const document = <D extends z.ZodType, A extends z.ZodType>(
       version: z
         .enum(PROTOCOL_VERSIONS)
         .describe(
-          'Protocol version, "major.minor": the oldest version that has every feature the document uses.',
+          'Protocol version, "major.minor": the oldest version that has every feature the document uses. Readers also accept a 0.x version and read the document as 1.0; this schema lists only the versions to write.',
         ),
       title: z.string().max(LIMITS.textLength).optional(),
       source: Source.optional(),

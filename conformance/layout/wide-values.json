@@ -1,7 +1,7 @@
 {
   "description": "Hand-computed layout of an array holding a CJK string and a long number, using the default options and the bundled metrics (ADR 0024). \"数组\" is 2 em (East Asian wide) and \"123456789012\" is 12 × 0.6 em in JetBrains Mono, so both cells are ceil(7.2 × 20 + 2 × 14) = 172 wide, and the row is 2 × 172 + 8 = 352. The badge is the 20 minimum because \"i\" needs ceil(0.6 × 12 + 12) = 20. The array has a label, so that, alone in the figure, it keeps its caption.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "arr": {
         "kind": "array",

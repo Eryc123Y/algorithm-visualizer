@@ -33,7 +33,7 @@ const errorsOf = (input: unknown) => {
 };
 
 const doc = (nodes: unknown[], steps: Action[][]) => ({
-  version: '0.6',
+  version: '1.0',
   structures: { T: { kind: 'btree', nodes } },
   steps: steps.map((actions) => ({
     actions: actions.map((a) => ({ target: 'T', ...a })),
@@ -306,7 +306,7 @@ describe('btree layout', () => {
 
   it('draws an empty root as one empty cell', () => {
     const [scene] = scenes({
-      version: '0.6',
+      version: '1.0',
       structures: { T: { kind: 'btree' } },
       steps: [],
     });

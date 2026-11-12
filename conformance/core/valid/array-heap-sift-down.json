@@ -1,7 +1,7 @@
 {
   "description": "Sifting down in an array drawn as a heap: the view changes only the layout, never the state.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "h": {
         "kind": "array",

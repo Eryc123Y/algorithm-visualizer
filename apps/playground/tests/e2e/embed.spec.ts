@@ -188,7 +188,7 @@ test('fires algo-load, algo-frame and algo-error', async ({ page }) => {
     el.next();
     el.next();
     el.prev();
-    el.visualization = { version: '0.1' };
+    el.visualization = { version: '1.0' };
     await new Promise((r) => setTimeout(r, 50));
     return seen;
   }, sort as unknown);

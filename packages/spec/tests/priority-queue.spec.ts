@@ -1,6 +1,6 @@
 /**
  * The `priorityQueue` kind and the `heap` view of `array` (ADR 0029),
- * both in protocol version 0.4.
+ * both added in protocol version 0.4, part of 1.0.
  */
 import { describe, expect, it } from 'vitest';
 
@@ -15,7 +15,7 @@ import {
 const doc = (
   structures: Record<string, unknown>,
   steps: unknown[] = [],
-  version = '0.4',
+  version = '1.0',
 ) => ({ version, structures, steps });
 
 const errorsOf = (input: unknown) => {
@@ -138,31 +138,21 @@ describe('priorityQueue', () => {
     ).toMatchObject([{ path: '$.steps[0].actions[0].key' }]);
   });
 
-  it('needs version 0.4', () => {
+  it('needs no version beyond 1.0 (ADR 0043)', () => {
     const input = doc({ q: queue() });
-    expect(minimumVersion(input as unknown as VisualizationInput)).toBe('0.4');
-    expect(errorsOf({ ...input, version: '0.3' })).toEqual([
-      { code: 'VERSION_TOO_OLD', path: '$.version' },
-    ]);
+    expect(minimumVersion(input as unknown as VisualizationInput)).toBe('1.0');
+    expect(errorsOf({ ...input, version: '0.3' })).toEqual([]);
   });
 });
 
 describe('the heap view of array', () => {
   const heap = { kind: 'array', view: 'heap', initial: [9, 7, 8] };
 
-  it('is a view, and needs version 0.4', () => {
+  it('is a view of 1.0, read in any 0.x document too', () => {
     expect(errorsOf(doc({ h: heap }))).toEqual([]);
     expect(
       minimumVersion(doc({ h: heap }) as unknown as VisualizationInput),
-    ).toBe('0.4');
-    expect(errorsOf(doc({ h: heap }, [], '0.3'))).toEqual([
-      { code: 'VERSION_TOO_OLD', path: '$.version' },
-    ]);
-  });
-
-  it('leaves the tree view at its old version', () => {
-    const tree = doc({ h: { ...heap, view: 'tree' } }, [], '0.1');
-    expect(minimumVersion(tree as unknown as VisualizationInput)).toBe('0.1');
-    expect(errorsOf(tree)).toEqual([]);
+    ).toBe('1.0');
+    expect(errorsOf(doc({ h: heap }, [], '0.3'))).toEqual([]);
   });
 });

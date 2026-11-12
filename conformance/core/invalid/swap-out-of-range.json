@@ -1,7 +1,7 @@
 {
   "description": "An index past the end is rejected at the field that holds it.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "arr": {
         "kind": "array",

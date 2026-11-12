@@ -1,7 +1,7 @@
 {
   "description": "A root has no edge above it to mark.",
   "input": {
-    "version": "0.5",
+    "version": "1.0",
     "structures": {
       "t": {
         "kind": "tree",

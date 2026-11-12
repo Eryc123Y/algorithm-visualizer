@@ -1,10 +1,13 @@
 /**
- * Protocol versions (ADR 0021).
+ * Protocol versions (ADR 0021, 0043).
  *
  * A document's `version` is `"major.minor"`. A minor version only adds, so
  * a reader reads every document of its own major version up to its own
  * minor version. A writer records the oldest version that holds every
  * feature the document uses, so older readers can still show it.
+ *
+ * The protocol is 1.0 (ADR 0043): 0.9 as it stood. Documents of the 0.x
+ * versions are read by relabelling them as 1.0, before validation.
  */
 import type { ProtocolError } from './errors.ts';
 import type { VisualizationInput } from './visualization.ts';
@@ -14,7 +17,14 @@ import type { VisualizationInput } from './visualization.ts';
  * change appends a version here and adds its features to
  * `PROTOCOL_FEATURES`.
  */
-export const PROTOCOL_VERSIONS = [
+export const PROTOCOL_VERSIONS = ['1.0'] as const;
+
+/**
+ * The versions before 1.0, which a reader reads by relabelling a document
+ * as 1.0: 1.0 is 0.9 as it stood, and every 0.x document is a 0.9
+ * document (ADR 0043).
+ */
+export const UPGRADED_VERSIONS = [
   '0.1',
   '0.2',
   '0.3',
@@ -69,16 +79,46 @@ export function compareVersions(a: string, b: string): number {
   return order(numbers(a), numbers(b));
 }
 
-/** The versions a reader reads: one major version, from `oldest` to `newest`. */
+/**
+ * The versions a reader reads: one major version, from `oldest` to
+ * `newest`, and older ones it reads by upgrading them.
+ */
 export interface ReadRange {
   readonly oldest: string;
   readonly newest: string;
+  readonly upgrades?: readonly string[];
 }
 
 const READS: ReadRange = {
   oldest: PROTOCOL_VERSIONS[0],
   newest: PROTOCOL_VERSION,
+  upgrades: UPGRADED_VERSIONS,
 };
+
+/** A document, upgraded to the current version, and the version it had. */
+export interface Upgraded {
+  readonly document: unknown;
+  /** The version the document had, when it was upgraded. */
+  readonly from?: string;
+}
+
+/**
+ * The document as this reader reads it: a document of a 0.x version is
+ * relabelled as 1.0, which is all the upgrade from 0.9 to 1.0 does (ADR
+ * 0043). Anything else is given back as it is. Pure: the input is never
+ * changed.
+ */
+export function upgradeDocument(input: unknown): Upgraded {
+  if (typeof input !== 'object' || input === null || Array.isArray(input))
+    return { document: input };
+  const { version } = input as { version?: unknown };
+  if (
+    typeof version !== 'string' ||
+    !(UPGRADED_VERSIONS as readonly string[]).includes(version)
+  )
+    return { document: input };
+  return { document: { ...input, version: '1.0' }, from: version };
+}
 
 /** Quotes a version for a message, shortened so a huge value stays readable. */
 function quote(version: string): string {
@@ -114,6 +154,8 @@ export function checkVersion(
       fix,
     );
   if (order(v, oldest) >= 0 && order(v, newest) <= 0) return undefined;
+  const upgrades = reads.upgrades ?? [];
+  if (upgrades.includes(version)) return undefined;
 
   const range =
     reads.oldest === reads.newest
@@ -131,13 +173,13 @@ export function checkVersion(
       `This copy reads ${range}. Update algoviz to show this document.${relabel}`,
     );
   }
-  if (v.major === oldest.major)
+  // A version of a major version this reader knows, which never existed.
+  if (
+    v.major === oldest.major ||
+    upgrades.some((u) => numbers(u).major === v.major)
+  )
     return error(`There is no protocol version ${quote(version)}`, fix);
-  // An older major version. ADR 0021 gives each major version an
-  // `upgrade(document)` from the one before it; the parser will apply them
-  // here, before validation. None exists before 1.0, and this package's
-  // own reader (major 0) never gets here: only readers of a later major
-  // version, such as the 1.x reader in the tests, do.
+  // An older major version with no upgrade this reader knows.
   return error(
     `Protocol version ${quote(version)} is older than this copy of algoviz can read`,
     `This copy reads ${range}, and cannot upgrade older documents.`,
@@ -157,154 +199,12 @@ export interface ProtocolFeature<V extends string = ProtocolVersion> {
   readonly usedBy: (document: Content) => boolean;
 }
 
-/** An action of a document, as written, with the kind of its target. */
-type ActionOf = Content['steps'][number]['actions'][number];
-
-/** Whether some action on a structure of `kind` passes `test`. */
-const anyActionOn = (
-  d: Content,
-  kind: string,
-  test: (action: Record<string, unknown>) => boolean,
-): boolean =>
-  d.steps.some((step) =>
-    step.actions.some(
-      (action: ActionOf) =>
-        Object.hasOwn(d.structures, action.target) &&
-        d.structures[action.target]!.kind === kind &&
-        test(action),
-    ),
-  );
-
-/** Whether some action on a tree of the document passes `test`. */
-const anyTreeAction = (
-  d: Content,
-  test: (action: Record<string, unknown>) => boolean,
-): boolean => anyActionOn(d, 'tree', test);
-
 /**
- * Features added after the first protocol version, with the version that
- * added each. A protocol change adds its entries here.
+ * Features added after 1.0, with the version that added each: a minor
+ * version adds its entries here. Empty at 1.0, which holds everything the
+ * 0.x versions added (ADR 0043).
  */
-export const PROTOCOL_FEATURES: readonly ProtocolFeature[] = [
-  {
-    name: 'step names',
-    since: '0.2',
-    usedBy: (d) => d.steps.some((step) => step.meta?.id !== undefined),
-  },
-  {
-    name: 'sections',
-    since: '0.2',
-    usedBy: (d) => d.sections !== undefined,
-  },
-  {
-    name: 'sources',
-    since: '0.3',
-    usedBy: (d) => d.sources !== undefined,
-  },
-  {
-    name: 'anchors',
-    since: '0.3',
-    usedBy: (d) => d.steps.some((step) => step.meta?.at !== undefined),
-  },
-  {
-    name: 'placement',
-    since: '0.4',
-    usedBy: (d) =>
-      Object.values(d.structures).some((s) => s.place !== undefined),
-  },
-  {
-    name: 'priority queues',
-    since: '0.4',
-    usedBy: (d) =>
-      Object.values(d.structures).some((s) => s.kind === 'priorityQueue'),
-  },
-  {
-    name: 'the heap view',
-    since: '0.4',
-    usedBy: (d) =>
-      Object.values(d.structures).some(
-        (s) => s.kind === 'array' && s.view === 'heap',
-      ),
-  },
-  {
-    name: 'root slots',
-    since: '0.5',
-    usedBy: (d) =>
-      anyTreeAction(
-        d,
-        (a) =>
-          a['slot'] !== undefined &&
-          (a['type'] === 'detach' ||
-            (a['type'] === 'addNode' && a['parent'] === null)),
-      ),
-  },
-  {
-    name: 'NIL pointers',
-    since: '0.5',
-    usedBy: (d) =>
-      anyTreeAction(
-        d,
-        (a) =>
-          a['type'] === 'pointer' &&
-          typeof a['node'] === 'object' &&
-          a['node'] !== null,
-      ),
-  },
-  {
-    name: 'named notes',
-    since: '0.5',
-    usedBy: (d) =>
-      anyTreeAction(
-        d,
-        (a) => a['type'] === 'annotate' && a['field'] !== undefined,
-      ),
-  },
-  {
-    name: 'tree edge marks',
-    since: '0.5',
-    usedBy: (d) =>
-      anyTreeAction(
-        d,
-        (a) => a['type'] === 'markEdge' || a['type'] === 'labelEdge',
-      ),
-  },
-  {
-    name: 'planes',
-    since: '0.9',
-    usedBy: (d) => Object.values(d.structures).some((s) => s.kind === 'plane'),
-  },
-  {
-    name: 'array patterns',
-    since: '0.8',
-    usedBy: (d) =>
-      Object.values(d.structures).some(
-        (s) => s.kind === 'array' && s.pattern !== undefined,
-      ) ||
-      anyActionOn(
-        d,
-        'array',
-        (a) => a['type'] === 'align' || a['type'] === 'check',
-      ),
-  },
-  {
-    name: 'list moves',
-    since: '0.7',
-    usedBy: (d) => anyActionOn(d, 'linkedList', (a) => a['type'] === 'move'),
-  },
-  {
-    name: 'B-trees',
-    since: '0.6',
-    usedBy: (d) => Object.values(d.structures).some((s) => s.kind === 'btree'),
-  },
-  {
-    name: 'root lists',
-    since: '0.5',
-    usedBy: (d) =>
-      Object.values(d.structures).some(
-        (s) => s.kind === 'tree' && s.rootList !== undefined,
-      ),
-  },
-];
+export const PROTOCOL_FEATURES: readonly ProtocolFeature[] = [];
 
 /**
  * The newest `since` among the features a document uses, or `base` if it

@@ -24,7 +24,7 @@ describe('Recorder with sources (ADR 0017)', () => {
     const doc = r.build();
     expect(doc.sources).toEqual(sources);
     expect(doc.steps[0]?.meta).toEqual({ at: 'push', narration: 'Push 2.' });
-    expect(doc.version).toBe('0.3');
+    expect(doc.version).toBe('1.0');
   });
 
   it('rejects an anchor missing from a source when building', () => {

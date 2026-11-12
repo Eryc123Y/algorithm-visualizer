@@ -1,7 +1,7 @@
 {
   "description": "A root slot counts the other roots: a root among three moves to 0, 1 or 2.",
   "input": {
-    "version": "0.5",
+    "version": "1.0",
     "structures": {
       "h": {
         "kind": "tree",

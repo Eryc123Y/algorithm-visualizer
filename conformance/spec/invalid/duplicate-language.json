@@ -1,7 +1,7 @@
 {
   "description": "Each language appears once in sources.",
   "input": {
-    "version": "0.3",
+    "version": "1.0",
     "sources": [
       {
         "language": "python",

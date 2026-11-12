@@ -5,8 +5,6 @@ import {
   LIMITS,
   minimumVersion,
   parseVisualization,
-  PROTOCOL_FEATURES,
-  PROTOCOL_VERSIONS,
   type VisualizationInput,
 } from '../src/index.ts';
 
@@ -27,7 +25,7 @@ const step = (meta?: Meta) => ({
 });
 
 const doc = (extra: Record<string, unknown> = {}) => ({
-  version: '0.3',
+  version: '1.0',
   structures: { a: { kind: 'array', initial: [1, 2] } },
   steps: [step({ at: 'swap' }), step({ narration: 'Done.' })],
   sources,
@@ -198,22 +196,16 @@ describe('meta.at', () => {
   });
 });
 
-describe('version 0.3', () => {
-  it('dates sources and anchors', () => {
-    expect(PROTOCOL_VERSIONS).toContain('0.3');
-    expect(
-      PROTOCOL_FEATURES.filter((f) => f.since === '0.3').map((f) => f.name),
-    ).toEqual(['sources', 'anchors']);
+describe('sources in 1.0 (ADR 0043)', () => {
+  it('need no version beyond 1.0', () => {
+    expect(minimumVersion(doc() as unknown as VisualizationInput)).toBe('1.0');
   });
 
-  it('is what a document with sources needs', () => {
-    expect(minimumVersion(doc() as unknown as VisualizationInput)).toBe('0.3');
-    expect(errorsOf(doc({ version: '0.2' }))).toEqual([
-      { code: 'VERSION_TOO_OLD', path: '$.version' },
-    ]);
+  it('are read in a document of any 0.x version', () => {
+    expect(errorsOf(doc({ version: '0.2' }))).toEqual([]);
   });
 
-  it('is not needed for source and meta.line', () => {
+  it('are not needed for source and meta.line', () => {
     const old = {
       version: '0.1',
       source: { language: 'python', code: 'x = 1' },

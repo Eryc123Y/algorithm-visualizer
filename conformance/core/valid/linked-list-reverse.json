@@ -1,7 +1,7 @@
 {
   "description": "Reversing a singly linked list one pointer at a time; links are independent of the row order.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "ll": {
         "kind": "linkedList",

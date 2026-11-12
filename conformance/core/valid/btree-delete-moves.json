@@ -1,7 +1,7 @@
 {
   "description": "Borrow from each side, lift a key, merge and shrink, with a pointer handed to the merged node (ADR 0035).",
   "input": {
-    "version": "0.6",
+    "version": "1.0",
     "structures": {
       "T": {
         "kind": "btree",

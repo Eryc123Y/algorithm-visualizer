@@ -1,7 +1,7 @@
 {
   "description": "A max-priority queue: extract takes the greatest key; a null key still comes last.",
   "input": {
-    "version": "0.4",
+    "version": "1.0",
     "structures": {
       "Q": {
         "kind": "priorityQueue",

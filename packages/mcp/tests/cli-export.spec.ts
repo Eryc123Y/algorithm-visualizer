@@ -187,7 +187,7 @@ describe('algoviz export', () => {
     writeFileSync(
       sided,
       JSON.stringify({
-        version: '0.4',
+        version: '1.0',
         structures: {
           a: { kind: 'array', initial: [3, 1, 2] },
           calls: { kind: 'stack', initial: ['sort'], place: 'side' },

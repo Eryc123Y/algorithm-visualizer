@@ -22,7 +22,7 @@ const item = (scene: Scene, key: string) => {
 
 /** A document of one structure: settled first, marked in the last step. */
 const doc = (structure: unknown, settle: unknown, mark: unknown) => ({
-  version: '0.4',
+  version: '1.0',
   structures: { s: structure },
   steps: [
     { actions: [{ target: 's', ...(settle as object) }] },
@@ -99,7 +99,7 @@ describe('settled under a transient mark (ADR 0031)', () => {
 
   it('leaves settled out where the role says it, or nothing is settled', () => {
     const settledOnly = lastScene({
-      version: '0.1',
+      version: '1.0',
       structures: { s: { kind: 'array', initial: [1, 2] } },
       steps: [{ actions: [{ target: 's', type: 'settle', index: 0 }] }],
     });

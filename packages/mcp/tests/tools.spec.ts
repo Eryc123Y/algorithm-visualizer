@@ -9,7 +9,7 @@ import { callTool, tools } from '../src/tools.ts';
 import { formatReport, validate } from '../src/validate.ts';
 
 const doc = {
-  version: '0.1',
+  version: '1.0',
   structures: { a: { kind: 'array', initial: [3, 1, 2] } },
   steps: [
     {
@@ -80,7 +80,7 @@ describe('validate', () => {
 
   it('warns about documents that teach less than they could', () => {
     const report = validate({
-      version: '0.1',
+      version: '1.0',
       source: { code: 'x = 1' },
       structures: { a: { kind: 'array', initial: [1] } },
       steps: [
@@ -92,6 +92,23 @@ describe('validate', () => {
       'NO_NARRATION',
       'UNUSED_SOURCE',
       'EMPTY_STEP',
+    ]);
+  });
+
+  it('reads a 0.x document as 1.0, and says to write 1.0 (ADR 0043)', () => {
+    const report = validate({ ...doc, version: '0.4' });
+    expect(report.valid && report.warnings).toEqual([
+      {
+        code: 'UPGRADED_VERSION',
+        path: '$.version',
+        message: 'The document says version "0.4", which is read as "1.0"',
+        hint: 'Set "version" to "1.0": the protocol is 1.0, which holds everything 0.x had.',
+      },
+    ]);
+    // As JSON text too, as models pass documents.
+    const text = validate(JSON.stringify({ ...doc, version: '0.9' }));
+    expect(text.valid && text.warnings.map((w) => w.code)).toEqual([
+      'UPGRADED_VERSION',
     ]);
   });
 

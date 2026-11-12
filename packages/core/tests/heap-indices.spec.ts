@@ -15,7 +15,7 @@ import {
 
 function heapScene(initial: number[], pointers: boolean) {
   const loaded = loadTrace({
-    version: '0.4',
+    version: '1.0',
     structures: { h: { kind: 'array', view: 'heap', initial } },
     steps: [
       {

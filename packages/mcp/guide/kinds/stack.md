@@ -13,7 +13,7 @@ Declaration: `{ "kind": "stack", "initial": [], "label"?: "…" }`, elements fro
 
 ```json
 {
-  "version": "0.1",
+  "version": "1.0",
   "title": "Matching brackets in (())",
   "structures": {
     "s": { "kind": "stack", "label": "open brackets", "initial": [] }

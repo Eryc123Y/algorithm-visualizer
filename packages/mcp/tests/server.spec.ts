@@ -46,7 +46,7 @@ describe('MCP server', () => {
       name: 'algoviz_validate',
       arguments: {
         document: {
-          version: '0.1',
+          version: '1.0',
           structures: { s: { kind: 'stack', initial: [] } },
           steps: [{ actions: [{ target: 's', type: 'pop' }] }],
         },
@@ -97,7 +97,7 @@ describe('MCP server', () => {
 
 describe('algoviz_show, the MCP App', () => {
   const doc = {
-    version: '0.1',
+    version: '1.0',
     title: 'Two pushes',
     structures: { s: { kind: 'stack', initial: [] } },
     steps: [

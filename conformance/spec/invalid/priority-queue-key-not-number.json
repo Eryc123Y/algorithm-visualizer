@@ -1,7 +1,7 @@
 {
   "description": "A key is a number or null.",
   "input": {
-    "version": "0.4",
+    "version": "1.0",
     "structures": {
       "Q": {
         "kind": "priorityQueue",

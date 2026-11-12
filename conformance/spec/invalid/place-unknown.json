@@ -1,7 +1,7 @@
 {
   "description": "place is \"main\" or \"side\".",
   "input": {
-    "version": "0.4",
+    "version": "1.0",
     "structures": {
       "a": {
         "kind": "array",

@@ -17,13 +17,6 @@ const treeDecl = ({ nodes, roots }: TreeData) => ({
   roots,
 });
 
-/** The later of two protocol versions such as "0.4". */
-const newer = (a: string, b: string) => {
-  const [am = 0, an = 0] = a.split('.').map(Number);
-  const [bm = 0, bn = 0] = b.split('.').map(Number);
-  return am > bm || (am === bm && an >= bn) ? a : b;
-};
-
 describe('eval tasks', () => {
   it('have unique ids and a reference each', () => {
     const ids = tasks.map((t) => t.id);
@@ -88,9 +81,7 @@ describe('eval tasks', () => {
         }),
       );
       const result = grade(task, {
-        // Side panels and priority queues need 0.4 (ADR 0029); newer kinds
-        // need their reference's version.
-        version: newer('0.4', trace.visualization.version),
+        version: '1.0',
         structures,
         steps: Array.from({ length: task.minSteps }, (_, k) => ({
           actions: [],
@@ -164,7 +155,7 @@ describe('eval tasks', () => {
       meta: { narration },
     });
     const result = grade(task, {
-      version: '0.1',
+      version: '1.0',
       structures: { a: { kind: 'array', initial: [1, 3, 4, 7, 9, 11, 15] } },
       steps: [
         {
@@ -189,7 +180,7 @@ describe('eval tasks', () => {
       meta: { narration: `Set the answer to ${value}.` },
     });
     const result = grade(task, {
-      version: '0.1',
+      version: '1.0',
       structures: { t: { kind: 'table', rows: 5, columns: 6 } },
       steps: [1, 2, 3, 1, 2, 3].map(corner),
     });
@@ -205,7 +196,7 @@ describe('eval tasks', () => {
       meta: { narration },
     });
     const result = grade(task, {
-      version: '0.1',
+      version: '1.0',
       structures: {
         t: {
           kind: 'tree',
@@ -231,7 +222,7 @@ describe('eval tasks', () => {
       meta: { narration: `Colour ${node}.` },
     });
     const result = grade(task, {
-      version: '0.1',
+      version: '1.0',
       structures: {
         g: {
           kind: 'graph',
@@ -287,7 +278,7 @@ describe('eval tasks', () => {
       meta: { narration: `${key} mod 7 = ${key % 7}.` },
     });
     const result = grade(task, {
-      version: '0.1',
+      version: '1.0',
       structures: { h: { kind: 'hashTable', size: 7 } },
       steps: [15, 11, 27, 8, 12].map(insert),
     });
@@ -303,7 +294,7 @@ describe('eval tasks', () => {
       meta: { narration: `Insert ${key}.` },
     });
     const result = grade(task, {
-      version: '0.1',
+      version: '1.0',
       structures: { h: { kind: 'hashTable', size: 7 } },
       steps: [
         insert(15, 1),
@@ -324,7 +315,7 @@ describe('eval tasks', () => {
       meta: { narration: `Look ${k}.` },
     });
     const result = grade(task, {
-      version: '0.1',
+      version: '1.0',
       structures: { a: { kind: 'array', initial: [5, 2, 4, 6, 1, 3] } },
       steps: [
         {

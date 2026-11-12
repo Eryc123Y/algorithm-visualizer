@@ -1,7 +1,7 @@
 {
   "description": "setChild checks the slot of a non-binary parent after the child has left its old place.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "t": {
         "kind": "tree",

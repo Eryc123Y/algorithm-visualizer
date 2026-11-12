@@ -71,7 +71,7 @@ describe('operations as sections', () => {
       ],
     });
     // Sections need 0.2, and the code in two languages 0.3 (ADR 0017).
-    expect(document.version).toBe('0.3');
+    expect(document.version).toBe('1.0');
     expect(document.sections?.map(({ id, title }) => ({ id, title }))).toEqual([
       { id: 'insert-5', title: 'Insert 5' },
       { id: 'search-5', title: 'Search 5' },

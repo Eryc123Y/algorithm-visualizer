@@ -1,7 +1,7 @@
 {
   "description": "Names inherited by every JavaScript object, such as \"constructor\", are rejected rather than resolving to inherited values.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "arr": {
         "kind": "array",

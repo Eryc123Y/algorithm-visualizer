@@ -37,7 +37,7 @@ export function reverse(
     ],
   });
   return {
-    version: '0.1',
+    version: '1.0',
     title: 'Reverse an array',
     structures: { arr: { kind: 'array', initial: [...values] } },
     steps,

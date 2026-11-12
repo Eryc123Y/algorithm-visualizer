@@ -1,5 +1,5 @@
 /**
- * The `btree` kind (ADR 0035), protocol version 0.6: its declaration,
+ * The `btree` kind (ADR 0035), added in 0.6, part of 1.0: its declaration,
  * generated ids, the default root, the shape rules, and its actions.
  */
 import { describe, expect, it } from 'vitest';
@@ -8,12 +8,11 @@ import {
   actionTypesOf,
   minimumVersion,
   parseVisualization,
-  PROTOCOL_FEATURES,
   type VisualizationInput,
 } from '../src/index.ts';
 
 const doc = (decl: Record<string, unknown>, actions: unknown[] = []) => ({
-  version: '0.6',
+  version: '1.0',
   structures: { T: { kind: 'btree', ...decl } },
   steps: actions.length === 0 ? [] : [{ actions }],
 });
@@ -40,7 +39,7 @@ const tree = {
 };
 
 describe('btree (ADR 0035)', () => {
-  it('is a kind of version 0.6 with thirteen actions', () => {
+  it('is a kind of 1.0 with thirteen actions', () => {
     expect(actionTypesOf('btree')).toEqual([
       'insertKey',
       'removeKey',
@@ -56,18 +55,13 @@ describe('btree (ADR 0035)', () => {
       'pointer',
       'annotate',
     ]);
-    expect(PROTOCOL_FEATURES.find((f) => f.name === 'B-trees')?.since).toBe(
-      '0.6',
-    );
     expect(
       minimumVersion({
         structures: { T: { kind: 'btree' } },
         steps: [],
       } as unknown as Omit<VisualizationInput, 'version'>),
-    ).toBe('0.6');
-    expect(errorsOf({ ...doc(tree), version: '0.5' })).toEqual([
-      { code: 'VERSION_TOO_OLD', path: '$.version' },
-    ]);
+    ).toBe('1.0');
+    expect(errorsOf({ ...doc(tree), version: '0.5' })).toEqual([]);
   });
 
   it('gives bare keys ids through the tree, and finds the root', () => {

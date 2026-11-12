@@ -57,7 +57,7 @@ describe('renderSvg', () => {
       renderSvg(
         sceneOf(
           {
-            version: '0.1',
+            version: '1.0',
             title: 'a < b & "c"',
             structures: {
               arr: { kind: 'array', label: 'arr', initial: ['<b>', "it's"] },

@@ -1,7 +1,7 @@
 {
   "description": "insertKey goes into a leaf only.",
   "input": {
-    "version": "0.6",
+    "version": "1.0",
     "structures": {
       "T": {
         "kind": "btree",

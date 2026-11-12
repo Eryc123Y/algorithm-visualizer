@@ -1,7 +1,7 @@
 {
   "description": "\"__proto__\" cannot name a structure.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "__proto__": {
         "kind": "array",

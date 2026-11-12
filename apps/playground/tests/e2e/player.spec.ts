@@ -305,7 +305,7 @@ test('the editor recovers from broken JSON and invalid documents', async ({
   // The last valid document stays on screen while the text is broken.
   await expect(player.locator('.errors')).toHaveCount(0);
 
-  await editor.fill(good.replace('"version": "0.1"', '"version": "9"'));
+  await editor.fill(good.replace('"version": "1.0"', '"version": "9"'));
   await expect(page.getByTestId('json-error')).toHaveCount(0);
   await expect(player.getByRole('alert')).toContainText('UNSUPPORTED_VERSION');
   await expect(player.locator('.controls')).toBeHidden();
@@ -334,7 +334,7 @@ test('places side structures beside or below with the layout attribute', async (
   await page.goto('/');
   // An array with a call stack in the side panel (ADR 0029).
   const sided = {
-    version: '0.4',
+    version: '1.0',
     structures: {
       a: { kind: 'array', initial: [3, 1, 2] },
       calls: { kind: 'stack', initial: ['sort a[0..2]'], place: 'side' },

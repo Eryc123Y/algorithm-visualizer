@@ -19,7 +19,7 @@ import {
 describe('a note beside parallel edges', () => {
   it('clears every drawn edge when a direction does', () => {
     const loaded = loadTrace({
-      version: '0.1',
+      version: '1.0',
       structures: {
         g: {
           kind: 'graph',

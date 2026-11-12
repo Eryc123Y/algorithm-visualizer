@@ -1,7 +1,7 @@
 {
   "description": "At least one structure must be declared.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {},
     "steps": []
   },

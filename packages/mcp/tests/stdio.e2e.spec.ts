@@ -45,7 +45,7 @@ describe('the MCP server over stdio', () => {
 
     // A first draft with a mistake: popping an empty stack.
     const draft = {
-      version: '0.1',
+      version: '1.0',
       structures: { s: { kind: 'stack', initial: [] } },
       steps: [
         {
@@ -174,7 +174,7 @@ describe('the CLI as a command', () => {
 
   it('validates a document from standard input', () => {
     const doc = JSON.stringify({
-      version: '0.1',
+      version: '1.0',
       structures: { q: { kind: 'queue', initial: [1] } },
       steps: [
         {
@@ -191,7 +191,7 @@ describe('the CLI as a command', () => {
   });
 
   it('exits with 1 and prints errors to stderr for an invalid document', () => {
-    const result = run(['validate', '-'], '{"version": "0.1"}');
+    const result = run(['validate', '-'], '{"version": "1.0"}');
     expect(result.status).toBe(1);
     expect(result.stderr).toContain('INVALID_SHAPE');
     expect(result.stdout).toBe('');

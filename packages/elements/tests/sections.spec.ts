@@ -11,7 +11,7 @@ import type { AlgoFrameDetail, AlgoPlayer } from '../src/index.ts';
 // Steps 0–1 are the first pass and steps 2–4 the second, so frames 1–2
 // show the first pass and frames 3–5 the second.
 const doc = {
-  version: '0.2',
+  version: '1.0',
   structures: { arr: { kind: 'array', initial: [3, 2, 1] } },
   steps: [
     {
@@ -170,7 +170,7 @@ describe('step names and sections for page scripts', () => {
     const details: AlgoFrameDetail[] = [];
     const plain = {
       ...doc,
-      version: '0.1',
+      version: '1.0',
       steps: doc.steps.map(({ actions }) => ({ actions })),
       sections: undefined,
     };
@@ -309,7 +309,7 @@ describe('sections on the timeline', () => {
   });
 
   it('is absent without sections, and in display mode', async () => {
-    const plain = { ...doc, version: '0.1', sections: undefined };
+    const plain = { ...doc, version: '1.0', sections: undefined };
     const steps = plain.steps.map(({ actions }) => ({ actions }));
     const el = await mount((e) => {
       e.visualization = { ...plain, steps };

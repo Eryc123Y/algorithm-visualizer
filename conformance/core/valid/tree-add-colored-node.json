@@ -1,7 +1,7 @@
 {
   "description": "addNode can give a red–black colour directly; without one the node has none.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "rb": {
         "kind": "tree",

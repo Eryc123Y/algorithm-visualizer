@@ -1,7 +1,7 @@
 {
   "description": "Rotations at the root and below it, then emptying, filling and detaching slots of a binary tree.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "t": {
         "kind": "tree",

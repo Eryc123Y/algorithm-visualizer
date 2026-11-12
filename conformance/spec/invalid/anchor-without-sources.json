@@ -1,7 +1,7 @@
 {
   "description": "meta.at in a document without source code names no anchor.",
   "input": {
-    "version": "0.3",
+    "version": "1.0",
     "structures": { "a": { "kind": "array", "initial": [2, 1] } },
     "steps": [{ "actions": [], "meta": { "at": "compare" } }]
   },

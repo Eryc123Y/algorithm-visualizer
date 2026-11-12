@@ -1,7 +1,7 @@
 {
   "description": "Bare values in push actions get the lowest unused id e0, e1, …, skipping ids already taken.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "st": {
         "kind": "stack",
@@ -35,7 +35,7 @@
     ]
   },
   "expected": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "st": {
         "kind": "stack",

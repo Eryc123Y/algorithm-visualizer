@@ -72,15 +72,15 @@ describe('guide', () => {
     }
   });
 
-  it('shows step names and sections with the version they need', () => {
+  it('shows step names and sections', () => {
     const blocks = jsonBlocks(guideOverview()).map(
       (block) => JSON.parse(block) as { version: string; sections?: unknown },
     );
     const named = blocks.find((doc) => doc.sections !== undefined);
-    expect(named?.version).toBe('0.2');
+    expect(named?.version).toBe('1.0');
   });
 
-  it('shows code in pseudocode and Python with anchors, as version 0.3', () => {
+  it('shows code in pseudocode and Python with anchors', () => {
     const blocks = jsonBlocks(guideOverview()).map(
       (block) =>
         JSON.parse(block) as {
@@ -90,7 +90,7 @@ describe('guide', () => {
         },
     );
     const anchored = blocks.find((doc) => doc.sources !== undefined);
-    expect(anchored?.version).toBe('0.3');
+    expect(anchored?.version).toBe('1.0');
     expect(anchored?.sources?.map((s) => s.language)).toEqual([
       'pseudocode',
       'python',
@@ -98,7 +98,7 @@ describe('guide', () => {
     expect(anchored?.steps.every((s) => s.meta?.at !== undefined)).toBe(true);
   });
 
-  it('places an auxiliary structure on the side, as version 0.4', () => {
+  it('places an auxiliary structure on the side', () => {
     const blocks = jsonBlocks(guideOverview()).map(
       (block) =>
         JSON.parse(block) as {
@@ -109,6 +109,6 @@ describe('guide', () => {
     const placed = blocks.find((doc) =>
       Object.values(doc.structures).some((s) => s.place === 'side'),
     );
-    expect(placed?.version).toBe('0.4');
+    expect(placed?.version).toBe('1.0');
   });
 });

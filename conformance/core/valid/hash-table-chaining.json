@@ -1,7 +1,7 @@
 {
   "description": "Separate chaining: inserting at the end or front of a chain, probing, finding, updating and removing.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "h": {
         "kind": "hashTable",

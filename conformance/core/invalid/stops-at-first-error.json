@@ -1,7 +1,7 @@
 {
   "description": "Replay stops at the first invalid action; later errors would describe an impossible state.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "arr": {
         "kind": "array",

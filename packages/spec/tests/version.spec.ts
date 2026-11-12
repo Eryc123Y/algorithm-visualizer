@@ -15,6 +15,8 @@ import {
   compareVersions,
   newestNeeded,
   parseVersion,
+  UPGRADED_VERSIONS,
+  upgradeDocument,
   type ProtocolFeature,
 } from '../src/version.ts';
 
@@ -80,10 +82,49 @@ describe('PROTOCOL_VERSIONS', () => {
     expect(PROTOCOL_VERSIONS.at(-1)).toBe(PROTOCOL_VERSION);
   });
 
-  it('starts at 0.1 or at minor 0 of a major version', () => {
-    expect(['0.1', `${parseVersion(PROTOCOL_VERSION)!.major}.0`]).toContain(
-      PROTOCOL_VERSIONS[0],
+  it('starts at 1.0, the frozen protocol (ADR 0043)', () => {
+    expect(PROTOCOL_VERSIONS[0]).toBe('1.0');
+  });
+});
+
+describe('0.x documents (ADR 0043)', () => {
+  it('are every minor version from 0.1 to 0.9', () => {
+    expect(UPGRADED_VERSIONS).toEqual(
+      Array.from({ length: 9 }, (_, k) => `0.${k + 1}`),
     );
+  });
+
+  it('are read, by relabelling them as 1.0', () => {
+    for (const version of UPGRADED_VERSIONS) {
+      expect(checkVersion(version)).toBeUndefined();
+      expect(upgradeDocument(doc(version))).toEqual({
+        document: doc('1.0'),
+        from: version,
+      });
+    }
+  });
+
+  it('leave everything else as it is', () => {
+    for (const input of [doc('1.0'), doc('0.10'), doc(0.5), null, 'x', [1]])
+      expect(upgradeDocument(input)).toEqual({ document: input });
+  });
+
+  it('do not change the document they are given', () => {
+    const input = doc('0.4');
+    upgradeDocument(input);
+    expect(input.version).toBe('0.4');
+  });
+
+  it('parse to 1.0, with any feature of 0.x', () => {
+    // A plane came with 0.9, but a 0.1 document may now have one.
+    const result = parseVisualization({
+      version: '0.1',
+      structures: {
+        p: { kind: 'plane', points: [{ id: 'a', x: 0, y: 0 }] },
+      },
+      steps: [],
+    });
+    expect(result.ok && result.value.version).toBe('1.0');
   });
 });
 
@@ -94,7 +135,7 @@ describe('checkVersion', () => {
   });
 
   it('rejects a newer minor version with a hint to update algoviz', () => {
-    const error = checkVersion('0.99');
+    const error = checkVersion('1.1');
     expect(error).toMatchObject({
       code: 'UNSUPPORTED_VERSION',
       path: '$.version',
@@ -114,10 +155,12 @@ describe('checkVersion', () => {
     expect(error?.hint).not.toContain('set "version"');
   });
 
-  it('rejects a version before the first one', () => {
-    const error = checkVersion('0.0');
-    expect(error).toMatchObject({ code: 'UNSUPPORTED_VERSION' });
-    expect(error?.message).toBe('There is no protocol version "0.0"');
+  it('rejects a version that never existed', () => {
+    for (const version of ['0.0', '0.10', '0.99']) {
+      const error = checkVersion(version);
+      expect(error).toMatchObject({ code: 'UNSUPPORTED_VERSION' });
+      expect(error?.message).toBe(`There is no protocol version "${version}"`);
+    }
   });
 
   it.each([0.1, null, true, '0.1.0', 'latest', ''])(
@@ -164,7 +207,7 @@ describe('checkVersion', () => {
 
 describe('parseVisualization and versions', () => {
   it('reports an unsupported version before anything else', () => {
-    const result = parseVisualization({ version: '0.99', structures: {} });
+    const result = parseVisualization({ version: '1.99', structures: {} });
     expect(result).toMatchObject({
       ok: false,
       error: [{ code: 'UNSUPPORTED_VERSION', path: '$.version' }],
@@ -177,6 +220,14 @@ describe('parseVisualization and versions', () => {
       expect(result.ok && result.value.version).toBe(version);
     }
   });
+
+  it('reports errors at the paths of the document as written', () => {
+    const result = parseVisualization({ ...doc('0.3'), steps: [{}] });
+    expect(result).toMatchObject({
+      ok: false,
+      error: [{ code: 'INVALID_SHAPE', path: '$.steps[0].actions' }],
+    });
+  });
 });
 
 const specFixtures = new URL(
@@ -185,12 +236,13 @@ const specFixtures = new URL(
 );
 
 describe('minimumVersion', () => {
-  it('gives the version each valid fixture declares, as a writer would', () => {
+  it('gives 1.0 for every valid fixture, as a writer would', () => {
     for (const file of readdirSync(specFixtures)) {
       const fixture = JSON.parse(
         readFileSync(new URL(file, specFixtures), 'utf8'),
-      ) as { input: VisualizationInput };
-      expect(minimumVersion(fixture.input), file).toBe(fixture.input.version);
+      ) as { input: VisualizationInput; expected: { version: string } };
+      expect(minimumVersion(fixture.input), file).toBe('1.0');
+      expect(fixture.expected.version, file).toBe('1.0');
     }
   });
 

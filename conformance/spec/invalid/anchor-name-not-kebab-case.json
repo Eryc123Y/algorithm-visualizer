@@ -1,7 +1,7 @@
 {
   "description": "Anchor names are lower-case kebab-case, like step names.",
   "input": {
-    "version": "0.3",
+    "version": "1.0",
     "sources": [
       {
         "language": "pseudocode",

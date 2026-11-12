@@ -1,7 +1,7 @@
 {
   "description": "move takes a node along the row with its id, marks and pointers; links stay until link relinks them, here in the same step, so 7 moves to the front of 4 2 7 1.",
   "input": {
-    "version": "0.7",
+    "version": "1.0",
     "structures": { "l": { "kind": "linkedList", "initial": [4, 2, 7, 1] } },
     "steps": [
       {

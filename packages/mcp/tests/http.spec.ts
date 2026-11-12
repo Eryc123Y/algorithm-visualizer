@@ -340,7 +340,7 @@ const CALLS: { name: string; arguments: Record<string, unknown> }[] = [
   },
   {
     name: 'algoviz_validate',
-    arguments: { document: { version: '0.1', structures: {}, steps: [] } },
+    arguments: { document: { version: '1.0', structures: {}, steps: [] } },
   },
   { name: 'algoviz_validate', arguments: { document: { version: 'x' } } },
   {

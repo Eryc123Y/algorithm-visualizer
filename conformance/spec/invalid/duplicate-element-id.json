@@ -1,7 +1,7 @@
 {
   "description": "Element ids must be unique within a structure.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "arr": {
         "kind": "array",

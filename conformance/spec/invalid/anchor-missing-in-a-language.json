@@ -1,7 +1,7 @@
 {
   "description": "Every anchor a step names must be in every source; here the python source has no \"swap\".",
   "input": {
-    "version": "0.3",
+    "version": "1.0",
     "sources": [
       {
         "language": "pseudocode",

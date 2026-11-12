@@ -15,7 +15,7 @@ Declaration: `{ "kind": "hashTable", "size": 5, "initial"?: [[10], [], [7, 12]],
 
 ```json
 {
-  "version": "0.1",
+  "version": "1.0",
   "title": "Chaining with h(k) = k mod 5",
   "structures": { "h": { "kind": "hashTable", "size": 5 } },
   "steps": [

@@ -77,7 +77,7 @@ describe('nodeShape', () => {
 describe('graph layout', () => {
   it('keeps every node in place while edges and nodes come and go', () => {
     const { trace, layout: l } = layout({
-      version: '0.1',
+      version: '1.0',
       structures: { g: { kind: 'graph', nodes: ['A', 'B', 'C'] } },
       steps: [
         { actions: [{ target: 'g', type: 'addEdge', edge: ['A', 'B'] }] },
@@ -95,7 +95,7 @@ describe('graph layout', () => {
 
   it('routes edges that span rows around the nodes between', () => {
     const { layout: l } = layout({
-      version: '0.1',
+      version: '1.0',
       structures: {
         g: {
           kind: 'graph',
@@ -144,7 +144,7 @@ describe('graph layout', () => {
     // A path of 200 nodes, plus 100 edges that each span about 100 rows.
     const ids = Array.from({ length: 200 }, (_, k) => `n${k}`);
     const { layout: l } = layout({
-      version: '0.1',
+      version: '1.0',
       structures: {
         g: {
           kind: 'graph',
@@ -164,7 +164,7 @@ describe('graph layout', () => {
 
   it('points several self-loops of one node different ways', () => {
     const { layout: l } = layout({
-      version: '0.1',
+      version: '1.0',
       structures: {
         g: {
           kind: 'graph',
@@ -183,7 +183,7 @@ describe('graph layout', () => {
 
   it('keeps every self-loop distinct beyond the eight directions', () => {
     const { layout: l } = layout({
-      version: '0.1',
+      version: '1.0',
       structures: {
         g: {
           kind: 'graph',
@@ -205,7 +205,7 @@ describe('graph layout', () => {
 
   it('keeps many straight parallel edges distinct', () => {
     const { layout: l } = layout({
-      version: '0.1',
+      version: '1.0',
       structures: {
         g: {
           kind: 'graph',
@@ -226,7 +226,7 @@ describe('graph layout', () => {
 
   it('spreads parallel edges that are routed around rows', () => {
     const { layout: l } = layout({
-      version: '0.1',
+      version: '1.0',
       structures: {
         g: {
           kind: 'graph',
@@ -253,7 +253,7 @@ describe('graph layout', () => {
 
   it('spreads antiparallel edges and labels them on the outside', () => {
     const { layout: l } = layout({
-      version: '0.1',
+      version: '1.0',
       structures: {
         g: {
           kind: 'graph',
@@ -277,7 +277,7 @@ describe('graph layout', () => {
 
   it('points a self-loop away from notes and other edges', () => {
     const { layout: l } = layout({
-      version: '0.1',
+      version: '1.0',
       structures: {
         g: {
           kind: 'graph',

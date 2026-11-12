@@ -483,6 +483,6 @@ describe('side panels', () => {
       .filter(([, s]) => s.place === 'side')
       .map(([name]) => name);
     expect(placed).toEqual(side);
-    expect(doc.version).toBe(side.length > 0 ? '0.4' : doc.version);
+    expect(doc.version).toBe('1.0');
   });
 });

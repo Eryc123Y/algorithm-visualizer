@@ -1,7 +1,7 @@
 {
   "description": "Buckets are numbered from 0 to size − 1.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "h": {
         "kind": "hashTable",

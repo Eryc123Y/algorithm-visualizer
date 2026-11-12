@@ -1,7 +1,7 @@
 {
   "description": "A root's slot is a position among the roots, so \"left\" is refused there (ADR 0034).",
   "input": {
-    "version": "0.5",
+    "version": "1.0",
     "structures": {
       "f": {
         "kind": "tree",

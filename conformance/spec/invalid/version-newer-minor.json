@@ -1,7 +1,7 @@
 {
   "description": "A document of a newer minor version is rejected, because guessing at fields it may add could show something wrong.",
   "input": {
-    "version": "0.99",
+    "version": "1.1",
     "structures": {
       "arr": {
         "kind": "array",

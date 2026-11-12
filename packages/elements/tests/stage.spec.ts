@@ -6,7 +6,7 @@ import { createTheme, paintScene } from '@algoviz/svg';
 import { SceneStage } from '../src/stage.ts';
 
 const result = loadTrace({
-  version: '0.1',
+  version: '1.0',
   // A label keeps the lone array's caption, which the positions below include.
   structures: { arr: { kind: 'array', label: 'arr', initial: [2, 1] } },
   steps: [
@@ -32,7 +32,7 @@ describe('SceneStage', () => {
   it('draws labels as text and builds nodes without parsing markup', () => {
     const label = '<img src=x onerror="alert(1)"></text><script>x()</script>';
     const loaded = loadTrace({
-      version: '0.1',
+      version: '1.0',
       structures: { arr: { kind: 'array', label, initial: [label] } },
       steps: [],
     });

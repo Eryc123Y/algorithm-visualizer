@@ -1,7 +1,7 @@
 {
   "description": "Trees from LeetCode-style level order, roots inferred from parentless nodes, and addNode with a bare value and a side.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "t": {
         "kind": "tree",
@@ -37,7 +37,7 @@
     ]
   },
   "expected": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "t": {
         "kind": "tree",

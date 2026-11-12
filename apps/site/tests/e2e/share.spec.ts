@@ -53,7 +53,7 @@ test('explains itself without a link, and plays its example', async ({
 
 test('opens a document link at its frame', async ({ page }) => {
   const document = {
-    version: '0.1',
+    version: '1.0',
     title: 'Two pushes',
     structures: { s: { kind: 'stack', initial: [] } },
     steps: [
@@ -144,7 +144,7 @@ test('draws a crafted document’s text as text and runs none of it', async ({
   page,
 }) => {
   const document = {
-    version: '0.1',
+    version: '1.0',
     title: `Title ${attack(1)}`,
     structures: {
       a: {

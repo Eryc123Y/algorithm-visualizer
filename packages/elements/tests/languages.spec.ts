@@ -18,7 +18,7 @@ const sources = [
 ];
 
 const doc = {
-  version: '0.3',
+  version: '1.0',
   sources,
   structures: { a: { kind: 'array', initial: [2, 1] } },
   steps: [

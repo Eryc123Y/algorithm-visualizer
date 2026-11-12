@@ -1,7 +1,7 @@
 {
   "description": "Ten parallel edges routed around a row are spread apart and stay inside the scene.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "g": {
         "kind": "graph",

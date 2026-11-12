@@ -1,7 +1,7 @@
 {
   "description": "Protocol 0.2: steps may have names, which repeat, and the document may group steps into sections; steps before the first section belong to none.",
   "input": {
-    "version": "0.2",
+    "version": "1.0",
     "title": "Two operations",
     "structures": {
       "s": { "kind": "stack", "initial": [1] }
@@ -27,7 +27,7 @@
     ]
   },
   "expected": {
-    "version": "0.2",
+    "version": "1.0",
     "title": "Two operations",
     "structures": {
       "s": {

@@ -1,7 +1,7 @@
 {
   "description": "Placement changes nothing in the state: a call stack on the side and an output array in the main column replay as without place (ADR 0029).",
   "input": {
-    "version": "0.4",
+    "version": "1.0",
     "structures": {
       "a": {
         "kind": "array",

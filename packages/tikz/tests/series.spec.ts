@@ -10,7 +10,7 @@ import {
 
 // Two passes of a sort, as in the SVG painter's series tests.
 const doc = {
-  version: '0.2',
+  version: '1.0',
   title: 'Two passes',
   structures: { a: { kind: 'array', initial: [3, 1, 2] } },
   sections: [
@@ -85,7 +85,7 @@ describe('exportTikzFigures', () => {
       ok: false,
       error: [{ code: 'UNKNOWN_THEME', path: '$.theme' }],
     });
-    expect(exportTikzFigures({ version: '0.2', structures: {} }).ok).toBe(
+    expect(exportTikzFigures({ version: '1.0', structures: {} }).ok).toBe(
       false,
     );
     expect(exportTikzFigures(doc, { steps: ['relax'] })).toMatchObject({

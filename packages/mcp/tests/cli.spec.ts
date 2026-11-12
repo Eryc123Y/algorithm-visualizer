@@ -11,7 +11,7 @@ const file = join(dir, 'doc.json');
 writeFileSync(
   file,
   JSON.stringify({
-    version: '0.1',
+    version: '1.0',
     structures: { q: { kind: 'queue', initial: [1, 2] } },
     steps: [
       {
@@ -63,7 +63,7 @@ describe('algoviz CLI', () => {
     );
     expect(code).toBe(0);
     expect(JSON.parse(out)).toMatchObject({
-      version: '0.3',
+      version: '1.0',
       title: 'Binary search tree: delete 3',
     });
   });
@@ -76,7 +76,7 @@ describe('algoviz CLI', () => {
     );
     expect(code).toBe(0);
     expect(JSON.parse(out)).toMatchObject({
-      version: '0.3',
+      version: '1.0',
       title: 'Edit distance',
     });
     const old = run('recipe', 'edit-distance', '{"first":"ab","second":"b"}');

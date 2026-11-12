@@ -1,7 +1,7 @@
 {
   "description": "Unknown keys are rejected so that typos are caught.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "arr": {
         "kind": "array",

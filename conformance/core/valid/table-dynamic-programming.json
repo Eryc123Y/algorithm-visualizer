@@ -1,7 +1,7 @@
 {
   "description": "Filling an LCS-style table: dependency arrows and highlights last one step, settled cells persist (without duplicates) until resetMarks.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "dp": {
         "kind": "table",

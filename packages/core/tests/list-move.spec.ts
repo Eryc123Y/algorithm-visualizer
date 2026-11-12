@@ -17,7 +17,7 @@ import {
 } from '../src/index.ts';
 
 const doc = (actions: Record<string, unknown>[][], initial = [4, 2, 7, 1]) => ({
-  version: '0.7',
+  version: '1.0',
   structures: { l: { kind: 'linkedList', initial } },
   steps: actions.map((step) => ({
     actions: step.map((a) => ({ target: 'l', ...a })),

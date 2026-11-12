@@ -1,7 +1,7 @@
 {
   "description": "Root slots (ADR 0034): a new root at a slot, a cut subtree at a slot, a root moved, and a root left in place by detach without a slot.",
   "input": {
-    "version": "0.5",
+    "version": "1.0",
     "structures": {
       "h": {
         "kind": "tree",

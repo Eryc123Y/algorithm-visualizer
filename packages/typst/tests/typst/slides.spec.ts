@@ -163,7 +163,7 @@ describe('algoviz-slides with a stand-in only', () => {
   it('draws wide by default, as slides have room, and takes layout', () => {
     // An array with a stack in the side panel (ADR 0029).
     const sided = {
-      version: '0.4',
+      version: '1.0',
       structures: {
         a: { kind: 'array', initial: [3, 1, 2] },
         calls: { kind: 'stack', initial: ['sort'], place: 'side' },

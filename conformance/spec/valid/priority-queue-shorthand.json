@@ -1,7 +1,7 @@
 {
   "description": "Items without an id get e0, e1, … by position, and a bare inserted value the next free id; keys stay as given.",
   "input": {
-    "version": "0.4",
+    "version": "1.0",
     "structures": {
       "Q": {
         "kind": "priorityQueue",
@@ -32,7 +32,7 @@
     ]
   },
   "expected": {
-    "version": "0.4",
+    "version": "1.0",
     "structures": {
       "Q": {
         "kind": "priorityQueue",

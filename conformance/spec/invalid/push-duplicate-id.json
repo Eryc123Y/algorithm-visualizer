@@ -1,7 +1,7 @@
 {
   "description": "An explicit id in a push must be new.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "st": {
         "kind": "stack",

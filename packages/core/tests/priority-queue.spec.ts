@@ -34,7 +34,7 @@ type Action = Record<string, unknown>;
 
 /** Dijkstra's queue on four vertices, with steps of the given actions. */
 const doc = (steps: Action[][], extra: Record<string, unknown> = {}) => ({
-  version: '0.4',
+  version: '1.0',
   structures: {
     Q: {
       kind: 'priorityQueue',
@@ -231,7 +231,7 @@ describe('priorityQueue layout', () => {
   it('says when the queue is empty, and draws −∞ in a max-queue', () => {
     const scene = layoutTrace(
       mustLoad({
-        version: '0.4',
+        version: '1.0',
         structures: {
           Q: {
             kind: 'priorityQueue',

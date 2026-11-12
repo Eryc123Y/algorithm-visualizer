@@ -1,7 +1,7 @@
 {
   "description": "A split lifts the middle key, keeping its id, then a key goes into a leaf and the root grows (ADR 0035).",
   "input": {
-    "version": "0.6",
+    "version": "1.0",
     "structures": {
       "T": {
         "kind": "btree",

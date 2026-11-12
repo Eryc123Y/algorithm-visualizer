@@ -1,7 +1,7 @@
 {
   "description": "Pointer names follow the same rule.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "arr": {
         "kind": "array",

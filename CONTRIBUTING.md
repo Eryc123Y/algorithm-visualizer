@@ -72,7 +72,7 @@ The pre-commit hook runs ESLint and Prettier on staged files. Run `npm run check
 
 Kinds are plug-ins (ADR 0012). Use an existing kind of similar shape as the model (`stack` for a linear kind, `tree` or `graph` for node-link kinds).
 
-1. **Protocol:** add `packages/spec/src/kinds/<kind>.ts` exporting a `KindSpec`, register it in `kinds/index.ts`, and add its schemas to `TargetedAction`, `TargetedActionInput`, `StructureDecl` and `StructureDeclInput` in `visualization.ts`. Regenerate the JSON Schema.
+1. **Protocol:** add `packages/spec/src/kinds/<kind>.ts` exporting a `KindSpec`, register it in `kinds/index.ts`, and add its schemas to `TargetedAction`, `TargetedActionInput`, `StructureDecl` and `StructureDeclInput` in `visualization.ts`. Regenerate the JSON Schema. The protocol is frozen at 1.0 (ADR 0043), so a new kind, action or optional field is a minor version: append it to `PROTOCOL_VERSIONS` in `version.ts`, and add what it adds to `PROTOCOL_FEATURES`, so writers record it. A rename, a removal or a narrowed limit needs 2.0 (ADR 0021).
 2. **Engine:** add the reducer in `packages/core/src/kinds/` and the layout in `packages/core/src/layout/`, and register both in `packages/core/src/registry.ts`. The `satisfies` check there fails until the runtime matches the protocol.
 3. **Tests:** add conformance fixtures (valid replays with hand-computed states, invalid documents with expected error paths); scene invariants then run on them automatically. Check the result with `npm run gallery`.
 4. **Guide:** add `packages/mcp/guide/kinds/<kind>.md` with the declaration, a table row for every action and a complete example. Tests fail until every action is listed and the example validates.

@@ -1,7 +1,7 @@
 {
   "description": "A node with two parents, and a cycle that no root reaches.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "t": {
         "kind": "tree",

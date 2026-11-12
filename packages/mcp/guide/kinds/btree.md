@@ -1,6 +1,6 @@
 ## btree
 
-Multiway search trees whose nodes hold several keys: B-trees, 2-3-4 trees. A node has its keys in order and no children (a leaf) or one more child than keys; child `i` hangs from the gap left of key `i`. Keys are elements with ids, so a key moves visibly from node to node. A tree always has a root; an empty tree is a root leaf with no keys. Needs `"version": "0.6"`.
+Multiway search trees whose nodes hold several keys: B-trees, 2-3-4 trees. A node has its keys in order and no children (a leaf) or one more child than keys; child `i` hangs from the gap left of key `i`. Keys are elements with ids, so a key moves visibly from node to node. A tree always has a root; an empty tree is a root leaf with no keys.
 
 Declaration: `{ "kind": "btree", "nodes": [{ "id": "r", "keys": ["G", "M"], "children": ["a", "b", "c"] }, { "id": "a", "keys": ["A", "C"] }, …], "root"?: "r" }`. Keys are values (ids `k0`, `k1`, … are generated through the tree in order) or `{ "id", "value" }`. `root` defaults to the node that is nobody's child. Without `nodes`, the tree is one empty root with the id `root`. A node holds at most 32 keys, and the tree at most 1,000 elements, nodes and keys together. The kind checks the shape, not key order or a minimum degree.
 
@@ -24,7 +24,7 @@ Ids in `newNode`, `newRoot` and inserted keys must be new: no node or key in the
 
 ```json
 {
-  "version": "0.6",
+  "version": "1.0",
   "title": "Insert B into a B-tree with t = 2",
   "structures": {
     "T": {

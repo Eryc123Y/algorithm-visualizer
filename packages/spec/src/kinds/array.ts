@@ -47,7 +47,7 @@ const Shift = z
   .max(LIMITS.elementsPerStructure)
   .optional()
   .describe(
-    'Text position under which the pattern starts, from 0 to the text length (default 0). Needs version 0.8.',
+    'Text position under which the pattern starts, from 0 to the text length (default 0).',
   );
 
 /** Canonical declaration: every element has an explicit id. */
@@ -84,7 +84,7 @@ export const ArrayDeclInput = ArrayDecl.extend({
     ])
     .optional()
     .describe(
-      'A pattern drawn under the text at `shift`, for string matching: values (ids "p0", "p1", … are generated) or elements. Needs version 0.8.',
+      'A pattern drawn under the text at `shift`, for string matching: values (ids "p0", "p1", … are generated) or elements.',
     ),
 });
 export type ArrayDeclInput = z.infer<typeof ArrayDeclInput>;
@@ -185,12 +185,12 @@ const actions = <E extends z.ZodType>(element: E) =>
         matched: z.int().min(0).max(MAX_PATTERN).optional(),
       })
       .describe(
-        'Move the pattern so that its first element is under text position `shift`; its first `matched` elements (default 0) are marked as matched, and must equal the text above them. Needs version 0.8.',
+        'Move the pattern so that its first element is under text position `shift`; its first `matched` elements (default 0) are marked as matched, and must equal the text above them.',
       ),
     z
       .strictObject({ type: z.literal('check'), j: Index })
       .describe(
-        'Compare pattern element `j` with the text element above it (position shift + j): both are marked as compared in this step, and if they are equal, `j` is marked as matched until the next `align`. Needs version 0.8.',
+        'Compare pattern element `j` with the text element above it (position shift + j): both are marked as compared in this step, and if they are equal, `j` is marked as matched until the next `align`.',
       ),
   ]);
 

@@ -1,7 +1,7 @@
 {
   "description": "A step line past the end of the source code is rejected.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "source": {
       "language": "python",
       "code": "for i in range(n - 1):\n    for j in range(n - 1 - i):\n        if a[j] > a[j + 1]:\n            a[j], a[j + 1] = a[j + 1], a[j]"

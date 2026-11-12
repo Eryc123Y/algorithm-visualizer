@@ -1,7 +1,7 @@
 {
   "description": "addNode into a binary slot that is taken is an error; setChild replaces children.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "t": {
         "kind": "tree",

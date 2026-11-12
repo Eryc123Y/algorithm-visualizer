@@ -1,5 +1,5 @@
 {
-  "description": "Protocol 0.x starts at 0.1; there is no version 0.0.",
+  "description": "There is no protocol version 0.0: 0.x went from 0.1 to 0.9, which 1.0 reads (ADR 0043).",
   "input": {
     "version": "0.0",
     "structures": {

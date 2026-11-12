@@ -1,7 +1,7 @@
 {
   "description": "Push appends on top, pop removes the top, peek highlights it for one step.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "st": {
         "kind": "stack",

@@ -17,7 +17,7 @@ A recipe from `algoviz_list_recipes` covers most classic algorithms and single o
 
 ```json
 {
-  "version": "0.1",
+  "version": "1.0",
   "title": "Bubble sort, first pass",
   "source": {
     "language": "python",
@@ -47,7 +47,7 @@ A recipe from `algoviz_list_recipes` covers most classic algorithms and single o
 }
 ```
 
-- `version` is the protocol version, `"major.minor"`. Write the oldest version that has every feature you use: `"0.9"` if a structure is a `plane`, `"0.8"` if an array has a `pattern`, `"0.7"` if a linked list uses `move`, `"0.6"` if a structure is a `btree`, `"0.5"` if a tree uses root slots, NIL pointers, named notes, edge marks or labels, or a root list (see `tree`), `"0.4"` if a structure has `place` (below), `"0.3"` if the document has `sources` (code in several languages, below), `"0.2"` if any step has a name or the document has sections, and `"0.1"` otherwise.
+- `version` is the protocol version: write `"1.0"`. (Documents that say a 0.x version, from before the protocol was frozen, are still read as 1.0.)
 - `title` and `source` are optional. `source.code` is the code being taught; `meta.line` (1-based) highlights a line of it. Without `source`, leave out `line`. To show the code in pseudocode and Python, give `sources` instead (below).
 - `structures` maps names to declarations (at most 16). Names are identifiers: letters, digits and `_`, not starting with a digit, e.g. `arr`, `dist`, `call_stack`.
 - A structure's caption is its `label`, or else its name. A structure alone in its document gets no caption unless it has a `label`; give one only when it says more than the figure does, such as `"label": "call stack"`.
@@ -65,14 +65,14 @@ Frame 0 shows the declared initial state; frame `n` shows the state after step `
 
 ## Step names and sections
 
-Names let people and tools refer to a step by what it does rather than by its number, which changes whenever steps are added. Both need `"version": "0.2"`.
+Names let people and tools refer to a step by what it does rather than by its number, which changes whenever steps are added.
 
 - `meta.id` names the kind of step: `"compare"`, `"swap"`, `"relax"`, `"fixup-case-3"`. Use lower-case kebab-case that starts with a letter, at most 40 characters. Names repeat: every relaxation is `"relax"`. Name every step.
 - `sections` groups consecutive steps under a title, such as each operation of a sequence. `start` is the index of the section's first step (0-based), and the section lasts until the next one starts. Sections are listed in order, each has at least one step, and their ids are unique. Steps before the first section belong to none. Don't give a section the id of a step name: the bare name would then select the section.
 
 ```json
 {
-  "version": "0.2",
+  "version": "1.0",
   "title": "Push twice, then pop",
   "structures": {
     "s": { "kind": "stack", "initial": [1] }
@@ -114,7 +114,7 @@ A selector names frames, in `algoviz_inspect`, `algoviz_render` and `algoviz_sho
 
 ## Code in two languages
 
-Readers choose between pseudocode and Python in the player, which keeps the frame when they switch. To offer both, give `sources` instead of `source`: a list of `{ "language", "code", "anchors" }`, one per language. This needs `"version": "0.3"`.
+Readers choose between pseudocode and Python in the player, which keeps the frame when they switch. To offer both, give `sources` instead of `source`: a list of `{ "language", "code", "anchors" }`, one per language.
 
 - Give `"pseudocode"` first, then `"python"`. Write the pseudocode in the conventions of CLRS, in your own words: `for i = 0 to n - 1` (and `downto`), `while`, `repeat … until`, `if`, `elseif`, `else`, `return`, `error "…"`; `=` assigns and `==` compares; `and`, `or`, `not`; `NIL`, `TRUE` and `FALSE`; procedure names in capitals joined by hyphens, such as `LINEAR-SEARCH`; `//` comments; indentation for blocks.
 - Count indices from 0 in both languages, and give variables the same names, so that narrations, `vars` and the cell numbers in the picture fit both.
@@ -124,7 +124,7 @@ Readers choose between pseudocode and Python in the player, which keeps the fram
 
 ```json
 {
-  "version": "0.3",
+  "version": "1.0",
   "title": "Linear search for 7",
   "sources": [
     {
@@ -217,7 +217,7 @@ Readers choose between pseudocode and Python in the player, which keeps the fram
 
 ## Main and side structures
 
-Draw what the algorithm keeps besides its main structure: Dijkstra's priority queue, BFS's queue, a call stack, a table of results. Give each such auxiliary structure `"place": "side"`; the others are `"main"`, the default. This needs `"version": "0.4"`.
+Draw what the algorithm keeps besides its main structure: Dijkstra's priority queue, BFS's queue, a call stack, a table of results. Give each such auxiliary structure `"place": "side"`; the others are `"main"`, the default.
 
 - In a wide figure (the player, slides) side structures form a column right of the main ones. In a narrow figure (a column of notes) they go below them. The output chooses; the document only says which structures are auxiliary.
 - Within the main and the side column, structures keep their declaration order. Declare the main structure first.
@@ -225,7 +225,7 @@ Draw what the algorithm keeps besides its main structure: Dijkstra's priority qu
 
 ```json
 {
-  "version": "0.4",
+  "version": "1.0",
   "title": "Depth-first search, the first two calls",
   "structures": {
     "g": {
@@ -267,7 +267,7 @@ Draw what the algorithm keeps besides its main structure: Dijkstra's priority qu
 Besides data, structures carry marks that colour elements. A document never names colours or fonts: marks are roles, and the reader picks a theme that draws them, `light` by default, in the player, `algoviz_render` and every other output.
 
 - **Transient** marks (`compare`, `highlight`, `peek`, `depend`, and the mark `swap` leaves) last for their step only. Repeat them in the next step to keep them.
-- **Persistent** marks (`pointer`, `settle`, `visit`, `group`, `annotate`, `markEdge`) stay until changed. Remove a pointer with `"index": null` or `"node": null`; clear graph, table and hash table marks with `resetMarks`.
+- **Persistent** marks (`pointer`, `settle`, `visit`, `group`, `annotate`, `markEdge`, `labelEdge`, a plane's `select`, `label` and `line`) stay until changed. Remove a pointer with `"index": null` or `"node": null`; clear graph, table and hash table marks with `resetMarks`.
 
 ## Ids and positions
 

@@ -1,7 +1,7 @@
 {
   "description": "Replaying the first pass of bubble sort: swaps move elements, compare marks last one step, pointers persist.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "title": "Bubble sort",
     "structures": {
       "arr": {
