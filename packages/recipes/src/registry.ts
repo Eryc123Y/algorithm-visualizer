@@ -38,6 +38,7 @@ import {
 } from './algorithms/trees/tree-walks.ts';
 import { finiteAutomatonMatcher } from './algorithms/strings/finite-automaton.ts';
 import { kmp } from './algorithms/strings/kmp.ts';
+import { recursionTree } from './algorithms/foundations/recursion-tree.ts';
 import { strassen } from './algorithms/foundations/strassen.ts';
 import { naiveStringMatcher } from './algorithms/strings/naive.ts';
 import { rabinKarp } from './algorithms/strings/rabin-karp.ts';
@@ -102,6 +103,7 @@ export const algorithms: readonly Algorithm[] = [
   finiteAutomatonMatcher,
   kmp,
   strassen,
+  recursionTree,
 ];
 
 /** The module with `id`, if there is one. */
