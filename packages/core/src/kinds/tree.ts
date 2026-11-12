@@ -81,6 +81,9 @@ export interface TreeState {
 
 type Reduced = Result<TreeState, ReduceError>;
 
+/** Most named notes one node holds (ADR 0034), so its label stays short. */
+export const MAX_NAMED_NOTES = 4;
+
 const emptyMarks: TreeMarks = {
   highlight: [],
   compare: null,
@@ -539,6 +542,17 @@ function reduceShape(s: TreeState, a: TreeAction): Reduced {
       if (bad) return err(bad);
       if (a.field !== undefined) {
         const current = marks.namedNotes[a.node] ?? {};
+        if (
+          a.text !== null &&
+          !Object.hasOwn(current, a.field) &&
+          Object.keys(current).length >= MAX_NAMED_NOTES
+        )
+          return err({
+            code: 'LIMIT_EXCEEDED',
+            path: ['field'],
+            message: `Node "${a.node}" already has ${MAX_NAMED_NOTES} named notes`,
+            hint: 'Remove a note (text null) before adding another field.',
+          });
         const next =
           a.text === null
             ? without(current, a.field)

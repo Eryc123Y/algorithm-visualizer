@@ -85,6 +85,8 @@ export interface TreeMetrics {
   readonly rootPointerRows: number;
   /** Widest name among them, in em of the value font. */
   readonly rootPointerWidth: number;
+  /** Widest edge label, in em of the value font; 0 without labels. */
+  readonly edgeLabelWidth: number;
 }
 
 /** A NIL leaf a pointer names, and where it goes. */
@@ -176,6 +178,10 @@ export function measureTree(
       g.above.map(([name]) => name),
       fonts.value,
     ),
+    edgeLabelWidth: maxWidth(
+      Object.values(state.marks.edgeLabels).map(String),
+      fonts.value,
+    ),
   };
 }
 
@@ -193,6 +199,7 @@ export const mergeTreeMetrics = (
   nilLeft: Math.max(a.nilLeft, b.nilLeft),
   rootPointerRows: Math.max(a.rootPointerRows, b.rootPointerRows),
   rootPointerWidth: Math.max(a.rootPointerWidth, b.rootPointerWidth),
+  edgeLabelWidth: Math.max(a.edgeLabelWidth, b.edgeLabelWidth),
 });
 
 function roleOf(state: TreeState, id: string): ElementRole {
@@ -258,11 +265,28 @@ export function layoutTree({
       (metrics.rootPointerWidth * o.pointerFontSize + 12) / 2 - halfWidth,
     ),
   );
-  const margin = Math.max(noteOverhang, wrapMargin, aboveOverhang);
+  // An edge label sits beside a point of its edge, up to its width plus a
+  // gap away on the outer side (edge-label.ts); keep room for it beyond the
+  // outermost nodes, above the roots and below the deepest level.
+  const labelHalf = (metrics.edgeLabelWidth * o.indexFontSize) / 2;
+  const labelled = Object.keys(state.marks.edgeLabels).length > 0;
+  const [labelX, labelY] =
+    metrics.edgeLabelWidth > 0 || labelled
+      ? [
+          Math.ceil(4 + 2 * labelHalf + o.indexFontSize / 2),
+          Math.ceil(4 + labelHalf + o.indexFontSize),
+        ]
+      : [0, 0];
+  const margin = Math.max(
+    noteOverhang,
+    wrapMargin,
+    aboveOverhang,
+    labelX - halfWidth,
+  );
   const leftMargin = Math.max(pointerWidth, margin);
   const left = origin.x + leftMargin;
   const laneTop = origin.y + titleRowHeight(o);
-  const top = laneTop + lane + Math.max(noteRoom, aboveRoom);
+  const top = laneTop + lane + Math.max(noteRoom, aboveRoom, labelY - radius);
   const g = geometryOf(state, decl);
   const at = (column: number, depth: number) => ({
     x: left + halfWidth + (column + metrics.nilLeft) * pitchX,
@@ -341,7 +365,13 @@ export function layoutTree({
     leftMargin + (columns - 1) * pitchX + 2 * halfWidth + margin,
     titleWidth(title, o),
   );
-  const height = top - origin.y + (levels - 1) * pitchY + 2 * radius + 4;
+  const height =
+    top -
+    origin.y +
+    (levels - 1) * pitchY +
+    2 * radius +
+    4 +
+    Math.max(0, labelY - 2 * radius - 4);
 
   // Pointers above roots, placed first so notes keep clear of them.
   const aboveItems = [...groupPointers(g.above)].flatMap(([id, names]) =>

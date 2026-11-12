@@ -438,7 +438,13 @@ export const treeSpec: KindSpec<{
   validateDecl: validateTreeDecl,
   normalizeAction: (input, ctx) => {
     let action: Record<string, unknown> = { ...input };
-    if ('slot' in input && typeof input.slot === 'string')
+    // A root's slot is a position among the roots, so "left" and "right"
+    // stay as written there, and the canonical schema refuses them.
+    if (
+      'slot' in input &&
+      typeof input.slot === 'string' &&
+      !(input.type === 'addNode' && input.parent === null)
+    )
       action = { ...action, slot: slotNumber(input.slot) };
     if (
       input.type === 'pointer' &&

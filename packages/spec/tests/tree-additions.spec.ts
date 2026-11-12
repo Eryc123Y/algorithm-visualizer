@@ -122,6 +122,22 @@ describe('tree additions (ADR 0034)', () => {
       ).toEqual([{ code: 'VERSION_TOO_OLD', path: '$.version' }]);
     });
 
+    it('refuses left and right as a root slot', () => {
+      expect(
+        errorsOf(
+          doc({ f: forest }, [
+            {
+              target: 'f',
+              type: 'addNode',
+              node: 9,
+              parent: null,
+              slot: 'left',
+            },
+          ]),
+        ),
+      ).toMatchObject([{ path: '$.steps[0].actions[0].slot' }]);
+    });
+
     it('refuses a slot that is not a whole number from 0', () => {
       expect(
         errorsOf(

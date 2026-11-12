@@ -165,8 +165,8 @@ export function sceneProblems(scene: Scene): string[] {
 
 /**
  * Text that does not fit inside what it is drawn in, with the room layout
- * promises: 10 units each side in a cell (the least, in tables), 8 in a
- * node, 6 on a badge.
+ * promises: 10 units each side in a cell (the least, in tables), 3 in a
+ * NIL leaf, 8 in a node, 6 on a badge.
  */
 export function fitProblems(scene: Scene): string[] {
   return scene.items.flatMap((item) => {
@@ -176,7 +176,8 @@ export function fitProblems(scene: Scene): string[] {
       item.type === 'node'
         ? Math.max(2 * item.radius, item.width ?? 0) - 16
         : item.type === 'box'
-          ? item.width - 20
+          ? // A NIL leaf (ADR 0034) is a small label box, not a cell.
+            item.width - (item.key.includes('/nil/') ? 6 : 20)
           : item.width - 12;
     const width = valueWidth(item.text, item.fontSize);
     return width > room + 1e-6

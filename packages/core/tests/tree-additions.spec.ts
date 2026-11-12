@@ -252,6 +252,23 @@ describe('named notes (S3)', () => {
     expect(Object.keys(marks(4).namedNotes['n3']!)).toEqual(['max', 'size']);
     expect(marks(5)).toEqual({ notes: {}, namedNotes: {} });
   });
+
+  it('hold at most four fields per node', () => {
+    const note = (field: string, text: string | null = field) => ({
+      type: 'annotate',
+      node: 'n3',
+      text,
+      field,
+    });
+    const four = ['a', 'b', 'c', 'd'].map((f) => note(f));
+    expect(errorsOf(doc(bst, [four, [note('e')]]))).toEqual([
+      { code: 'LIMIT_EXCEEDED', path: '$.steps[1].actions[0].field' },
+    ]);
+    // Changing a field, or removing one first, is fine.
+    expect(
+      errorsOf(doc(bst, [four, [note('a', 'x'), note('b', null), note('e')]])),
+    ).toEqual([]);
+  });
 });
 
 describe('edge marks and labels (S4)', () => {

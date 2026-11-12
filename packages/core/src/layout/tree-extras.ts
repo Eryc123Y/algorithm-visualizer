@@ -70,10 +70,18 @@ export interface NilBox {
   readonly fontSize: number;
 }
 
+/** Size of the text in a NIL leaf. */
+const NIL_FONT = 10;
+
+/**
+ * A NIL leaf's box: narrow, so that the NIL leaves of two neighbouring
+ * trees of a forest, half a column apart, never touch (half a column is at
+ * least 28 units).
+ */
 export const nilBox = (o: LayoutOptions): NilBox => ({
-  width: ceilWidth(textWidth(NIL_TEXT, o.fonts.value) * o.indexFontSize) + 20,
-  height: o.indexFontSize + 8,
-  fontSize: o.indexFontSize,
+  width: ceilWidth(textWidth(NIL_TEXT, o.fonts.value) * NIL_FONT) + 8,
+  height: NIL_FONT + 6,
+  fontSize: NIL_FONT,
 });
 
 interface Point {
