@@ -48,6 +48,7 @@ import { finiteAutomatonMatcher } from './algorithms/strings/finite-automaton.ts
 import { kmp } from './algorithms/strings/kmp.ts';
 import { strassen } from './algorithms/foundations/strassen.ts';
 import { lup } from './algorithms/math/lup.ts';
+import { fft } from './algorithms/math/fft.ts';
 import { naiveStringMatcher } from './algorithms/strings/naive.ts';
 import { rabinKarp } from './algorithms/strings/rabin-karp.ts';
 import { closestPair } from './algorithms/geometry/closest-pair.ts';
@@ -127,6 +128,7 @@ export const algorithms: readonly Algorithm[] = [
   jarvisMarch,
   closestPair,
   lup,
+  fft,
   strassen,
 ];
 
