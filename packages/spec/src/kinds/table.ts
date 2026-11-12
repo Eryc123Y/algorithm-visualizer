@@ -118,7 +118,7 @@ export const TableAction = z.discriminatedUnion('type', [
   z
     .strictObject({ type: z.literal('depend'), cell: Cell, on: Cells })
     .describe(
-      'Show that `cell` is computed from the cells `on`, with arrows from each (this step only).',
+      'Show that `cell` is computed from the cells `on` (this step only): every cell in `on` is marked, and each that touches `cell` gets an arrow to it.',
     ),
   z
     .strictObject({ type: z.literal('settle'), cells: Cells })

@@ -59,6 +59,83 @@ describe('edmonds-karp', () => {
     expect(results).toEqual([23]);
   });
 
+  it('lays the network out left to right, one column per BFS layer, as CLRS does', () => {
+    const { document } = runOk('edmonds-karp', undefined);
+    const decl = (
+      document as unknown as {
+        structures: {
+          g: { layout: string; nodes: { id: string; x: number; y: number }[] };
+        };
+      }
+    ).structures.g;
+    expect(decl.layout).toBe('manual');
+    const at = Object.fromEntries(decl.nodes.map((n) => [n.id, n]));
+    // s | v1 v2 | v3 v4 | t, with v1 above v2 and v3 above v4.
+    const column = (v: string) => at[v]!.x;
+    expect(column('s')).toBeLessThan(column('v1'));
+    expect(column('v1')).toBe(column('v2'));
+    expect(column('v2')).toBeLessThan(column('v3'));
+    expect(column('v3')).toBe(column('v4'));
+    expect(column('v4')).toBeLessThan(column('t'));
+    expect(at['v1']!.y).toBeLessThan(at['v2']!.y);
+    expect(at['v3']!.y).toBeLessThan(at['v4']!.y);
+    // The source and sink sit on the middle row.
+    expect(at['s']!.y).toBe(at['t']!.y);
+    expect(at['s']!.y).toBe((at['v1']!.y + at['v2']!.y) / 2);
+  });
+
+  it('points at the source and sink only when their names do not say so', () => {
+    const pointers = (input: unknown) => {
+      const { document } = runOk('edmonds-karp', input);
+      const steps = (
+        document as unknown as {
+          steps: { actions: { type: string; name?: string }[] }[];
+        }
+      ).steps;
+      return [
+        ...new Set(
+          steps.flatMap((st) =>
+            st.actions.flatMap((a) => (a.type === 'pointer' ? [a.name] : [])),
+          ),
+        ),
+      ];
+    };
+    expect(pointers(undefined)).toEqual([]);
+    expect(pointers('A->B 3, B->C 2, A->C 1')).toEqual(['s', 't']);
+    expect(pointers({ graph: 's->a 3, a->b 2', sink: 'b' })).toEqual(['t']);
+  });
+
+  it('puts nodes the source cannot reach in a column of their own', () => {
+    const { document } = runOk('edmonds-karp', 'A->B 3, C->B 2, D');
+    const nodes = (
+      document as unknown as {
+        structures: { g: { nodes: { id: string; x: number }[] } };
+      }
+    ).structures.g.nodes;
+    const x = Object.fromEntries(nodes.map((n) => [n.id, n.x]));
+    expect(x['A']).toBeLessThan(x['B']!);
+    expect(x['C']).toBeGreaterThan(x['B']!);
+    expect(x['D']).toBe(x['C']);
+  });
+
+  it('lays out left to right only when no edge would cross a node', () => {
+    const layout = (graph: string) =>
+      (
+        runOk('edmonds-karp', graph).document as unknown as {
+          structures: { g: { layout: string } };
+        }
+      ).structures.g.layout;
+    // a-c would run straight through b, in the same column.
+    expect(layout('s->a 1, s->b 1, s->c 1, a->c 1, c->t 1, b->t 1')).toBe(
+      'layered',
+    );
+    // s-t would run through the middle node of a column of three.
+    expect(
+      layout('s->a 1, s->b 1, s->c 1, a->t 1, b->t 1, c->t 1, s->t 5'),
+    ).toBe('layered');
+    expect(layout('s->a 1, s->b 1, a->t 1, b->t 1')).toBe('manual');
+  });
+
   it('finds a flow as large as the least cut, and draws a valid flow', () => {
     fc.assert(
       fc.property(networks, ({ nodes, edges }) => {
@@ -88,6 +165,37 @@ describe('edmonds-karp', () => {
           .filter((e) => g.marks.edgeMarks[e.id] === 'selected')
           .reduce((sum, e) => sum + Number(String(e.weight).split('/')[1]), 0);
         expect(cut).toBe(want);
+        // Laid out by hand only where every edge keeps clear of the other
+        // nodes, by at least a node's radius.
+        const decl = (
+          document as unknown as {
+            structures: {
+              g: {
+                layout: string;
+                nodes: { id: string; x: number; y: number }[];
+              };
+            };
+          }
+        ).structures.g;
+        if (decl.layout !== 'manual') return;
+        const at = new Map(decl.nodes.map((n) => [n.id, n]));
+        for (const [a, b] of edges) {
+          const [p, q] = [at.get(a)!, at.get(b)!];
+          for (const n of decl.nodes) {
+            if (n.id === a || n.id === b) continue;
+            const [dx, dy] = [q.x - p.x, q.y - p.y];
+            const k = Math.max(
+              0,
+              Math.min(
+                1,
+                ((n.x - p.x) * dx + (n.y - p.y) * dy) /
+                  (dx * dx + dy * dy || 1),
+              ),
+            );
+            const gap = Math.hypot(p.x + k * dx - n.x, p.y + k * dy - n.y);
+            expect(gap, `${a}-${b} near ${n.id}`).toBeGreaterThan(24);
+          }
+        }
       }),
       fuzz,
     );

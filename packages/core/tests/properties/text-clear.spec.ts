@@ -9,6 +9,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   CLEAR,
+  LABEL_ANGLES,
   LABEL_POSITIONS,
   NOTE_GAP,
   clearance,
@@ -215,6 +216,182 @@ describe.each(['graph', 'tree'])('text clear of edges (%s)', (kind) => {
             expect(problems(layout.sceneAt(f), trees), `frame ${f}`).toEqual(
               [],
             );
+        }),
+        params,
+      );
+    },
+    20 * 60_000,
+  );
+});
+
+/** The parts of segment a–b inside a rectangle, by Liang–Barsky. */
+function crossesBox(
+  [a, b]: readonly [{ x: number; y: number }, { x: number; y: number }],
+  box: { x: number; y: number; width: number; height: number },
+): boolean {
+  let [t0, t1] = [0, 1];
+  const [dx, dy] = [b.x - a.x, b.y - a.y];
+  const edges: [number, number][] = [
+    [-dx, a.x - box.x],
+    [dx, box.x + box.width - a.x],
+    [-dy, a.y - box.y],
+    [dy, box.y + box.height - a.y],
+  ];
+  for (const [p, q] of edges) {
+    if (p === 0) {
+      if (q < 0) return false;
+      continue;
+    }
+    const t = q / p;
+    if (p < 0) t0 = Math.max(t0, t);
+    else t1 = Math.min(t1, t);
+    if (t0 > t1) return false;
+  }
+  return t1 - t0 > 1e-9;
+}
+
+describe('dependency arrows in tables', () => {
+  it(
+    'cross no cell but the two they join',
+    () => {
+      fc.assert(
+        fc.property(dice, (values) => {
+          const built = build(new Dice(values), ['table']);
+          const loaded = loadTrace(built.doc);
+          if (!loaded.ok) return;
+          const layout = layoutTrace(loaded.value);
+          for (let f = 0; f <= loaded.value.length; f++) {
+            const scene = layout.sceneAt(f);
+            const cells = scene.items.filter(
+              (i): i is Extract<typeof i, { type: 'box' }> =>
+                i.type === 'box' && i.key.includes('/cell/'),
+            );
+            for (const arrow of edges(scene).filter((e) =>
+              e.key.includes('/depend/'),
+            )) {
+              const line = linesOf(arrow)[0];
+              if (line === undefined) continue;
+              const inside =
+                (p: { x: number; y: number }) => (c: (typeof cells)[number]) =>
+                  p.x >= c.x &&
+                  p.x <= c.x + c.width &&
+                  p.y >= c.y &&
+                  p.y <= c.y + c.height;
+              const ends = cells.filter(
+                (c) => inside(line[0])(c) || inside(line[1])(c),
+              );
+              expect(ends, `${arrow.key} at frame ${f}`).toHaveLength(2);
+              const crossed = cells
+                .filter((c) => !ends.includes(c))
+                .filter((c) => crossesBox(line, c))
+                .map((c) => c.key);
+              expect(crossed, `${arrow.key} at frame ${f}`).toEqual([]);
+            }
+          }
+        }),
+        params,
+      );
+    },
+    20 * 60_000,
+  );
+});
+
+describe('labels of points in a plane', () => {
+  it(
+    'go under a pointer’s badge only where every direction meets one',
+    () => {
+      fc.assert(
+        fc.property(dice, (values) => {
+          const built = build(new Dice(values), ['plane']);
+          const loaded = loadTrace(built.doc);
+          if (!loaded.ok) return;
+          const layout = layoutTrace(loaded.value);
+          const scenes = Array.from(
+            { length: loaded.value.length + 1 },
+            (_, f) => layout.sceneAt(f),
+          );
+          // The badges under each point over the trace, as one box, as
+          // layout keeps labels clear of them.
+          const stacks = new Map<string, LabelBox>();
+          for (const scene of scenes)
+            for (const b of scene.items.filter(
+              (i): i is SceneBadge => i.type === 'badge',
+            )) {
+              const name = b.key.split('/')[0]!;
+              const under = nodes(scene)
+                .filter(
+                  (n) =>
+                    n.key.startsWith(`${name}/point/`) &&
+                    Math.abs(n.x - b.x) < 0.5 &&
+                    n.y < b.y,
+                )
+                .sort((p, q) => q.y - p.y)[0];
+              if (under === undefined) continue;
+              const key = under.key;
+              const box = {
+                x0: b.x - b.width / 2,
+                x1: b.x + b.width / 2,
+                y0: b.y - b.height / 2,
+                y1: b.y + b.height / 2,
+              };
+              const old = stacks.get(key);
+              const [x0, x1, y0, y1] = old
+                ? [
+                    Math.min(old.x - old.halfWidth, box.x0),
+                    Math.max(old.x + old.halfWidth, box.x1),
+                    Math.min(old.y - old.halfHeight, box.y0),
+                    Math.max(old.y + old.halfHeight, box.y1),
+                  ]
+                : [box.x0, box.x1, box.y0, box.y1];
+              stacks.set(key, {
+                x: (x0 + x1) / 2,
+                y: (y0 + y1) / 2,
+                halfWidth: (x1 - x0) / 2,
+                halfHeight: (y1 - y0) / 2,
+              });
+            }
+          scenes.forEach((scene, f) => {
+            const badges = scene.items.filter(
+              (i): i is SceneBadge => i.type === 'badge',
+            );
+            for (const n of nodes(scene)) {
+              if (n.label === undefined) continue;
+              const name = n.key.split('/')[0]!;
+              const note = noteAt(n, n.labelAngle ?? 0);
+              const covered = badges.some(
+                (b) =>
+                  b.key.startsWith(`${name}/`) &&
+                  overlaps(note, {
+                    x: b.x,
+                    y: b.y,
+                    halfWidth: b.width / 2 - 2,
+                    halfHeight: b.height / 2 - 2,
+                  }),
+              );
+              if (!covered) continue;
+              const m = layout.metrics[name]!;
+              if (m.kind !== 'plane') continue;
+              const theirs = [...stacks]
+                .filter(([k]) => k.startsWith(`${name}/`))
+                .map(([, box]) => box);
+              const room = LABEL_ANGLES.some(
+                (a) =>
+                  clearance(
+                    noteRegion(
+                      { x: n.x, y: n.y, radius: n.radius, halfWidth: n.radius },
+                      a,
+                      (m.metrics.labelWidth * n.fontSize) / 2,
+                      n.fontSize,
+                    ),
+                    { segments: [], discs: [], boxes: theirs },
+                  ) >= CLEAR,
+              );
+              expect(
+                room,
+                `label of ${n.key} under a badge at frame ${f}`,
+              ).toBe(false);
+            }
+          });
         }),
         params,
       );

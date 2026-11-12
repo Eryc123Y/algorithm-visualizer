@@ -186,6 +186,10 @@ Recipes that exist beyond CLRS stay: bubble and selection sort, binary search, l
 | S8  | `plane` kind: points, segments, a sweep line and axes                       | computational geometry                             |
 | S9  | Pattern alignment in `array`: a second row at a shifting offset             | string matching                                    |
 
+**Fixes found in the Phase 2 review** (2026-11-12):
+
+- [x] Table arrows join only cells that touch, so none strikes through another cell's text, and a point's label in a plane keeps clear of pointer badges ([ADR 0042](adr/0042-arrows-and-badges-clear-of-text.md), #128, #129). Edmonds–Karp lays its network out left to right, as CLRS does, without pointers that repeat the names of the source and sink (#129).
+
 ## Phase 3: remote MCP and sharing
 
 Independent of Phase 2, so the two can interleave.

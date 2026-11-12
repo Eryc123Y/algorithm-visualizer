@@ -4,13 +4,13 @@ A grid of cells: dynamic programming (LCS, edit distance, knapsack, coin change)
 
 Declaration: `{ "kind": "table", "rows"?: 3, "columns"?: 4, "initial"?: [[0, 0], [0]], "rowLabels"?: […], "columnLabels"?: […], "label"?: "…" }`. Give `rows` and `columns` for an empty table, `initial` for one with values (short rows are padded with empty cells), or both. Labels must match the number of rows and columns; without them rows and columns are numbered.
 
-| Action       | Fields          | Effect                                                                         |
-| ------------ | --------------- | ------------------------------------------------------------------------------ |
-| `set`        | `cell`, `value` | Write a cell; `null` empties it.                                               |
-| `highlight`  | `cells`         | Highlight cells (this step).                                                   |
-| `depend`     | `cell`, `on`    | Arrows from each cell in `on` to `cell`: it is computed from them (this step). |
-| `settle`     | `cells`         | Mark cells as part of the answer, e.g. a traceback. Persists.                  |
-| `resetMarks` | —               | Clear every mark.                                                              |
+| Action       | Fields          | Effect                                                                                                                   |
+| ------------ | --------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `set`        | `cell`, `value` | Write a cell; `null` empties it.                                                                                         |
+| `highlight`  | `cells`         | Highlight cells (this step).                                                                                             |
+| `depend`     | `cell`, `on`    | `cell` is computed from the cells in `on` (this step): all are marked, and each that touches `cell` gets an arrow to it. |
+| `settle`     | `cells`         | Mark cells as part of the answer, e.g. a traceback. Persists.                                                            |
+| `resetMarks` | —               | Clear every mark.                                                                                                        |
 
 ```json
 {
