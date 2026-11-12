@@ -108,7 +108,7 @@ It steps through a series in a slide deck, one frame per subslide, with your sli
 
 == Dijkstra's algorithm, step by step
 
-#align(center, algoviz-slides(only, "dijkstra", "A-B 4, B-C 1, A-C 7, C-D 2", height: 75%))
+#align(center, algoviz-slides(only, "dijkstra", "A-B 4, B-C 1, A-C 7, C-D 2"))
 ```
 
 With [polylux](https://typst.app/universe/package/polylux), the same call goes inside `#slide[…]`, with polylux's `only`.
@@ -116,7 +116,8 @@ With [polylux](https://typst.app/universe/package/polylux), the same call goes i
 - **`only`** is the framework's `only`, passed in, as algoviz does not import a framework. It works with any function that takes a subslide number or a string such as `"3-"`, and a body. polylux 0.4.0 and touying 0.8.0 are tested.
 - **`steps`** selects the frames as for `algoviz-series`: `auto` for every frame, a range such as `"relax#2..-1"`, a section such as `"insert-5"`, or an array of selectors.
 - **`start`** is the subslide of the first frame. The last frame stays from its subslide to the end of the slide. Neither framework's `only` follows `#pause`, so after a `#pause` in touying, give the subslide yourself, such as `start: 2`.
-- **`width`, `height` and `fit`** size every frame as for `algoviz`; relative sizes such as `height: 75%` work in both frameworks. Each frame keeps its step's narration as `alt`.
+- **Size.** A frame fills the slide: it is as large as fits in the width of the region it is in and three quarters of its height, keeping its shape. A tall figure no longer runs off the slide, and a narrow one grows past its natural size. `width` and `height` replace their side of that box only, so `height: 60%` leaves room for text and is still capped by the width; they take lengths, ratios and relative lengths such as `100% - 2cm`. Two series side by side go in a `grid`, whose cells are the regions they fill. With `fit: "contain"`, the default, the series' box is the figure's size; `"cover"` and `"stretch"` make every frame the box itself, as `image` does. Figures of one document share a canvas, so they come out at one scale on slides with the same room. Each frame keeps its step's narration as `alt`.
+- **One figure on a slide.** `algoviz` and `algoviz-series` keep their natural size, as they cannot tell a slide from a page; use `algoviz-slides` with one step, such as `steps: "relax#3"`, to fill the slide.
 - A series of one frame is the image alone, on every subslide. An error shows in a box, as for `algoviz`.
 - In touying's handout mode, which keeps the last subslide of each slide, a series shows its last frame.
 

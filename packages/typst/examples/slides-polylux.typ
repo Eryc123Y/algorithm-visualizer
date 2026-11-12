@@ -9,13 +9,15 @@
 // node, s.
 #let input = "s-a 4, s-b 1, b-a 2, a-c 1, b-c 5, c-t 3"
 
-// polylux's own `only` shows each frame on its subslide.
+// polylux's own `only` shows each frame on its subslide. The figure fills
+// the slide's width and three quarters of its height.
 #slide[
   == Dijkstra's algorithm, step by step
-  #align(center, algoviz-slides(only, "dijkstra", input, height: 75%))
+  #align(center, algoviz-slides(only, "dijkstra", input))
 ]
 
-// A range of steps, starting on the second subslide.
+// A range of steps, starting on the second subslide; under a line of text,
+// at 60% of the height.
 #slide[
   == Settling $a$
   The queue hands out $a$, at distance 3, and relaxes its edges.
@@ -39,6 +41,5 @@
     (from: (8, 3, 10, 1, 6, 4, 7), key: 3),
     steps: "delete-3",
     theme: "print",
-    height: 75%,
   ))
 ]

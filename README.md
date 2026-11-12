@@ -152,7 +152,7 @@ In LaTeX, [the algoviz package](packages/latex/package/README.md) draws them wit
 
 The package is not on CTAN yet; its README says how to use it, and how to build the standalone `algoviz` it calls, until it is.
 
-In slides, a series steps through one frame per overlay, all in one picture ([ADR 0028](docs/adr/0028-slides.md)): `steps` in a Beamer frame, and `algoviz-slides` with polylux's or touying's own `only` in Typst.
+In slides, a series steps through one frame per overlay, all in one picture ([ADR 0028](docs/adr/0028-slides.md)): `steps` in a Beamer frame, and `algoviz-slides` with polylux's or touying's own `only` in Typst. A slide figure fills the frame's width and three quarters of its height, keeping its shape; `height` gives another share ([ADR 0033](docs/adr/0033-slide-figures-fill-the-frame.md)).
 
 ```latex
 \begin{frame}{Dijkstra's algorithm}
@@ -161,7 +161,7 @@ In slides, a series steps through one frame per overlay, all in one picture ([AD
 ```
 
 ```typ
-#algoviz-slides(only, "dijkstra", "A-B 4, B-C 1, A-C 7, C-D 2", steps: "relax#1..-1", height: 75%)
+#algoviz-slides(only, "dijkstra", "A-B 4, B-C 1, A-C 7, C-D 2", steps: "relax#1..-1")
 ```
 
 In code, `exportFigures(document, { steps, theme, layout })` from `@algoviz/svg` returns the same figures as strings, and `selectSeries` from `@algoviz/core` the frames that selectors name. `prepareFigures(document, { theme, layout })` loads a document once and then draws a figure of any frame, or any series, on demand.

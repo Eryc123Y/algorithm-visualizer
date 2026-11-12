@@ -143,6 +143,76 @@
   alt: if alt == auto { figure.at("narration", default: none) } else { alt },
 )
 
+// The share of a slide's height that a figure fills when `height` is
+// `auto` (ADR 0033): room is left for a title and a line or two of text.
+#let _slide-height = 75%
+
+// Checks a size argument of `algoviz-slides`: auto, a length, a ratio or
+// a relative length such as `100% - 2cm`.
+#let _slide-side(name, value) = {
+  if value != auto and type(value) not in (length, ratio, relative) {
+    panic(
+      "algoviz-slides: `"
+        + name
+        + "` takes a length or a ratio such as 60%, not "
+        + repr(type(value)),
+    )
+  }
+}
+
+#let _absolute(value) = if value.em == 0 { value.abs } else {
+  value.to-absolute()
+}
+
+// A ratio of a side of the region; 0% is nothing even of an unbounded
+// side, where the product would not be a number.
+#let _share(ratio, base) = if ratio == 0% { 0pt } else { ratio * base }
+
+// A size resolved against a side of the region.
+#let _resolve(value, base) = {
+  if type(value) == ratio { _share(value, base) } else if (
+    type(value) == relative
+  ) {
+    _share(value.ratio, base) + _absolute(value.length)
+  } else { _absolute(value) }
+}
+
+#let _finite(value) = value.abs.pt() < float.inf
+
+// One frame on a slide (ADR 0033): inside a box as wide as the region and
+// three quarters of its height, unless `width` or `height` gives a side.
+// With "contain" the figure keeps its shape and is the size it fills; with
+// "cover" and "stretch" it is the box. A side without a limit, in an
+// unbounded region, does not count.
+#let _slide-image(figure, width, height, fit, alt) = layout(region => {
+  let w = if width == auto { region.width } else {
+    _resolve(width, region.width)
+  }
+  let h = _resolve(
+    if height == auto { _slide-height } else { height },
+    region.height,
+  )
+  if fit != "contain" {
+    return _image(
+      figure,
+      if _finite(w) { w } else { auto },
+      if _finite(h) { h } else { auto },
+      fit,
+      alt,
+    )
+  }
+  let canvas = (width: figure.width * 1pt, height: figure.height * 1pt)
+  if canvas.width <= 0pt or canvas.height <= 0pt {
+    return _image(figure, auto, auto, fit, alt)
+  }
+  let scales = ()
+  if _finite(w) { scales.push(w / canvas.width) }
+  if _finite(h) { scales.push(h / canvas.height) }
+  if scales.len() == 0 { return _image(figure, auto, auto, fit, alt) }
+  let k = calc.max(0, calc.min(..scales))
+  _image(figure, k * canvas.width, k * canvas.height, fit, alt)
+})
+
 /// A figure of one step of an algorithm or a document.
 ///
 /// - source (str, dictionary): A registry id, such as "dijkstra", followed by
@@ -255,7 +325,14 @@
 ///   subslide, whatever `start` says.
 /// - layout (auto, str): As for `algoviz`, but "wide" by default, as slides
 ///   have room beside the main structure.
-/// - theme, strict, width, height, fit: As for `algoviz`.
+/// - width, height (auto, length, ratio, relative): The box the figure fills
+///   on the slide (ADR 0033). `auto` is the region's width and three
+///   quarters of its height; a value replaces its side only, so
+///   `height: 60%` is a smaller share, still capped by the width.
+/// - fit (str): "contain", the default, keeps the figure's shape and makes
+///   it as large as fits in the box; "cover" and "stretch" make it the box,
+///   as `image` does.
+/// - theme, strict: As for `algoviz`.
 /// -> content
 #let algoviz-slides(
   only,
@@ -282,6 +359,8 @@
         + repr(start),
     )
   }
+  _slide-side("width", width)
+  _slide-side("height", height)
   let request = _source("algoviz-slides", source, args)
   let response = _render(request + (
     steps: _selectors("algoviz-slides", steps),
@@ -293,16 +372,17 @@
   }
   let figures = response.figures
   if figures.len() == 1 {
-    return _image(figures.first(), width, height, fit, auto)
+    return _slide-image(figures.first(), width, height, fit, auto)
   }
-  // Each frame resolves its size against the same region as the hidden
-  // copy, so relative sizes such as `height: 70%` give one size for all.
+  // Each frame sizes itself with `layout` inside `only`, where touying
+  // still finds `only`; a layout placed in the box sees the same region as
+  // the hidden copy, so every frame gets the same size.
   let last = figures.len() - 1
   box({
-    hide(_image(figures.first(), width, height, fit, none))
+    hide(_slide-image(figures.first(), width, height, fit, none))
     for (k, figure) in figures.enumerate() {
       let subslides = if k == last { str(start + k) + "-" } else { start + k }
-      place(top + left, only(subslides, _image(
+      place(top + left, only(subslides, _slide-image(
         figure,
         width,
         height,

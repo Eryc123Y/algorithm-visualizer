@@ -9,12 +9,14 @@
 // node, s.
 #let input = "s-a 4, s-b 1, b-a 2, a-c 1, b-c 5, c-t 3"
 
-// touying's own `only` shows each frame on its subslide.
+// touying's own `only` shows each frame on its subslide. The figure fills
+// the slide's width and three quarters of its height.
 == Dijkstra's algorithm, step by step
 
-#align(center, algoviz-slides(only, "dijkstra", input, height: 75%))
+#align(center, algoviz-slides(only, "dijkstra", input))
 
-// After #pause, `start` names the subslide the series begins on.
+// After #pause, `start` names the subslide the series begins on. Under a
+// line of text, the figure takes 60% of the height.
 == Settling $a$
 
 The queue hands out $a$, at distance 3, and relaxes its edges.
@@ -39,5 +41,4 @@ The queue hands out $a$, at distance 3, and relaxes its edges.
   (from: (8, 3, 10, 1, 6, 4, 7), key: 3),
   steps: "delete-3",
   theme: "print",
-  height: 75%,
 ))
