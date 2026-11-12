@@ -9,6 +9,11 @@ const conditions = [
   'default',
 ];
 
+// The generated requests run FUZZ_RUNS cases, 30 by default; a deeper run
+// before a release gets time in proportion.
+const testTimeout =
+  120_000 * Math.max(1, Number(process.env['FUZZ_RUNS'] ?? 30) / 30);
+
 export default defineConfig({
   resolve: { conditions },
   ssr: { resolve: { conditions } },
@@ -20,6 +25,6 @@ export default defineConfig({
     exclude: ['tests/typst/**'],
     // The plugin tests bundle the engine and run it in WebAssembly first.
     hookTimeout: 120_000,
-    testTimeout: 120_000,
+    testTimeout,
   },
 });
