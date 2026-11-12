@@ -211,6 +211,7 @@ Independent of Phase 2, so the two can interleave.
   - The README and the guide are up to date.
   - Split in two, since the last run must follow 4.2:
     - part 1 (#132): evals for root lists, `btree`, list `move`, array patterns, `plane` and the priority queue in the side panel; `npm run sizes` and [the sizes](sizes.md);
+      - the CDN bundle minified, with source maps (#PR);
     - part 2, after 4.2: the README and the guide, deep fuzz, the full E2E suite and the Typst, LaTeX, standalone and Worker tests.
 
 ## After 1.0
