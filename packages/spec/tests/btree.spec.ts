@@ -151,6 +151,61 @@ describe('btree (ADR 0035)', () => {
         }),
       ),
     ).toMatchObject([{ path: '$.structures.T.nodes[0].keys' }]);
+    // A node that lists one child twice says so.
+    const twice = parseVisualization(
+      doc({
+        nodes: [
+          { id: 'r', keys: [1], children: ['a', 'a'] },
+          { id: 'a', keys: [] },
+        ],
+      }),
+    );
+    expect(twice.ok ? [] : twice.error.map((e) => e.message)).toContain(
+      'Node "r" lists "a" as a child twice',
+    );
+  });
+
+  it('holds at most 1,000 elements, nodes and keys together', () => {
+    // 31 leaves of 31 keys and a root of 30: 32 nodes and 991 keys.
+    const leaves = Array.from({ length: 31 }, (_, l) => ({
+      id: `l${l}`,
+      keys: Array.from({ length: 31 }, (_, k) => l * 100 + k),
+    }));
+    const root = {
+      id: 'r',
+      keys: Array.from({ length: 30 }, (_, k) => k * 100 + 50),
+      children: leaves.map((l) => l.id),
+    };
+    expect(errorsOf(doc({ nodes: [root, ...leaves] }))).toEqual([
+      { code: 'INVALID_STRUCTURE', path: '$.structures.T.nodes' },
+    ]);
+    const fewer = {
+      ...root,
+      keys: root.keys.slice(0, 29),
+      children: root.children.slice(0, 30),
+    };
+    expect(errorsOf(doc({ nodes: [fewer, ...leaves.slice(0, 30)] }))).toEqual(
+      [],
+    );
+  });
+
+  it('gives bare keys ids the author has not used', () => {
+    const t = parsed(
+      doc({
+        nodes: [{ id: 'k0', keys: [{ id: 'k1', value: 1 }, 2, 3] }],
+      }),
+    ).structures['T'];
+    expect(t).toMatchObject({
+      nodes: [
+        {
+          keys: [
+            { id: 'k1', value: 1 },
+            { id: 'k2', value: 2 },
+            { id: 'k3', value: 3 },
+          ],
+        },
+      ],
+    });
   });
 
   it('takes every action, and gives an inserted bare key an id', () => {

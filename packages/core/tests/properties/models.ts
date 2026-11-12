@@ -361,7 +361,14 @@ export function dataOf(entry: { kind: string; state: unknown }): unknown {
       return { kind: 'priorityQueue', ...(s['data'] as object) };
     case 'btree': {
       const data = s['data'] as { nodes: unknown; root: unknown };
-      return { kind: 'btree', nodes: data.nodes, root: data.root };
+      const marks = s['marks'] as { pointers: unknown; notes: unknown };
+      return {
+        kind: 'btree',
+        nodes: data.nodes,
+        root: data.root,
+        pointers: marks.pointers,
+        notes: marks.notes,
+      };
     }
     case 'tree': {
       const data = s['data'] as { nodes: unknown; roots: unknown };

@@ -1,8 +1,9 @@
 /**
  * The `btree` kind in the property tests (ADR 0035): random declarations
  * and actions, a plain model of the data written from the ADR's table of
- * actions rather than from the reducer, and the invariants every state
- * keeps.
+ * actions rather than from the reducer, with the pointers and notes that
+ * pass to the node that stays when a merge or shrink removes one, and the
+ * invariants every state keeps.
  */
 import { MAX_NODE_KEYS, type Scalar, type StructureDecl } from '@algoviz/spec';
 
@@ -20,6 +21,30 @@ export interface BTreeModel {
     readonly children: readonly string[];
   }[];
   readonly root: string;
+  /** Named pointers to node ids. */
+  readonly pointers: Readonly<Record<string, string>>;
+  /** Notes by node id. */
+  readonly notes: Readonly<Record<string, string>>;
+}
+
+const omit = (
+  rec: Readonly<Record<string, string>>,
+  name: string,
+): Record<string, string> =>
+  Object.fromEntries(Object.entries(rec).filter(([k]) => k !== name));
+
+/**
+ * The marks once node `gone` has given way to node `to`: pointers at it
+ * now point at `to`, and its note moves there unless `to` has one.
+ */
+function giveWay(m: BTreeModel, gone: string, to: string): BTreeModel {
+  const pointers: Record<string, string> = {};
+  for (const [name, id] of Object.entries(m.pointers))
+    pointers[name] = id === gone ? to : id;
+  const notes = omit(m.notes, gone);
+  if (Object.hasOwn(m.notes, gone) && !Object.hasOwn(m.notes, to))
+    notes[to] = m.notes[gone]!;
+  return { ...m, pointers, notes };
 }
 
 /** A tree of one or two levels, sometimes a keyless root. */
@@ -37,7 +62,8 @@ export function btreeDecl(r: Dice, label: object): StructureDecl {
   const m = 1 + r.int(3);
   const leaves = Array.from({ length: m + 1 }, (_, i) => ({
     id: `b${i}`,
-    keys: keys(r.int(4 * r.scale)),
+    // Now and then a leaf at or near the 32-key cap.
+    keys: keys(r.chance(0.1) ? MAX_NODE_KEYS - r.int(3) : r.int(4 * r.scale)),
   }));
   return {
     kind: 'btree',
@@ -124,6 +150,8 @@ export function initBTreeModel(
       children: [...(n.children ?? [])],
     })),
     root: decl.root,
+    pointers: {},
+    notes: {},
   };
 }
 
@@ -132,6 +160,43 @@ export function applyBTreeModel(
   m: BTreeModel,
   a: Fields,
 ): BTreeModel | undefined {
+  const next = applyShape(m, a);
+  if (next === undefined) return undefined;
+  switch (a['type']) {
+    case 'pointer': {
+      const name = a['name'] as string;
+      return {
+        ...next,
+        pointers:
+          a['node'] === null
+            ? omit(m.pointers, name)
+            : { ...m.pointers, [name]: a['node'] as string },
+      };
+    }
+    case 'annotate': {
+      const node = a['node'] as string;
+      return {
+        ...next,
+        notes:
+          a['text'] === null
+            ? omit(m.notes, node)
+            : { ...m.notes, [node]: a['text'] as string },
+      };
+    }
+    case 'merge': {
+      const x = m.nodes.find((n) => n.id === a['node'])!;
+      const i = a['index'] as number;
+      return giveWay(next, x.children[i + 1]!, x.children[i]!);
+    }
+    case 'shrink':
+      return giveWay(next, m.root, next.root);
+    default:
+      return next;
+  }
+}
+
+/** The nodes and keys after an action, or undefined if it is refused. */
+function applyShape(m: BTreeModel, a: Fields): BTreeModel | undefined {
   const find = (id: unknown) => m.nodes.find((n) => n.id === id);
   const holder = (id: unknown) =>
     m.nodes.find((n) => n.keys.some((k) => k.id === id));
@@ -328,7 +393,12 @@ export function applyBTreeModel(
 export function btreeProblems(s: BTreeState): string[] {
   const problems: string[] = [];
   const nodes = new Map(s.data.nodes.map((n) => [n.id, n]));
-  const keys = new Set(s.data.nodes.flatMap((n) => n.keys.map((k) => k.id)));
+  const keyIds = s.data.nodes.flatMap((n) => n.keys.map((k) => k.id));
+  const keys = new Set(keyIds);
+  if (keys.size !== keyIds.length) problems.push('two keys share an id');
+  for (const k of keyIds)
+    if (s.data.nodes.some((n) => n.id === k))
+      problems.push(`a key and a node share the id ${k}`);
   if (!nodes.has(s.data.root)) problems.push('the root is not a node');
   const seen = new Set<string>();
   const walk = (id: string) => {

@@ -211,6 +211,58 @@ describe('btree reducer', () => {
     expect(
       errorsOf(doc(uneven, [[{ type: 'merge', node: 'r', index: 0 }]])),
     ).toEqual([{ code: 'INVALID_OPERATION', path: at('.index') }]);
+    // A new key may not take an id in use.
+    expect(
+      one({
+        type: 'insertKey',
+        node: 'b',
+        index: 0,
+        key: { id: 'g', value: 1 },
+      }),
+    ).toEqual([{ code: 'DUPLICATE_ID', path: at('.key.id') }]);
+  });
+
+  it('refuses a 33rd key in a node, however it would come', () => {
+    const keys = (from: number, n: number, prefix: string) =>
+      Array.from({ length: n }, (_, k) => ({
+        id: `${prefix}${k}`,
+        value: from + k,
+      }));
+    // A leaf of 32 keys next to a leaf of one.
+    const full = [
+      { id: 'r', keys: [{ id: 'm', value: 50 }], children: ['l', 's'] },
+      { id: 'l', keys: keys(0, 32, 'l') },
+      { id: 's', keys: [{ id: 's0', value: 60 }] },
+    ];
+    const one = (action: Action) => errorsOf(doc(full, [[action]]));
+    const at = (field: string) => `$.steps[0].actions[0]${field}`;
+    expect(one({ type: 'insertKey', node: 'l', index: 0, key: -1 })).toEqual([
+      { code: 'LIMIT_EXCEEDED', path: at('.node') },
+    ]);
+    expect(one({ type: 'merge', node: 'r', index: 0 })).toEqual([
+      { code: 'LIMIT_EXCEEDED', path: at('.index') },
+    ]);
+    expect(one({ type: 'borrow', node: 'r', child: 0, from: 'right' })).toEqual(
+      [{ code: 'LIMIT_EXCEEDED', path: at('.child') }],
+    );
+    // A parent of 32 keys cannot take the middle key of a split child.
+    const wide = [
+      {
+        id: 'r',
+        keys: keys(10, 32, 'r').map((k, i) => ({ ...k, value: 10 * (i + 1) })),
+        children: Array.from({ length: 33 }, (_, c) => `c${c}`),
+      },
+      { id: 'c0', keys: keys(1, 3, 'x') },
+      ...Array.from({ length: 32 }, (_, c) => ({
+        id: `c${c + 1}`,
+        keys: [{ id: `y${c}`, value: 10 * (c + 1) + 5 }],
+      })),
+    ];
+    expect(
+      errorsOf(
+        doc(wide, [[{ type: 'split', node: 'r', index: 0, newNode: 'z' }]]),
+      ),
+    ).toEqual([{ code: 'LIMIT_EXCEEDED', path: at('.node') }]);
   });
 });
 

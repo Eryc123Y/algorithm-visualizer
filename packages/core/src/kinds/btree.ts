@@ -168,6 +168,13 @@ function reduceBTree(s: BTreeState, a: BTreeAction): Reduced {
           ),
         );
       if (n.keys.length >= MAX_NODE_KEYS) return err(tooMany(['node'], n.id));
+      if (holder(a.key.id) !== undefined || nodeOf(a.key.id) !== undefined)
+        return err({
+          code: 'DUPLICATE_ID',
+          path: ['key', 'id'],
+          message: `The id "${a.key.id}" is already used`,
+          hint: 'Give the new key a new id.',
+        });
       const keys = [...n.keys];
       keys.splice(a.index, 0, a.key);
       return result({ nodes: put(data.nodes, { ...n, keys }) });

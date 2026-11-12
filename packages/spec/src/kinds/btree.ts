@@ -94,12 +94,19 @@ const NO_ROOT = '';
 
 function normalizeBTreeDecl(input: BTreeDeclInput): BTreeDecl {
   const { nodes: given = [{ id: 'root', keys: [] }], root, ...rest } = input;
+  // Generated key ids skip the ids the author wrote.
+  const taken = new Set([
+    ...given.map((n) => n.id),
+    ...given.flatMap((n) => n.keys.filter(isElement).map((k) => k.id)),
+  ]);
   let next = 0;
+  const fresh = (): string => {
+    while (taken.has(`k${next}`)) next++;
+    return `k${next++}`;
+  };
   const nodes = given.map((n): BTreeNode => ({
     id: n.id,
-    keys: n.keys.map((k) =>
-      isElement(k) ? k : { id: `k${next++}`, value: k },
-    ),
+    keys: n.keys.map((k) => (isElement(k) ? k : { id: fresh(), value: k })),
     ...(n.children === undefined ? {} : { children: n.children }),
   }));
   if (root !== undefined) return { ...rest, nodes, root };
@@ -112,9 +119,15 @@ function normalizeBTreeDecl(input: BTreeDeclInput): BTreeDecl {
   };
 }
 
-/** Shape rules: child counts, one parent each, one root, no cycles. */
+/** Shape rules: size, child counts, one parent each, one root, no cycles. */
 export function validateBTreeDecl(decl: BTreeDecl): DeclIssue[] {
   const issues: DeclIssue[] = [];
+  const total = decl.nodes.reduce((n, node) => n + 1 + node.keys.length, 0);
+  if (total > LIMITS.elementsPerStructure)
+    issues.push({
+      path: ['nodes'],
+      message: `The tree holds ${total} elements, nodes and keys together; at most ${LIMITS.elementsPerStructure} are allowed`,
+    });
   const index = new Map(decl.nodes.map((n, k) => [n.id, k]));
   const parent = new Map<string, string>();
   decl.nodes.forEach((node, k) => {
@@ -134,7 +147,10 @@ export function validateBTreeDecl(decl: BTreeDecl): DeclIssue[] {
       else if (parent.has(child))
         issues.push({
           path,
-          message: `Node "${child}" has two parents ("${parent.get(child)}" and "${node.id}")`,
+          message:
+            parent.get(child) === node.id
+              ? `Node "${node.id}" lists "${child}" as a child twice`
+              : `Node "${child}" has two parents ("${parent.get(child)}" and "${node.id}")`,
         });
       else parent.set(child, node.id);
     });
