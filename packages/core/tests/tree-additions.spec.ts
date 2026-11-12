@@ -357,6 +357,32 @@ function scenes(input: unknown): Scene[] {
   return Array.from({ length: trace.length + 1 }, (_, k) => layout.sceneAt(k));
 }
 
+/** Whether a node's note keeps clear of a straight or routed edge. */
+function noteClearOf(n: SceneNode, e: SceneEdge): boolean {
+  const size = Math.max(10, n.fontSize * 0.7);
+  const box = noteBox(
+    { x: n.x, y: n.y, radius: n.radius, halfWidth: n.radius },
+    n.labelAngle ?? 0,
+    (textWidth(n.label!, defaultFonts.value) * size) / 2,
+    size,
+  );
+  const points = [{ x: e.x1, y: e.y1 }, ...(e.via ?? []), { x: e.x2, y: e.y2 }];
+  return points.slice(1).every((q, k) => {
+    const p = points[k]!;
+    // Sample the segment; a crossing comes within the box.
+    for (let t = 0; t <= 1; t += 1 / 64) {
+      const x = p.x + (q.x - p.x) * t;
+      const y = p.y + (q.y - p.y) * t;
+      if (
+        Math.abs(x - box.x) < box.halfWidth &&
+        Math.abs(y - box.y) < box.halfHeight
+      )
+        return false;
+    }
+    return true;
+  });
+}
+
 const item = <T extends Scene['items'][number]>(
   scene: Scene,
   key: string,
@@ -581,6 +607,64 @@ describe('layout of the additions', () => {
       Math.abs(note.x - min.x) >= note.halfWidth + min.width / 2 ||
       Math.abs(note.y - min.y) >= note.halfHeight + min.height / 2;
     expect(apart).toBe(true);
+  });
+
+  it('keeps a short note clear of its parent edge, though another note is long', () => {
+    // b hangs left of a, so its parent edge comes from the upper right;
+    // d's long note must not make b's note find no place.
+    const frames = scenes(
+      doc(
+        {
+          nodes: [
+            { id: 'a', value: 24, children: ['b', 'c'] },
+            { id: 'b', value: 26 },
+            { id: 'c', value: 46 },
+            { id: 'd', value: 7 },
+          ],
+        },
+        [
+          [
+            { type: 'annotate', node: 'b', field: 'mark', text: 'marked' },
+            { type: 'annotate', node: 'd', field: 'mark', text: 'marked' },
+            { type: 'annotate', node: 'd', field: 'deg', text: 'd=12' },
+          ],
+        ],
+      ),
+    );
+    const scene = frames[1]!;
+    const b = item<SceneNode>(scene, 't/element/b');
+    const edge = item<SceneEdge>(scene, 't/edge/b');
+    expect(noteClearOf(b, edge)).toBe(true);
+  });
+
+  it('puts a root’s note off the root list', () => {
+    const frames = scenes(
+      doc(
+        {
+          // c has a child, so the place below it is taken too.
+          nodes: [
+            { id: 'a', value: 'a', children: ['b'] },
+            { id: 'b', value: 'b' },
+            { id: 'c', value: 'c', children: ['e'] },
+            { id: 'e', value: 'e' },
+            { id: 'd', value: 'd' },
+          ],
+          rootList: 'circular',
+        },
+        [
+          [
+            { type: 'pointer', name: 'min', node: 'c' },
+            { type: 'annotate', node: 'c', field: 'deg', text: 'd=1' },
+          ],
+        ],
+      ),
+    );
+    const scene = frames[1]!;
+    const c = item<SceneNode>(scene, 't/element/c');
+    for (const link of scene.items.filter(
+      (i): i is SceneEdge => i.type === 'edge' && i.key.includes('root-'),
+    ))
+      expect(noteClearOf(c, link), link.key).toBe(true);
   });
 
   it('draws a plain list without the wrap link', () => {
