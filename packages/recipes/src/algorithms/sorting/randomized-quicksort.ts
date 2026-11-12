@@ -19,8 +19,10 @@ export const randomizedQuicksort = defineAlgorithm({
   input: SortInput.extend({ seed: seedField }),
   main: 'values',
   examples: [
-    { ...SAMPLE, seed: 1 },
-    { values: [1, 2, 3, 4, 5, 6, 7, 8], seed: 3 },
+    // Seed 7 draws the median, 5, as the first pivot.
+    { ...SAMPLE, seed: 7 },
+    // Sorted input, PARTITION's worst case, splits evenly with seed 6.
+    { values: [1, 2, 3, 4, 5, 6, 7, 8], seed: 6 },
   ],
   code: {
     pseudocode: `
