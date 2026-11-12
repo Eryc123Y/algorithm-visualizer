@@ -19,7 +19,10 @@ const less = (a: K, b: K) =>
 
 export class RefBTree {
   root: RNode = { keys: [], c: [] };
-  constructor(readonly t: number) {}
+  readonly t: number;
+  constructor(t: number) {
+    this.t = t;
+  }
 
   #leaf = (x: RNode) => x.c.length === 0;
   #index = (x: RNode, k: K) => {
