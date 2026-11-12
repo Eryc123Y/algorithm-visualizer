@@ -10,6 +10,7 @@ import {
   type TreeState,
 } from '../../src/index.ts';
 import { btreeProblems } from './btree-model.ts';
+import { planeProblems } from './plane-model.ts';
 
 type Keyed = { readonly id: string; readonly key: number | null };
 
@@ -80,6 +81,8 @@ export function stateProblems(entry: KindedState): string[] {
   switch (entry.kind) {
     case 'btree':
       return btreeProblems(entry.state);
+    case 'plane':
+      return planeProblems(entry.state);
     case 'array': {
       const { data, marks } = entry.state;
       const n = data.length;

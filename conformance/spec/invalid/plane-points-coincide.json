@@ -1,0 +1,19 @@
+{
+  "description": "Two points at the same coordinates would draw as one.",
+  "input": {
+    "version": "0.9",
+    "structures": {
+      "P": {
+        "kind": "plane",
+        "points": [
+          { "id": "a", "x": 1, "y": 2 },
+          { "id": "b", "x": 1, "y": 2 }
+        ]
+      }
+    },
+    "steps": []
+  },
+  "expectedErrors": [
+    { "code": "INVALID_STRUCTURE", "path": "$.structures.P.points[1]" }
+  ]
+}

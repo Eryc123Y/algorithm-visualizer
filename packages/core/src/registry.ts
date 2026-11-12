@@ -7,6 +7,7 @@ import type { KindTypeMap, StructureKindName } from '@algoviz/spec';
 import type { KindRuntime } from './kind.ts';
 import { arrayKind } from './kinds/array.ts';
 import { btreeKind } from './kinds/btree.ts';
+import { planeKind } from './kinds/plane.ts';
 import { graphKind } from './kinds/graph.ts';
 import { hashTableKind } from './kinds/hash-table.ts';
 import { linkedListKind } from './kinds/linked-list.ts';
@@ -61,6 +62,11 @@ import {
   measureBTree,
   mergeBTreeMetrics,
 } from './layout/btree.ts';
+import {
+  layoutPlane,
+  measurePlane,
+  mergePlaneMetrics,
+} from './layout/plane.ts';
 
 const registry = {
   array: {
@@ -116,6 +122,12 @@ const registry = {
     measure: measurePriorityQueue,
     mergeMetrics: mergePriorityQueueMetrics,
     layout: layoutPriorityQueue,
+  },
+  plane: {
+    ...planeKind,
+    measure: measurePlane,
+    mergeMetrics: mergePlaneMetrics,
+    layout: layoutPlane,
   },
   btree: {
     ...btreeKind,
