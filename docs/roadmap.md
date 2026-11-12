@@ -168,7 +168,7 @@ Each entry is one registry module, or one per operation for data structures. Eac
 - [~] string matching: naive, Rabin–Karp, finite automaton, KMP (S9, [ADR 0037](adr/0037-array-pattern.md))
 - [ ] suffix array
 - [ ] approximation: vertex cover, TSP tour, set cover
-- [ ] computational geometry, 3rd edition: segment intersection, Graham scan, Jarvis march, closest pair (S8)
+- [~] computational geometry, 3rd edition: segment intersection, Graham scan, Jarvis march, closest pair (S8, [ADR 0038](adr/0038-plane-kind.md))
 
 Recipes that exist beyond CLRS stay: bubble and selection sort, binary search, list reversal, bracket matching, AVL, trie, binary heap run, edit distance and 0/1 knapsack.
 
