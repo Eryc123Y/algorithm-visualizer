@@ -2185,3 +2185,24 @@ recipe(
     );
   },
 );
+
+// Greedy set cover: small families over a few elements.
+recipe(
+  'greedy-set-cover',
+  fc
+    .array(fc.subarray(['a', 'b', 'c', 'd', 'e', 'f'], { minLength: 1 }), {
+      minLength: 1,
+      maxLength: 6,
+    })
+    .map((ms) => ms.map((m, k): [string, string[]] => [`S${k}`, m])),
+  (subsets) => runOk('greedy-set-cover', { subsets }).document,
+  (trace, subsets) => {
+    // The ticked subsets cover every element.
+    const rows = stateOf(trace, 'F', 'table').data;
+    const last = rows[0]!.length - 1;
+    const covered = new Set(
+      subsets.flatMap(([, m], k) => (rows[k]![last] === '✓' ? m : [])),
+    );
+    expect(covered.size).toBe(new Set(subsets.flatMap(([, m]) => m)).size);
+  },
+);
