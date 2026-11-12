@@ -33,7 +33,7 @@ export function btreeDecl(r: Dice, label: object): StructureDecl {
       ...label,
       nodes: [{ id: 'r', keys: keys(r.int(4)) }],
       root: 'r',
-    } as StructureDecl;
+    };
   const m = 1 + r.int(3);
   const leaves = Array.from({ length: m + 1 }, (_, i) => ({
     id: `b${i}`,
@@ -47,7 +47,7 @@ export function btreeDecl(r: Dice, label: object): StructureDecl {
       ...leaves,
     ],
     root: 'r',
-  } as StructureDecl;
+  };
 }
 
 export function btreeAction(s: BTreeState, r: Dice): Fields {
