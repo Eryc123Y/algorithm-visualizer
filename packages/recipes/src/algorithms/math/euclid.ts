@@ -13,7 +13,10 @@ import { z } from 'zod';
 
 import { defineAlgorithm } from '../../algorithm.ts';
 
-/** Largest operand: at most 45 calls, the rows of one table. */
+/**
+ * Largest operand: at most 44 rows of calls, base included, for F43 and
+ * F44, the largest neighbouring Fibonacci numbers allowed.
+ */
 export const MAX_EUCLID = 1_000_000_000;
 
 const Operand = z
@@ -30,6 +33,9 @@ const Input = z
   });
 
 const minus = (x: number) => (x < 0 ? `−${-x}` : String(x));
+
+/** A number in brackets when it is negative, for a sum. */
+const paren = (x: number) => (x < 0 ? `(${minus(x)})` : String(x));
 
 /** The calls EUCLID makes from (a, b), the last one with b = 0. */
 export function calls(a: number, b: number): [number, number][] {
@@ -79,9 +85,7 @@ export const euclid = defineAlgorithm({
           { vars: { a, b } },
         );
         table.set({ cell: [k, 0], value: a }).set({ cell: [k, 1], value: 0 });
-        table.settle({
-          cells: rows.map((_, i) => [i, 0] as [number, number]),
-        });
+        table.settle({ cells: [[k, 0]] });
         return;
       }
       trace.step(
@@ -181,9 +185,15 @@ export const extendedEuclid = defineAlgorithm({
           ],
         });
     }
+    // The answer, in the first row: on the last return step, or on the
+    // base step when b was 0 from the start.
+    table.settle({
+      cells: [
+        [0, 3],
+        [0, 4],
+        [0, 5],
+      ],
+    });
     return { results: [d, x, y] };
   },
 });
-
-/** A number in brackets when it is negative, for a sum. */
-const paren = (x: number) => (x < 0 ? `(${minus(x)})` : String(x));

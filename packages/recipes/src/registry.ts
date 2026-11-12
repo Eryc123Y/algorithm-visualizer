@@ -48,6 +48,7 @@ import { finiteAutomatonMatcher } from './algorithms/strings/finite-automaton.ts
 import { kmp } from './algorithms/strings/kmp.ts';
 import { strassen } from './algorithms/foundations/strassen.ts';
 import { lup } from './algorithms/math/lup.ts';
+import { fft } from './algorithms/math/fft.ts';
 import { euclid, extendedEuclid } from './algorithms/math/euclid.ts';
 import { modularExponentiation } from './algorithms/math/modular-exponentiation.ts';
 import { naiveStringMatcher } from './algorithms/strings/naive.ts';
@@ -129,6 +130,7 @@ export const algorithms: readonly Algorithm[] = [
   jarvisMarch,
   closestPair,
   lup,
+  fft,
   euclid,
   extendedEuclid,
   modularExponentiation,
