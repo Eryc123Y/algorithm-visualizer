@@ -200,15 +200,21 @@ export function measureTree(
   };
 }
 
-/** Per-key maxima of two records. */
+/**
+ * Per-key maxima of two records, built as own properties, so a node id
+ * such as `__proto__` is kept like any other.
+ */
 function mergeMax(
   a: Readonly<Record<string, number>>,
   b: Readonly<Record<string, number>>,
 ): Record<string, number> {
-  const out: Record<string, number> = { ...a };
-  for (const [k, v] of Object.entries(b))
-    out[k] = Object.hasOwn(out, k) ? Math.max(out[k]!, v) : v;
-  return out;
+  return Object.fromEntries([
+    ...Object.entries(a).map(([k, v]) => [
+      k,
+      Object.hasOwn(b, k) ? Math.max(v, b[k]!) : v,
+    ]),
+    ...Object.entries(b).filter(([k]) => !Object.hasOwn(a, k)),
+  ]);
 }
 
 export const mergeTreeMetrics = (
@@ -278,7 +284,11 @@ export function layoutTree({
   const noteHalf = noteTextWidth(metrics.noteWidth, shape) / 2;
   const noteAt = (x: number, y: number, angle: number) =>
     noteRegion({ x, y, radius, halfWidth }, angle, noteHalf, noteFont);
-  /** The region of the notes of node `id`, the widest it ever has. */
+  /**
+   * The region of the notes of node `id`, the widest it ever has: the
+   * choice of angle uses each node's own width, while the margins above
+   * keep room for the widest note of the trace.
+   */
   const nodeNoteAt = (id: string, x: number, y: number, angle: number) =>
     noteRegion(
       { x, y, radius, halfWidth },

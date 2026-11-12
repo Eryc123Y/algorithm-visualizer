@@ -361,7 +361,12 @@ function scenes(input: unknown): Scene[] {
 function noteClearOf(n: SceneNode, e: SceneEdge): boolean {
   const size = Math.max(10, n.fontSize * 0.7);
   const box = noteBox(
-    { x: n.x, y: n.y, radius: n.radius, halfWidth: n.radius },
+    {
+      x: n.x,
+      y: n.y,
+      radius: n.radius,
+      halfWidth: n.width ? n.width / 2 : n.radius,
+    },
     n.labelAngle ?? 0,
     (textWidth(n.label!, defaultFonts.value) * size) / 2,
     size,
