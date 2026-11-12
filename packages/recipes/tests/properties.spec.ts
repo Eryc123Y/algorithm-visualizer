@@ -511,6 +511,39 @@ recipe(
   },
 );
 
+recipe(
+  'order-statistic-tree',
+  fc
+    .tuple(
+      fc.uniqueArray(smallInt, { minLength: 1, maxLength: 24 }),
+      fc.array(
+        fc.oneof(
+          fc.record({
+            op: fc.constantFrom('insert', 'delete', 'rank'),
+            key: smallInt,
+          }),
+          fc.record({ op: fc.constant('select'), i: fc.constant(1) }),
+        ),
+        { minLength: 1, maxLength: 8 },
+      ),
+    )
+    // Keep the first key, so that every select of rank 1 has one to find.
+    .map(([from, ops]) => ({
+      from,
+      ops: ops.map((o) =>
+        o.op === 'delete' && o.key === from[0] ? { ...o, key: o.key + 101 } : o,
+      ),
+    })),
+  (input) => runOk('order-statistic-tree', input).document,
+  (trace, { from, ops }) => {
+    const keys = new Set(from);
+    for (const o of ops)
+      if (o.op === 'insert') keys.add(o.key);
+      else if (o.op === 'delete') keys.delete(o.key);
+    expect(inorder(stateOf(trace, 'T', 'tree'))).toEqual(ascending([...keys]));
+  },
+);
+
 /**
  * A valid LeetCode level order: the root, then for every node in order
  * its two slots, then possibly a few trailing nulls.
