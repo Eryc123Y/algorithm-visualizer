@@ -1647,6 +1647,34 @@ recipe(
   },
 );
 
+recipe(
+  'gale-shapley',
+  fc.integer({ min: 1, max: 6 }).chain((n) => {
+    const ps = Array.from({ length: n }, (_, k) => `p${k}`);
+    const rs = Array.from({ length: n }, (_, k) => `r${k}`);
+    const ranking = (names: string[]) =>
+      fc.shuffledSubarray(names, { minLength: n });
+    return fc.record({
+      proposers: fc
+        .tuple(...ps.map(() => ranking(rs)))
+        .map((ls) => ps.map((p, k): [string, string[]] => [p, ls[k]!])),
+      receivers: fc
+        .tuple(...rs.map(() => ranking(ps)))
+        .map((ls) => rs.map((r, k): [string, string[]] => [r, ls[k]!])),
+    });
+  }),
+  (input) => runOk('gale-shapley', input).document,
+  (trace, input) => {
+    // Everyone ends engaged, once, and only engagements are drawn.
+    const g = stateOf(trace, 'g', 'graph');
+    const ends = g.data.edges.flatMap((e) => {
+      expect(g.marks.edgeMarks[e.id]).toBe('selected');
+      return [e.from, e.to];
+    });
+    expect(new Set(ends).size).toBe(2 * input.proposers.length);
+  },
+);
+
 describe('topological-sort input checks', () => {
   it(
     'refuses a graph with a cycle, and only such a graph',
