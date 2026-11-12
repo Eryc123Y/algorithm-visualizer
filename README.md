@@ -6,7 +6,7 @@ The project was called algoviz until [ADR 0044](docs/adr/0044-the-name-algomotio
 
 A visualization is a declarative JSON document: the structures involved and a timeline of steps, each applying actions such as `compare` or `swap`. People write it with code, LLMs write it directly, and the library validates it and renders it as an interactive player, a static image, or a figure in Typst or LaTeX.
 
-> Status: early development. Eight structure kinds work end to end (protocol, timeline engine, layout, static SVG and an interactive player), with ready-made visualizations of the classic undergraduate algorithms, and an MCP server through which models write, check and render documents.
+> Status: release candidate for 1.0, not yet published (roadmap 4.3). The protocol is frozen at 1.0. Eleven structure kinds work end to end (protocol, timeline engine, layout, static SVG, the interactive player, Typst and LaTeX), with ready-made visualizations of the algorithms and data structures of CLRS, and an MCP server through which models write, check and render documents.
 
 ```json
 {
@@ -27,17 +27,19 @@ A visualization is a declarative JSON document: the structures involved and a ti
 
 ## Structures
 
-| Kind            | For                                                        | Notable actions                                              |
-| --------------- | ---------------------------------------------------------- | ------------------------------------------------------------ |
-| `array`         | sorting, searching, two pointers; `view: "heap"` for heaps | `compare` `swap` `set` `insert` `remove` `pointer` `settle`  |
-| `stack`         | call stacks, bracket matching, DFS                         | `push` `pop` `peek`                                          |
-| `queue`         | BFS, schedulers; also a deque                              | `enqueue` `dequeue` `pushFront` `popBack` `peek`             |
-| `linkedList`    | singly, doubly and circular lists                          | `insert` `remove` `link` `pointer` `visit`                   |
-| `tree`          | BST, AVL, red–black, tries, recursion trees, union–find    | `addNode` `setChild` `rotate` `setColor` `annotate` `visit`  |
-| `graph`         | traversals, shortest paths, spanning trees, flows          | `addEdge` `setWeight` `markEdge` `annotate` `visit` `settle` |
-| `table`         | dynamic programming, adjacency matrices                    | `set` `depend` `highlight` `settle`                          |
-| `hashTable`     | separate chaining                                          | `insert` `remove` `highlight` `settle`                       |
-| `priorityQueue` | Dijkstra's and Prim's queue: items in key order            | `insert` `extract` `setKey` `peek`                           |
+| Kind            | For                                                                                | Notable actions                                                             |
+| --------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `array`         | sorting, searching, two pointers; `view: "heap"` for heaps; a pattern under a text | `compare` `swap` `set` `insert` `remove` `pointer` `settle` `align` `check` |
+| `stack`         | call stacks, bracket matching, DFS                                                 | `push` `pop` `peek`                                                         |
+| `queue`         | BFS, schedulers; also a deque                                                      | `enqueue` `dequeue` `pushFront` `popBack` `peek`                            |
+| `linkedList`    | singly, doubly and circular lists; move-to-front                                   | `insert` `remove` `move` `link` `pointer` `visit`                           |
+| `tree`          | BST, AVL, red–black, tries, recursion trees, union–find                            | `addNode` `setChild` `rotate` `setColor` `annotate` `visit`                 |
+| `btree`         | B-trees: keys that move between nodes                                              | `insertKey` `split` `merge` `borrow` `lift` `settle`                        |
+| `graph`         | traversals, shortest paths, spanning trees, flows                                  | `addEdge` `setWeight` `markEdge` `annotate` `visit` `settle`                |
+| `table`         | dynamic programming, adjacency matrices                                            | `set` `depend` `highlight` `settle`                                         |
+| `hashTable`     | separate chaining                                                                  | `insert` `remove` `highlight` `settle`                                      |
+| `priorityQueue` | Dijkstra's and Prim's queue: items in key order                                    | `insert` `extract` `setKey` `peek`                                          |
+| `plane`         | computational geometry: points and segments                                        | `addPoint` `addSegment` `removeSegment` `compare` `select`                  |
 
 Shorthands keep documents short: `"initial": [5, 3, 8]` generates element ids, a tree can be given in LeetCode `levelOrder`, and a graph as `"nodes": ["A", "B"]` with `"edges": [["A", "B", 4]]`. The JSON Schema is in [`packages/spec/schema`](packages/spec/schema).
 
@@ -65,20 +67,22 @@ const mine = r.build();
 
 The registry holds these modules, by topic ([ADR 0022](docs/adr/0022-registry-details.md), [ADR 0023](docs/adr/0023-remaining-modules.md)). They follow the procedures of CLRS where CLRS has them.
 
-- **Sorting:** `insertion-sort`, `merge-sort`, `heapsort`, `quicksort`, `counting-sort`, `bubble-sort`, `selection-sort`.
-- **Searching:** `binary-search`.
-- **Lists:** `reverse-linked-list`, `move-to-front`, `balanced-brackets`.
+- **Sorting:** `insertion-sort`, `merge-sort`, `heapsort`, `quicksort`, `randomized-quicksort`, `counting-sort`, `radix-sort`, `bucket-sort`, `bubble-sort`, `selection-sort`.
+- **Searching:** `binary-search`, `randomized-select`, `select`.
+- **Lists, stacks and queues:** `reverse-linked-list`, `move-to-front`, `balanced-brackets`, `stack` (push, pop), `queue` (enqueue, dequeue), `linked-list` (search, prepend, insert, delete).
 - **Trees:** `bst` (search, insert, delete), `avl` (insert), `red-black-tree` (insert, delete), `order-statistic-tree` (select, rank, insert, delete), `interval-tree` (search, insert, delete), `b-tree` (search, insert, delete), `inorder-tree-walk`, `preorder-tree-walk`, `postorder-tree-walk`, `trie` (insert, search), `disjoint-set` (union, find-set).
 - **Heaps:** `min-heap` (push, pop, decrease-key), `max-heap` (push, pop, increase-key), `fibonacci-heap` (insert, union, extract-min, decrease-key, delete).
-- **Hashing:** `hash-chaining` and `linear-probing`, each with insert and search.
+- **Hashing:** `hash-chaining`, `linear-probing`, `quadratic-probing` and `double-hashing`, each with insert and search.
 - **Graphs:** `bfs`, `dfs`, `topological-sort`, `strongly-connected-components`, `dijkstra`, `bellman-ford`, `dag-shortest-paths`, `prim`, `kruskal`, `floyd-warshall`, `transitive-closure`, `johnson`, `edmonds-karp`, `bipartite-matching`, `hopcroft-karp`, `gale-shapley`, `hungarian`, `approx-vertex-cover`, `approx-tsp-tour`.
-- **Dynamic programming:** `lcs`, `edit-distance`, `knapsack`.
-- **Greedy algorithms:** `huffman`, `greedy-set-cover`.
+- **Dynamic programming:** `lcs`, `edit-distance`, `knapsack`, `rod-cutting`, `matrix-chain`, `optimal-bst`.
+- **Greedy algorithms:** `activity-selection`, `huffman`, `offline-caching`, `greedy-set-cover`.
 - **String matching:** `naive-string-matcher`, `rabin-karp`, `finite-automaton-matcher`, `kmp`, `suffix-array`.
 - **Computational geometry:** `any-segments-intersect`, `graham-scan`, `jarvis-march`, `closest-pair`.
 - **Algebra and number theory:** `lup-decomposition`, `fft`, `euclid`, `extended-euclid`, `modular-exponentiation`.
+- **Divide and conquer, randomization:** `strassen`, `recursion-tree`, `random-permutation`.
+- **Amortized analysis:** `dynamic-table`, `binary-counter`.
 
-A data structure has one module per operation, such as `bst.delete`, which starts from a structure the caller describes, and one for its sequence, such as `bst`, which runs up to 8 operations. `algorithms` lists every module.
+A data structure has one module per operation, such as `bst.delete`, which starts from a structure the caller describes, and one for its sequence, such as `bst`, which runs up to 8 operations. `algorithms` lists every module: 132 of them.
 
 ### Inputs
 
@@ -111,7 +115,7 @@ MCP, the `algomotion` command line and the playground's example menu read the re
 
 ## For models
 
-[`@algomotion/mcp`](packages/mcp) lets a model write documents: it reads a guide written for models, validates its document (every step is replayed, and each error says where and why), inspects the state at any frame to check the result, and renders frames to SVG. In clients that display MCP Apps, `algomotion_show` then opens the interactive player right in the conversation. For a ready-made algorithm a model writes no document at all: `algomotion_show { "recipe": "dijkstra", "input": "A-B 4, B-C 1, A-C 7" }` shows it, and `algomotion_render` and `algomotion_inspect` take a recipe the same way. With the address of a share page set (`ALGOMOTION_SHARE_URL`), `algomotion_show` and `algomotion_run_recipe` also return a share link, which opens the visualization in any browser: the link carries the recipe and its input, or the whole document compressed, after the `#`, so no server ever stores it ([ADR 0040](docs/adr/0040-share-links.md)). `apps/site` builds the share page, with the documentation. The same tools work as the `algomotion` command line. [`evals/`](evals) measures how well models do on 28 undergraduate tasks, each checked for what a correct visualization must show.
+[`@algomotion/mcp`](packages/mcp) lets a model write documents: it reads a guide written for models, validates its document (every step is replayed, and each error says where and why), inspects the state at any frame to check the result, and renders frames to SVG. In clients that display MCP Apps, `algomotion_show` then opens the interactive player right in the conversation. For a ready-made algorithm a model writes no document at all: `algomotion_show { "recipe": "dijkstra", "input": "A-B 4, B-C 1, A-C 7" }` shows it, and `algomotion_render` and `algomotion_inspect` take a recipe the same way. With the address of a share page set (`ALGOMOTION_SHARE_URL`), `algomotion_show` and `algomotion_run_recipe` also return a share link, which opens the visualization in any browser: the link carries the recipe and its input, or the whole document compressed, after the `#`, so no server ever stores it ([ADR 0040](docs/adr/0040-share-links.md)). `apps/site` builds the share page, with the documentation. The same tools work as the `algomotion` command line. [`evals/`](evals) measures how well models do on 34 undergraduate tasks, each checked for what a correct visualization must show.
 
 ## Figures
 
@@ -133,7 +137,7 @@ algomotion export bst.delete --input '"from": "8 3 10 1 6", "key": 3' \
 
 A figure draws the structures an algorithm keeps besides its main one, such as Dijkstra's priority queue or a call stack, in a side panel ([ADR 0029](docs/adr/0029-auxiliary-structures.md)). `--layout wide`, the default, puts the side panel right of the main structure, for slides and web pages; `--layout narrow` puts it below, for a column of notes. The Typst and LaTeX packages draw narrow in notes and wide on slides by default, and take `layout` too.
 
-`--format tikz` writes the same figures as TikZ in `.tex` files, with text left to the fonts of the LaTeX document that includes them ([ADR 0027](docs/adr/0027-latex-package.md)). The command also builds as a standalone 2 MB executable that needs no Node.js; see [the CLI's README](packages/mcp/README.md#without-nodejs).
+`--format tikz` writes the same figures as TikZ in `.tex` files, with text left to the fonts of the LaTeX document that includes them ([ADR 0027](docs/adr/0027-latex-package.md)). The command also builds as a standalone 3 MB executable that needs no Node.js; see [the CLI's README](packages/mcp/README.md#without-nodejs).
 
 In Typst, [the algomotion package](packages/typst/package/README.md) draws the same figures from inside a document, with the engine running in a WebAssembly plugin, so students need nothing but Typst ([ADR 0026](docs/adr/0026-typst-package.md)):
 

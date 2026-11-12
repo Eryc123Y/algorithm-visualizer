@@ -6,6 +6,8 @@ import { kinds, kindNames } from '@algomotion/spec';
 import { describe, expect, it } from 'vitest';
 
 import { guide, guideOverview, guideSection } from '../src/guide.ts';
+import { INSTRUCTIONS } from '../src/instructions.ts';
+import { findTool } from '../src/tools.ts';
 import { validate } from '../src/validate.ts';
 
 /** The JSON code blocks of a Markdown text. */
@@ -110,5 +112,32 @@ describe('guide', () => {
       Object.values(doc.structures).some((s) => s.place === 'side'),
     );
     expect(placed?.version).toBe('1.0');
+  });
+
+  it('names every kind in the guide tool and the instructions', () => {
+    // How the instructions name each kind; a new kind needs a name here.
+    const plain: Record<string, string> = {
+      array: 'arrays',
+      stack: 'stacks',
+      queue: 'queues',
+      linkedList: 'linked lists',
+      tree: 'trees',
+      btree: 'B-trees',
+      graph: 'graphs',
+      table: 'tables',
+      hashTable: 'hash tables',
+      priorityQueue: 'priority queues',
+      plane: 'points and segments in the plane',
+    };
+    const input = findTool('algomotion_guide')!.input.shape as Record<
+      string,
+      { description?: string }
+    >;
+    for (const kind of kindNames) {
+      expect(input['kinds']!.description, kind).toMatch(
+        new RegExp(`\\b${kind}\\b`),
+      );
+      expect(INSTRUCTIONS, kind).toContain(plain[kind] ?? kind);
+    }
   });
 });

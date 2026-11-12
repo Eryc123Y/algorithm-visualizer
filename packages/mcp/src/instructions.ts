@@ -2,7 +2,7 @@
  * How a model should use the tools, sent as the MCP server's instructions
  * and used as the system prompt in evaluations, so both see the same text.
  */
-export const INSTRUCTIONS = `algomotion turns an algorithm into a step-by-step visualization: a JSON document declaring data structures (arrays, stacks, queues, linked lists, trees, graphs, tables, hash tables) and a timeline of steps that change them, with a narration for each step. A player shows it frame by frame.
+export const INSTRUCTIONS = `algomotion turns an algorithm into a step-by-step visualization: a JSON document declaring data structures (arrays, stacks, queues, linked lists, trees, B-trees, graphs, tables, hash tables, priority queues, points and segments in the plane) and a timeline of steps that change them, with a narration for each step. A player shows it frame by frame.
 
 To make one:
 1. If a recipe from algomotion_list_recipes covers the request, run it with algomotion_run_recipe on the input asked for, written short: a list "5 2 4 6 1 3", a graph "A-B 4, B-C 2" ("->" for directed edges), operations "insert 4, delete 3"; an input with one needed field may be that field alone, such as the graph for "dijkstra". For one operation on a data structure, use the operation's own recipe, such as "bst.delete" or "min-heap.pop", with \`from\` set to the starting structure: only the operation is animated. The structure's recipe without the operation, such as "bst", runs several operations one after another.

@@ -106,7 +106,7 @@ From the repository without building, run `node --conditions=@algomotion/source 
 
 ### Without Node.js
 
-`npm run build:standalone -w @algomotion/mcp` builds `dist/standalone/algomotion`, a 2 MB executable that runs every command but the MCP server with no Node.js installed ([ADR 0027](../../docs/adr/0027-latex-package.md)). It is the CLI's JavaScript compiled to bytecode for QuickJS-ng, the engine the Typst plugin uses, inside a small Rust program. The build needs rustup, which installs the pinned Rust, and a C compiler. It builds for the machine it runs on; `-- --target <triple>` builds for another target the toolchain has.
+`npm run build:standalone -w @algomotion/mcp` builds `dist/standalone/algomotion`, a 3 MB executable that runs every command but the MCP server with no Node.js installed ([ADR 0027](../../docs/adr/0027-latex-package.md)). It is the CLI's JavaScript compiled to bytecode for QuickJS-ng, the engine the Typst plugin uses, inside a small Rust program. The build needs rustup, which installs the pinned Rust, and a C compiler. It builds for the machine it runs on; `-- --target <triple>` builds for another target the toolchain has.
 
 A command takes about 20 ms to start, and one Dijkstra figure 45 ms on an Apple M4. Very long documents are slower than in Node, since QuickJS interprets: 0.3 s for the 1,024 steps of the longest bubble sort. `npm run test:standalone` builds the executable and checks that its figures are the Node CLI's, byte for byte. Releases for each platform wait for roadmap 4.3.
 

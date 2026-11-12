@@ -20,7 +20,7 @@ The package runs the `algomotion` command through shell escape, as `minted` runs
 
 > **Not on CTAN yet.** Until it is published:
 >
-> 1. **The command.** Build the standalone `algomotion` executable in the algomotion repository: `npm install`, then `npm run build:standalone -w @algomotion/mcp`. This needs rustup and a C compiler, and writes `packages/mcp/dist/standalone/algomotion`, a 2 MB program that needs no Node.js. Put it on your `PATH`, or name it with the package option `command=`. The Node.js CLI works too: `command={node /path/to/algomotion.js}`.
+> 1. **The command.** Build the standalone `algomotion` executable in the algomotion repository: `npm install`, then `npm run build:standalone -w @algomotion/mcp`. This needs rustup and a C compiler, and writes `packages/mcp/dist/standalone/algomotion`, a 3 MB program that needs no Node.js. Put it on your `PATH`, or name it with the package option `command=`. The Node.js CLI works too: `command={node /path/to/algomotion.js}`.
 > 2. **The package.** Put `algomotion.sty` next to your document, or in your local `texmf` tree under `tex/latex/algomotion/`.
 >
 > The `examples/` folder next to this package has notes and slides to start from.
@@ -179,4 +179,4 @@ Shell escape lets a document run programs, so compile documents from others with
 
 - **Custom themes** made with `createTheme` reach the player and the library; a theme file for the command, so that they reach LaTeX too, is future work.
 
-`algomotion` is a working name. The package, its licence and its publishing to CTAN wait for the project's 1.0 release.
+The package's licence and its publishing to CTAN wait for the project's 1.0 release.

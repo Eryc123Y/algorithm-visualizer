@@ -5,6 +5,7 @@
 import { TOPICS } from '@algomotion/recipes';
 import {
   formatErrors,
+  kindNames,
   type Diagnostic,
   type ShareContent,
 } from '@algomotion/spec';
@@ -69,7 +70,7 @@ export const tools: readonly ToolDefinition[] = [
         .array(z.string())
         .optional()
         .describe(
-          'Structure kinds to include, e.g. ["array", "graph"]. Default: all of array, stack, queue, linkedList, tree, graph, table, hashTable, priorityQueue.',
+          `Structure kinds to include, e.g. ["array", "graph"]. Default: all of ${kindNames.join(', ')}.`,
         ),
     }),
     run({ kinds }) {
