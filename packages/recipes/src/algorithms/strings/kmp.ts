@@ -38,6 +38,7 @@ export const kmp = defineAlgorithm({
           n = T.length
           m = P.length
           π = COMPUTE-PREFIX-FUNCTION(P)
+          S = an empty list
           q = 0
           for i = 0 to n - 1
               while q > 0 and P[q] ≠ T[i]  // @compare
@@ -136,13 +137,15 @@ export const kmp = defineAlgorithm({
     const found: number[] = [];
     let matched = 0;
     for (let i = 0; i < n; i++) {
-      T.align({ shift: i - matched, matched });
       for (;;) {
         trace.step(
           'compare',
           `Read T[${i}] = ${text[i]}, with ${matched} character${matched === 1 ? '' : 's'} matched: compare it with P[${matched}] = ${pattern[matched]}.`,
         );
-        T.pointer({ name: 'i', index: i }).check({ j: matched });
+        // The alignment this comparison is made in, then the comparison.
+        T.align({ shift: i - matched, matched })
+          .pointer({ name: 'i', index: i })
+          .check({ j: matched });
         if (matched === 0 || pattern[matched] === text[i]) break;
         const back = pi[matched - 1]!;
         trace.step(

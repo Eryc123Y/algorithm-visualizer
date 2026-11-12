@@ -67,6 +67,7 @@ export const finiteAutomatonMatcher = defineAlgorithm({
 
       FINITE-AUTOMATON-MATCHER(T, δ, m)
           n = T.length
+          S = an empty list
           q = 0
           for i = 0 to n - 1
               q = δ(q, T[i])  // @read
@@ -129,7 +130,9 @@ export const finiteAutomatonMatcher = defineAlgorithm({
       const to = table[q]![c]!;
       trace.step(
         'read',
-        `Read T[${i}] = ${text[i]}: δ(${q}, ${text[i]}) = ${to}, so the text read ends with the first ${to} character${to === 1 ? '' : 's'} of P.`,
+        to === 0
+          ? `Read T[${i}] = ${text[i]}: δ(${q}, ${text[i]}) = 0, so no prefix of P ends the text read.`
+          : `Read T[${i}] = ${text[i]}: δ(${q}, ${text[i]}) = ${to}, so the text read ends with the first ${to} character${to === 1 ? '' : 's'} of P.`,
       );
       delta.highlight({ cells: [[q, c]] });
       q = to;

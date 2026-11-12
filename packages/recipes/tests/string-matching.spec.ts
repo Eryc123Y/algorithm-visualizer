@@ -120,6 +120,36 @@ describe('string matching', () => {
     );
   });
 
+  it('shows each occurrence with the pattern over it, fully matched', () => {
+    fc.assert(
+      fc.property(textAndPattern('ab'), ({ text, pattern }) => {
+        const want = shiftsOf(text, pattern);
+        for (const id of MATCHERS) {
+          const trace = replay(runOk(id, { text, pattern }).document);
+          const steps = trace.visualization.steps;
+          const found = steps.flatMap((step, k) =>
+            step.meta?.id === 'found' ? [k + 1] : [],
+          );
+          expect(found, id).toHaveLength(want.length);
+          found.forEach((frame, k) => {
+            const p = stateOf(trace, 'T', 'array', frame).pattern!;
+            expect(p.shift, `${id} occurrence ${k}`).toBe(want[k]);
+            expect(p.matched, `${id} occurrence ${k}`).toHaveLength(
+              pattern.length,
+            );
+          });
+          // Every comparison shows the pair it compares.
+          steps.forEach((step, k) => {
+            if (step.meta?.id !== 'compare') return;
+            const p = stateOf(trace, 'T', 'array', k + 1).pattern!;
+            expect(p.compared, `${id} step ${k}`).not.toBe(null);
+          });
+        }
+      }),
+      fuzz,
+    );
+  });
+
   it('computes π as its definition says, drawn beside the text', () => {
     fc.assert(
       fc.property(textAndPattern('abc'), ({ text, pattern }) => {
@@ -175,6 +205,33 @@ describe('string matching', () => {
               t !== p ? null : shifts.includes(s) ? 'match' : 'spurious';
             expect(rows[s + 1]![1], `t${s}`).toBe(verdict);
           }
+        },
+      ),
+      fuzz,
+    );
+  });
+
+  it('rolls windows of letters in radix 26 too', () => {
+    fc.assert(
+      fc.property(
+        textAndPattern('abc'),
+        fc.constantFrom(5, 7, 11, 13),
+        ({ text, pattern }, q) => {
+          const value = (s: string) =>
+            Number(
+              [...s].reduce(
+                (v, c) => (v * 26n + BigInt(c.charCodeAt(0) - 97)) % BigInt(q),
+                0n,
+              ),
+            );
+          const trace = replay(
+            runOk('rabin-karp', { text, pattern, q }).document,
+          );
+          const rows = stateOf(trace, 'hash', 'table').data;
+          for (let s = 0; s + pattern.length <= text.length; s++)
+            expect(rows[s + 1]![0], `t${s}`).toBe(
+              value(text.slice(s, s + pattern.length)),
+            );
         },
       ),
       fuzz,

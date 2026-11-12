@@ -59,7 +59,7 @@ export const rabinKarp = defineAlgorithm({
           code: 'custom',
           path: ['text'],
           message:
-            'Rabin–Karp reads characters as digits: write the text and pattern in digits only, or in lower-case letters only',
+            'Rabin–Karp reads characters as digits: write the text and pattern in digits only, or in lower-case letters only (no capitals)',
         });
       if (!isPrime(q))
         ctx.addIssue({
@@ -75,8 +75,10 @@ export const rabinKarp = defineAlgorithm({
   code: {
     pseudocode: `
       RABIN-KARP-MATCHER(T, P, d, q)
+          // T[i] and P[i] are the characters read as digits in radix d
           n = T.length
           m = P.length
+          S = an empty list
           h = d^(m - 1) mod q
           p = 0
           t = 0
@@ -94,6 +96,9 @@ export const rabinKarp = defineAlgorithm({
     `,
     python: `
       def rabin_karp(T, P, d, q):
+          # the characters as digits in radix d
+          digit = int if d == 10 else lambda c: ord(c) - ord('a')
+          T, P = [digit(c) for c in T], [digit(c) for c in P]
           n, m = len(T), len(P)
           h = pow(d, m - 1, q)
           p = t = 0
@@ -106,7 +111,7 @@ export const rabinKarp = defineAlgorithm({
                   if P == T[s:s + m]:  # @verify
                       shifts.append(s)  # @found
                   else:
-                      pass  # a spurious hit  # @spurious
+                      pass  # @spurious
               if s < n - m:
                   t = (d * (t - T[s] * h) + T[s + m]) % q  # @roll
           return shifts  # @done
@@ -139,7 +144,7 @@ export const rabinKarp = defineAlgorithm({
     const window = (s: number) => Array.from({ length: m }, (_, k) => s + k);
     trace.step(
       'hash',
-      `Read P and the first window of T as ${m}-digit numbers in radix ${d}, modulo ${q}: p = ${p} and t0 = ${t}. A step of the window will remove its first digit, worth h = ${d} to the power ${m - 1}, modulo ${q}, which is ${h}.`,
+      `Read P and the first window of T as ${m}-digit numbers in radix ${d}, modulo ${q}: p = ${p} and t0 = ${t}. The leading digit of a window is worth h = ${d} to the power ${m - 1}, modulo ${q}, which is ${h}.`,
     );
     values
       .set({ cell: [0, 0], value: p })
