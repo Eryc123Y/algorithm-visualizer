@@ -128,7 +128,7 @@ Each entry is one registry module, or one per operation for data structures. Eac
 - [x] activity selection (#118)
 - [x] Huffman codes (S1, S4) (#74)
 - [x] offline caching (#119)
-- [ ] dynamic tables and binary counter (amortized analysis)
+- [x] dynamic tables and binary counter (amortized analysis) (#120)
 
 **V Advanced data structures**
 

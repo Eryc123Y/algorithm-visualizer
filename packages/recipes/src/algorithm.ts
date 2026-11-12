@@ -25,6 +25,7 @@ export const TOPICS = [
   'geometry',
   'math',
   'foundations',
+  'amortized',
 ] as const;
 export type Topic = (typeof TOPICS)[number];
 
@@ -43,6 +44,7 @@ export const TOPIC_TITLES: Readonly<Record<Topic, string>> = {
   geometry: 'Computational geometry',
   math: 'Algebra and number theory',
   foundations: 'Divide and conquer, randomization',
+  amortized: 'Amortized analysis',
 };
 
 /** What an operation returns: found or not, a popped value, or nothing. */
