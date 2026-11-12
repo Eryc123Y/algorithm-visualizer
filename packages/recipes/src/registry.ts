@@ -19,6 +19,7 @@ import { dijkstra } from './algorithms/graphs/dijkstra.ts';
 import { floydWarshall } from './algorithms/graphs/floyd-warshall.ts';
 import { kruskal } from './algorithms/graphs/kruskal.ts';
 import { prim } from './algorithms/graphs/prim.ts';
+import { stronglyConnectedComponents } from './algorithms/graphs/scc.ts';
 import { topologicalSort } from './algorithms/graphs/topological-sort.ts';
 import { balancedBrackets } from './algorithms/lists/balanced-brackets.ts';
 import { reverseLinkedList } from './algorithms/lists/reverse-linked-list.ts';
@@ -38,6 +39,7 @@ import {
 } from './algorithms/trees/tree-walks.ts';
 import { finiteAutomatonMatcher } from './algorithms/strings/finite-automaton.ts';
 import { kmp } from './algorithms/strings/kmp.ts';
+import { strassen } from './algorithms/foundations/strassen.ts';
 import { naiveStringMatcher } from './algorithms/strings/naive.ts';
 import { rabinKarp } from './algorithms/strings/rabin-karp.ts';
 import { runModule, type AlgorithmRun } from './run-module.ts';
@@ -86,6 +88,7 @@ export const algorithms: readonly Algorithm[] = [
   bfs,
   dfs,
   topologicalSort,
+  stronglyConnectedComponents,
   dijkstra,
   bellmanFord,
   dagShortestPaths,
@@ -100,6 +103,7 @@ export const algorithms: readonly Algorithm[] = [
   rabinKarp,
   finiteAutomatonMatcher,
   kmp,
+  strassen,
 ];
 
 /** The module with `id`, if there is one. */

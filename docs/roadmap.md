@@ -92,7 +92,7 @@ Each entry is one registry module, or one per operation for data structures. Eac
 
 - [x] insertion sort
 - [x] merge sort
-- [ ] Strassen matrix multiplication
+- [x] Strassen matrix multiplication (#87)
 - [ ] recursion trees for divide and conquer
 - [ ] random permutation (randomize in place)
 
@@ -148,7 +148,7 @@ Each entry is one registry module, or one per operation for data structures. Eac
 - [x] Floyd–Warshall
 - [x] Prim
 - [x] Kruskal
-- [ ] strongly connected components
+- [x] strongly connected components (#86)
 - [ ] DAG shortest paths
 - [ ] transitive closure
 - [ ] Johnson
