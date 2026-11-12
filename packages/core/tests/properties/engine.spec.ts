@@ -22,7 +22,10 @@ import { Dice, RUNS } from './random.ts';
 const dice = fc.array(fc.nat(), { maxLength: 400 });
 const TIMEOUT = 20 * 60_000;
 
-/** fast-check settings: a fixed seed in CI unless FUZZ_SEED is given. */
+/**
+ * fast-check settings: a fresh seed each run unless FUZZ_SEED is given; a
+ * failure prints its seed, to run again with FUZZ_SEED.
+ */
 const params = {
   numRuns: RUNS,
   ...(process.env['FUZZ_SEED']
@@ -82,10 +85,32 @@ describe.each(['all', ...kindNames])('generated documents (%s)', (kind) => {
               ...(bare ? bareLayoutOptions : {}),
               layout: figure,
             });
-            // Nodes placed by hand may overlap, as their author put them.
+            // Nodes placed by hand may overlap, as their author put them:
+            // in a manual layout, or an automatic one that resolves to
+            // manual because every node of the trace has x and y.
             const manual = new Set(
               Object.entries(trace.visualization.structures)
-                .filter(([, d]) => d.kind === 'graph' && d.layout === 'manual')
+                .filter(([name, d]) => {
+                  if (d.kind !== 'graph') return false;
+                  if (d.layout === 'manual') return true;
+                  if ((d.layout ?? 'auto') !== 'auto') return false;
+                  const added = trace.visualization.steps.flatMap((step) =>
+                    step.actions.flatMap((a) =>
+                      a.target === name && a.type === 'addNode' ? [a.node] : [],
+                    ),
+                  );
+                  const all = [...d.nodes, ...added];
+                  return (
+                    all.length > 0 &&
+                    all.every(
+                      (n) =>
+                        'x' in n &&
+                        n.x !== undefined &&
+                        'y' in n &&
+                        n.y !== undefined,
+                    )
+                  );
+                })
                 .map(([name]) => name),
             );
             const first = layout.sceneAt(0);
