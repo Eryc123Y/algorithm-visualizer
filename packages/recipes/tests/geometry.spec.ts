@@ -148,7 +148,7 @@ describe('geometry', () => {
       fc.property(
         distinctPoints(4, 8).filter(notCollinear),
         fc.shuffledSubarray(
-          ['p0', 'p1', 's1', 's2', 'best1', 'best-1', 'a', 'P'],
+          ['p0', 'p1', 's1', 's2', 'best1', 'best2', 'a', 'P'],
           { minLength: 8, maxLength: 8 },
         ),
         (points, ids) => {
@@ -158,9 +158,7 @@ describe('geometry', () => {
             y,
           }));
           for (const id of ['graham-scan', 'jarvis-march', 'closest-pair'])
-            runOk(id, {
-              points: named.filter((p) => /^[A-Za-z_]\w*$/.test(p.id)),
-            });
+            runOk(id, { points: named });
         },
       ),
       fuzz,
