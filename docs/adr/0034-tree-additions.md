@@ -45,7 +45,7 @@ All of this is protocol version **0.5** (ADR 0021). Each addition is a protocol 
 - `annotate` takes `field`, a short name such as `size`, `max`, `deg` or `mark`: lower-case letters, digits and hyphens, starting with a letter, at most 16 characters.
 - A node holds one note per field. `text: null` removes that field's note.
 - Without `field`, `annotate` sets or removes the node's plain note, as today.
-- **Drawing.** A node's notes form one label, in the order their fields were first set on that node, joined by `·`, and placed as notes are today (ADR 0031). Layout measures the joined label over the trace, so the room it keeps fits the widest one.
+- **Drawing.** A node's notes form one label: its plain note first, then its named notes in the order their fields were first set on that node, joined by a spaced middle dot (`h=2 · s=3`). The label is placed as notes are today (ADR 0031). Layout measures the joined label over the trace, so the room it keeps fits the widest one.
 
 ### S4: edge marks and edge labels
 
