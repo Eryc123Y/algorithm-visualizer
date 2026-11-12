@@ -117,9 +117,12 @@ export const edmondsKarp = defineAlgorithm({
     const label = (k: number) => `${flow[k]}/${cap[k]}`;
     // Each edge starts labelled 0/c in the declaration: a step holds at
     // most 100 actions, and a network may have 200 edges.
-    const decl = declareGraph(g, false, { from: s });
+    const decl = declareGraph(g, false);
     const graph = trace.add('g', {
       ...decl,
+      // Left to right, as CLRS draws flow networks.
+      layout: 'manual' as const,
+      nodes: placeByLayers(g, s),
       edges: g.edges.map(([from, to], k) => ({
         id: ids[k]!,
         from,
@@ -131,7 +134,12 @@ export const edmondsKarp = defineAlgorithm({
       'start',
       `Start with no flow: every edge carries 0 of its capacity. Send flow from ${s} to ${t}.`,
     );
-    graph.pointer({ name: 's', node: s }).pointer({ name: 't', node: t });
+    // Pointers name the source and sink, unless their names already do.
+    const ends = () => {
+      if (s !== 's') graph.pointer({ name: 's', node: s });
+      if (t !== 't') graph.pointer({ name: 't', node: t });
+    };
+    ends();
 
     /** Residual moves out of u: forward with room, or back against flow. */
     const moves = (u: string): (Step & { to: string; room: number })[] =>
@@ -163,10 +171,8 @@ export const edmondsKarp = defineAlgorithm({
           'done',
           `No path is left from ${s} to ${t} in the residual network: the flow, ${total}, is maximum. The vertices still reachable from ${s} form a minimum cut: the edges leaving them are full, and those coming into them carry nothing.`,
         );
-        graph
-          .resetMarks()
-          .pointer({ name: 's', node: s })
-          .pointer({ name: 't', node: t });
+        graph.resetMarks();
+        ends();
         for (const v of seen) graph.group({ node: v, group: 0 });
         // The edges leaving the cut, marked in the room this step has
         // left (a step holds at most 100 actions), the rest in more steps.
@@ -200,10 +206,8 @@ export const edmondsKarp = defineAlgorithm({
         'path',
         `Breadth-first search finds a shortest path in the residual network, ${route}, of ${path.length} edge${path.length === 1 ? '' : 's'}${backward === 0 ? '' : `, ${backward} of them against the flow`}. Its least residual capacity is ${c}.`,
       );
-      graph
-        .resetMarks()
-        .pointer({ name: 's', node: s })
-        .pointer({ name: 't', node: t });
+      graph.resetMarks();
+      ends();
       // Forward edges are marked; edges the path goes back along are
       // only highlighted, as their flow is cancelled, not refused.
       graph.highlight({
@@ -223,3 +227,42 @@ export const edmondsKarp = defineAlgorithm({
     }
   },
 });
+
+/** Room between columns, and between rows of up to six nodes. */
+const COLUMN_GAP = 130;
+const ROW_GAP = 90;
+
+/**
+ * Each node's place: one column per breadth-first layer from the source,
+ * along the edges' direction, and the nodes it cannot reach in a column
+ * after the last; each column centred, its nodes in the input's order.
+ */
+function placeByLayers(
+  g: GraphInput,
+  s: string,
+): { id: string; x: number; y: number }[] {
+  const layer = new Map([[s, 0]]);
+  const queue = [s];
+  while (queue.length > 0) {
+    const u = queue.shift()!;
+    for (const [a, b] of g.edges)
+      if (a === u && !layer.has(b)) {
+        layer.set(b, layer.get(u)! + 1);
+        queue.push(b);
+      }
+  }
+  const unreached = Math.max(...layer.values()) + 1;
+  const columns: string[][] = [];
+  for (const v of [s, ...g.nodes.filter((v) => v !== s)])
+    (columns[layer.get(v) ?? unreached] ??= []).push(v);
+  const rows = Math.max(...columns.map((c) => c?.length ?? 0));
+  const gap = rows <= 6 ? ROW_GAP : Math.max(48, (5 * ROW_GAP) / (rows - 1));
+  const middle = 40 + ((rows - 1) * gap) / 2;
+  return columns.flatMap((column, k) =>
+    (column ?? []).map((id, i) => ({
+      id,
+      x: 60 + k * COLUMN_GAP,
+      y: middle + (i - (column.length - 1) / 2) * gap,
+    })),
+  );
+}

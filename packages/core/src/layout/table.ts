@@ -6,9 +6,9 @@
  *  dp
  *          ""   a    b
  *    ""  [ 0 ][ 0 ][ 0 ]
- *    a   [ 0 ][ 1 ][ 1 ]   ← `depend` draws arrows from the cells read
- *    c   [ 0 ][ 1 ][ 1 ]      into the cell computed
- * ```
+ *    a   [ 0 ][ 1 ][ 1 ]   ← `depend` marks the cells read and the cell
+ *    c   [ 0 ][ 1 ][ 1 ]      computed, with an arrow from each read cell
+ * ```                          that touches it (ADR 0042)
  *
  * Cells are smaller than array cells so that larger tables fit.
  */
@@ -173,7 +173,12 @@ export function layoutTable({
       y: y(r) + height / 2,
     });
     const to = centre(depend.cell);
+    const [tr, tc] = depend.cell;
     depend.on.forEach((cell, k) => {
+      // Only between cells that touch, by a side or a corner: a line to a
+      // cell further away would cross the cells between and their text
+      // (ADR 0042). Those stay marked as read, without a line.
+      if (Math.abs(cell[0] - tr) > 1 || Math.abs(cell[1] - tc) > 1) return;
       const from = centre(cell);
       const dx = to.x - from.x;
       const dy = to.y - from.y;

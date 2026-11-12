@@ -59,6 +59,65 @@ describe('edmonds-karp', () => {
     expect(results).toEqual([23]);
   });
 
+  it('lays the network out left to right, one column per BFS layer, as CLRS does', () => {
+    const { document } = runOk('edmonds-karp', undefined);
+    const decl = (
+      document as unknown as {
+        structures: {
+          g: { layout: string; nodes: { id: string; x: number; y: number }[] };
+        };
+      }
+    ).structures.g;
+    expect(decl.layout).toBe('manual');
+    const at = Object.fromEntries(decl.nodes.map((n) => [n.id, n]));
+    // s | v1 v2 | v3 v4 | t, with v1 above v2 and v3 above v4.
+    const column = (v: string) => at[v]!.x;
+    expect(column('s')).toBeLessThan(column('v1'));
+    expect(column('v1')).toBe(column('v2'));
+    expect(column('v2')).toBeLessThan(column('v3'));
+    expect(column('v3')).toBe(column('v4'));
+    expect(column('v4')).toBeLessThan(column('t'));
+    expect(at['v1']!.y).toBeLessThan(at['v2']!.y);
+    expect(at['v3']!.y).toBeLessThan(at['v4']!.y);
+    // The source and sink sit on the middle row.
+    expect(at['s']!.y).toBe(at['t']!.y);
+    expect(at['s']!.y).toBe((at['v1']!.y + at['v2']!.y) / 2);
+  });
+
+  it('points at the source and sink only when their names do not say so', () => {
+    const pointers = (input: unknown) => {
+      const { document } = runOk('edmonds-karp', input);
+      const steps = (
+        document as unknown as {
+          steps: { actions: { type: string; name?: string }[] }[];
+        }
+      ).steps;
+      return [
+        ...new Set(
+          steps.flatMap((st) =>
+            st.actions.flatMap((a) => (a.type === 'pointer' ? [a.name] : [])),
+          ),
+        ),
+      ];
+    };
+    expect(pointers(undefined)).toEqual([]);
+    expect(pointers('A->B 3, B->C 2, A->C 1')).toEqual(['s', 't']);
+    expect(pointers({ graph: 's->a 3, a->b 2', sink: 'b' })).toEqual(['t']);
+  });
+
+  it('puts nodes the source cannot reach in a column of their own', () => {
+    const { document } = runOk('edmonds-karp', 'A->B 3, C->B 2, D');
+    const nodes = (
+      document as unknown as {
+        structures: { g: { nodes: { id: string; x: number }[] } };
+      }
+    ).structures.g.nodes;
+    const x = Object.fromEntries(nodes.map((n) => [n.id, n.x]));
+    expect(x['A']).toBeLessThan(x['B']!);
+    expect(x['C']).toBeGreaterThan(x['B']!);
+    expect(x['D']).toBe(x['C']);
+  });
+
   it('finds a flow as large as the least cut, and draws a valid flow', () => {
     fc.assert(
       fc.property(networks, ({ nodes, edges }) => {

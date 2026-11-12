@@ -2,8 +2,9 @@
  * Layout for the `plane` kind (ADR 0038). One region, the bounding box of
  * every point and line over the trace padded by a tenth, is scaled
  * uniformly into a square of side `PLOT`, y up. Points are small nodes
- * with their labels turned away from what is near; segments, lines and
- * axes are edges; pointers are badges under their points. A margin
+ * with their labels turned away from what is near, the badges of pointers
+ * included; segments, lines and axes are edges; pointers are badges
+ * under their points. A margin
  * around the square keeps labels and badges inside the block.
  */
 import type { PlaneDecl } from '@algoviz/spec';
@@ -19,7 +20,7 @@ import {
   titleWidth,
 } from './common.ts';
 import type { LabelBox } from './edge-label.ts';
-import { clearestAngle, noteRegion } from './notes.ts';
+import { CLEAR, clearance, clearestAngle, noteRegion } from './notes.ts';
 import type { LayoutFonts } from './options.ts';
 import type { EdgeRole, ElementRole, SceneItem } from './scene.ts';
 
@@ -27,6 +28,8 @@ import type { EdgeRole, ElementRole, SceneItem } from './scene.ts';
 const PLOT = 320;
 /** Radius of a point. */
 const RADIUS = 5;
+/** From a point's centre to the top of the badges under it. */
+const BADGE_GAP = RADIUS + 6;
 
 /** Sizes over the trace, so the region and margins never change. */
 export interface PlaneMetrics {
@@ -39,6 +42,12 @@ export interface PlaneMetrics {
   /** Widest pointer name, in em, and most pointers at one point. */
   readonly pointerWidth: number;
   readonly pointerRows: number;
+  /**
+   * Each point a pointer names in some frame, with the most pointers it
+   * holds at once and its widest pointer name, in em: the badges its
+   * label keeps clear of.
+   */
+  readonly pointed: readonly (readonly [string, number, number])[];
   /**
    * Every point, segment and line position of the trace, so that labels
    * keep one place in every frame, clear of all of them.
@@ -58,6 +67,19 @@ function union<T>(
   return [...a, ...b.filter((t) => !seen.has(key(t)))];
 }
 
+/** Each point's badges over both: the most rows, the widest name. */
+function mergePointed(
+  a: PlaneMetrics['pointed'],
+  b: PlaneMetrics['pointed'],
+): PlaneMetrics['pointed'] {
+  const merged = new Map(a.map(([id, rows, em]) => [id, [rows, em]] as const));
+  for (const [id, rows, em] of b) {
+    const [r, e] = merged.get(id) ?? [0, 0];
+    merged.set(id, [Math.max(r, rows), Math.max(e, em)]);
+  }
+  return [...merged].map(([id, [rows, em]]) => [id, rows, em] as const);
+}
+
 const labelOf = (p: { id: string; label?: string | undefined }) =>
   p.label ?? p.id;
 
@@ -72,8 +94,14 @@ export function measurePlane(
   ];
   const ys = state.data.points.map((p) => p.y);
   const perPoint = new Map<string, number>();
-  for (const id of Object.values(state.marks.pointers))
+  const widest = new Map<string, number>();
+  for (const [name, id] of Object.entries(state.marks.pointers)) {
     perPoint.set(id, (perPoint.get(id) ?? 0) + 1);
+    widest.set(
+      id,
+      Math.max(widest.get(id) ?? 0, maxWidth([name], fonts.value)),
+    );
+  }
   return {
     minX: Math.min(Infinity, ...xs),
     maxX: Math.max(-Infinity, ...xs),
@@ -89,6 +117,9 @@ export function measurePlane(
     ),
     pointerWidth: maxWidth(Object.keys(state.marks.pointers), fonts.value),
     pointerRows: Math.max(0, ...perPoint.values()),
+    pointed: [...perPoint].map(
+      ([id, rows]) => [id, rows, widest.get(id)!] as const,
+    ),
     points: state.data.points.map((p) => [p.id, p.x, p.y] as const),
     links: state.data.segments.map((x) => [x.from, x.to] as const),
     lineXs: [...new Set(Object.values(state.marks.lines))],
@@ -106,6 +137,7 @@ export const mergePlaneMetrics = (
   labelWidth: Math.max(a.labelWidth, b.labelWidth),
   pointerWidth: Math.max(a.pointerWidth, b.pointerWidth),
   pointerRows: Math.max(a.pointerRows, b.pointerRows),
+  pointed: mergePointed(a.pointed, b.pointed),
   points: union(a.points, b.points, ([id]) => id),
   links: union(a.links, b.links, ([f, t]) => `${f} ${t}`),
   lineXs: union(a.lineXs, b.lineXs, String),
@@ -137,16 +169,21 @@ function segmentRole(m: PlaneState['marks'], id: string): EdgeRole {
 type Spot = { readonly x: number; readonly y: number };
 type Line = readonly [Spot, Spot];
 
+/** Where a point's label may go, in the order it is tried. */
+export const LABEL_ANGLES = [0, 45, 315, 90, 270, 135, 225, 180] as const;
+
 /**
  * Each point's label direction for the whole trace: the first that
- * clears every segment, line position, axis and point of the trace and
- * the labels placed before it, points in the order they appear.
+ * clears every segment, line position, axis and point of the trace, the
+ * badges any pointer puts under a point, and the labels placed before
+ * it, points in the order they appear.
  */
 function labelAngles(
   m: PlaneMetrics,
   at: (x: number, y: number) => Spot,
   axes: readonly Line[],
   font: number,
+  badgesAt: (point: Spot, rows: number, em: number) => LabelBox,
 ): Map<string, number> {
   const r = regionOf(m);
   const where = new Map(m.points.map(([id, x, y]) => [id, at(x, y)]));
@@ -160,16 +197,31 @@ function labelAngles(
   ];
   const discs = [...where.values()].map((c) => ({ ...c, radius: RADIUS }));
   const labelHalf = (m.labelWidth * font) / 2;
+  const badges = m.pointed.flatMap(([id, rows, em]) => {
+    const c = where.get(id);
+    return c === undefined ? [] : [badgesAt(c, rows, em)];
+  });
   const placed: LabelBox[] = [];
   const angles = new Map<string, number>();
   for (const [id, c] of where) {
     const outline = { ...c, radius: RADIUS, halfWidth: RADIUS };
     const boxAt = (angle: number) =>
       noteRegion(outline, angle, labelHalf, font);
-    const angle = clearestAngle([0, 45, 315, 90, 270, 135, 225, 180], boxAt, {
+    const others = discs.filter((d) => d.x !== c.x || d.y !== c.y);
+    // In order of what text must not go under: a badge, which hides it;
+    // then a point or another label; then the clearest of lines.
+    let pool: readonly number[] = LABEL_ANGLES;
+    for (const tier of [
+      { segments: [], discs: [], boxes: badges },
+      { segments: [], discs: others, boxes: [...badges, ...placed] },
+    ]) {
+      const clear = pool.filter((a) => clearance(boxAt(a), tier) >= CLEAR);
+      if (clear.length > 0) pool = clear;
+    }
+    const angle = clearestAngle(pool, boxAt, {
       segments: lines,
-      discs: discs.filter((d) => d.x !== c.x || d.y !== c.y),
-      boxes: placed,
+      discs: others,
+      boxes: [...badges, ...placed],
     });
     placed.push(boxAt(angle));
     angles.set(id, angle);
@@ -289,7 +341,18 @@ export function layoutPlane(
     );
   }
 
-  const angles = labelAngles(metrics, at, axisLines, font);
+  // Where the badges under a point stand in some frame: `rows` of them,
+  // as wide as its widest pointer name.
+  const badgesAt = (c: Spot, rows: number, em: number): LabelBox => {
+    const stack = rows * (badgeHeight(o) + 2) - 2;
+    return {
+      x: c.x,
+      y: c.y + BADGE_GAP + stack / 2,
+      halfWidth: badgeWidthFor(em, o) / 2,
+      halfHeight: stack / 2,
+    };
+  };
+  const angles = labelAngles(metrics, at, axisLines, font, badgesAt);
   for (const p of state.data.points) {
     const c = byId.get(p.id)!;
     const angle = angles.get(p.id) ?? 0;
@@ -322,7 +385,7 @@ export function layoutPlane(
       type: 'badge',
       key: `${name}/pointer/${pointer}`,
       x: c.x,
-      y: c.y + RADIUS + 6 + row * (height + 2) + height / 2,
+      y: c.y + BADGE_GAP + row * (height + 2) + height / 2,
       width: badgeWidthFor(maxWidth([pointer], o.fonts.value), o),
       height,
       role: 'pointer',
