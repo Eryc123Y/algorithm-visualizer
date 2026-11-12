@@ -17,6 +17,7 @@ import {
   turn,
   type Pt,
 } from './common.ts';
+import { parsePoints } from './common.ts';
 
 /** Most points a hull module takes. */
 export const MAX_HULL_POINTS = 24;
@@ -60,17 +61,12 @@ export const grahamScan = defineAlgorithm({
   input: hullInput,
   main: 'points',
   examples: [
-    { points: '(0, 0) (4, 1) (6, 4) (3, 6) (-1, 4) (2, 2) (3, 3) (1, 4)' },
     {
-      points: [
-        [0, 0],
-        [2, 0],
-        [4, 0],
-        [4, 4],
-        [2, 2],
-        [0, 4],
-      ],
+      points: parsePoints(
+        '(0, 0) (4, 1) (6, 4) (3, 6) (-1, 4) (2, 2) (3, 3) (1, 4)',
+      ),
     },
+    { points: parsePoints('(0, 0) (2, 0) (4, 0) (4, 4) (2, 2) (0, 4)') },
   ],
   code: {
     pseudocode: `

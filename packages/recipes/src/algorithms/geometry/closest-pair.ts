@@ -11,6 +11,7 @@ import { defineAlgorithm } from '../../algorithm.ts';
 import type { Handle } from '../../recorder.ts';
 import type { Trace } from '../../trace.ts';
 import { dist2, planeOf, pointsField, show, type Pt } from './common.ts';
+import { parsePoints } from './common.ts';
 
 /** Most points the module takes. */
 export const MAX_PAIR_POINTS = 16;
@@ -35,16 +36,11 @@ export const closestPair = defineAlgorithm({
   main: 'points',
   examples: [
     {
-      points: '(0, 0) (7, 1) (2, 5) (5, 3) (9, 6) (3, 1) (8, 3) (1, 8) (6, 7)',
+      points: parsePoints(
+        '(0, 0) (7, 1) (2, 5) (5, 3) (9, 6) (3, 1) (8, 3) (1, 8) (6, 7)',
+      ),
     },
-    {
-      points: [
-        [0, 0],
-        [10, 0],
-        [5, 1],
-        [5, 9],
-      ],
-    },
+    { points: parsePoints('(0, 0) (10, 0) (5, 1) (5, 9)') },
   ],
   code: {
     pseudocode: `

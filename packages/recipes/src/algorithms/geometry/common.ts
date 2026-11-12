@@ -125,21 +125,26 @@ export function parsePoints(text: string): Pt[] {
   return raw.map((p) => ({ id: p.name ?? fresh(), x: p.x, y: p.y }));
 }
 
+/** A segment as given: its ends, and a name if it has one. */
+export interface SegmentInput {
+  readonly id?: string | undefined;
+  readonly from: readonly [number, number];
+  readonly to: readonly [number, number];
+}
+
 /** Segments in the notation, `(0, 0)-(4, 3), s2: (1, 4)-(5, 0)`. */
-export function parseSegments(
-  text: string,
-): [number, number, number, number, string?][] {
+export function parseSegments(text: string): SegmentInput[] {
   const r = new Reader(text);
-  const out: [number, number, number, number, string?][] = [];
+  const out: SegmentInput[] = [];
   while (!r.done()) {
     const start = r.at;
     const name = r.name();
     if (name !== undefined) r.expect(':');
     else r.at = start;
-    const [x1, y1] = r.pair();
+    const from = r.pair();
     r.expect('-');
-    const [x2, y2] = r.pair();
-    out.push(name === undefined ? [x1, y1, x2, y2] : [x1, y1, x2, y2, name]);
+    const to = r.pair();
+    out.push(name === undefined ? { from, to } : { id: name, from, to });
   }
   return out;
 }
@@ -200,15 +205,13 @@ export const pointsField = (min: number, max: number) =>
 const segmentsForm =
   'segments as pairs of points, optionally named, e.g. "(0, 0)-(4, 3), s2: (1, 4)-(5, 0)"';
 
-type RawSegment = [number, number, number, number, string?];
-
 /** Segments, with equal end coordinates made one point. */
-export function segmentsOf(raw: readonly RawSegment[]): {
+export function segmentsOf(raw: readonly SegmentInput[]): {
   points: Pt[];
   segments: Seg[];
 } {
   const points: Pt[] = [];
-  const pointAt = (x: number, y: number) => {
+  const pointAt = ([x, y]: readonly [number, number]) => {
     const there = points.find((p) => p.x === x && p.y === y);
     if (there !== undefined) return there;
     const p = { id: `p${points.length}`, x, y };
@@ -216,14 +219,14 @@ export function segmentsOf(raw: readonly RawSegment[]): {
     return p;
   };
   const fresh = namer(
-    raw.flatMap((s) => s[4] ?? []),
+    raw.flatMap((s) => s.id ?? []),
     's',
     1,
   );
-  const segments = raw.map(([x1, y1, x2, y2, name]) => ({
-    id: name ?? fresh(),
-    from: pointAt(x1, y1),
-    to: pointAt(x2, y2),
+  const segments = raw.map((s) => ({
+    id: s.id ?? fresh(),
+    from: pointAt(s.from),
+    to: pointAt(s.to),
   }));
   return { points, segments };
 }
@@ -240,12 +243,19 @@ export const segmentsField = (max: number) =>
       z
         .array(z.tuple([z.tuple([Coord, Coord]), z.tuple([Coord, Coord])]))
         .transform((ss) =>
-          ss.map(([[x1, y1], [x2, y2]]): RawSegment => [x1, y1, x2, y2]),
+          ss.map(([from, to]): SegmentInput => ({ from, to })),
         ),
+      z.array(
+        z.strictObject({
+          id: z.string().regex(NAME).optional(),
+          from: z.tuple([Coord, Coord]),
+          to: z.tuple([Coord, Coord]),
+        }),
+      ),
     ])
     .pipe(
       z
-        .array(z.custom<RawSegment>())
+        .array(z.custom<SegmentInput>())
         .min(1, 'Give at least one segment')
         .max(max, `Give at most ${max} segments`),
     )

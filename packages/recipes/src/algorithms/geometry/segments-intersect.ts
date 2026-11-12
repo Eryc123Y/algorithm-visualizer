@@ -17,6 +17,7 @@ import {
   type Pt,
   type Seg,
 } from './common.ts';
+import { parseSegments } from './common.ts';
 
 /** Most segments the module takes. */
 export const MAX_SEGMENTS_SWEPT = 12;
@@ -73,16 +74,16 @@ export const anySegmentsIntersect = defineAlgorithm({
   input: z
     .strictObject({ segments: segmentsField(MAX_SEGMENTS_SWEPT) })
     .superRefine(({ segments }, ctx) => {
-      segments.forEach(([x1, , x2], k) => {
-        if (x1 === x2)
+      segments.forEach((s, k) => {
+        if (s.from[0] === s.to[0])
           ctx.addIssue({
             code: 'custom',
             path: ['segments', k],
             message: `Segment ${k + 1} is vertical (or a point); the sweep assumes no segment is vertical`,
           });
       });
-      const pairs = segments.map(([x1, y1, x2, y2]) =>
-        [`${x1} ${y1}`, `${x2} ${y2}`].sort().join(' '),
+      const pairs = segments.map((s) =>
+        [s.from.join(' '), s.to.join(' ')].sort().join(' '),
       );
       if (new Set(pairs).size !== pairs.length)
         ctx.addIssue({
@@ -90,7 +91,7 @@ export const anySegmentsIntersect = defineAlgorithm({
           path: ['segments'],
           message: 'Two segments have the same ends',
         });
-      const names = segments.flatMap((s) => s[4] ?? []);
+      const names = segments.flatMap((s) => s.id ?? []);
       if (new Set(names).size !== names.length)
         ctx.addIssue({
           code: 'custom',
@@ -100,8 +101,12 @@ export const anySegmentsIntersect = defineAlgorithm({
     }),
   main: 'segments',
   examples: [
-    { segments: '(0, 1)-(6, 3), (1, 4)-(5, 0), (3, 6)-(7, 5), (6, 0)-(9, 2)' },
-    { segments: '(0, 0)-(4, 1), (1, 3)-(6, 4), (5, 0)-(9, 2)' },
+    {
+      segments: parseSegments(
+        '(0, 1)-(6, 3), (1, 4)-(5, 0), (3, 6)-(7, 5), (6, 0)-(9, 2)',
+      ),
+    },
+    { segments: parseSegments('(0, 0)-(4, 1), (1, 3)-(6, 4), (5, 0)-(9, 2)') },
   ],
   code: {
     pseudocode: `

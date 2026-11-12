@@ -7,6 +7,7 @@
  */
 import { defineAlgorithm } from '../../algorithm.ts';
 import { cross, dist2, lowest, planeOf, show, type Pt } from './common.ts';
+import { parsePoints } from './common.ts';
 import { hullInput } from './graham-scan.ts';
 
 /** Whether `p` beats the candidate `c` as the next vertex after `at`. */
@@ -24,17 +25,12 @@ export const jarvisMarch = defineAlgorithm({
   input: hullInput,
   main: 'points',
   examples: [
-    { points: '(0, 0) (4, 1) (6, 4) (3, 6) (-1, 4) (2, 2) (3, 3) (1, 4)' },
     {
-      points: [
-        [0, 0],
-        [2, 0],
-        [4, 0],
-        [4, 4],
-        [2, 2],
-        [0, 4],
-      ],
+      points: parsePoints(
+        '(0, 0) (4, 1) (6, 4) (3, 6) (-1, 4) (2, 2) (3, 3) (1, 4)',
+      ),
     },
+    { points: parsePoints('(0, 0) (2, 0) (4, 0) (4, 4) (2, 2) (0, 4)') },
   ],
   code: {
     pseudocode: `
