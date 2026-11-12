@@ -153,7 +153,13 @@ export function applyModel(m: ModelData, a: A): ModelData | undefined {
           if (j >= p.elements.length || p.shift + j >= n) return undefined;
           const same = p.elements[j]!.value === xs[p.shift + j]!.value;
           return same && !p.matched.includes(j)
-            ? { ...m, pattern: { ...p, matched: [...p.matched, j] } }
+            ? {
+                ...m,
+                pattern: {
+                  ...p,
+                  matched: [...p.matched, j].sort((x, y) => x - y),
+                },
+              }
             : m;
         }
         case 'set':
