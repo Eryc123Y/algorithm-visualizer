@@ -53,6 +53,27 @@ function check(
   expect(kinds.filter((x) => x !== 'check' && x !== 'done')).toHaveLength(
     misses as number,
   );
+  // Each step's kind, and each evicted block, as an independent
+  // furthest-in-future simulation gives them; ties evict the first slot.
+  const cacheNow: string[] = [];
+  requests.forEach((block, i) => {
+    const step = doc.steps[i]!.meta!;
+    if (cacheNow.includes(block)) return expect(step.id).toBe('check');
+    if (cacheNow.length < k) {
+      cacheNow.push(block);
+      return expect(step.id).toBe('miss');
+    }
+    expect(step.id).toBe('evict');
+    let z = 0;
+    let furthest = -1;
+    cacheNow.forEach((b, slot) => {
+      let next = requests.slice(i + 1).indexOf(b);
+      if (next < 0) next = Infinity;
+      if (next > furthest) [z, furthest] = [slot, next];
+    });
+    expect(step.narration).toContain(`Evict ${cacheNow[z]},`);
+    cacheNow[z] = block;
+  });
   // After each request, its block is in the cache.
   requests.forEach((block, i) => {
     const cache = stateOf(trace, 'cache', 'array', i + 1).data.map(
@@ -89,6 +110,29 @@ describe('offline-caching', () => {
       ),
       fuzz,
     );
+  });
+
+  it('evicts on every new block with k = 1, and never with room for all', () => {
+    check(
+      runOk('offline-caching', { requests: ['a', 'b', 'a', 'b'], k: 1 })
+        .document,
+      ['a', 'b', 'a', 'b'],
+      1,
+    );
+    const doc = runOk('offline-caching', {
+      requests: ['a', 'b', 'a', 'c', 'b'],
+      k: 3,
+    }).document;
+    check(doc, ['a', 'b', 'a', 'c', 'b'], 3);
+    expect(doc.steps.some((x) => x.meta?.id === 'evict')).toBe(false);
+  });
+
+  it('counts misses as ordinals past the teens', () => {
+    const requests = Array.from({ length: 22 }, (_, t) => `b${t}`);
+    const doc = runOk('offline-caching', { requests, k: 1 }).document;
+    const said = doc.steps.map((x) => x.meta!.narration!).join(' ');
+    for (const o of ['11th', '12th', '13th', '21st', '22nd'])
+      expect(said).toContain(`the ${o}`);
   });
 
   it('takes 1 to 24 short block names and a cache of 1 to 6', () => {

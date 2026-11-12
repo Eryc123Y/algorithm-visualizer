@@ -15,15 +15,22 @@ import { z } from 'zod';
 
 import { defineAlgorithm } from '../../algorithm.ts';
 import { listField } from '../../notation/schema.ts';
+import { ordinal } from '../searching/randomized-select.ts';
 
-/** The most requests and the largest cache, so that a run stays short. */
+/**
+ * The most requests and the largest cache: 24 requests keep a run to a
+ * screen of steps and the request array to one row, and a cache of 6
+ * still fits beside it.
+ */
 export const MAX_REQUESTS = 24;
 export const MAX_CACHE = 6;
 
 const Block = z
   .string()
   .regex(/^[A-Za-z0-9_]{1,4}$/, 'A block is a name of 1 to 4 letters or digits')
-  .describe('A block, named by a short word such as "a".');
+  .describe(
+    'A block, named by a short word such as "a"; names are case-sensitive, so "a" and "A" are two blocks.',
+  );
 
 export const offlineCaching = defineAlgorithm({
   id: 'offline-caching',
@@ -170,9 +177,3 @@ export const offlineCaching = defineAlgorithm({
     M.settle({ index: 0 });
   },
 });
-
-/** 1st, 2nd, 3rd, 4th, …, 11th, 21st. */
-function ordinal(n: number): string {
-  const teen = n % 100 >= 11 && n % 100 <= 13;
-  return `${n}${teen ? 'th' : (['th', 'st', 'nd', 'rd'][n % 10] ?? 'th')}`;
-}
