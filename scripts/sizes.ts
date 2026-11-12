@@ -202,5 +202,6 @@ console.log(output);
 if (args.has('--write')) {
   const doc = at('docs/sizes.md');
   writeFileSync(doc, replaceBetween(readFileSync(doc, 'utf8'), output));
+  run('npx', ['prettier', '--write', doc]);
   console.log('Wrote docs/sizes.md.');
 }
