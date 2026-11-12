@@ -47,4 +47,4 @@ node --conditions=@algoviz/source evals/src/report.ts <run-dir>
 
 ## Adding a task
 
-Add it to `src/tasks.ts` with a check, and a reference solution to `tests/references.ts` (a registry module's run, or a document recorded with `Recorder`). Run `npx vitest run --project evals`: the reference must pass its check and fail every other.
+Add it to `src/tasks.ts` with a check (tasks for the kinds added after 0.4, from root lists to the plane, are in `src/tasks-kinds.ts`), and a reference solution to `tests/references.ts` (a registry module's run, or a document recorded with `Recorder`). Run `npx vitest run --project evals`: the reference must pass its check and fail every other. Near misses a model might hand in, such as a related algorithm on the same input, go in the spec files as tests the check must reject.

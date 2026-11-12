@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { loadTrace, type TreeData } from '@algoviz/core';
+import {
+  loadTrace,
+  type BTreeData,
+  type PlaneData,
+  type TreeData,
+} from '@algoviz/core';
 
 import { grade } from '../src/grade.ts';
 import { tasks } from '../src/tasks.ts';
@@ -11,6 +16,13 @@ const treeDecl = ({ nodes, roots }: TreeData) => ({
   nodes: nodes.map(({ color, ...n }) => (color === null ? n : { ...n, color })),
   roots,
 });
+
+/** The later of two protocol versions such as "0.4". */
+const newer = (a: string, b: string) => {
+  const [am = 0, an = 0] = a.split('.').map(Number);
+  const [bm = 0, bn = 0] = b.split('.').map(Number);
+  return am > bm || (am === bm && an >= bn) ? a : b;
+};
 
 describe('eval tasks', () => {
   it('have unique ids and a reference each', () => {
@@ -62,15 +74,23 @@ describe('eval tasks', () => {
                   ? { cells: data }
                   : decl.kind === 'tree'
                     ? treeDecl(data as TreeData)
-                    : decl.kind === 'graph' || decl.kind === 'linkedList'
-                      ? {}
-                      : { initial: data };
+                    : decl.kind === 'btree'
+                      ? {
+                          nodes: (data as BTreeData).nodes,
+                          root: (data as BTreeData).root,
+                        }
+                      : decl.kind === 'plane'
+                        ? { ...(data as PlaneData) }
+                        : decl.kind === 'graph' || decl.kind === 'linkedList'
+                          ? {}
+                          : { initial: data };
           return [name, { ...decl, ...solved }];
         }),
       );
       const result = grade(task, {
-        // Side panels and priority queues need 0.4 (ADR 0029).
-        version: '0.4',
+        // Side panels and priority queues need 0.4 (ADR 0029); newer kinds
+        // need their reference's version.
+        version: newer('0.4', trace.visualization.version),
         structures,
         steps: Array.from({ length: task.minSteps }, (_, k) => ({
           actions: [],

@@ -8,6 +8,7 @@ export default defineConfig({
       'apps/site',
       'apps/worker',
       'evals',
+      { test: { name: 'scripts', include: ['scripts/**/*.spec.ts'] } },
     ],
     coverage: {
       provider: 'v8',

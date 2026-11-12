@@ -432,4 +432,63 @@ export const references: Readonly<Record<string, () => VisualizationInput>> = {
         key,
       })),
     }),
+  'fibonacci-extract-min': () =>
+    moduleDocument('fibonacci-heap', {
+      from: [
+        { key: 12 },
+        {
+          key: 5,
+          children: [
+            { key: 9, children: [{ key: 20, marked: true }] },
+            { key: 14 },
+          ],
+        },
+        { key: 8, children: [{ key: 11 }] },
+        { key: 30 },
+      ],
+      ops: [{ op: 'insert', key: 17 }, { op: 'extract-min' }],
+    }),
+  'b-tree-insert': () =>
+    moduleDocument('b-tree', {
+      from: { t: 2, keys: [] },
+      ops: [8, 3, 12, 5, 1, 9, 15, 7].map((key) => ({
+        op: 'insert',
+        key,
+      })),
+    }),
+  'move-to-front': () =>
+    moduleDocument('move-to-front', {
+      list: [3, 8, 5, 1, 6],
+      requests: [5, 1, 5, 6],
+    }),
+  kmp: () =>
+    moduleDocument('kmp', { text: 'abaabacababacab', pattern: 'abacab' }),
+  'graham-scan': () =>
+    moduleDocument('graham-scan', {
+      points: [
+        [1, 0],
+        [7, 2],
+        [5, 3],
+        [8, 6],
+        [4, 5],
+        [2, 8],
+        [3, 3],
+        [0, 4],
+      ].map(([x, y], k) => ({ id: `p${k}`, x, y })),
+    }),
+  'prim-queue': () =>
+    moduleDocument('prim', {
+      graph: cities([
+        ['A', 'B', 6],
+        ['A', 'C', 2],
+        ['B', 'C', 7],
+        ['B', 'D', 4],
+        ['B', 'E', 9],
+        ['C', 'E', 5],
+        ['D', 'E', 8],
+        ['D', 'F', 1],
+        ['E', 'F', 3],
+      ]),
+      root: 'A',
+    }),
 };

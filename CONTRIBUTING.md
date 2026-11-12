@@ -36,25 +36,26 @@ Workspace packages expose their TypeScript sources through the `@algoviz/source`
 
 Run from the repository root.
 
-| Command                                     | Purpose                                                                       |
-| ------------------------------------------- | ----------------------------------------------------------------------------- |
-| `npm run dev`                               | Start the playground dev server                                               |
-| `npm run build`                             | Type-check and build every workspace                                          |
-| `npm run typecheck`                         | Type-check every project (`vue-tsc --build`)                                  |
-| `npm run lint` / `lint:fix`                 | ESLint                                                                        |
-| `npm run format` / `format:check`           | Prettier                                                                      |
-| `npm test` / `test:watch` / `test:coverage` | Unit tests for all workspaces (Vitest)                                        |
-| `npm run test:e2e`                          | Playwright tests against the production builds of the playground and the site |
-| `npm run test:typst`                        | The Typst package in the `typst` command (needs Typst 0.15)                   |
-| `npm run test:standalone`                   | Build the standalone `algoviz` and compare it with the Node CLI               |
-| `npm run test:latex`                        | Compile the LaTeX package's examples and cases (needs TeX Live)               |
-| `npm run check`                             | Typecheck, lint, format check and unit tests (what CI runs first)             |
-| `npm run generate:schema -w @algoviz/spec`  | Regenerate `packages/spec/schema/visualization.schema.json`                   |
-| `npm run gallery -- out.html [file.json …]` | Render every frame of fixtures or documents to one page, for review           |
-| `npm run generate:fonts`                    | Regenerate the fonts' metrics, outlines and web fonts (ADR 0030)              |
-| `npm run build -w @algoviz/typst`           | Build the Typst package's engine bytecode (Node only)                         |
-| `npm run build:plugin -w @algoviz/typst`    | Rebuild the Typst plugin; needs rustup and LLVM 23 (ADR 0026)                 |
-| `npm run build:standalone -w @algoviz/mcp`  | Build the standalone `algoviz` executable; needs rustup (ADR 0027)            |
+| Command                                     | Purpose                                                                         |
+| ------------------------------------------- | ------------------------------------------------------------------------------- |
+| `npm run dev`                               | Start the playground dev server                                                 |
+| `npm run build`                             | Type-check and build every workspace                                            |
+| `npm run typecheck`                         | Type-check every project (`vue-tsc --build`)                                    |
+| `npm run lint` / `lint:fix`                 | ESLint                                                                          |
+| `npm run format` / `format:check`           | Prettier                                                                        |
+| `npm test` / `test:watch` / `test:coverage` | Unit tests for all workspaces (Vitest)                                          |
+| `npm run test:e2e`                          | Playwright tests against the production builds of the playground and the site   |
+| `npm run test:typst`                        | The Typst package in the `typst` command (needs Typst 0.15)                     |
+| `npm run test:standalone`                   | Build the standalone `algoviz` and compare it with the Node CLI                 |
+| `npm run test:latex`                        | Compile the LaTeX package's examples and cases (needs TeX Live)                 |
+| `npm run check`                             | Typecheck, lint, format check and unit tests (what CI runs first)               |
+| `npm run generate:schema -w @algoviz/spec`  | Regenerate `packages/spec/schema/visualization.schema.json`                     |
+| `npm run gallery -- out.html [file.json …]` | Render every frame of fixtures or documents to one page, for review             |
+| `npm run generate:fonts`                    | Regenerate the fonts' metrics, outlines and web fonts (ADR 0030)                |
+| `npm run build -w @algoviz/typst`           | Build the Typst package's engine bytecode (Node only)                           |
+| `npm run build:plugin -w @algoviz/typst`    | Rebuild the Typst plugin; needs rustup and LLVM 23 (ADR 0026)                   |
+| `npm run build:standalone -w @algoviz/mcp`  | Build the standalone `algoviz` executable; needs rustup (ADR 0027)              |
+| `npm run sizes` / `sizes -- --write`        | Build what users download and report its sizes ([docs/sizes.md](docs/sizes.md)) |
 
 The pre-commit hook runs ESLint and Prettier on staged files. Run `npm run check` before pushing.
 

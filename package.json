@@ -24,6 +24,7 @@
     "check": "npm run typecheck && npm run lint && npm run format:check && npm run test",
     "prepare": "husky",
     "gallery": "node --conditions=@algoviz/source scripts/gallery.ts",
+    "sizes": "node --conditions=@algoviz/source scripts/sizes.ts",
     "generate:fonts": "node --conditions=@algoviz/source scripts/fonts.ts",
     "test:worker": "npm run test:worker -w @algoviz/worker"
   },

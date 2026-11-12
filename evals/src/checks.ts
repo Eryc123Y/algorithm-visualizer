@@ -240,3 +240,49 @@ export function twoLanguages(trace: Trace, minAnchors = 2): string[] {
     ),
   ];
 }
+
+/** A value as a number; numeric strings count, null does not. */
+export const num = (v: Scalar): number => (v === null ? NaN : Number(v));
+export const nums = (vs: readonly Scalar[]) => vs.map(num);
+export const str = (vs: readonly Scalar[]) => vs.map((v) => String(v));
+
+export const selected = (s: GraphState) =>
+  s.data.edges.filter((e) => s.marks.edgeMarks[e.id] === 'selected');
+export const rejected = (s: GraphState) =>
+  s.data.edges.filter((e) => s.marks.edgeMarks[e.id] === 'rejected');
+
+/** Most of `count(state)` gained in one step: 1 when added one at a time. */
+export const maxGain = <S>(states: readonly S[], count: (s: S) => number) =>
+  Math.max(0, ...states.slice(1).map((s, i) => count(s) - count(states[i]!)));
+
+/** A graph whose nodes and edges are exactly these (by endpoints). */
+export function graphIs(
+  t: Track<'graph'>,
+  nodes: readonly string[],
+  edges: readonly (readonly [string, string, number?])[],
+  directed: boolean,
+): string[] {
+  const g = t.first;
+  const key = (a: string, b: string) =>
+    directed ? `${a}>${b}` : [a, b].sort().join('|');
+  const want = edges.map(([a, b, w]) => `${key(a, b)}:${w ?? ''}`).sort();
+  const got = g.data.edges
+    .map(
+      (e) =>
+        `${key(e.from, e.to)}:${typeof e.weight === 'number' ? e.weight : ''}`,
+    )
+    .sort();
+  return [
+    ...expect(
+      g.directed === directed,
+      directed ? 'is not directed' : 'is directed',
+    ),
+    ...expect(
+      same(sortedNodes(g), [...nodes].sort()),
+      `has nodes ${JSON.stringify(sortedNodes(g))}`,
+    ),
+    ...expect(same(got, want), `has edges ${JSON.stringify(got)}`),
+  ];
+}
+export const sortedNodes = (g: Track<'graph'>['first']) =>
+  [...nodeIds(g)].sort();
