@@ -34,6 +34,10 @@ import {
   postorderTreeWalk,
   preorderTreeWalk,
 } from './algorithms/trees/tree-walks.ts';
+import { finiteAutomatonMatcher } from './algorithms/strings/finite-automaton.ts';
+import { kmp } from './algorithms/strings/kmp.ts';
+import { naiveStringMatcher } from './algorithms/strings/naive.ts';
+import { rabinKarp } from './algorithms/strings/rabin-karp.ts';
 import { runModule, type AlgorithmRun } from './run-module.ts';
 import { avl } from './structures/avl/index.ts';
 import { bTree } from './structures/b-tree/index.ts';
@@ -88,6 +92,10 @@ export const algorithms: readonly Algorithm[] = [
   editDistance,
   knapsack,
   huffman,
+  naiveStringMatcher,
+  rabinKarp,
+  finiteAutomatonMatcher,
+  kmp,
 ];
 
 /** The module with `id`, if there is one. */

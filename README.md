@@ -72,6 +72,7 @@ The registry holds these modules, by topic ([ADR 0022](docs/adr/0022-registry-de
 - **Graphs:** `bfs`, `dfs`, `topological-sort`, `dijkstra`, `bellman-ford`, `prim`, `kruskal`, `floyd-warshall`.
 - **Dynamic programming:** `lcs`, `edit-distance`, `knapsack`.
 - **Greedy algorithms:** `huffman`.
+- **String matching:** `naive-string-matcher`, `rabin-karp`, `finite-automaton-matcher`, `kmp`.
 
 A data structure has one module per operation, such as `bst.delete`, which starts from a structure the caller describes, and one for its sequence, such as `bst`, which runs up to 8 operations. `algorithms` lists every module.
 
