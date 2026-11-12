@@ -20,6 +20,8 @@ export function partitioner(
   arr: Handle<'array'>,
   calls: CallStack,
   random?: Random,
+  /** Whether a partition pushes its call; false when the call began earlier. */
+  push = true,
 ): (p: number, r: number, call: string) => number {
   const { trace } = calls;
 
@@ -50,7 +52,7 @@ export function partitioner(
       `Partition a[${p}..${r}] around the pivot ${x}, ${random === undefined ? 'its' : 'now its'} last value.`,
       { vars: { p, r, x } },
     );
-    if (random === undefined) calls.push(`call-${p}-${r}`, call);
+    if (random === undefined && push) calls.push(`call-${p}-${r}`, call);
     arr.pointer({ name: 'pivot', index: r }).highlight({ indices: [r] });
     let i = p - 1;
     for (let j = p; j < r; j++) {
