@@ -75,6 +75,7 @@ import { bst } from './structures/bst/index.ts';
 import { disjointSet } from './structures/disjoint-set/index.ts';
 import { hashChaining } from './structures/hashing/chaining.ts';
 import { linearProbing } from './structures/hashing/linear-probing.ts';
+import { stack } from './structures/elementary/stack.ts';
 import { fibonacciHeap } from './structures/fibonacci-heap/index.ts';
 import { maxHeap, minHeap } from './structures/heap/index.ts';
 import { intervalTree } from './structures/red-black/interval-tree.ts';
@@ -100,6 +101,7 @@ export const algorithms: readonly Algorithm[] = [
   reverseLinkedList,
   moveToFront,
   balancedBrackets,
+  ...stack.modules,
   ...bst.modules,
   ...avl.modules,
   ...redBlackTree.modules,
