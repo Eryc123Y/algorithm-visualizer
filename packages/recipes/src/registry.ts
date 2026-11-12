@@ -16,6 +16,7 @@ import { bfs } from './algorithms/graphs/bfs.ts';
 import { dfs } from './algorithms/graphs/dfs.ts';
 import { dagShortestPaths } from './algorithms/graphs/dag-shortest-paths.ts';
 import { dijkstra } from './algorithms/graphs/dijkstra.ts';
+import { edmondsKarp } from './algorithms/graphs/edmonds-karp.ts';
 import { floydWarshall } from './algorithms/graphs/floyd-warshall.ts';
 import { transitiveClosure } from './algorithms/graphs/transitive-closure.ts';
 import { kruskal } from './algorithms/graphs/kruskal.ts';
@@ -101,6 +102,7 @@ export const algorithms: readonly Algorithm[] = [
   kruskal,
   floydWarshall,
   transitiveClosure,
+  edmondsKarp,
   lcs,
   editDistance,
   knapsack,

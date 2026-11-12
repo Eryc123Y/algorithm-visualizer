@@ -1521,6 +1521,23 @@ recipe(
   },
 );
 
+recipe(
+  'edmonds-karp',
+  graphs(
+    fc.option(fc.integer({ min: 0, max: 20 }), { nil: undefined, freq: 4 }),
+    { minNodes: 2 },
+  ),
+  (graph) => runOk('edmonds-karp', { graph }).document,
+  (trace) => {
+    // Every edge ends with a flow within its capacity.
+    for (const e of stateOf(trace, 'g', 'graph').data.edges) {
+      const [f, c] = String(e.weight).split('/').map(Number);
+      expect(f).toBeGreaterThanOrEqual(0);
+      expect(f).toBeLessThanOrEqual(c!);
+    }
+  },
+);
+
 describe('topological-sort input checks', () => {
   it(
     'refuses a graph with a cycle, and only such a graph',

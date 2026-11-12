@@ -152,7 +152,7 @@ Each entry is one registry module, or one per operation for data structures. Eac
 - [x] DAG shortest paths (#88)
 - [x] transitive closure (#91)
 - [ ] Johnson
-- [ ] Edmonds–Karp maximum flow
+- [x] Edmonds–Karp maximum flow (#93)
 - [ ] bipartite matching
 - [ ] Hopcroft–Karp
 - [ ] stable matching (Gale–Shapley)
