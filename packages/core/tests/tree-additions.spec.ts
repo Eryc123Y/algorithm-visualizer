@@ -4,9 +4,13 @@
  */
 import { describe, expect, it } from 'vitest';
 
+import { textWidth } from '@algoviz/fonts';
+
 import {
+  defaultFonts,
   layoutTrace,
   loadTrace,
+  noteBox,
   type Scene,
   type SceneBadge,
   type SceneBox,
@@ -538,6 +542,45 @@ describe('layout of the additions', () => {
     expect(x.y).toBeCloseTo(b.y);
     // The frame without pointers keeps the same nodes.
     expect(nodesOf(frames[0]!)).toEqual(nodesOf(scene));
+  });
+
+  it('keeps a root’s notes off the pointer above it', () => {
+    // Links on both sides and a child below leave no clear place.
+    const frames = scenes(
+      doc(
+        {
+          rootList: 'circular',
+          nodes: [
+            { id: 'a', value: 7 },
+            { id: 'b', value: 17, children: ['c'] },
+            { id: 'c', value: 30 },
+            { id: 'd', value: 24 },
+          ],
+        },
+        [
+          [
+            { type: 'pointer', name: 'min', node: 'b' },
+            { type: 'annotate', node: 'b', field: 'mark', text: 'marked' },
+            { type: 'annotate', node: 'b', field: 'deg', text: 'd=1' },
+          ],
+        ],
+      ),
+    );
+    const scene = frames[1]!;
+    const b = item<SceneNode>(scene, 't/element/b');
+    const min = item<SceneBadge>(scene, 't/pointer/min');
+    const note = noteBox(
+      { x: b.x, y: b.y, radius: b.radius, halfWidth: b.radius },
+      b.labelAngle ?? 0,
+      (textWidth(b.label!, defaultFonts.value) *
+        Math.max(10, b.fontSize * 0.7)) /
+        2,
+      Math.max(10, b.fontSize * 0.7),
+    );
+    const apart =
+      Math.abs(note.x - min.x) >= note.halfWidth + min.width / 2 ||
+      Math.abs(note.y - min.y) >= note.halfHeight + min.height / 2;
+    expect(apart).toBe(true);
   });
 
   it('draws a plain list without the wrap link', () => {

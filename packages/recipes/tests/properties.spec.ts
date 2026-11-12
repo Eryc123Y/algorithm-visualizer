@@ -575,6 +575,55 @@ recipe(
   },
 );
 
+recipe(
+  'fibonacci-heap',
+  fc
+    .tuple(
+      fc.uniqueArray(fc.integer({ min: 0, max: 60 }), { maxLength: 16 }),
+      fc.array(
+        fc.oneof(
+          fc.record({
+            op: fc.constant('insert'),
+            key: fc.integer({ min: 61, max: 99 }),
+          }),
+          fc.record({ op: fc.constant('extract-min') }),
+        ),
+        { minLength: 1, maxLength: 8 },
+      ),
+    )
+    // Distinct inserted keys, and no more extractions than keys.
+    .map(([keys, raw]) => {
+      let size = keys.length;
+      const seen = new Set(keys);
+      const ops = raw.filter((o) => {
+        if (o.op === 'insert') {
+          if (seen.has(o.key)) return false;
+          seen.add(o.key);
+          size++;
+          return true;
+        }
+        if (size === 0) return false;
+        size--;
+        return true;
+      });
+      return {
+        from: keys,
+        ops: ops.length > 0 ? ops : [{ op: 'insert', key: 100 }],
+      };
+    }),
+  (input) => runOk('fibonacci-heap', input).document,
+  (trace, { from, ops }) => {
+    const keys = new Set(from);
+    for (const o of ops)
+      if (o.op === 'insert') keys.add(o.key);
+      else keys.delete(Math.min(...keys));
+    const tree = stateOf(trace, 'H', 'tree');
+    expect(
+      tree.data.nodes.map((n) => n.value).sort((a, b) => Number(a) - Number(b)),
+    ).toEqual([...keys].sort((a, b) => a - b));
+  },
+);
+
 /**
  * A valid LeetCode level order: the root, then for every node in order
  * its two slots, then possibly a few trailing nulls.

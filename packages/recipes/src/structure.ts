@@ -76,10 +76,17 @@ export interface Operation<
   titleOf(args: Args<Shape>): string;
   /**
    * Applies the operation to `state`, recording its steps on `trace` and
-   * its actions on `on`. Throws a RangeError for a call the state does not
-   * allow, such as a pop from an empty heap.
+   * its actions on `on`, and on `sides` for the side structures the run
+   * declared. Throws a RangeError for a call the state does not allow,
+   * such as a pop from an empty heap.
    */
-  apply(state: S, args: Args<Shape>, trace: Trace, on: Handle<K>): Applied<S>;
+  apply(
+    state: S,
+    args: Args<Shape>,
+    trace: Trace,
+    on: Handle<K>,
+    sides: Sides,
+  ): Applied<S>;
 }
 
 /**
@@ -92,6 +99,12 @@ export const operationsOf =
     op: Operation<S, From, K, Shape>,
   ): Operation<S, From, K, Shape> =>
     op;
+
+/**
+ * The handles of a run's side structures, such as the Fibonacci heap's
+ * array `A`, by name (ADR 0034).
+ */
+export type Sides = Readonly<Record<string, Handle<StructureKindName>>>;
 
 /** A call in a sequence: the operation's name and its arguments. */
 export type Call = { readonly op: string } & Record<string, unknown>;
@@ -125,7 +138,17 @@ export interface StructureDef<S, From, K extends StructureKindName> {
    * Removes marks an earlier operation left behind, such as pointers, in
    * the first step of the next one.
    */
-  clear(on: Handle<K>): void;
+  clear(on: Handle<K>, sides: Sides): void;
+  /**
+   * The side structures a run declares besides the main one, by name, from
+   * its starting state and calls (ADR 0034): the recorder declares every
+   * structure before the first step, so a structure an operation needs,
+   * such as CONSOLIDATE's array, is declared here for the whole run.
+   */
+  auxiliary?(
+    from: From,
+    calls: readonly Call[],
+  ): Readonly<Record<string, StructureDeclInput>>;
   readonly operations: readonly Operation<S, From, K>[];
 }
 
@@ -181,15 +204,22 @@ function runCalls<S, From, K extends StructureKindName>(
   const code = joinListings(resolved.map((r) => r.listing));
   const ids = sectionIds(resolved.map((r) => r.title));
   const on = trace.add(def.name, def.declare(state)) as Handle<K>;
+  const sides: Sides = Object.fromEntries(
+    Object.entries(def.auxiliary?.(from, calls) ?? {}).map(([name, decl]) => [
+      name,
+      trace.add(name, decl),
+    ]),
+  );
   const results = resolved.map(({ op, args, title, listing }, k) => {
     // Each operation is a section (ADR 0020).
     trace.section(ids[k]!, capitalize(title));
-    const clear = k > 0 ? () => def.clear(on) : undefined;
+    const clear = k > 0 ? () => def.clear(on, sides) : undefined;
     const applied = op.apply(
       state,
       args,
       listingTrace(trace, code, listing, clear),
       on,
+      sides,
     );
     state = applied.state;
     return applied.result;
