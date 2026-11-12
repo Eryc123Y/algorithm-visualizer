@@ -1,0 +1,29 @@
+{
+  "description": "A B-tree node has no children or one more than its keys.",
+  "input": {
+    "version": "0.6",
+    "structures": {
+      "T": {
+        "kind": "btree",
+        "nodes": [
+          {
+            "id": "r",
+            "keys": [1, 2],
+            "children": ["a"]
+          },
+          {
+            "id": "a",
+            "keys": []
+          }
+        ]
+      }
+    },
+    "steps": []
+  },
+  "expectedErrors": [
+    {
+      "code": "INVALID_STRUCTURE",
+      "path": "$.structures.T.nodes[0].children"
+    }
+  ]
+}

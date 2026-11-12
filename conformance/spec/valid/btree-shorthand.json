@@ -1,0 +1,106 @@
+{
+  "description": "A B-tree with bare keys gets key ids k0, k1, … through the tree, and its root is the node nobody holds (ADR 0035).",
+  "input": {
+    "version": "0.6",
+    "structures": {
+      "T": {
+        "kind": "btree",
+        "nodes": [
+          {
+            "id": "r",
+            "keys": ["G"],
+            "children": ["a", "b"]
+          },
+          {
+            "id": "a",
+            "keys": ["A", "C", "E"]
+          },
+          {
+            "id": "b",
+            "keys": ["H", "K"]
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "T",
+            "type": "insertKey",
+            "node": "b",
+            "index": 2,
+            "key": "M"
+          }
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "version": "0.6",
+    "structures": {
+      "T": {
+        "kind": "btree",
+        "nodes": [
+          {
+            "id": "r",
+            "keys": [
+              {
+                "id": "k0",
+                "value": "G"
+              }
+            ],
+            "children": ["a", "b"]
+          },
+          {
+            "id": "a",
+            "keys": [
+              {
+                "id": "k1",
+                "value": "A"
+              },
+              {
+                "id": "k2",
+                "value": "C"
+              },
+              {
+                "id": "k3",
+                "value": "E"
+              }
+            ]
+          },
+          {
+            "id": "b",
+            "keys": [
+              {
+                "id": "k4",
+                "value": "H"
+              },
+              {
+                "id": "k5",
+                "value": "K"
+              }
+            ]
+          }
+        ],
+        "root": "r"
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "T",
+            "type": "insertKey",
+            "node": "b",
+            "index": 2,
+            "key": {
+              "id": "k6",
+              "value": "M"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

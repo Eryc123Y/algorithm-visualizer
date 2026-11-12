@@ -22,6 +22,7 @@ import type {
   TableState,
   TreeState,
 } from '../../src/index.ts';
+import { btreeAction, btreeDecl } from './btree-model.ts';
 import type { Dice } from './random.ts';
 
 type Fields = Record<string, unknown>;
@@ -98,6 +99,8 @@ export function declaration(kind: StructureKindName, r: Dice): StructureDecl {
           : {}),
       } as unknown as StructureDecl;
     }
+    case 'btree':
+      return btreeDecl(r, label);
     case 'priorityQueue':
       return {
         kind,
@@ -217,6 +220,8 @@ export function action(entry: KindedState, r: Dice): Fields {
       return hashAction(entry.state, r);
     case 'priorityQueue':
       return priorityQueueAction(entry.state, r);
+    case 'btree':
+      return btreeAction(entry.state, r);
   }
 }
 
@@ -598,10 +603,13 @@ function hashAction(s: HashTableState, r: Dice): Fields {
 
 /** The id an action introduces, if any: ids must be new for the whole trace. */
 export function introducedId(a: Fields): string | undefined {
-  for (const key of ['element', 'node', 'edge']) {
+  for (const key of ['element', 'node', 'edge', 'key']) {
     const v = a[key];
     if (typeof v === 'object' && v !== null && 'id' in v) return String(v.id);
   }
+  // A B-tree's split and grow name the node they make (ADR 0035).
+  for (const key of ['newNode', 'newRoot'])
+    if (typeof a[key] === 'string') return a[key];
   return undefined;
 }
 
@@ -623,6 +631,8 @@ export function declIds(decl: StructureDecl): string[] {
       return decl.buckets.flatMap(ids);
     case 'priorityQueue':
       return ids(decl.initial);
+    case 'btree':
+      return decl.nodes.flatMap((n) => [n.id, ...ids(n.keys)]);
   }
 }
 

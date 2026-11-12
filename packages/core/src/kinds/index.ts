@@ -13,6 +13,7 @@ import type { ReduceError } from '../errors.ts';
 import { runtimes, type CoreTypeMap } from '../registry.ts';
 
 export * from './array.ts';
+export * from './btree.ts';
 export * from './graph.ts';
 export * from './hash-table.ts';
 export * from './table.ts';

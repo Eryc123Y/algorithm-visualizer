@@ -1,0 +1,288 @@
+{
+  "description": "A split lifts the middle key, keeping its id, then a key goes into a leaf and the root grows (ADR 0035).",
+  "input": {
+    "version": "0.6",
+    "structures": {
+      "T": {
+        "kind": "btree",
+        "nodes": [
+          {
+            "id": "r",
+            "keys": ["G"],
+            "children": ["a", "b"]
+          },
+          {
+            "id": "a",
+            "keys": ["A", "C", "E"]
+          },
+          {
+            "id": "b",
+            "keys": ["H", "K"]
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "T",
+            "type": "split",
+            "node": "r",
+            "index": 0,
+            "newNode": "a2"
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "T",
+            "type": "insertKey",
+            "node": "a",
+            "index": 1,
+            "key": {
+              "id": "kb",
+              "value": "B"
+            }
+          }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "T",
+            "type": "grow",
+            "newRoot": "s"
+          }
+        ]
+      }
+    ]
+  },
+  "expectedLength": 3,
+  "expectedFrames": [
+    {
+      "index": 1,
+      "state": {
+        "T": {
+          "kind": "btree",
+          "state": {
+            "data": {
+              "nodes": [
+                {
+                  "id": "r",
+                  "keys": [
+                    {
+                      "id": "k2",
+                      "value": "C"
+                    },
+                    {
+                      "id": "k0",
+                      "value": "G"
+                    }
+                  ],
+                  "children": ["a", "a2", "b"]
+                },
+                {
+                  "id": "a",
+                  "keys": [
+                    {
+                      "id": "k1",
+                      "value": "A"
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "id": "b",
+                  "keys": [
+                    {
+                      "id": "k4",
+                      "value": "H"
+                    },
+                    {
+                      "id": "k5",
+                      "value": "K"
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "id": "a2",
+                  "keys": [
+                    {
+                      "id": "k3",
+                      "value": "E"
+                    }
+                  ],
+                  "children": []
+                }
+              ],
+              "root": "r"
+            },
+            "marks": {
+              "keys": [],
+              "nodes": [],
+              "settled": [],
+              "pointers": {},
+              "notes": {}
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 2,
+      "state": {
+        "T": {
+          "kind": "btree",
+          "state": {
+            "data": {
+              "nodes": [
+                {
+                  "id": "r",
+                  "keys": [
+                    {
+                      "id": "k2",
+                      "value": "C"
+                    },
+                    {
+                      "id": "k0",
+                      "value": "G"
+                    }
+                  ],
+                  "children": ["a", "a2", "b"]
+                },
+                {
+                  "id": "a",
+                  "keys": [
+                    {
+                      "id": "k1",
+                      "value": "A"
+                    },
+                    {
+                      "id": "kb",
+                      "value": "B"
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "id": "b",
+                  "keys": [
+                    {
+                      "id": "k4",
+                      "value": "H"
+                    },
+                    {
+                      "id": "k5",
+                      "value": "K"
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "id": "a2",
+                  "keys": [
+                    {
+                      "id": "k3",
+                      "value": "E"
+                    }
+                  ],
+                  "children": []
+                }
+              ],
+              "root": "r"
+            },
+            "marks": {
+              "keys": [],
+              "nodes": [],
+              "settled": [],
+              "pointers": {},
+              "notes": {}
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 3,
+      "state": {
+        "T": {
+          "kind": "btree",
+          "state": {
+            "data": {
+              "nodes": [
+                {
+                  "id": "r",
+                  "keys": [
+                    {
+                      "id": "k2",
+                      "value": "C"
+                    },
+                    {
+                      "id": "k0",
+                      "value": "G"
+                    }
+                  ],
+                  "children": ["a", "a2", "b"]
+                },
+                {
+                  "id": "a",
+                  "keys": [
+                    {
+                      "id": "k1",
+                      "value": "A"
+                    },
+                    {
+                      "id": "kb",
+                      "value": "B"
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "id": "b",
+                  "keys": [
+                    {
+                      "id": "k4",
+                      "value": "H"
+                    },
+                    {
+                      "id": "k5",
+                      "value": "K"
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "id": "a2",
+                  "keys": [
+                    {
+                      "id": "k3",
+                      "value": "E"
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "id": "s",
+                  "keys": [],
+                  "children": ["r"]
+                }
+              ],
+              "root": "s"
+            },
+            "marks": {
+              "keys": [],
+              "nodes": [],
+              "settled": [],
+              "pointers": {},
+              "notes": {}
+            }
+          }
+        }
+      }
+    }
+  ]
+}

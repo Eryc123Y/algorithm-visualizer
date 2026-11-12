@@ -14,7 +14,14 @@ import type { VisualizationInput } from './visualization.ts';
  * change appends a version here and adds its features to
  * `PROTOCOL_FEATURES`.
  */
-export const PROTOCOL_VERSIONS = ['0.1', '0.2', '0.3', '0.4', '0.5'] as const;
+export const PROTOCOL_VERSIONS = [
+  '0.1',
+  '0.2',
+  '0.3',
+  '0.4',
+  '0.5',
+  '0.6',
+] as const;
 
 /** A protocol version this package reads. */
 export type ProtocolVersion = (typeof PROTOCOL_VERSIONS)[number];
@@ -250,6 +257,11 @@ export const PROTOCOL_FEATURES: readonly ProtocolFeature[] = [
         d,
         (a) => a['type'] === 'markEdge' || a['type'] === 'labelEdge',
       ),
+  },
+  {
+    name: 'B-trees',
+    since: '0.6',
+    usedBy: (d) => Object.values(d.structures).some((s) => s.kind === 'btree'),
   },
   {
     name: 'root lists',

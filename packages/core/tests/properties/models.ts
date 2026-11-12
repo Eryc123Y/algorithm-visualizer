@@ -6,6 +6,11 @@
  */
 import { LIMITS, type Scalar, type StructureDecl } from '@algoviz/spec';
 
+import {
+  applyBTreeModel,
+  initBTreeModel,
+  type BTreeModel,
+} from './btree-model.ts';
 import { applyTreeModel, initTreeModel, type TreeModel } from './tree-model.ts';
 
 type Element = { id: string; value: Scalar };
@@ -19,7 +24,8 @@ export type ModelData =
   | { kind: 'table'; cells: Scalar[][] }
   | { kind: 'hashTable'; buckets: Element[][] }
   | { kind: 'priorityQueue'; order: 'min' | 'max'; items: Item[] }
-  | TreeModel;
+  | TreeModel
+  | BTreeModel;
 
 export type ModelKind = ModelData['kind'];
 export const modelled: readonly string[] = [
@@ -31,6 +37,7 @@ export const modelled: readonly string[] = [
   'hashTable',
   'priorityQueue',
   'tree',
+  'btree',
 ];
 
 export function initModel(decl: StructureDecl): ModelData | undefined {
@@ -66,6 +73,8 @@ export function initModel(decl: StructureDecl): ModelData | undefined {
       };
     case 'tree':
       return initTreeModel(decl);
+    case 'btree':
+      return initBTreeModel(decl);
     default:
       return undefined;
   }
@@ -82,6 +91,7 @@ const insertAt = <T>(xs: T[], i: number, x: T) => [
 export function applyModel(m: ModelData, a: A): ModelData | undefined {
   if (m.kind === 'priorityQueue') return applyPriorityQueue(m, a);
   if (m.kind === 'tree') return applyTreeModel(m, a);
+  if (m.kind === 'btree') return applyBTreeModel(m, a);
   switch (m.kind) {
     case 'array': {
       const xs = m.items;
@@ -349,6 +359,17 @@ export function dataOf(entry: { kind: string; state: unknown }): unknown {
       return { kind: 'hashTable', buckets: s['data'] };
     case 'priorityQueue':
       return { kind: 'priorityQueue', ...(s['data'] as object) };
+    case 'btree': {
+      const data = s['data'] as { nodes: unknown; root: unknown };
+      const marks = s['marks'] as { pointers: unknown; notes: unknown };
+      return {
+        kind: 'btree',
+        nodes: data.nodes,
+        root: data.root,
+        pointers: marks.pointers,
+        notes: marks.notes,
+      };
+    }
     case 'tree': {
       const data = s['data'] as { nodes: unknown; roots: unknown };
       const marks = s['marks'] as Record<string, unknown>;

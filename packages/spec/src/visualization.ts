@@ -49,6 +49,10 @@ import {
   PriorityQueueActionInput,
   PriorityQueueDecl,
   PriorityQueueDeclInput,
+  BTreeAction,
+  BTreeActionInput,
+  BTreeDecl,
+  BTreeDeclInput,
   TableAction,
   TableDecl,
   TableDeclInput,
@@ -93,6 +97,7 @@ export const TargetedAction = z.union([
   z.discriminatedUnion('type', withTargets(TableAction.options)),
   z.discriminatedUnion('type', withTargets(HashTableAction.options)),
   z.discriminatedUnion('type', withTargets(PriorityQueueAction.options)),
+  z.discriminatedUnion('type', withTargets(BTreeAction.options)),
 ]);
 export type TargetedAction = z.infer<typeof TargetedAction>;
 
@@ -107,6 +112,7 @@ export const TargetedActionInput = z.union([
   z.discriminatedUnion('type', withTargets(TableAction.options)),
   z.discriminatedUnion('type', withTargets(HashTableActionInput.options)),
   z.discriminatedUnion('type', withTargets(PriorityQueueActionInput.options)),
+  z.discriminatedUnion('type', withTargets(BTreeActionInput.options)),
 ]);
 export type TargetedActionInput = z.infer<typeof TargetedActionInput>;
 
@@ -120,6 +126,7 @@ export const StructureDecl = z.discriminatedUnion('kind', [
   TableDecl,
   HashTableDecl,
   PriorityQueueDecl,
+  BTreeDecl,
 ]);
 export type StructureDecl = z.infer<typeof StructureDecl>;
 
@@ -133,6 +140,7 @@ export const StructureDeclInput = z.discriminatedUnion('kind', [
   TableDeclInput,
   HashTableDeclInput,
   PriorityQueueDeclInput,
+  BTreeDeclInput,
 ]);
 export type StructureDeclInput = z.infer<typeof StructureDeclInput>;
 

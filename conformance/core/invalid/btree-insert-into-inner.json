@@ -1,0 +1,45 @@
+{
+  "description": "insertKey goes into a leaf only.",
+  "input": {
+    "version": "0.6",
+    "structures": {
+      "T": {
+        "kind": "btree",
+        "nodes": [
+          {
+            "id": "r",
+            "keys": ["G"],
+            "children": ["a", "b"]
+          },
+          {
+            "id": "a",
+            "keys": ["A", "C", "E"]
+          },
+          {
+            "id": "b",
+            "keys": ["H", "K"]
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "T",
+            "type": "insertKey",
+            "node": "r",
+            "index": 0,
+            "key": "B"
+          }
+        ]
+      }
+    ]
+  },
+  "expectedErrors": [
+    {
+      "code": "INVALID_OPERATION",
+      "path": "$.steps[0].actions[0].node"
+    }
+  ]
+}

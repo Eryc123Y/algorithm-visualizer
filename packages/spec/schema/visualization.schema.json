@@ -9,7 +9,8 @@
         "0.2",
         "0.3",
         "0.4",
-        "0.5"
+        "0.5",
+        "0.6"
       ],
       "description": "Protocol version, \"major.minor\": the oldest version that has every feature the document uses."
     },
@@ -1174,6 +1175,131 @@
               "initial"
             ],
             "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "btree"
+              },
+              "label": {
+                "type": "string",
+                "maxLength": 2000
+              },
+              "place": {
+                "type": "string",
+                "enum": [
+                  "main",
+                  "side"
+                ],
+                "description": "Where the structure goes: \"main\" (default) with the main picture, or \"side\" for an auxiliary structure such as a queue, a call stack or a table of results. Side structures go right of the main ones in wide figures (slides, the player) and below them in narrow ones (notes)."
+              },
+              "nodes": {
+                "description": "The nodes; by default one empty root with the id \"root\".",
+                "minItems": 1,
+                "maxItems": 1000,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                      "description": "Identifier of an element, unique within its structure and stable for the whole trace."
+                    },
+                    "keys": {
+                      "maxItems": 32,
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                                "description": "Identifier of an element, unique within its structure and stable for the whole trace."
+                              },
+                              "value": {
+                                "anyOf": [
+                                  {
+                                    "type": "number"
+                                  },
+                                  {
+                                    "type": "string",
+                                    "maxLength": 2000
+                                  },
+                                  {
+                                    "type": "boolean"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ],
+                                "description": "A displayable value: number, string, boolean or null."
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "value"
+                            ],
+                            "additionalProperties": false,
+                            "description": "An element with an explicit id."
+                          },
+                          {
+                            "anyOf": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "string",
+                                "maxLength": 2000
+                              },
+                              {
+                                "type": "boolean"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ],
+                            "description": "A displayable value: number, string, boolean or null."
+                          }
+                        ],
+                        "description": "An element `{ \"id\", \"value\" }`, or a bare value to get a generated id."
+                      },
+                      "description": "Keys in order: values like [\"G\", \"M\"] (ids \"k0\", \"k1\", … are generated through the tree) or elements { \"id\", \"value\" }."
+                    },
+                    "children": {
+                      "maxItems": 33,
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                        "description": "Identifier of an element, unique within its structure and stable for the whole trace."
+                      },
+                      "description": "Child node ids, one more than the keys; none for a leaf."
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "keys"
+                  ],
+                  "additionalProperties": false,
+                  "description": "A node: its keys in order and its children."
+                }
+              },
+              "root": {
+                "description": "The root node; by default the node that is nobody’s child.",
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:-]{1,64}$"
+              }
+            },
+            "required": [
+              "kind"
+            ],
+            "additionalProperties": false,
+            "description": "A multiway search tree, such as a B-tree."
           }
         ]
       },
@@ -4288,6 +4414,487 @@
                       "additionalProperties": false
                     }
                   ]
+                },
+                {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "insertKey"
+                        },
+                        "node": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                          "description": "A node id."
+                        },
+                        "index": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 32
+                        },
+                        "key": {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string",
+                                  "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                                  "description": "Identifier of an element, unique within its structure and stable for the whole trace."
+                                },
+                                "value": {
+                                  "anyOf": [
+                                    {
+                                      "type": "number"
+                                    },
+                                    {
+                                      "type": "string",
+                                      "maxLength": 2000
+                                    },
+                                    {
+                                      "type": "boolean"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ],
+                                  "description": "A displayable value: number, string, boolean or null."
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "value"
+                              ],
+                              "additionalProperties": false,
+                              "description": "An element with an explicit id."
+                            },
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "type": "string",
+                                  "maxLength": 2000
+                                },
+                                {
+                                  "type": "boolean"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "description": "A displayable value: number, string, boolean or null."
+                            }
+                          ],
+                          "description": "An element `{ \"id\", \"value\" }`, or a bare value to get a generated id."
+                        },
+                        "target": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+                          "description": "Name of the structure this action applies to."
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "node",
+                        "index",
+                        "key",
+                        "target"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "removeKey"
+                        },
+                        "key": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                          "description": "A key id."
+                        },
+                        "target": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+                          "description": "Name of the structure this action applies to."
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "key",
+                        "target"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "setKey"
+                        },
+                        "key": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                          "description": "A key id."
+                        },
+                        "value": {
+                          "anyOf": [
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "string",
+                              "maxLength": 2000
+                            },
+                            {
+                              "type": "boolean"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "description": "A displayable value: number, string, boolean or null."
+                        },
+                        "target": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+                          "description": "Name of the structure this action applies to."
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "key",
+                        "value",
+                        "target"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "lift"
+                        },
+                        "key": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                          "description": "A key id."
+                        },
+                        "over": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                          "description": "A key id."
+                        },
+                        "target": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+                          "description": "Name of the structure this action applies to."
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "key",
+                        "over",
+                        "target"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "split"
+                        },
+                        "node": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                          "description": "A node id."
+                        },
+                        "index": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 32
+                        },
+                        "newNode": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                          "description": "Identifier of an element, unique within its structure and stable for the whole trace."
+                        },
+                        "target": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+                          "description": "Name of the structure this action applies to."
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "node",
+                        "index",
+                        "newNode",
+                        "target"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "grow"
+                        },
+                        "newRoot": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                          "description": "Identifier of an element, unique within its structure and stable for the whole trace."
+                        },
+                        "target": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+                          "description": "Name of the structure this action applies to."
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "newRoot",
+                        "target"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "merge"
+                        },
+                        "node": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                          "description": "A node id."
+                        },
+                        "index": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 32
+                        },
+                        "target": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+                          "description": "Name of the structure this action applies to."
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "node",
+                        "index",
+                        "target"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "shrink"
+                        },
+                        "target": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+                          "description": "Name of the structure this action applies to."
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "target"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "borrow"
+                        },
+                        "node": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                          "description": "A node id."
+                        },
+                        "child": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 32
+                        },
+                        "from": {
+                          "type": "string",
+                          "enum": [
+                            "left",
+                            "right"
+                          ]
+                        },
+                        "target": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+                          "description": "Name of the structure this action applies to."
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "node",
+                        "child",
+                        "from",
+                        "target"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "highlight"
+                        },
+                        "keys": {
+                          "maxItems": 1000,
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                            "description": "A key id."
+                          }
+                        },
+                        "nodes": {
+                          "maxItems": 1000,
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                            "description": "A node id."
+                          }
+                        },
+                        "target": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+                          "description": "Name of the structure this action applies to."
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "target"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "settle"
+                        },
+                        "key": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                          "description": "A key id."
+                        },
+                        "target": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+                          "description": "Name of the structure this action applies to."
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "key",
+                        "target"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "pointer"
+                        },
+                        "name": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,15}$",
+                          "description": "Pointer name, e.g. \"i\", \"lo\" or \"head\"."
+                        },
+                        "node": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                              "description": "A node id."
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "target": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+                          "description": "Name of the structure this action applies to."
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "name",
+                        "node",
+                        "target"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "annotate"
+                        },
+                        "node": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                          "description": "A node id."
+                        },
+                        "text": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "maxLength": 32
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "target": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+                          "description": "Name of the structure this action applies to."
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "node",
+                        "text",
+                        "target"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
                 }
               ]
             },
@@ -4423,6 +5030,6 @@
       ]
     }
   },
-  "$id": "urn:algoviz:schema:visualization:0.5",
+  "$id": "urn:algoviz:schema:visualization:0.6",
   "title": "Visualization"
 }
