@@ -41,5 +41,6 @@ Each file records one architectural decision: the context, what we decided, and 
 | [0035](0035-btree-kind.md)                          | B-trees get a kind of their own, with keys that move between nodes   | Accepted                            |
 | [0036](0036-linked-list-move.md)                    | A linked-list node can move along the row                            | Accepted                            |
 | [0037](0037-array-pattern.md)                       | An array can carry a pattern aligned under it                        | Accepted                            |
+| [0038](0038-plane-kind.md)                          | Points and segments get a kind of their own: `plane`                 | Accepted                            |
 
 Template: Status · Context · Decision · Consequences.
