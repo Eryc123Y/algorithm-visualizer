@@ -24,9 +24,12 @@ This is an npm workspaces monorepo.
 | `packages/elements/` | `@algomotion/elements`   | `<algo-player>` Web Component (Lit) and a standalone CDN bundle.                                                             |
 | `packages/recipes/`  | `@algomotion/recipes`    | Typed recorder and classic algorithms, each tested against a reference implementation.                                       |
 | `packages/typst/`    | `@algomotion/typst`      | The Typst package: the engine in QuickJS-ng inside a WebAssembly plugin (ADR 0026).                                          |
+| `packages/mcp/`      | `@algomotion/mcp`        | The MCP server and MCP App, the `algomotion` command line and its standalone executable, and the guide for models.           |
 | `packages/latex/`    | `@algomotion/latex`      | The LaTeX package: `algomotion.sty`, which draws TikZ figures made by the `algomotion` command (ADR 0027).                   |
-| `apps/playground/`   | `@algomotion/playground` | Vite + Vue app for demos and, later, documentation.                                                                          |
+| `apps/playground/`   | `@algomotion/playground` | Vite + Vue app for trying documents and the registry's examples, and the E2E tests of the player.                            |
 | `apps/site/`         | `@algomotion/site`       | The static site for Cloudflare Pages: the documentation, generated from the registry, and the share page `play/` (ADR 0040). |
+| `apps/worker/`       | `@algomotion/worker`     | The MCP server as a Cloudflare Worker, over Streamable HTTP (ADR 0039).                                                      |
+| `evals/`             | —                        | How well models write documents: tasks with checks, references and a runner ([evals/README.md](evals/README.md)).            |
 | `conformance/`       | —                        | Language-agnostic JSON fixtures every implementation must pass.                                                              |
 | `docs/adr/`          | —                        | Architecture decision records. Read these before changing the design.                                                        |
 
@@ -48,6 +51,7 @@ Run from the repository root.
 | `npm run test:typst`                          | The Typst package in the `typst` command (needs Typst 0.15)                     |
 | `npm run test:standalone`                     | Build the standalone `algomotion` and compare it with the Node CLI              |
 | `npm run test:latex`                          | Compile the LaTeX package's examples and cases (needs TeX Live)                 |
+| `npm run test:worker`                         | Build the Worker and test it in workerd, locally                                |
 | `npm run check`                               | Typecheck, lint, format check and unit tests (what CI runs first)               |
 | `npm run generate:schema -w @algomotion/spec` | Regenerate `packages/spec/schema/visualization.schema.json`                     |
 | `npm run gallery -- out.html [file.json …]`   | Render every frame of fixtures or documents to one page, for review             |
@@ -114,7 +118,7 @@ Every algorithm, and every operation of a data structure, is a module of the reg
 - The standalone executable's tests in `packages/mcp/tests/standalone/` build it with the Rust toolchain and compare every registry example's figures with the Node CLI's: `npm run test:standalone`. `npm run check` runs its JavaScript in a bare V8 context instead (`tests/standalone-bundle.spec.ts`). Run them when the CLI, the engine's output or `packages/mcp/standalone/` changes.
 - The LaTeX package's tests in `packages/latex/tests/latex/` compile its examples and error cases with pdfLaTeX, LuaLaTeX and XeLaTeX through `latexmk`, so they need TeX Live 2024 or later and run apart from `npm run check`: `npm run test:latex`. They call the Node CLI from source, or the executable that `ALGOMOTION_COMMAND` names. Run them when the package, the TikZ painter or the CLI changes.
 - The Worker's tests in `apps/worker/tests/local/` build it and run it in wrangler's local runtime (workerd, from npm), then list and call the tools with the MCP SDK's client over HTTP and check the rate limit: `npm run test:worker`. They need no Cloudflare account and deploy nothing. Run them when the Worker, the HTTP transport or the server's resources change; `npm run check` runs the Worker's unit tests in Node.
-- Generative (property-based) tests live in `packages/core/tests/properties/` and `packages/recipes/tests/properties.spec.ts`. They run a few dozen random cases by default; run them deeper before a release with `FUZZ_RUNS=5000 npx vitest run --project core --project recipes`, and replay a failure with the `FUZZ_SEED` it prints.
+- Generative (property-based) tests use fast-check. Most live in `packages/core/tests/properties/` and `packages/recipes/tests/properties.spec.ts`, and many recipes' own spec files, `spec`'s share links and `svg`'s painters have some too. They run a few dozen random cases by default; `FUZZ_RUNS` sets how many, and a failure prints the `FUZZ_SEED` that replays it. Before a release, run them with `FUZZ_RUNS=5000`, a few files at a time rather than the whole suite at once (`FUZZ_RUNS=5000 npx vitest run <files>`): the deepest take several minutes each.
 
 ## Git workflow
 
