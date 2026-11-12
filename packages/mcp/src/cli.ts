@@ -65,18 +65,18 @@ const USAGE = `Usage:
   algomotion validate <file>                Check a document
   algomotion inspect <file> [frame …]       State at frames (default: the last)
   algomotion render <file> [--frame f] [--theme t]
-                 [--layout wide|narrow] [--out file.svg]
+                    [--layout wide|narrow] [--out file.svg]
   algomotion export <file> [--step s …] [--theme t]
-                 [--layout wide|narrow] [--format svg|tikz] [--one-file]
-                 [--out dir]
-                 [--name pattern] [--error-file file]
-                                         Write frames as SVG or TikZ figures
+                    [--layout wide|narrow] [--format svg|tikz] [--one-file]
+                    [--out dir]
+                    [--name pattern] [--error-file file]
+                                            Write frames as SVG or TikZ figures
   algomotion export <id> --input <input|file> [the same options]
-                                         Run an algorithm, then export
+                                            Run an algorithm, then export
   algomotion recipes                        List ready-made visualizations
   algomotion run <id> [input] [--out file.json]
-                                         Run one, e.g. run dijkstra
-                                         'A-B 4, B-C 1, A-C 7'
+                                            Run one, e.g. run dijkstra
+                                            'A-B 4, B-C 1, A-C 7'
 
 An input is JSON, a JSON object without its outer braces, or a notation:
 a list "5 2 4 6 1 3", a graph "A-B 4, B-C 2" ("->" for directed edges),

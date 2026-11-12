@@ -66,7 +66,7 @@ From the repository root, with a Cloudflare account:
 
 ```sh
 npm run dev -w @algomotion/worker      # wrangler dev: builds, then serves on http://localhost:8787
-npm run test:worker                 # build, then test the Worker in workerd with the MCP SDK's client
+npm run test:worker                    # build, then test the Worker in workerd with the MCP SDK's client
 ```
 
 Both run locally with workerd from npm; neither needs a Cloudflare account. The rate limit is simulated locally. `npm run check` runs the Worker's own unit tests in Node.
