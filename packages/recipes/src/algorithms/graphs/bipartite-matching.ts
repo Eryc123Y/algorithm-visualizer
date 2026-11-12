@@ -5,7 +5,9 @@
  * an augmenting path there is a path here that starts at a free vertex of
  * the left side, alternates between edges not in the matching and edges
  * in it, and ends at a free vertex of the right side. Flipping its edges
- * matches one more pair. The graph must be bipartite.
+ * matches one more pair. Searching once from each left vertex in turn, as
+ * here, is enough: a vertex with no such path never gains one later. The
+ * graph must be bipartite.
  */
 import { z } from 'zod';
 
@@ -18,12 +20,22 @@ import {
   type GraphInput,
 } from './graph.ts';
 
-/** The two sides by colouring, the first vertex of each part on the left. */
+/**
+ * The two sides by colouring, the first vertex of each part on the left;
+ * a vertex with no edges goes on the shorter side, so the columns stay
+ * even.
+ */
 export function sides(g: GraphInput): { left: string[]; right: string[] } {
+  const loop = g.edges.find(([a, b]) => a === b);
+  if (loop !== undefined)
+    throw new RangeError(
+      `The graph is not bipartite: edge ${loop[0]}–${loop[0]} joins a vertex to itself`,
+    );
   const adj = adjacency({ ...g, directed: false });
   const side = new Map<string, 0 | 1>();
+  const lone = g.nodes.filter((v) => adj.get(v)!.length === 0);
   for (const start of g.nodes) {
-    if (side.has(start)) continue;
+    if (side.has(start) || lone.includes(start)) continue;
     side.set(start, 0);
     const queue = [start];
     while (queue.length > 0) {
@@ -39,11 +51,17 @@ export function sides(g: GraphInput): { left: string[]; right: string[] } {
       }
     }
   }
+  const count = (s: 0 | 1) => [...side.values()].filter((x) => x === s).length;
+  for (const v of lone) side.set(v, count(1) < count(0) ? 1 : 0);
   return {
     left: g.nodes.filter((v) => side.get(v) === 0),
     right: g.nodes.filter((v) => side.get(v) === 1),
   };
 }
+
+/** Rows 60 apart, closer for a side of more than 10 vertices. */
+const pitchFor = (rows: number) =>
+  rows <= 10 ? 60 : Math.max(44, 540 / (rows - 1));
 
 /** The graph drawn in two columns, the left side on the left. */
 function declareBipartite(
@@ -52,15 +70,18 @@ function declareBipartite(
   right: readonly string[],
 ) {
   const ids = edgeIds(g);
-  const rowOf = (vs: readonly string[], v: string) => vs.indexOf(v);
+  const rows = Math.max(left.length, right.length);
+  const pitch = pitchFor(rows);
+  // Wider apart as the columns grow, so edges are not too steep.
+  const across = 60 + Math.max(200, ((rows - 1) * pitch) / 2);
   return {
     kind: 'graph' as const,
     label: 'G',
     directed: false,
     layout: 'manual' as const,
     nodes: [
-      ...left.map((v) => ({ id: v, x: 60, y: 40 + 60 * rowOf(left, v) })),
-      ...right.map((v) => ({ id: v, x: 260, y: 40 + 60 * rowOf(right, v) })),
+      ...left.map((v, k) => ({ id: v, x: 60, y: 40 + pitch * k })),
+      ...right.map((v, k) => ({ id: v, x: across, y: 40 + pitch * k })),
     ],
     edges: g.edges.map(([from, to], k) => ({ id: ids[k]!, from, to })),
   };
@@ -74,7 +95,7 @@ export const bipartiteMatching = defineAlgorithm({
     'Finds a largest set of edges, no two sharing a vertex, in a bipartite graph, by searching from each free vertex for a path that alternates between unmatched and matched edges, and flipping it.',
   input: z.strictObject({
     graph: Graph.describe(
-      'A bipartite graph; its edges are taken as undirected, and the first vertex of each part goes on the left.',
+      'A bipartite graph; its edges are taken as undirected, the first vertex of each part goes on the left, and a vertex with no edges on the shorter side.',
     ),
   }),
   main: 'graph',
@@ -111,11 +132,10 @@ export const bipartiteMatching = defineAlgorithm({
           mate = {}  # @start
           for u in left:  # @search
               p = alternating_path(u, adj, mate)
-              if p is not None:
-                  for a, b in p[::2]:  # @augment
-                      mate[a], mate[b] = b, a
-              else:
-                  pass  # @none
+              if p is None:
+                  continue  # @none
+              for a, b in zip(p[::2], p[1::2]):  # @augment
+                  mate[a], mate[b] = b, a
           return mate  # @done
     `,
   },
@@ -133,7 +153,9 @@ export const bipartiteMatching = defineAlgorithm({
     const mate = new Map<string, string>();
     trace.step(
       'start',
-      `Split the vertices into two sides, ${left.join(' ')} and ${right.join(' ')}: every edge joins the two. Start with no edge matched.`,
+      g.edges.length === 0
+        ? 'No edge joins two vertices, so none can be matched.'
+        : `Split the vertices into two sides, ${left.join(' ')} and ${right.join(' ')}: every edge joins the two. Start with no edge matched.`,
     );
     for (const v of left) graph.group({ node: v, group: 0 });
     for (const v of right) graph.group({ node: v, group: 1 });
@@ -200,7 +222,9 @@ export const bipartiteMatching = defineAlgorithm({
     const size = mate.size / 2;
     trace.step(
       'done',
-      `Every vertex on the left has had its search: the ${size} marked edge${size === 1 ? '' : 's'} form a maximum matching, since no augmenting path is left.`,
+      size === 0
+        ? 'Every vertex has had its search, and the matching is empty.'
+        : `Every vertex on the left has had its search: the ${size} marked edge${size === 1 ? ' forms' : 's form'} a maximum matching, since no augmenting path is left.`,
     );
     graph.pointer({ name: 'u', node: null });
     return { results: [size] };

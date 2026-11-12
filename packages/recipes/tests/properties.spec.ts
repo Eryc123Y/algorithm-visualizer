@@ -1527,15 +1527,23 @@ recipe(
     .tuple(
       fc.integer({ min: 1, max: 8 }),
       fc.integer({ min: 1, max: 8 }),
-      fc.array(fc.tuple(fc.nat(7), fc.nat(7)), { maxLength: 20 }),
+      fc.array(fc.tuple(fc.nat(7), fc.nat(7), fc.boolean()), {
+        maxLength: 20,
+      }),
+      fc.nat(),
     )
-    .map(([l, r, raw]) => {
-      const nodes = [
+    .map(([l, r, raw, turn]) => {
+      // Nodes rotated, so a right vertex may come first; edges either way
+      // round, parallel ones kept.
+      const listed = [
         ...Array.from({ length: l }, (_, k) => `l${k}`),
         ...Array.from({ length: r }, (_, k) => `r${k}`),
       ];
-      const pairs = new Set(raw.map(([a, b]) => `l${a % l} r${b % r}`));
-      const edges = [...pairs].map((p) => p.split(' ') as [string, string]);
+      const t = turn % listed.length;
+      const nodes = [...listed.slice(t), ...listed.slice(0, t)];
+      const edges = raw.map(([a, b, flip]): [string, string] =>
+        flip ? [`r${b % r}`, `l${a % l}`] : [`l${a % l}`, `r${b % r}`],
+      );
       return { nodes, edges };
     }),
   (graph) => runOk('bipartite-matching', { graph }).document,

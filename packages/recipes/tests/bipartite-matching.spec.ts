@@ -1,6 +1,7 @@
 /**
  * Maximum bipartite matching against a brute force that tries every set
- * of edges, on random bipartite graphs: the size, a valid matching drawn,
+ * of edges, on random bipartite graphs with the nodes in any order, edges
+ * either way round and parallel edges: the size, a valid matching drawn,
  * and the refusal of a graph that is not bipartite.
  */
 import fc from 'fast-check';
@@ -28,10 +29,18 @@ const bipartite = fc
     const left = Array.from({ length: l }, (_, k) => `l${k}`);
     const right = Array.from({ length: r }, (_, k) => `r${k}`);
     return fc.record({
-      nodes: fc.constant([...left, ...right]),
-      edges: fc.uniqueArray(
-        fc.tuple(fc.constantFrom(...left), fc.constantFrom(...right)),
-        { maxLength: 12, selector: ([a, b]) => `${a} ${b}` },
+      nodes: fc.shuffledSubarray([...left, ...right], {
+        minLength: l + r,
+      }),
+      edges: fc.array(
+        fc
+          .tuple(
+            fc.constantFrom(...left),
+            fc.constantFrom(...right),
+            fc.boolean(),
+          )
+          .map(([a, b, flip]): [string, string] => (flip ? [b, a] : [a, b])),
+        { maxLength: 12 },
       ),
     });
   });
@@ -64,9 +73,34 @@ describe('bipartite-matching', () => {
     );
   });
 
-  it('refuses a graph with an odd cycle', () => {
+  it('marks one of parallel edges, and draws 40 vertices in bounds', () => {
+    const { document, results } = runOk('bipartite-matching', {
+      graph: 'a-p, p-a, a-p',
+    });
+    expect(results).toEqual([1]);
+    const g = stateOf(replay(document), 'g', 'graph');
+    expect(
+      g.data.edges.filter((e) => g.marks.edgeMarks[e.id] === 'selected'),
+    ).toHaveLength(1);
+    // 40 vertices with no edges split 20 and 20, in rows 44 apart.
+    const lone = Array.from({ length: 40 }, (_, k) => `v${k}`);
+    const big = runOk('bipartite-matching', {
+      graph: { nodes: lone, edges: [] },
+    });
+    expect(big.results).toEqual([0]);
+    const ys = stateOf(replay(big.document), 'g', 'graph').data.nodes.map(
+      (n) => n.y ?? 0,
+    );
+    expect(Math.max(...ys)).toBe(40 + 19 * 44);
+    expect(big.document.steps[0]!.meta?.narration).toMatch(/none can be/);
+  });
+
+  it('refuses a graph with an odd cycle or a loop', () => {
     expect(
       runError('bipartite-matching', { graph: 'a-b, b-c, c-a' }).message,
     ).toMatch(/not bipartite/);
+    expect(
+      runError('bipartite-matching', { graph: 'a-b, b-b' }).message,
+    ).toMatch(/joins a vertex to itself/);
   });
 });
