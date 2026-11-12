@@ -172,6 +172,8 @@ export function fitProblems(scene: Scene): string[] {
   return scene.items.flatMap((item) => {
     if (item.type !== 'box' && item.type !== 'node' && item.type !== 'badge')
       return [];
+    // A point of a plane (ADR 0038) is a dot with no text inside.
+    if (item.text === '' && item.key.includes('/point/')) return [];
     const room =
       item.type === 'node'
         ? Math.max(2 * item.radius, item.width ?? 0) - 16

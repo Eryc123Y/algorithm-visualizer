@@ -23,6 +23,7 @@ export const PROTOCOL_VERSIONS = [
   '0.6',
   '0.7',
   '0.8',
+  '0.9',
 ] as const;
 
 /** A protocol version this package reads. */
@@ -266,6 +267,11 @@ export const PROTOCOL_FEATURES: readonly ProtocolFeature[] = [
         d,
         (a) => a['type'] === 'markEdge' || a['type'] === 'labelEdge',
       ),
+  },
+  {
+    name: 'planes',
+    since: '0.9',
+    usedBy: (d) => Object.values(d.structures).some((s) => s.kind === 'plane'),
   },
   {
     name: 'array patterns',

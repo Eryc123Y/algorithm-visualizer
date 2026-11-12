@@ -23,6 +23,7 @@ import type {
   TreeState,
 } from '../../src/index.ts';
 import { btreeAction, btreeDecl } from './btree-model.ts';
+import { planeAction, planeDecl } from './plane-model.ts';
 import type { Dice } from './random.ts';
 
 type Fields = Record<string, unknown>;
@@ -120,6 +121,8 @@ export function declaration(kind: StructureKindName, r: Dice): StructureDecl {
     }
     case 'btree':
       return btreeDecl(r, label);
+    case 'plane':
+      return planeDecl(r, label);
     case 'priorityQueue':
       return {
         kind,
@@ -241,6 +244,8 @@ export function action(entry: KindedState, r: Dice): Fields {
       return priorityQueueAction(entry.state, r);
     case 'btree':
       return btreeAction(entry.state, r);
+    case 'plane':
+      return planeAction(entry.state, r);
   }
 }
 
@@ -643,7 +648,7 @@ function hashAction(s: HashTableState, r: Dice): Fields {
 
 /** The id an action introduces, if any: ids must be new for the whole trace. */
 export function introducedId(a: Fields): string | undefined {
-  for (const key of ['element', 'node', 'edge', 'key']) {
+  for (const key of ['element', 'node', 'edge', 'key', 'point', 'segment']) {
     const v = a[key];
     if (typeof v === 'object' && v !== null && 'id' in v) return String(v.id);
   }
@@ -673,6 +678,8 @@ export function declIds(decl: StructureDecl): string[] {
       return ids(decl.initial);
     case 'btree':
       return decl.nodes.flatMap((n) => [n.id, ...ids(n.keys)]);
+    case 'plane':
+      return [...ids(decl.points), ...ids(decl.segments ?? [])];
   }
 }
 

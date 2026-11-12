@@ -1,0 +1,67 @@
+{
+  "description": "A step of a hull: an orientation test compares three points, an edge is added and chosen, and a sweep line moves; the compare mark lasts one step.",
+  "input": {
+    "version": "0.9",
+    "structures": {
+      "P": {
+        "kind": "plane",
+        "points": [
+          { "id": "a", "x": 0, "y": 0 },
+          { "id": "b", "x": 4, "y": 1 },
+          { "id": "c", "x": 3, "y": 4 }
+        ],
+        "axes": true
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          { "target": "P", "type": "compare", "points": ["a", "b", "c"] },
+          { "target": "P", "type": "line", "name": "sweep", "x": 1 }
+        ]
+      },
+      {
+        "actions": [
+          {
+            "target": "P",
+            "type": "addSegment",
+            "segment": { "id": "ab", "from": "a", "to": "b" }
+          },
+          { "target": "P", "type": "select", "segment": "ab", "on": true },
+          { "target": "P", "type": "settle", "point": "a" },
+          { "target": "P", "type": "line", "name": "sweep", "x": 3 }
+        ]
+      }
+    ]
+  },
+  "expectedLength": 2,
+  "expectedFrames": [
+    {
+      "index": 2,
+      "state": {
+        "P": {
+          "kind": "plane",
+          "state": {
+            "data": {
+              "points": [
+                { "id": "a", "x": 0, "y": 0 },
+                { "id": "b", "x": 4, "y": 1 },
+                { "id": "c", "x": 3, "y": 4 }
+              ],
+              "segments": [{ "id": "ab", "from": "a", "to": "b" }]
+            },
+            "marks": {
+              "highlight": [],
+              "compare": [],
+              "visited": [],
+              "settled": ["a"],
+              "selected": ["ab"],
+              "pointers": {},
+              "lines": { "sweep": 3 }
+            }
+          }
+        }
+      }
+    }
+  ]
+}
