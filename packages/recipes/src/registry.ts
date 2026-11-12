@@ -13,6 +13,7 @@ import { matrixChain } from './algorithms/dynamic-programming/matrix-chain.ts';
 import { optimalBst } from './algorithms/dynamic-programming/optimal-bst.ts';
 import { rodCutting } from './algorithms/dynamic-programming/rod-cutting.ts';
 import { lcs } from './algorithms/dynamic-programming/lcs.ts';
+import { activitySelection } from './algorithms/greedy/activity-selection.ts';
 import { huffman } from './algorithms/greedy/huffman.ts';
 import { greedySetCover } from './algorithms/greedy/greedy-set-cover.ts';
 import { bellmanFord } from './algorithms/graphs/bellman-ford.ts';
@@ -154,6 +155,7 @@ export const algorithms: readonly Algorithm[] = [
   rodCutting,
   matrixChain,
   optimalBst,
+  activitySelection,
   huffman,
   greedySetCover,
   naiveStringMatcher,
