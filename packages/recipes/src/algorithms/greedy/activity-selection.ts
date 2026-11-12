@@ -127,7 +127,12 @@ export const activitySelection = defineAlgorithm({
           : `a${m + 1} starts at ${a.s}, before a${k + 1} finishes, at ${last.f}: it overlaps, so skip it.`,
         { vars: { m: m + 1, k: k + 1 } },
       );
-      table.highlight({ cells: [[0, m], [1, k]] });
+      table.highlight({
+        cells: [
+          [0, m],
+          [1, k],
+        ],
+      });
       if (!fits) continue;
       table.settle({ cells: column(m) });
       chosen.set({ index: taken, value: `a${m + 1}` }).highlight({
@@ -136,8 +141,6 @@ export const activitySelection = defineAlgorithm({
       taken += 1;
       k = m;
     }
-    const picked = sorted.flatMap((_, m) => m);
-    void picked;
     trace.step(
       'done',
       `A holds ${taken === 1 ? 'one activity' : `${taken} activities`}, as many as can be held without overlap.`,
