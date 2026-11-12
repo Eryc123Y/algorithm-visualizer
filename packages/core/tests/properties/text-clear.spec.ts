@@ -22,6 +22,7 @@ import {
   type LabelBox,
   type Obstacles,
   type Scene,
+  type SceneBadge,
   type SceneEdge,
   type SceneNode,
 } from '../../src/index.ts';
@@ -78,6 +79,10 @@ function regionAt(n: SceneNode, angle: number, em: number): LabelBox {
   );
 }
 
+/** Whether a badge sits right above a node, as pointers at linked roots do. */
+const aboveANode = (b: SceneBadge, scene: Scene) =>
+  nodes(scene).some((n) => Math.abs(n.x - b.x) < 0.5 && b.y < n.y - n.radius);
+
 const overlaps = (p: LabelBox, q: LabelBox) =>
   Math.abs(p.x - q.x) < p.halfWidth + q.halfWidth + 2 &&
   Math.abs(p.y - q.y) < p.halfHeight + q.halfHeight + 2;
@@ -103,12 +108,31 @@ function problems(scene: Scene, trees: ReadonlyMap<string, number>): string[] {
       out.push(`note of ${n.key} inside its gap`);
     const widest = trees.get(n.key.split('/')[0]!);
     if (widest === undefined) continue;
+    // As layout chooses (ADR 0031, 0034): clear of the regions of the notes
+    // placed before this one, in node order, of NIL leaves and of the
+    // pointers above roots.
+    const earlier = noted.slice(0, noted.indexOf(n));
     const others: Obstacles = {
       segments: all,
       discs: nodes(scene)
         .filter((m) => m.key !== n.key)
         .map((m) => ({ x: m.x, y: m.y, radius: halfOf(m) })),
-      boxes: [...notes].filter(([k]) => k !== n.key).map(([, b]) => b),
+      boxes: [
+        ...earlier.map((m) => regionAt(m, m.labelAngle ?? 0, widest)),
+        ...scene.items.flatMap((i): LabelBox[] =>
+          (i.type === 'box' && i.key.includes('/nil/')) ||
+          (i.type === 'badge' && aboveANode(i, scene))
+            ? [
+                {
+                  x: i.type === 'box' ? i.x + i.width / 2 : i.x,
+                  y: i.type === 'box' ? i.y + i.height / 2 : i.y,
+                  halfWidth: i.width / 2,
+                  halfHeight: i.height / 2,
+                },
+              ]
+            : [],
+        ),
+      ],
     };
     if (
       clearance(box, { ...others, discs: [], boxes: [] }) < CLEAR &&

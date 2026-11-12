@@ -1,0 +1,192 @@
+{
+  "description": "Tree additions of protocol 0.5 (ADR 0034): a root list, root slots, a NIL slot given as left or right, named notes, edge marks and labels.",
+  "input": {
+    "version": "0.5",
+    "structures": {
+      "h": {
+        "kind": "tree",
+        "rootList": "circular",
+        "nodes": [
+          {
+            "id": "a",
+            "value": 3,
+            "children": ["b", "c"]
+          },
+          {
+            "id": "b",
+            "value": 18
+          },
+          {
+            "id": "c",
+            "value": 52
+          },
+          {
+            "id": "d",
+            "value": 7
+          },
+          {
+            "id": "e",
+            "value": 23
+          }
+        ]
+      },
+      "bt": {
+        "kind": "tree",
+        "levelOrder": [5, 2, 8]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "h",
+            "type": "addNode",
+            "node": 21,
+            "parent": null,
+            "slot": 1
+          },
+          {
+            "target": "h",
+            "type": "detach",
+            "node": "c",
+            "slot": 0
+          },
+          {
+            "target": "bt",
+            "type": "pointer",
+            "name": "x",
+            "node": {
+              "parent": "e1",
+              "slot": "left"
+            }
+          },
+          {
+            "target": "bt",
+            "type": "annotate",
+            "node": "e0",
+            "field": "size",
+            "text": "s=3"
+          },
+          {
+            "target": "bt",
+            "type": "markEdge",
+            "node": "e1",
+            "mark": "selected"
+          },
+          {
+            "target": "bt",
+            "type": "labelEdge",
+            "node": "e2",
+            "label": 1
+          }
+        ]
+      }
+    ]
+  },
+  "expected": {
+    "version": "0.5",
+    "structures": {
+      "h": {
+        "kind": "tree",
+        "rootList": "circular",
+        "binary": false,
+        "nodes": [
+          {
+            "id": "a",
+            "value": 3,
+            "children": ["b", "c"]
+          },
+          {
+            "id": "b",
+            "value": 18
+          },
+          {
+            "id": "c",
+            "value": 52
+          },
+          {
+            "id": "d",
+            "value": 7
+          },
+          {
+            "id": "e",
+            "value": 23
+          }
+        ],
+        "roots": ["a", "d", "e"]
+      },
+      "bt": {
+        "kind": "tree",
+        "binary": true,
+        "nodes": [
+          {
+            "id": "e0",
+            "value": 5,
+            "children": ["e1", "e2"]
+          },
+          {
+            "id": "e1",
+            "value": 2,
+            "children": [null, null]
+          },
+          {
+            "id": "e2",
+            "value": 8,
+            "children": [null, null]
+          }
+        ],
+        "roots": ["e0"]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "h",
+            "type": "addNode",
+            "node": {
+              "id": "e0",
+              "value": 21
+            },
+            "parent": null,
+            "slot": 1
+          },
+          {
+            "target": "h",
+            "type": "detach",
+            "node": "c",
+            "slot": 0
+          },
+          {
+            "target": "bt",
+            "type": "pointer",
+            "name": "x",
+            "node": {
+              "parent": "e1",
+              "slot": 0
+            }
+          },
+          {
+            "target": "bt",
+            "type": "annotate",
+            "node": "e0",
+            "text": "s=3",
+            "field": "size"
+          },
+          {
+            "target": "bt",
+            "type": "markEdge",
+            "node": "e1",
+            "mark": "selected"
+          },
+          {
+            "target": "bt",
+            "type": "labelEdge",
+            "node": "e2",
+            "label": 1
+          }
+        ]
+      }
+    ]
+  }
+}

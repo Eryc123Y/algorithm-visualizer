@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted
+Accepted. Corrected while implementing it (#67): a circular root list's closing link is keyed `<tree>/root-wrap`, not `<tree>/root-link/wrap`, which a root with the id `wrap` would also have.
 
 ## Context
 

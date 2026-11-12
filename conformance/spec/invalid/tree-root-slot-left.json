@@ -1,0 +1,29 @@
+{
+  "description": "A root's slot is a position among the roots, so \"left\" is refused there (ADR 0034).",
+  "input": {
+    "version": "0.5",
+    "structures": {
+      "f": {
+        "kind": "tree",
+        "binary": true,
+        "nodes": [{ "id": "a", "value": 1 }]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "f",
+            "type": "addNode",
+            "node": 2,
+            "parent": null,
+            "slot": "left"
+          }
+        ]
+      }
+    ]
+  },
+  "expectedErrors": [
+    { "code": "INVALID_ACTION", "path": "$.steps[0].actions[0].slot" }
+  ]
+}

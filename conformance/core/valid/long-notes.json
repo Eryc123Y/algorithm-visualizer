@@ -106,7 +106,10 @@
               "notes": {
                 "e1": "a note of thirty-two characters!",
                 "e2": "a note of thirty-two characters!"
-              }
+              },
+              "namedNotes": {},
+              "edgeMarks": {},
+              "edgeLabels": {}
             },
             "binary": true
           }

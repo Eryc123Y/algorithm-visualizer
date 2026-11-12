@@ -7,7 +7,10 @@
  * n-ary trees, tries, recursion trees and union–find forests.
  *
  * Marks: `highlight` and `compare` last one step; `visit`, `settle`,
- * `group`, `pointer` and `annotate` persist.
+ * `group`, `pointer`, `annotate`, `markEdge` and `labelEdge` persist.
+ *
+ * Protocol 0.5 (ADR 0034) adds root slots, pointers at empty child slots
+ * (NIL), named notes, edge marks and labels, and root lists.
  */
 import { z } from 'zod';
 
@@ -42,6 +45,12 @@ export type TreeNode = z.infer<typeof TreeNode>;
 
 const Nodes = z.array(TreeNode).max(LIMITS.elementsPerStructure);
 
+const RootList = z
+  .enum(['list', 'circular'])
+  .describe(
+    'Join the roots in order, as a Fibonacci heap’s root list; "circular" also joins the last root to the first.',
+  );
+
 /** Canonical declaration. */
 export const TreeDecl = z
   .strictObject({
@@ -55,6 +64,7 @@ export const TreeDecl = z
       ),
     nodes: Nodes,
     roots: z.array(ElementId).describe('Root ids, left to right.'),
+    rootList: RootList.optional(),
   })
   .describe('A rooted tree or forest.');
 export type TreeDecl = z.infer<typeof TreeDecl>;
@@ -75,6 +85,7 @@ export const TreeDeclInput = z
       .describe(
         'Root ids; by default every node that is nobody’s child, in order.',
       ),
+    rootList: RootList.optional(),
     levelOrder: z
       .array(Scalar)
       .max(LIMITS.elementsPerStructure)
@@ -245,6 +256,29 @@ const SlotInput = z
   .describe(
     'A child position; binary trees also accept "left" (0) and "right" (1).',
   );
+const RootSlot = Slot.describe('A position among the roots, from 0.');
+
+/** An empty child slot of a binary tree: the NIL leaf there. */
+const nilSlot = <S extends z.ZodType>(slotType: S) =>
+  z
+    .strictObject({ parent: NodeRef, slot: slotType })
+    .describe('The empty child slot `slot` of `parent`: the NIL leaf there.');
+
+/** A named note's field, such as `size`, `max`, `deg` or `mark`. */
+export const NoteField = z
+  .string()
+  .max(16)
+  .regex(
+    /^[a-z][a-z0-9-]*$/,
+    'Use lower-case letters, digits and hyphens, starting with a letter',
+  )
+  .describe(
+    'The field a note shows, e.g. "size"; a node holds one note per field.',
+  );
+
+const EdgeLabel = z
+  .union([z.string().max(16), z.number()])
+  .describe('A short label beside the edge, e.g. a code bit "0".');
 
 const actions = <N extends z.ZodType, S extends z.ZodType>(
   newNode: N,
@@ -260,7 +294,7 @@ const actions = <N extends z.ZodType, S extends z.ZodType>(
         ...slot,
       })
       .describe(
-        'Add a node under `parent` (null makes it a new root). Binary trees: `slot` is "left" or "right" (default the first empty one) and must be empty. Other trees: inserts at `slot`, default appends.',
+        'Add a node under `parent`. Binary trees: `slot` is "left" or "right" (default the first empty one) and must be empty. Other trees: inserts at `slot`, default appends. With `parent: null` the node is a new root, at position `slot` among the roots (default last).',
       ),
     z
       .strictObject({ type: z.literal('removeNode'), node: NodeRef })
@@ -276,9 +310,13 @@ const actions = <N extends z.ZodType, S extends z.ZodType>(
         'Move `child` (with its subtree) under `parent`, detaching it from where it was. Binary trees: `slot` is required and any child already there becomes a separate root. Other trees: inserts at `slot`, default appends. With `child: null`, removes the child at `slot` from `parent`; it becomes a separate root.',
       ),
     z
-      .strictObject({ type: z.literal('detach'), node: NodeRef })
+      .strictObject({
+        type: z.literal('detach'),
+        node: NodeRef,
+        slot: RootSlot.optional(),
+      })
       .describe(
-        'Detach a subtree from its parent so it becomes a separate root.',
+        'Detach a subtree from its parent so it becomes a separate root, at position `slot` among the roots (default last). A root with a `slot` moves there.',
       ),
     z
       .strictObject({
@@ -328,19 +366,38 @@ const actions = <N extends z.ZodType, S extends z.ZodType>(
       .strictObject({
         type: z.literal('pointer'),
         name: PointerName,
-        node: NodeRef.nullable(),
+        node: z.union([NodeRef, nilSlot(slotType)]).nullable(),
       })
       .describe(
-        'Point a named pointer (e.g. "curr") at a node; null removes it.',
+        'Point a named pointer (e.g. "curr") at a node, or at an empty child slot `{ "parent", "slot" }` of a binary tree (NIL); null removes it.',
       ),
     z
       .strictObject({
         type: z.literal('annotate'),
         node: NodeRef,
         text: z.string().max(32).nullable(),
+        field: NoteField.optional(),
       })
       .describe(
-        'Show a short note above a node, e.g. its height or balance factor; null removes it.',
+        'Show a short note beside a node, e.g. its height or balance factor; null removes it. With `field`, the note is one of several the node shows, e.g. "size" and "max".',
+      ),
+    z
+      .strictObject({
+        type: z.literal('markEdge'),
+        node: NodeRef,
+        mark: z.enum(['selected', 'rejected']).nullable(),
+      })
+      .describe(
+        'Mark the edge from `node`’s parent to `node`: selected (e.g. a search path) or rejected; null clears it. Persists while the edge does.',
+      ),
+    z
+      .strictObject({
+        type: z.literal('labelEdge'),
+        node: NodeRef,
+        label: EdgeLabel.nullable(),
+      })
+      .describe(
+        'Label the edge from `node`’s parent to `node`, e.g. "0" or "1" in a Huffman tree; null removes it. Persists while the edge does.',
       ),
   ]);
 };
@@ -361,6 +418,8 @@ export type TreeAction = z.infer<typeof TreeAction>;
 export const TreeActionInput = actions(NewNodeInput, SlotInput);
 export type TreeActionInput = z.infer<typeof TreeActionInput>;
 
+const slotNumber = (slot: 'left' | 'right') => (slot === 'left' ? 0 : 1);
+
 export const treeSpec: KindSpec<{
   decl: TreeDecl;
   declInput: TreeDeclInput;
@@ -379,8 +438,24 @@ export const treeSpec: KindSpec<{
   validateDecl: validateTreeDecl,
   normalizeAction: (input, ctx) => {
     let action: Record<string, unknown> = { ...input };
-    if ('slot' in input && typeof input.slot === 'string')
-      action = { ...action, slot: input.slot === 'left' ? 0 : 1 };
+    // A root's slot is a position among the roots, so "left" and "right"
+    // stay as written there, and the canonical schema refuses them.
+    if (
+      'slot' in input &&
+      typeof input.slot === 'string' &&
+      !(input.type === 'addNode' && input.parent === null)
+    )
+      action = { ...action, slot: slotNumber(input.slot) };
+    if (
+      input.type === 'pointer' &&
+      typeof input.node === 'object' &&
+      input.node !== null &&
+      typeof input.node.slot === 'string'
+    )
+      action = {
+        ...action,
+        node: { ...input.node, slot: slotNumber(input.node.slot) },
+      };
     if (input.type === 'addNode' && !isElement(input.node))
       action = {
         ...action,

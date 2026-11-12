@@ -141,7 +141,10 @@
               "settled": [],
               "groups": {},
               "pointers": {},
-              "notes": {}
+              "notes": {},
+              "namedNotes": {},
+              "edgeMarks": {},
+              "edgeLabels": {}
             },
             "binary": false
           }
@@ -190,7 +193,10 @@
               "settled": [],
               "groups": {},
               "pointers": {},
-              "notes": {}
+              "notes": {},
+              "namedNotes": {},
+              "edgeMarks": {},
+              "edgeLabels": {}
             },
             "binary": false
           }
@@ -239,7 +245,10 @@
               "settled": [],
               "groups": {},
               "pointers": {},
-              "notes": {}
+              "notes": {},
+              "namedNotes": {},
+              "edgeMarks": {},
+              "edgeLabels": {}
             },
             "binary": false
           }
@@ -288,7 +297,10 @@
               "settled": [],
               "groups": {},
               "pointers": {},
-              "notes": {}
+              "notes": {},
+              "namedNotes": {},
+              "edgeMarks": {},
+              "edgeLabels": {}
             },
             "binary": false
           }
@@ -342,7 +354,10 @@
               "pointers": {
                 "p": "d"
               },
-              "notes": {}
+              "notes": {},
+              "namedNotes": {},
+              "edgeMarks": {},
+              "edgeLabels": {}
             },
             "binary": false
           }
@@ -381,7 +396,10 @@
                 "a": 1
               },
               "pointers": {},
-              "notes": {}
+              "notes": {},
+              "namedNotes": {},
+              "edgeMarks": {},
+              "edgeLabels": {}
             },
             "binary": false
           }

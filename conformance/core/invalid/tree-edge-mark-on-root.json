@@ -1,0 +1,48 @@
+{
+  "description": "A root has no edge above it to mark.",
+  "input": {
+    "version": "0.5",
+    "structures": {
+      "t": {
+        "kind": "tree",
+        "binary": true,
+        "nodes": [
+          {
+            "id": "n8",
+            "value": 8,
+            "children": ["n3", "n10"],
+            "color": "black"
+          },
+          {
+            "id": "n3",
+            "value": 3,
+            "color": "red"
+          },
+          {
+            "id": "n10",
+            "value": 10,
+            "color": "red"
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "t",
+            "type": "markEdge",
+            "node": "n8",
+            "mark": "selected"
+          }
+        ]
+      }
+    ]
+  },
+  "expectedErrors": [
+    {
+      "code": "INVALID_OPERATION",
+      "path": "$.steps[0].actions[0].node"
+    }
+  ]
+}

@@ -19,7 +19,7 @@ export const NODE_GAP_Y = 40;
 /** Room above a node for its annotation. */
 export const NOTE_HEIGHT = 18;
 /** Length of the arrow from a pointer badge to its node. */
-const POINTER_ARROW = 12;
+export const POINTER_ARROW = 12;
 
 /**
  * Size of a node and of its text. Short values get a circle that fits them;

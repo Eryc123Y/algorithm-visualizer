@@ -1,0 +1,54 @@
+{
+  "description": "A root list and a named note need protocol version 0.5.",
+  "input": {
+    "version": "0.4",
+    "structures": {
+      "h": {
+        "kind": "tree",
+        "rootList": "circular",
+        "nodes": [
+          {
+            "id": "a",
+            "value": 3,
+            "children": ["b", "c"]
+          },
+          {
+            "id": "b",
+            "value": 18
+          },
+          {
+            "id": "c",
+            "value": 52
+          },
+          {
+            "id": "d",
+            "value": 7
+          },
+          {
+            "id": "e",
+            "value": 23
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "h",
+            "type": "annotate",
+            "node": "a",
+            "field": "deg",
+            "text": "d=2"
+          }
+        ]
+      }
+    ]
+  },
+  "expectedErrors": [
+    {
+      "code": "VERSION_TOO_OLD",
+      "path": "$.version"
+    }
+  ]
+}

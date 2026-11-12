@@ -177,7 +177,10 @@
               "pointers": {},
               "notes": {
                 "e0": "距离 ∞"
-              }
+              },
+              "namedNotes": {},
+              "edgeMarks": {},
+              "edgeLabels": {}
             },
             "binary": true
           }

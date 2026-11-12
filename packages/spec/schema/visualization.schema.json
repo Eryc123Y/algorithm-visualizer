@@ -8,7 +8,8 @@
         "0.1",
         "0.2",
         "0.3",
-        "0.4"
+        "0.4",
+        "0.5"
       ],
       "description": "Protocol version, \"major.minor\": the oldest version that has every feature the document uses."
     },
@@ -564,6 +565,14 @@
                   "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
                   "description": "Identifier of an element, unique within its structure and stable for the whole trace."
                 }
+              },
+              "rootList": {
+                "type": "string",
+                "enum": [
+                  "list",
+                  "circular"
+                ],
+                "description": "Join the roots in order, as a Fibonacci heap’s root list; \"circular\" also joins the last root to the first."
               },
               "levelOrder": {
                 "description": "Binary tree in level order as on LeetCode, null for missing nodes, e.g. [3, 9, 20, null, null, 15, 7]. Node ids are e0, e1, … in order. Use instead of `nodes`.",
@@ -2443,6 +2452,12 @@
                           "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
                           "description": "A node id."
                         },
+                        "slot": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 1000,
+                          "description": "A position among the roots, from 0."
+                        },
                         "target": {
                           "type": "string",
                           "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
@@ -2775,9 +2790,46 @@
                         "node": {
                           "anyOf": [
                             {
-                              "type": "string",
-                              "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
-                              "description": "A node id."
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                                  "description": "A node id."
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "parent": {
+                                      "type": "string",
+                                      "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                                      "description": "A node id."
+                                    },
+                                    "slot": {
+                                      "anyOf": [
+                                        {
+                                          "type": "integer",
+                                          "minimum": 0,
+                                          "maximum": 1000
+                                        },
+                                        {
+                                          "type": "string",
+                                          "enum": [
+                                            "left",
+                                            "right"
+                                          ]
+                                        }
+                                      ],
+                                      "description": "A child position; binary trees also accept \"left\" (0) and \"right\" (1)."
+                                    }
+                                  },
+                                  "required": [
+                                    "parent",
+                                    "slot"
+                                  ],
+                                  "additionalProperties": false,
+                                  "description": "The empty child slot `slot` of `parent`: the NIL leaf there."
+                                }
+                              ]
                             },
                             {
                               "type": "null"
@@ -2821,6 +2873,12 @@
                             }
                           ]
                         },
+                        "field": {
+                          "type": "string",
+                          "maxLength": 16,
+                          "pattern": "^[a-z][a-z0-9-]*$",
+                          "description": "The field a note shows, e.g. \"size\"; a node holds one note per field."
+                        },
                         "target": {
                           "type": "string",
                           "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
@@ -2831,6 +2889,91 @@
                         "type",
                         "node",
                         "text",
+                        "target"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "markEdge"
+                        },
+                        "node": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                          "description": "A node id."
+                        },
+                        "mark": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "enum": [
+                                "selected",
+                                "rejected"
+                              ]
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "target": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+                          "description": "Name of the structure this action applies to."
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "node",
+                        "mark",
+                        "target"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "labelEdge"
+                        },
+                        "node": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                          "description": "A node id."
+                        },
+                        "label": {
+                          "anyOf": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "maxLength": 16
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ],
+                              "description": "A short label beside the edge, e.g. a code bit \"0\"."
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "target": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+                          "description": "Name of the structure this action applies to."
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "node",
+                        "label",
                         "target"
                       ],
                       "additionalProperties": false
@@ -4280,6 +4423,6 @@
       ]
     }
   },
-  "$id": "urn:algoviz:schema:visualization:0.4",
+  "$id": "urn:algoviz:schema:visualization:0.5",
   "title": "Visualization"
 }

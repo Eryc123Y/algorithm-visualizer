@@ -110,7 +110,10 @@
               "settled": [],
               "groups": {},
               "pointers": {},
-              "notes": {}
+              "notes": {},
+              "namedNotes": {},
+              "edgeMarks": {},
+              "edgeLabels": {}
             },
             "binary": true
           }
@@ -153,7 +156,10 @@
               "settled": [],
               "groups": {},
               "pointers": {},
-              "notes": {}
+              "notes": {},
+              "namedNotes": {},
+              "edgeMarks": {},
+              "edgeLabels": {}
             },
             "binary": true
           }
@@ -196,7 +202,10 @@
               "settled": [],
               "groups": {},
               "pointers": {},
-              "notes": {}
+              "notes": {},
+              "namedNotes": {},
+              "edgeMarks": {},
+              "edgeLabels": {}
             },
             "binary": true
           }
@@ -239,7 +248,10 @@
               "settled": [],
               "groups": {},
               "pointers": {},
-              "notes": {}
+              "notes": {},
+              "namedNotes": {},
+              "edgeMarks": {},
+              "edgeLabels": {}
             },
             "binary": true
           }
@@ -282,7 +294,10 @@
               "settled": [],
               "groups": {},
               "pointers": {},
-              "notes": {}
+              "notes": {},
+              "namedNotes": {},
+              "edgeMarks": {},
+              "edgeLabels": {}
             },
             "binary": true
           }
@@ -325,7 +340,10 @@
               "settled": [],
               "groups": {},
               "pointers": {},
-              "notes": {}
+              "notes": {},
+              "namedNotes": {},
+              "edgeMarks": {},
+              "edgeLabels": {}
             },
             "binary": true
           }
@@ -368,7 +386,10 @@
               "settled": [],
               "groups": {},
               "pointers": {},
-              "notes": {}
+              "notes": {},
+              "namedNotes": {},
+              "edgeMarks": {},
+              "edgeLabels": {}
             },
             "binary": true
           }

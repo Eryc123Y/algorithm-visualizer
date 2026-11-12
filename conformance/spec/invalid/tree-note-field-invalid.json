@@ -1,0 +1,54 @@
+{
+  "description": "A note field is lower-case kebab-case, at most 16 characters.",
+  "input": {
+    "version": "0.5",
+    "structures": {
+      "h": {
+        "kind": "tree",
+        "rootList": "circular",
+        "nodes": [
+          {
+            "id": "a",
+            "value": 3,
+            "children": ["b", "c"]
+          },
+          {
+            "id": "b",
+            "value": 18
+          },
+          {
+            "id": "c",
+            "value": 52
+          },
+          {
+            "id": "d",
+            "value": 7
+          },
+          {
+            "id": "e",
+            "value": 23
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "actions": [
+          {
+            "target": "h",
+            "type": "annotate",
+            "node": "a",
+            "field": "Deg",
+            "text": "d=2"
+          }
+        ]
+      }
+    ]
+  },
+  "expectedErrors": [
+    {
+      "code": "INVALID_ACTION",
+      "path": "$.steps[0].actions[0].field"
+    }
+  ]
+}
