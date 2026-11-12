@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted
+Accepted; the sizes of figures in Beamer are superseded by ADR 0033
 
 ## Context
 
