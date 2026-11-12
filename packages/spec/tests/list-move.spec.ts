@@ -25,7 +25,7 @@ describe('linkedList move (ADR 0036)', () => {
       '0.7',
     );
     const move = { type: 'move', from: 2, to: 0 };
-    const { version: _, ...content } = doc('0.7', [move]);
+    const content = { ...doc('0.7', [move]), version: undefined };
     expect(
       minimumVersion(content as unknown as Omit<VisualizationInput, 'version'>),
     ).toBe('0.7');
@@ -49,9 +49,10 @@ describe('linkedList move (ADR 0036)', () => {
   });
 
   it('leaves documents without a move at their version', () => {
-    const { version: _, ...content } = doc('0.1', [
-      { type: 'link', from: 0, to: 2 },
-    ]);
+    const content = {
+      ...doc('0.1', [{ type: 'link', from: 0, to: 2 }]),
+      version: undefined,
+    };
     expect(
       minimumVersion(content as unknown as Omit<VisualizationInput, 'version'>),
     ).toBe('0.1');
