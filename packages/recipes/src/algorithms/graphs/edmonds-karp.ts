@@ -117,12 +117,14 @@ export const edmondsKarp = defineAlgorithm({
     const label = (k: number) => `${flow[k]}/${cap[k]}`;
     // Each edge starts labelled 0/c in the declaration: a step holds at
     // most 100 actions, and a network may have 200 edges.
-    const decl = declareGraph(g, false);
+    // Left to right, as CLRS draws flow networks, where no edge would
+    // then cross a node; else in layers, whose edges bend around nodes.
+    const placed = placeByLayers(g, s, t);
+    const decl = clearOfNodes(placed, g.edges)
+      ? { ...declareGraph(g, false), layout: 'manual' as const, nodes: placed }
+      : declareGraph(g, false, { from: s });
     const graph = trace.add('g', {
       ...decl,
-      // Left to right, as CLRS draws flow networks.
-      layout: 'manual' as const,
-      nodes: placeByLayers(g, s),
       edges: g.edges.map(([from, to], k) => ({
         id: ids[k]!,
         from,
@@ -179,7 +181,7 @@ export const edmondsKarp = defineAlgorithm({
         const leaving = g.edges.flatMap(([a, b], k) =>
           seen.has(a) && !seen.has(b) ? [ids[k]!] : [],
         );
-        const room = MAX_ACTIONS - 3 - seen.size;
+        const room = Math.max(0, MAX_ACTIONS - 3 - seen.size);
         leaving
           .slice(0, room)
           .forEach((edge) => graph.markEdge({ edge, mark: 'selected' }));
@@ -232,15 +234,19 @@ export const edmondsKarp = defineAlgorithm({
 const COLUMN_GAP = 130;
 const ROW_GAP = 90;
 
+/** A node's half-width as drawn, roughly, from its name, with room. */
+const reach = (v: string) => Math.max(22, 5 * v.length + 10) + 6;
+
+type Place = { id: string; x: number; y: number };
+
 /**
  * Each node's place: one column per breadth-first layer from the source,
- * along the edges' direction, and the nodes it cannot reach in a column
- * after the last; each column centred, its nodes in the input's order.
+ * along the edges' direction; the sink in a column of its own after them
+ * when it shares its layer; and the nodes the source cannot reach in a
+ * column after the last. Each column is centred, its nodes in the input's
+ * order.
  */
-function placeByLayers(
-  g: GraphInput,
-  s: string,
-): { id: string; x: number; y: number }[] {
+function placeByLayers(g: GraphInput, s: string, t: string): Place[] {
   const layer = new Map([[s, 0]]);
   const queue = [s];
   while (queue.length > 0) {
@@ -251,18 +257,54 @@ function placeByLayers(
         queue.push(b);
       }
   }
+  const deepest = Math.max(...layer.values());
+  const tLayer = layer.get(t);
+  if (
+    tLayer !== undefined &&
+    [...layer].some(([v, l]) => v !== t && l >= tLayer)
+  )
+    layer.set(t, deepest + 1);
   const unreached = Math.max(...layer.values()) + 1;
   const columns: string[][] = [];
   for (const v of [s, ...g.nodes.filter((v) => v !== s)])
     (columns[layer.get(v) ?? unreached] ??= []).push(v);
+  const widest = Math.max(...g.nodes.map(reach));
+  const step = Math.max(COLUMN_GAP, 2 * widest + 40);
   const rows = Math.max(...columns.map((c) => c?.length ?? 0));
   const gap = rows <= 6 ? ROW_GAP : Math.max(48, (5 * ROW_GAP) / (rows - 1));
   const middle = 40 + ((rows - 1) * gap) / 2;
   return columns.flatMap((column, k) =>
     (column ?? []).map((id, i) => ({
       id,
-      x: 60 + k * COLUMN_GAP,
+      x: 60 + k * step,
       y: middle + (i - (column.length - 1) / 2) * gap,
     })),
   );
+}
+
+/**
+ * Whether every edge, drawn straight, keeps clear of every node but its
+ * own two, as a layout by hand needs: it has no bends to go around one.
+ */
+function clearOfNodes(
+  places: readonly Place[],
+  edges: GraphInput['edges'],
+): boolean {
+  const at = new Map(places.map((p) => [p.id, p]));
+  return edges.every(([a, b]) => {
+    const [p, q] = [at.get(a)!, at.get(b)!];
+    const [dx, dy] = [q.x - p.x, q.y - p.y];
+    const length2 = dx * dx + dy * dy;
+    return places.every((n) => {
+      if (n.id === a || n.id === b) return true;
+      const k =
+        length2 === 0
+          ? 0
+          : Math.max(
+              0,
+              Math.min(1, ((n.x - p.x) * dx + (n.y - p.y) * dy) / length2),
+            );
+      return Math.hypot(p.x + k * dx - n.x, p.y + k * dy - n.y) >= reach(n.id);
+    });
+  });
 }

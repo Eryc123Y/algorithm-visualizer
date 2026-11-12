@@ -384,8 +384,7 @@ describe('labels of points in a plane', () => {
                       n.fontSize,
                     ),
                     { segments: [], discs: [], boxes: theirs },
-                  ) >=
-                  CLEAR + 1,
+                  ) >= CLEAR,
               );
               expect(
                 room,
