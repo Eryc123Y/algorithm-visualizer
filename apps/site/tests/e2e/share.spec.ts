@@ -7,31 +7,9 @@
  */
 import AxeBuilder from '@axe-core/playwright';
 import { shareFragment, type ShareContent } from '@algoviz/spec';
-import { test as base, expect, type Page } from '@playwright/test';
+import { type Page } from '@playwright/test';
 
-const test = base.extend<{ watch: void }>({
-  watch: [
-    async ({ page }, use) => {
-      const problems: string[] = [];
-      page.on('console', (m) => {
-        if (m.type() === 'error') problems.push(`console: ${m.text()}`);
-      });
-      page.on('pageerror', (e) => problems.push(`page error: ${e.message}`));
-      page.on('dialog', (d) => {
-        problems.push(`dialog: ${d.message()}`);
-        void d.dismiss();
-      });
-      await page.addInitScript(() => {
-        addEventListener('securitypolicyviolation', (e) =>
-          console.error(`CSP: ${e.violatedDirective} ${e.blockedURI}`),
-        );
-      });
-      await use();
-      expect(problems).toEqual([]);
-    },
-    { auto: true },
-  ],
-});
+import { expect, test } from './fixtures.ts';
 
 async function linkTo(content: ShareContent): Promise<string> {
   const fragment = await shareFragment(content);
@@ -113,6 +91,18 @@ test('opens an algorithm link at a named step, in its theme', async ({
   expect(
     await player(page).evaluate((el) => (el as { theme?: string }).theme),
   ).toBe('textbook');
+});
+
+test('draws a run with sections within the page’s policy', async ({ page }) => {
+  // The section strip places itself through CSSOM, which the policy
+  // allows; a style attribute would be a violation, which fails the test.
+  await page.goto('/play/#v=1&alg=bst');
+  await expect(
+    player(page).locator('.sections .section').first(),
+  ).toBeAttached();
+  expect(
+    await player(page).locator('.sections .section').count(),
+  ).toBeGreaterThan(1);
 });
 
 test('plays the next link when the fragment changes', async ({ page }) => {

@@ -204,6 +204,19 @@ describe('sections on the timeline', () => {
     ).toBe('true');
   });
 
+  it('moves the sections for a new document', async () => {
+    // Placed through CSSOM, which a strict CSP allows; the share page's
+    // E2E tests check that in a browser (ADR 0040).
+    const el = await mount((e) => {
+      e.visualization = doc;
+    });
+    el.visualization = { ...doc, sections: [doc.sections[0]] };
+    await settle(el);
+    expect(segments(el).map((s) => [s.style.left, s.style.width])).toEqual([
+      ['0%', '100%'],
+    ]);
+  });
+
   it('marks the section of the current step', async () => {
     const el = await mount((e) => {
       e.visualization = doc;

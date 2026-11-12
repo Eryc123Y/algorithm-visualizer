@@ -67,7 +67,7 @@ Everything later builds on these, so they come first. The ADRs are accepted (#13
   - the themes and their fonts in the painters, Typst and LaTeX: `textbook`, `textbook-dark`, `blocks`, `blocks-dark`, `answer-sheet` and `turbo-c` next to `light`, `dark` and `print`; the default refined with a design pass; captions as the code names structures (#53);
   - the player's chrome per theme, its web fonts, day-and-night pairs, the language menu as a `<select>`, and the playground's Theme menu with every theme (#54);
   - the documentation of themes in every output, and the lab's removal, kept outside the repository (#55).
-  - The documentation site shows themes once it exists (3.4).
+  - The documentation site shows themes once it exists (3.4): its `themes/` page (#127).
 - [x] **1.7 Painter fixes** found during theme work. _ADR_ [ADR 0031](adr/0031-painter-fixes.md) (#56) for the three that change a recorded decision, then three PRs: text clear of lines and settled under every mark (#57); pointer bands and the heap's sorted part (#58); radii in the chrome (#59).
   - check marks on graph and tree nodes stick out of the circle;
   - radii in the code panel and buttons are hard-coded instead of theme tokens;
@@ -193,7 +193,7 @@ Independent of Phase 2, so the two can interleave.
 - [x] **3.1 Streamable HTTP transport** for the MCP server, next to stdio. The server and the MCP App page must run on Workers. [ADR 0039](adr/0039-http-transport.md) (#121, #123).
 - [x] **3.2 Cloudflare Worker** with a "Deploy to Cloudflare" button. It is stateless and rate-limited, and its README shows how to connect Claude and other clients. `apps/worker` (#124); deploying waits for the owner: a public repository or a manual `wrangler deploy`, and a Worker name.
 - [x] **3.3 Share links.** _ADR_ [ADR 0040](adr/0040-share-links.md) (#122), amended by [ADR 0041](adr/0041-share-link-limits.md) (#125), then the codec, the MCP links and the share page `apps/site` (#126). A player page that reads a compressed document, or an algorithm and its input, from the URL fragment. MCP tools return the link alongside the document.
-- [ ] **3.4 Documentation site** on Cloudflare Pages, generated from the registry. It is grouped structure → operation, with the player and the export snippets for every algorithm.
+- [x] **3.4 Documentation site** on Cloudflare Pages, generated from the registry. It is grouped structure → operation, with the player and the export snippets for every algorithm. `apps/site`: a page per module with its player, step names and snippets (web, Typst, LaTeX, CLI, MCP, share link), the catalogue by topic, and the themes; deploying waits for the owner's domain (#127).
 
 ## Phase 4: release 1.0
 
