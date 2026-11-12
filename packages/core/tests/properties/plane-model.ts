@@ -11,8 +11,13 @@ import type { PlaneState } from '../../src/index.ts';
 import type { Dice } from './random.ts';
 
 type Fields = Record<string, unknown>;
-type Point = { id: string; x: number; y: number; label?: string };
-type Segment = { id: string; from: string; to: string; label?: string };
+type Point = { id: string; x: number; y: number; label?: string | undefined };
+type Segment = {
+  id: string;
+  from: string;
+  to: string;
+  label?: string | undefined;
+};
 
 export interface PlaneModel {
   readonly kind: 'plane';
