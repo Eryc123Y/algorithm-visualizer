@@ -23,6 +23,9 @@ const RUN_IN_QUICKJS = [
   'mcp',
 ];
 const NEEDS_INTL = /\btoLocale\w*\(|\bIntl\.|\.localeCompare\(/;
+/** A line of code without its comment; doc comment lines are empty. */
+const code = (line: string) =>
+  /^\s*(\/\*|\*)/.test(line) ? '' : line.replace(/\/\/.*$/, '');
 
 function sources(dir: string): string[] {
   return readdirSync(dir).flatMap((name) => {
@@ -39,7 +42,7 @@ describe('code that QuickJS runs', () => {
         readFileSync(file, 'utf8')
           .split('\n')
           .flatMap((line, k) =>
-            NEEDS_INTL.test(line)
+            NEEDS_INTL.test(code(line))
               ? [`${file.slice(packages.length)}:${k + 1}`]
               : [],
           ),
