@@ -53,11 +53,19 @@ export const bucketSort = defineAlgorithm({
       def bucket_sort(a):
           n = len(a)
           b = [[] for _ in range(n)]
-          for x in a:
-              b[int(n * x)].append(x)  # @bucket
-          for chain in b:
-              chain.sort()  # @sort
+          for i in range(n):
+              b[int(n * a[i])].append(a[i])  # @bucket
+          for k in range(n):
+              insertion_sort(b[k])  # @sort
           return [x for chain in b for x in chain]  # @concat
+
+      def insertion_sort(chain):
+          for j in range(1, len(chain)):
+              key, i = chain[j], j - 1
+              while i >= 0 and chain[i] > key:
+                  chain[i + 1] = chain[i]
+                  i -= 1
+              chain[i + 1] = key
     `,
   },
   run({ values }, trace) {
@@ -86,7 +94,7 @@ export const bucketSort = defineAlgorithm({
       trace.step(
         'bucket',
         `⌊${n} · ${value}⌋ = ${k}: ${value} goes into bucket ${k}, which holds [${k}/${n}, ${k + 1}/${n}).`,
-        { vars: { i, k } },
+        { vars: { i } },
       );
       arr.pointer({ name: 'i', index: i }).highlight({ indices: [i] });
       buckets.insert({ bucket: k, element: { id, value } });

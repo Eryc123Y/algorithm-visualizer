@@ -37,7 +37,7 @@ function check(doc: VisualizationInput, values: readonly number[]): void {
     byBucket.reduce((s, b) => s + Math.max(0, b.length - 1), 0),
   );
   const moved = sorts.filter((s) =>
-    s.meta?.narration?.includes('moves it'),
+    s.actions.some((a) => a.target === 'b' && a.type === 'remove'),
   ).length;
   const firstPlaces = byBucket.reduce(
     (s, b) => s + b.filter((x, j) => b.slice(0, j).some((y) => y > x)).length,
@@ -70,7 +70,24 @@ describe('bucket-sort', () => {
     );
   });
 
+  it('sorts the edges: one value, values next to 1, and 16 values', () => {
+    for (const values of [
+      [0],
+      [0.999999999, 0],
+      [1 - 2 ** -53, 0.5],
+      Array.from({ length: 16 }, (_, k) => (15 - k) / 16),
+    ])
+      check(runOk('bucket-sort', { values }).document, values);
+    // 1 − 2⁻⁵³ lands in the last bucket, as ⌊2(1 − 2⁻⁵³)⌋ = 1.
+    const doc = runOk('bucket-sort', { values: [1 - 2 ** -53, 0.5] }).document;
+    expect(doc.steps[0]!.meta!.narration).toContain('bucket 1');
+  });
+
   it('takes 1 to 16 numbers from 0 up to 1', () => {
+    expect(
+      runError('bucket-sort', { values: Array.from({ length: 17 }, () => 0.5) })
+        .path,
+    ).toBe('$.input.values');
     expect(runError('bucket-sort', { values: [0.5, 1] }).path).toBe(
       '$.input.values[1]',
     );
