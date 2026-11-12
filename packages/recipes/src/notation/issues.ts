@@ -3,7 +3,7 @@
  * tried; this keeps the branch that matches the value's type, so a string
  * gets the notation's error and an array the structured form's.
  */
-import { formatPath, type Diagnostic } from '@algoviz/spec';
+import { formatPath, type Diagnostic } from '@algomotion/spec';
 import type { z } from 'zod';
 
 import { CODE_PARAM, HINT_PARAM } from './error.ts';

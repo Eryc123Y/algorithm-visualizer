@@ -1,5 +1,5 @@
-import { selectFrames } from '@algoviz/core';
-import { SectionId } from '@algoviz/spec';
+import { selectFrames } from '@algomotion/core';
+import { SectionId } from '@algomotion/spec';
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 

@@ -2,7 +2,7 @@
  * The guide is what models learn the protocol from, so it must not drift
  * from it: every example must validate, and every action must be listed.
  */
-import { kinds, kindNames } from '@algoviz/spec';
+import { kinds, kindNames } from '@algomotion/spec';
 import { describe, expect, it } from 'vitest';
 
 import { guide, guideOverview, guideSection } from '../src/guide.ts';

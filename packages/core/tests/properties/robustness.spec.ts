@@ -5,9 +5,9 @@
  */
 import { readdirSync, readFileSync } from 'node:fs';
 
-import { callTool, tools } from '@algoviz/mcp';
-import { parseVisualization, type Diagnostic } from '@algoviz/spec';
-import { renderSvg } from '@algoviz/svg';
+import { callTool, tools } from '@algomotion/mcp';
+import { parseVisualization, type Diagnostic } from '@algomotion/spec';
+import { renderSvg } from '@algomotion/svg';
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 

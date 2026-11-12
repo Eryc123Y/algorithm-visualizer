@@ -135,13 +135,13 @@ describe('validate', () => {
 
 describe('tools and CLI with selectors', () => {
   it('accept selectors as tool arguments', () => {
-    const inspected = callTool('algoviz_inspect', {
+    const inspected = callTool('algomotion_inspect', {
       document: named,
       frames: ['push#2', 0],
     });
     expect(inspected.isError).toBeUndefined();
     expect(inspected.text).toContain('Frame 2 of 0–3');
-    const rendered = callTool('algoviz_render', {
+    const rendered = callTool('algomotion_render', {
       document: named,
       frame: 'pop-once/pop',
     });
@@ -149,7 +149,7 @@ describe('tools and CLI with selectors', () => {
   });
 
   it('accept selectors on the command line', () => {
-    const dir = mkdtempSync(join(tmpdir(), 'algoviz-selectors-'));
+    const dir = mkdtempSync(join(tmpdir(), 'algomotion-selectors-'));
     const file = join(dir, 'doc.json');
     writeFileSync(file, JSON.stringify(named));
     const out: string[] = [];

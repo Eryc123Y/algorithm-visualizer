@@ -20,12 +20,12 @@ import { fileURLToPath } from 'node:url';
 export const repo = fileURLToPath(new URL('../../../../', import.meta.url));
 export const examples = join(repo, 'packages/latex/examples');
 export const command =
-  process.env['ALGOVIZ_COMMAND'] ??
+  process.env['ALGOMOTION_COMMAND'] ??
   [
     process.execPath,
     '--no-warnings',
-    '--conditions=@algoviz/source',
-    join(repo, 'packages/mcp/src/algoviz.ts'),
+    '--conditions=@algomotion/source',
+    join(repo, 'packages/mcp/src/algomotion.ts'),
   ].join(' ');
 
 export type Engine = 'pdflatex' | 'lualatex' | 'xelatex';
@@ -39,13 +39,13 @@ export const LATEXMK: Readonly<Record<Engine, string>> = {
 
 /**
  * A fresh directory with the examples and a command that logs each call
- * to calls.log before running algoviz.
+ * to calls.log before running algomotion.
  */
 export function workspace(): string {
-  const dir = mkdtempSync(join(tmpdir(), 'algoviz-latex-'));
+  const dir = mkdtempSync(join(tmpdir(), 'algomotion-latex-'));
   for (const file of readdirSync(examples))
     copyFileSync(join(examples, file), join(dir, file));
-  const wrapper = join(dir, 'algoviz-calls');
+  const wrapper = join(dir, 'algomotion-calls');
   writeFileSync(
     wrapper,
     `#!/bin/sh\necho "$@" >> "${join(dir, 'calls.log')}"\nexec ${command} "$@"\n`,
@@ -60,7 +60,7 @@ export const env = {
 };
 
 const pretex = (dir: string, options = '') =>
-  `\\PassOptionsToPackage{command=${join(dir, 'algoviz-calls')}${options}}{algoviz}`;
+  `\\PassOptionsToPackage{command=${join(dir, 'algomotion-calls')}${options}}{algomotion}`;
 
 /** Compiles with latexmk, as users do; `force` runs TeX again anyway. */
 export function latexmk(
@@ -122,8 +122,8 @@ export const log = (dir: string, file: string) =>
       return lines;
     }, [])
     .join('\n')
-    // l3msg wraps messages itself, continuing them after "(algoviz)".
-    .replace(/\n\(algoviz\)\s+/g, ' ');
+    // l3msg wraps messages itself, continuing them after "(algomotion)".
+    .replace(/\n\(algomotion\)\s+/g, ' ');
 
 /** The lines of a log that report errors. */
 export const errors = (text: string) =>
@@ -138,8 +138,8 @@ export const calls = (dir: string) =>
     : [];
 
 export const cached = (dir: string) =>
-  existsSync(join(dir, '_algoviz'))
-    ? readdirSync(join(dir, '_algoviz')).filter((f) => f.endsWith('.tex'))
+  existsSync(join(dir, '_algomotion'))
+    ? readdirSync(join(dir, '_algomotion')).filter((f) => f.endsWith('.tex'))
     : [];
 
 export const pdfText = (pdf: string) =>
@@ -150,7 +150,7 @@ export function document(dir: string, name: string, body: string): string {
   const file = `${name}.tex`;
   writeFileSync(
     join(dir, file),
-    `\\documentclass{article}\n\\usepackage{algoviz}\n\\begin{document}\n${body}\n\\end{document}\n`,
+    `\\documentclass{article}\n\\usepackage{algomotion}\n\\begin{document}\n${body}\n\\end{document}\n`,
   );
   return file;
 }

@@ -2,7 +2,7 @@
  * The documentation's catalogue (roadmap 3.4): every registry module gets
  * a page, grouped by topic, and a data structure's operations under it.
  */
-import { algorithms, TOPICS } from '@algoviz/recipes';
+import { algorithms, TOPICS } from '@algomotion/recipes';
 import { describe, expect, it } from 'vitest';
 
 import { catalog, depthOf, pathOf } from '../../src/docs/catalog.ts';

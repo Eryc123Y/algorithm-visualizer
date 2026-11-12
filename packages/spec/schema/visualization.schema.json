@@ -5712,6 +5712,6 @@
       ]
     }
   },
-  "$id": "urn:algoviz:schema:visualization:1.0",
+  "$id": "urn:algomotion:schema:visualization:1.0",
   "title": "Visualization"
 }

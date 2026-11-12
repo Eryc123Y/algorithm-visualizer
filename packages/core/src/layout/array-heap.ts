@@ -15,7 +15,7 @@
  * animates as two nodes trading places; edges are keyed by position, since
  * they belong to the shape, not to the values.
  */
-import type { ArrayDecl } from '@algoviz/spec';
+import type { ArrayDecl } from '@algomotion/spec';
 
 import type { Block, LayoutInput } from '../kind.ts';
 import type { ArrayState } from '../kinds/array.ts';

@@ -8,7 +8,7 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 
-import type { BTreeState, Trace } from '@algoviz/core';
+import type { BTreeState, Trace } from '@algomotion/core';
 
 import { RefBTree } from './b-tree-reference.ts';
 import { fuzz, replay, runError, runOk, stateOf } from './helpers.ts';

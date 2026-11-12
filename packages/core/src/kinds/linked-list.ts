@@ -11,7 +11,7 @@ import {
   type LinkedListDecl,
   type Result,
   type Scalar,
-} from '@algoviz/spec';
+} from '@algomotion/spec';
 
 import type { ReduceError } from '../errors.ts';
 import type { StructureKind } from '../kind.ts';

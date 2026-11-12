@@ -10,14 +10,14 @@ import { readdirSync, readFileSync } from 'node:fs';
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 
-import { layoutTrace, loadTrace, type Scene } from '@algoviz/core';
-import { algorithms, runAlgorithm } from '@algoviz/recipes';
+import { layoutTrace, loadTrace, type Scene } from '@algomotion/core';
+import { algorithms, runAlgorithm } from '@algomotion/recipes';
 import {
   prepareFigures,
   renderSvg,
   themeNames,
   type ThemeName,
-} from '@algoviz/svg';
+} from '@algomotion/svg';
 
 import { prepareTikzFigures, renderTikz } from '../src/index.ts';
 import {
@@ -120,7 +120,7 @@ describe('every registry example', () => {
   }, 120_000);
 });
 
-// Random documents of every kind, from @algoviz/core's generator, by
+// Random documents of every kind, from @algomotion/core's generator, by
 // relative path: a computed specifier keeps TypeScript from pulling core's
 // tests into this project (TS6307).
 const properties = new URL('../../core/tests/properties/', import.meta.url);

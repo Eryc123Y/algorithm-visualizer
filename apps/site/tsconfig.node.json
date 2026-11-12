@@ -8,7 +8,7 @@
     "types": ["node"],
     "noEmit": true,
     "allowImportingTsExtensions": true,
-    "customConditions": ["@algoviz/source"]
+    "customConditions": ["@algomotion/source"]
   },
   "include": [
     "vite.config.ts",

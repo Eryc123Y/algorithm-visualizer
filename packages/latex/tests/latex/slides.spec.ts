@@ -12,8 +12,8 @@ import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import { loadTrace, selectSeries } from '@algoviz/core';
-import { runAlgorithm } from '@algoviz/recipes';
+import { loadTrace, selectSeries } from '@algomotion/core';
+import { runAlgorithm } from '@algomotion/recipes';
 
 import {
   calls,
@@ -30,7 +30,7 @@ import {
 const WORDS = ['FRAMEA', 'FRAMEB', 'FRAMEC'];
 
 /**
- * A series file as `algoviz export --one-file` writes it, one word per
+ * A series file as `algomotion export --one-file` writes it, one word per
  * frame, so a page's text tells which frame it shows.
  */
 function seriesFile(
@@ -40,12 +40,12 @@ function seriesFile(
 ): void {
   const figure = ({ word, width = 100 }: { word: string; width?: number }) =>
     [
-      `% algoviz figure for LaTeX, format 2: ${word}`,
-      `\\algoviz@figure{2}{${width}}{40}{%`,
-      '\\algoviz@fonts{normal}{sf}%',
-      '\\algoviz@color{1}{1F2A26}%',
+      `% algomotion figure for LaTeX, format 2: ${word}`,
+      `\\algomotion@figure{2}{${width}}{40}{%`,
+      '\\algomotion@fonts{normal}{sf}%',
+      '\\algomotion@color{1}{1F2A26}%',
       '}{%',
-      `\\algoviz@text{50,25}{c}{12}{0}{label}{algoviz@c1}{}{${word}}`,
+      `\\algomotion@text{50,25}{c}{12}{0}{label}{algomotion@c1}{}{${word}}`,
       '}%',
     ].join('\n');
   writeFileSync(join(dir, name), `${frames.map(figure).join('\n\n')}\n`);
@@ -72,7 +72,7 @@ function source(
 ): string {
   writeFileSync(
     join(dir, `${name}.tex`),
-    `${documentclass}\n\\usepackage{algoviz}\n\\begin{document}\n${body}\n\\end{document}\n`,
+    `${documentclass}\n\\usepackage{algomotion}\n\\begin{document}\n${body}\n\\end{document}\n`,
   );
   return `${name}.tex`;
 }
@@ -98,14 +98,14 @@ describe('a series file in Beamer', () => {
   };
 
   it('shows one frame per slide, in order', () => {
-    compile('steps', '\\begin{frame}\\algovizinput{series.tex}\\end{frame}');
+    compile('steps', '\\begin{frame}\\algomotioninput{series.tex}\\end{frame}');
     expect(shown(dir, 'steps')).toEqual([['FRAMEA'], ['FRAMEB'], ['FRAMEC']]);
   });
 
   it('starts after a \\pause, as <+> does', () => {
     compile(
       'pause',
-      '\\begin{frame}Intro \\pause \\algovizinput{series.tex}\\end{frame}',
+      '\\begin{frame}Intro \\pause \\algomotioninput{series.tex}\\end{frame}',
     );
     expect(shown(dir, 'pause')).toEqual([
       [],
@@ -120,7 +120,7 @@ describe('a series file in Beamer', () => {
   it('keeps the last frame while later overlays follow', () => {
     compile(
       'after',
-      '\\begin{frame}\\algovizinput{series.tex}\\uncover<+->{Outro}\\end{frame}',
+      '\\begin{frame}\\algomotioninput{series.tex}\\uncover<+->{Outro}\\end{frame}',
     );
     expect(shown(dir, 'after')).toEqual([
       ['FRAMEA'],
@@ -136,7 +136,7 @@ describe('a series file in Beamer', () => {
   it('starts on the slide start names, and two series step together', () => {
     compile(
       'start',
-      '\\begin{frame}\\algovizinput[start=2]{series.tex}\\end{frame}',
+      '\\begin{frame}\\algomotioninput[start=2]{series.tex}\\end{frame}',
     );
     expect(shown(dir, 'start')).toEqual([
       [],
@@ -152,7 +152,7 @@ describe('a series file in Beamer', () => {
     compile(
       'together',
       // Side by side, so each takes less than half the line (ADR 0033).
-      '\\begin{frame}\\algovizset{start=1, width=.45\\linewidth}\\algovizinput{series.tex}\\algovizinput{other.tex}\\end{frame}',
+      '\\begin{frame}\\algomotionset{start=1, width=.45\\linewidth}\\algomotioninput{series.tex}\\algomotioninput{other.tex}\\end{frame}',
     );
     const together = pages(join(dir, 'together.pdf'));
     expect(together).toHaveLength(3);
@@ -166,7 +166,7 @@ describe('a series file in Beamer', () => {
     for (const mode of ['handout', 'trans']) {
       compile(
         mode,
-        '\\begin{frame}\\algovizinput{series.tex}\\end{frame}',
+        '\\begin{frame}\\algomotioninput{series.tex}\\end{frame}',
         mode,
       );
       expect(shown(dir, mode), mode).toEqual([['FRAMEC']]);
@@ -176,7 +176,7 @@ describe('a series file in Beamer', () => {
   it('draws a file of one figure on every slide, as before', () => {
     compile(
       'alone',
-      '\\begin{frame}\\algovizinput{one.tex} \\pause Outro\\end{frame}',
+      '\\begin{frame}\\algomotioninput{one.tex} \\pause Outro\\end{frame}',
     );
     const both = pages(join(dir, 'alone.pdf'));
     expect(both).toHaveLength(2);
@@ -187,10 +187,10 @@ describe('a series file in Beamer', () => {
     const name = beamer(
       dir,
       'bad-start',
-      '\\begin{frame}\\algovizinput[start=0]{series.tex}\\end{frame}',
+      '\\begin{frame}\\algomotioninput[start=0]{series.tex}\\end{frame}',
     );
     expect(tex(dir, name, 'off')).toContain(
-      "Package algoviz Error: start takes + or a slide number, not '0'.",
+      "Package algomotion Error: start takes + or a slide number, not '0'.",
     );
   });
 });
@@ -199,7 +199,7 @@ describe('steps in a call', () => {
   it('passes the list with --one-file, keyed apart from step', () => {
     const dir = workspace();
     const figure = (keys: string) =>
-      `\\algoviz[${keys}]{bubble-sort}{"values": [3, 1, 2]}`;
+      `\\algomotion[${keys}]{bubble-sort}{"values": [3, 1, 2]}`;
     const file = document(
       dir,
       'series-keys', // not calls.tex: its log would replace calls.log
@@ -211,7 +211,7 @@ describe('steps in a call', () => {
         figure('steps={0,swap\\#1..-1}'),
         figure('steps'),
         // step after steps draws one frame again.
-        `\\algovizset{steps}${figure('step=-1')}`,
+        `\\algomotionset{steps}${figure('step=-1')}`,
         figure('steps={a;b}'),
       ].join('\n\n'),
     );
@@ -239,7 +239,7 @@ describe('a series file without overlays', () => {
       dir,
       'notes',
       '\\documentclass{article}\\usepackage{beamerarticle}',
-      '\\begin{frame}\\algovizinput{series.tex}\\end{frame}',
+      '\\begin{frame}\\algomotioninput{series.tex}\\end{frame}',
     );
     const text = tex(dir, name, 'off');
     expect(errors(text)).toEqual([]);
@@ -252,13 +252,13 @@ describe('a series file without overlays', () => {
       dir,
       'article',
       '\\documentclass{article}',
-      '\\algovizinput{series.tex}',
+      '\\algomotioninput{series.tex}',
     );
     const text = tex(dir, name, 'off');
     expect(errors(text)).toEqual([]);
     expect(shown(dir, 'article')).toEqual([['FRAMEC']]);
     expect(text).toContain(
-      'Package algoviz Warning: A series of 3 frames needs Beamer for its overlays, so only its last frame is drawn.',
+      'Package algomotion Warning: A series of 3 frames needs Beamer for its overlays, so only its last frame is drawn.',
     );
   });
 
@@ -273,8 +273,8 @@ describe('a series file without overlays', () => {
       'sizes',
       '\\documentclass{article}',
       [
-        '\\sbox0{\\algovizinput{wide.tex}}\\typeout{SIZE wide \\the\\wd0}',
-        '\\sbox0{\\algovizinput{mixed.tex}}\\typeout{SIZE mixed \\the\\wd0}',
+        '\\sbox0{\\algomotioninput{wide.tex}}\\typeout{SIZE wide \\the\\wd0}',
+        '\\sbox0{\\algomotioninput{mixed.tex}}\\typeout{SIZE mixed \\the\\wd0}',
       ].join('\n'),
     );
     const text = tex(dir, name, 'off');
@@ -322,19 +322,19 @@ function oneAtATime(dir: string): string {
     ...DIJKSTRA.map((f) =>
       frame(
         "Dijkstra's algorithm, step by step",
-        `\\algovizfile[algorithm=dijkstra, step=${f}]{graph.json}`,
+        `\\algomotionfile[algorithm=dijkstra, step=${f}]{graph.json}`,
       ),
     ),
     ...SECTION.map((f) =>
       frame(
         'Deleting $3$ from a binary search tree',
-        `\\algoviz[step=${f}, theme=print]{bst.delete}{"from": [8, 3, 10, 1, 6, 4, 7], "key": 3}`,
+        `\\algomotion[step=${f}, theme=print]{bst.delete}{"from": [8, 3, 10, 1, 6, 4, 7], "key": 3}`,
       ),
     ),
   ];
   writeFileSync(
     join(dir, 'reference.tex'),
-    `\\documentclass{beamer}\n\\usepackage{algoviz}\n\\begin{document}\n${body.join('\n')}\n\\end{document}\n`,
+    `\\documentclass{beamer}\n\\usepackage{algomotion}\n\\begin{document}\n${body.join('\n')}\n\\end{document}\n`,
   );
   return 'reference.tex';
 }
@@ -345,7 +345,7 @@ describe.each<Engine>(['pdflatex', 'lualatex'])(
     const dir = workspace();
     const slides = DIJKSTRA.length + 1 + RANGE.length + 1 + SECTION.length;
 
-    it('calls algoviz once per series or figure, and makes a slide per frame', () => {
+    it('calls algomotion once per series or figure, and makes a slide per frame', () => {
       const text = latexmk(dir, 'slides.tex', engine);
       expect(errors(text)).toEqual([]);
       expect(calls(dir)).toHaveLength(4);
@@ -416,7 +416,7 @@ describe('slides.tex as a handout', () => {
 
 describe('layout (ADR 0029)', () => {
   const figure = (keys = '') =>
-    `\\algoviz${keys === '' ? '' : `[${keys}]`}{bubble-sort}{"values": [3, 1, 2]}`;
+    `\\algomotion${keys === '' ? '' : `[${keys}]`}{bubble-sort}{"values": [3, 1, 2]}`;
   const layouts = (dir: string) =>
     calls(dir).map((c) => /--layout=(\S+)/.exec(c)?.[1]);
 
@@ -431,8 +431,8 @@ describe('layout (ADR 0029)', () => {
         // Cached: the same figures again.
         figure('layout=narrow'),
         figure('layout=wide'),
-        `\\algovizset{layout=wide}${figure()}`,
-        `\\algovizset{layout=auto}${figure('step=0')}`,
+        `\\algomotionset{layout=wide}${figure()}`,
+        `\\algomotionset{layout=auto}${figure('step=0')}`,
       ].join('\n\n'),
     );
     expect(errors(tex(dir, file, 'unrestricted'))).toEqual([]);
@@ -461,7 +461,7 @@ describe('layout (ADR 0029)', () => {
     const dir = workspace();
     const file = document(dir, 'layout-bad', figure('layout=square'));
     expect(tex(dir, file, 'unrestricted')).toMatch(
-      /Key 'algoviz\/layout' accepts only a fixed set of choices/,
+      /Key 'algomotion\/layout' accepts only a fixed set of choices/,
     );
   });
 });

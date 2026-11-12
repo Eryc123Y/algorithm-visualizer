@@ -9,8 +9,8 @@ import {
   TOPICS,
   type Algorithm,
   type Topic,
-} from '@algoviz/recipes';
-import type { VisualizationInput } from '@algoviz/spec';
+} from '@algomotion/recipes';
+import type { VisualizationInput } from '@algomotion/spec';
 
 export interface Example {
   readonly topic: Topic;

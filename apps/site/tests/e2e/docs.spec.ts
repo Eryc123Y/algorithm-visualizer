@@ -4,7 +4,7 @@
  * structure's operations, and the themes, on a desktop and a phone.
  */
 import AxeBuilder from '@axe-core/playwright';
-import { algorithms } from '@algoviz/recipes';
+import { algorithms } from '@algomotion/recipes';
 import type { Page } from '@playwright/test';
 
 import { expect, test } from './fixtures.ts';
@@ -20,7 +20,7 @@ const noSideScroll = (page: Page) =>
 
 test('the home page lists every module, and filters them', async ({ page }) => {
   await page.goto('/');
-  await expect(page).toHaveTitle('algoviz: step-by-step algorithms');
+  await expect(page).toHaveTitle('algomotion: step-by-step algorithms');
   await expect(player(page).getByText('Initial state.')).toBeVisible();
   const catalog = page.locator('#catalog');
   for (const a of algorithms)
@@ -79,7 +79,7 @@ test('an algorithm’s page plays it, names its steps and gives every snippet', 
     ).toBeVisible();
 
   const cli = page.locator('[data-snippet="cli"] pre');
-  await expect(cli).toContainText("algoviz export dijkstra --input '");
+  await expect(cli).toContainText("algomotion export dijkstra --input '");
   if (browserName === 'chromium') {
     await context.grantPermissions(['clipboard-read', 'clipboard-write']);
     await page
@@ -99,7 +99,7 @@ test('an algorithm’s page plays it, names its steps and gives every snippet', 
     .getByRole('link', { name: 'Open this run in the share page' })
     .click();
   await expect(page).toHaveURL(/\/play\/#v=1&alg=dijkstra&in=/);
-  await expect(page).toHaveTitle('dijkstra · algoviz');
+  await expect(page).toHaveTitle('dijkstra · algomotion');
   await expect(
     page.locator('algo-player').getByText('Initial state.'),
   ).toBeVisible();

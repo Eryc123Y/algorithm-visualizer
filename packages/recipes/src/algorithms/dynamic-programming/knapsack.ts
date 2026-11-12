@@ -5,7 +5,7 @@
  * remaining capacity one row up. KNAPSACK-ITEMS then walks back from the
  * corner and settles the cells where an item was taken.
  */
-import type { Cell } from '@algoviz/spec';
+import type { Cell } from '@algomotion/spec';
 import { z } from 'zod';
 
 import { defineAlgorithm } from '../../algorithm.ts';

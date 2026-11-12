@@ -6,7 +6,7 @@
  * describes, declared rather than animated, so its steps cover only the
  * operations asked for.
  */
-import type { StructureDeclInput, StructureKindName } from '@algoviz/spec';
+import type { StructureDeclInput, StructureKindName } from '@algomotion/spec';
 import { z } from 'zod';
 
 import type {

@@ -7,7 +7,7 @@
  * under their points. A margin
  * around the square keeps labels and badges inside the block.
  */
-import type { PlaneDecl } from '@algoviz/spec';
+import type { PlaneDecl } from '@algomotion/spec';
 
 import type { Block, LayoutInput } from '../kind.ts';
 import type { PlaneState } from '../kinds/plane.ts';

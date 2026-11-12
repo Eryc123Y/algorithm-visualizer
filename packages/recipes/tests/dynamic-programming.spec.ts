@@ -5,7 +5,7 @@
  */
 import { describe, expect, it } from 'vitest';
 
-import type { VisualizationInput } from '@algoviz/spec';
+import type { VisualizationInput } from '@algomotion/spec';
 
 import { replay, runError, runOk, stateOf } from './helpers.ts';
 

@@ -4,7 +4,7 @@
  * carry no glyph bounds, so the bundled faces' depths are listed here; a
  * test measures them again from the outlines.
  */
-import type { FontMetrics } from '@algoviz/fonts';
+import type { FontMetrics } from '@algomotion/fonts';
 
 /**
  * Characters whose ink stays on or above the baseline in every bundled

@@ -4,13 +4,13 @@
  * SVG figures, so a frame's TikZ and SVG figures have the same size and
  * positions. No DOM and no Node.js.
  */
-import { err, ok, type Diagnostic, type Result } from '@algoviz/spec';
+import { err, ok, type Diagnostic, type Result } from '@algomotion/spec';
 import {
   prepareScenes,
   type SceneFrame,
   type SeriesOptions,
   type SvgTheme,
-} from '@algoviz/svg';
+} from '@algomotion/svg';
 
 import { renderTikz } from './render.ts';
 

@@ -2,7 +2,7 @@
  * The server through a real MCP client, over an in-memory transport.
  */
 import { Client, InMemoryTransport } from '@modelcontextprotocol/client';
-import { kindNames } from '@algoviz/spec';
+import { kindNames } from '@algomotion/spec';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { SERVER_INSTRUCTIONS } from '../src/instructions.ts';
@@ -33,7 +33,7 @@ describe('MCP server', () => {
     const { tools: listed } = await client.listTools();
     expect(listed.map((t) => t.name)).toEqual([
       ...tools.map((t) => t.name),
-      'algoviz_show',
+      'algomotion_show',
     ]);
     for (const t of listed) {
       expect(t.inputSchema.type).toBe('object');
@@ -43,7 +43,7 @@ describe('MCP server', () => {
 
   it('validates a document', async () => {
     const result = await client.callTool({
-      name: 'algoviz_validate',
+      name: 'algomotion_validate',
       arguments: {
         document: {
           version: '1.0',
@@ -58,7 +58,7 @@ describe('MCP server', () => {
 
   it('rejects arguments that do not match the schema', async () => {
     const result = await client.callTool({
-      name: 'algoviz_render',
+      name: 'algomotion_render',
       arguments: { document: {}, theme: 'neon' },
     });
     expect(result.isError).toBe(true);
@@ -68,13 +68,15 @@ describe('MCP server', () => {
     const { resources } = await client.listResources();
     expect(resources.map((r) => r.uri)).toEqual([
       PLAYER_URI,
-      'algoviz://guide',
-      ...kindNames.map((k) => `algoviz://guide/${k}`),
-      'algoviz://schema',
+      'algomotion://guide',
+      ...kindNames.map((k) => `algomotion://guide/${k}`),
+      'algomotion://schema',
     ]);
-    const graph = await client.readResource({ uri: 'algoviz://guide/graph' });
+    const graph = await client.readResource({
+      uri: 'algomotion://guide/graph',
+    });
     expect((graph.contents[0] as { text: string }).text).toMatch(/^## graph/);
-    const schema = await client.readResource({ uri: 'algoviz://schema' });
+    const schema = await client.readResource({ uri: 'algomotion://schema' });
     const parsed = JSON.parse(
       (schema.contents[0] as { text: string }).text,
     ) as {
@@ -90,12 +92,12 @@ describe('MCP server', () => {
     });
     expect(prompt.messages[0]!.content).toEqual({
       type: 'text',
-      text: 'Make an algoviz visualization: bubble sort on [3, 1, 2]',
+      text: 'Make an algomotion visualization: bubble sort on [3, 1, 2]',
     });
   });
 });
 
-describe('algoviz_show, the MCP App', () => {
+describe('algomotion_show, the MCP App', () => {
   const doc = {
     version: '1.0',
     title: 'Two pushes',
@@ -114,7 +116,7 @@ describe('algoviz_show, the MCP App', () => {
 
   it('links the tool to the player page', async () => {
     const { tools: listed } = await client.listTools();
-    const shown = listed.find((t) => t.name === 'algoviz_show')!;
+    const shown = listed.find((t) => t.name === 'algomotion_show')!;
     expect(shown._meta).toMatchObject({ ui: { resourceUri: PLAYER_URI } });
     expect(shown.annotations?.readOnlyHint).toBe(true);
   });
@@ -131,7 +133,7 @@ describe('algoviz_show, the MCP App', () => {
 
   it('hands a valid document and frame to the page', async () => {
     const result = await client.callTool({
-      name: 'algoviz_show',
+      name: 'algomotion_show',
       arguments: { document: JSON.stringify(doc), frame: -1 },
     });
     expect(result.isError).toBeFalsy();
@@ -147,7 +149,7 @@ describe('algoviz_show, the MCP App', () => {
 
   it('reports an invalid document or frame as an error', async () => {
     const invalid = await client.callTool({
-      name: 'algoviz_show',
+      name: 'algomotion_show',
       arguments: {
         document: {
           ...doc,
@@ -159,7 +161,7 @@ describe('algoviz_show, the MCP App', () => {
     expect(text(invalid)).toContain('EMPTY at $.steps[0].actions[0]');
     expect(invalid.structuredContent).toBeUndefined();
     const frame = await client.callTool({
-      name: 'algoviz_show',
+      name: 'algomotion_show',
       arguments: { document: doc, frame: 3 },
     });
     expect(frame.isError).toBe(true);

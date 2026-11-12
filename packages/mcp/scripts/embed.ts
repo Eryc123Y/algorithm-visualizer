@@ -31,7 +31,7 @@ export function guideFiles(
 
 /** Replaces `src/guide-files.ts`, which reads `guide/`, with the files' text. */
 export const embeddedGuide = (): Plugin => ({
-  name: 'algoviz-embedded-guide',
+  name: 'algomotion-embedded-guide',
   load(id) {
     if (!id.endsWith('/src/guide-files.ts')) return null;
     return [
@@ -50,7 +50,7 @@ export const embeddedGuide = (): Plugin => ({
  * page's text; the page must be built first (`npm run build:app`).
  */
 export const embeddedPlayer = (): Plugin => ({
-  name: 'algoviz-embedded-player',
+  name: 'algomotion-embedded-player',
   load(id) {
     if (!id.endsWith('/src/player-file.ts')) return null;
     const html = readFileSync(join(mcpRoot, 'ui', 'player.html'), 'utf8');

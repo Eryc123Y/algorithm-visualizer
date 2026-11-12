@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 
 import { main } from '../src/cli.ts';
 
-const dir = mkdtempSync(join(tmpdir(), 'algoviz-cli-'));
+const dir = mkdtempSync(join(tmpdir(), 'algomotion-cli-'));
 const file = join(dir, 'doc.json');
 writeFileSync(
   file,
@@ -33,7 +33,7 @@ function run(...argv: string[]) {
   return { code, out: out.join('\n'), err: err.join('\n') };
 }
 
-describe('algoviz CLI', () => {
+describe('algomotion CLI', () => {
   it('validates a file', () => {
     expect(run('validate', file)).toEqual({
       code: 0,

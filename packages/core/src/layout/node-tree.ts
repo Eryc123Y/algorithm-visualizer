@@ -7,7 +7,7 @@
  * leaves side by side and centre each parent over its children. Trees of a
  * forest follow each other left to right, half a column apart.
  */
-import { textWidth } from '@algoviz/fonts';
+import { textWidth } from '@algomotion/fonts';
 
 import { badgeHeight, badgeWidthFor, ceilWidth } from './common.ts';
 import type { LayoutOptions } from './options.ts';

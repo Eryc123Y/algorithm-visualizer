@@ -3,7 +3,7 @@
  * MCP tools in an agent loop, or in one shot with the guide in the prompt.
  */
 import type Anthropic from '@anthropic-ai/sdk';
-import { guide, INSTRUCTIONS, tools, visualizeRequest } from '@algoviz/mcp';
+import { guide, INSTRUCTIONS, tools, visualizeRequest } from '@algomotion/mcp';
 import { z } from 'zod';
 
 import { appendLog, loggedCall, submit } from './log.ts';
@@ -66,7 +66,7 @@ const submitTool: Anthropic.Tool = {
 export function apiTools(recipes: boolean): Anthropic.Tool[] {
   const offered = tools.filter(
     (t) =>
-      t.name !== 'algoviz_render' && (recipes || !t.name.includes('recipe')),
+      t.name !== 'algomotion_render' && (recipes || !t.name.includes('recipe')),
   );
   return [
     ...offered.map((t): Anthropic.Tool => {
@@ -89,7 +89,7 @@ export function systemPrompt(options: AttemptOptions): string {
   if (options.mode === 'oneshot') {
     const text = guide();
     if (!text.ok) throw new Error('The guide failed to load');
-    return `You write algoviz visualization documents. Trace the algorithm on the given input by hand, one step per thing a learner should see, and narrate each step. Reply with the document only, as one \`\`\`json code block.\n\n${text.value}`;
+    return `You write algomotion visualization documents. Trace the algorithm on the given input by hand, one step per thing a learner should see, and narrate each step. Reply with the document only, as one \`\`\`json code block.\n\n${text.value}`;
   }
   const recipes = options.recipes
     ? ''

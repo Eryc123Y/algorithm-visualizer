@@ -6,7 +6,7 @@
  * named notes, and edge marks and labels, which go when their edge does.
  * Returns the new model, or `undefined` if the action must be rejected.
  */
-import { LIMITS, type Scalar, type TreeDecl } from '@algoviz/spec';
+import { LIMITS, type Scalar, type TreeDecl } from '@algomotion/spec';
 
 export interface ModelNode {
   readonly id: string;

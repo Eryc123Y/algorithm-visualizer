@@ -7,7 +7,7 @@
  */
 import { unsafeCSS, type CSSResult } from 'lit';
 
-import { isThemeName, type ThemeName } from '@algoviz/svg';
+import { isThemeName, type ThemeName } from '@algomotion/svg';
 
 /** The custom properties of one theme's chrome. */
 export interface ChromeTokens {

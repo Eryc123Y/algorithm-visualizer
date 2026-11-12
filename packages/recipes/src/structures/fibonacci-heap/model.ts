@@ -8,7 +8,7 @@
  * Keys are distinct finite numbers; `-Infinity` appears only inside a
  * deletion, which decreases a key to −∞ and extracts it at once.
  */
-import type { Scalar } from '@algoviz/spec';
+import type { Scalar } from '@algomotion/spec';
 
 export interface FibNode {
   readonly key: number;

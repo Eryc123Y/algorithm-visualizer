@@ -4,7 +4,7 @@
  * fits the cell, node or badge it is drawn in. Text is measured in the
  * default fonts, which the default themes draw with (ADR 0024).
  */
-import { textWidth } from '@algoviz/fonts';
+import { textWidth } from '@algomotion/fonts';
 
 import {
   defaultFonts,

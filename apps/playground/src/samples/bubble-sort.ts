@@ -1,7 +1,7 @@
 /**
  * Records a full bubble sort as a visualization document.
  */
-import type { VisualizationInput } from '@algoviz/spec';
+import type { VisualizationInput } from '@algomotion/spec';
 
 type Step = VisualizationInput['steps'][number];
 

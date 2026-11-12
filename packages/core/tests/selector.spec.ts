@@ -1,7 +1,7 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 
-import type { Section } from '@algoviz/spec';
+import type { Section } from '@algomotion/spec';
 
 import {
   parseSelector,

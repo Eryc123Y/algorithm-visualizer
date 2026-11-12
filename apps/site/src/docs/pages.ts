@@ -4,9 +4,9 @@
  * is HTML text built from the registry; `scripts/build-pages.ts` writes
  * them next to the share page.
  */
-import { findAlgorithm, runAlgorithm, writeInput } from '@algoviz/recipes';
-import { shareFragment } from '@algoviz/spec';
-import type { ThemeName } from '@algoviz/svg';
+import { findAlgorithm, runAlgorithm, writeInput } from '@algomotion/recipes';
+import { shareFragment } from '@algomotion/spec';
+import type { ThemeName } from '@algomotion/svg';
 
 import { depthOf, type Entry, type TopicGroup } from './catalog.ts';
 import { attribute, page, rootOf, text, type Assets } from './html.ts';
@@ -142,7 +142,7 @@ export function entryPage(d: EntryDetails, assets: Assets): string {
   const { entry } = d;
   const root = rootOf(depthOf(entry.path));
   const crumbs = [
-    `<li><a href="${root || './'}">algoviz</a></li>`,
+    `<li><a href="${root || './'}">algomotion</a></li>`,
     `<li><a href="${root}#topic-${entry.topic}">${text(d.topicTitle)}</a></li>`,
     ...(d.structure === undefined
       ? []
@@ -179,7 +179,7 @@ ${d.steps.map((s) => `  <li><code>${text(s.name)}</code> <span>× ${s.count}</sp
           .map((e) => `<a href="${attribute(e.link)}">${text(e.label)}</a>`)
           .join(', ')}.</p>`;
   return page({
-    title: `${entry.title} · algoviz`,
+    title: `${entry.title} · algomotion`,
     description: entry.summary,
     root,
     assets,
@@ -198,7 +198,7 @@ ${d.snippets.map(snippetSection).join('\n')}
   });
 }
 
-/** The home page: what algoviz is, one run in every output, the catalogue. */
+/** The home page: what algomotion is, one run in every output, the catalogue. */
 export function homePage(
   groups: readonly TopicGroup[],
   demo: EntryDetails,
@@ -246,7 +246,7 @@ ${[
     0,
   );
   return page({
-    title: 'algoviz: step-by-step algorithms',
+    title: 'algomotion: step-by-step algorithms',
     description:
       'Step-by-step pictures and animations of algorithms and data structures, from one algorithm name and your input, for web pages, Typst, LaTeX, slides and AI conversations.',
     root: '',
@@ -300,19 +300,19 @@ export function themesPage(
       'Web page',
       '<algo-player algorithm="dijkstra" theme="textbook"></algo-player>',
     ],
-    ['Typst', '#algoviz("dijkstra", input, theme: "textbook")'],
-    ['LaTeX', '\\algoviz[theme=textbook]{dijkstra}{…}'],
-    ['Command line', 'algoviz export dijkstra --theme textbook'],
-    ['MCP', 'algoviz_render { "recipe": "dijkstra", "theme": "textbook" }'],
+    ['Typst', '#algomotion("dijkstra", input, theme: "textbook")'],
+    ['LaTeX', '\\algomotion[theme=textbook]{dijkstra}{…}'],
+    ['Command line', 'algomotion export dijkstra --theme textbook'],
+    ['MCP', 'algomotion_render { "recipe": "dijkstra", "theme": "textbook" }'],
     ['Share link', 'play/#v=1&alg=dijkstra&theme=textbook'],
   ];
   return page({
-    title: 'Themes · algoviz',
+    title: 'Themes · algomotion',
     description:
-      'The built-in themes of algoviz, and how to pick one in each output.',
+      'The built-in themes of algomotion, and how to pick one in each output.',
     root: '../',
     assets,
-    body: `<nav class="crumbs" aria-label="Breadcrumb"><ol><li><a href="../">algoviz</a></li><li aria-current="page">Themes</li></ol></nav>
+    body: `<nav class="crumbs" aria-label="Breadcrumb"><ol><li><a href="../">algomotion</a></li><li aria-current="page">Themes</li></ol></nav>
 <h1>Themes</h1>
 <p class="lede">Every output draws in the same built-in themes, and every theme works in every output. <code>light</code> is the default; the player’s <code>auto</code> follows the reader’s light or dark setting, and a pair such as <code>textbook textbook-dark</code> picks a day and a night theme.</p>
 <h2>Picking a theme</h2>
@@ -346,7 +346,7 @@ ${figures
  */
 export function notFoundPage(assets: Assets): string {
   return page({
-    title: 'Not found · algoviz',
+    title: 'Not found · algomotion',
     description: 'This page does not exist.',
     root: '/',
     assets,

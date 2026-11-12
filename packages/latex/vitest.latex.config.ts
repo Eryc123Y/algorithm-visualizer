@@ -1,10 +1,16 @@
 import { defineConfig } from 'vitest/config';
 
 // Resolve workspace packages to their TypeScript sources.
-const conditions = ['@algoviz/source', 'import', 'module', 'node', 'default'];
+const conditions = [
+  '@algomotion/source',
+  'import',
+  'module',
+  'node',
+  'default',
+];
 
 // The package compiled by LaTeX: needs TeX Live 2024 or later with
-// latexmk, and runs the algoviz command (npm run test:latex).
+// latexmk, and runs the algomotion command (npm run test:latex).
 export default defineConfig({
   resolve: { conditions },
   ssr: { resolve: { conditions } },

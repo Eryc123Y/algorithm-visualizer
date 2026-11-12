@@ -9,7 +9,7 @@ import {
   type Scalar,
   type TableAction,
   type TableDecl,
-} from '@algoviz/spec';
+} from '@algomotion/spec';
 
 import type { ReduceError } from '../errors.ts';
 import type { StructureKind } from '../kind.ts';

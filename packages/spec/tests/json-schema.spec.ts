@@ -10,7 +10,7 @@ import {
 } from '../src/index.ts';
 
 describe('visualizationJsonSchema', () => {
-  it('matches the committed schema file (run `npm run generate:schema -w @algoviz/spec`)', () => {
+  it('matches the committed schema file (run `npm run generate:schema -w @algomotion/spec`)', () => {
     const committed: unknown = JSON.parse(
       readFileSync(
         new URL('../schema/visualization.schema.json', import.meta.url),
@@ -68,7 +68,7 @@ describe('visualizationJsonSchema', () => {
 
   it('is identified by the newest protocol version', () => {
     expect(SCHEMA_ID).toBe(
-      `urn:algoviz:schema:visualization:${PROTOCOL_VERSION}`,
+      `urn:algomotion:schema:visualization:${PROTOCOL_VERSION}`,
     );
   });
 

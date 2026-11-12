@@ -2,9 +2,9 @@
  * A correct document for every task, to show that each check accepts a
  * faithful solution. Recipes provide most; the rest are recorded here.
  */
-import * as recipes from '@algoviz/recipes';
-import { Recorder } from '@algoviz/recipes';
-import type { VisualizationInput } from '@algoviz/spec';
+import * as recipes from '@algomotion/recipes';
+import { Recorder } from '@algomotion/recipes';
+import type { VisualizationInput } from '@algomotion/spec';
 
 function twoSum(): VisualizationInput {
   const r = new Recorder({ title: 'Two sum' });

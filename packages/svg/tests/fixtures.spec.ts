@@ -2,7 +2,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 
 import { describe, expect, it } from 'vitest';
 
-import { layoutTrace, loadTrace } from '@algoviz/core';
+import { layoutTrace, loadTrace } from '@algomotion/core';
 
 import { renderSvg } from '../src/index.ts';
 

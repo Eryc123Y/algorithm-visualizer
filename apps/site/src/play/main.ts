@@ -5,9 +5,9 @@
 // First: it configures zod before any package builds a schema.
 import '../no-eval.ts';
 
-import { AlgoPlayer } from '@algoviz/elements';
+import { AlgoPlayer } from '@algomotion/elements';
 // The themes' web fonts, bundled with the page (ADR 0030).
-import '@algoviz/elements/fonts.css';
+import '@algomotion/elements/fonts.css';
 
 import './play.css';
 import { showFragment, type PlayPage } from './show.ts';

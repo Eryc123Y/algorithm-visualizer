@@ -1,5 +1,5 @@
 /**
- * `algoviz-slides` (ADR 0028): a series as one box whose frames show on
+ * `algomotion-slides` (ADR 0028): a series as one box whose frames show on
  * consecutive subslides through the slide framework's own `only`. A
  * stand-in `only` records what each frame gets; decks with polylux 0.4.0
  * and touying 0.8.0 show that each page draws its frame's SVG. Run with
@@ -11,8 +11,8 @@ import { join } from 'node:path';
 
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-import { runAlgorithm } from '@algoviz/recipes';
-import { themeNames } from '@algoviz/svg';
+import { runAlgorithm } from '@algomotion/recipes';
+import { themeNames } from '@algomotion/svg';
 
 import {
   examples,
@@ -66,7 +66,7 @@ const bstInput = { from: [8, 3, 10, 1, 6], key: 3 };
 const BST = '(from: (8, 3, 10, 1, 6), key: 3)';
 
 /**
- * What `algoviz-slides` returns with a stand-in `only` that records the
+ * What `algomotion-slides` returns with a stand-in `only` that records the
  * subslides and the image it gets: the box's children, each a hidden
  * image, a placed frame or another element. A frame sizes itself with
  * `layout` (ADR 0033); the stand-in calls it with the region given.
@@ -98,14 +98,16 @@ const standIn = (region: string) => `
   let parts(r) = if r.func() == box { r.body.children.map(part) } else { (part(r),) };
 `;
 
-/** The parts of `algoviz-slides(…)` laid out in an 800 by 400 pt region. */
+/** The parts of `algomotion-slides(…)` laid out in an 800 by 400 pt region. */
 const slides = (
   args: string,
   region = '(width: 800pt, height: 400pt)',
 ): Part[] =>
-  evaluate(`${standIn(region)} parts(algoviz-slides(only, ${args}))`) as Part[];
+  evaluate(
+    `${standIn(region)} parts(algomotion-slides(only, ${args}))`,
+  ) as Part[];
 
-describe('algoviz-slides with a stand-in only', () => {
+describe('algomotion-slides with a stand-in only', () => {
   it('gives frame k subslide start + k − 1, and the last one its subslide on', () => {
     const parts = slides(`"bst.delete", ${BST}, steps: (0, 1, -1)`);
     const document = documentOf('bst.delete', bstInput);
@@ -122,7 +124,7 @@ describe('algoviz-slides with a stand-in only', () => {
     expect(parts[0]).toMatchObject({ svg: svg[0], alt: null });
   });
 
-  it('starts at start, and takes the steps of algoviz-series', () => {
+  it('starts at start, and takes the steps of algomotion-series', () => {
     const parts = slides(`"bst.delete", ${BST}, steps: "delete-3", start: 3`);
     const document = documentOf('bst.delete', bstInput);
     const svg = exported(document, ['delete-3'], 'light', 'wide');
@@ -199,7 +201,7 @@ describe('algoviz-slides with a stand-in only', () => {
     const doc = join(installed!.root, 'slides-error.typ');
     writeFileSync(
       doc,
-      `#import "${spec}": *\n#algoviz-slides((s, b) => b, "bst.delete", ${BST}, steps: "nope")\n`,
+      `#import "${spec}": *\n#algomotion-slides((s, b) => b, "bst.delete", ${BST}, steps: "nope")\n`,
     );
     const codes = typst([
       'eval',
@@ -207,28 +209,32 @@ describe('algoviz-slides with a stand-in only', () => {
       installed!.root,
       '--in',
       doc,
-      'query(<algoviz-error>).map(m => m.value.map(d => d.code))',
+      'query(<algomotion-error>).map(m => m.value.map(d => d.code))',
     ]);
     expect(JSON.parse(codes.stdout)).toEqual([['NO_MATCH']]);
     expect(
       failure(
-        `algoviz-slides((s, b) => b, "bst.delete", ${BST}, steps: "nope", strict: true)`,
+        `algomotion-slides((s, b) => b, "bst.delete", ${BST}, steps: "nope", strict: true)`,
       ),
-    ).toContain('algoviz-slides: NO_MATCH at $');
+    ).toContain('algomotion-slides: NO_MATCH at $');
   });
 
   it('stops compilation for arguments of the wrong type', () => {
-    expect(failure(`algoviz-slides("bst.delete", ${BST})`)).toContain(
-      "algoviz-slides: the first argument is the slide framework's `only`",
+    expect(failure(`algomotion-slides("bst.delete", ${BST})`)).toContain(
+      "algomotion-slides: the first argument is the slide framework's `only`",
     );
     expect(
-      failure(`algoviz-slides((s, b) => b, "bst.delete", ${BST}, start: 0)`),
+      failure(`algomotion-slides((s, b) => b, "bst.delete", ${BST}, start: 0)`),
     ).toContain('`start` takes a subslide number from 1');
     expect(
-      failure(`algoviz-slides((s, b) => b, "bst.delete", ${BST}, start: "2")`),
+      failure(
+        `algomotion-slides((s, b) => b, "bst.delete", ${BST}, start: "2")`,
+      ),
     ).toContain('`start` takes a subslide number from 1');
     expect(
-      failure(`algoviz-slides((s, b) => b, "bst.delete", ${BST}, steps: 1.5)`),
+      failure(
+        `algomotion-slides((s, b) => b, "bst.delete", ${BST}, steps: 1.5)`,
+      ),
     ).toContain('`steps` takes a frame number');
   });
 });
@@ -236,7 +242,7 @@ describe('algoviz-slides with a stand-in only', () => {
 /** The canvas of a registry example's last frame, in the wide layout. */
 function canvasOf(id: string): { width: number; height: number } {
   return evaluate(
-    `algoviz-figures("${id}", steps: -1, layout: "wide").figures.first()`,
+    `algomotion-figures("${id}", steps: -1, layout: "wide").figures.first()`,
   ) as { width: number; height: number };
 }
 
@@ -267,7 +273,7 @@ function expectFilled(
   );
 }
 
-describe('algoviz-slides sizes (ADR 0033)', () => {
+describe('algomotion-slides sizes (ADR 0033)', () => {
   const ids = ['kruskal', 'dijkstra', 'binary-search'];
   let canvases: Record<string, { width: number; height: number }> = {};
   beforeAll(() => {
@@ -349,11 +355,11 @@ describe('algoviz-slides sizes (ADR 0033)', () => {
 
   it('stops compilation for a size of the wrong type', () => {
     expect(
-      failure(`algoviz-slides((s, b) => b, "binary-search", width: 1fr)`),
-    ).toContain('algoviz-slides: `width` takes a length or a ratio');
+      failure(`algomotion-slides((s, b) => b, "binary-search", width: 1fr)`),
+    ).toContain('algomotion-slides: `width` takes a length or a ratio');
     expect(
-      failure(`algoviz-slides((s, b) => b, "binary-search", height: "big")`),
-    ).toContain('algoviz-slides: `height` takes a length or a ratio');
+      failure(`algomotion-slides((s, b) => b, "binary-search", height: "big")`),
+    ).toContain('algomotion-slides: `height` takes a length or a ratio');
   });
 });
 
@@ -461,12 +467,12 @@ describe('decks', () => {
         join(installed!.root, file),
         [
           preambles[file],
-          `#import "${spec}": algoviz-slides`,
+          `#import "${spec}": algomotion-slides`,
           ...ids.map((id) =>
-            filling[file](`algoviz-slides(only, "${id}", steps: -1)`),
+            filling[file](`algomotion-slides(only, "${id}", steps: -1)`),
           ),
           // A series of two frames, on two subslides.
-          filling[file](`algoviz-slides(only, "dijkstra", steps: (0, -1))`),
+          filling[file](`algomotion-slides(only, "dijkstra", steps: (0, -1))`),
         ].join('\n\n'),
       );
       const regions = JSON.parse(

@@ -16,7 +16,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { exportFigures, type ThemeName } from '@algoviz/svg';
+import { exportFigures, type ThemeName } from '@algomotion/svg';
 
 import { buildEngine } from '../../scripts/engine.ts';
 
@@ -26,7 +26,7 @@ export const examples = here('../../examples');
 const manifest = readFileSync(join(packageDir, 'typst.toml'), 'utf8');
 const field = (name: string) =>
   new RegExp(`^${name}\\s*=\\s*"([^"]+)"`, 'm').exec(manifest)![1]!;
-/** The package as documents import it, `@local/algoviz:0.1.0`. */
+/** The package as documents import it, `@local/algomotion:0.1.0`. */
 export const spec = `@local/${field('name')}:${field('version')}`;
 
 /** The slide frameworks the examples and tests use (ADR 0028). */
@@ -45,7 +45,7 @@ export interface Installed {
 
 /** Installs the package, with a freshly built engine, in a new directory. */
 export async function installPackage(): Promise<Installed> {
-  const tmp = mkdtempSync(join(tmpdir(), 'algoviz-typst-'));
+  const tmp = mkdtempSync(join(tmpdir(), 'algomotion-typst-'));
   const packages = join(tmp, 'packages');
   const root = join(tmp, 'root');
   const installed = join(packages, 'local', field('name'), field('version'));
@@ -80,7 +80,7 @@ export async function installPackage(): Promise<Installed> {
  * while the tests are collected, before any of them is chosen.
  */
 export function frameworksMissing(): string | undefined {
-  const dir = mkdtempSync(join(tmpdir(), 'algoviz-frameworks-'));
+  const dir = mkdtempSync(join(tmpdir(), 'algomotion-frameworks-'));
   try {
     const probe = join(dir, 'probe.typ');
     writeFileSync(probe, FRAMEWORKS.map((f) => `#import "${f}"\n`).join(''));
@@ -100,7 +100,7 @@ export function frameworksMissing(): string | undefined {
 }
 
 /**
- * The SVG `algoviz export` draws for a document, in the layout the Typst
+ * The SVG `algomotion export` draws for a document, in the layout the Typst
  * function draws in by default: narrow for notes, wide for slides (ADR
  * 0029).
  */

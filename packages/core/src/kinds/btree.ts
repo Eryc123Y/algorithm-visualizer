@@ -16,7 +16,7 @@ import {
   type BTreeDecl,
   type Element,
   type Result,
-} from '@algoviz/spec';
+} from '@algomotion/spec';
 
 import type { ReduceError } from '../errors.ts';
 import type { StructureKind } from '../kind.ts';

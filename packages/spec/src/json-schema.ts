@@ -7,7 +7,7 @@ import { z } from 'zod';
 import { PROTOCOL_VERSION } from './version.ts';
 import { VisualizationInput } from './visualization.ts';
 
-export const SCHEMA_ID = `urn:algoviz:schema:visualization:${PROTOCOL_VERSION}`;
+export const SCHEMA_ID = `urn:algomotion:schema:visualization:${PROTOCOL_VERSION}`;
 
 export function visualizationJsonSchema(): Record<string, unknown> {
   return {

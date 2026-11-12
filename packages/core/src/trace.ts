@@ -12,7 +12,7 @@ import {
   type Result,
   type Step,
   type Visualization,
-} from '@algoviz/spec';
+} from '@algomotion/spec';
 
 import type { EngineError, ReduceError } from './errors.ts';
 import {

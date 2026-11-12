@@ -2,7 +2,7 @@
  * Registry of the engine side of every structure kind (ADR 0012): each
  * entry combines a kind's reducer with its layout.
  */
-import type { KindTypeMap, StructureKindName } from '@algoviz/spec';
+import type { KindTypeMap, StructureKindName } from '@algomotion/spec';
 
 import type { KindRuntime } from './kind.ts';
 import { arrayKind } from './kinds/array.ts';

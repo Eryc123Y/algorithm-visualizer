@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import type { VisualizationInput } from '@algoviz/spec';
+import type { VisualizationInput } from '@algomotion/spec';
 
 import { loadTrace, type Trace } from '../src/index.ts';
 

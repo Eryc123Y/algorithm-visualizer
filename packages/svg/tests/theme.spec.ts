@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { defaultFonts, type Scene } from '@algoviz/core';
-import { uniformFont } from '@algoviz/fonts';
+import { defaultFonts, type Scene } from '@algomotion/core';
+import { uniformFont } from '@algomotion/fonts';
 
 import { readFileSync } from 'node:fs';
 

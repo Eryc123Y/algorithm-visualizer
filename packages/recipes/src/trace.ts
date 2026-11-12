@@ -9,7 +9,7 @@ import {
   type StepMeta,
   type StructureDeclInput,
   type StructureKindName,
-} from '@algoviz/spec';
+} from '@algomotion/spec';
 
 import type { Handle, Recorder } from './recorder.ts';
 import type { JoinedCode, Listing } from './snippet.ts';

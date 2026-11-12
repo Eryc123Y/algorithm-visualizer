@@ -1,18 +1,18 @@
-% Slides with algoviz figures. Compile with shell escape:
+% Slides with algomotion figures. Compile with shell escape:
 %   latexmk -pdf -shell-escape slides.tex
 % steps= makes one slide per frame of a series, all in one picture.
 % Inside a frame, write the # of a step as \#, or make the frame fragile.
 % A figure fills the line and three quarters of the frame's height; height=
 % gives another share.
 \documentclass{beamer}
-\usepackage{algoviz}
+\usepackage{algomotion}
 
 \begin{document}
 
 % steps without a value is every frame of the run.
 \begin{frame}{Dijkstra's algorithm, step by step}
   \centering
-  \algovizfile[algorithm=dijkstra, steps]{graph.json}
+  \algomotionfile[algorithm=dijkstra, steps]{graph.json}
 \end{frame}
 
 % A range of steps. After \pause, the series starts on the next slide.
@@ -21,20 +21,20 @@
   \pause
 
   \centering
-  \algovizfile[algorithm=dijkstra, steps=extract\#3..improve\#5,
+  \algomotionfile[algorithm=dijkstra, steps=extract\#3..improve\#5,
     height=0.6\textheight]{graph.json}
 \end{frame}
 
 % step= is one figure, on every slide of its frame.
 \begin{frame}[fragile]{Dijkstra's algorithm: the last relaxation}
   \centering
-  \algovizfile[algorithm=dijkstra, step=relax#6]{graph.json}
+  \algomotionfile[algorithm=dijkstra, step=relax#6]{graph.json}
 \end{frame}
 
 % A section of a run, in the print theme.
 \begin{frame}{Deleting $3$ from a binary search tree}
   \centering
-  \algoviz[steps=delete-3, theme=print]{bst.delete}{
+  \algomotion[steps=delete-3, theme=print]{bst.delete}{
     "from": [8, 3, 10, 1, 6, 4, 7], "key": 3}
 \end{frame}
 

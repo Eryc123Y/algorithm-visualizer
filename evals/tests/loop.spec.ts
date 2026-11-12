@@ -55,15 +55,15 @@ const use = (id: string, name: string, input: unknown) =>
 const text = (t: string) =>
   ({ type: 'text', text: t, citations: null }) as Anthropic.ContentBlock;
 
-const newRun = () => mkdtempSync(join(tmpdir(), 'algoviz-eval-'));
+const newRun = () => mkdtempSync(join(tmpdir(), 'algomotion-eval-'));
 
 describe('attempt with tools', () => {
   it('runs tools until the document is submitted, logging each call', async () => {
     const run = newRun();
     const { create, requests } = scripted([
-      [use('1', 'algoviz_guide', { kinds: ['queue'] })],
-      [use('2', 'algoviz_validate', { document: bad })],
-      [use('3', 'algoviz_validate', { document: good })],
+      [use('1', 'algomotion_guide', { kinds: ['queue'] })],
+      [use('2', 'algomotion_validate', { document: bad })],
+      [use('3', 'algomotion_validate', { document: good })],
       [use('4', 'submit_document', { document: good })],
     ]);
     const result = await attempt(task, run, create, {
@@ -79,9 +79,9 @@ describe('attempt with tools', () => {
       cacheWrite: 0,
     });
     expect(readLog(run, task.id).map((e) => [e.tool, e.ok, e.codes])).toEqual([
-      ['algoviz_guide', true, undefined],
-      ['algoviz_validate', false, ['EMPTY']],
-      ['algoviz_validate', true, undefined],
+      ['algomotion_guide', true, undefined],
+      ['algomotion_validate', false, ['EMPTY']],
+      ['algomotion_validate', true, undefined],
       ['submit', true, undefined],
     ]);
     expect(
@@ -110,12 +110,14 @@ describe('attempt with tools', () => {
 
   it('offers the tools without render and recipes by default', () => {
     expect(apiTools(false).map((t) => t.name)).toEqual([
-      'algoviz_guide',
-      'algoviz_validate',
-      'algoviz_inspect',
+      'algomotion_guide',
+      'algomotion_validate',
+      'algomotion_inspect',
       'submit_document',
     ]);
-    expect(apiTools(true).map((t) => t.name)).toContain('algoviz_run_recipe');
+    expect(apiTools(true).map((t) => t.name)).toContain(
+      'algomotion_run_recipe',
+    );
     for (const t of apiTools(true)) {
       expect(t.input_schema.type).toBe('object');
       expect(t.input_schema).not.toHaveProperty('$schema');
@@ -189,7 +191,7 @@ describe('attempt with tools', () => {
     const run = newRun();
     const { create } = scripted(
       Array.from({ length: 5 }, (_, k) => [
-        use(String(k), 'algoviz_guide', {}),
+        use(String(k), 'algomotion_guide', {}),
       ]),
     );
     const result = await attempt(task, run, create, {

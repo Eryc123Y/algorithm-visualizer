@@ -15,7 +15,7 @@ import {
   type EdgeRole,
   type ElementRole,
   type LayoutFonts,
-} from '@algoviz/core';
+} from '@algomotion/core';
 
 import { answerSheetTheme } from './themes/answer-sheet.ts';
 import { blocksDarkTheme, blocksTheme } from './themes/blocks.ts';

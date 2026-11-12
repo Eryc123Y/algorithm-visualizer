@@ -9,7 +9,7 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 
-import type { Trace, TreeState } from '@algoviz/core';
+import type { Trace, TreeState } from '@algomotion/core';
 
 import { parseForest } from '../src/structures/fibonacci-heap/notation.ts';
 import { RefFibHeap } from './fibonacci-reference.ts';

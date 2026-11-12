@@ -3,8 +3,8 @@
  * written for each output, from the same short input (ADR 0032). Each is
  * the shortest form that output reads, so a reader can copy it as is.
  */
-import { readInput, writeInput } from '@algoviz/recipes';
-import { shareFragment } from '@algoviz/spec';
+import { readInput, writeInput } from '@algomotion/recipes';
+import { shareFragment } from '@algomotion/spec';
 
 export interface Snippet {
   readonly id: 'web' | 'typst' | 'latex' | 'cli' | 'mcp' | 'link';
@@ -144,31 +144,31 @@ export async function snippetsFor(
     {
       id: 'web',
       label: 'On a web page',
-      code: `<script type="module" src="algoviz-player.js"></script>\n${player}`,
-      note: 'The player is one script, the standalone bundle; until it is on a CDN, build it with npm run build -w @algoviz/elements.',
+      code: `<script type="module" src="algomotion-player.js"></script>\n${player}`,
+      note: 'The player is one script, the standalone bundle; until it is on a CDN, build it with npm run build -w @algomotion/elements.',
     },
     {
       id: 'typst',
       label: 'In Typst',
-      code: `#import "@preview/algoviz:0.1.0": algoviz\n#algoviz(${typstString(id)}, ${typstValue(input)})`,
+      code: `#import "@preview/algomotion:0.1.0": algomotion\n#algomotion(${typstString(id)}, ${typstValue(input)})`,
       note: `Draws the last frame; step: "${step}" draws that step instead.`,
     },
     {
       id: 'latex',
       label: 'In LaTeX',
-      code: `\\usepackage{algoviz}\n\\algoviz{${id}}{${latexText(text)}}`,
+      code: `\\usepackage{algomotion}\n\\algomotion{${id}}{${latexText(text)}}`,
       note: `Compile with -shell-escape the first time; [step=${step}] picks the step drawn.`,
     },
     {
       id: 'cli',
       label: 'On the command line',
-      code: `algoviz export ${id} --input ${shellQuote(text)} --out figures`,
+      code: `algomotion export ${id} --input ${shellQuote(text)} --out figures`,
       note: `Writes an SVG of every frame into figures/; --step ${step} writes only that step.`,
     },
     {
       id: 'mcp',
       label: 'To a model, through MCP',
-      code: `algoviz_show ${JSON.stringify({ recipe: id, input }, null, 2)}`,
+      code: `algomotion_show ${JSON.stringify({ recipe: id, input }, null, 2)}`,
       note: `The call a model makes to show this run in the conversation; "frame": "${step}" opens it on that step.`,
     },
     {

@@ -4,7 +4,7 @@
  * order or `{ levelOrder, red }`, its description `after`, the
  * declaration of a state, and the run of one operation.
  */
-import type { TreeDeclInput, TreeNode } from '@algoviz/spec';
+import type { TreeDeclInput, TreeNode } from '@algomotion/spec';
 import { z } from 'zod';
 
 import type { Listing } from '../../snippet.ts';

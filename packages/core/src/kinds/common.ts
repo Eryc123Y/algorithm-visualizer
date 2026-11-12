@@ -1,7 +1,7 @@
 /**
  * Helpers shared by reducers.
  */
-import { LIMITS } from '@algoviz/spec';
+import { LIMITS } from '@algomotion/spec';
 
 import type { ReduceError } from '../errors.ts';
 

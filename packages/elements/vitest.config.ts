@@ -2,7 +2,7 @@ import { defineConfig } from 'vitest/config';
 
 // Resolve workspace packages to their TypeScript sources.
 const conditions = [
-  '@algoviz/source',
+  '@algomotion/source',
   'browser',
   'import',
   'module',

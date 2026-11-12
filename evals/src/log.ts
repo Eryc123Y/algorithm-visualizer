@@ -15,8 +15,8 @@ import {
 } from 'node:fs';
 import { join } from 'node:path';
 
-import { formatErrors } from '@algoviz/spec';
-import { callTool, validate, type ToolResult } from '@algoviz/mcp';
+import { formatErrors } from '@algomotion/spec';
+import { callTool, validate, type ToolResult } from '@algomotion/mcp';
 
 export interface LogEntry {
   readonly tool: string;
@@ -50,6 +50,13 @@ export function appendLog(run: string, task: string, entry: LogEntry): void {
   appendFileSync(logPath(run, task), `${JSON.stringify(entry)}\n`);
 }
 
+/**
+ * The tools' prefix before ADR 0044 renamed the project. Runs recorded
+ * then, such as those in evals/results, keep it, and are read with the
+ * tools' current names.
+ */
+const OLD_PREFIX = 'algoviz_';
+
 export function readLog(run: string, task: string): LogEntry[] {
   let text: string;
   try {
@@ -60,7 +67,15 @@ export function readLog(run: string, task: string): LogEntry[] {
   return text
     .split('\n')
     .filter((line) => line.trim() !== '')
-    .map((line) => JSON.parse(line) as LogEntry);
+    .map((line) => JSON.parse(line) as LogEntry)
+    .map((entry) =>
+      entry.tool.startsWith(OLD_PREFIX)
+        ? {
+            ...entry,
+            tool: `algomotion_${entry.tool.slice(OLD_PREFIX.length)}`,
+          }
+        : entry,
+    );
 }
 
 export function writeMeta(run: string, meta: RunMeta): void {
@@ -77,7 +92,7 @@ export function loggedCall(
 ): ToolResult {
   const result = callTool(tool, args);
   let entry: LogEntry = { tool, ok: !result.isError };
-  if (tool === 'algoviz_validate' && result.isError) {
+  if (tool === 'algomotion_validate' && result.isError) {
     const report = validate(args['document']);
     if (!report.valid)
       entry = {

@@ -16,7 +16,7 @@
  * text and the pointers, shifted so that pattern element 0 sits under
  * text position `shift`; the pointers then point at a column of both.
  */
-import type { ArrayDecl } from '@algoviz/spec';
+import type { ArrayDecl } from '@algomotion/spec';
 
 import type { Block, LayoutInput } from '../kind.ts';
 import type { ArrayPattern, ArrayState } from '../kinds/array.ts';

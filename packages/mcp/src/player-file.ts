@@ -13,7 +13,7 @@ export function readPlayerFile(): string {
     return readFileSync(file, 'utf8');
   } catch {
     throw new Error(
-      `The player page is missing at ${file.pathname}; build it with "npm run build -w @algoviz/mcp".`,
+      `The player page is missing at ${file.pathname}; build it with "npm run build -w @algomotion/mcp".`,
     );
   }
 }

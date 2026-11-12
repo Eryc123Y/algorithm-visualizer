@@ -2,7 +2,7 @@
  * Grades every task of a run directory and writes summary.json and
  * report.md next to the logs.
  *
- *   node --conditions=@algoviz/source evals/src/report.ts <run-dir> [<run-dir> …]
+ *   node --conditions=@algomotion/source evals/src/report.ts <run-dir> [<run-dir> …]
  */
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -49,12 +49,12 @@ function summarizeTask(run: string, task: EvalTask): TaskSummary {
   const doc = existsSync(path)
     ? (JSON.parse(readFileSync(path, 'utf8')) as unknown)
     : undefined;
-  const validations = log.filter((e) => e.tool === 'algoviz_validate');
+  const validations = log.filter((e) => e.tool === 'algomotion_validate');
   const firstOk = validations.findIndex((e) => e.ok);
   const failed = validations.filter((e) => !e.ok);
   return {
     ...grade(task, doc),
-    calls: log.filter((e) => e.tool.startsWith('algoviz_')).length,
+    calls: log.filter((e) => e.tool.startsWith('algomotion_')).length,
     submissions: log.filter((e) => e.tool === 'submit').length,
     validations: validations.length,
     firstValid: validations.length === 0 ? null : validations[0]!.ok,
@@ -83,7 +83,7 @@ export function summarizeRun(run: string): RunSummary {
   const rows = attempted.map((t) => summarizeTask(run, t));
   const validated = rows.filter((r) => r.firstValid !== null);
   const failedEntries: LogEntry[] = attempted.flatMap((t) =>
-    readLog(run, t.id).filter((e) => e.tool === 'algoviz_validate' && !e.ok),
+    readLog(run, t.id).filter((e) => e.tool === 'algomotion_validate' && !e.ok),
   );
   const examples: Record<string, string[]> = {};
   for (const entry of failedEntries)

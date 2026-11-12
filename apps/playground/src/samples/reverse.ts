@@ -1,7 +1,7 @@
 /**
  * Records an in-place array reversal with two pointers.
  */
-import type { VisualizationInput } from '@algoviz/spec';
+import type { VisualizationInput } from '@algomotion/spec';
 
 type Step = VisualizationInput['steps'][number];
 

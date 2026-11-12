@@ -1,5 +1,5 @@
 /**
- * Builds the page algoviz_show opens into one self-contained HTML file,
+ * Builds the page algomotion_show opens into one self-contained HTML file,
  * ui/player.html: MCP Apps hosts serve it from a sandbox with no other
  * files, so the scripts are inlined.
  */
@@ -9,7 +9,7 @@ import { defineConfig, type Plugin } from 'vite';
 
 /** Moves the built script chunks into the HTML file. */
 const inlineScripts = (): Plugin => ({
-  name: 'algoviz:inline-scripts',
+  name: 'algomotion:inline-scripts',
   enforce: 'post',
   generateBundle(_, bundle) {
     for (const html of Object.values(bundle)) {
@@ -39,10 +39,16 @@ export default defineConfig({
   root: fileURLToPath(new URL('app', import.meta.url)),
   base: './',
   resolve: {
-    conditions: ['@algoviz/source', 'browser', 'import', 'module', 'default'],
+    conditions: [
+      '@algomotion/source',
+      'browser',
+      'import',
+      'module',
+      'default',
+    ],
     // The page never runs an algorithm: the server does.
     alias: {
-      '@algoviz/recipes': fileURLToPath(
+      '@algomotion/recipes': fileURLToPath(
         new URL('app/no-recipes.ts', import.meta.url),
       ),
     },

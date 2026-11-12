@@ -7,13 +7,13 @@ import {
   loadTrace,
   type Scene,
   type SceneItem,
-} from '@algoviz/core';
+} from '@algomotion/core';
 import {
   createTheme,
   lightTheme,
   type SvgTheme,
   type ThemeName,
-} from '@algoviz/svg';
+} from '@algomotion/svg';
 
 import { renderTikz, TIKZ_FORMAT } from '../src/index.ts';
 
@@ -33,17 +33,17 @@ function drawing(tikz: string): string[] {
 /** The colour definitions of a figure, by name. */
 function colours(tikz: string): Map<string, string> {
   return new Map(
-    [...tikz.matchAll(/\\algoviz@color\{(\d+)\}\{([0-9A-F]{6})\}%/g)].map(
-      (m) => [`algoviz@c${m[1]}`, m[2]!],
+    [...tikz.matchAll(/\\algomotion@color\{(\d+)\}\{([0-9A-F]{6})\}%/g)].map(
+      (m) => [`algomotion@c${m[1]}`, m[2]!],
     ),
   );
 }
 
-/** The arguments of each `\algoviz@text`. */
+/** The arguments of each `\algomotion@text`. */
 function texts(tikz: string) {
   return [
     ...tikz.matchAll(
-      /\\algoviz@text\{([^}]*)\}\{([lcr])\}\{([^}]*)\}\{([^}]*)\}\{(value|label)\}\{([^}]*)\}\{([^}]*)\}\{(.*)\}$/gm,
+      /\\algomotion@text\{([^}]*)\}\{([lcr])\}\{([^}]*)\}\{([^}]*)\}\{(value|label)\}\{([^}]*)\}\{([^}]*)\}\{(.*)\}$/gm,
     ),
   ].map((m) => ({
     at: m[1],
@@ -88,14 +88,14 @@ const tikzOf = (scene: Scene, options: Parameters<typeof renderTikz>[1] = {}) =>
   renderTikz(scene, { theme: shadowed, ...options });
 
 describe('renderTikz', () => {
-  it('calls \\algoviz@figure with the format, the canvas and the drawing', () => {
+  it('calls \\algomotion@figure with the format, the canvas and the drawing', () => {
     const tikz = renderTikz(sceneOf(), { comments: ['Frame 3, relax#2.'] });
     expect(tikz.split('\n').slice(0, 6)).toEqual([
-      `% algoviz figure for LaTeX, format ${TIKZ_FORMAT}: Test`,
+      `% algomotion figure for LaTeX, format ${TIKZ_FORMAT}: Test`,
       '% Frame 3, relax#2.',
-      '% Draw it with \\algovizinput from the algoviz LaTeX package.',
-      `\\algoviz@figure{${TIKZ_FORMAT}}{300}{200}{%`,
-      '\\algoviz@fonts{normal}{sf}%',
+      '% Draw it with \\algomotioninput from the algomotion LaTeX package.',
+      `\\algomotion@figure{${TIKZ_FORMAT}}{300}{200}{%`,
+      '\\algomotion@fonts{normal}{sf}%',
       '}{%',
     ]);
     expect(TIKZ_FORMAT).toBe(2);
@@ -104,7 +104,7 @@ describe('renderTikz', () => {
 
   it('names the theme’s TeX families for values and labels (ADR 0030)', () => {
     const fonts = (theme: ThemeName | SvgTheme) =>
-      /^\\algoviz@fonts\{(\w+)\}\{(\w+)\}%$/m
+      /^\\algomotion@fonts\{(\w+)\}\{(\w+)\}%$/m
         .exec(renderTikz(sceneOf(), { theme }))!
         .slice(1);
     expect(fonts('turbo-c')).toEqual(['tt', 'tt']);
@@ -129,12 +129,12 @@ describe('renderTikz', () => {
     expect(rest).toEqual([]);
     // The shadow is translucent, 2 units below the cell.
     expect(shadow).toMatch(
-      /^\\path\[fill=(algoviz@c\d+),fill opacity=0\.1,rounded corners=8\\algoviz@u\] \(20,42\) rectangle \+\+\(52,52\);$/,
+      /^\\path\[fill=(algomotion@c\d+),fill opacity=0\.1,rounded corners=8\\algomotion@u\] \(20,42\) rectangle \+\+\(52,52\);$/,
     );
-    expect(c.get(/fill=(algoviz@c\d+)/.exec(shadow!)![1]!)).toBe('142D26');
+    expect(c.get(/fill=(algomotion@c\d+)/.exec(shadow!)![1]!)).toBe('142D26');
     // The body is inset by half its border, so the border stays inside.
     expect(body).toBe(
-      `\\path[fill=${name(c, 'FFFFFF')},draw=${name(c, 'C9D3CF')},line width=1.25\\algoviz@u,rounded corners=8\\algoviz@u] (20.63,40.63) rectangle ++(50.75,50.75);`,
+      `\\path[fill=${name(c, 'FFFFFF')},draw=${name(c, 'C9D3CF')},line width=1.25\\algomotion@u,rounded corners=8\\algomotion@u] (20.63,40.63) rectangle ++(50.75,50.75);`,
     );
     // Centred on the baseline, 0.35 em below the middle, with room for
     // the cell's width less a margin on each side.
@@ -154,16 +154,18 @@ describe('renderTikz', () => {
 
   it('marks roles with the theme’s borders, dashes and check marks', () => {
     const compare = drawing(tikzOf(sceneOf(box({ role: 'compare' }))));
-    expect(compare[1]).toContain('line width=2.5\\algoviz@u');
+    expect(compare[1]).toContain('line width=2.5\\algomotion@u');
     const swap = drawing(tikzOf(sceneOf(box({ role: 'swap' }))));
-    expect(swap[1]).toContain('dash pattern=on 5\\algoviz@u off 3\\algoviz@u');
+    expect(swap[1]).toContain(
+      'dash pattern=on 5\\algomotion@u off 3\\algomotion@u',
+    );
     const visited = drawing(tikzOf(sceneOf(box({ role: 'visited' }))));
     expect(visited[1]).toContain(
-      'dash pattern=on 2\\algoviz@u off 2.5\\algoviz@u',
+      'dash pattern=on 2\\algomotion@u off 2.5\\algomotion@u',
     );
     const settled = drawing(tikzOf(sceneOf(box({ role: 'settled' }))));
     expect(settled[2]).toMatch(
-      /^\\path\[draw=algoviz@c\d+,line width=1\.75\\algoviz@u,line cap=round,line join=round\] \(57,50\) -- \(60\.5,53\.5\) -- \(66\.5,46\.5\);$/,
+      /^\\path\[draw=algomotion@c\d+,line width=1\.75\\algomotion@u,line cap=round,line join=round\] \(57,50\) -- \(60\.5,53\.5\) -- \(66\.5,46\.5\);$/,
     );
   });
 
@@ -197,7 +199,7 @@ describe('renderTikz', () => {
     );
     const lines = drawing(tikz);
     expect(lines[1]).toMatch(
-      /^\\path\[.*\] \(100,80\) circle\[radius=19\.38\\algoviz@u\];$/,
+      /^\\path\[.*\] \(100,80\) circle\[radius=19\.38\\algomotion@u\];$/,
     );
     const [value, label, wide] = texts(tikz);
     expect(value).toMatchObject({ at: '100,87', anchor: 'c', room: 28 });
@@ -207,10 +209,10 @@ describe('renderTikz', () => {
       room: 0,
       text: '\\ensuremath{\\infty}',
     });
-    expect(label!.halo).toMatch(/^algoviz@c\d+,1\.5\\algoviz@u$/);
+    expect(label!.halo).toMatch(/^algomotion@c\d+,1\.5\\algomotion@u$/);
     expect(
       lines.some((l) =>
-        /rounded corners=19\.13\\algoviz@u\] \(165\.88,60\.88\) rectangle \+\+\(68\.25,38\.25\)/.test(
+        /rounded corners=19\.13\\algomotion@u\] \(165\.88,60\.88\) rectangle \+\+\(68\.25,38\.25\)/.test(
           l,
         ),
       ),
@@ -236,13 +238,13 @@ describe('renderTikz', () => {
     const [line, head, label] = drawing(tikz);
     // The line stops where the head (8 units) begins.
     expect(line).toMatch(
-      /^\\path\[draw=algoviz@c\d+,line width=1\.75\\algoviz@u\] \(10,10\) -- \(102,10\);$/,
+      /^\\path\[draw=algomotion@c\d+,line width=1\.75\\algomotion@u\] \(10,10\) -- \(102,10\);$/,
     );
     expect(head).toMatch(
-      /^\\path\[fill=algoviz@c\d+\] \(110,10\) -- \(102,5\.5\) -- \(102,14\.5\) -- cycle;$/,
+      /^\\path\[fill=algomotion@c\d+\] \(110,10\) -- \(102,5\.5\) -- \(102,14\.5\) -- cycle;$/,
     );
     expect(texts(label!)[0]).toMatchObject({ anchor: 'c', room: 0, size: 12 });
-    expect(texts(label!)[0]!.halo).toMatch(/,1\.75\\algoviz@u$/);
+    expect(texts(label!)[0]!.halo).toMatch(/,1\.75\\algomotion@u$/);
   });
 
   it('turns rotated shapes the way SVG does', () => {
@@ -281,9 +283,9 @@ describe('renderTikz', () => {
         }),
       ),
     );
-    const colour = /draw=(algoviz@c\d+)/.exec(loop[0]!)![1]!;
+    const colour = /draw=(algomotion@c\d+)/.exec(loop[0]!)![1]!;
     expect(loop[0]).toBe(
-      `\\path[draw=${colour},line width=1.25\\algoviz@u,draw opacity=0.6] (100,93) .. controls (134,78) and (134,122) .. (100,107);`,
+      `\\path[draw=${colour},line width=1.25\\algomotion@u,draw opacity=0.6] (100,93) .. controls (134,78) and (134,122) .. (100,107);`,
     );
   });
 
@@ -367,22 +369,22 @@ describe('renderTikz', () => {
     );
     const lines = drawing(tikz);
     expect(lines[0]).toMatch(
-      /rounded corners=9\\algoviz@u\] \(35,41\) rectangle \+\+\(30,18\);$/,
+      /rounded corners=9\\algomotion@u\] \(35,41\) rectangle \+\+\(30,18\);$/,
     );
     expect(texts(tikz)[0]).toMatchObject({ at: '50,54.2', room: 22 });
     expect(lines[2]).toMatch(
-      /line width=1\.75\\algoviz@u,line cap=round\] \(50,59\) -- \(50,74\);$/,
+      /line width=1\.75\\algomotion@u,line cap=round\] \(50,59\) -- \(50,74\);$/,
     );
     expect(lines[3]).toMatch(
-      /^\\path\[fill=(algoviz@c\d+),draw=\1,line width=1\\algoviz@u,line join=round\] \(50,80\) -- \(46,74\) -- \(54,74\) -- cycle;$/,
+      /^\\path\[fill=(algomotion@c\d+),draw=\1,line width=1\\algomotion@u,line join=round\] \(50,80\) -- \(46,74\) -- \(54,74\) -- cycle;$/,
     );
   });
 
   it('defines each colour once, in order of first use', () => {
     const tikz = renderTikz(sceneOf(box(), box({ key: 'a/1', x: 80 })));
     const defined = [...colours(tikz).keys()];
-    expect(defined).toEqual(defined.map((_, k) => `algoviz@c${k + 1}`));
-    const used = new Set(tikz.match(/algoviz@c\d+/g));
+    expect(defined).toEqual(defined.map((_, k) => `algomotion@c${k + 1}`));
+    const used = new Set(tikz.match(/algomotion@c\d+/g));
     expect([...used].sort()).toEqual([...defined].sort());
   });
 
@@ -396,9 +398,9 @@ describe('renderTikz', () => {
       theme: createTheme(lightTheme, { background: '#fafafa' }),
     });
     expect(drawing(filled)[0]).toMatch(
-      /^\\path\[fill=algoviz@c1\] \(0,0\) rectangle \(300,200\);$/,
+      /^\\path\[fill=algomotion@c1\] \(0,0\) rectangle \(300,200\);$/,
     );
-    expect(colours(filled).get('algoviz@c1')).toBe('FAFAFA');
+    expect(colours(filled).get('algomotion@c1')).toBe('FAFAFA');
   });
 
   it('escapes text', () => {

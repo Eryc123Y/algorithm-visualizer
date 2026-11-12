@@ -6,7 +6,7 @@
  * in insertion order; `after` lists its keys in level order, which rebuild
  * the same tree without a rotation. Each node is annotated with its height.
  */
-import type { TreeNode } from '@algoviz/spec';
+import type { TreeNode } from '@algomotion/spec';
 import { z } from 'zod';
 
 import type { Handle } from '../../recorder.ts';

@@ -5,7 +5,7 @@
  * is the cheapest of its three neighbours above and to the left.
  * EDIT-PATH then walks back from the corner and settles one cheapest way.
  */
-import type { Cell } from '@algoviz/spec';
+import type { Cell } from '@algomotion/spec';
 
 import { defineAlgorithm } from '../../algorithm.ts';
 import { TwoStrings } from './strings.ts';

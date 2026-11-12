@@ -18,7 +18,7 @@ const page = (path: string) => fileURLToPath(new URL(path, import.meta.url));
  * needs its own scripts and socket), and every header in `_headers`.
  */
 const securityHeaders = (): Plugin => ({
-  name: 'algoviz:security-headers',
+  name: 'algomotion:security-headers',
   apply: 'build',
   transformIndexHtml(html, { filename }) {
     return withPolicy(html, filename);
@@ -36,7 +36,7 @@ export default defineConfig({
   base: './',
   resolve: {
     // Workspace packages resolve to their TypeScript sources.
-    conditions: ['@algoviz/source', ...defaultClientConditions],
+    conditions: ['@algomotion/source', ...defaultClientConditions],
   },
   plugins: [securityHeaders()],
   build: {

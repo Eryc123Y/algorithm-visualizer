@@ -46,17 +46,17 @@ describe('the Worker in workerd', () => {
   it('serves the SDK client: tools, a call, the player page and the guide', async () => {
     const client = new Client({ name: 'local-test', version: '0' });
     await client.connect(new StreamableHTTPClientTransport(mcp()));
-    expect(client.getServerVersion()?.name).toBe('algoviz');
+    expect(client.getServerVersion()?.name).toBe('algomotion');
     const { tools } = await client.listTools();
     expect(tools.map((t) => t.name)).toEqual(
       expect.arrayContaining([
-        'algoviz_validate',
-        'algoviz_render',
-        'algoviz_show',
+        'algomotion_validate',
+        'algomotion_render',
+        'algomotion_show',
       ]),
     );
     const rendered = await client.callTool({
-      name: 'algoviz_render',
+      name: 'algomotion_render',
       arguments: {
         recipe: 'dijkstra',
         input: 'A-B 4, B-C 1, A-C 7',
@@ -66,14 +66,16 @@ describe('the Worker in workerd', () => {
     expect(rendered.isError).toBeFalsy();
     expect(JSON.stringify(rendered)).toContain('<svg');
     const shown = await client.callTool({
-      name: 'algoviz_show',
+      name: 'algomotion_show',
       arguments: { recipe: 'stack' },
     });
     expect(shown.structuredContent).toMatchObject({ frame: 0 });
-    const page = await client.readResource({ uri: 'ui://algoviz/player.html' });
+    const page = await client.readResource({
+      uri: 'ui://algomotion/player.html',
+    });
     expect(JSON.stringify(page.contents[0])).toContain('<html');
     const guide = await client.callTool({
-      name: 'algoviz_guide',
+      name: 'algomotion_guide',
       arguments: { kinds: ['graph'] },
     });
     expect(JSON.stringify(guide)).toContain('## graph');
@@ -130,7 +132,7 @@ describe('share links in workerd (ADR 0040)', () => {
       config: fileURLToPath(new URL('../../wrangler.jsonc', import.meta.url)),
       build: { bundle: false },
       bindings: {
-        ALGOVIZ_SHARE_URL: {
+        ALGOMOTION_SHARE_URL: {
           type: 'plain_text',
           value: 'https://example.org/play/',
         },
@@ -156,14 +158,14 @@ describe('share links in workerd (ADR 0040)', () => {
     const texts = (r: Awaited<ReturnType<Client['callTool']>>) =>
       (r.content as { text: string }[]).map((c) => c.text);
     const recipe = await client.callTool({
-      name: 'algoviz_show',
+      name: 'algomotion_show',
       arguments: { recipe: 'bfs', input: 'A-B, B-C' },
     });
     expect(texts(recipe)[1]).toMatch(
       /: https:\/\/example\.org\/play\/#v=1&alg=bfs&in=A-B%2C%20B-C$/,
     );
     const document = await client.callTool({
-      name: 'algoviz_show',
+      name: 'algomotion_show',
       arguments: {
         document: {
           version: '1.0',

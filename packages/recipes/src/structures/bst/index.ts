@@ -6,7 +6,7 @@
  * children copies its successor (as in CLRS) or, on request, its
  * predecessor. The code is in pseudocode and Python (ADR 0017).
  */
-import type { TreeNode } from '@algoviz/spec';
+import type { TreeNode } from '@algomotion/spec';
 import { z } from 'zod';
 
 import type { Handle } from '../../recorder.ts';

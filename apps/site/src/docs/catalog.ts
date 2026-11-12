@@ -9,7 +9,7 @@ import {
   TOPICS,
   type Algorithm,
   type Topic,
-} from '@algoviz/recipes';
+} from '@algomotion/recipes';
 
 /** One module's page. */
 export interface Entry {

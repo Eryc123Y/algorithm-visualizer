@@ -17,7 +17,7 @@
  * Cells are keyed by key id, so a key slides between nodes; a node with
  * no keys is one empty cell. Pointers sit left of their node, notes right.
  */
-import type { BTreeDecl } from '@algoviz/spec';
+import type { BTreeDecl } from '@algomotion/spec';
 
 import type { Block, LayoutInput } from '../kind.ts';
 import type { BTreeNodeState, BTreeState } from '../kinds/btree.ts';

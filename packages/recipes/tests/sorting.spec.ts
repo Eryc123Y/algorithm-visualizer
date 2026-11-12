@@ -5,8 +5,8 @@
  */
 import { describe, expect, it } from 'vitest';
 
-import type { Trace } from '@algoviz/core';
-import type { VisualizationInput } from '@algoviz/spec';
+import type { Trace } from '@algomotion/core';
+import type { VisualizationInput } from '@algomotion/spec';
 
 import { randomInts, replay, runError, runOk, stateOf } from './helpers.ts';
 

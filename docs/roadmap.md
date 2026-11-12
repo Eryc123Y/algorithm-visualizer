@@ -16,7 +16,7 @@ Everything later builds on these, so they come first. The ADRs are accepted (#13
 - [x] **0.2 Step names and sections** [ADR 0020](adr/0020-step-names-and-sections.md) (protocol `0.2`). Split in two PRs: the spec, core selectors, recipes and MCP (#15), then the player (#16).
   - `meta.id` and `sections` in the spec, with validation.
   - Their entries in the protocol feature table (`PROTOCOL_FEATURES`), and a parser check that a document's `version` is not older than the features it uses (from the review of #14).
-  - Selectors in core, used by the player's `frame` attribute and by `algoviz_inspect` and `algoviz_render`.
+  - Selectors in core, used by the player's `frame` attribute and by `algomotion_inspect` and `algomotion_render`.
   - Section marks on the player's timeline, and the guide and fixtures.
 - [x] **0.3 Sources in two languages** [ADR 0017](adr/0017-multi-language-source.md) (protocol `0.3`). Split in two PRs: the spec, the highlighter, recording, `ops.bst` and `ops.heap` in pseudocode, MCP and the guide (#17), then the player's language switcher (#18).
   - `sources` with anchors, and `meta.at`, with validation.
@@ -25,7 +25,7 @@ Everything later builds on these, so they come first. The ADRs are accepted (#13
   - The guide and fixtures.
 - [x] **0.4 Algorithm registry** [ADR 0019](adr/0019-algorithm-registry.md), refined by [ADR 0022](adr/0022-registry-details.md) (#19). Split in three PRs:
   - `Algorithm<I>`, `Trace` (merging `Recorder` and `Tape`), `defineStructure`, `runModule`, `runAlgorithm` and the generic test suite, proven by moving `ops.bst` and `ops.heap` onto `defineStructure` as `bst`, `min-heap` and `max-heap` (#20).
-  - MCP, the CLI (`algoviz run <id> <input>`) and the playground read the registry; recipes not migrated yet stay reachable through a marked legacy path (#21).
+  - MCP, the CLI (`algomotion run <id> <input>`) and the playground read the registry; recipes not migrated yet stay reachable through a marked legacy path (#21).
   - The seven sorting algorithms as modules in both languages, following the CLRS procedures; their old recipe functions go (#22).
 - [x] **0.5 Migrate the remaining recipes** into the registry, in both languages, with ids, inputs and procedures from [ADR 0023](adr/0023-remaining-modules.md): the other 22 recipes, with `bstInsert` and `binaryHeap` as examples of the `bst` and `min-heap` sequences. Then the legacy path is removed: the old recipe functions, `packages/mcp/src/legacy-recipes.ts`, `apps/playground/src/samples/legacy.ts` and the CLI's `recipe` command. ADR 0023 (#23), one PR per topic, then one for the removal:
   - searching, lists and hashing: `binary-search`, `reverse-linked-list`, `balanced-brackets`, `hash-chaining` and `linear-probing` (#24).
@@ -37,23 +37,23 @@ Everything later builds on these, so they come first. The ADRs are accepted (#13
 ## Phase 1: static output and packages
 
 - [x] **1.1 Text measurement and fonts** _ADR_ [ADR 0024](adr/0024-text-measurement-and-fonts.md). Layout measures text with real glyph widths from a bundled font instead of an average character width (`charWidthRatio`). SVG output embeds or outlines that font, so figures look the same in any document. ADR 0024 (#29), then three PRs:
-  - `@algoviz/fonts`: the generator, metrics and outlines of JetBrains Mono SemiBold and Inter SemiBold, and `textWidth` (#30).
+  - `@algomotion/fonts`: the generator, metrics and outlines of JetBrains Mono SemiBold and Inter SemiBold, and `textWidth` (#30).
   - layout measures with the theme's font metrics; painters place labels with them; fixtures with wide values (#31).
   - standalone SVG draws text as outlines; the MCP render tool keeps text (#32).
-- [x] **1.2 `algoviz export`** _ADR_ [ADR 0025](adr/0025-exporting-figures.md) (#34), then `selectSeries`, `exportFigures` and the command (#35).
+- [x] **1.2 `algomotion export`** _ADR_ [ADR 0025](adr/0025-exporting-figures.md) (#34), then `selectSeries`, `exportFigures` and the command (#35).
   - Select steps by "section / step id", by a range, or all of them.
   - Write SVG files.
   - A series shares one set of layout metrics (`layoutState` already takes metrics), so all its figures have one scale.
   - Also run a registry algorithm on an input directly, without writing a document first.
 - [x] **1.3 Typst package** _ADR_ [ADR 0026](adr/0026-typst-package.md). A prototype measured QuickJS-ng and Boa in a Typst WebAssembly plugin; ADR 0026 records the numbers and picks QuickJS-ng (#36). Then two PRs:
-  - the plugin: QuickJS-ng in a Rust crate, the engine entry with its cache, `prepareFigures` in `@algoviz/svg`, the builds of `plugin.wasm` and `engine.bc`, and the Node tests (#37).
-  - the package: `#algoviz("dijkstra", (graph: …, source: "A"), step: "relax#3")` or `#algoviz(json("doc.json"), step: …)` returning the SVG as an image, `algoviz-series`, themes, errors in the document, `typst.toml`, the README with examples, and the Typst tests (#38).
-- [x] **1.4 LaTeX package** _ADR_ [ADR 0027](adr/0027-latex-package.md). The package calls the `algoviz` command through shell escape (as `minted` does) and caches what it writes. The command writes TikZ from a new painter, so text uses the document's fonts and Beamer overlays fit inside one picture. A standalone `algoviz`, the CLI in QuickJS-ng, spares users from installing Node.js; ADR 0027 measures it against Node SEA and bun. ADR 0027 (#39), then three PRs:
-  - the TikZ painter: `@algoviz/tikz` on the SVG painter's shapes, and `prepareScenes` in `@algoviz/svg` (#40).
-  - the command: `algoviz export --format tikz`, `--input-hex` and `--error-file`, and the standalone executable with its build script and tests (#41).
-  - the package: `\algoviz[step=relax#3]{dijkstra}{<input>}`, `\algovizfile` for a document or an input file, `\algovizinput`, the cache, errors in the document, the README with examples, and compile tests with pdfLaTeX, LuaLaTeX and XeLaTeX (#42).
+  - the plugin: QuickJS-ng in a Rust crate, the engine entry with its cache, `prepareFigures` in `@algomotion/svg`, the builds of `plugin.wasm` and `engine.bc`, and the Node tests (#37).
+  - the package: `#algomotion("dijkstra", (graph: …, source: "A"), step: "relax#3")` or `#algomotion(json("doc.json"), step: …)` returning the SVG as an image, `algomotion-series`, themes, errors in the document, `typst.toml`, the README with examples, and the Typst tests (#38).
+- [x] **1.4 LaTeX package** _ADR_ [ADR 0027](adr/0027-latex-package.md). The package calls the `algomotion` command through shell escape (as `minted` does) and caches what it writes. The command writes TikZ from a new painter, so text uses the document's fonts and Beamer overlays fit inside one picture. A standalone `algomotion`, the CLI in QuickJS-ng, spares users from installing Node.js; ADR 0027 measures it against Node SEA and bun. ADR 0027 (#39), then three PRs:
+  - the TikZ painter: `@algomotion/tikz` on the SVG painter's shapes, and `prepareScenes` in `@algomotion/svg` (#40).
+  - the command: `algomotion export --format tikz`, `--input-hex` and `--error-file`, and the standalone executable with its build script and tests (#41).
+  - the package: `\algomotion[step=relax#3]{dijkstra}{<input>}`, `\algomotionfile` for a document or an input file, `\algomotioninput`, the cache, errors in the document, the README with examples, and compile tests with pdfLaTeX, LuaLaTeX and XeLaTeX (#42).
 - [x] **1.5 Slides** _ADR_ [ADR 0028](adr/0028-slides.md) (#43). One overlay per step: `\only<n>` in Beamer, and the equivalent in Typst slide frameworks (polylux, touying). The overlays come from the same step selection as 1.2. ADR 0028, then one PR (#44):
-  - `algoviz export --one-file`, which writes a series into one TikZ file; the LaTeX keys `steps` and `start`, which draw a series as Beamer overlays in one picture; `algoviz-slides` in Typst, through polylux's or touying's `only`; examples whose prose matches their steps; compile tests with pdfLaTeX, LuaLaTeX, polylux 0.4.0 and touying 0.8.0.
+  - `algomotion export --one-file`, which writes a series into one TikZ file; the LaTeX keys `steps` and `start`, which draw a series as Beamer overlays in one picture; `algomotion-slides` in Typst, through polylux's or touying's `only`; examples whose prose matches their steps; compile tests with pdfLaTeX, LuaLaTeX, polylux 0.4.0 and touying 0.8.0.
 - [x] **1.8 Auxiliary structures** _ADR_ [ADR 0029](adr/0029-auxiliary-structures.md) (#46) (added 2026-11-08 at the owner's request; it comes before 1.6, so the themes cover its kinds and placements). Figures show the structures an algorithm keeps besides its main one, in a sensible place next to it, not the main structure alone. ADR 0029 (protocol `0.4`), then three PRs:
   - placement: `place: "side"` on any structure, and the `wide` and `narrow` layouts in core, the CLI, the player and the Typst and LaTeX packages (#47);
   - the `priorityQueue` kind and the `heap` view of `array` (#48);
@@ -78,8 +78,8 @@ Everything later builds on these, so they come first. The ADRs are accepted (#13
   - in the heap view, the index under a node sits on its child edges;
   - pointer rows reserved for a whole trace leave a blank band in frames without pointers, such as the last frame of insertion sort.
 - [x] **1.9 Algorithm and input everywhere** _ADR_ [ADR 0032](adr/0032-algorithm-and-input.md) (#60) (added 2026-11-08 after the owner set the goal of the lowest cost of use, now in the requirements' purpose). People and models give an algorithm and its input, not a document, in every output. ADR 0032, then three PRs:
-  - notations in the input schemas (lists, graphs as edge lists `A-B 4, B-C 2`, operation lists `insert 4, delete 3`), an input given as its main field alone, the first example when there is no input, one rule for input written as text, errors that quote the token, and recipes by name in `algoviz_show`, `algoviz_render` and `algoviz_inspect` (#61);
-  - the player's `algorithm` and `input`, with the registry as a second file of the standalone bundle, `algoviz-recipes.js`, loaded on demand (#62);
+  - notations in the input schemas (lists, graphs as edge lists `A-B 4, B-C 2`, operation lists `insert 4, delete 3`), an input given as its main field alone, the first example when there is no input, one rule for input written as text, errors that quote the token, and recipes by name in `algomotion_show`, `algomotion_render` and `algomotion_inspect` (#61);
+  - the player's `algorithm` and `input`, with the registry as a second file of the standalone bundle, `algomotion-recipes.js`, loaded on demand (#62);
   - the Typst and LaTeX packages: no input runs the first example, LaTeX hands its text to the command, and the READMEs and examples use the notations (#63).
   - Measured on six typical tasks, characters typed before → after: Dijkstra in Typst 161 → 69; BFS in LaTeX 146 → 38; insertion sort on a web page 128 (a command and a tag) → 74; a model showing Dijkstra writes 5,274 → 58; BST operations in LaTeX 104 → 68; a LeetCode tree walk with the command line 72 → 56. The concepts each needs are in the ADR.
 - [x] **1.10 Figures that fill a slide** _ADR_ [ADR 0033](adr/0033-slide-figures-fill-the-frame.md) (#64, #66) (found in 1.6). In Beamer and in Typst slides a figure is drawn at its natural size, at most the line's width, so wide figures (Kruskal's, the wide layout) come out small on a slide. By default a slide figure should fill the frame's width and a share of its height, keeping its shape; the ADR amends ADR 0027 and 0028. Done: the slide box is the line by three quarters of the frame's height, and `width`/`height` replace one side of it. Width-bound figures such as Kruskal's wide canvas do not grow, since the trace-wide canvas (ADR 0025) is already as wide as the line.
@@ -195,13 +195,13 @@ Recipes that exist beyond CLRS stay: bubble and selection sort, binary search, l
 Independent of Phase 2, so the two can interleave.
 
 - [x] **3.1 Streamable HTTP transport** for the MCP server, next to stdio. The server and the MCP App page must run on Workers. [ADR 0039](adr/0039-http-transport.md) (#121, #123).
-- [x] **3.2 Cloudflare Worker** with a "Deploy to Cloudflare" button. It is stateless and rate-limited, and its README shows how to connect Claude and other clients. `apps/worker` (#124); it is named `algoviz-mcp`; deploying waits for the owner: a public repository or a manual `wrangler deploy`.
+- [x] **3.2 Cloudflare Worker** with a "Deploy to Cloudflare" button. It is stateless and rate-limited, and its README shows how to connect Claude and other clients. `apps/worker` (#124); it is named `algomotion-mcp`; deploying waits for the owner: a public repository or a manual `wrangler deploy`.
 - [x] **3.3 Share links.** _ADR_ [ADR 0040](adr/0040-share-links.md) (#122), amended by [ADR 0041](adr/0041-share-link-limits.md) (#125), then the codec, the MCP links and the share page `apps/site` (#126). A player page that reads a compressed document, or an algorithm and its input, from the URL fragment. MCP tools return the link alongside the document.
 - [x] **3.4 Documentation site** on Cloudflare Pages, generated from the registry. It is grouped structure → operation, with the player and the export snippets for every algorithm. `apps/site`: a page per module with its player, step names and snippets (web, Typst, LaTeX, CLI, MCP, share link), the catalogue by topic, and the themes; deploying waits for the owner's domain (#127).
 
 ## Phase 4: release 1.0
 
-- [ ] **4.1 Name** _owner_. Check availability on npm, Typst Universe and CTAN. The owner chose algomotion: _ADR_ [ADR 0044](adr/0044-the-name-algomotion.md), then the rename.
+- [x] **4.1 Name** _owner_. Check availability on npm, Typst Universe and CTAN. The owner chose algomotion: _ADR_ [ADR 0044](adr/0044-the-name-algomotion.md) (#135), then the rename (#136): packages, commands, MCP tools, the Typst and LaTeX packages, the CDN files, the environment variables, the schema id, the Worker and the docs.
 - [x] **4.2 Freeze the protocol at 1.0** under 0.4's rules. Regenerate the JSON Schema and fixtures. _ADR_ [ADR 0043](adr/0043-protocol-1-0.md) (#130), then the code (#133): 1.0 is 0.9 as it stands, and 0.x documents are read as 1.0 with an `UPGRADED_VERSION` warning.
 - [ ] **4.3 Publish** _owner_: npm packages, the CDN bundle, the Typst package, the LaTeX package and the standalone executable.
 - [ ] **4.4 Release check.**

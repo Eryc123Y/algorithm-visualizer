@@ -4,14 +4,14 @@
  * themes with one figure each, and the missing page. Each page gets the
  * site's Content Security Policy, as the share page does.
  *
- *     node --conditions=@algoviz/source scripts/build-pages.ts
+ *     node --conditions=@algomotion/source scripts/build-pages.ts
  */
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { algorithms, runAlgorithm } from '@algoviz/recipes';
-import { exportFigures, themeNames } from '@algoviz/svg';
+import { algorithms, runAlgorithm } from '@algomotion/recipes';
+import { exportFigures, themeNames } from '@algomotion/svg';
 
 import { catalog, type Entry } from '../src/docs/catalog.ts';
 import { assetsOf, type Manifest } from '../src/docs/assets.ts';

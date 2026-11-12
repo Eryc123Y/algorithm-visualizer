@@ -7,7 +7,7 @@
  * Keys are generic: numbers for the red–black and order-statistic trees,
  * intervals for the interval tree. They are distinct under `compare`.
  */
-import type { Scalar } from '@algoviz/spec';
+import type { Scalar } from '@algomotion/spec';
 
 export type Color = 'red' | 'black';
 export type Side = 'left' | 'right';

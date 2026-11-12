@@ -12,13 +12,17 @@ import {
   type PartInfo,
 } from 'lit/directive.js';
 
-import { parseSelector, selectFrames, type SelectorError } from '@algoviz/core';
+import {
+  parseSelector,
+  selectFrames,
+  type SelectorError,
+} from '@algomotion/core';
 import {
   ok,
   type Result,
   type Section,
   type Visualization,
-} from '@algoviz/spec';
+} from '@algomotion/spec';
 
 /** A frame number, or a selector such as `relax#2` (ADR 0020). */
 export type FrameSelector = number | string;

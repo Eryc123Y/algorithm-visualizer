@@ -1,5 +1,5 @@
 /**
- * The LaTeX package against the rest of algoviz, without TeX: its version
+ * The LaTeX package against the rest of algomotion, without TeX: its version
  * and format agree with the TikZ painter's, and the checks it applies
  * before calling the shell accept every algorithm id, step selector and
  * theme the engine has (ADR 0027).
@@ -8,13 +8,13 @@ import { readFileSync } from 'node:fs';
 
 import { describe, expect, it } from 'vitest';
 
-import { loadTrace, selectorOf } from '@algoviz/core';
-import { algorithms, runAlgorithm } from '@algoviz/recipes';
-import { themes } from '@algoviz/svg';
-import { TIKZ_FORMAT } from '@algoviz/tikz';
+import { loadTrace, selectorOf } from '@algomotion/core';
+import { algorithms, runAlgorithm } from '@algomotion/recipes';
+import { themes } from '@algomotion/svg';
+import { TIKZ_FORMAT } from '@algomotion/tikz';
 
 const sty = readFileSync(
-  new URL('../package/algoviz.sty', import.meta.url),
+  new URL('../package/algomotion.sty', import.meta.url),
   'utf8',
 );
 
@@ -25,7 +25,7 @@ const constant = (name: string) =>
 /** One of the package's l3regex patterns, as a JavaScript RegExp. */
 function pattern(name: string): RegExp {
   const source = new RegExp(
-    `\\\\regex_const:Nn \\\\c__algoviz_${name}_regex\\s*\\{([^\\n]*)\\}`,
+    `\\\\regex_const:Nn \\\\c__algomotion_${name}_regex\\s*\\{([^\\n]*)\\}`,
   ).exec(sty)?.[1];
   if (source === undefined) throw new Error(`No regex ${name}`);
   return new RegExp(
@@ -38,18 +38,20 @@ function pattern(name: string): RegExp {
   );
 }
 
-describe('algoviz.sty', () => {
+describe('algomotion.sty', () => {
   it('reads the format the TikZ painter writes', () => {
-    expect(Number(constant('int_const:Nn \\\\c__algoviz_format_int'))).toBe(
+    expect(Number(constant('int_const:Nn \\\\c__algomotion_format_int'))).toBe(
       TIKZ_FORMAT,
     );
   });
 
   it('gives one version, in its header and in its cache key', () => {
     const header =
-      /\\ProvidesExplPackage\{algoviz\}\{[\d-]+\}\{([\d.]+)\}/.exec(sty)?.[1];
+      /\\ProvidesExplPackage\{algomotion\}\{[\d-]+\}\{([\d.]+)\}/.exec(
+        sty,
+      )?.[1];
     expect(header).toMatch(/^\d+\.\d+\.\d+$/);
-    expect(constant('str_const:Nn \\\\c__algoviz_version_str')).toBe(header);
+    expect(constant('str_const:Nn \\\\c__algomotion_version_str')).toBe(header);
   });
 
   it('accepts every algorithm id of the registry', () => {

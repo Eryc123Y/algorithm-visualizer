@@ -1,14 +1,14 @@
-# algoviz for LaTeX
+# algomotion for LaTeX
 
-Step-by-step figures of algorithms and data structures in your LaTeX notes and Beamer slides. Name an algorithm, give it your input and pick a step, such as the moment Dijkstra's algorithm improves a distance on your graph, and get a TikZ figure. You can also pass a document that you wrote, or that an AI wrote for you, in the algoviz format.
+Step-by-step figures of algorithms and data structures in your LaTeX notes and Beamer slides. Name an algorithm, give it your input and pick a step, such as the moment Dijkstra's algorithm improves a distance on your graph, and get a TikZ figure. You can also pass a document that you wrote, or that an AI wrote for you, in the algomotion format.
 
 The figures are drawn with TikZ, so their text is set in your document's fonts and they scale with the page. Shapes, colours and positions are those of the SVG and Typst figures of the same step.
 
 ```latex
 \documentclass{article}
-\usepackage{algoviz}
+\usepackage{algomotion}
 \begin{document}
-\algoviz[step=improve#3]{dijkstra}{A-B 4, B-C 1, A-C 7, C-D 2}
+\algomotion[step=improve#3]{dijkstra}{A-B 4, B-C 1, A-C 7, C-D 2}
 \end{document}
 ```
 
@@ -16,12 +16,12 @@ The figures are drawn with TikZ, so their text is set in your document's fonts a
 latexmk -pdf -shell-escape notes.tex     # or -pdflua, -pdfxe
 ```
 
-The package runs the `algoviz` command through shell escape, as `minted` runs Pygments. It keeps every figure in `_algoviz/`, so a figure that did not change is never made again, and cached figures need no shell escape at all.
+The package runs the `algomotion` command through shell escape, as `minted` runs Pygments. It keeps every figure in `_algomotion/`, so a figure that did not change is never made again, and cached figures need no shell escape at all.
 
 > **Not on CTAN yet.** Until it is published:
 >
-> 1. **The command.** Build the standalone `algoviz` executable in the algoviz repository: `npm install`, then `npm run build:standalone -w @algoviz/mcp`. This needs rustup and a C compiler, and writes `packages/mcp/dist/standalone/algoviz`, a 2 MB program that needs no Node.js. Put it on your `PATH`, or name it with the package option `command=`. The Node.js CLI works too: `command={node /path/to/algoviz.js}`.
-> 2. **The package.** Put `algoviz.sty` next to your document, or in your local `texmf` tree under `tex/latex/algoviz/`.
+> 1. **The command.** Build the standalone `algomotion` executable in the algomotion repository: `npm install`, then `npm run build:standalone -w @algomotion/mcp`. This needs rustup and a C compiler, and writes `packages/mcp/dist/standalone/algomotion`, a 2 MB program that needs no Node.js. Put it on your `PATH`, or name it with the package option `command=`. The Node.js CLI works too: `command={node /path/to/algomotion.js}`.
+> 2. **The package.** Put `algomotion.sty` next to your document, or in your local `texmf` tree under `tex/latex/algomotion/`.
 >
 > The `examples/` folder next to this package has notes and slides to start from.
 
@@ -33,15 +33,15 @@ The package runs the `algoviz` command through shell escape, as `minted` runs Py
 
 ## Commands
 
-| Command                                     | Draws                                                                           |
-| ------------------------------------------- | ------------------------------------------------------------------------------- |
-| `\algoviz[keys]{id}{input}`                 | a step of a registry algorithm, run on the input ([The input](#the-input))      |
-| `\algovizfile[keys]{doc.json}`              | a step of an algoviz document in a JSON file                                    |
-| `\algovizfile[algorithm=id, keys]{in.json}` | a step of an algorithm whose input is in a file                                 |
-| `\algovizinput[keys]{figure.tex}`           | a figure or series made by `algoviz export --format tikz`, without shell escape |
-| `\algovizset{keys}`                         | sets keys for the figures that follow, in the current group                     |
+| Command                                        | Draws                                                                              |
+| ---------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `\algomotion[keys]{id}{input}`                 | a step of a registry algorithm, run on the input ([The input](#the-input))         |
+| `\algomotionfile[keys]{doc.json}`              | a step of an algomotion document in a JSON file                                    |
+| `\algomotionfile[algorithm=id, keys]{in.json}` | a step of an algorithm whose input is in a file                                    |
+| `\algomotioninput[keys]{figure.tex}`           | a figure or series made by `algomotion export --format tikz`, without shell escape |
+| `\algomotionset{keys}`                         | sets keys for the figures that follow, in the current group                        |
 
-`algoviz recipes` lists the algorithm ids and the inputs they take, and `algoviz guide` explains documents.
+`algomotion recipes` lists the algorithm ids and the inputs they take, and `algomotion guide` explains documents.
 
 ## Keys
 
@@ -56,16 +56,16 @@ The package runs the `algoviz` command through shell escape, as `minted` runs Py
 | `scale`           | none                    | A factor on the natural size. `scale` without a value goes back to the default.                                                                                                                                                                                                 |
 | `value font`      | the theme's             | The font of values in cells and nodes, indices, edge labels and pointers. By default the document's family the theme names: `\normalfont` for light, dark and print, `\rmfamily` for the textbook themes, `\sffamily` for blocks, `\ttfamily` for the answer sheet and Turbo C. |
 | `label font`      | the theme's             | The font of titles and labels such as "top". By default `\sffamily`, but `\rmfamily` for the textbook themes and `\ttfamily` for Turbo C.                                                                                                                                       |
-| `algorithm`       | none                    | With `\algovizfile`: the file is this algorithm's input, not a document.                                                                                                                                                                                                        |
+| `algorithm`       | none                    | With `\algomotionfile`: the file is this algorithm's input, not a document.                                                                                                                                                                                                     |
 
 An algorithm's figure draws what it keeps besides its main structure, such as Dijkstra's priority queue or a call stack. `layout=narrow` puts those structures below the main one, which suits a column of notes; `layout=wide` puts them beside it, which suits a slide. The default is `wide` in the `beamer` class and `narrow` everywhere else, `beamerarticle` notes included; `layout=auto` goes back to it.
 
 At its natural size, a figure's values come out at 1.25 times the size of the text around it, and its labels at three quarters of it. A figure is never wider than the line, unless `width` or `height` says otherwise. In Beamer a figure fills the frame instead ([Slides](#slides)); `scale=1` gives it its natural size there. Every figure of one run of an algorithm has the same canvas, so figures of different steps drawn at the same scale line up.
 
-Package options, in `\usepackage[...]{algoviz}`:
+Package options, in `\usepackage[...]{algomotion}`:
 
-- `command=algoviz`: the command to run, with a path or arguments if needed.
-- `cachedir=_algoviz`: where the figures are kept.
+- `command=algomotion`: the command to run, with a path or arguments if needed.
+- `cachedir=_algomotion`: where the figures are kept.
 
 ## Steps
 
@@ -86,14 +86,14 @@ In a Beamer frame, `steps` turns a figure into overlays: one slide per frame of 
 ```latex
 \begin{frame}{Dijkstra's algorithm, step by step}
   \centering
-  \algovizfile[algorithm=dijkstra, steps]{graph.json}   % every frame
+  \algomotionfile[algorithm=dijkstra, steps]{graph.json}   % every frame
 \end{frame}
 
 \begin{frame}{Settling $a$}
   The queue hands out $a$, at distance $3$. \pause
 
   \centering
-  \algovizfile[algorithm=dijkstra, steps=extract\#3..improve\#5]{graph.json}
+  \algomotionfile[algorithm=dijkstra, steps=extract\#3..improve\#5]{graph.json}
 \end{frame}
 ```
 
@@ -103,46 +103,46 @@ In a Beamer frame, `steps` turns a figure into overlays: one slide per frame of 
 - **Handouts.** With `\documentclass[handout]{beamer}`, in transparencies and in `beamerarticle` notes, a series shows its last frame. Outside Beamer it does too, with a warning.
 - **Size.** In the `beamer` class, a figure or a series fills the frame: it is as large as fits in the line's width and three quarters of the text height, keeping its shape, so a tall figure no longer runs off the slide and a narrow one grows. `width` and `height` replace their side of that box only: `height=0.6\textheight` leaves room for text and is still capped by the line, and `width=0.5\linewidth` is still capped by the height. `scale` gives the natural size times `scale`. In a column, the line is the column's; two figures side by side need `width=0.45\linewidth` each, or a column each. Figures of one run share a canvas, so they come out at one scale on frames with the same room.
 - **A series** has the canvas of its largest frame, and `width`, `height` and `scale` apply to the whole of it. A series that names one frame is an ordinary figure, on every slide.
-- **By hand.** The command writes a series into one file of the cache. `algoviz export … --format tikz --one-file` writes such a file outside LaTeX, and `\algovizinput` draws it as a series.
+- **By hand.** The command writes a series into one file of the cache. `algomotion export … --format tikz --one-file` writes such a file outside LaTeX, and `\algomotioninput` draws it as a series.
 
 `examples/slides.tex` steps through a whole run, a range after a pause, and a section.
 
 ## The input
 
-The input of `\algoviz` is a notation, or JSON ([ADR 0032](../../../docs/adr/0032-algorithm-and-input.md)):
+The input of `\algomotion` is a notation, or JSON ([ADR 0032](../../../docs/adr/0032-algorithm-and-input.md)):
 
 ```latex
-\algoviz{insertion-sort}{5 2 4 6 1 3}                     % a list
-\algoviz{dijkstra}{A-B 4, B-C 1, A-C 7, C-D 2}            % a graph, from its first node
-\algoviz{topological-sort}{shirt->tie, tie->jacket, socks} % a directed graph
-\algoviz{inorder-tree-walk}{[4, 2, 6, 1, 3, null, 7]}     % a tree in level order
-\algoviz{bst}{"from": "8 3 10 1 6", "ops": "insert 4, delete 3"}
-\algoviz{dijkstra}{"graph": "A-B 4, B-C 1", "source": "C"}
-\algoviz{kruskal}{}                                        % the first example
+\algomotion{insertion-sort}{5 2 4 6 1 3}                     % a list
+\algomotion{dijkstra}{A-B 4, B-C 1, A-C 7, C-D 2}            % a graph, from its first node
+\algomotion{topological-sort}{shirt->tie, tie->jacket, socks} % a directed graph
+\algomotion{inorder-tree-walk}{[4, 2, 6, 1, 3, null, 7]}     % a tree in level order
+\algomotion{bst}{"from": "8 3 10 1 6", "ops": "insert 4, delete 3"}
+\algomotion{dijkstra}{"graph": "A-B 4, B-C 1", "source": "C"}
+\algomotion{kruskal}{}                                        % the first example
 ```
 
 - **Lists** are numbers separated by commas or spaces, optionally in brackets; a level order writes `null` for a gap.
 - **Graphs** are edge lists: `-` joins an undirected edge and `->` a directed one, a number after a space is the weight, and a name alone is a node without edges. Names are letters, digits and `_`. Write the edges on several lines if you like, but separate them with commas, since TeX turns a line break into a space.
 - **Operations** of a data structure are written as exercises write them: `insert 4, delete 3`.
 - An input that needs only one thing may be that thing alone, such as a sort's values or a graph algorithm's graph, which then starts at its first node; `"source"` (`"root"` for Prim) picks another. Empty braces run the algorithm on its first example.
-- Anything that starts with `{`, `[` or `"` is JSON, with the structured forms that `algoviz recipes` lists, such as `"graph": {"nodes": [...], "edges": [["A", "B", 4], ...]}`. A notation error names the token and its position: `INVALID_NOTATION at $.input: Expected a weight or "," after "B-C", not "x" (character 12)`.
+- Anything that starts with `{`, `[` or `"` is JSON, with the structured forms that `algomotion recipes` lists, such as `"graph": {"nodes": [...], "edges": [["A", "B", 4], ...]}`. A notation error names the token and its position: `INVALID_NOTATION at $.input: Expected a weight or "," after "B-C", not "x" (character 12)`.
 
 As TeX reads it:
 
 - The outer braces of an object may be left out: `{"source": "A", ...}` and `"source": "A", ...` are the same.
 - Line breaks and repeated spaces are fine.
 - Write `%` as `\%`, which TeX would otherwise read as the start of a comment. `\#`, `\{`, `\}`, `\&`, `\$` and `\_` also stand for the characters.
-- Backslash escapes in JSON strings, such as `\n` and `\u00e9`, work as in JSON, except that TeX drops a space right after a letter escape such as `\n`: write `\u0020` for such a space. On Windows, where a command line holds at most 8,191 characters, inputs over about 3,500 characters are refused with a message; put them in a file and use `\algovizfile[algorithm=...]`, as for any input you would rather keep apart.
+- Backslash escapes in JSON strings, such as `\n` and `\u00e9`, work as in JSON, except that TeX drops a space right after a letter escape such as `\n`: write `\u0020` for such a space. On Windows, where a command line holds at most 8,191 characters, inputs over about 3,500 characters are refused with a message; put them in a file and use `\algomotionfile[algorithm=...]`, as for any input you would rather keep apart.
 
 ## The cache
 
-Each figure is kept in `_algoviz/` under the MD5 of everything that changes its drawing: the input or the file's contents, the algorithm, the step, the theme, the layout, the file format and the package version.
+Each figure is kept in `_algomotion/` under the MD5 of everything that changes its drawing: the input or the file's contents, the algorithm, the step, the theme, the layout, the file format and the package version.
 
 - A figure found there is drawn without running anything, so the next runs of a document cost only TikZ's time.
 - Fonts and sizes are applied when the figure is drawn, so changing them makes no new figure.
-- Share or commit `_algoviz/` to compile the document where the command is missing or shell escape is off, such as on arXiv or for a co-author.
-- The package deletes nothing. Delete `_algoviz/` to clean up, and after updating the `algoviz` command.
-- Figure files carry a format number, and the package reads its own format only. A file that `algoviz export --format tikz` made with an older command stops with an error that names both formats: make it again with the command of this release.
+- Share or commit `_algomotion/` to compile the document where the command is missing or shell escape is off, such as on arXiv or for a co-author.
+- The package deletes nothing. Delete `_algomotion/` to clean up, and after updating the `algomotion` command.
+- Figure files carry a format number, and the package reads its own format only. A file that `algomotion export --format tikz` made with an older command stops with an error that names both formats: make it again with the command of this release.
 
 ## Errors
 
@@ -156,7 +156,7 @@ When a figure cannot be made, LaTeX reports an error, and a framed box takes the
 The package also says when:
 
 - shell escape is off and the figure is not in the cache yet;
-- restricted shell escape, the TeX Live default, did not run `algoviz`, which is not in `shell_escape_commands`;
+- restricted shell escape, the TeX Live default, did not run `algomotion`, which is not in `shell_escape_commands`;
 - the command made no figure, usually because it is not installed or not on the `PATH`.
 
 ## Engines
@@ -179,4 +179,4 @@ Shell escape lets a document run programs, so compile documents from others with
 
 - **Custom themes** made with `createTheme` reach the player and the library; a theme file for the command, so that they reach LaTeX too, is future work.
 
-`algoviz` is a working name. The package, its licence and its publishing to CTAN wait for the project's 1.0 release.
+`algomotion` is a working name. The package, its licence and its publishing to CTAN wait for the project's 1.0 release.

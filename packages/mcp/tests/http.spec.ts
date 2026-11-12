@@ -224,7 +224,7 @@ describe('the request rules', () => {
   });
 
   it('hides the message of a tool that throws, and only when asked', async () => {
-    const guide = tools.find((t) => t.name === 'algoviz_guide')!;
+    const guide = tools.find((t) => t.name === 'algomotion_guide')!;
     const spy = vi.spyOn(guide, 'run').mockImplementation(() => {
       throw new Error('broke at /Users/someone/src/guide.ts:12');
     });
@@ -235,7 +235,7 @@ describe('the request rules', () => {
         await createServer({ hideInternalErrors: hide }).connect(a);
         await client.connect(b);
         const result = await client.callTool({
-          name: 'algoviz_guide',
+          name: 'algomotion_guide',
           arguments: {},
         });
         expect(result.isError).toBe(true);
@@ -286,7 +286,7 @@ describe('the limits a slow or odd request meets', () => {
   });
 
   it('hides a tool that rejects as well as one that throws', async () => {
-    const guide = tools.find((t) => t.name === 'algoviz_guide')!;
+    const guide = tools.find((t) => t.name === 'algomotion_guide')!;
     const spy = vi
       .spyOn(guide, 'run')
       .mockImplementation(
@@ -298,7 +298,7 @@ describe('the limits a slow or odd request meets', () => {
       await createServer({ hideInternalErrors: true }).connect(a);
       await client.connect(b);
       const result = await client.callTool({
-        name: 'algoviz_guide',
+        name: 'algomotion_guide',
         arguments: {},
       });
       expect(JSON.stringify(result)).not.toContain('/Users/someone');
@@ -320,9 +320,9 @@ describe('the limits a slow or odd request meets', () => {
       }),
     );
     const { tools: listed } = await client.listTools();
-    expect(listed.map((t) => t.name)).toContain('algoviz_show');
+    expect(listed.map((t) => t.name)).toContain('algomotion_show');
     const result = await client.callTool({
-      name: 'algoviz_list_recipes',
+      name: 'algomotion_list_recipes',
       arguments: {},
     });
     expect(result.isError).toBeFalsy();
@@ -332,27 +332,27 @@ describe('the limits a slow or odd request meets', () => {
 
 /** Every tool, called with arguments that succeed and that fail. */
 const CALLS: { name: string; arguments: Record<string, unknown> }[] = [
-  { name: 'algoviz_guide', arguments: { kinds: ['stack'] } },
-  { name: 'algoviz_list_recipes', arguments: {} },
+  { name: 'algomotion_guide', arguments: { kinds: ['stack'] } },
+  { name: 'algomotion_list_recipes', arguments: {} },
   {
-    name: 'algoviz_run_recipe',
+    name: 'algomotion_run_recipe',
     arguments: { id: 'insertion-sort', input: '3 1 2' },
   },
   {
-    name: 'algoviz_validate',
+    name: 'algomotion_validate',
     arguments: { document: { version: '1.0', structures: {}, steps: [] } },
   },
-  { name: 'algoviz_validate', arguments: { document: { version: 'x' } } },
+  { name: 'algomotion_validate', arguments: { document: { version: 'x' } } },
   {
-    name: 'algoviz_render',
+    name: 'algomotion_render',
     arguments: { recipe: 'insertion-sort', input: '3 1 2', frame: -1 },
   },
   {
-    name: 'algoviz_inspect',
+    name: 'algomotion_inspect',
     arguments: { recipe: 'binary-search', frames: [0, -1] },
   },
-  { name: 'algoviz_show', arguments: { recipe: 'stack', frame: 2 } },
-  { name: 'algoviz_show', arguments: { recipe: 'no-such-recipe' } },
+  { name: 'algomotion_show', arguments: { recipe: 'stack', frame: 2 } },
+  { name: 'algomotion_show', arguments: { recipe: 'no-such-recipe' } },
 ];
 
 async function connectHttp(fetch: typeof globalThis.fetch, url: string) {
@@ -398,16 +398,18 @@ describe('the SDK client over HTTP', () => {
   });
 
   it('reads the player page and the guide', async () => {
-    const player = await http.readResource({ uri: 'ui://algoviz/player.html' });
+    const player = await http.readResource({
+      uri: 'ui://algomotion/player.html',
+    });
     expect(player.contents[0]).toMatchObject({
       mimeType: 'text/html;profile=mcp-app',
     });
-    const guide = await http.readResource({ uri: 'algoviz://guide/stack' });
+    const guide = await http.readResource({ uri: 'algomotion://guide/stack' });
     expect(JSON.stringify(guide)).toContain('stack');
   });
 });
 
-describe('algoviz-mcp --http on a real socket', () => {
+describe('algomotion-mcp --http on a real socket', () => {
   let server: Awaited<ReturnType<typeof serveHttp>>;
   let client: Client;
 
@@ -457,9 +459,9 @@ describe('algoviz-mcp --http on a real socket', () => {
 
   it('lists and calls the tools through the network', async () => {
     const { tools } = await client.listTools();
-    expect(tools.map((t) => t.name)).toContain('algoviz_render');
+    expect(tools.map((t) => t.name)).toContain('algomotion_render');
     const result = await client.callTool({
-      name: 'algoviz_render',
+      name: 'algomotion_render',
       arguments: { recipe: 'insertion-sort', input: '3 1 2', frame: -1 },
     });
     expect(result.isError).toBeFalsy();
@@ -467,7 +469,7 @@ describe('algoviz-mcp --http on a real socket', () => {
   });
 });
 
-describe('algoviz-mcp --http as a process', () => {
+describe('algomotion-mcp --http as a process', () => {
   let child: ChildProcess;
   let url: string;
 
@@ -475,7 +477,7 @@ describe('algoviz-mcp --http as a process', () => {
     child = spawn(
       process.execPath,
       [
-        '--conditions=@algoviz/source',
+        '--conditions=@algomotion/source',
         fileURLToPath(new URL('../src/mcp-server.ts', import.meta.url)),
         '--http',
         '--port',
@@ -538,7 +540,7 @@ describe('algoviz-mcp --http as a process', () => {
   });
 });
 
-describe('the arguments of algoviz-mcp', () => {
+describe('the arguments of algomotion-mcp', () => {
   it('defaults to stdio, and to 127.0.0.1:8787 over HTTP', () => {
     expect(parseServeArgs([])).toEqual({
       http: false,

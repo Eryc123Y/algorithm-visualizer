@@ -1,6 +1,6 @@
 /**
  * Entry of the standalone executable's bundle (ADR 0027): the CLI of
- * `@algoviz/mcp`, with the host's arguments, output and exit code.
+ * `@algomotion/mcp`, with the host's arguments, output and exit code.
  */
 import { main } from '../../src/cli.ts';
 

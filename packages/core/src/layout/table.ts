@@ -12,7 +12,7 @@
  *
  * Cells are smaller than array cells so that larger tables fit.
  */
-import type { Cell, Scalar, TableDecl } from '@algoviz/spec';
+import type { Cell, Scalar, TableDecl } from '@algomotion/spec';
 
 import type { Block, LayoutInput } from '../kind.ts';
 import type { TableState } from '../kinds/table.ts';

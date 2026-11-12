@@ -1,5 +1,5 @@
 /**
- * The standalone `algoviz` executable (ADR 0027), built with the Rust
+ * The standalone `algomotion` executable (ADR 0027), built with the Rust
  * toolchain and run as a separate process. Its figures must be the CLI's,
  * byte for byte, for every registry example in both formats, and its exit
  * codes, messages and error files the same as in Node.
@@ -18,7 +18,7 @@ import { join } from 'node:path';
 
 import { beforeAll, describe, expect, it } from 'vitest';
 
-import { algorithms } from '@algoviz/recipes';
+import { algorithms } from '@algomotion/recipes';
 
 import { paths } from '../../scripts/standalone.ts';
 import { main } from '../../src/cli.ts';
@@ -34,7 +34,7 @@ beforeAll(() => {
   const built = spawnSync(
     process.execPath,
     [
-      '--conditions=@algoviz/source',
+      '--conditions=@algomotion/source',
       join(paths.root, 'scripts/build-standalone.ts'),
     ],
     { encoding: 'utf8' },
@@ -62,7 +62,7 @@ function node(argv: readonly string[]): Run {
   return { code, out: out.join(''), err: err.join('') };
 }
 
-const dir = mkdtempSync(join(tmpdir(), 'algoviz-executable-'));
+const dir = mkdtempSync(join(tmpdir(), 'algomotion-executable-'));
 // The input of the tests that need one; the export of every example
 // writes its own too.
 writeFileSync(

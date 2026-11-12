@@ -131,7 +131,7 @@ export function* codePoints(ranges: readonly Range[]): Generator<number> {
 export const measuredText = String.fromCodePoint(...codePoints(MEASURED));
 
 export const root = new URL('../', import.meta.url);
-const cache = new URL('node_modules/.cache/algoviz-fonts/', root);
+const cache = new URL('node_modules/.cache/algomotion-fonts/', root);
 
 /** Downloads `url` once into the cache and checks its SHA-256. */
 function download(url: string, name: string, sha256: string): string {

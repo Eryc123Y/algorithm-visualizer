@@ -2,7 +2,7 @@ import {
   interSemiBold,
   jetbrainsMonoSemiBold,
   type FontMetrics,
-} from '@algoviz/fonts';
+} from '@algomotion/fonts';
 
 /**
  * Metrics of the two fonts a scene's text is set in (ADR 0024). Painters

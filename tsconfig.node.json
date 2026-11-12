@@ -5,7 +5,7 @@
     "lib": ["ES2023"],
     "types": ["node"],
     "noEmit": true,
-    "customConditions": ["@algoviz/source"]
+    "customConditions": ["@algomotion/source"]
   },
   "include": ["eslint.config.ts", "vitest.config.ts", "scripts", "evals"]
 }

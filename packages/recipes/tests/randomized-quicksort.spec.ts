@@ -7,8 +7,8 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 
-import type { Trace } from '@algoviz/core';
-import type { VisualizationInput } from '@algoviz/spec';
+import type { Trace } from '@algomotion/core';
+import type { VisualizationInput } from '@algomotion/spec';
 
 import { seededRandom } from '../src/random.ts';
 import { fuzz, replay, runOk, stateOf } from './helpers.ts';

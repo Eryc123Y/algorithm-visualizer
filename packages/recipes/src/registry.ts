@@ -4,7 +4,7 @@
  * and LaTeX all read it, so adding an algorithm means adding its module
  * here.
  */
-import { err, type Diagnostic, type Result } from '@algoviz/spec';
+import { err, type Diagnostic, type Result } from '@algomotion/spec';
 
 import type { Algorithm } from './algorithm.ts';
 import { editDistance } from './algorithms/dynamic-programming/edit-distance.ts';

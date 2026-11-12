@@ -1,6 +1,6 @@
 // Slides that step through a run with polylux: one frame per subslide.
 #import "@preview/polylux:0.4.0": *
-#import "@local/algoviz:0.1.0": algoviz-slides
+#import "@local/algomotion:0.1.0": algomotion-slides
 
 #set page(paper: "presentation-16-9", margin: 1.5cm)
 #set text(size: 20pt)
@@ -13,7 +13,7 @@
 // the slide's width and three quarters of its height.
 #slide[
   == Dijkstra's algorithm, step by step
-  #align(center, algoviz-slides(only, "dijkstra", input))
+  #align(center, algomotion-slides(only, "dijkstra", input))
 ]
 
 // A range of steps, starting on the second subslide; under a line of text,
@@ -22,7 +22,7 @@
   == Settling $a$
   The queue hands out $a$, at distance 3, and relaxes its edges.
 
-  #align(center, algoviz-slides(
+  #align(center, algomotion-slides(
     only,
     "dijkstra",
     input,
@@ -35,7 +35,7 @@
 // A section of a run, in the print theme.
 #slide[
   == Deleting 3 from a binary search tree
-  #align(center, algoviz-slides(
+  #align(center, algomotion-slides(
     only,
     "bst.delete",
     (from: (8, 3, 10, 1, 6, 4, 7), key: 3),

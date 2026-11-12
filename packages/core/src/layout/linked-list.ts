@@ -11,7 +11,7 @@
  * - A null `next` is drawn as "∅" at the node's top-right corner (a null
  *   `prev` at its bottom-left), clear of arrows arriving at its sides.
  */
-import type { LinkedListDecl } from '@algoviz/spec';
+import type { LinkedListDecl } from '@algomotion/spec';
 
 import type { Block, LayoutInput } from '../kind.ts';
 import type { LinkedListState } from '../kinds/linked-list.ts';

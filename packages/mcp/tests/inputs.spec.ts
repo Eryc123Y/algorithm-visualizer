@@ -10,13 +10,13 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import type { z } from 'zod';
 
-import { findAlgorithm, runAlgorithm } from '@algoviz/recipes';
+import { findAlgorithm, runAlgorithm } from '@algomotion/recipes';
 
 import { main } from '../src/cli.ts';
 import { show, showSource } from '../src/show.ts';
 import { callTool, listRecipes } from '../src/index.ts';
 
-const dir = mkdtempSync(join(tmpdir(), 'algoviz-inputs-'));
+const dir = mkdtempSync(join(tmpdir(), 'algomotion-inputs-'));
 let outs = 0;
 const outDir = () => join(dir, `out-${++outs}`);
 
@@ -53,7 +53,7 @@ function documentOf(id: string, input?: unknown) {
 
 const hex = (text: string) => Buffer.from(text, 'utf8').toString('hex');
 
-describe('algoviz run', () => {
+describe('algomotion run', () => {
   it('takes a notation, the main field alone', () => {
     const { code, out } = run('run', 'dijkstra', GRAPH);
     expect(code).toBe(0);
@@ -99,7 +99,7 @@ describe('algoviz run', () => {
   });
 });
 
-describe('algoviz export --input', () => {
+describe('algomotion export --input', () => {
   const frames = (out: string) => readdirSync(out).length;
 
   it('takes a notation, as text or in a file', () => {
@@ -167,29 +167,29 @@ describe('algoviz export --input', () => {
 
 describe('the MCP tools', () => {
   it('run a recipe on a notation, or on its first example', () => {
-    const run = callTool('algoviz_run_recipe', {
+    const run = callTool('algomotion_run_recipe', {
       id: 'dijkstra',
       input: GRAPH,
     });
     expect(run.isError).toBeFalsy();
     expect(JSON.parse(run.text)).toEqual(documentOf('dijkstra', STRUCTURED));
-    const example = callTool('algoviz_run_recipe', { id: 'dijkstra' });
+    const example = callTool('algomotion_run_recipe', { id: 'dijkstra' });
     expect(JSON.parse(example.text)).toEqual(documentOf('dijkstra'));
   });
 
   it('render and inspect a recipe by name', () => {
-    const byName = callTool('algoviz_render', {
+    const byName = callTool('algomotion_render', {
       recipe: 'dijkstra',
       input: GRAPH,
       frame: 'improve#1',
     });
-    const byDocument = callTool('algoviz_render', {
+    const byDocument = callTool('algomotion_render', {
       document: documentOf('dijkstra', STRUCTURED),
       frame: 'improve#1',
     });
     expect(byName.isError).toBeFalsy();
     expect(byName.text).toBe(byDocument.text);
-    const inspected = callTool('algoviz_inspect', {
+    const inspected = callTool('algomotion_inspect', {
       recipe: 'insertion-sort',
       input: '3 1 2',
     });
@@ -200,16 +200,16 @@ describe('the MCP tools', () => {
   it('take a document or a recipe, not both and not neither', () => {
     const doc = documentOf('insertion-sort');
     expect(
-      callTool('algoviz_render', { document: doc, recipe: 'dijkstra' }).text,
+      callTool('algomotion_render', { document: doc, recipe: 'dijkstra' }).text,
     ).toContain('not both');
-    expect(callTool('algoviz_render', {}).text).toContain('Give a document');
+    expect(callTool('algomotion_render', {}).text).toContain('Give a document');
     expect(
-      callTool('algoviz_render', { document: doc, input: '3 1' }).text,
+      callTool('algomotion_render', { document: doc, input: '3 1' }).text,
     ).toContain('goes with a recipe');
   });
 
   it('report an input error of a recipe at its token', () => {
-    const result = callTool('algoviz_render', {
+    const result = callTool('algomotion_render', {
       recipe: 'dijkstra',
       input: 'A-B x',
     });

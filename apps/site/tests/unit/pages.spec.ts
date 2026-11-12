@@ -2,8 +2,8 @@
  * The generated pages (roadmap 3.4): the home page with the catalogue, a
  * page per module with its player, steps and snippets, and the themes.
  */
-import { algorithms } from '@algoviz/recipes';
-import { themeNames } from '@algoviz/svg';
+import { algorithms } from '@algomotion/recipes';
+import { themeNames } from '@algomotion/svg';
 import { describe, expect, it } from 'vitest';
 
 import { catalog, type Entry } from '../../src/docs/catalog.ts';

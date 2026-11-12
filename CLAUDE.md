@@ -1,4 +1,4 @@
-# Working on algoviz
+# Working on algomotion
 
 The owner (Eric) hands this project to Claude to iterate on unattended, one roadmap item at a time. These rules say how. Talk to the owner in Chinese; write code, docs, commits and PRs in English.
 

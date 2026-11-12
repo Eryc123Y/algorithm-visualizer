@@ -14,15 +14,20 @@
  */
 import { z } from 'zod';
 
-import { runAlgorithm } from '@algoviz/recipes';
-import { err, formatPath, type Diagnostic, type Result } from '@algoviz/spec';
+import { runAlgorithm } from '@algomotion/recipes';
+import {
+  err,
+  formatPath,
+  type Diagnostic,
+  type Result,
+} from '@algomotion/spec';
 import {
   prepareFigures,
   type Figure,
   type PreparedFigures,
   type SeriesOptions,
   type ThemeName,
-} from '@algoviz/svg';
+} from '@algomotion/svg';
 
 /** How many prepared documents an engine keeps by default. */
 export const CACHE_SIZE = 8;
@@ -188,7 +193,7 @@ export function respond(engine: Engine, text: string): string {
           code: 'ENGINE_ERROR',
           path: '$',
           message: messageOf(e),
-          hint: 'This is a bug in algoviz, or a document too large for the Typst plugin; algoviz export can draw it outside Typst.',
+          hint: 'This is a bug in algomotion, or a document too large for the Typst plugin; algomotion export can draw it outside Typst.',
         },
       ]),
     );

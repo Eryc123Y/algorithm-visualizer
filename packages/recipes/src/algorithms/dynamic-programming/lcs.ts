@@ -7,7 +7,7 @@
  * corner, as PRINT-LCS does, and settles the matched cells of one longest
  * common subsequence.
  */
-import type { Cell } from '@algoviz/spec';
+import type { Cell } from '@algomotion/spec';
 
 import { defineAlgorithm } from '../../algorithm.ts';
 import { TwoStrings } from './strings.ts';

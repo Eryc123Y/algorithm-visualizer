@@ -6,8 +6,8 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 
-import '@algoviz/elements/define';
-import type { PlayerMode, PlayerTheme } from '@algoviz/elements';
+import '@algomotion/elements/define';
+import type { PlayerMode, PlayerTheme } from '@algomotion/elements';
 
 import { bubbleSort } from './samples/bubble-sort';
 import { bubbleSortDocument } from './samples/bubble-sort-doc';
@@ -74,7 +74,7 @@ watch(parsed, ({ value, error }) => {
   <main class="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-10">
     <header class="flex flex-wrap items-end justify-between gap-4">
       <div>
-        <h1 class="text-3xl font-bold">algoviz playground</h1>
+        <h1 class="text-3xl font-bold">algomotion playground</h1>
         <p class="text-slate-600">
           Edit the document on the right, or paste one written by an LLM.
         </p>

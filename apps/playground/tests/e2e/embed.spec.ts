@@ -6,9 +6,9 @@
  */
 import { readFileSync } from 'node:fs';
 
-import { selectFrame } from '@algoviz/core';
-import { runAlgorithm } from '@algoviz/recipes';
-import type { AlgoPlayer } from '@algoviz/elements';
+import { selectFrame } from '@algomotion/core';
+import { runAlgorithm } from '@algomotion/recipes';
+import type { AlgoPlayer } from '@algomotion/elements';
 import type { Page } from '@playwright/test';
 
 import { expect, expectStageMatches, test } from './fixtures';
@@ -22,7 +22,7 @@ function documentOf(id: string, input: unknown) {
 
 const ORIGIN = 'http://embed.test';
 const cdn = new URL('../../../../packages/elements/dist/cdn/', import.meta.url);
-/** A file of the standalone bundle, such as algoviz-player.js. */
+/** A file of the standalone bundle, such as algomotion-player.js. */
 const bundleFile = (name: string) => readFileSync(new URL(name, cdn));
 
 const sort = documentOf('bubble-sort', { values: [4, 2, 3, 1] });
@@ -70,11 +70,11 @@ async function open(
       return route.fulfill({
         contentType: 'text/html',
         body: `<!doctype html><meta charset="utf-8"><title>embed</title>
-<script type="module" src="/algoviz-player.js"></script>
+<script type="module" src="/algomotion-player.js"></script>
 <body style="margin:0">${body}</body>`,
       });
     // The player, and the registry next to it (ADR 0032).
-    if (/^\/algoviz-[\w-]+\.js$/.test(path))
+    if (/^\/algomotion-[\w-]+\.js$/.test(path))
       return route.fulfill({
         contentType: 'text/javascript',
         body: bundleFile(path.slice(1)),
@@ -117,7 +117,7 @@ test('draws a theme in its own fonts, loaded from beside the bundle', async ({
   await open(page, inline(sort, 'theme="turbo-c"'));
   const player = page.locator('#p');
   await expect(player).toHaveAttribute('data-resolved-theme', 'turbo-c');
-  await expect(page.locator('link[data-algoviz-fonts]')).toHaveAttribute(
+  await expect(page.locator('link[data-algomotion-fonts]')).toHaveAttribute(
     'href',
     `${ORIGIN}/fonts/fonts.css`,
   );
@@ -135,7 +135,7 @@ test('draws a theme in its own fonts, loaded from beside the bundle', async ({
   await page.evaluate(() =>
     document.body.append(document.createElement('algo-player')),
   );
-  await expect(page.locator('link[data-algoviz-fonts]')).toHaveCount(1);
+  await expect(page.locator('link[data-algomotion-fonts]')).toHaveCount(1);
 });
 
 test('follows the colour scheme between a day and a night theme', async ({
@@ -577,7 +577,7 @@ test.describe('an algorithm and its input (ADR 0032)', () => {
   const loadsRegistry = (page: Page) => {
     const asked = { value: false };
     page.on('request', (request) => {
-      if (request.url().endsWith('/algoviz-recipes.js')) asked.value = true;
+      if (request.url().endsWith('/algomotion-recipes.js')) asked.value = true;
     });
     return asked;
   };

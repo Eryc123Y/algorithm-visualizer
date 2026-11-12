@@ -4,14 +4,14 @@
  * bundled face; fallbacks of a similar width follow, then CJK families,
  * which the bundled faces lack, then the generic family.
  */
-import { defaultFonts, type LayoutFonts } from '@algoviz/core';
+import { defaultFonts, type LayoutFonts } from '@algomotion/core';
 import {
   dotGothic16Regular,
   lexendSemiBold,
   notoSansMonoSemiBold,
   notoSansSemiBold,
   stixTwoTextSemiBold,
-} from '@algoviz/fonts';
+} from '@algomotion/fonts';
 
 /** CSS families of both roles. */
 export interface FontFamilies {

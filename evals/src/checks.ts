@@ -20,8 +20,8 @@ import {
   type Trace,
   type TreeState,
   type VisualizationState,
-} from '@algoviz/core';
-import type { Scalar, StructureKindName } from '@algoviz/spec';
+} from '@algomotion/core';
+import type { Scalar, StructureKindName } from '@algomotion/spec';
 
 type StateOf = {
   array: ArrayState;

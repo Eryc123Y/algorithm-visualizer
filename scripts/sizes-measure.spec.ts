@@ -15,10 +15,10 @@ import {
   table,
 } from './sizes-measure.ts';
 
-const dir = mkdtempSync(join(tmpdir(), 'algoviz-sizes-'));
+const dir = mkdtempSync(join(tmpdir(), 'algomotion-sizes-'));
 afterAll(() => rmSync(dir, { recursive: true, force: true }));
 
-const text = 'algoviz '.repeat(500);
+const text = 'compare '.repeat(500);
 writeFileSync(join(dir, 'a.js'), text);
 mkdirSync(join(dir, 'fonts'));
 writeFileSync(join(dir, 'fonts', 'b.css'), 'body{}');

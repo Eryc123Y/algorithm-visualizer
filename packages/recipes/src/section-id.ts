@@ -2,7 +2,7 @@
  * Section ids from operation titles (ADR 0020): "insert 5" becomes
  * `insert-5`, and a repeat becomes `insert-5-2`.
  */
-import { LIMITS } from '@algoviz/spec';
+import { LIMITS } from '@algomotion/spec';
 
 const MAX = LIMITS.nameLength;
 

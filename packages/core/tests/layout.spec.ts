@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { uniformFont } from '@algoviz/fonts';
-import type { VisualizationInput } from '@algoviz/spec';
+import { uniformFont } from '@algomotion/fonts';
+import type { VisualizationInput } from '@algomotion/spec';
 
 import {
   bareLayoutOptions,

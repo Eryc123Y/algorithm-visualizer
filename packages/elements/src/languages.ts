@@ -6,16 +6,16 @@
  * for the page only. Players on the page hear of a choice through a window
  * event, and players in other tabs through the `storage` event.
  */
-import type { CodeListing } from '@algoviz/core';
+import type { CodeListing } from '@algomotion/core';
 
 /** The local storage key of the reader's choice, one for the whole site. */
-export const LANGUAGE_KEY = 'algoviz:language';
+export const LANGUAGE_KEY = 'algomotion:language';
 
 /**
  * The window event that tells every player on the page about a reader's
  * choice, so that they all show the same language.
  */
-export const LANGUAGE_EVENT = 'algoviz-language';
+export const LANGUAGE_EVENT = 'algomotion-language';
 
 export interface LanguageEventDetail {
   readonly language: string;

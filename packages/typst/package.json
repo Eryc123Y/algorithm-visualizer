@@ -1,19 +1,19 @@
 {
-  "name": "@algoviz/typst",
+  "name": "@algomotion/typst",
   "version": "0.0.0",
   "private": true,
-  "description": "The algoviz Typst package: the engine in QuickJS-ng inside a Typst WebAssembly plugin (ADR 0026).",
+  "description": "The algomotion Typst package: the engine in QuickJS-ng inside a Typst WebAssembly plugin (ADR 0026).",
   "type": "module",
   "sideEffects": false,
   "scripts": {
-    "build": "node --conditions=@algoviz/source scripts/build.ts",
+    "build": "node --conditions=@algomotion/source scripts/build.ts",
     "build:plugin": "node scripts/build-plugin.ts",
     "test:typst": "vitest run --config vitest.typst.config.ts"
   },
   "dependencies": {
-    "@algoviz/recipes": "*",
-    "@algoviz/spec": "*",
-    "@algoviz/svg": "*",
+    "@algomotion/recipes": "*",
+    "@algomotion/spec": "*",
+    "@algomotion/svg": "*",
     "zod": "^4.6.7"
   }
 }

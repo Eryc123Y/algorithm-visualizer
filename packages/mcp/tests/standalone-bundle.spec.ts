@@ -19,7 +19,7 @@ import { runInNewContext } from 'node:vm';
 
 import { beforeAll, describe, expect, it } from 'vitest';
 
-import { findAlgorithm, runAlgorithm } from '@algoviz/recipes';
+import { findAlgorithm, runAlgorithm } from '@algomotion/recipes';
 
 import { bundleStandalone } from '../scripts/standalone.ts';
 import { main } from '../src/cli.ts';
@@ -68,7 +68,7 @@ function node(argv: readonly string[]): Run {
   return { code, out: out.join(''), err: err.join('') };
 }
 
-const dir = mkdtempSync(join(tmpdir(), 'algoviz-standalone-'));
+const dir = mkdtempSync(join(tmpdir(), 'algomotion-standalone-'));
 const bst = join(dir, 'bst.json');
 const bstRun = runAlgorithm('bst', findAlgorithm('bst')!.examples[0]);
 if (!bstRun.ok) throw new Error('bst');

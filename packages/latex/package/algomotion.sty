@@ -1,0 +1,909 @@
+%% algomotion.sty: figures of algorithms and data structures, drawn with TikZ
+%% in the document's own fonts (ADR 0027 of the algomotion repository).
+%%
+%%   \algomotion[step=relax#3]{dijkstra}{"graph": {...}, "source": "A"}
+%%   \algomotionfile[step=3]{heap.json}                 a JSON document
+%%   \algomotionfile[algorithm=dijkstra]{graph.json}    an input in a file
+%%   \algomotioninput{figure.tex}                       made by algomotion export
+%%   \algomotionset{theme=print, width=\linewidth}
+%%   \algomotion[steps=0..-1]{dijkstra}{...}            Beamer overlays (ADR 0028)
+%%
+%% The package runs the algomotion command through shell escape, as minted
+%% runs Pygments, and keeps the figures it writes in a cache directory.
+%% A figure that did not change is read from the cache without running
+%% anything, so cached figures need no shell escape at all.
+\NeedsTeXFormat{LaTeX2e}[2024-06-01]
+\ProvidesExplPackage{algomotion}{2026-11-08}{0.1.0}
+  {Algorithm figures drawn with TikZ (algomotion)}
+
+\RequirePackage{tikz}
+
+% ---------------------------------------------------------------------------
+% Messages
+% ---------------------------------------------------------------------------
+
+\msg_new:nnnn { algomotion } { no-shell-escape }
+  { Shell~escape~is~off,~so~the~figure~of~#1~cannot~be~made. }
+  {
+    The~algomotion~package~runs~the~algomotion~command~to~make~a~figure~the~
+    first~time.~Compile~with~-shell-escape,~for~example~
+    pdflatex~-shell-escape~file.tex.~Figures~made~before~are~read~from~
+    the~cache~directory~without~it.
+  }
+\msg_new:nnnn { algomotion } { restricted-shell-escape }
+  { Restricted~shell~escape~did~not~run~algomotion,~so~the~figure~of~#1~is~missing. }
+  {
+    In~restricted~mode~TeX~runs~only~the~commands~listed~in~
+    shell_escape_commands,~and~algomotion~is~not~one~of~them.~Compile~with~
+    -shell-escape.
+  }
+\msg_new:nnnn { algomotion } { no-command }
+  { The~command~'#1'~made~no~figure. }
+  {
+    Check~that~the~algomotion~command~is~installed~and~on~the~PATH,~for~
+    example~with~'algomotion~--help'~in~a~terminal,~or~name~it~with~the~
+    package~option~command=...~The~terminal~output~of~this~run~may~say~
+    more.
+  }
+\msg_new:nnnn { algomotion } { failed }
+  { algomotion~could~not~make~the~figure:~#1 }
+  { The~figure~is~replaced~by~a~box~with~the~whole~message. }
+\msg_new:nnnn { algomotion } { bad-argument }
+  { The~#1~'#2'~has~characters~that~it~cannot~have. }
+  { #3 }
+\msg_new:nnnn { algomotion } { no-file }
+  { File~'#1'~not~found. }
+  {
+    \iow_char:N\\algomotionfile~reads~a~JSON~document,~or~an~input~with~
+    algorithm=,~and~\iow_char:N\\algomotioninput~a~figure~made~by~
+    'algomotion~export~--format~tikz'.
+  }
+\msg_new:nnnn { algomotion } { long-input }
+  { The~input~of~#1~is~too~long~for~a~command~line. }
+  {
+    Windows~limits~a~command~line~to~8191~characters,~and~the~input~goes~
+    there~in~hexadecimal.~Put~the~input~in~a~JSON~file~and~use~
+    \iow_char:N\\algomotionfile[algorithm=#1]{file.json}.
+  }
+\msg_new:nnnn { algomotion } { bad-start }
+  { start~takes~+~or~a~slide~number,~not~'#1'. }
+  {
+    +,~the~default,~starts~a~series~on~the~next~step~of~Beamer's~
+    incremental~count,~as~<+>~does;~a~number~such~as~2~starts~it~on~
+    that~slide.
+  }
+\msg_new:nnnn { algomotion } { no-overlays }
+  { A~series~of~#1~frames~needs~Beamer~for~its~overlays,~so~only~its~last~frame~is~drawn. }
+  {
+    steps=~draws~one~frame~per~slide~in~a~Beamer~frame.~For~several~
+    frames~side~by~side,~use~one~\iow_char:N\\algomotion~per~frame~with~step=.
+  }
+\msg_new:nnnn { algomotion } { format }
+  { The~figure~'#1'~has~format~#2,~but~this~package~reads~format~#3. }
+  {
+    The~figure~was~made~by~another~version~of~algomotion.~Use~the~algomotion~
+    command~and~package~of~one~release,~and~delete~the~cache~directory.
+  }
+
+% ---------------------------------------------------------------------------
+% Options and keys
+% ---------------------------------------------------------------------------
+
+\str_const:Nn \c__algomotion_version_str { 0.1.0 }
+% The version of the figure files that \algomotion@figure reads. Format 2
+% starts each figure's colours with \algomotion@fonts (ADR 0030).
+\int_const:Nn \c__algomotion_format_int { 2 }
+
+\tl_new:N \l__algomotion_command_tl
+\str_new:N \l__algomotion_cache_str
+\tl_new:N \l__algomotion_step_tl
+\tl_new:N \l__algomotion_steps_tl
+\bool_new:N \l__algomotion_series_bool
+\str_new:N \l__algomotion_start_str
+\tl_new:N \l__algomotion_theme_tl
+% Where structures placed on the side go (ADR 0029): wide or narrow, or
+% empty for the document's default.
+\str_new:N \l__algomotion_layout_str
+\str_new:N \g__algomotion_default_layout_str
+\str_gset:Nn \g__algomotion_default_layout_str { narrow }
+\tl_new:N \l__algomotion_algorithm_tl
+\dim_new:N \l__algomotion_width_dim
+\dim_new:N \l__algomotion_height_dim
+% Empty when scale is not given: the slide box in Beamer, the natural
+% size elsewhere (ADR 0033).
+\tl_new:N \l__algomotion_scale_tl
+\tl_new:N \l__algomotion_value_font_tl
+\tl_new:N \l__algomotion_label_font_tl
+% The families the figure's theme sets values and labels in (ADR 0030),
+% which \algomotion@fonts gives at the start of the figure's colours.
+\tl_new:N \l__algomotion_value_family_tl
+\tl_new:N \l__algomotion_label_family_tl
+\tl_set:Nn \l__algomotion_value_family_tl { normal }
+\tl_set:Nn \l__algomotion_label_family_tl { sf }
+
+% The slide of a series' first frame: + for Beamer's incremental count, as
+% <+> takes it, or a slide number, short enough for TeX's integers.
+\regex_const:Nn \c__algomotion_start_regex { \A (\+ | [1-9] [0-9]{0,3}) \Z }
+\str_new:N \l__algomotion_tmp_str
+\cs_new_protected:Npn \__algomotion_set_start:n #1
+  {
+    \str_set:Nn \l__algomotion_tmp_str {#1}
+    \regex_match:NVTF \c__algomotion_start_regex \l__algomotion_tmp_str
+      { \str_set_eq:NN \l__algomotion_start_str \l__algomotion_tmp_str }
+      { \msg_error:nnV { algomotion } { bad-start } \l__algomotion_tmp_str }
+  }
+\cs_generate_variant:Nn \regex_match:NnTF { NV }
+\cs_generate_variant:Nn \msg_error:nnn { nnV }
+
+\keys_define:nn { algomotion }
+  {
+    command .tl_set:N = \l__algomotion_command_tl ,
+    command .initial:n = algomotion ,
+    command .usage:n = preamble ,
+    cachedir .str_set:N = \l__algomotion_cache_str ,
+    cachedir .initial:n = _algomotion ,
+    cachedir .usage:n = preamble ,
+    % step and steps replace each other: the last one set applies.
+    step .code:n =
+      {
+        \tl_set:Nn \l__algomotion_step_tl {#1}
+        \bool_set_false:N \l__algomotion_series_bool
+      } ,
+    step .initial:n = -1 ,
+    steps .code:n =
+      {
+        \tl_set:Nn \l__algomotion_steps_tl {#1}
+        \bool_set_true:N \l__algomotion_series_bool
+      } ,
+    steps .default:n = ,
+    start .code:n = \__algomotion_set_start:n {#1} ,
+    start .initial:n = + ,
+    theme .tl_set:N = \l__algomotion_theme_tl ,
+    theme .initial:n = light ,
+    layout .choices:nn =
+      { wide, narrow, auto }
+      {
+        \int_compare:nNnTF \l_keys_choice_int = 3
+          { \str_clear:N \l__algomotion_layout_str }
+          { \str_set:NV \l__algomotion_layout_str \l_keys_choice_tl }
+      } ,
+    algorithm .tl_set:N = \l__algomotion_algorithm_tl ,
+    width .dim_set:N = \l__algomotion_width_dim ,
+    width .initial:n = 0pt ,
+    height .dim_set:N = \l__algomotion_height_dim ,
+    height .initial:n = 0pt ,
+    % Without a value, the default again.
+    scale .tl_set:N = \l__algomotion_scale_tl ,
+    scale .initial:n = ,
+    scale .default:n = ,
+    % Empty: the family the figure's theme names.
+    value~font .tl_set:N = \l__algomotion_value_font_tl ,
+    value~font .initial:n = ,
+    label~font .tl_set:N = \l__algomotion_label_font_tl ,
+    label~font .initial:n = ,
+  }
+\ProcessKeyOptions [ algomotion ]
+
+\NewDocumentCommand \algomotionset { m } { \keys_set:nn { algomotion } {#1} }
+
+% ---------------------------------------------------------------------------
+% Drawing a figure file
+% ---------------------------------------------------------------------------
+
+% One scene unit, set before a figure is drawn. Figure files write every
+% length in it.
+\dim_new:N \algomotion@u
+
+% At natural size a scene unit is a sixteenth of the current font size, so
+% values (20 units) come out at 1.25 times the text around the figure and
+% labels (12 units) at three quarters of it.
+\fp_const:Nn \c__algomotion_units_per_size_fp { 16 }
+
+\fp_new:N \l__algomotion_unit_fp
+\fp_new:N \l__algomotion_text_fp
+\box_new:N \l__algomotion_text_box
+\dim_new:N \l__algomotion_halo_dim
+\dim_new:N \g__algomotion_size_dim
+\str_new:N \l__algomotion_current_str
+
+% The figures of the file being read, each {colours}{drawing}, and the
+% largest canvas among them (ADR 0028). A file holds one figure, or every
+% figure of a series.
+\bool_new:N \l__algomotion_reading_bool
+\seq_new:N \l__algomotion_frames_seq
+\fp_new:N \l__algomotion_canvas_width_fp
+\fp_new:N \l__algomotion_canvas_height_fp
+\tl_new:N \l__algomotion_frame_tl
+
+% #1 format, #2 width, #3 height (scene units), #4 colours, #5 drawing.
+% While a file is read, it keeps the figure for \__algomotion_draw_frames:;
+% called on its own, it draws the figure at once.
+\cs_new_protected:cpn { algomotion@figure } #1#2#3#4#5
+  {
+    \int_compare:nNnTF {#1} = { \c__algomotion_format_int }
+      {
+        \bool_if:NTF \l__algomotion_reading_bool
+          {
+            \fp_set:Nn \l__algomotion_canvas_width_fp
+              { max ( \l__algomotion_canvas_width_fp , #2 ) }
+            \fp_set:Nn \l__algomotion_canvas_height_fp
+              { max ( \l__algomotion_canvas_height_fp , #3 ) }
+            \seq_put_right:Nn \l__algomotion_frames_seq { {#4} {#5} }
+          }
+          { \__algomotion_draw:nnnn {#2} {#3} {#4} {#5} }
+      }
+      {
+        \msg_error:nneee { algomotion } { format }
+          { \l__algomotion_current_str } {#1}
+          { \int_use:N \c__algomotion_format_int }
+      }
+  }
+\cs_generate_variant:Nn \msg_error:nnnnn { nneee }
+
+% The unit of a canvas #1 by #2 (ADR 0027, 0033), from the first rule that
+% applies: width or height fits the figure inside the box of the sides
+% given, whose other side is the slide box's in Beamer and unbounded
+% elsewhere; scale is the natural size times scale; in Beamer the figure
+% fits the slide box, the line by three quarters of the text height;
+% elsewhere it has its natural size. The natural size is never wider than
+% the line.
+\fp_const:Nn \c__algomotion_slide_height_fp { 0.75 }
+\bool_new:N \g__algomotion_slides_bool
+\cs_new_protected:Npn \__algomotion_unit:nn #1#2
+  {
+    \bool_lazy_or:nnTF
+      { \dim_compare_p:nNn \l__algomotion_width_dim > \c_zero_dim }
+      { \dim_compare_p:nNn \l__algomotion_height_dim > \c_zero_dim }
+      {
+        \__algomotion_fit:nnnn {#1} {#2}
+          { \l__algomotion_width_dim } { \l__algomotion_height_dim }
+      }
+      {
+        \tl_if_empty:NTF \l__algomotion_scale_tl
+          {
+            \bool_if:NTF \g__algomotion_slides_bool
+              { \__algomotion_fit:nnnn {#1} {#2} { 0pt } { 0pt } }
+              { \__algomotion_natural:nn { 1 } {#1} }
+          }
+          { \__algomotion_natural:Vn \l__algomotion_scale_tl {#1} }
+      }
+    \dim_set:Nn \algomotion@u { \fp_to_dim:n { \l__algomotion_unit_fp } }
+  }
+
+% The largest unit at which a canvas #1 by #2 fits a box #3 by #4. A side
+% of 0pt is the slide box's in Beamer, and unbounded elsewhere.
+\cs_new_protected:Npn \__algomotion_fit:nnnn #1#2#3#4
+  {
+    \fp_set:Nn \l__algomotion_unit_fp { inf }
+    \__algomotion_fit_side:nnn {#1} {#3} { \linewidth }
+    \__algomotion_fit_side:nnn {#2} {#4}
+      { \fp_to_dim:n { \c__algomotion_slide_height_fp * \textheight } }
+    % A box without a bounded side, as where there is no line.
+    \fp_compare:nNnT \l__algomotion_unit_fp = { inf }
+      { \__algomotion_natural:nn { 1 } {#1} }
+  }
+
+% One side: the canvas's #1 units in the length #2, or in the slide box's
+% #3 when #2 is 0pt in Beamer; nothing for an unbounded or empty side.
+\cs_new_protected:Npn \__algomotion_fit_side:nnn #1#2#3
+  {
+    \dim_compare:nNnTF {#2} > \c_zero_dim
+      { \__algomotion_fit_unit:nn {#1} {#2} }
+      {
+        \bool_if:NT \g__algomotion_slides_bool
+          {
+            \dim_compare:nNnT {#3} > \c_zero_dim
+              { \__algomotion_fit_unit:nn {#1} {#3} }
+          }
+      }
+  }
+\cs_new_protected:Npn \__algomotion_fit_unit:nn #1#2
+  {
+    \fp_set:Nn \l__algomotion_unit_fp
+      { min ( \l__algomotion_unit_fp , \dim_to_fp:n {#2} / (#1) ) }
+  }
+
+% The natural size times #1, never wider than the line, for a canvas #2
+% units wide.
+\cs_new_protected:Npn \__algomotion_natural:nn #1#2
+  {
+    \fp_set:Nn \l__algomotion_unit_fp
+      { (#1) * \f@size / \c__algomotion_units_per_size_fp }
+    \dim_compare:nNnT \linewidth > \c_zero_dim
+      { \__algomotion_fit_unit:nn {#2} { \linewidth } }
+  }
+\cs_generate_variant:Nn \__algomotion_natural:nn { V }
+
+\cs_new_protected:Npn \__algomotion_draw:nnnn #1#2#3#4
+  { \__algomotion_picture:nnn {#1} {#2} { #3 #4 } }
+
+% A picture of the canvas #1 by #2, drawing #3.
+\cs_new_protected:Npn \__algomotion_picture:nnn #1#2#3
+  {
+    \__algomotion_unit:nn {#1} {#2}
+    \begin{tikzpicture} [ x = \algomotion@u , y = -\algomotion@u ]
+      \useasboundingbox (0,0) rectangle (#1,#2);
+      #3
+    \end{tikzpicture}
+  }
+\cs_generate_variant:Nn \__algomotion_picture:nnn { ee }
+
+% Beamer, or beamerarticle notes made from the same frames, have overlays.
+% Slides have room beside a figure's main structure, so Beamer draws side
+% structures beside it; beamerarticle notes, like other documents, below.
+\bool_new:N \g__algomotion_overlays_bool
+\hook_gput_code:nnn { begindocument } { algomotion }
+  {
+    \bool_lazy_or:nnT
+      { \IfClassLoadedTF { beamer } { \c_true_bool } { \c_false_bool } }
+      { \IfPackageLoadedTF { beamerarticle } { \c_true_bool } { \c_false_bool } }
+      { \bool_gset_true:N \g__algomotion_overlays_bool }
+    \IfClassLoadedT { beamer }
+      {
+        \str_gset:Nn \g__algomotion_default_layout_str { wide }
+        \bool_gset_true:N \g__algomotion_slides_bool
+      }
+  }
+
+% The layout of a figure: the key's, or the document's default.
+\cs_new:Npn \__algomotion_layout:
+  {
+    \str_if_empty:NTF \l__algomotion_layout_str
+      { \g__algomotion_default_layout_str }
+      { \l__algomotion_layout_str }
+  }
+
+% The figures read from a file: one is a figure; several share one picture,
+% one frame per slide in Beamer, and the last frame elsewhere (ADR 0028).
+\cs_new_protected:Npn \__algomotion_draw_frames:
+  {
+    \int_case:nnF { \seq_count:N \l__algomotion_frames_seq }
+      {
+        { 0 } { }
+        { 1 } { \__algomotion_draw_last: }
+      }
+      {
+        \bool_if:NTF \g__algomotion_overlays_bool
+          {
+            \__algomotion_picture:een
+              { \fp_use:N \l__algomotion_canvas_width_fp }
+              { \fp_use:N \l__algomotion_canvas_height_fp }
+              {
+                \seq_map_indexed_function:NN \l__algomotion_frames_seq
+                  \__algomotion_overlay:nn
+              }
+          }
+          {
+            \msg_warning:nne { algomotion } { no-overlays }
+              { \seq_count:N \l__algomotion_frames_seq }
+            \__algomotion_draw_last:
+          }
+      }
+  }
+
+% The last figure read, alone in its picture.
+\cs_new_protected:Npn \__algomotion_draw_last:
+  {
+    \seq_get_right:NN \l__algomotion_frames_seq \l__algomotion_frame_tl
+    \__algomotion_picture:een
+      { \fp_use:N \l__algomotion_canvas_width_fp }
+      { \fp_use:N \l__algomotion_canvas_height_fp }
+      { \exp_last_unbraced:NV \use:nn \l__algomotion_frame_tl }
+  }
+
+% Frame #1 of the series, #2 its {colours}{drawing}, on its slides: frame k
+% on slide start + k - 1, or on the next step of Beamer's incremental count
+% for start=+; the last frame from its slide on. Handouts, transparencies
+% and beamerarticle show the last frame. Colours are numbered per figure,
+% so each frame keeps its own in a scope.
+\cs_new_protected:Npn \__algomotion_overlay:nn #1#2
+  {
+    \__algomotion_only:en { \__algomotion_spec:n {#1} }
+      { \begin{scope} \use:nn #2 \end{scope} }
+  }
+\cs_new_protected:Npn \__algomotion_only:nn #1#2 { \only < #1 > {#2} }
+\cs_generate_variant:Nn \__algomotion_only:nn { e }
+
+% An overlay specification, with Beamer's colons, which expl3 reads as
+% letters.
+\cs_new:Npn \__algomotion_spec:n #1
+  {
+    \str_if_eq:VnTF \l__algomotion_start_str { + }
+      { + }
+      { \int_eval:n { \l__algomotion_start_str + #1 - 1 } }
+    \int_compare:nNnTF {#1} < { \seq_count:N \l__algomotion_frames_seq }
+      { | handout \c_colon_str 0 | trans \c_colon_str 0 | article \c_colon_str 0 }
+      { - | handout \c_colon_str 1 | trans \c_colon_str 1 | article \c_colon_str 1 }
+  }
+\cs_generate_variant:Nn \str_if_eq:nnTF { Vn }
+
+\cs_new_protected:cpn { algomotion@color } #1#2
+  { \definecolor { algomotion@c #1 } { HTML } {#2} }
+
+% The families of the figure's theme for values (#1) and labels (#2):
+% normal, rm, sf or tt. Local to the figure, like its colours.
+\cs_new_protected:cpn { algomotion@fonts } #1#2
+  {
+    \tl_set:Nn \l__algomotion_value_family_tl {#1}
+    \tl_set:Nn \l__algomotion_label_family_tl {#2}
+  }
+
+% The font of role #1 (value or label): its key, or the theme's family.
+\cs_new_protected:Npn \__algomotion_font:n #1
+  {
+    \tl_if_empty:cTF { l__algomotion_ #1 _font_tl }
+      {
+        \normalfont
+        \str_case_e:nn { \tl_use:c { l__algomotion_ #1 _family_tl } }
+          {
+            { rm } { \rmfamily }
+            { sf } { \sffamily }
+            { tt } { \ttfamily }
+          }
+      }
+      { \use:c { l__algomotion_ #1 _font_tl } }
+  }
+
+% #1 x,y  #2 alignment l|c|r  #3 size  #4 room (0 for none)  #5 value|label
+% #6 colour  #7 halo (colour,padding) or nothing  #8 text
+\cs_new_protected:cpn { algomotion@text } #1#2#3#4#5#6#7#8
+  {
+    \node
+      [
+        inner~sep = 0pt , outer~sep = 0pt ,
+        anchor = \str_case:nn {#2} { {l} {base~west} {c} {base} {r} {base~east} }
+      ]
+      at (#1) { \__algomotion_text:nnnnnn {#3} {#4} {#5} {#6} {#7} {#8} } ;
+  }
+
+% The text in the document's font for its role, scaled from the size it is
+% set at to its size in the scene, and down to its room if it is wider.
+\cs_new_protected:Npn \__algomotion_text:nnnnnn #1#2#3#4#5#6
+  {
+    \hbox_set:Nn \l__algomotion_text_box
+      {
+        \__algomotion_font:n {#3}
+        % The size the font command left, whatever it is.
+        \dim_gset:Nn \g__algomotion_size_dim { \f@size pt }
+        \color {#4}
+        #6
+      }
+    \fp_set:Nn \l__algomotion_text_fp
+      { #1 * \l__algomotion_unit_fp / \dim_to_fp:n { \g__algomotion_size_dim } }
+    \bool_lazy_and:nnT
+      { \fp_compare_p:nNn {#2} > { 0 } }
+      { \dim_compare_p:nNn { \box_wd:N \l__algomotion_text_box } > \c_zero_dim }
+      {
+        \fp_set:Nn \l__algomotion_text_fp
+          {
+            min ( \l__algomotion_text_fp ,
+              #2 * \l__algomotion_unit_fp
+                / \dim_to_fp:n { \box_wd:N \l__algomotion_text_box } )
+          }
+      }
+    \box_scale:Nnn \l__algomotion_text_box
+      { \l__algomotion_text_fp } { \l__algomotion_text_fp }
+    \tl_if_empty:nF {#5} { \__algomotion_halo:w #5 \q_stop }
+    \box_use_drop:N \l__algomotion_text_box
+  }
+
+% A box of the halo colour behind the text, as far beyond it as the halo
+% of the SVG figure reaches. TikZ cannot stroke glyphs in every engine.
+\cs_new_protected:Npn \__algomotion_halo:w #1 , #2 \q_stop
+  {
+    \dim_set:Nn \l__algomotion_halo_dim {#2}
+    \hbox_overlap_right:n
+      {
+        \skip_horizontal:n { -\l__algomotion_halo_dim }
+        \color {#1}
+        \rule
+          [ \dim_eval:n { -\box_dp:N \l__algomotion_text_box - \l__algomotion_halo_dim } ]
+          { \dim_eval:n { \box_wd:N \l__algomotion_text_box + 2\l__algomotion_halo_dim } }
+          {
+            \dim_eval:n
+              {
+                \box_ht:N \l__algomotion_text_box + \box_dp:N \l__algomotion_text_box
+                + 2\l__algomotion_halo_dim
+              }
+          }
+      }
+  }
+
+% Reads a figure file, with @ as a letter for its macros, then draws its
+% figures. The blank line between two figures of a series is a \par, which
+% must not end the paragraph the picture is in, so \par does nothing while
+% the file is read; drawing gets it back.
+\cs_new_protected:Npn \__algomotion_input:n #1
+  {
+    \group_begin:
+      \str_set:Nn \l__algomotion_current_str {#1}
+      \bool_set_true:N \l__algomotion_reading_bool
+      \seq_clear:N \l__algomotion_frames_seq
+      \fp_zero:N \l__algomotion_canvas_width_fp
+      \fp_zero:N \l__algomotion_canvas_height_fp
+      \char_set_catcode_letter:N \@
+      \cs_set_eq:NN \__algomotion_saved_par: \par
+      \cs_set_eq:NN \par \scan_stop:
+      \file_input:n {#1}
+      \cs_set_eq:NN \par \__algomotion_saved_par:
+      \bool_set_false:N \l__algomotion_reading_bool
+      \__algomotion_draw_frames:
+    \group_end:
+  }
+\cs_generate_variant:Nn \__algomotion_input:n { V }
+
+% ---------------------------------------------------------------------------
+% Errors in the document
+% ---------------------------------------------------------------------------
+
+\seq_new:N \l__algomotion_lines_seq
+\ior_new:N \g__algomotion_ior
+
+% A framed box with the lines of a message, in place of the figure.
+\cs_new_protected:Npn \__algomotion_error_box:
+  {
+    \par \noindent
+    \fbox
+      {
+        \parbox { \dim_eval:n { \linewidth - 2\fboxsep - 2\fboxrule } }
+          {
+            \raggedright \ttfamily \small
+            \seq_use:Nn \l__algomotion_lines_seq { \par }
+          }
+      }
+    \par
+  }
+
+% The engine's message, from the error file the command wrote.
+\cs_new_protected:Npn \__algomotion_fail_file:n #1
+  {
+    \seq_clear:N \l__algomotion_lines_seq
+    \ior_open:Nn \g__algomotion_ior {#1}
+    \ior_str_map_inline:Nn \g__algomotion_ior
+      { \seq_put_right:Nn \l__algomotion_lines_seq {##1} }
+    \ior_close:N \g__algomotion_ior
+    \msg_error:nne { algomotion } { failed }
+      { \seq_item:Nn \l__algomotion_lines_seq { 1 } }
+    \__algomotion_error_box:
+  }
+\cs_generate_variant:Nn \__algomotion_fail_file:n { V }
+
+% A message of the package's own, with a detail such as the command line.
+\cs_new_protected:Npn \__algomotion_fail:nn #1#2
+  {
+    \seq_clear:N \l__algomotion_lines_seq
+    \seq_put_right:Nn \l__algomotion_lines_seq { algomotion:~#1 }
+    \seq_put_right:Ne \l__algomotion_lines_seq {#2}
+    \__algomotion_error_box:
+  }
+
+% ---------------------------------------------------------------------------
+% Text that goes to the shell
+% ---------------------------------------------------------------------------
+
+\str_new:N \l__algomotion_step_str
+\str_new:N \l__algomotion_steps_str
+\str_new:N \l__algomotion_theme_str
+\str_new:N \l__algomotion_id_str
+\str_new:N \l__algomotion_input_str
+\str_new:N \l__algomotion_file_str
+\str_new:N \l__algomotion_hex_str
+\str_new:N \l__algomotion_hash_str
+\str_new:N \l__algomotion_figure_str
+\str_new:N \l__algomotion_error_str
+\str_new:N \l__algomotion_call_str
+
+% TeX's tokens as the characters they stand for: escaped specials (\# \%
+% \{ \} \& \$ \_) become the characters; a doubled # becomes one, as TeX
+% doubles every parameter character it turns into a string; and the space
+% TeX writes after a control word goes, so JSON escapes such as \n and
+% \u00e9 come through.
+\cs_new_protected:Npn \__algomotion_to_str:Nn #1#2
+  {
+    \str_set:Ne #1 { \tl_to_str:n {#2} }
+    \regex_replace_all:nnN
+      {
+        (\\\\) | (\\[A-Za-z]+)\ ? | \\ ([\#\%\{\}\&\$\_]) | (\#)\#
+      }
+      { \1\2\3\4 } #1
+    \tl_trim_spaces:N #1
+  }
+\cs_generate_variant:Nn \__algomotion_to_str:Nn { NV }
+
+% Registry ids, selectors and theme names have no character a shell reads.
+\regex_const:Nn \c__algomotion_id_regex { \A [a-z0-9] [a-z0-9.\-]* \Z }
+\regex_const:Nn \c__algomotion_step_regex { \A [A-Za-z0-9\#/.,\-]+ \Z }
+\regex_const:Nn \c__algomotion_theme_regex { \A [a-z0-9\-]+ \Z }
+% File names are quoted: none of the characters shells read inside quotes.
+\regex_const:Nn \c__algomotion_path_regex
+  { \A [^\"\$\`\\\%\!\^\&\|\<\>\;\*\?\x{00}-\x{1F}]+ \Z }
+
+% Runs #4 if the string #2 matches #1; otherwise an error names it (#3).
+\cs_new_protected:Npn \__algomotion_check:NNnn #1#2#3#4
+  {
+    \regex_match:NVTF #1 #2
+      {#4}
+      {
+        \msg_error:nneee { algomotion } { bad-argument } {#3} {#2}
+          { \__algomotion_hint:n {#3} }
+      }
+  }
+
+\cs_new:Npn \__algomotion_hint:n #1
+  {
+    \str_case:nn {#1}
+      {
+        { step }
+          {
+            A~step~is~a~selector,~such~as~relax\iow_char:N\#3~or~
+            insert-5/relax.~Write~relax\iow_char:N\\\iow_char:N\#3~inside~
+            macro~definitions~and~Beamer~frames.~For~several~frames,~use~
+            steps=.
+          }
+        { steps }
+          {
+            steps~takes~selectors~separated~by~commas,~such~as~
+            relax\iow_char:N\#1..-1~or~\iow_char:N\{0,~insert-5\iow_char:N\}.~
+            Write~\iow_char:N\\\iow_char:N\#~inside~macro~definitions~and~
+            Beamer~frames.
+          }
+        { theme }
+          {
+            Theme~names~are~written~in~lower~case~with~hyphens,~such~as~
+            light,~textbook~or~turbo-c.
+          }
+        { algorithm~id } { Algorithm~ids~are~written~like~dijkstra~or~bst.delete. }
+        { file~name }
+          {
+            Rename~the~file~or~its~directories~without~quotes,~\iow_char:N\$,~
+            \iow_char:N\%,~!,~\iow_char:N\&~and~the~like.
+          }
+        { cache~directory }
+          { Choose~a~name~without~quotes,~\iow_char:N\$,~\iow_char:N\%~and~the~like. }
+      }
+  }
+
+% The keys of one figure, with its step or steps and its theme as strings.
+% Selectors have no spaces, so the spaces of a list such as {0, -1} go.
+\cs_new_protected:Npn \__algomotion_options:n #1
+  {
+    \keys_set:nn { algomotion } {#1}
+    \__algomotion_to_str:NV \l__algomotion_step_str \l__algomotion_step_tl
+    \__algomotion_to_str:NV \l__algomotion_steps_str \l__algomotion_steps_tl
+    \str_remove_all:Nn \l__algomotion_steps_str { ~ }
+    \__algomotion_to_str:NV \l__algomotion_theme_str \l__algomotion_theme_tl
+  }
+
+% Runs #1 once the step or steps, the theme and the cache directory are
+% checked. Steps may be empty, for every frame.
+\cs_new_protected:Npn \__algomotion_checked:n #1
+  {
+    \bool_if:NTF \l__algomotion_series_bool
+      {
+        \str_if_empty:NTF \l__algomotion_steps_str
+          { \__algomotion_checked_rest:n {#1} }
+          {
+            \__algomotion_check:NNnn \c__algomotion_step_regex \l__algomotion_steps_str
+              { steps } { \__algomotion_checked_rest:n {#1} }
+          }
+      }
+      {
+        \__algomotion_check:NNnn \c__algomotion_step_regex \l__algomotion_step_str
+          { step } { \__algomotion_checked_rest:n {#1} }
+      }
+  }
+\cs_new_protected:Npn \__algomotion_checked_rest:n #1
+  {
+    \__algomotion_check:NNnn \c__algomotion_theme_regex \l__algomotion_theme_str
+      { theme }
+      {
+        \__algomotion_check:NNnn \c__algomotion_path_regex \l__algomotion_cache_str
+          { cache~directory } {#1}
+      }
+  }
+
+% What the figure shows, for the cache key: a step, or steps: and a list.
+% Steps have no colon, so the two never meet.
+\cs_new:Npn \__algomotion_selection:
+  {
+    \bool_if:NTF \l__algomotion_series_bool
+      { steps \c_colon_str \l__algomotion_steps_str }
+      { \l__algomotion_step_str }
+  }
+
+% The command line's selection: --step, and --one-file for a series.
+\cs_new:Npn \__algomotion_step_option:
+  {
+    \bool_if:NTF \l__algomotion_series_bool
+      {
+        \str_if_empty:NF \l__algomotion_steps_str
+          { \c_space_tl --step= \l__algomotion_steps_str }
+        \c_space_tl --one-file
+      }
+      { \c_space_tl --step= \l__algomotion_step_str }
+  }
+
+% ---------------------------------------------------------------------------
+% Making figures
+% ---------------------------------------------------------------------------
+
+% #1: the source's arguments on the command line; #2: what the source is,
+% for the cache key; #3: its name, for messages.
+\cs_new_protected:Npn \__algomotion_make:nnn #1#2#3
+  {
+    \str_set:Ne \l__algomotion_hash_str
+      {
+        \str_lowercase:f
+          {
+            \str_mdfive_hash:e
+              {
+                algomotion~tikz~\int_use:N \c__algomotion_format_int \c_space_tl
+                \c__algomotion_version_str ; #2 ;
+                \__algomotion_selection: ; \l__algomotion_theme_str ;
+                \__algomotion_layout:
+              }
+          }
+      }
+    \str_set:Ne \l__algomotion_figure_str
+      { \l__algomotion_cache_str / \l__algomotion_hash_str .tex }
+    \str_set:Ne \l__algomotion_error_str
+      { \l__algomotion_cache_str / \l__algomotion_hash_str .err }
+    \file_if_exist:nTF { \l__algomotion_figure_str }
+      { \__algomotion_input:V \l__algomotion_figure_str }
+      {
+        \sys_if_shell:TF
+          { \__algomotion_run:nn {#1} {#3} }
+          {
+            \msg_error:nne { algomotion } { no-shell-escape } {#3}
+            \__algomotion_fail:nn { shell~escape~is~off. }
+              { Compile~with~-shell-escape~to~make~the~figure~of~#3. }
+          }
+      }
+  }
+\cs_generate_variant:Nn \str_mdfive_hash:n { e }
+
+% Runs the command, then draws its figure or says why there is none.
+\cs_new_protected:Npn \__algomotion_run:nn #1#2
+  {
+    \str_set:Ne \l__algomotion_call_str
+      {
+        \l__algomotion_command_tl \c_space_tl export \c_space_tl #1
+        \__algomotion_step_option:
+        \c_space_tl --theme= \l__algomotion_theme_str
+        \c_space_tl --layout= \__algomotion_layout:
+        \c_space_tl --format=tikz
+        \c_space_tl --out=" \l__algomotion_cache_str "
+        \c_space_tl --name= \l__algomotion_hash_str
+        \c_space_tl --error-file=" \l__algomotion_error_str "
+      }
+    \sys_shell_now:e { \l__algomotion_call_str }
+    \file_if_exist:nTF { \l__algomotion_figure_str }
+      { \__algomotion_input:V \l__algomotion_figure_str }
+      {
+        \file_if_exist:nTF { \l__algomotion_error_str }
+          { \__algomotion_fail_file:V \l__algomotion_error_str }
+          {
+            \sys_if_shell_unrestricted:TF
+              {
+                \msg_error:nnV { algomotion } { no-command } \l__algomotion_command_tl
+                \__algomotion_fail:nn
+                  { the~command~made~no~figure.~Is~it~installed? }
+                  { \l__algomotion_call_str }
+              }
+              {
+                \msg_error:nne { algomotion } { restricted-shell-escape } {#2}
+                \__algomotion_fail:nn
+                  { restricted~shell~escape~did~not~run~the~command. }
+                  { Compile~with~-shell-escape. }
+              }
+          }
+      }
+  }
+\cs_generate_variant:Nn \sys_shell_now:n { e }
+
+% The longest input, in hexadecimal digits, that goes on a command line:
+% within cmd.exe's 8191 characters with the rest of the call on Windows,
+% and well within TeX's own buffers elsewhere.
+\int_const:Nn \c__algomotion_hex_limit_int
+  { \sys_if_platform_windows:TF { 7000 } { 100000 } }
+
+% A file name that starts with - would read as an option: ./ goes before.
+\cs_new:Npn \__algomotion_not_option:n #1
+  { \str_if_eq:eeT { \str_head:n {#1} } { - } { ./ } #1 }
+\cs_generate_variant:Nn \__algomotion_not_option:n { V }
+
+% The input as hexadecimal UTF-8: pdfTeX's strings are bytes already;
+% LuaTeX's and XeTeX's are characters, encoded first.
+\cs_new_protected:Npn \__algomotion_hex:NN #1#2
+  {
+    \sys_if_engine_pdftex:TF
+      { \str_set_convert:NVnn #1 #2 { } { latin1/hex } }
+      { \str_set_convert:NVnn #1 #2 { } { utf8/hex } }
+  }
+\cs_generate_variant:Nn \str_set_convert:Nnnn { NV }
+
+\NewDocumentCommand \algomotion { O{} m +m }
+  {
+    \group_begin:
+      \__algomotion_options:n {#1}
+      \__algomotion_to_str:Nn \l__algomotion_id_str {#2}
+      % The command reads the text (ADR 0032): JSON, an object without its
+      % braces, which TeX takes off, or a notation such as A-B 4, B-C 2;
+      % empty text runs the algorithm's first example.
+      \__algomotion_to_str:Nn \l__algomotion_input_str {#3}
+      \__algomotion_checked:n
+        {
+          \__algomotion_check:NNnn \c__algomotion_id_regex \l__algomotion_id_str
+            { algorithm~id }
+            {
+              \__algomotion_hex:NN \l__algomotion_hex_str \l__algomotion_input_str
+              \int_compare:nNnTF
+                { \str_count:N \l__algomotion_hex_str } > { \c__algomotion_hex_limit_int }
+                {
+                  \msg_error:nne { algomotion } { long-input } { \l__algomotion_id_str }
+                  \__algomotion_fail:nn { the~input~is~too~long~for~a~command~line. }
+                    { Put~it~in~a~file~and~use~\iow_char:N\\algomotionfile[algorithm=\l__algomotion_id_str]. }
+                }
+                {
+                  \__algomotion_make:nnn
+                    { \l__algomotion_id_str \c_space_tl --input-hex= \l__algomotion_hex_str }
+                    { algorithm ; \l__algomotion_id_str ; \l__algomotion_input_str }
+                    { \l__algomotion_id_str }
+                }
+            }
+        }
+    \group_end:
+  }
+
+\NewDocumentCommand \algomotionfile { O{} m }
+  {
+    \group_begin:
+      \__algomotion_options:n {#1}
+      \__algomotion_to_str:NV \l__algomotion_id_str \l__algomotion_algorithm_tl
+      \file_get_full_name:nNTF {#2} \l__algomotion_file_str
+        {
+          \__algomotion_checked:n
+            {
+              \__algomotion_check:NNnn \c__algomotion_path_regex \l__algomotion_file_str
+                { file~name }
+                {
+                  \str_if_empty:NTF \l__algomotion_id_str
+                    {
+                      \__algomotion_make:nnn
+                        { " \__algomotion_not_option:V \l__algomotion_file_str " }
+                        { document ; \file_mdfive_hash:V \l__algomotion_file_str }
+                        { \l__algomotion_file_str }
+                    }
+                    {
+                      \__algomotion_check:NNnn \c__algomotion_id_regex
+                        \l__algomotion_id_str { algorithm~id }
+                        {
+                          \__algomotion_make:nnn
+                            {
+                              \l__algomotion_id_str \c_space_tl
+                              --input=" \l__algomotion_file_str "
+                            }
+                            {
+                              input ; \l__algomotion_id_str ;
+                              \file_mdfive_hash:V \l__algomotion_file_str
+                            }
+                            { \l__algomotion_id_str }
+                        }
+                    }
+                }
+            }
+        }
+        { \msg_error:nnn { algomotion } { no-file } {#2} }
+    \group_end:
+  }
+\cs_generate_variant:Nn \file_mdfive_hash:n { V }
+
+\NewDocumentCommand \algomotioninput { O{} m }
+  {
+    \group_begin:
+      \keys_set:nn { algomotion } {#1}
+      \file_if_exist:nTF {#2}
+        { \__algomotion_input:n {#2} }
+        { \msg_error:nnn { algomotion } { no-file } {#2} }
+    \group_end:
+  }

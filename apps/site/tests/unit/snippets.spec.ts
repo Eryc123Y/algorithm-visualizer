@@ -3,8 +3,8 @@
  * a web page, Typst, LaTeX, the command line, MCP and a share link. Each
  * one's input must run to the example's document.
  */
-import { algorithms, readInput, runAlgorithm } from '@algoviz/recipes';
-import { readShareFragment } from '@algoviz/spec';
+import { algorithms, readInput, runAlgorithm } from '@algomotion/recipes';
+import { readShareFragment } from '@algomotion/spec';
 import { describe, expect, it } from 'vitest';
 
 import { shortInput } from '../../src/docs/short-input.ts';
@@ -98,19 +98,19 @@ describe('snippetsFor', () => {
       'link',
     ]);
     expect(byId(snippets, 'web')).toBe(
-      '<script type="module" src="algoviz-player.js"></script>\n<algo-player algorithm="dijkstra" input="A-B 4, B-C 1"></algo-player>',
+      '<script type="module" src="algomotion-player.js"></script>\n<algo-player algorithm="dijkstra" input="A-B 4, B-C 1"></algo-player>',
     );
     expect(byId(snippets, 'typst')).toBe(
-      '#import "@preview/algoviz:0.1.0": algoviz\n#algoviz("dijkstra", "A-B 4, B-C 1")',
+      '#import "@preview/algomotion:0.1.0": algomotion\n#algomotion("dijkstra", "A-B 4, B-C 1")',
     );
     expect(byId(snippets, 'latex')).toBe(
-      '\\usepackage{algoviz}\n\\algoviz{dijkstra}{A-B 4, B-C 1}',
+      '\\usepackage{algomotion}\n\\algomotion{dijkstra}{A-B 4, B-C 1}',
     );
     expect(byId(snippets, 'cli')).toBe(
-      "algoviz export dijkstra --input 'A-B 4, B-C 1' --out figures",
+      "algomotion export dijkstra --input 'A-B 4, B-C 1' --out figures",
     );
     expect(
-      JSON.parse(byId(snippets, 'mcp').replace(/^algoviz_show /, '')),
+      JSON.parse(byId(snippets, 'mcp').replace(/^algomotion_show /, '')),
     ).toEqual({ recipe: 'dijkstra', input: 'A-B 4, B-C 1' });
     expect(byId(snippets, 'link')).toBe(
       '../play/#v=1&alg=dijkstra&in=A-B%204%2C%20B-C%201',
@@ -150,7 +150,7 @@ describe('snippetsFor', () => {
       expect(
         byId(snippets, 'latex')
           .split('\n')[1]!
-          .replace(/^\\algoviz\{[^}]*\}\{/, '')
+          .replace(/^\\algomotion\{[^}]*\}\{/, '')
           .replace(/\}$/, '')
           .replace(/\\([%#{}])/g, '$1'),
         a.id,
@@ -158,7 +158,7 @@ describe('snippetsFor', () => {
 
       // MCP takes JSON values.
       const mcp = JSON.parse(
-        byId(snippets, 'mcp').replace(/^algoviz_show /, ''),
+        byId(snippets, 'mcp').replace(/^algomotion_show /, ''),
       );
       expect(documentOf(a.id, mcp.input), a.id).toBe(expected);
 

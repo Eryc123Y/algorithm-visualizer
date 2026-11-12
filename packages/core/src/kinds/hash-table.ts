@@ -9,7 +9,7 @@ import {
   type HashTableAction,
   type HashTableDecl,
   type Result,
-} from '@algoviz/spec';
+} from '@algomotion/spec';
 
 import type { ReduceError } from '../errors.ts';
 import type { StructureKind } from '../kind.ts';

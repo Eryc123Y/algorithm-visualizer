@@ -1,6 +1,6 @@
 /**
  * Serves a `{ fetch }` handler from Node's `node:http`, for
- * `algoviz-mcp --http` (ADR 0039): each request becomes a web `Request`,
+ * `algomotion-mcp --http` (ADR 0039): each request becomes a web `Request`,
  * and the `Response` is written back. Node-only; the handler itself is not.
  */
 import { createServer, type IncomingMessage } from 'node:http';
@@ -128,7 +128,7 @@ export interface ServeArgs {
 }
 
 /**
- * `algoviz-mcp`'s arguments: none for stdio, or `--http` with optional
+ * `algomotion-mcp`'s arguments: none for stdio, or `--http` with optional
  * `--host` (127.0.0.1) and `--port` (8787). Throws a message for a bad one.
  */
 export function parseServeArgs(argv: readonly string[]): ServeArgs {

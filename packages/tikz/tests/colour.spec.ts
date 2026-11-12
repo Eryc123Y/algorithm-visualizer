@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { darkTheme, lightTheme, printTheme, type SvgTheme } from '@algoviz/svg';
+import {
+  darkTheme,
+  lightTheme,
+  printTheme,
+  type SvgTheme,
+} from '@algomotion/svg';
 
 import { parseColour } from '../src/index.ts';
 

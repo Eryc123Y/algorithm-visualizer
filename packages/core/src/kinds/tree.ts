@@ -18,7 +18,7 @@ import {
   type Scalar,
   type TreeAction,
   type TreeDecl,
-} from '@algoviz/spec';
+} from '@algomotion/spec';
 
 import type { ReduceError } from '../errors.ts';
 import type { StructureKind } from '../kind.ts';

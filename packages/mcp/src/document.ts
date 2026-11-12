@@ -8,8 +8,8 @@ import {
   selectFrames,
   type FrameRange,
   type Trace,
-} from '@algoviz/core';
-import { err, ok, type Diagnostic, type Result } from '@algoviz/spec';
+} from '@algomotion/core';
+import { err, ok, type Diagnostic, type Result } from '@algomotion/spec';
 
 /** Parses JSON text; any other value is returned as it is. */
 export function readDocument(input: unknown): Result<unknown, Diagnostic[]> {

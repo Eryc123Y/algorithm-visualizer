@@ -2,10 +2,10 @@
  * What a player shows (ADR 0010, 0032): a document, or an algorithm of
  * the registry run on its input. The registry is loaded on first use, so
  * a page that shows documents never loads it; the standalone bundle keeps
- * it in a second file, `algoviz-recipes.js`, next to the player's.
+ * it in a second file, `algomotion-recipes.js`, next to the player's.
  */
-import type * as Recipes from '@algoviz/recipes';
-import { err, ok, type Diagnostic, type Result } from '@algoviz/spec';
+import type * as Recipes from '@algomotion/recipes';
+import { err, ok, type Diagnostic, type Result } from '@algomotion/spec';
 
 export interface Content {
   /** A document object; wins over everything else. */
@@ -27,7 +27,7 @@ let registry: Promise<Registry> | undefined;
 
 /** The registry, imported once for every player on the page. */
 function loadRegistry(): Promise<Registry> {
-  registry ??= import('@algoviz/recipes').catch((e: unknown) => {
+  registry ??= import('@algomotion/recipes').catch((e: unknown) => {
     // Let a later player try again.
     registry = undefined;
     throw e;
@@ -58,7 +58,9 @@ async function run(algorithm: string, content: Content): Promise<Loaded> {
   try {
     recipes = await loadRegistry();
   } catch (e) {
-    return err([loadError('the algorithm registry (algoviz-recipes.js)', e)]);
+    return err([
+      loadError('the algorithm registry (algomotion-recipes.js)', e),
+    ]);
   }
   // Text, from the attribute or the property, is read as JSON or a notation.
   const input =

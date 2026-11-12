@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { createTheme, type SvgTheme } from '@algoviz/svg';
+import { createTheme, type SvgTheme } from '@algomotion/svg';
 
 import '../src/define.ts';
 import type { AlgoPlayer } from '../src/index.ts';

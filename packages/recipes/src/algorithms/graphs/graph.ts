@@ -4,7 +4,7 @@
  * ids, adjacency lists and the declaration that draws it. Neighbours are
  * taken in the order edges are listed.
  */
-import type { GraphDeclInput } from '@algoviz/spec';
+import type { GraphDeclInput } from '@algomotion/spec';
 import { z } from 'zod';
 
 import { graphField } from '../../notation/schema.ts';

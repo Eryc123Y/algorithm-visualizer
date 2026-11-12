@@ -12,8 +12,8 @@ import {
   defaultLayoutOptions,
   layoutTrace,
   loadTrace,
-} from '@algoviz/core';
-import { num, paintScene } from '@algoviz/svg';
+} from '@algomotion/core';
+import { num, paintScene } from '@algomotion/svg';
 import {
   test as base,
   expect,

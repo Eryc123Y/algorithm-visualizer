@@ -9,9 +9,9 @@ import { join } from 'node:path';
 
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-import { algorithms, runAlgorithm } from '@algoviz/recipes';
-import type { Diagnostic } from '@algoviz/spec';
-import { exportFigures, themeNames } from '@algoviz/svg';
+import { algorithms, runAlgorithm } from '@algomotion/recipes';
+import type { Diagnostic } from '@algomotion/spec';
+import { exportFigures, themeNames } from '@algomotion/svg';
 
 import { instantiatePlugin } from '../../scripts/host.ts';
 import {
@@ -90,7 +90,8 @@ describe('the examples', () => {
         typst(['eval', '--root', examples, '--in', join(examples, file), code])
           .stdout,
       ) as unknown;
-    const errors = 'query(<algoviz-error>).map(m => m.value.map(d => d.code))';
+    const errors =
+      'query(<algomotion-error>).map(m => m.value.map(d => d.code))';
     for (const file of files.filter(
       (f) => f !== 'errors.typ' && !unavailable(f),
     )) {
@@ -113,7 +114,7 @@ describe('figures in Typst', () => {
     expect(new Set(cases.map((c) => c.theme))).toEqual(new Set(themeNames));
     writeFileSync(join(root, 'cases.json'), JSON.stringify(cases));
     const svg = evaluate(
-      'json("/cases.json").map(c => algoviz-figures(c.algorithm, c.input, theme: c.theme).figures.map(f => f.svg))',
+      'json("/cases.json").map(c => algomotion-figures(c.algorithm, c.input, theme: c.theme).figures.map(f => f.svg))',
     ) as string[][];
     expect(svg).toHaveLength(cases.length);
     cases.forEach((c, k) =>
@@ -130,10 +131,10 @@ describe('figures in Typst', () => {
     writeFileSync(join(root, 'input.json'), JSON.stringify(input));
     const [run, doc, last, alt] = evaluate(
       `(
-        str(algoviz("bst.delete", json("/input.json"), step: 2, theme: "dark").source),
-        str(algoviz(json("/doc.json"), step: "delete-3/no-left").source),
-        str(algoviz("bst.delete", json("/input.json")).source),
-        algoviz("bst.delete", json("/input.json"), step: 1).alt,
+        str(algomotion("bst.delete", json("/input.json"), step: 2, theme: "dark").source),
+        str(algomotion(json("/doc.json"), step: "delete-3/no-left").source),
+        str(algomotion("bst.delete", json("/input.json")).source),
+        algomotion("bst.delete", json("/input.json"), step: 1).alt,
       )`,
     ) as string[];
     expect(run).toBe(exported(document, [2], 'dark')[0]);
@@ -166,11 +167,11 @@ describe('figures in Typst', () => {
     });
     const [notation, field, alone, ops, example] = evaluate(
       `(
-        str(algoviz("dijkstra", "A-B 4, B-C 1, A-C 7, C-D 2", step: "improve#3").source),
-        str(algoviz("dijkstra", (graph: "A-B 4, B-C 1, A-C 7, C-D 2", source: "A"), step: "improve#3").source),
-        str(algoviz("insertion-sort", (5, 2, 4, 6, 1, 3), step: 4).source),
-        str(algoviz("bst", (from: "8 3 10 1 6", ops: "insert 4, delete 3")).source),
-        str(algoviz("dijkstra", step: 2).source),
+        str(algomotion("dijkstra", "A-B 4, B-C 1, A-C 7, C-D 2", step: "improve#3").source),
+        str(algomotion("dijkstra", (graph: "A-B 4, B-C 1, A-C 7, C-D 2", source: "A"), step: "improve#3").source),
+        str(algomotion("insertion-sort", (5, 2, 4, 6, 1, 3), step: 4).source),
+        str(algomotion("bst", (from: "8 3 10 1 6", ops: "insert 4, delete 3")).source),
+        str(algomotion("dijkstra", step: 2).source),
       )`,
     ) as string[];
     expect(notation).toBe(exported(dijkstra, ['improve#3'], 'light')[0]);
@@ -181,7 +182,7 @@ describe('figures in Typst', () => {
       exported(documentOf('dijkstra', undefined), [2], 'light')[0],
     );
     expect(
-      evaluate('algoviz-figures("dijkstra", "A-B 4, B-C x")'),
+      evaluate('algomotion-figures("dijkstra", "A-B 4, B-C x")'),
     ).toMatchObject({
       ok: false,
       diagnostics: [
@@ -199,7 +200,7 @@ describe('figures in Typst', () => {
     const input = { from: [8, 3, 10, 1, 6], key: 3 };
     writeFileSync(join(root, 'input.json'), JSON.stringify(input));
     const svg = evaluate(
-      'algoviz-series("bst.delete", json("/input.json"), steps: ("delete-3", 0, 1)).map(i => str(i.source))',
+      'algomotion-series("bst.delete", json("/input.json"), steps: ("delete-3", 0, 1)).map(i => str(i.source))',
     ) as string[];
     const document = documentOf('bst.delete', input);
     expect(svg).toEqual(exported(document, ['delete-3', 0, 1], 'light'));
@@ -226,10 +227,10 @@ describe('layout (ADR 0029)', () => {
     writeFileSync(join(root, 'sided.json'), JSON.stringify(sided));
     const [one, wide, series, figures] = evaluate(
       `(
-        str(algoviz(json("/sided.json")).source),
-        str(algoviz(json("/sided.json"), layout: "wide").source),
-        algoviz-series(json("/sided.json")).map(i => str(i.source)),
-        algoviz-figures(json("/sided.json"), layout: "wide").figures.map(f => f.svg),
+        str(algomotion(json("/sided.json")).source),
+        str(algomotion(json("/sided.json"), layout: "wide").source),
+        algomotion-series(json("/sided.json")).map(i => str(i.source)),
+        algomotion-figures(json("/sided.json"), layout: "wide").figures.map(f => f.svg),
       )`,
     ) as [string, string, string[], string[]];
     expect(one).toBe(exported(sided, [-1], 'light', 'narrow')[0]);
@@ -242,9 +243,9 @@ describe('layout (ADR 0029)', () => {
   it('reports an unknown layout, and stops for one of the wrong type', () => {
     writeFileSync(join(root, 'sided.json'), JSON.stringify(sided));
     expect(
-      evaluate('algoviz-figures(json("/sided.json"), layout: "square")'),
+      evaluate('algomotion-figures(json("/sided.json"), layout: "square")'),
     ).toMatchObject({ ok: false, diagnostics: [{ code: 'UNKNOWN_LAYOUT' }] });
-    expect(failure('algoviz(json("/sided.json"), layout: 1)')).toContain(
+    expect(failure('algomotion(json("/sided.json"), layout: 1)')).toContain(
       '`layout` takes "wide" or "narrow"',
     );
   });
@@ -253,8 +254,8 @@ describe('layout (ADR 0029)', () => {
 describe('errors', () => {
   it('replace the figure with a box, or stop compilation when strict', () => {
     const doc = join(root, 'strict.typ');
-    const call = `algoviz("dijkstra", (graph: (nodes: ("A", "B"), edges: (("A", "B", 1),)), source: "A"), step: "relax#2"`;
-    writeFileSync(doc, `#import "${spec}": algoviz\n#${call})\n`);
+    const call = `algomotion("dijkstra", (graph: (nodes: ("A", "B"), edges: (("A", "B", 1),)), source: "A"), step: "relax#2"`;
+    writeFileSync(doc, `#import "${spec}": algomotion\n#${call})\n`);
     expect(
       typst(['compile', '--root', root, doc, join(tmp, 's.pdf')]).status,
     ).toBe(0);
@@ -264,16 +265,19 @@ describe('errors', () => {
       root,
       '--in',
       doc,
-      'query(<algoviz-error>).map(m => m.value)',
+      'query(<algomotion-error>).map(m => m.value)',
     ]);
     const diagnostic = (JSON.parse(boxes.stdout) as Diagnostic[][])[0]?.[0];
     expect(diagnostic).toMatchObject({ code: 'NO_MATCH', path: '$' });
     expect(diagnostic!.hint).toContain('relax');
 
-    writeFileSync(doc, `#import "${spec}": algoviz\n#${call}, strict: true)\n`);
+    writeFileSync(
+      doc,
+      `#import "${spec}": algomotion\n#${call}, strict: true)\n`,
+    );
     const strict = typst(['compile', '--root', root, doc, join(tmp, 's.pdf')]);
     expect(strict.status).not.toBe(0);
-    expect(strict.stderr).toContain('algoviz: NO_MATCH at $');
+    expect(strict.stderr).toContain('algomotion: NO_MATCH at $');
   });
 
   it('reject a step of several frames, which a series takes', () => {
@@ -281,7 +285,7 @@ describe('errors', () => {
     const input = '(from: (8, 3, 10), key: 3)';
     writeFileSync(
       doc,
-      `#import "${spec}": *\n#algoviz("bst.delete", ${input}, step: "1..2")\n#algoviz-series("bst.delete", ${input}, steps: "1..2").len()\n`,
+      `#import "${spec}": *\n#algomotion("bst.delete", ${input}, step: "1..2")\n#algomotion-series("bst.delete", ${input}, steps: "1..2").len()\n`,
     );
     const codes = typst([
       'eval',
@@ -289,41 +293,43 @@ describe('errors', () => {
       root,
       '--in',
       doc,
-      'query(<algoviz-error>).map(m => m.value.map(d => d.code))',
+      'query(<algomotion-error>).map(m => m.value.map(d => d.code))',
     ]);
     expect(JSON.parse(codes.stdout)).toEqual([['INVALID_SELECTOR']]);
   });
 
-  it('come back as data from algoviz-figures', () => {
-    expect(evaluate('algoviz-figures("nope", (:))')).toMatchObject({
+  it('come back as data from algomotion-figures', () => {
+    expect(evaluate('algomotion-figures("nope", (:))')).toMatchObject({
       ok: false,
       diagnostics: [{ code: 'UNKNOWN_ALGORITHM' }],
     });
     expect(
       evaluate(
-        'algoviz-figures("bst.delete", (from: (1,), key: 1), theme: "neon")',
+        'algomotion-figures("bst.delete", (from: (1,), key: 1), theme: "neon")',
       ),
     ).toMatchObject({ ok: false, diagnostics: [{ code: 'UNKNOWN_THEME' }] });
   });
 
   it('stop compilation for arguments of the wrong type', () => {
-    expect(failure('algoviz("dijkstra", (:), (:))')).toContain(
+    expect(failure('algomotion("dijkstra", (:), (:))')).toContain(
       'takes its input as the second argument',
     );
-    expect(failure('algoviz("{}")')).toContain('json(');
-    expect(failure('algoviz((:), (:))')).toContain('a document takes no input');
-    expect(failure('algoviz(3)')).toContain('expected an algorithm id');
-    expect(failure('algoviz("bst.delete", (:), theme: 3)')).toContain(
+    expect(failure('algomotion("{}")')).toContain('json(');
+    expect(failure('algomotion((:), (:))')).toContain(
+      'a document takes no input',
+    );
+    expect(failure('algomotion(3)')).toContain('expected an algorithm id');
+    expect(failure('algomotion("bst.delete", (:), theme: 3)')).toContain(
       '`theme` takes a name',
     );
-    expect(failure('algoviz("bst.delete", (:), stpe: 1)')).toContain(
+    expect(failure('algomotion("bst.delete", (:), stpe: 1)')).toContain(
       'unexpected argument `stpe`',
     );
-    expect(failure('algoviz("bst.delete", (:), step: 1.5)')).toContain(
+    expect(failure('algomotion("bst.delete", (:), step: 1.5)')).toContain(
       '`step` takes a frame number',
     );
     expect(
-      failure('algoviz-series("bst.delete", (:), steps: (1, none))'),
+      failure('algomotion-series("bst.delete", (:), steps: (1, none))'),
     ).toContain('`steps` takes a frame number');
   });
 });

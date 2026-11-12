@@ -6,7 +6,7 @@
  * violation, so the page's own code must also live within its policy.
  */
 import AxeBuilder from '@axe-core/playwright';
-import { shareFragment, type ShareContent } from '@algoviz/spec';
+import { shareFragment, type ShareContent } from '@algomotion/spec';
 import { type Page } from '@playwright/test';
 
 import { expect, test } from './fixtures.ts';
@@ -46,7 +46,7 @@ test('explains itself without a link, and plays its example', async ({
     page.getByRole('heading', { name: 'Play a visualization from a link' }),
   ).toBeVisible();
   await page.getByRole('link', { name: /Try Dijkstra/ }).click();
-  await expect(page).toHaveTitle('dijkstra · algoviz');
+  await expect(page).toHaveTitle('dijkstra · algomotion');
   await expect(player(page).getByText('Initial state.')).toBeVisible();
   await expect(page.locator('#intro')).toBeHidden();
 });
@@ -68,7 +68,7 @@ test('opens a document link at its frame', async ({ page }) => {
     ],
   };
   await page.goto(await linkTo({ document, frame: 1 }));
-  await expect(page).toHaveTitle('Two pushes · algoviz');
+  await expect(page).toHaveTitle('Two pushes · algomotion');
   await expect(player(page).getByText('Push 1.')).toBeVisible();
   await expect(player(page)).toHaveAttribute('frame', '1');
 });
@@ -107,11 +107,11 @@ test('draws a run with sections within the page’s policy', async ({ page }) =>
 
 test('plays the next link when the fragment changes', async ({ page }) => {
   await page.goto('/play/#v=1&alg=insertion-sort&in=3%201%202');
-  await expect(page).toHaveTitle('insertion-sort · algoviz');
+  await expect(page).toHaveTitle('insertion-sort · algomotion');
   await page.evaluate(() => {
     location.hash = '#v=1&alg=bfs';
   });
-  await expect(page).toHaveTitle('bfs · algoviz');
+  await expect(page).toHaveTitle('bfs · algomotion');
   await expect(player(page)).toHaveCount(1);
 });
 
@@ -119,12 +119,12 @@ test('reports a link it cannot read, as text', async ({ page }) => {
   await page.goto(`/play/#v=2&alg=bfs&x=${encodeURIComponent(attack(1))}`);
   const problem = page.getByRole('alert');
   await expect(problem).toContainText('This link cannot be opened');
-  await expect(problem).toContainText('made by a newer algoviz');
+  await expect(problem).toContainText('made by a newer algomotion');
   await expect(player(page)).toHaveCount(0);
 
   // A key this page does not know is skipped, markup and all (ADR 0041).
   await page.goto(`/play/#v=1&alg=bfs&${encodeURIComponent(attack(8))}`);
-  await expect(page).toHaveTitle('bfs · algoviz');
+  await expect(page).toHaveTitle('bfs · algomotion');
   expect(await injected(page)).toEqual({ elements: [], ran: null });
   // The version error quotes the decoded value.
   await page.goto(
@@ -163,7 +163,7 @@ test('draws a crafted document’s text as text and runs none of it', async ({
     ],
   };
   await page.goto(await linkTo({ document, frame: 1 }));
-  await expect(page).toHaveTitle(`Title ${attack(1)} · algoviz`);
+  await expect(page).toHaveTitle(`Title ${attack(1)} · algomotion`);
   await expect(
     player(page).getByText(`Swap ${attack(5)}`, { exact: false }),
   ).toBeVisible();

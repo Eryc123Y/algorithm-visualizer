@@ -4,15 +4,15 @@
  * The SVG painter's `paintScene` decides every shape, colour and position,
  * so both painters agree on geometry; this module only writes the painted
  * shapes as TikZ paths, in scene coordinates. Text is left to the
- * document: each label becomes a call to the package's `\algoviz@text`,
+ * document: each label becomes a call to the package's `\algomotion@text`,
  * which sets it in the document's fonts at the anchor the painter chose,
  * and shrinks text inside a cell, node or badge in the rare case it comes
  * out wider than the shape has room for.
  *
- * The output needs the package's macros (`\algoviz@figure`, `\algoviz@u`
- * and the rest) and is read with `@` as a letter, as `\algovizinput` does.
+ * The output needs the package's macros (`\algomotion@figure`, `\algomotion@u`
+ * and the rest) and is read with `@` as a letter, as `\algomotioninput` does.
  */
-import type { Scene, SceneItem } from '@algoviz/core';
+import type { Scene, SceneItem } from '@algomotion/core';
 import {
   num,
   paintScene,
@@ -21,7 +21,7 @@ import {
   type SvgNode,
   type SvgTheme,
   type ThemeName,
-} from '@algoviz/svg';
+} from '@algomotion/svg';
 
 import { parseColour } from './colour.ts';
 import { texText } from './escape.ts';
@@ -35,7 +35,7 @@ import {
 } from './geometry.ts';
 
 /**
- * The version of the file format that `\algoviz@figure` reads. Format 2
+ * The version of the file format that `\algomotion@figure` reads. Format 2
  * starts a figure's colours with the theme's TeX families (ADR 0030).
  */
 export const TIKZ_FORMAT = 2;
@@ -58,22 +58,22 @@ class Palette {
   name(hex: string): string {
     let name = this.names.get(hex);
     if (name === undefined) {
-      name = `algoviz@c${this.names.size + 1}`;
+      name = `algomotion@c${this.names.size + 1}`;
       this.names.set(hex, name);
     }
     return name;
   }
 
-  /** `\algoviz@color{<n>}{<RRGGBB>}` for each colour, in order. */
+  /** `\algomotion@color{<n>}{<RRGGBB>}` for each colour, in order. */
   definitions(): string[] {
     return [...this.names].map(
       ([hex, name]) =>
-        `\\algoviz@color{${name.slice('algoviz@c'.length)}}{${hex}}%`,
+        `\\algomotion@color{${name.slice('algomotion@c'.length)}}{${hex}}%`,
     );
   }
 }
 
-const unit = (n: number) => `${num(n)}\\algoviz@u`;
+const unit = (n: number) => `${num(n)}\\algomotion@u`;
 const point = (p: Point) => `(${num(p.x)},${num(p.y)})`;
 
 /** Attributes a `g` passes to the shapes inside it. */
@@ -187,7 +187,7 @@ function writeText(
       ? ''
       : `${palette.name(parseColour(stroke).hex)},${unit(Number(node.attrs['stroke-width'] ?? 0) / 2)}`;
   return [
-    '\\algoviz@text',
+    '\\algomotion@text',
     `{${num(at.x)},${num(at.y)}}`,
     `{${ANCHOR[node.attrs['text-anchor'] ?? 'start'] ?? 'l'}}`,
     `{${num(Number(node.attrs['font-size']))}}`,
@@ -305,10 +305,10 @@ const comment = (text: string) => `% ${text.replace(/\s+/g, ' ').trim()}`;
 
 /**
  * Renders a scene as a TikZ figure for the LaTeX package: a call to
- * `\algoviz@figure` with the format, the canvas size in scene units, the
+ * `\algomotion@figure` with the format, the canvas size in scene units, the
  * theme's TeX families and colours, and the drawing. Positions are those of
  * `renderSvg`; text is left to the document's fonts, in the families the
- * theme names (`\algoviz@fonts{<values>}{<labels>}`).
+ * theme names (`\algomotion@fonts{<values>}{<labels>}`).
  */
 export function renderTikz(
   scene: Scene,
@@ -338,12 +338,14 @@ export function renderTikz(
     body.push(...writeItem(item, sources.get(item.key), palette));
   return [
     comment(
-      `algoviz figure for LaTeX, format ${TIKZ_FORMAT}: ${painted.title}`,
+      `algomotion figure for LaTeX, format ${TIKZ_FORMAT}: ${painted.title}`,
     ),
     ...(options.comments ?? []).map(comment),
-    comment('Draw it with \\algovizinput from the algoviz LaTeX package.'),
-    `\\algoviz@figure{${TIKZ_FORMAT}}{${num(painted.width)}}{${num(painted.height)}}{%`,
-    `\\algoviz@fonts{${theme.tex.value}}{${theme.tex.label}}%`,
+    comment(
+      'Draw it with \\algomotioninput from the algomotion LaTeX package.',
+    ),
+    `\\algomotion@figure{${TIKZ_FORMAT}}{${num(painted.width)}}{${num(painted.height)}}{%`,
+    `\\algomotion@fonts{${theme.tex.value}}{${theme.tex.label}}%`,
     ...palette.definitions(),
     '}{%',
     ...body,

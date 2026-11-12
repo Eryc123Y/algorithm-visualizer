@@ -1,10 +1,10 @@
-import * as spec from '@algoviz/spec';
+import * as spec from '@algomotion/spec';
 import { describe, expect, it, vi } from 'vitest';
 
 import { Recorder } from '../src/index.ts';
 
 // Watch the version helper without changing what it returns.
-vi.mock('@algoviz/spec', async (importOriginal) => {
+vi.mock('@algomotion/spec', async (importOriginal) => {
   const actual = await importOriginal<typeof spec>();
   return { ...actual, minimumVersion: vi.fn(actual.minimumVersion) };
 });

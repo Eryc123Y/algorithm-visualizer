@@ -1,8 +1,8 @@
 /**
- * Builds the standalone `algoviz` executable (ADR 0027): the CLI bundled
+ * Builds the standalone `algomotion` executable (ADR 0027): the CLI bundled
  * with Vite, compiled to QuickJS bytecode and included in a small Rust
  * program that runs it with QuickJS-ng. Run it with
- * `npm run build:standalone -w @algoviz/mcp`; add `-- --target <triple>`
+ * `npm run build:standalone -w @algomotion/mcp`; add `-- --target <triple>`
  * to build for another platform the Rust toolchain has.
  *
  * Needs rustup, which installs the Rust version pinned in
@@ -122,7 +122,7 @@ async function main(argv: readonly string[]): Promise<void> {
         ...process.env,
         PATH: [bin, process.env['PATH'] ?? ''].join(delimiter),
         CARGO_TARGET_DIR: target,
-        ALGOVIZ_BUNDLE: paths.bundle,
+        ALGOMOTION_BUNDLE: paths.bundle,
       },
       inherit: true,
     },
@@ -131,7 +131,7 @@ async function main(argv: readonly string[]): Promise<void> {
     triple === undefined
       ? process.platform === 'win32'
       : triple.includes('windows');
-  const name = windows ? 'algoviz.exe' : 'algoviz';
+  const name = windows ? 'algomotion.exe' : 'algomotion';
   const built = join(
     target,
     ...(triple === undefined ? [] : [triple]),

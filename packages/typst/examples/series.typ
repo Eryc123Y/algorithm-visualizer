@@ -1,5 +1,5 @@
 // Several steps of one run on one scale, with their selectors as captions.
-#import "@local/algoviz:0.1.0": algoviz-figures, algoviz-series
+#import "@local/algomotion:0.1.0": algomotion-figures, algomotion-series
 
 #set page(width: 18cm, height: auto, margin: 1cm)
 
@@ -9,11 +9,11 @@
 #grid(
   columns: 3,
   gutter: 8pt,
-  ..algoviz-series("bst.delete", input, width: 100%),
+  ..algomotion-series("bst.delete", input, width: 100%),
 )
 
 // Chosen frames, with captions from the engine's data.
-#let series = algoviz-figures("bst.delete", input, steps: (0, -1))
+#let series = algomotion-figures("bst.delete", input, steps: (0, -1))
 #grid(
   columns: 2,
   gutter: 8pt,

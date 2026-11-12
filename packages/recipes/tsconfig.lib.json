@@ -12,7 +12,7 @@
     "sourceMap": true
   },
   "include": ["src"],
-  // Resolves @algoviz/spec and @algoviz/core to their built declarations,
+  // Resolves @algomotion/spec and @algomotion/core to their built declarations,
   // so build them first.
   "references": [
     { "path": "../spec/tsconfig.lib.json" },

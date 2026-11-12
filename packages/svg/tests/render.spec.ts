@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { Window } from 'happy-dom';
 import { describe, expect, it } from 'vitest';
 
-import { layoutTrace, loadTrace, type Scene } from '@algoviz/core';
+import { layoutTrace, loadTrace, type Scene } from '@algomotion/core';
 
 import { darkTheme, renderSvg } from '../src/index.ts';
 

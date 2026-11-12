@@ -1,21 +1,21 @@
 # Requirements
 
-What algoviz is for, what version 1.0 must do, and how good it has to be. The [roadmap](roadmap.md) turns this into work items; the [ADRs](adr/README.md) record how each part is built. This file changes only when the owner's requirements change.
+What algomotion is for, what version 1.0 must do, and how good it has to be. The [roadmap](roadmap.md) turns this into work items; the [ADRs](adr/README.md) record how each part is built. This file changes only when the owner's requirements change.
 
 ## Purpose
 
-algoviz makes step-by-step pictures and animations of algorithms and data structures. A visualization is a declarative JSON document, so the same document becomes a vector figure, an animation on a web page, slides, or an interactive player in an AI conversation. Every output is drawn by algoviz's own engine and painters.
+algomotion makes step-by-step pictures and animations of algorithms and data structures. A visualization is a declarative JSON document, so the same document becomes a vector figure, an animation on a web page, slides, or an interactive player in an AI conversation. Every output is drawn by algomotion's own engine and painters.
 
-Using algoviz should cost as little as possible, for people and for models alike. Each kind of user has a shortest path to a figure, and it stays short:
+Using algomotion should cost as little as possible, for people and for models alike. Each kind of user has a shortest path to a figure, and it stays short:
 
-- a student, a teacher or a model names an algorithm and gives its input, the structures it works on, written in notations they already know, and algoviz runs the algorithm;
-- only an algorithm that algoviz does not have needs a document, written by hand, by code or by a model.
+- a student, a teacher or a model names an algorithm and gives its input, the structures it works on, written in notations they already know, and algomotion runs the algorithm;
+- only an algorithm that algomotion does not have needs a document, written by hand, by code or by a model.
 
 A feature that lengthens one of these paths needs a reason, and a change meant to shorten them is measured: by the concepts a user must know and the input they must write for typical tasks, and for models by the evals.
 
 ## Users and use cases
 
-1. **Students writing notes in Typst or LaTeX.** A student calls a package function with an algorithm, its input and the step they want, for example the third relaxation of Dijkstra on their graph, and gets a native vector figure in the document. They can also pass a document they wrote or got from an AI. A Typst package and a LaTeX package do this, and both run algoviz's engine underneath.
+1. **Students writing notes in Typst or LaTeX.** A student calls a package function with an algorithm, its input and the step they want, for example the third relaxation of Dijkstra on their graph, and gets a native vector figure in the document. They can also pass a document they wrote or got from an AI. A Typst package and a LaTeX package do this, and both run algomotion's engine underneath.
 2. **Teaching websites.** A teacher embeds the player with one script tag, from npm or a CDN, and points it at a document or an algorithm and input. Display mode shows only the animation, for pages that need no controls.
 3. **Slides.** Each step becomes an overlay in Beamer or in a Typst slide framework, so a lecture can step through an algorithm with the slide controls. Web slides embed the player.
 4. **AI conversations.** Through MCP, a model runs a ready-made algorithm or writes a document, checks it, and shows it in the conversation as an interactive player. The MCP server runs locally (stdio) or remotely (HTTP), and a user can deploy their own remote server to Cloudflare in one click. A share link opens any document in the player.
@@ -28,7 +28,7 @@ A feature that lengthens one of these paths needs a reason, and a change meant t
 - **R4 Source code.** Each algorithm shows its code in pseudocode written in CLRS conventions (our own text, not copied from the book) and in Python, chosen by the viewer. Syntax highlighting and the current-line marker work for every algorithm in every language. More languages come after 1.0 through the same mechanism (ADR 0017).
 - **R5 Output formats.**
   - Standalone SVG for any step, any range of steps, or all of them.
-  - A Typst package and a LaTeX package that make figures from inside the document by calling algoviz.
+  - A Typst package and a LaTeX package that make figures from inside the document by calling algomotion.
   - Overlays for Beamer and Typst slides.
   - The `<algo-player>` web component and its standalone bundle.
   - Figures of one series share one scale, so a sequence of steps lines up across pages.

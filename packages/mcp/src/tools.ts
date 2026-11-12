@@ -2,13 +2,13 @@
  * The tools an MCP client sees, independent of any transport: the MCP
  * server registers them, and the evaluation harness calls them directly.
  */
-import { TOPICS } from '@algoviz/recipes';
+import { TOPICS } from '@algomotion/recipes';
 import {
   formatErrors,
   type Diagnostic,
   type ShareContent,
-} from '@algoviz/spec';
-import { themeNames, type ThemeName } from '@algoviz/svg';
+} from '@algomotion/spec';
+import { themeNames, type ThemeName } from '@algomotion/svg';
 import { z } from 'zod';
 
 import { guide } from './guide.ts';
@@ -60,10 +60,10 @@ const BY_RECIPE =
 
 export const tools: readonly ToolDefinition[] = [
   tool({
-    name: 'algoviz_guide',
+    name: 'algomotion_guide',
     title: 'Read the authoring guide',
     description:
-      'How to write an algoviz visualization document: the document format, steps and marks, and every structure kind with its actions and an example. Read it before writing a document. Pass `kinds` to read only the kinds you need.',
+      'How to write an algomotion visualization document: the document format, steps and marks, and every structure kind with its actions and an example. Read it before writing a document. Pass `kinds` to read only the kinds you need.',
     input: z.strictObject({
       kinds: z
         .array(z.string())
@@ -78,7 +78,7 @@ export const tools: readonly ToolDefinition[] = [
     },
   }),
   tool({
-    name: 'algoviz_validate',
+    name: 'algomotion_validate',
     title: 'Validate a document',
     description:
       'Checks a visualization document: its format, then every step replayed against the state it applies to. Returns "Valid" with a summary and any warnings, or each error with its code, its JSON path (e.g. $.steps[3].actions[0].j), a message and a hint. Fix every error and validate again before returning a document.',
@@ -89,7 +89,7 @@ export const tools: readonly ToolDefinition[] = [
     },
   }),
   tool({
-    name: 'algoviz_inspect',
+    name: 'algomotion_inspect',
     title: 'Inspect frames',
     description: `Shows the state of every structure at chosen frames: data, marks such as pointers or visited nodes, and the step's narration, line, name and section. ${SELECTORS} A section's frames run from the frame before its first step, which still shows the step before it, to the frame after its last. Use it to check that a valid document does what you meant, e.g. that an array ends up sorted. At most ${MAX_FRAMES} frames per call. ${BY_RECIPE}`,
     input: z.strictObject({
@@ -113,7 +113,7 @@ export const tools: readonly ToolDefinition[] = [
     },
   }),
   tool({
-    name: 'algoviz_render',
+    name: 'algomotion_render',
     title: 'Render a frame',
     description: `Draws one frame of a valid document as a standalone SVG image, as the player would show it. ${SELECTORS} A section or range is several frames, so name one of its steps instead. ${BY_RECIPE}`,
     input: z.strictObject({
@@ -146,7 +146,7 @@ export const tools: readonly ToolDefinition[] = [
     },
   }),
   tool({
-    name: 'algoviz_list_recipes',
+    name: 'algomotion_list_recipes',
     title: 'List recipes',
     description: `Lists ready-made visualizations (${recipeCatalog.length}): classic algorithms, and single operations on data structures such as "bst.delete" or "min-heap.pop". Each has an id, a title, a topic (${TOPICS.join(', ')}), a one-sentence summary and the JSON Schema of its input. A recipe produces a complete, narrated document for your own input; prefer one when it matches what is asked. Recipes with a kebab-case id also show their code in pseudocode and Python.`,
     input: z.strictObject({}),
@@ -155,10 +155,10 @@ export const tools: readonly ToolDefinition[] = [
     },
   }),
   tool({
-    name: 'algoviz_run_recipe',
+    name: 'algomotion_run_recipe',
     title: 'Run a recipe',
     description:
-      'Builds the document of a recipe from algoviz_list_recipes for the given input, e.g. id "bst.delete" with input { "from": "8 3 10 1 6", "key": 3 }, id "dijkstra" with input "A-B 4, B-C 1, A-C 7", or id "bst" with input { "from": [8, 3, 10], "ops": "insert 4, delete 3" }. Returns the document as JSON, already validated. To show or draw a recipe, pass it to algoviz_show or algoviz_render by name instead.',
+      'Builds the document of a recipe from algomotion_list_recipes for the given input, e.g. id "bst.delete" with input { "from": "8 3 10 1 6", "key": 3 }, id "dijkstra" with input "A-B 4, B-C 1, A-C 7", or id "bst" with input { "from": [8, 3, 10], "ops": "insert 4, delete 3" }. Returns the document as JSON, already validated. To show or draw a recipe, pass it to algomotion_show or algomotion_render by name instead.',
     input: z.strictObject({
       id: z.string().describe('Recipe id, e.g. "bst.delete" or "dijkstra".'),
       // Any JSON: the recipe's own schema checks it, at paths under $.input.

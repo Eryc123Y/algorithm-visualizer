@@ -1,7 +1,7 @@
 // Slides that step through a run with touying: one frame per subslide.
 #import "@preview/touying:0.8.0": *
 #import themes.simple: *
-#import "@local/algoviz:0.1.0": algoviz-slides
+#import "@local/algomotion:0.1.0": algomotion-slides
 
 #show: simple-theme.with(aspect-ratio: "16-9")
 
@@ -13,7 +13,7 @@
 // the slide's width and three quarters of its height.
 == Dijkstra's algorithm, step by step
 
-#align(center, algoviz-slides(only, "dijkstra", input))
+#align(center, algomotion-slides(only, "dijkstra", input))
 
 // After #pause, `start` names the subslide the series begins on. Under a
 // line of text, the figure takes 60% of the height.
@@ -23,7 +23,7 @@ The queue hands out $a$, at distance 3, and relaxes its edges.
 
 #pause
 
-#align(center, algoviz-slides(
+#align(center, algomotion-slides(
   only,
   "dijkstra",
   input,
@@ -35,7 +35,7 @@ The queue hands out $a$, at distance 3, and relaxes its edges.
 // A section of a run, in the print theme.
 == Deleting 3 from a binary search tree
 
-#align(center, algoviz-slides(
+#align(center, algomotion-slides(
   only,
   "bst.delete",
   (from: (8, 3, 10, 1, 6, 4, 7), key: 3),

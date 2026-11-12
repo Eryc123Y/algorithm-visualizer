@@ -8,22 +8,22 @@ Raw is the size on disk. gzip and brotli are what a server that compresses sends
 
 Measured on 2026-11-12 at commit `b7674b8`, with Node 24.22.2; gzip at level 9 and brotli at quality 11, each file on its own.
 
-| Download                      | Files |      Raw |     gzip |   brotli | What it is                                                                                  |
-| ----------------------------- | ----: | -------: | -------: | -------: | ------------------------------------------------------------------------------------------- |
-| CDN `algoviz-player.js`       |     1 | 348.2 kB | 105.8 kB |  91.4 kB | the `<algo-player>` element with Lit and the engine, as a `<script type="module">` loads it |
-| CDN `algoviz-recipes.js`      |     1 | 395.8 kB | 119.5 kB |  99.4 kB | the registry, loaded on first use of `algorithm` (ADR 0032)                                 |
-| CDN `fonts/`                  |    30 | 817.8 kB | 818.6 kB | 817.8 kB | every theme’s web fonts; a player loads only its theme’s                                    |
-| `@algoviz/elements` in an app |     1 | 346.1 kB | 105.4 kB |  91.2 kB | the `define` entry minified by Vite, without the registry chunk                             |
-| … its registry chunk          |     1 | 395.8 kB | 119.4 kB |  99.4 kB | the same, the registry loaded on first use                                                  |
-| Typst `plugin.wasm`           |     1 |  1.21 MB | 417.8 kB | 330.0 kB | QuickJS in WebAssembly, as committed (ADR 0026)                                             |
-| Typst `engine.bc`             |     1 |  1.35 MB | 528.8 kB | 438.2 kB | the engine as QuickJS bytecode                                                              |
-| Typst package                 |     6 |  2.62 MB | 960.0 kB | 779.2 kB | everything in `packages/typst/package/`                                                     |
-| LaTeX package                 |     2 |  50.1 kB |  14.7 kB |  12.8 kB | everything in `packages/latex/package/`                                                     |
-| Worker `worker.js`            |     1 |  2.07 MB | 573.9 kB | 454.0 kB | the MCP server with the guide and player page (ADR 0039)                                    |
-| Standalone `algoviz`          |     1 |  2.95 MB |  1.25 MB |  1.01 MB | the CLI for darwin-arm64 (ADR 0027)                                                         |
-| Site scripts and styles       |     7 | 773.3 kB | 234.2 kB | 198.5 kB | `.js` and `.css` under `apps/site/dist/`                                                    |
-| Site pages                    |   136 | 821.0 kB | 272.5 kB | 218.1 kB | `.html` under `apps/site/dist/`                                                             |
-| Site, everything              |   184 |  2.60 MB |  1.36 MB |  1.26 MB | all of `apps/site/dist/`, fonts and images included                                         |
+| Download                         | Files |      Raw |     gzip |   brotli | What it is                                                                                  |
+| -------------------------------- | ----: | -------: | -------: | -------: | ------------------------------------------------------------------------------------------- |
+| CDN `algomotion-player.js`       |     1 | 348.2 kB | 105.8 kB |  91.4 kB | the `<algo-player>` element with Lit and the engine, as a `<script type="module">` loads it |
+| CDN `algomotion-recipes.js`      |     1 | 395.8 kB | 119.5 kB |  99.4 kB | the registry, loaded on first use of `algorithm` (ADR 0032)                                 |
+| CDN `fonts/`                     |    30 | 817.8 kB | 818.6 kB | 817.8 kB | every theme’s web fonts; a player loads only its theme’s                                    |
+| `@algomotion/elements` in an app |     1 | 346.1 kB | 105.4 kB |  91.2 kB | the `define` entry minified by Vite, without the registry chunk                             |
+| … its registry chunk             |     1 | 395.8 kB | 119.4 kB |  99.4 kB | the same, the registry loaded on first use                                                  |
+| Typst `plugin.wasm`              |     1 |  1.21 MB | 417.8 kB | 330.0 kB | QuickJS in WebAssembly, as committed (ADR 0026)                                             |
+| Typst `engine.bc`                |     1 |  1.35 MB | 528.8 kB | 438.2 kB | the engine as QuickJS bytecode                                                              |
+| Typst package                    |     6 |  2.62 MB | 960.0 kB | 779.2 kB | everything in `packages/typst/package/`                                                     |
+| LaTeX package                    |     2 |  50.1 kB |  14.7 kB |  12.8 kB | everything in `packages/latex/package/`                                                     |
+| Worker `worker.js`               |     1 |  2.07 MB | 573.9 kB | 454.0 kB | the MCP server with the guide and player page (ADR 0039)                                    |
+| Standalone `algomotion`          |     1 |  2.95 MB |  1.25 MB |  1.01 MB | the CLI for darwin-arm64 (ADR 0027)                                                         |
+| Site scripts and styles          |     7 | 773.3 kB | 234.2 kB | 198.5 kB | `.js` and `.css` under `apps/site/dist/`                                                    |
+| Site pages                       |   136 | 821.0 kB | 272.5 kB | 218.1 kB | `.html` under `apps/site/dist/`                                                             |
+| Site, everything                 |   184 |  2.60 MB |  1.36 MB |  1.26 MB | all of `apps/site/dist/`, fonts and images included                                         |
 
 <!-- sizes:end -->
 
