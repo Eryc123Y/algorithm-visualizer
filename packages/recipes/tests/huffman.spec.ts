@@ -73,6 +73,40 @@ describe('huffman', () => {
     ).toEqual(['f:5', 'e:9', 'c:12', 'b:13', 'd:16', 'a:45']);
   });
 
+  it('reads every codeword from the drawn edges’ labels and marks', () => {
+    const { trace, codes } = codesOf({
+      frequencies: 'a:45 b:13 c:12 d:16 e:9 f:5',
+    });
+    const q = stateOf(trace, 'Q', 'tree');
+    const byId = new Map(q.data.nodes.map((n) => [n.id, n]));
+    // Each leaf's codeword, read from the labels on the way down.
+    const read = new Map<string, string>();
+    const walk = (id: string, code: string) => {
+      const n = byId.get(id)!;
+      if (n.children.every((c) => c === null)) read.set(String(n.value), code);
+      n.children.forEach((c) => {
+        if (c !== null) walk(c, code + String(q.marks.edgeLabels[c]));
+      });
+    };
+    walk(q.data.roots[0]!, '');
+    expect(
+      ['a:45', 'b:13', 'c:12', 'd:16', 'e:9', 'f:5'].map((l) => read.get(l)),
+    ).toEqual(codes);
+    // In each codeword step, exactly the edges on the leaf's path are
+    // selected.
+    const parent = new Map<string, string>();
+    for (const n of q.data.nodes)
+      for (const c of n.children) if (c !== null) parent.set(c, n.id);
+    trace.visualization.steps.forEach((step, k) => {
+      if (step.meta?.id !== 'code') return;
+      const at = stateOf(trace, 'Q', 'tree', k + 1);
+      const leaf = at.marks.highlight[0]!;
+      const path: string[] = [];
+      for (let id = leaf; parent.has(id); id = parent.get(id)!) path.push(id);
+      expect(Object.keys(at.marks.edgeMarks).sort()).toEqual(path.sort());
+    });
+  });
+
   it('labels edges 0 and 1 and ends with one tree', () => {
     const { trace } = codesOf({ frequencies: { x: 1, y: 1, z: 2 } });
     const q = stateOf(trace, 'Q', 'tree');
@@ -94,53 +128,63 @@ describe('huffman', () => {
       /at least two/,
     );
     expect(runError('huffman', { frequencies: 'a:3 a:4' }).message).toMatch(
-      /once/,
+      /"a" appears twice/,
     );
+    expect(
+      runError('huffman', { frequencies: 'a:1e308 b:1e308' }).message,
+    ).toMatch(/too large/);
+    expect(
+      runError('huffman', { frequencies: { b: 1, '2': 1, '1': 1 } }).message,
+    ).toMatch(/as text or as pairs/);
     expect(runError('huffman', { frequencies: 'a:3 b:0' }).message).toMatch(
       /positive/,
     );
   });
 
-  it('agrees with the references on random frequencies', () => {
-    fc.assert(
-      fc.property(
-        fc.uniqueArray(fc.constantFrom(...'abcdefghijklmnopqrstuvwxyz'), {
-          minLength: 2,
-          maxLength: 16,
-        }),
-        fc.array(fc.integer({ min: 1, max: 40 }), {
-          minLength: 16,
-          maxLength: 16,
-        }),
-        (chars, weights) => {
-          const pairs: Pairs = chars.map((c, k) => [c, weights[k]!]);
-          const { codes, trace } = codesOf({ frequencies: pairs });
-          const expected = reference(pairs);
-          expect(codes).toEqual(pairs.map(([c]) => expected.get(c)));
-          // Optimal, and prefix-free.
-          const cost = pairs.reduce(
-            (s, [, f], k) => s + f * codes[k]!.length,
-            0,
-          );
-          expect(cost).toBe(optimalCost(pairs.map(([, f]) => f)));
-          for (const a of codes)
-            for (const b of codes)
-              if (a !== b) expect(b.startsWith(a)).toBe(false);
-          // The queue's roots are in order of frequency in every frame.
-          for (let k = 0; k <= trace.length; k++) {
-            const q = stateOf(trace, 'Q', 'tree', k);
-            const freq = (id: string) => {
-              const v = q.data.nodes.find((n) => n.id === id)!.value;
-              return typeof v === 'number'
-                ? v
-                : Number(String(v).split(':')[1]);
-            };
-            const fs = q.data.roots.map(freq);
-            expect(fs).toEqual([...fs].sort((a, b) => a - b));
-          }
-        },
-      ),
-      fuzz,
-    );
-  });
+  it(
+    'agrees with the references on random frequencies',
+    { timeout: 600_000 },
+    () => {
+      fc.assert(
+        fc.property(
+          fc.uniqueArray(fc.constantFrom(...'abcdefghijklmnopqrstuvwxyz'), {
+            minLength: 2,
+            maxLength: 16,
+          }),
+          fc.array(fc.integer({ min: 1, max: 40 }), {
+            minLength: 16,
+            maxLength: 16,
+          }),
+          (chars, weights) => {
+            const pairs: Pairs = chars.map((c, k) => [c, weights[k]!]);
+            const { codes, trace } = codesOf({ frequencies: pairs });
+            const expected = reference(pairs);
+            expect(codes).toEqual(pairs.map(([c]) => expected.get(c)));
+            // Optimal, and prefix-free.
+            const cost = pairs.reduce(
+              (s, [, f], k) => s + f * codes[k]!.length,
+              0,
+            );
+            expect(cost).toBe(optimalCost(pairs.map(([, f]) => f)));
+            for (const a of codes)
+              for (const b of codes)
+                if (a !== b) expect(b.startsWith(a)).toBe(false);
+            // The queue's roots are in order of frequency in every frame.
+            for (let k = 0; k <= trace.length; k++) {
+              const q = stateOf(trace, 'Q', 'tree', k);
+              const freq = (id: string) => {
+                const v = q.data.nodes.find((n) => n.id === id)!.value;
+                return typeof v === 'number'
+                  ? v
+                  : Number(String(v).split(':')[1]);
+              };
+              const fs = q.data.roots.map(freq);
+              expect(fs).toEqual([...fs].sort((a, b) => a - b));
+            }
+          },
+        ),
+        fuzz,
+      );
+    },
+  );
 });

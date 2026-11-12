@@ -15,7 +15,7 @@ import { numberAt } from '../../notation/list.ts';
 /** Most characters: a code tree of 31 nodes, which a figure still holds. */
 export const MAX_CHARACTERS = 16;
 
-const SYMBOL = /^[^\s:,]{1,8}$/;
+const SYMBOL = /^[^\s:,]{1,8}$/u;
 
 const FREQUENCIES_FORM =
   'characters with their frequencies, separated by spaces or commas, e.g. "a:45 b:13 c:12 d:16 e:9 f:5"';
@@ -56,9 +56,26 @@ const Pairs = z
   )
   .min(2, 'Give at least two characters: one character needs no code')
   .max(MAX_CHARACTERS)
-  .refine((pairs) => new Set(pairs.map(([c]) => c)).size === pairs.length, {
-    message: 'Each character appears once',
+  .superRefine((pairs, ctx) => {
+    const seen = new Set<string>();
+    pairs.forEach(([c], k) => {
+      if (seen.has(c))
+        ctx.addIssue({
+          code: 'custom',
+          path: [k, 0],
+          message: `The character ${JSON.stringify(c)} appears twice; each appears once`,
+        });
+      seen.add(c);
+    });
+    if (!Number.isFinite(pairs.reduce((sum, [, f]) => sum + f, 0)))
+      ctx.addIssue({
+        code: 'custom',
+        message: 'The frequencies add up to too large a number',
+      });
   });
+
+/** A whole number as JavaScript orders object keys: before the others. */
+const INDEX_LIKE = /^(0|[1-9]\d*)$/;
 
 const Frequencies = z
   .union([
@@ -67,7 +84,19 @@ const Frequencies = z
       .transform((s, ctx) =>
         parseIn(s, ctx, parseFrequencies, `Write ${FREQUENCIES_FORM}.`),
       ),
-    z.record(z.string(), z.number()).transform((o) => Object.entries(o)),
+    z
+      .record(z.string(), z.number())
+      .superRefine((o, ctx) => {
+        // JavaScript puts keys such as "1" first, so their order is lost.
+        const index = Object.keys(o).find((k) => INDEX_LIKE.test(k));
+        if (index !== undefined)
+          ctx.addIssue({
+            code: 'custom',
+            path: [index],
+            message: `An object puts a character such as ${JSON.stringify(index)} first, losing the order that breaks ties; give the frequencies as text or as pairs instead`,
+          });
+      })
+      .transform((o) => Object.entries(o)),
     z.array(z.tuple([z.string(), z.number()])),
   ])
   .pipe(Pairs)
@@ -123,7 +152,7 @@ export const huffman = defineAlgorithm({
   code: {
     pseudocode: `
       HUFFMAN(C)  // each character c of C has a frequency c.freq
-          Q = a min-priority queue of C, keyed on freq
+          Q = a min-priority queue of C, keyed on freq  // ties: oldest first
           while Q holds more than one tree
               x = EXTRACT-MIN(Q); y = EXTRACT-MIN(Q)  // the two least  // @extract
               z = a new node with z.left = x and z.right = y  // @merge
@@ -131,7 +160,7 @@ export const huffman = defineAlgorithm({
               INSERT(Q, z)
           return EXTRACT-MIN(Q)  // the root of the code tree  // @done
 
-      CODEWORD(c)  // along the path from the root down to c
+      CODEWORD(c)  // walk down from the root to c
           a 0 for every step left, a 1 for every step right  // @code
     `,
     python: `
@@ -206,7 +235,7 @@ export const huffman = defineAlgorithm({
       const at = rest.filter((q) => before(q, z) < 0).length;
       trace.step(
         'merge',
-        `Join them under a new node of frequency ${format(x.freq)} + ${format(y.freq)} = ${format(z.freq)}, 0 to the left and 1 to the right, and put it back into Q ${at === rest.length ? 'last' : at === 0 ? 'first' : `after ${name(rest[at - 1]!)}`}.`,
+        `Join them under a new node of frequency ${format(x.freq)} + ${format(y.freq)} = ${format(z.freq)}, 0 to the left and 1 to the right, and put it back into Q${rest.length === 0 ? ', where it is the only tree' : at === rest.length ? ' last' : at === 0 ? ' first' : ` after ${name(rest[at - 1]!)}`}.`,
       );
       // x and y are still the first two roots until they become children.
       Q.addNode({
