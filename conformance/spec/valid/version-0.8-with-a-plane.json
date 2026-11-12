@@ -1,0 +1,35 @@
+{
+  "description": "A 0.x document is read as 1.0 whatever features it uses: a plane, added in 0.9, in a document that says 0.8 (ADR 0043).",
+  "input": {
+    "version": "0.8",
+    "structures": {
+      "P": {
+        "kind": "plane",
+        "points": [
+          {
+            "id": "a",
+            "x": 0,
+            "y": 0
+          }
+        ]
+      }
+    },
+    "steps": []
+  },
+  "expected": {
+    "version": "1.0",
+    "structures": {
+      "P": {
+        "kind": "plane",
+        "points": [
+          {
+            "id": "a",
+            "x": 0,
+            "y": 0
+          }
+        ]
+      }
+    },
+    "steps": []
+  }
+}

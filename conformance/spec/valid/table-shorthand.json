@@ -1,7 +1,7 @@
 {
   "description": "A table from ragged initial rows, padded to the given size with empty (null) cells.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "m": {
         "kind": "table",
@@ -13,7 +13,7 @@
     "steps": []
   },
   "expected": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "m": {
         "kind": "table",

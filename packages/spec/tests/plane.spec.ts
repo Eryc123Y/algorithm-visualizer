@@ -1,5 +1,5 @@
 /**
- * The `plane` kind (ADR 0038), protocol version 0.9: the declaration and
+ * The `plane` kind (ADR 0038), added in 0.9, part of 1.0: the declaration and
  * its shape rules, the actions, and the feature.
  */
 import { describe, expect, it } from 'vitest';
@@ -8,7 +8,6 @@ import {
   actionTypesOf,
   minimumVersion,
   parseVisualization,
-  PROTOCOL_FEATURES,
   type VisualizationInput,
 } from '../src/index.ts';
 
@@ -33,7 +32,7 @@ const errorsOf = (input: unknown) => {
 };
 
 describe('plane (ADR 0038)', () => {
-  it('is a kind of version 0.9 with twelve actions', () => {
+  it('is a kind of 1.0 with twelve actions', () => {
     expect(actionTypesOf('plane')).toEqual([
       'addPoint',
       'removePoint',
@@ -48,18 +47,13 @@ describe('plane (ADR 0038)', () => {
       'pointer',
       'line',
     ]);
-    expect(PROTOCOL_FEATURES.find((f) => f.name === 'planes')?.since).toBe(
-      '0.9',
-    );
     expect(
       minimumVersion({
         structures: { P: { kind: 'plane' } },
         steps: [],
       } as unknown as Omit<VisualizationInput, 'version'>),
-    ).toBe('0.9');
-    expect(errorsOf({ ...doc({ points }), version: '0.8' })).toEqual([
-      { code: 'VERSION_TOO_OLD', path: '$.version' },
-    ]);
+    ).toBe('1.0');
+    expect(errorsOf({ ...doc({ points }), version: '0.8' })).toEqual([]);
   });
 
   it('starts empty without points', () => {

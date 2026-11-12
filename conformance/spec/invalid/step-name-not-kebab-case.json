@@ -1,7 +1,7 @@
 {
   "description": "Step names and section ids are lower-case kebab-case that starts with a letter, at most 40 characters, so a selector can tell them from frame numbers.",
   "input": {
-    "version": "0.2",
+    "version": "1.0",
     "structures": { "a": { "kind": "array", "initial": [1, 2] } },
     "steps": [
       { "actions": [], "meta": { "id": "Compare" } },

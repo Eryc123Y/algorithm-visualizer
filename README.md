@@ -8,7 +8,7 @@ A visualization is a declarative JSON document: the structures involved and a ti
 
 ```json
 {
-  "version": "0.1",
+  "version": "1.0",
   "structures": { "arr": { "kind": "array", "initial": [5, 3, 8, 1] } },
   "steps": [
     {
@@ -192,7 +192,7 @@ The registry is a second file of the bundle, `algoviz-recipes.js`, which the pla
 ```html
 <algo-player theme="auto">
   <script type="application/json">
-    { "version": "0.1", "structures": { … }, "steps": [ … ] }
+    { "version": "1.0", "structures": { … }, "steps": [ … ] }
   </script>
 </algo-player>
 ```
@@ -247,6 +247,8 @@ Every output draws in the same nine built-in themes, and every theme works in ev
 [`apps/site`](apps/site) builds the documentation from the registry: a page for every algorithm and every operation of a data structure, grouped by topic and by structure. Each page has its player, the names of its steps, and the same run as a snippet for a web page, Typst, LaTeX, the command line, MCP and a share link. A themes page shows every theme and how each output picks one. The site also holds the share page, and is built for Cloudflare Pages (`npm run build -w @algoviz/site`; deploying waits for the owner's domain).
 
 ## Packages
+
+Every package reads and writes protocol 1.0, the frozen form of the document format ([ADR 0043](docs/adr/0043-protocol-1-0.md)). A 1.x version only adds to it, and documents that say a 0.x version, from before the freeze, are read as 1.0. The JSON Schema is [`packages/spec/schema/visualization.schema.json`](packages/spec/schema/visualization.schema.json).
 
 | Package                                  | Status    | Purpose                                                            |
 | ---------------------------------------- | --------- | ------------------------------------------------------------------ |

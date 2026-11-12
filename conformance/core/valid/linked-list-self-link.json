@@ -1,7 +1,7 @@
 {
   "description": "A circular, doubly linked list of one node links to itself both ways.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "ll": {
         "kind": "linkedList",

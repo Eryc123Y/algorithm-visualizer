@@ -1,7 +1,7 @@
 {
   "description": "A B-tree with bare keys gets key ids k0, k1, … through the tree, and its root is the node nobody holds (ADR 0035).",
   "input": {
-    "version": "0.6",
+    "version": "1.0",
     "structures": {
       "T": {
         "kind": "btree",
@@ -37,7 +37,7 @@
     ]
   },
   "expected": {
-    "version": "0.6",
+    "version": "1.0",
     "structures": {
       "T": {
         "kind": "btree",

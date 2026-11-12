@@ -1,7 +1,7 @@
 {
   "description": "align checks that the matched elements equal the text under them.",
   "input": {
-    "version": "0.8",
+    "version": "1.0",
     "structures": {
       "T": {
         "kind": "array",

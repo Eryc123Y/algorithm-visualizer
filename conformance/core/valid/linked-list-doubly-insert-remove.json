@@ -1,7 +1,7 @@
 {
   "description": "Doubly linked list: insert places an unlinked node, links wire it in, and removing a node nulls the links and pointers to it.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "ll": {
         "kind": "linkedList",

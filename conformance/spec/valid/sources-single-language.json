@@ -1,7 +1,7 @@
 {
   "description": "sources may hold a single language, and anchors may be empty when no step names one.",
   "input": {
-    "version": "0.3",
+    "version": "1.0",
     "sources": [
       {
         "language": "python",
@@ -13,7 +13,7 @@
     "steps": [{ "actions": [], "meta": { "narration": "Nothing to do." } }]
   },
   "expected": {
-    "version": "0.3",
+    "version": "1.0",
     "sources": [
       {
         "language": "python",

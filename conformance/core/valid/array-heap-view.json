@@ -1,7 +1,7 @@
 {
   "description": "The heap view: one array drawn as a tree with the row under it. The state is that of any array.",
   "input": {
-    "version": "0.4",
+    "version": "1.0",
     "structures": {
       "h": {
         "kind": "array",

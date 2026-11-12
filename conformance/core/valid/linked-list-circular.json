@@ -1,7 +1,7 @@
 {
   "description": "A circular list links its last node back to the first (and the first back to the last when doubly linked).",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "ll": {
         "kind": "linkedList",

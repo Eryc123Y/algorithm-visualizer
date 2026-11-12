@@ -38,6 +38,7 @@ import { err, ok, type Result } from './result.ts';
 import {
   checkFeatures,
   checkVersion,
+  upgradeDocument,
   listOf,
   PROTOCOL_FEATURES,
   type ProtocolVersion,
@@ -55,6 +56,13 @@ export function parseVisualization(
 ): Result<Visualization, readonly ProtocolError[]> {
   const versionError = checkDocumentVersion(input);
   if (versionError) return err([versionError]);
+  return parseCurrent(upgradeDocument(input).document);
+}
+
+/** Parses a document of the current version. */
+function parseCurrent(
+  input: unknown,
+): Result<Visualization, readonly ProtocolError[]> {
   const protoErrors = checkProtoKeys(input);
   if (protoErrors.length > 0) return err(protoErrors);
 

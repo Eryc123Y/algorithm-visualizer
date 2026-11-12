@@ -1,7 +1,7 @@
 {
   "description": "A circular root list with min above its root, a cut child moved into the list and a root reordered (ADR 0034).",
   "input": {
-    "version": "0.5",
+    "version": "1.0",
     "structures": {
       "h": {
         "kind": "tree",

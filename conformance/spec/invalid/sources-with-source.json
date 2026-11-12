@@ -1,7 +1,7 @@
 {
   "description": "A document gives source or sources, not both.",
   "input": {
-    "version": "0.3",
+    "version": "1.0",
     "source": {
       "language": "python",
       "code": "def sort_two(a):\n    if a[0] > a[1]:\n        # put them in order\n        a[0], a[1] = a[1], a[0]"

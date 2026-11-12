@@ -18,7 +18,7 @@ import { shareBaseFromEnv } from '../src/share.ts';
 const BASE = 'https://example.org/play/';
 
 const doc = {
-  version: '0.1',
+  version: '1.0',
   title: 'Two pushes',
   structures: { s: { kind: 'stack', initial: [] } },
   steps: [

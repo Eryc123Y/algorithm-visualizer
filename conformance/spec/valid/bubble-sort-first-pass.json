@@ -1,7 +1,7 @@
 {
   "description": "First pass of bubble sort on [5, 3, 8, 1] with explicit ids, source lines and narration.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "title": "Bubble sort",
     "structures": {
       "arr": {
@@ -147,7 +147,7 @@
     ]
   },
   "expected": {
-    "version": "0.1",
+    "version": "1.0",
     "title": "Bubble sort",
     "structures": {
       "arr": {

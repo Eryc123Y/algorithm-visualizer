@@ -1,6 +1,6 @@
 ## array
 
-A row of cells: sorting, searching, two pointers, sliding windows. With `"view": "tree"` it is drawn as a complete binary tree (index `i` has children `2i+1` and `2i+2`). With `"view": "heap"` (version `"0.4"`) it is drawn as that tree with the row under it, both from the one array, as textbooks draw heaps: prefer it for heaps and heapsort, where the sorted part grows at the end of the row.
+A row of cells: sorting, searching, two pointers, sliding windows. With `"view": "tree"` it is drawn as a complete binary tree (index `i` has children `2i+1` and `2i+2`). With `"view": "heap"` it is drawn as that tree with the row under it, both from the one array, as textbooks draw heaps: prefer it for heaps and heapsort, where the sorted part grows at the end of the row.
 
 Declaration: `{ "kind": "array", "initial": [5, 3, 8], "label"?: "…", "view"?: "row" | "tree" | "heap" }`. `initial` holds bare values (ids `e0`, `e1`, …) or `{ "id", "value" }` elements. Values are numbers, strings, booleans or null.
 
@@ -15,7 +15,7 @@ Declaration: `{ "kind": "array", "initial": [5, 3, 8], "label"?: "…", "view"?:
 | `pointer`   | `name`, `index`    | Point a named arrow (`"i"`, `"lo"`, `"mid"`) at `index`; `null` removes it. Persists.                    |
 | `settle`    | `index`            | Mark an element as final, e.g. sorted or found. Persists.                                                |
 
-**Patterns** (version `"0.8"`), for string matching: `"pattern": ["a", "b"]` draws a second row under the text, its first element under text position `"shift"` (default 0, up to the text's length, so it may hang past the end). Pattern values get the ids `p0`, `p1`, … (skipping ids the array already uses; ids are unique within one array), or are `{ "id", "value" }` elements. A pattern needs the row view, and while it is there the text is fixed: `set`, `swap`, `insert` and `remove` are refused.
+**Patterns**, for string matching: `"pattern": ["a", "b"]` draws a second row under the text, its first element under text position `"shift"` (default 0, up to the text's length, so it may hang past the end). Pattern values get the ids `p0`, `p1`, … (skipping ids the array already uses; ids are unique within one array), or are `{ "id", "value" }` elements. A pattern needs the row view, and while it is there the text is fixed: `set`, `swap`, `insert` and `remove` are refused.
 
 | Action  | Fields              | Effect                                                                                                                                       |
 | ------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -26,7 +26,7 @@ The engine decides whether characters match, so a document cannot show a false m
 
 ```json
 {
-  "version": "0.1",
+  "version": "1.0",
   "title": "Binary search for 7",
   "structures": { "a": { "kind": "array", "initial": [1, 3, 5, 7, 9, 11] } },
   "steps": [

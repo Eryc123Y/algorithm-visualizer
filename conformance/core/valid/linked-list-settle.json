@@ -1,7 +1,7 @@
 {
   "description": "settle marks a node by id, so the mark follows it when the row shifts, and goes away when the node is removed.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": { "l": { "kind": "linkedList", "initial": [1, 2, 3] } },
     "steps": [
       {

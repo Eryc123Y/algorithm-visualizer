@@ -1,7 +1,7 @@
 {
   "description": "All action errors are reported, not just the first.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "arr": {
         "kind": "array",

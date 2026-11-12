@@ -1,7 +1,7 @@
 {
   "description": "The naive matcher's checks at shifts 0 and 2 of a a b in a c a a b c: a mismatch, then an occurrence; the matches stay until the next align, and the compare mark lasts a step.",
   "input": {
-    "version": "0.8",
+    "version": "1.0",
     "structures": {
       "T": {
         "kind": "array",

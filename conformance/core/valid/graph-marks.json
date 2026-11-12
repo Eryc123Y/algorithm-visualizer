@@ -1,7 +1,7 @@
 {
   "description": "Shortest-path style marks on a directed graph; removing a node removes its edges and their marks, and resetMarks clears everything.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "g": {
         "kind": "graph",

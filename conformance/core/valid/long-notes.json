@@ -1,7 +1,7 @@
 {
   "description": "The longest allowed notes on a lone graph node and on tree nodes at the edges stay inside the scene.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "g": {
         "kind": "graph",

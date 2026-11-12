@@ -15,7 +15,7 @@ Declaration: `{ "kind": "queue", "initial": [], "label"?: "…" }`, elements fro
 
 ```json
 {
-  "version": "0.1",
+  "version": "1.0",
   "structures": { "q": { "kind": "queue", "initial": ["A"] } },
   "steps": [
     {

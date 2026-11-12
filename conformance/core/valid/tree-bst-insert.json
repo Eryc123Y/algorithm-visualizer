@@ -1,7 +1,7 @@
 {
   "description": "Building a binary search tree with generated ids, slots by side, and every kind of mark.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "t": {
         "kind": "tree",

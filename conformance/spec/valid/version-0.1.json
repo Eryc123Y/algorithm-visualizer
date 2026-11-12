@@ -1,5 +1,5 @@
 {
-  "description": "Documents of protocol 0.1 stay readable in every later 0.x version, and the canonical form keeps the version they declare.",
+  "description": "A document of a 0.x version is read as 1.0: 1.0 is 0.9 as it stood, so the upgrade relabels it (ADR 0043).",
   "input": {
     "version": "0.1",
     "structures": {
@@ -16,7 +16,7 @@
     "steps": []
   },
   "expected": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "arr": {
         "kind": "array",

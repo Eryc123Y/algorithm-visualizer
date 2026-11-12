@@ -1,7 +1,7 @@
 {
   "description": "Wide text in every kind that shows values: CJK strings, a long number, symbols, emoji and wide Latin letters, as values, labels, notes and edge weights. Layout measures them with the bundled metrics (ADR 0024), so they fit their cells and nodes.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "title": "Wide text",
     "structures": {
       "arr": {

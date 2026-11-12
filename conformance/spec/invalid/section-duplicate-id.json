@@ -1,7 +1,7 @@
 {
   "description": "Section ids are unique within a document, unlike step names.",
   "input": {
-    "version": "0.2",
+    "version": "1.0",
     "structures": { "a": { "kind": "array", "initial": [1, 2] } },
     "steps": [
       {

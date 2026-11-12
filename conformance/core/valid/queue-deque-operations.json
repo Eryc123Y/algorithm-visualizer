@@ -1,7 +1,7 @@
 {
   "description": "enqueue/dequeue work at opposite ends; pushFront/popBack give deque behaviour; peek can look at either end.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "q": {
         "kind": "queue",

@@ -1,7 +1,7 @@
 {
   "description": "A structure placed on the side, and one placed explicitly in the main column; place is kept in the canonical form (ADR 0029).",
   "input": {
-    "version": "0.4",
+    "version": "1.0",
     "structures": {
       "a": {
         "kind": "array",
@@ -62,7 +62,7 @@
     ]
   },
   "expected": {
-    "version": "0.4",
+    "version": "1.0",
     "structures": {
       "a": {
         "kind": "array",

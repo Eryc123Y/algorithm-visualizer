@@ -1,7 +1,7 @@
 {
   "description": "A pointer at an empty slot (NIL, ADR 0034) stays while the slot is empty and goes when it fills.",
   "input": {
-    "version": "0.5",
+    "version": "1.0",
     "structures": {
       "t": {
         "kind": "tree",

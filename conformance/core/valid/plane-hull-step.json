@@ -1,7 +1,7 @@
 {
   "description": "A step of a hull: an orientation test compares three points, an edge is added and chosen, and a sweep line moves; the compare mark lasts one step.",
   "input": {
-    "version": "0.9",
+    "version": "1.0",
     "structures": {
       "P": {
         "kind": "plane",

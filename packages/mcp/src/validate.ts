@@ -6,11 +6,13 @@ import { isCodeLine, type Trace } from '@algoviz/core';
 import {
   formatErrors,
   formatPath,
+  PROTOCOL_VERSION,
+  upgradeDocument,
   type Diagnostic,
   type Visualization,
 } from '@algoviz/spec';
 
-import { loadDocument } from './document.ts';
+import { loadDocument, readDocument } from './document.ts';
 
 /** At most this many errors are reported; the rest are counted. */
 export const MAX_ERRORS = 20;
@@ -147,8 +149,24 @@ export function validate(input: unknown): ValidationReport {
   return {
     valid: true,
     summary: summarize(loaded.value),
-    warnings: lint(loaded.value),
+    warnings: [...upgradeWarnings(input), ...lint(loaded.value)],
   };
+}
+
+/** A 0.x document is read as 1.0 (ADR 0043); writers should say 1.0. */
+function upgradeWarnings(input: unknown): Diagnostic[] {
+  const read = readDocument(input);
+  const from = read.ok ? upgradeDocument(read.value).from : undefined;
+  return from === undefined
+    ? []
+    : [
+        {
+          code: 'UPGRADED_VERSION',
+          path: '$.version',
+          message: `The document says version "${from}", which is read as "${PROTOCOL_VERSION}"`,
+          hint: `Set "version" to "${PROTOCOL_VERSION}": the protocol is ${PROTOCOL_VERSION}, which holds everything 0.x had.`,
+        },
+      ];
 }
 
 /** The report as text for a model to read. */

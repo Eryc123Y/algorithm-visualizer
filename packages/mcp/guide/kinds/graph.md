@@ -6,7 +6,7 @@ Declaration: `{ "kind": "graph", "directed"?: false, "nodes": ["A", "B", "C"], "
 
 - A node is a name (its id and its text) or `{ "id", "value"?, "x"?, "y"? }`.
 - An edge is `[from, to]`, `[from, to, weight]` or `{ "id"?, "from", "to", "weight"? }`. Its id defaults to `"from-to"` exactly as written, so `["B", "A"]` is `"B-A"` even in an undirected graph. Two edges between the same nodes need explicit ids.
-- `layout`: `"auto"` (layered for directed acyclic graphs, otherwise a circle), `"layered"` (top to bottom along edges, good for trees and DAGs), `"circle"`, `"grid"`, or `"manual"` (every node has `x` and `y` in pixels). Nodes keep their place for the whole trace.
+- `layout`: `"auto"` (by hand when every node has `x` and `y`, else layered for directed acyclic graphs, else a circle), `"layered"` (top to bottom along edges, good for trees and DAGs), `"circle"`, `"grid"`, or `"manual"` (every node has `x` and `y` in pixels). Nodes keep their place for the whole trace.
 
 | Action       | Fields             | Effect                                                                                                |
 | ------------ | ------------------ | ----------------------------------------------------------------------------------------------------- |
@@ -27,7 +27,7 @@ Declaration: `{ "kind": "graph", "directed"?: false, "nodes": ["A", "B", "C"], "
 
 ```json
 {
-  "version": "0.1",
+  "version": "1.0",
   "title": "Dijkstra from A",
   "structures": {
     "g": {

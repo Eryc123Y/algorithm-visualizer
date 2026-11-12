@@ -1,7 +1,7 @@
 {
   "description": "Insert may append (index = length) but not skip positions.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "arr": {
         "kind": "array",

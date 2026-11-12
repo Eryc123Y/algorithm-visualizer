@@ -1,7 +1,7 @@
 {
   "description": "Bare node names serve as id and value; tuple edges get the id \"from-to\"; a node object without a value shows its id.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "g": {
         "kind": "graph",
@@ -53,7 +53,7 @@
     ]
   },
   "expected": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "g": {
         "kind": "graph",

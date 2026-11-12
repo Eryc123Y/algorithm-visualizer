@@ -1,7 +1,7 @@
 {
   "description": "Named notes keep one note per field, in the order first set; edge marks and labels go when a rotation moves their edge.",
   "input": {
-    "version": "0.5",
+    "version": "1.0",
     "structures": {
       "t": {
         "kind": "tree",

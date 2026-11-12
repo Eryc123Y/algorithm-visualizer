@@ -1,7 +1,7 @@
 {
   "description": "An action type must exist for the target kind.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "arr": {
         "kind": "array",

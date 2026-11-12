@@ -1,7 +1,7 @@
 {
   "description": "A B-tree node has no children or one more than its keys.",
   "input": {
-    "version": "0.6",
+    "version": "1.0",
     "structures": {
       "T": {
         "kind": "btree",

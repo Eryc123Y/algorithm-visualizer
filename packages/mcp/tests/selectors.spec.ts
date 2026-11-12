@@ -13,7 +13,7 @@ import { formatReport, validate } from '../src/validate.ts';
 
 /** Two sections of named steps (ADR 0020). */
 const named = {
-  version: '0.2',
+  version: '1.0',
   title: 'Stack',
   structures: { s: { kind: 'stack', initial: [1] } },
   steps: [

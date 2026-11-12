@@ -7,8 +7,6 @@ import { describe, expect, it } from 'vitest';
 import {
   minimumVersion,
   parseVisualization,
-  PROTOCOL_FEATURES,
-  PROTOCOL_VERSIONS,
   type VisualizationInput,
 } from '../src/index.ts';
 
@@ -62,29 +60,14 @@ describe('place (ADR 0029)', () => {
   });
 });
 
-describe('version 0.4', () => {
-  it('is a version, and dates placement', () => {
-    expect(PROTOCOL_VERSIONS).toContain('0.4');
-    expect(
-      PROTOCOL_FEATURES.filter((f) => f.since === '0.4').map((f) => f.name),
-    ).toContain('placement');
-  });
-
-  it('is what a document with place needs, even place "main"', () => {
+describe('placement in 1.0 (ADR 0043)', () => {
+  it('needs no version beyond 1.0, even place "main"', () => {
     for (const place of ['main', 'side']) {
       const input = doc({ a: DECLS.array, s: { ...DECLS.stack, place } });
       expect(minimumVersion(input as unknown as VisualizationInput)).toBe(
-        '0.4',
+        '1.0',
       );
-      expect(errorsOf({ ...input, version: '0.3' })).toEqual([
-        { code: 'VERSION_TOO_OLD', path: '$.version' },
-      ]);
+      expect(errorsOf({ ...input, version: '0.3' })).toEqual([]);
     }
-  });
-
-  it('is not needed without place', () => {
-    const input = doc({ a: DECLS.array }, '0.1');
-    expect(minimumVersion(input as unknown as VisualizationInput)).toBe('0.1');
-    expect(errorsOf(input)).toEqual([]);
   });
 });

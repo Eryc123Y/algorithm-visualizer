@@ -14,7 +14,7 @@ Declaration: `{ "kind": "table", "rows"?: 3, "columns"?: 4, "initial"?: [[0, 0],
 
 ```json
 {
-  "version": "0.1",
+  "version": "1.0",
   "title": "Fibonacci with a table",
   "structures": {
     "fib": {

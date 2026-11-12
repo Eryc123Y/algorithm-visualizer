@@ -1,7 +1,7 @@
 {
   "description": "A split needs a child of at least 3 keys.",
   "input": {
-    "version": "0.6",
+    "version": "1.0",
     "structures": {
       "T": {
         "kind": "btree",

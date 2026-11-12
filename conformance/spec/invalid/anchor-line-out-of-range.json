@@ -1,7 +1,7 @@
 {
   "description": "An anchor must be on a line of its own code: the python code has 4 lines.",
   "input": {
-    "version": "0.3",
+    "version": "1.0",
     "sources": [
       {
         "language": "pseudocode",

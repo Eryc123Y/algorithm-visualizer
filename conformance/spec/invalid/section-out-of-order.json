@@ -1,7 +1,7 @@
 {
   "description": "Sections are listed in order and do not overlap, so each starts at a later step than the one before; an empty section is out of order too.",
   "input": {
-    "version": "0.2",
+    "version": "1.0",
     "structures": { "a": { "kind": "array", "initial": [1, 2] } },
     "steps": [
       {

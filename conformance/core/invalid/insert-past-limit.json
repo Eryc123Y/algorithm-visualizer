@@ -1,7 +1,7 @@
 {
   "description": "Inserting into an array that already holds the maximum of 1000 elements is rejected, so a trace cannot grow a structure without bound.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "arr": {
         "kind": "array",

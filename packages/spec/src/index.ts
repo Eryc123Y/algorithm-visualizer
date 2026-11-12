@@ -10,8 +10,11 @@ export {
   PROTOCOL_FEATURES,
   PROTOCOL_VERSION,
   PROTOCOL_VERSIONS,
+  UPGRADED_VERSIONS,
+  upgradeDocument,
   type ProtocolFeature,
   type ProtocolVersion,
+  type Upgraded,
 } from './version.ts';
 export {
   StructureDecl,

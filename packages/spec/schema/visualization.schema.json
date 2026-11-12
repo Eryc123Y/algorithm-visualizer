@@ -5,15 +5,7 @@
     "version": {
       "type": "string",
       "enum": [
-        "0.1",
-        "0.2",
-        "0.3",
-        "0.4",
-        "0.5",
-        "0.6",
-        "0.7",
-        "0.8",
-        "0.9"
+        "1.0"
       ],
       "description": "Protocol version, \"major.minor\": the oldest version that has every feature the document uses."
     },
@@ -5720,6 +5712,6 @@
       ]
     }
   },
-  "$id": "urn:algoviz:schema:visualization:0.9",
+  "$id": "urn:algoviz:schema:visualization:1.0",
   "title": "Visualization"
 }

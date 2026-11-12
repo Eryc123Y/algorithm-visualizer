@@ -1,7 +1,7 @@
 {
   "description": "An inserted element must not reuse an existing id.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "arr": {
         "kind": "array",

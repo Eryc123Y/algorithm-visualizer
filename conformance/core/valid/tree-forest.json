@@ -1,7 +1,7 @@
 {
   "description": "A forest of n-ary trees as in union–find: linking roots, inserting at a slot, cutting a child, and removing a subtree with its marks.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "f": {
         "kind": "tree",

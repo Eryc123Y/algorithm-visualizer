@@ -1,29 +1,29 @@
 ## plane
 
-Points at coordinates and the segments between them, for computational geometry: segment intersection, convex hulls, closest pairs. The drawing keeps one region and one scale through the whole visualization, with y pointing up. Needs `"version": "0.9"`.
+Points at coordinates and the segments between them, for computational geometry: segment intersection, convex hulls, closest pairs. The drawing keeps one region and one scale through the whole visualization, with y pointing up.
 
 Declaration: `{ "kind": "plane", "points": [{ "id": "a", "x": 0, "y": 0 }, { "id": "b", "x": 4, "y": 3, "label"?: "p1" }], "segments"?: [{ "id": "s1", "from": "a", "to": "b", "label"?: "5" }], "axes"?: false }`. Coordinates are numbers from −1,000,000 to 1,000,000. Ids are unique within the plane, points and segments together. Two points may not share coordinates, a segment joins two different points, and two points have at most one segment. At most 64 points and 128 segments.
 
-| Action          | Fields                 | Effect                                                                                            |
-| --------------- | ---------------------- | ------------------------------------------------------------------------------------------------- |
-| `addPoint`      | `point`                | Add a point `{ "id", "x", "y", "label"? }`.                                                       |
-| `removePoint`   | `id`                   | Remove a point; a point that ends a segment is refused, so remove the segment first.              |
-| `addSegment`    | `segment`              | Add a segment `{ "id", "from", "to", "label"? }` between two points.                              |
-| `removeSegment` | `id`                   | Remove a segment.                                                                                 |
-| `label`         | `segment`, `text`      | Change a segment's label, such as a distance; `null` removes it.                                  |
-| `highlight`     | `points`?, `segments`? | Highlight points and segments (this step).                                                        |
-| `compare`       | `points`               | Mark two or three points as being compared, as an orientation test does (this step).              |
-| `visit`         | `point`                | Mark a point as considered. Persists.                                                             |
-| `settle`        | `point`                | Mark a point as final, such as a hull vertex. Persists.                                           |
-| `select`        | `segment`, `on`        | Mark a segment as chosen (`true`), such as a hull edge or a closest pair, or clear it. Persists.  |
-| `pointer`       | `name`, `point`        | A named badge under a point; `null` removes it. Persists.                                         |
-| `line`          | `name`, `x`            | A named vertical line at `x`, such as `"sweep"` or `"l"`; `null` removes it. At most 8. Persists. |
+| Action          | Fields                 | Effect                                                                                             |
+| --------------- | ---------------------- | -------------------------------------------------------------------------------------------------- |
+| `addPoint`      | `point`                | Add a point `{ "id", "x", "y", "label"? }`.                                                        |
+| `removePoint`   | `id`                   | Remove a point; a point that ends a segment is refused, so remove the segment first.               |
+| `addSegment`    | `segment`              | Add a segment `{ "id", "from", "to", "label"? }` between two points.                               |
+| `removeSegment` | `id`                   | Remove a segment.                                                                                  |
+| `label`         | `segment`, `text`      | Change a segment's label, such as a distance; `null` removes it.                                   |
+| `highlight`     | `points`?, `segments`? | Highlight points and segments (this step).                                                         |
+| `compare`       | `points`               | Mark two or three points as being compared, as an orientation test or a distance does (this step). |
+| `visit`         | `point`                | Mark a point as considered. Persists.                                                              |
+| `settle`        | `point`                | Mark a point as final, such as a hull vertex. Persists.                                            |
+| `select`        | `segment`, `on`        | Mark a segment as chosen (`true`), such as a hull edge or a closest pair, or clear it. Persists.   |
+| `pointer`       | `name`, `point`        | A named badge under a point; `null` removes it. Persists.                                          |
+| `line`          | `name`, `x`            | A named vertical line at `x`, such as `"sweep"` or `"l"`; `null` removes it. At most 8. Persists.  |
 
 Marks go with the point or segment they name when it is removed. Labels are 1 to 16 characters; line names up to 12, with no control characters or space at either end; pointer names are letters, digits and `_`, starting with a letter or `_`. `highlight` needs `points`, `segments` or both. A point drawn as compared beats highlighted, which beats settled, which beats visited. Keep points visibly apart: two points closer than about a fortieth of the drawing's span overlap. Coordinates or counts out of range are refused as an invalid shape or action, as in other kinds.
 
 ```json
 {
-  "version": "0.9",
+  "version": "1.0",
   "title": "Is the turn from a to b to c a left turn?",
   "structures": {
     "P": {

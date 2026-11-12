@@ -1,7 +1,7 @@
 {
   "description": "An edge must join existing nodes, including ones removed earlier.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "g": {
         "kind": "graph",

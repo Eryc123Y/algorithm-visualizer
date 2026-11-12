@@ -1,5 +1,5 @@
 /**
- * An array's pattern (ADR 0037), protocol version 0.8: the declaration,
+ * An array's pattern (ADR 0037), added in 0.8, part of 1.0: the declaration,
  * generated pattern ids, the refusals, the two actions and the feature.
  */
 import { describe, expect, it } from 'vitest';
@@ -8,7 +8,6 @@ import {
   actionTypesOf,
   minimumVersion,
   parseVisualization,
-  PROTOCOL_FEATURES,
   type VisualizationInput,
 } from '../src/index.ts';
 
@@ -33,18 +32,14 @@ const versionOf = (input: ReturnType<typeof doc>) =>
   } as unknown as Omit<VisualizationInput, 'version'>);
 
 describe('array patterns (ADR 0037)', () => {
-  it('are a feature of version 0.8, with align and check', () => {
+  it('are part of 1.0, with align and check', () => {
     expect(actionTypesOf('array')).toEqual(
       expect.arrayContaining(['align', 'check']),
     );
-    expect(
-      PROTOCOL_FEATURES.find((f) => f.name === 'array patterns')?.since,
-    ).toBe('0.8');
-    expect(versionOf(doc({ pattern: ['a', 'c'] }))).toBe('0.8');
-    expect(versionOf(doc({}))).toBe('0.1');
+    expect(versionOf(doc({ pattern: ['a', 'c'] }))).toBe('1.0');
     expect(
       errorsOf({ ...doc({ pattern: ['a', 'c'] }), version: '0.7' }),
-    ).toEqual([{ code: 'VERSION_TOO_OLD', path: '$.version' }]);
+    ).toEqual([]);
   });
 
   it('gives bare pattern values ids the document does not use', () => {

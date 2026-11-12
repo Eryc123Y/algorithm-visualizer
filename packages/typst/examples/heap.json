@@ -1,5 +1,5 @@
 {
-  "version": "0.3",
+  "version": "1.0",
   "title": "Binary min-heap: push 0, pop",
   "sources": [
     {

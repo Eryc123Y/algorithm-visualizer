@@ -1,7 +1,7 @@
 {
   "description": "With sources, steps name anchors in meta.at; meta.line would mean a different line in each language.",
   "input": {
-    "version": "0.3",
+    "version": "1.0",
     "sources": [
       {
         "language": "pseudocode",

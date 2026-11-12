@@ -1,7 +1,7 @@
 {
   "description": "A B-tree without nodes is one empty root with the id \"root\" (ADR 0035).",
   "input": {
-    "version": "0.6",
+    "version": "1.0",
     "structures": {
       "T": {
         "kind": "btree"
@@ -10,7 +10,7 @@
     "steps": []
   },
   "expected": {
-    "version": "0.6",
+    "version": "1.0",
     "structures": {
       "T": {
         "kind": "btree",

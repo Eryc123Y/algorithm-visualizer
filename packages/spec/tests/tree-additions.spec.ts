@@ -1,5 +1,5 @@
 /**
- * The tree additions of ADR 0034, protocol version 0.5: root slots, NIL
+ * The tree additions of ADR 0034, added in 0.5, part of 1.0: root slots, NIL
  * pointers, named notes, edge marks and labels, and root lists.
  */
 import { describe, expect, it } from 'vitest';
@@ -8,15 +8,13 @@ import {
   actionTypesOf,
   minimumVersion,
   parseVisualization,
-  PROTOCOL_FEATURES,
-  PROTOCOL_VERSIONS,
   type VisualizationInput,
 } from '../src/index.ts';
 
 const doc = (
   structures: Record<string, unknown>,
   actions: unknown[] = [],
-  version = '0.5',
+  version = '1.0',
 ) => ({
   version,
   structures,
@@ -57,19 +55,6 @@ const version = (input: unknown) =>
   minimumVersion(input as Omit<VisualizationInput, 'version'>);
 
 describe('tree additions (ADR 0034)', () => {
-  it('is in protocol 0.5, with five features', () => {
-    expect(PROTOCOL_VERSIONS).toContain('0.5');
-    expect(
-      PROTOCOL_FEATURES.filter((f) => f.since === '0.5').map((f) => f.name),
-    ).toEqual([
-      'root slots',
-      'NIL pointers',
-      'named notes',
-      'tree edge marks',
-      'root lists',
-    ]);
-  });
-
   it('adds markEdge and labelEdge to the tree actions', () => {
     expect(actionTypesOf('tree').slice(-2)).toEqual(['markEdge', 'labelEdge']);
   });
@@ -96,7 +81,7 @@ describe('tree additions (ADR 0034)', () => {
       ]);
     });
 
-    it('needs 0.5 for a root slot, not for a child slot', () => {
+    it('needs no version beyond 1.0, at a root or a child slot', () => {
       const base = { structures: { f: forest } };
       const step = (action: object) => ({
         ...base,
@@ -104,13 +89,13 @@ describe('tree additions (ADR 0034)', () => {
       });
       expect(
         version(step({ type: 'addNode', node: 1, parent: 'p', slot: 0 })),
-      ).toBe('0.1');
-      expect(version(step({ type: 'detach', node: 'q' }))).toBe('0.1');
+      ).toBe('1.0');
+      expect(version(step({ type: 'detach', node: 'q' }))).toBe('1.0');
       expect(
         version(step({ type: 'addNode', node: 1, parent: null, slot: 0 })),
-      ).toBe('0.5');
-      expect(version(step({ type: 'detach', node: 'q', slot: 0 }))).toBe('0.5');
-      expect(errorsOf(doc({ f: forest }, [], '0.4'))).toEqual([]);
+      ).toBe('1.0');
+      expect(version(step({ type: 'detach', node: 'q', slot: 0 }))).toBe('1.0');
+      // A 0.x document may use them too (ADR 0043).
       expect(
         errorsOf(
           doc(
@@ -119,7 +104,7 @@ describe('tree additions (ADR 0034)', () => {
             '0.4',
           ),
         ),
-      ).toEqual([{ code: 'VERSION_TOO_OLD', path: '$.version' }]);
+      ).toEqual([]);
     });
 
     it('refuses left and right as a root slot', () => {
@@ -183,7 +168,7 @@ describe('tree additions (ADR 0034)', () => {
       ]);
       expect(
         version({ structures: { t: binary }, steps: [{ actions: [] }] }),
-      ).toBe('0.1');
+      ).toBe('1.0');
       expect(
         version({
           structures: { t: binary },
@@ -200,7 +185,7 @@ describe('tree additions (ADR 0034)', () => {
             },
           ],
         }),
-      ).toBe('0.5');
+      ).toBe('1.0');
     });
 
     it('refuses a slot object with other fields', () => {
@@ -239,7 +224,7 @@ describe('tree additions (ADR 0034)', () => {
           structures: { t: binary },
           steps: [{ actions: [action('size')] }],
         }),
-      ).toBe('0.5');
+      ).toBe('1.0');
     });
 
     it('leave graph notes alone', () => {
@@ -277,7 +262,7 @@ describe('tree additions (ADR 0034)', () => {
         actions,
       );
       expect(version({ structures: { t: binary }, steps: [{ actions }] })).toBe(
-        '0.5',
+        '1.0',
       );
     });
 
@@ -300,7 +285,7 @@ describe('tree additions (ADR 0034)', () => {
       ]);
     });
 
-    it('needs 0.5 only for tree edges: graphs had markEdge before', () => {
+    it('need no version beyond 1.0, in trees as in graphs', () => {
       expect(
         version({
           structures: {
@@ -319,18 +304,18 @@ describe('tree additions (ADR 0034)', () => {
             },
           ],
         }),
-      ).toBe('0.1');
+      ).toBe('1.0');
     });
   });
 
   describe('root lists (S5)', () => {
-    it('are list or circular, and need 0.5', () => {
+    it('are list or circular', () => {
       for (const rootList of ['list', 'circular']) {
         const value = parsed(doc({ f: { ...forest, rootList } }));
         expect(value.structures['f']).toMatchObject({ rootList });
         expect(
           version({ structures: { f: { ...forest, rootList } }, steps: [] }),
-        ).toBe('0.5');
+        ).toBe('1.0');
       }
       expect(
         errorsOf(doc({ f: { ...forest, rootList: 'ring' } })),

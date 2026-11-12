@@ -16,7 +16,7 @@ describe('Recorder step names', () => {
     s.push({ element: 2 });
     const doc = r.build();
     expect(doc.steps[0]?.meta).toEqual({ id: 'push', narration: 'Push 2.' });
-    expect(doc.version).toBe('0.2');
+    expect(doc.version).toBe('1.0');
   });
 
   it('rejects an id that is not a step name when building', () => {
@@ -43,7 +43,7 @@ describe('Recorder sections', () => {
       { id: 'push-twice', title: 'Push twice', start: 1 },
       { id: 'pop', title: 'Pop', start: 3 },
     ]);
-    expect(doc.version).toBe('0.2');
+    expect(doc.version).toBe('1.0');
     expect(parseVisualization(doc).ok).toBe(true);
   });
 
@@ -64,7 +64,7 @@ describe('Recorder sections', () => {
     s.pop();
     const doc = r.build();
     expect(doc).not.toHaveProperty('sections');
-    expect(doc.version).toBe('0.1');
+    expect(doc.version).toBe('1.0');
   });
 
   it('refuses an id used twice, or one that is not a section id', () => {

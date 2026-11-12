@@ -1,7 +1,7 @@
 {
   "description": "extract needs an item in the queue.",
   "input": {
-    "version": "0.4",
+    "version": "1.0",
     "structures": {
       "Q": {
         "kind": "priorityQueue",

@@ -1,7 +1,7 @@
 {
   "description": "The element limit applies to a hash table as a whole, not to each chain.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "h": {
         "kind": "hashTable",

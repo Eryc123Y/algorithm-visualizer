@@ -1,6 +1,6 @@
 ## priorityQueue
 
-Items with keys, kept in key order: Dijkstra's and Prim's min-priority queue, event queues, best-first search. It needs `"version": "0.4"`. The front is the item of least key (`"order": "min"`, the default) or greatest key (`"max"`). Items are named by id, because their positions change with every key change. To show how a binary heap does it, use an `array` with `"view": "heap"` instead.
+Items with keys, kept in key order: Dijkstra's and Prim's min-priority queue, event queues, best-first search. The front is the item of least key (`"order": "min"`, the default) or greatest key (`"max"`). Items are named by id, because their positions change with every key change. To show how a binary heap does it, use an `array` with `"view": "heap"` instead.
 
 Declaration: `{ "kind": "priorityQueue", "initial": [{ "value": "A", "key": 0 }, { "value": "B", "key": null }], "order"?: "min" | "max", "label"?: "…" }`. Items without an `id` get `e0`, `e1`, … by position; give `{ "id": "A", "value": "A", "key": 0 }` to name it after a graph vertex. A key is a number, or `null` for no key yet, drawn as ∞ (−∞ in a max-queue) and ordered after every number. Items of equal key keep insertion order, also after a key change.
 
@@ -16,7 +16,7 @@ Beside a graph, give the queue `"place": "side"`. In the side panel of a wide fi
 
 ```json
 {
-  "version": "0.4",
+  "version": "1.0",
   "structures": {
     "Q": {
       "kind": "priorityQueue",

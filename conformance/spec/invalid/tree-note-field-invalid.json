@@ -1,7 +1,7 @@
 {
   "description": "A note field is lower-case kebab-case, at most 16 characters.",
   "input": {
-    "version": "0.5",
+    "version": "1.0",
     "structures": {
       "h": {
         "kind": "tree",

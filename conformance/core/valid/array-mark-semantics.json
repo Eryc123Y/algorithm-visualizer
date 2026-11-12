@@ -1,7 +1,7 @@
 {
   "description": "Settled marks follow their element through swaps and are dropped on removal; highlights last one step; a pointer may point one past the end, and is pulled back to it when the array shrinks.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "arr": {
         "kind": "array",

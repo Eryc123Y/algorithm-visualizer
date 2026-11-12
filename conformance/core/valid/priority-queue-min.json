@@ -1,7 +1,7 @@
 {
   "description": "A min-priority queue as Dijkstra's algorithm uses it: the state keeps items in insertion order; extract takes the least key, null keys come last, and ties go to the item inserted first, also after setKey (C ties D at 7 and goes first). setKey and peek highlight for one step.",
   "input": {
-    "version": "0.4",
+    "version": "1.0",
     "structures": {
       "Q": {
         "kind": "priorityQueue",

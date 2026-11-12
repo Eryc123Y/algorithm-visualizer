@@ -28,6 +28,6 @@ describe('Recorder versions', () => {
     const a = r.add('a', { kind: 'array', initial: [1, 2, 3] });
     r.step('Look at the middle value.');
     a.highlight({ indices: [1] });
-    expect(r.build().version).toBe('0.1');
+    expect(r.build().version).toBe('1.0');
   });
 });

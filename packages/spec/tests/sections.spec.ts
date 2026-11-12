@@ -3,8 +3,6 @@ import { describe, expect, it } from 'vitest';
 import {
   minimumVersion,
   parseVisualization,
-  PROTOCOL_FEATURES,
-  PROTOCOL_VERSIONS,
   StepName,
   type VisualizationInput,
 } from '../src/index.ts';
@@ -129,54 +127,32 @@ describe('sections', () => {
   });
 });
 
-describe('protocol version 0.2', () => {
-  it('is a version this package reads', () => {
-    expect(PROTOCOL_VERSIONS).toContain('0.2');
-  });
-
-  it('dates step names and sections to 0.2', () => {
-    expect(
-      PROTOCOL_FEATURES.filter((f) => f.since === '0.2').map((f) => f.name),
-    ).toEqual(['step names', 'sections']);
-  });
-
-  it('is what writers record for a document with step names or sections', () => {
+describe('step names and sections in 1.0 (ADR 0043)', () => {
+  it('need no version beyond 1.0, which writers record', () => {
     const plain = doc() as VisualizationInput;
-    expect(minimumVersion(plain)).toBe('0.1');
-    expect(minimumVersion({ ...plain, steps: [step('go')] })).toBe('0.2');
-    expect(minimumVersion({ ...plain, sections: [] })).toBe('0.2');
+    expect(minimumVersion({ ...plain, steps: [step('go')] })).toBe('1.0');
+    expect(minimumVersion({ ...plain, sections: [] })).toBe('1.0');
   });
 
-  it('is needed to read step names or sections', () => {
-    const named = { ...doc({ steps: [step('go')] }), version: '0.1' };
-    const sectioned = {
-      ...doc({ sections: [{ id: 'a', title: 'A', start: 0 }] }),
+  it('are read in a document of any 0.x version, which becomes 1.0', () => {
+    const input = {
+      ...doc({
+        steps: [step('go')],
+        sections: [{ id: 'a', title: 'A', start: 0 }],
+      }),
       version: '0.1',
     };
-    expect(errorsOf(named)).toEqual([
-      { code: 'VERSION_TOO_OLD', path: '$.version' },
-    ]);
-    expect(errorsOf(sectioned)).toEqual([
-      { code: 'VERSION_TOO_OLD', path: '$.version' },
-    ]);
-    const both = { ...sectioned, steps: [step('go')] };
-    const result = parseVisualization(both);
-    expect(result.ok).toBe(false);
-    if (!result.ok) {
-      expect(result.error).toHaveLength(1);
-      expect(result.error[0]?.message).toContain('step names and sections');
-      expect(result.error[0]?.hint).toBe('Set "version" to "0.2".');
-    }
+    const result = parseVisualization(input);
+    expect(result.ok && result.value.version).toBe('1.0');
   });
 
-  it('reports the version alongside other errors', () => {
+  it('still report their own errors', () => {
     const input = {
       ...doc({ steps: [step('go')] }),
       version: '0.1',
       sections: [{ id: 'a', title: 'A', start: 5 }],
     };
     expect(errorsOf(input)).toEqual([
-      { code: 'VERSION_TOO_OLD', path: '$.version' },
       { code: 'SECTION_OUT_OF_RANGE', path: '$.sections[0].start' },
     ]);
   });

@@ -1,7 +1,7 @@
 {
   "description": "Ids may be names of Object.prototype properties; they must behave like any other id (no inherited values, no prototype changes).",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "t": {
         "kind": "tree",
@@ -85,7 +85,7 @@
     ]
   },
   "expected": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "t": {
         "kind": "tree",

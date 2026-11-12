@@ -1,7 +1,7 @@
 {
   "description": "Popping an empty stack is an error.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "st": {
         "kind": "stack",

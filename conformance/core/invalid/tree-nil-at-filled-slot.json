@@ -1,7 +1,7 @@
 {
   "description": "A NIL pointer must name an empty slot.",
   "input": {
-    "version": "0.5",
+    "version": "1.0",
     "structures": {
       "t": {
         "kind": "tree",

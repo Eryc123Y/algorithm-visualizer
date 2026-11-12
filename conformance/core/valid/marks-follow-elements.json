@@ -1,7 +1,7 @@
 {
   "description": "Marks for one step (highlight, compare, peek) stay on the elements they marked when earlier elements are inserted or removed in the same step, and are dropped with their element.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "a": {
         "kind": "array",

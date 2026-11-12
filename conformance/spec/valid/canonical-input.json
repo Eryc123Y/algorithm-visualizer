@@ -1,7 +1,7 @@
 {
   "description": "Canonical declarations are valid input too, so a parsed document can be parsed again: a table given as cells and a hash table given as buckets.",
   "input": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "m": {
         "kind": "table",
@@ -15,7 +15,7 @@
     "steps": []
   },
   "expected": {
-    "version": "0.1",
+    "version": "1.0",
     "structures": {
       "m": {
         "kind": "table",

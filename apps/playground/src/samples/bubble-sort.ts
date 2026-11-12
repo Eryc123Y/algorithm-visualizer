@@ -50,7 +50,7 @@ export function bubbleSort(values: readonly number[]): VisualizationInput {
   }
 
   return {
-    version: '0.1',
+    version: '1.0',
     title: 'Bubble sort',
     structures: { arr: { kind: 'array', label: 'a', initial: [...values] } },
     steps,
