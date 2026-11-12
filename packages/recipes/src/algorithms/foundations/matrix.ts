@@ -19,12 +19,15 @@ const Entry = z.int().min(-MAX_ENTRY).max(MAX_ENTRY);
 const FORM =
   'rows separated by semicolons, entries by spaces or commas, e.g. "1 3; 7 5"';
 
-/** A square matrix field named `name`, as its rows or as text. */
-export function matrixField(name: string, example: Matrix) {
+/**
+ * A square matrix field named `name`, as its rows or as text, of at most
+ * `maxSize` rows (4 by default).
+ */
+export function matrixField(name: string, example: Matrix, maxSize = 4) {
   const rows = z
-    .array(z.array(Entry).min(1).max(4))
+    .array(z.array(Entry).min(1).max(maxSize))
     .min(1)
-    .max(4)
+    .max(maxSize)
     .superRefine((m, ctx) => {
       m.forEach((row, i) => {
         if (row.length !== m.length)

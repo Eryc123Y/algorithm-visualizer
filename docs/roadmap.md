@@ -149,26 +149,26 @@ Each entry is one registry module, or one per operation for data structures. Eac
 - [x] Prim
 - [x] Kruskal
 - [x] strongly connected components (#86)
-- [ ] DAG shortest paths
-- [ ] transitive closure
-- [ ] Johnson
-- [ ] Edmonds–Karp maximum flow
-- [ ] bipartite matching
-- [ ] Hopcroft–Karp
-- [ ] stable matching (Gale–Shapley)
-- [ ] Hungarian algorithm
+- [x] DAG shortest paths (#88)
+- [x] transitive closure (#91)
+- [x] Johnson (#92)
+- [x] Edmonds–Karp maximum flow (#93)
+- [x] bipartite matching (#94)
+- [x] Hopcroft–Karp (#95)
+- [x] stable matching (Gale–Shapley) (#96)
+- [x] Hungarian algorithm (#97)
 
 **VII Selected topics**
 
 - [x] move-to-front (S7, [ADR 0036](adr/0036-linked-list-move.md), #80, #81)
-- [ ] LUP decomposition
-- [ ] FFT
-- [ ] Euclid and extended Euclid
-- [ ] modular exponentiation
+- [x] LUP decomposition (#98)
+- [x] FFT (#99)
+- [x] Euclid and extended Euclid (#100)
+- [x] modular exponentiation (#101)
 - [x] string matching: naive, Rabin–Karp, finite automaton, KMP (S9, [ADR 0037](adr/0037-array-pattern.md), #82, #83)
-- [ ] suffix array
+- [x] suffix array (#102)
 - [ ] approximation: vertex cover, TSP tour, set cover
-- [~] computational geometry, 3rd edition: segment intersection, Graham scan, Jarvis march, closest pair (S8, [ADR 0038](adr/0038-plane-kind.md))
+- [x] computational geometry, 3rd edition: segment intersection, Graham scan, Jarvis march, closest pair (S8, [ADR 0038](adr/0038-plane-kind.md), #84, #85)
 
 Recipes that exist beyond CLRS stay: bubble and selection sort, binary search, list reversal, bracket matching, AVL, trie, binary heap run, edit distance and 0/1 knapsack.
 

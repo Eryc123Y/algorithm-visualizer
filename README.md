@@ -69,10 +69,12 @@ The registry holds these modules, by topic ([ADR 0022](docs/adr/0022-registry-de
 - **Trees:** `bst` (search, insert, delete), `avl` (insert), `red-black-tree` (insert, delete), `order-statistic-tree` (select, rank, insert, delete), `interval-tree` (search, insert, delete), `b-tree` (search, insert, delete), `inorder-tree-walk`, `preorder-tree-walk`, `postorder-tree-walk`, `trie` (insert, search), `disjoint-set` (union, find-set).
 - **Heaps:** `min-heap` (push, pop, decrease-key), `max-heap` (push, pop, increase-key), `fibonacci-heap` (insert, union, extract-min, decrease-key, delete).
 - **Hashing:** `hash-chaining` and `linear-probing`, each with insert and search.
-- **Graphs:** `bfs`, `dfs`, `topological-sort`, `strongly-connected-components`, `dijkstra`, `bellman-ford`, `prim`, `kruskal`, `floyd-warshall`.
+- **Graphs:** `bfs`, `dfs`, `topological-sort`, `strongly-connected-components`, `dijkstra`, `bellman-ford`, `dag-shortest-paths`, `prim`, `kruskal`, `floyd-warshall`, `transitive-closure`, `johnson`, `edmonds-karp`, `bipartite-matching`, `hopcroft-karp`, `gale-shapley`, `hungarian`.
 - **Dynamic programming:** `lcs`, `edit-distance`, `knapsack`.
 - **Greedy algorithms:** `huffman`.
-- **String matching:** `naive-string-matcher`, `rabin-karp`, `finite-automaton-matcher`, `kmp`.
+- **String matching:** `naive-string-matcher`, `rabin-karp`, `finite-automaton-matcher`, `kmp`, `suffix-array`.
+- **Computational geometry:** `any-segments-intersect`, `graham-scan`, `jarvis-march`, `closest-pair`.
+- **Algebra and number theory:** `lup-decomposition`, `fft`, `euclid`, `extended-euclid`, `modular-exponentiation`.
 
 A data structure has one module per operation, such as `bst.delete`, which starts from a structure the caller describes, and one for its sequence, such as `bst`, which runs up to 8 operations. `algorithms` lists every module.
 

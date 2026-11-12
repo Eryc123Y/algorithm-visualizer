@@ -14,8 +14,16 @@ import { huffman } from './algorithms/greedy/huffman.ts';
 import { bellmanFord } from './algorithms/graphs/bellman-ford.ts';
 import { bfs } from './algorithms/graphs/bfs.ts';
 import { dfs } from './algorithms/graphs/dfs.ts';
+import { dagShortestPaths } from './algorithms/graphs/dag-shortest-paths.ts';
 import { dijkstra } from './algorithms/graphs/dijkstra.ts';
+import { edmondsKarp } from './algorithms/graphs/edmonds-karp.ts';
+import { bipartiteMatching } from './algorithms/graphs/bipartite-matching.ts';
+import { hopcroftKarp } from './algorithms/graphs/hopcroft-karp.ts';
+import { galeShapley } from './algorithms/graphs/gale-shapley.ts';
+import { hungarian } from './algorithms/graphs/hungarian.ts';
 import { floydWarshall } from './algorithms/graphs/floyd-warshall.ts';
+import { transitiveClosure } from './algorithms/graphs/transitive-closure.ts';
+import { johnson } from './algorithms/graphs/johnson.ts';
 import { kruskal } from './algorithms/graphs/kruskal.ts';
 import { prim } from './algorithms/graphs/prim.ts';
 import { stronglyConnectedComponents } from './algorithms/graphs/scc.ts';
@@ -39,9 +47,18 @@ import {
 import { finiteAutomatonMatcher } from './algorithms/strings/finite-automaton.ts';
 import { kmp } from './algorithms/strings/kmp.ts';
 import { recursionTree } from './algorithms/foundations/recursion-tree.ts';
+import { suffixArray } from './algorithms/strings/suffix-array.ts';
 import { strassen } from './algorithms/foundations/strassen.ts';
+import { lup } from './algorithms/math/lup.ts';
+import { fft } from './algorithms/math/fft.ts';
+import { euclid, extendedEuclid } from './algorithms/math/euclid.ts';
+import { modularExponentiation } from './algorithms/math/modular-exponentiation.ts';
 import { naiveStringMatcher } from './algorithms/strings/naive.ts';
 import { rabinKarp } from './algorithms/strings/rabin-karp.ts';
+import { closestPair } from './algorithms/geometry/closest-pair.ts';
+import { grahamScan } from './algorithms/geometry/graham-scan.ts';
+import { jarvisMarch } from './algorithms/geometry/jarvis-march.ts';
+import { anySegmentsIntersect } from './algorithms/geometry/segments-intersect.ts';
 import { runModule, type AlgorithmRun } from './run-module.ts';
 import { avl } from './structures/avl/index.ts';
 import { bTree } from './structures/b-tree/index.ts';
@@ -91,9 +108,17 @@ export const algorithms: readonly Algorithm[] = [
   stronglyConnectedComponents,
   dijkstra,
   bellmanFord,
+  dagShortestPaths,
   prim,
   kruskal,
   floydWarshall,
+  transitiveClosure,
+  johnson,
+  edmondsKarp,
+  bipartiteMatching,
+  hopcroftKarp,
+  galeShapley,
+  hungarian,
   lcs,
   editDistance,
   knapsack,
@@ -102,6 +127,16 @@ export const algorithms: readonly Algorithm[] = [
   rabinKarp,
   finiteAutomatonMatcher,
   kmp,
+  suffixArray,
+  anySegmentsIntersect,
+  grahamScan,
+  jarvisMarch,
+  closestPair,
+  lup,
+  fft,
+  euclid,
+  extendedEuclid,
+  modularExponentiation,
   strassen,
   recursionTree,
 ];

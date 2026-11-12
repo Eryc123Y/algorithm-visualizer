@@ -18,7 +18,7 @@ import {
 } from './graph.ts';
 
 /** Throws a RangeError naming a cycle of `g`, if it has one. */
-function checkAcyclic(g: GraphInput): void {
+export function checkAcyclic(g: GraphInput): void {
   const adj = adjacency(g);
   const state = new Map<string, 'open' | 'done'>();
   const path: string[] = [];

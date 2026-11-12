@@ -1476,6 +1476,18 @@ recipe(
 );
 
 recipe(
+  'dag-shortest-paths',
+  withStart(graphs(anyWeight, { minNodes: 1, dag: true })),
+  ([graph, source]) => runOk('dag-shortest-paths', { graph, source }).document,
+  (trace, [g, s]) => {
+    // Each reachable vertex has its turn once, and its distance is
+    // annotated; the source's is 0.
+    expect(steps(trace, 'vertex')).toBe(g.nodes.length);
+    expect(stateOf(trace, 'g', 'graph').marks.notes[s]).toBe('0');
+  },
+);
+
+recipe(
   'strongly-connected-components',
   graphs(nonNegative, { minNodes: 1 }),
   (graph) => runOk('strongly-connected-components', { graph }).document,
@@ -1493,6 +1505,205 @@ recipe(
     expect(counted).toBe(g.nodes.length);
     expect(steps(trace, 'assign')).toBe(g.nodes.length);
     expect(steps(trace, 'finish')).toBe(g.nodes.length);
+  },
+);
+
+recipe(
+  'johnson',
+  fc
+    .tuple(
+      fc.integer({ min: 1, max: 8 }),
+      fc.array(
+        fc.tuple(fc.nat(7), fc.nat(7), fc.integer({ min: -3, max: 9 })),
+        { maxLength: 16 },
+      ),
+    )
+    .map(([n, raw]) => {
+      const nodes = Array.from({ length: n }, (_, k) => `v${k}`);
+      const seen = new Set<string>();
+      const edges = raw.flatMap(([a, b, w]): [string, string, number][] => {
+        const key = `${a % n} ${b % n}`;
+        if (seen.has(key)) return [];
+        seen.add(key);
+        return [[nodes[a % n]!, nodes[b % n]!, w]];
+      });
+      return { directed: true, nodes, edges };
+    }),
+  (graph) => runOk('johnson', { graph }).document,
+  (trace, g) => {
+    // Either a negative cycle is reported, or every row of D is filled
+    // with 0 on its diagonal.
+    const rows = steps(trace, 'row');
+    if (rows === 0) expect(steps(trace, 'cycle')).toBe(1);
+    else {
+      expect(rows).toBe(g.nodes.length);
+      const D = stateOf(trace, 'D', 'table').data;
+      g.nodes.forEach((_, i) => expect(D[i]![i]).toBe('0'));
+    }
+  },
+);
+
+recipe(
+  'transitive-closure',
+  graphs(nonNegative, { minNodes: 1 }),
+  (graph) => runOk('transitive-closure', { graph }).document,
+  (trace, g) => {
+    // The diagonal is 1, and every edge's entry is 1.
+    const t = stateOf(trace, 't', 'table').data;
+    g.nodes.forEach((_, i) => expect(t[i]![i]).toBe(1));
+    for (const [u, v] of g.edges)
+      expect(t[g.nodes.indexOf(u)]![g.nodes.indexOf(v)]).toBe(1);
+  },
+);
+
+recipe(
+  'edmonds-karp',
+  graphs(
+    fc.option(fc.integer({ min: 0, max: 20 }), { nil: undefined, freq: 4 }),
+    { minNodes: 2 },
+  ),
+  (graph) => runOk('edmonds-karp', { graph }).document,
+  (trace) => {
+    // Every edge ends with a flow within its capacity.
+    for (const e of stateOf(trace, 'g', 'graph').data.edges) {
+      const [f, c] = String(e.weight).split('/').map(Number);
+      expect(f).toBeGreaterThanOrEqual(0);
+      expect(f).toBeLessThanOrEqual(c!);
+    }
+  },
+);
+
+recipe(
+  'bipartite-matching',
+  fc
+    .tuple(
+      fc.integer({ min: 1, max: 8 }),
+      fc.integer({ min: 1, max: 8 }),
+      fc.array(fc.tuple(fc.nat(7), fc.nat(7), fc.boolean()), {
+        maxLength: 20,
+      }),
+      fc.nat(),
+    )
+    .map(([l, r, raw, turn]) => {
+      // Nodes rotated, so a right vertex may come first; edges either way
+      // round, parallel ones kept.
+      const listed = [
+        ...Array.from({ length: l }, (_, k) => `l${k}`),
+        ...Array.from({ length: r }, (_, k) => `r${k}`),
+      ];
+      const t = turn % listed.length;
+      const nodes = [...listed.slice(t), ...listed.slice(0, t)];
+      const edges = raw.map(([a, b, flip]): [string, string] =>
+        flip ? [`r${b % r}`, `l${a % l}`] : [`l${a % l}`, `r${b % r}`],
+      );
+      return { nodes, edges };
+    }),
+  (graph) => runOk('bipartite-matching', { graph }).document,
+  (trace) => {
+    // The marked edges share no vertex.
+    const g = stateOf(trace, 'g', 'graph');
+    const ends = g.data.edges
+      .filter((e) => g.marks.edgeMarks[e.id] === 'selected')
+      .flatMap((e) => [e.from, e.to]);
+    expect(new Set(ends).size).toBe(ends.length);
+  },
+);
+
+// The same graphs as bipartite matching.
+recipe(
+  'hopcroft-karp',
+  fc
+    .tuple(
+      fc.integer({ min: 1, max: 8 }),
+      fc.integer({ min: 1, max: 8 }),
+      fc.array(fc.tuple(fc.nat(7), fc.nat(7), fc.boolean()), {
+        maxLength: 20,
+      }),
+      fc.nat(),
+    )
+    .map(([l, r, raw, turn]) => {
+      // Nodes rotated, so a right vertex may come first; edges either way
+      // round, parallel ones kept.
+      const listed = [
+        ...Array.from({ length: l }, (_, k) => `l${k}`),
+        ...Array.from({ length: r }, (_, k) => `r${k}`),
+      ];
+      const t = turn % listed.length;
+      const nodes = [...listed.slice(t), ...listed.slice(0, t)];
+      const edges = raw.map(([a, b, flip]): [string, string] =>
+        flip ? [`r${b % r}`, `l${a % l}`] : [`l${a % l}`, `r${b % r}`],
+      );
+      return { nodes, edges };
+    }),
+  (graph) => runOk('hopcroft-karp', { graph }).document,
+  (trace) => {
+    // The marked edges share no vertex, and no note is left at the end.
+    const g = stateOf(trace, 'g', 'graph');
+    const ends = g.data.edges
+      .filter((e) => g.marks.edgeMarks[e.id] === 'selected')
+      .flatMap((e) => [e.from, e.to]);
+    expect(new Set(ends).size).toBe(ends.length);
+    expect(Object.keys(g.marks.notes)).toEqual([]);
+  },
+);
+
+recipe(
+  'gale-shapley',
+  fc.integer({ min: 1, max: 6 }).chain((n) => {
+    const ps = Array.from({ length: n }, (_, k) => `p${k}`);
+    const rs = Array.from({ length: n }, (_, k) => `r${k}`);
+    const ranking = (names: string[]) =>
+      fc.shuffledSubarray(names, { minLength: n });
+    return fc.record({
+      proposers: fc
+        .tuple(...ps.map(() => ranking(rs)))
+        .map((ls) => ps.map((p, k): [string, string[]] => [p, ls[k]!])),
+      receivers: fc
+        .tuple(...rs.map(() => ranking(ps)))
+        .map((ls) => rs.map((r, k): [string, string[]] => [r, ls[k]!])),
+    });
+  }),
+  (input) => runOk('gale-shapley', input).document,
+  (trace, input) => {
+    // Everyone ends engaged, once, and only engagements are drawn.
+    const g = stateOf(trace, 'g', 'graph');
+    const ends = g.data.edges.flatMap((e) => {
+      expect(g.marks.edgeMarks[e.id]).toBe('selected');
+      return [e.from, e.to];
+    });
+    expect(new Set(ends).size).toBe(2 * input.proposers.length);
+  },
+);
+
+recipe(
+  'hungarian',
+  fc.integer({ min: 1, max: 6 }).chain((n) =>
+    fc.array(
+      fc.array(fc.integer({ min: -30, max: 30 }), {
+        minLength: n,
+        maxLength: n,
+      }),
+      { minLength: n, maxLength: n },
+    ),
+  ),
+  (weights) => runOk('hungarian', { weights }).document,
+  (trace, weights) => {
+    // A perfect matching, weighing as much as the labels add up to.
+    const g = stateOf(trace, 'g', 'graph');
+    const matched = g.data.edges.filter(
+      (e) => g.marks.edgeMarks[e.id] === 'selected',
+    );
+    expect(matched).toHaveLength(weights.length);
+    const at = (v: string) => 'abcdefpqrstu'.indexOf(v) % 6;
+    const weight = matched.reduce(
+      (s, e) => s + weights[at(e.from)]![at(e.to)]!,
+      0,
+    );
+    const labels = Object.values(g.marks.notes).reduce(
+      (s, x) => s + Number(x.replace('−', '-')),
+      0,
+    );
+    expect(weight).toBe(labels);
   },
 );
 
@@ -1767,3 +1978,178 @@ for (const id of [
       expect(shifts).toEqual(want);
     },
   );
+
+// Computational geometry (ADR 0038): points on a small grid, so that
+// collinear points and equal x happen.
+
+const gridPoints = (min: number, max: number) =>
+  fc
+    .uniqueArray(
+      fc.tuple(fc.integer({ min: 0, max: 8 }), fc.integer({ min: 0, max: 8 })),
+      { minLength: min, maxLength: max, selector: (p) => p.join() },
+    )
+    .filter((ps) =>
+      ps.some(
+        (p) =>
+          (ps[1]![0] - ps[0]![0]) * (p[1] - ps[0]![1]) -
+            (ps[1]![1] - ps[0]![1]) * (p[0] - ps[0]![0]) !==
+          0,
+      ),
+    );
+
+for (const id of ['graham-scan', 'jarvis-march'])
+  recipe(
+    id,
+    gridPoints(3, 24),
+    (points) => runOk(id, { points }).document,
+    (trace) => {
+      const P = stateOf(trace, 'P', 'plane');
+      // As many hull edges chosen as hull vertices settled.
+      expect(P.marks.selected.length).toBe(P.marks.settled.length);
+    },
+  );
+
+recipe(
+  'closest-pair',
+  gridPoints(2, 16),
+  (points) => runOk('closest-pair', { points }).document,
+  (trace) => {
+    const P = stateOf(trace, 'P', 'plane');
+    expect(P.marks.selected).toHaveLength(1);
+  },
+);
+
+recipe(
+  'any-segments-intersect',
+  fc.uniqueArray(
+    fc
+      .tuple(
+        fc.tuple(
+          fc.integer({ min: 0, max: 8 }),
+          fc.integer({ min: 0, max: 8 }),
+        ),
+        fc.tuple(
+          fc.integer({ min: 0, max: 8 }),
+          fc.integer({ min: 0, max: 8 }),
+        ),
+      )
+      .filter(([a, b]) => a[0] !== b[0]),
+    {
+      minLength: 1,
+      maxLength: 12,
+      selector: ([a, b]) => [a.join(), b.join()].sort().join(' '),
+    },
+  ),
+  (segments) => runOk('any-segments-intersect', { segments }).document,
+  (trace) => {
+    const P = stateOf(trace, 'P', 'plane');
+    // Either two segments are chosen, as the pair found, or none.
+    expect([0, 2]).toContain(P.marks.selected.length);
+  },
+);
+
+// LUP decomposition: small integer matrices, singular ones included.
+recipe(
+  'lup-decomposition',
+  fc.integer({ min: 1, max: 4 }).chain((n) =>
+    fc.array(
+      fc.array(fc.integer({ min: -5, max: 5 }), {
+        minLength: n,
+        maxLength: n,
+      }),
+      { minLength: n, maxLength: n },
+    ),
+  ),
+  (a) => runOk('lup-decomposition', { a }).document,
+  (trace, a) => {
+    // π stays a permutation of the rows.
+    const pi = stateOf(trace, 'pi', 'table').data[0]!.map(Number);
+    expect([...pi].sort((x, y) => x - y)).toEqual(
+      Array.from({ length: a.length }, (_, i) => i + 1),
+    );
+  },
+);
+
+// FFT: coefficients of every allowed length.
+recipe(
+  'fft',
+  fc.constantFrom(1, 2, 4, 8, 16).chain((n) =>
+    fc.array(fc.integer({ min: -99, max: 99 }), {
+      minLength: n,
+      maxLength: n,
+    }),
+  ),
+  (coefficients) => runOk('fft', { coefficients }).document,
+  (trace, coefficients) => {
+    // y_0 is the sum of the coefficients, a real number.
+    const y0 = stateOf(trace, 'T', 'table').data[0]![1];
+    const sum = coefficients.reduce((s, x) => s + x, 0);
+    expect(String(y0).replace('−', '-')).toBe(String(sum));
+  },
+);
+
+// Euclid and extended Euclid: pairs of whole numbers, not both 0.
+const euclidPairs = fc
+  .tuple(fc.nat(100_000), fc.nat(100_000))
+  .filter(([a, b]) => a > 0 || b > 0)
+  .map(([a, b]) => ({ a, b }));
+
+recipe(
+  'euclid',
+  euclidPairs,
+  (input) => runOk('euclid', input).document,
+  (trace, { a, b }) => {
+    // The last call's a divides both operands.
+    const rows = stateOf(trace, 'calls', 'table').data;
+    const d = Number(rows.at(-1)![0]);
+    expect(a % d).toBe(0);
+    expect(b % d).toBe(0);
+  },
+);
+
+recipe(
+  'extended-euclid',
+  euclidPairs,
+  (input) => runOk('extended-euclid', input).document,
+  (trace, { a, b }) => {
+    // The first row holds d, x and y with d = ax + by.
+    const [, , , d, x, y] = stateOf(trace, 'calls', 'table').data[0]!.map(
+      Number,
+    );
+    expect(a * x! + b * y!).toBe(d);
+  },
+);
+
+// Modular exponentiation: any base, exponent and modulus allowed.
+recipe(
+  'modular-exponentiation',
+  fc.record({
+    a: fc.integer({ min: 0, max: 1_000_000_000 }),
+    b: fc.integer({ min: 0, max: 2 ** 31 - 1 }),
+    n: fc.integer({ min: 1, max: 1_000_000_000 }),
+  }),
+  (input) => runOk('modular-exponentiation', input).document,
+  (trace, { b, n }) => {
+    // The last column has read all of b, and every d is below n.
+    const [, c, d] = stateOf(trace, 'bits', 'table').data;
+    expect(c!.at(-1)).toBe(b);
+    for (const x of d!) expect(Number(x)).toBeLessThan(n);
+  },
+);
+
+// Suffix array: texts over a few letters, so suffixes share prefixes.
+recipe(
+  'suffix-array',
+  fc.string({
+    unit: fc.constantFrom('a', 'b', 'n'),
+    minLength: 1,
+    maxLength: 16,
+  }),
+  (text) => runOk('suffix-array', { text }).document,
+  (trace, text) => {
+    // The suffix column is in increasing order.
+    const suffixes = stateOf(trace, 'S', 'table').data.map((r) => String(r[1]));
+    expect(suffixes).toEqual([...suffixes].sort());
+    expect(suffixes).toHaveLength(text.length);
+  },
+);

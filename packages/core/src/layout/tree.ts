@@ -62,7 +62,7 @@ import {
 /** Where a tree's notes go, in order: above, above left, above right. */
 const NOTE_ANGLES: readonly number[] = [0, 315, 45];
 /** Where else they may go, inside the tree's block: the sides, below. */
-const MORE_NOTE_ANGLES: readonly number[] = [90, 270, 180];
+const MORE_NOTE_ANGLES: readonly number[] = [90, 270, 135, 225, 180];
 
 export interface TreeMetrics {
   /** Columns the widest frame spans, from column 0, NIL leaves included. */
@@ -79,6 +79,11 @@ export interface TreeMetrics {
   readonly hasNotes: boolean;
   /** Widest joined note, in em of the value font. */
   readonly noteWidth: number;
+  /**
+   * Each node's widest note over the trace, in em: a note's place is
+   * chosen for its own node's notes, not the widest of the tree's.
+   */
+  readonly noteWidths: Readonly<Record<string, number>>;
   /** Columns a NIL leaf reaches left of column 0: 0 or 0.5. */
   readonly nilLeft: number;
   /** Most pointers above one root of a linked forest. */
@@ -158,10 +163,11 @@ export function measureTree(
   fonts: LayoutFonts,
 ): TreeMetrics {
   const g = geometryOf(state, decl);
-  const notes = state.data.nodes.flatMap((n) => {
+  const noted = state.data.nodes.flatMap((n) => {
     const text = noteText(state.marks, n.id);
-    return text === undefined ? [] : [text];
+    return text === undefined ? [] : [[n.id, text] as const];
   });
+  const notes = noted.map(([, text]) => text);
   return {
     columns: g.columns,
     levels: g.levels,
@@ -176,6 +182,9 @@ export function measureTree(
     ),
     hasNotes: notes.length > 0,
     noteWidth: maxWidth(notes, fonts.value),
+    noteWidths: Object.fromEntries(
+      noted.map(([id, text]) => [id, maxWidth([text], fonts.value)]),
+    ),
     nilLeft: Math.max(0, ...[...g.nils.values()].map((n) => -n.column)),
     rootPointerRows: pointerRows(g.above),
     rootPointerWidth: maxWidth(
@@ -191,6 +200,23 @@ export function measureTree(
   };
 }
 
+/**
+ * Per-key maxima of two records, built as own properties, so a node id
+ * such as `__proto__` is kept like any other.
+ */
+function mergeMax(
+  a: Readonly<Record<string, number>>,
+  b: Readonly<Record<string, number>>,
+): Record<string, number> {
+  return Object.fromEntries([
+    ...Object.entries(a).map(([k, v]) => [
+      k,
+      Object.hasOwn(b, k) ? Math.max(v, b[k]!) : v,
+    ]),
+    ...Object.entries(b).filter(([k]) => !Object.hasOwn(a, k)),
+  ]);
+}
+
 export const mergeTreeMetrics = (
   a: TreeMetrics,
   b: TreeMetrics,
@@ -202,6 +228,7 @@ export const mergeTreeMetrics = (
   pointerWidth: Math.max(a.pointerWidth, b.pointerWidth),
   hasNotes: a.hasNotes || b.hasNotes,
   noteWidth: Math.max(a.noteWidth, b.noteWidth),
+  noteWidths: mergeMax(a.noteWidths, b.noteWidths),
   nilLeft: Math.max(a.nilLeft, b.nilLeft),
   rootPointerRows: Math.max(a.rootPointerRows, b.rootPointerRows),
   rootPointerWidth: Math.max(a.rootPointerWidth, b.rootPointerWidth),
@@ -257,6 +284,19 @@ export function layoutTree({
   const noteHalf = noteTextWidth(metrics.noteWidth, shape) / 2;
   const noteAt = (x: number, y: number, angle: number) =>
     noteRegion({ x, y, radius, halfWidth }, angle, noteHalf, noteFont);
+  /**
+   * The region of the notes of node `id`, the widest it ever has: the
+   * choice of angle uses each node's own width, while the margins above
+   * keep room for the widest note of the trace.
+   */
+  const nodeNoteAt = (id: string, x: number, y: number, angle: number) =>
+    noteRegion(
+      { x, y, radius, halfWidth },
+      angle,
+      noteTextWidth(own(metrics.noteWidths, id) ?? metrics.noteWidth, shape) /
+        2,
+      noteFont,
+    );
   const reaches = NOTE_ANGLES.map((angle) => noteAt(0, 0, angle));
   const noteOverhang = metrics.hasNotes
     ? Math.max(
@@ -493,33 +533,43 @@ export function layoutTree({
           // The left is the pointer badges' side, as in graphs.
           (a) =>
             !(a === 270 && metrics.pointerRows > 0) &&
-            inside(noteAt(c.x, c.y, a)),
+            inside(nodeNoteAt(node.id, c.x, c.y, a)),
         ),
       ];
       const discs = state.data.nodes.flatMap((n) =>
         n.id === node.id ? [] : [{ ...centre(n.id), radius: halfWidth }],
       );
-      let angle = clearestAngle(candidates, (a) => noteAt(c.x, c.y, a), {
-        segments: [...treeLines, ...lines],
-        discs,
-        boxes: placed,
-      });
+      let angle = clearestAngle(
+        candidates,
+        (a) => nodeNoteAt(node.id, c.x, c.y, a),
+        {
+          segments: [...treeLines, ...lines],
+          discs,
+          boxes: placed,
+        },
+      );
       // With no clear place, a note may cross a line, which its halo
       // keeps readable, but not cover a pointer above a root (ADR 0034).
       const onBadge = (a: number) =>
-        clearance(noteAt(c.x, c.y, a), {
+        clearance(nodeNoteAt(node.id, c.x, c.y, a), {
           segments: [],
           discs: [],
           boxes: badgeBoxes,
         }) < CLEAR;
+      // Off the badges, still keeping clear of lines where it can.
+      const offBadges = candidates.filter((a) => !onBadge(a));
       if (badgeBoxes.length > 0 && onBadge(angle))
-        angle = clearestAngle(candidates, (a) => noteAt(c.x, c.y, a), {
-          segments: [],
-          discs,
-          boxes: placed,
-        });
+        angle = clearestAngle(
+          offBadges.length > 0 ? offBadges : candidates,
+          (a) => nodeNoteAt(node.id, c.x, c.y, a),
+          {
+            segments: offBadges.length > 0 ? [...treeLines, ...lines] : [],
+            discs,
+            boxes: placed,
+          },
+        );
       angles.set(node.id, angle);
-      placed.push(noteAt(c.x, c.y, angle));
+      placed.push(nodeNoteAt(node.id, c.x, c.y, angle));
     }
     return angles;
   }
