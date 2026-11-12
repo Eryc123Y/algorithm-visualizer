@@ -2153,3 +2153,16 @@ recipe(
     expect(suffixes).toHaveLength(text.length);
   },
 );
+
+// Approximate vertex cover: any graph.
+recipe(
+  'approx-vertex-cover',
+  graphs(nonNegative, { minNodes: 1 }),
+  (graph) => runOk('approx-vertex-cover', { graph }).document,
+  (trace, g) => {
+    // Every edge has an end in the cover, group 0.
+    const groups = stateOf(trace, 'g', 'graph').marks.groups;
+    for (const [a, b] of g.edges)
+      expect(groups[a] === 0 || groups[b] === 0).toBe(true);
+  },
+);
