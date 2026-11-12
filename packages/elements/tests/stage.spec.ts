@@ -29,6 +29,28 @@ const el = (svg: SVGSVGElement, key: string) =>
   svg.querySelector<SVGGElement>(`[data-key="${key}"]`);
 
 describe('SceneStage', () => {
+  it('draws labels as text and builds nodes without parsing markup', () => {
+    const label = '<img src=x onerror="alert(1)"></text><script>x()</script>';
+    const loaded = loadTrace({
+      version: '0.1',
+      structures: { arr: { kind: 'array', label, initial: [label] } },
+      steps: [],
+    });
+    if (!loaded.ok) throw new Error('fixture');
+    const { svg, stage } = mount();
+    const parse = vi.spyOn(Element.prototype, 'innerHTML', 'set');
+    stage.render(paintScene(layoutTrace(loaded.value).sceneAt(0)), {
+      duration: 0,
+    });
+    expect(parse).not.toHaveBeenCalled();
+    parse.mockRestore();
+    expect(svg.querySelector('img, script')).toBeNull();
+    const texts = [...svg.querySelectorAll('text')].map((t) => t.textContent);
+    expect(texts).toContain(label);
+    for (const node of svg.querySelectorAll('[data-key] *'))
+      expect(node.namespaceURI).toBe('http://www.w3.org/2000/svg');
+  });
+
   it('draws every item of a scene with its position as a transform', () => {
     const { svg, stage } = mount();
     stage.render(painted(0), { duration: 0 });

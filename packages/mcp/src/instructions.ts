@@ -21,4 +21,4 @@ export const visualizeRequest = (request: string) =>
  */
 export const SERVER_INSTRUCTIONS = `${INSTRUCTIONS}
 
-Then show the document to the user with algoviz_show: clients that display MCP Apps open it as an interactive player in the conversation. For a recipe, call algoviz_show with the recipe and its input instead of a document, such as { "recipe": "dijkstra", "input": "A-B 4, B-C 1, A-C 7" }, without running it first.`;
+Then show the document to the user with algoviz_show: clients that display MCP Apps open it as an interactive player in the conversation. For a recipe, call algoviz_show with the recipe and its input instead of a document, such as { "recipe": "dijkstra", "input": "A-B 4, B-C 1, A-C 7" }, without running it first. When a result includes a share link, give it to the user too: it opens the visualization in the player in any browser, and in clients that cannot show the player it is the way to see it.`;

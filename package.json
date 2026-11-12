@@ -13,7 +13,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "test:e2e": "npm run test:e2e -w @algoviz/playground",
+    "test:e2e": "npm run test:e2e -w @algoviz/playground && npm run test:e2e -w @algoviz/site",
     "test:typst": "npm run test:typst -w @algoviz/typst",
     "test:standalone": "npm run test:standalone -w @algoviz/mcp",
     "test:latex": "npm run test:latex -w @algoviz/latex",
@@ -67,6 +67,7 @@
     "packages/mcp",
     "packages/latex",
     "packages/elements",
-    "apps/playground"
+    "apps/playground",
+    "apps/site"
   ]
 }

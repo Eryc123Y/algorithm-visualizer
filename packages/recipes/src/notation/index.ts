@@ -16,7 +16,7 @@ export {
   type NotatedCall,
   type OperationShape,
 } from './operations.ts';
-export { readInput } from './read-input.ts';
+export { readInput, writeInput } from './read-input.ts';
 export {
   graphField,
   listField,

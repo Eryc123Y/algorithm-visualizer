@@ -3,7 +3,11 @@
  * server registers them, and the evaluation harness calls them directly.
  */
 import { TOPICS } from '@algoviz/recipes';
-import { formatErrors, type Diagnostic } from '@algoviz/spec';
+import {
+  formatErrors,
+  type Diagnostic,
+  type ShareContent,
+} from '@algoviz/spec';
 import { themeNames, type ThemeName } from '@algoviz/svg';
 import { z } from 'zod';
 
@@ -11,12 +15,18 @@ import { guide } from './guide.ts';
 import { formatInspect, inspect, MAX_FRAMES } from './inspect.ts';
 import { listRecipes, recipeCatalog, runRecipe } from './recipes.ts';
 import { render } from './render.ts';
+import { recipeShare } from './share.ts';
 import { Document, RecipeInput, sourceArgs, sourceOf } from './source.ts';
 import { formatReport, validate } from './validate.ts';
 
 export interface ToolResult {
   readonly text: string;
   readonly isError?: boolean;
+  /**
+   * What a share link to the result would carry (ADR 0040). The server
+   * turns it into a link when it knows the share page's address.
+   */
+  readonly share?: ShareContent;
 }
 
 export interface ToolDefinition<S extends z.ZodObject = z.ZodObject> {
@@ -156,7 +166,9 @@ export const tools: readonly ToolDefinition[] = [
     }),
     run({ id, input }) {
       const doc = runRecipe(id, input);
-      return doc.ok ? { text: JSON.stringify(doc.value) } : failure(doc.error);
+      return doc.ok
+        ? { text: JSON.stringify(doc.value), share: recipeShare(id, input) }
+        : failure(doc.error);
     },
   }),
 ];

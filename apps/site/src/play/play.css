@@ -1,0 +1,106 @@
+:root {
+  color-scheme: light dark;
+  --ink: light-dark(#1f2a26, #e4ebe7);
+  --muted: light-dark(#5b6762, #9aa8a2);
+  --paper: light-dark(#f7f8f6, #121614);
+  --card: light-dark(#ffffff, #1a201d);
+  --line: light-dark(#dde3df, #2c3530);
+  --accent: light-dark(#1d6b55, #6fd0ac);
+  --alert: light-dark(#a3261b, #ff9c8f);
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif;
+  line-height: 1.5;
+  color: var(--ink);
+  background: var(--paper);
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+
+.bar {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.75rem clamp(1rem, 4vw, 2rem);
+  border-bottom: 1px solid var(--line);
+}
+
+.mark {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.tagline,
+footer {
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+main {
+  width: min(100%, 72rem);
+  margin-inline: auto;
+  padding: clamp(1rem, 3vw, 2rem) clamp(0.75rem, 3vw, 2rem);
+  box-sizing: border-box;
+}
+
+algo-player {
+  display: block;
+}
+
+.note {
+  max-width: 40rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  background: var(--card);
+}
+
+.note h1 {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+#problem h1 {
+  color: var(--alert);
+}
+
+#problem ul {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+#problem li + li {
+  margin-top: 0.5rem;
+}
+
+#problem .hint {
+  margin: 0.25rem 0 0;
+  color: var(--muted);
+}
+
+code {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.9em;
+}
+
+a {
+  color: var(--accent);
+}
+
+.try {
+  font-weight: 600;
+}
+
+footer {
+  padding: 1rem clamp(1rem, 4vw, 2rem);
+  border-top: 1px solid var(--line);
+}

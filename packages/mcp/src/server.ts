@@ -8,11 +8,16 @@ import {
   registerAppTool,
 } from '@modelcontextprotocol/ext-apps/server';
 import { McpServer } from '@modelcontextprotocol/server';
-import { kindNames, visualizationJsonSchema } from '@algoviz/spec';
+import {
+  kindNames,
+  visualizationJsonSchema,
+  type ShareContent,
+} from '@algoviz/spec';
 import { z } from 'zod';
 
 import { guide, guideSection } from './guide.ts';
 import { SERVER_INSTRUCTIONS, visualizeRequest } from './instructions.ts';
+import { checkShareUrl, shareText, sourceShare } from './share.ts';
 import { PLAYER_URI, playerHtml, showSource } from './show.ts';
 import { sourceArgs } from './source.ts';
 import { FrameSelectorArg, tools } from './tools.ts';
@@ -27,7 +32,29 @@ const readOnly = {
   openWorldHint: false,
 };
 
-export function createServer(): McpServer {
+export interface ServerOptions {
+  /**
+   * The share page's address, such as `https://example.org/play/`
+   * (ADR 0040). With it, algoviz_show and algoviz_run_recipe return a
+   * share link; without it, no tool does. No address is assumed.
+   */
+  readonly shareUrl?: string | undefined;
+}
+
+export function createServer(options: ServerOptions = {}): McpServer {
+  const shareBase =
+    options.shareUrl === undefined
+      ? undefined
+      : checkShareUrl(options.shareUrl);
+  /** The result's text, then its share link when there is one. */
+  const reply = async (text: string, share: ShareContent | undefined) => {
+    const link = await shareText(shareBase, share);
+    return [text, ...(link === undefined ? [] : [link])].map((t) => ({
+      type: 'text' as const,
+      text: t,
+    }));
+  };
+
   const server = new McpServer(
     { name: SERVER_NAME, version: SERVER_VERSION },
     { instructions: SERVER_INSTRUCTIONS },
@@ -42,10 +69,13 @@ export function createServer(): McpServer {
         inputSchema: t.input,
         annotations: readOnly,
       },
-      (args) => {
+      async (args) => {
         const result = t.run(args);
         return {
-          content: [{ type: 'text', text: result.text }],
+          content: await reply(
+            result.text,
+            result.isError ? undefined : result.share,
+          ),
           ...(result.isError ? { isError: true } : {}),
         };
       },
@@ -57,7 +87,7 @@ export function createServer(): McpServer {
     {
       title: 'Show to the user',
       description:
-        'Shows a valid document to the user as an interactive player in the conversation, with play, step and seek controls. Use it once the document validates and does what you meant. For a recipe, give the recipe and its input instead of a document, such as recipe "dijkstra" with input "A-B 4, B-C 1, A-C 7": there is no need to run it first. Hosts without MCP Apps only get the text result, so also give the user the document or a link if they need it.',
+        'Shows a valid document to the user as an interactive player in the conversation, with play, step and seek controls. Use it once the document validates and does what you meant. For a recipe, give the recipe and its input instead of a document, such as recipe "dijkstra" with input "A-B 4, B-C 1, A-C 7": there is no need to run it first. Hosts without MCP Apps only get the text result: give the user the share link it includes, when the server has one, or else the document.',
       inputSchema: z.strictObject({
         ...sourceArgs,
         frame: FrameSelectorArg.optional().describe(
@@ -67,11 +97,11 @@ export function createServer(): McpServer {
       annotations: readOnly,
       _meta: { ui: { resourceUri: PLAYER_URI } },
     },
-    ({ frame, ...source }) => {
+    async ({ frame, ...source }) => {
       const result = showSource(source, frame);
       return result.ok
         ? {
-            content: [{ type: 'text', text: result.text }],
+            content: await reply(result.text, sourceShare(source, frame)),
             structuredContent: { ...result.content },
           }
         : { content: [{ type: 'text', text: result.text }], isError: true };

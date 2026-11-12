@@ -6,5 +6,9 @@
 import { StdioServerTransport } from '@modelcontextprotocol/server/stdio';
 
 import { createServer } from './server.ts';
+import { shareBaseFromEnv } from './share.ts';
 
-await createServer().connect(new StdioServerTransport());
+// Share links need the share page's address, which no code assumes.
+await createServer({ shareUrl: shareBaseFromEnv(process.env) }).connect(
+  new StdioServerTransport(),
+);
