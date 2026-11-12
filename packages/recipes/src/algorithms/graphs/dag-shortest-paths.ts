@@ -38,7 +38,7 @@ export function topologicalOrder(g: GraphInput): string[] {
  * significant digits, so sums of decimals print as written, with a true
  * minus sign, as `plus` writes them.
  */
-const num = (x: number): string => {
+export const num = (x: number): string => {
   if (x === Infinity) return '∞';
   const r = Number(x.toPrecision(12));
   return r < 0 ? `−${-r}` : String(r);
