@@ -3,10 +3,15 @@
  * algoviz_run_recipe return one as a second text item when the server
  * has a share page's address, and no tool does without one.
  */
-import { Client, InMemoryTransport } from '@modelcontextprotocol/client';
+import {
+  Client,
+  InMemoryTransport,
+  StreamableHTTPClientTransport,
+} from '@modelcontextprotocol/client';
 import { readShareFragment } from '@algoviz/spec';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
+import { createHttpHandler } from '../src/http.ts';
 import { createServer, type ServerOptions } from '../src/server.ts';
 import { shareBaseFromEnv } from '../src/share.ts';
 
@@ -180,5 +185,32 @@ describe('the share page address', () => {
     expect(shareBaseFromEnv({ ALGOVIZ_SHARE_URL: BASE })).toBe(BASE);
     expect(shareBaseFromEnv({ ALGOVIZ_SHARE_URL: ' ' })).toBeUndefined();
     expect(shareBaseFromEnv({})).toBeUndefined();
+  });
+});
+
+describe('over HTTP', () => {
+  it('returns the same links', async () => {
+    const handler = createHttpHandler({ shareUrl: BASE });
+    const client = new Client({ name: 'test', version: '0.0.0' });
+    await client.connect(
+      new StreamableHTTPClientTransport(new URL('https://mcp.example/mcp'), {
+        fetch: (input, init) => handler.fetch(new Request(input, init)),
+      }),
+    );
+    const result = await client.callTool({
+      name: 'algoviz_show',
+      arguments: { recipe: 'bfs', input: 'A-B, B-C' },
+    });
+    expect(await linked(result)).toEqual({
+      algorithm: 'bfs',
+      input: 'A-B, B-C',
+    });
+    await client.close();
+  });
+
+  it('refuses a bad address when the handler is made', () => {
+    expect(() => createHttpHandler({ shareUrl: 'ftp://example.org/' })).toThrow(
+      /ALGOVIZ_SHARE_URL.*http/,
+    );
   });
 });
