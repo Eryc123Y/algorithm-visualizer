@@ -12,6 +12,15 @@ import type { VisualizationInput } from '@algoviz/spec';
 import { fuzz, replay, runError, runOk, stateOf } from './helpers.ts';
 import { recipe } from './recipe-properties.ts';
 
+/** The first split of Aᵢ⋯Aⱼ that reaches the fewest multiplications. */
+function firstBest(p: readonly number[], i: number, j: number): number {
+  const best = cost(p, i, j);
+  for (let k = i; k < j; k++)
+    if (cost(p, i, k) + cost(p, k + 1, j) + p[i - 1]! * p[k]! * p[j]! === best)
+      return k;
+  throw new Error('no split reaches the best cost');
+}
+
 /** The fewest multiplications for Aᵢ⋯Aⱼ, trying every split. */
 function cost(p: readonly number[], i: number, j: number): number {
   if (i === j) return 0;
@@ -45,9 +54,15 @@ function costOf(order: string, p: readonly number[]): number {
 
 function check(doc: VisualizationInput, p: readonly number[]): void {
   const n = p.length - 1;
-  const m = stateOf(replay(doc), 'm', 'table').data;
+  const trace = replay(doc);
+  const m = stateOf(trace, 'm', 'table').data;
+  const s = stateOf(trace, 's', 'table').data;
   for (let i = 1; i <= n; i++)
-    for (let j = i; j <= n; j++) expect(m[i - 1]![j - 1]).toBe(cost(p, i, j));
+    for (let j = i; j <= n; j++) {
+      expect(m[i - 1]![j - 1]).toBe(cost(p, i, j));
+      // Ties keep the first best split, as CLRS's strict < does.
+      if (j > i) expect(s[i - 1]![j - 1]).toBe(firstBest(p, i, j));
+    }
   const last = doc.steps.find((s) =>
     s.meta?.narration?.includes('Best order'),
   )!;
@@ -98,7 +113,7 @@ describe('matrix-chain', () => {
 const dims = fc.oneof(
   fc.array(fc.integer({ min: 1, max: 60 }), { minLength: 3, maxLength: 8 }),
   fc.array(fc.integer({ min: 1, max: 3 }), { minLength: 3, maxLength: 8 }),
-  fc.array(fc.integer({ min: 1, max: 1000 }), { minLength: 3, maxLength: 5 }),
+  fc.array(fc.integer({ min: 900, max: 1000 }), { minLength: 3, maxLength: 8 }),
 );
 
 recipe(

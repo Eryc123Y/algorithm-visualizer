@@ -63,9 +63,10 @@ export const matrixChain = defineAlgorithm({
           if i == j
               print "A"ᵢ
           else
+              k = s[i, j]  // @split
               print "("
-              PRINT-OPTIMAL-PARENS(s, i, s[i, j])  // @split
-              PRINT-OPTIMAL-PARENS(s, s[i, j] + 1, j)
+              PRINT-OPTIMAL-PARENS(s, i, k)
+              PRINT-OPTIMAL-PARENS(s, k + 1, j)
               print ")"
     `,
     python: `
@@ -141,7 +142,9 @@ export const matrixChain = defineAlgorithm({
         const k = s[i - 1]![j - 1]!;
         trace.step(
           'best',
-          `m[${i}, ${j}] = ${best}: A${i}⋯A${j} is cheapest split after A${k}, so s[${i}, ${j}] = ${k}.`,
+          j === i + 1
+            ? `m[${i}, ${j}] = ${best}: A${i}A${j} has only the one split, after A${i}, so s[${i}, ${j}] = ${k}.`
+            : `m[${i}, ${j}] = ${best}: A${i}⋯A${j} is cheapest split after A${k}, so s[${i}, ${j}] = ${k}.`,
           { vars: { i, j, k } },
         );
         M.set({ cell: cell(i, j), value: best }).highlight({
