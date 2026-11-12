@@ -30,6 +30,7 @@ export default defineConfig({
   build: {
     outDir: 'dist/cdn',
     emptyOutDir: true,
+    sourcemap: true,
     lib: {
       entry: 'src/define.ts',
       formats: ['es'],
@@ -38,6 +39,11 @@ export default defineConfig({
     rollupOptions: {
       preserveEntrySignatures: 'allow-extension',
       output: {
+        // Library mode minifies ES output without its whitespace and keeps
+        // pure annotations, for bundlers that use the files; browsers load
+        // these as they are, so minify them fully. Licence comments stay.
+        minify: { codegen: true },
+        comments: { legal: true, annotation: false, jsdoc: false },
         chunkFileNames: (chunk) =>
           chunk.moduleIds.some((id) => id.includes('/packages/recipes/'))
             ? 'algoviz-recipes.js'

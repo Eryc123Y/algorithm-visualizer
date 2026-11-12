@@ -187,7 +187,7 @@ Build the standalone bundle with `npm run build -w @algoviz/elements`, then name
 
 `algorithm` is any id of the registry ([Recipes](#recipes)), and `input` takes JSON, an object without its outer braces, or a notation ([Inputs](#inputs)). Without `input`, the algorithm runs on its first example. With `algorithm`, `src` or an inline `<script type="application/json">` may hold the input instead, and the `input` property takes any value, such as an object. An input that does not fit shows in the player, with the token where it went wrong, and fires `algo-error`.
 
-The registry is a second file of the bundle, `algoviz-recipes.js`, which the player loads from next to itself the first time a player has `algorithm`: 146 KB, 40 KB gzipped, on top of the player's 407 KB (104 KB). Keep the two files together under these names. A page that shows only documents never loads it:
+The registry is a second file of the bundle, `algoviz-recipes.js`, which the player loads from next to itself the first time a player has `algorithm`: 396 kB, 120 kB gzipped, on top of the player's 348 kB (106 kB) ([sizes](docs/sizes.md)). Keep the two files together under these names. A page that shows only documents never loads it:
 
 ```html
 <algo-player theme="auto">
