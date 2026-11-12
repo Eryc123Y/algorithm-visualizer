@@ -39,6 +39,10 @@ import { finiteAutomatonMatcher } from './algorithms/strings/finite-automaton.ts
 import { kmp } from './algorithms/strings/kmp.ts';
 import { naiveStringMatcher } from './algorithms/strings/naive.ts';
 import { rabinKarp } from './algorithms/strings/rabin-karp.ts';
+import { closestPair } from './algorithms/geometry/closest-pair.ts';
+import { grahamScan } from './algorithms/geometry/graham-scan.ts';
+import { jarvisMarch } from './algorithms/geometry/jarvis-march.ts';
+import { anySegmentsIntersect } from './algorithms/geometry/segments-intersect.ts';
 import { runModule, type AlgorithmRun } from './run-module.ts';
 import { avl } from './structures/avl/index.ts';
 import { bTree } from './structures/b-tree/index.ts';
@@ -98,6 +102,10 @@ export const algorithms: readonly Algorithm[] = [
   rabinKarp,
   finiteAutomatonMatcher,
   kmp,
+  anySegmentsIntersect,
+  grahamScan,
+  jarvisMarch,
+  closestPair,
 ];
 
 /** The module with `id`, if there is one. */
