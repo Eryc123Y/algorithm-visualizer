@@ -20,6 +20,7 @@ export const TOPICS = [
   'hashing',
   'graphs',
   'dynamic-programming',
+  'greedy',
 ] as const;
 export type Topic = (typeof TOPICS)[number];
 
@@ -33,6 +34,7 @@ export const TOPIC_TITLES: Readonly<Record<Topic, string>> = {
   hashing: 'Hashing',
   graphs: 'Graphs',
   'dynamic-programming': 'Dynamic programming',
+  greedy: 'Greedy algorithms',
 };
 
 /** What an operation returns: found or not, a popped value, or nothing. */

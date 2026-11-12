@@ -624,6 +624,32 @@ recipe(
   },
 );
 
+recipe(
+  'huffman',
+  fc
+    .tuple(
+      fc.uniqueArray(fc.constantFrom(...'abcdefghijklmnop'), {
+        minLength: 2,
+        maxLength: 16,
+      }),
+      fc.array(fc.integer({ min: 1, max: 99 }), {
+        minLength: 16,
+        maxLength: 16,
+      }),
+    )
+    .map(([chars, freqs]) => ({
+      frequencies: chars.map((c, k): [string, number] => [c, freqs[k]!]),
+    })),
+  (input) => runOk('huffman', input).document,
+  (trace, { frequencies }) => {
+    const codes = stateOf(trace, 'codes', 'table').data.map((row) => row[1]);
+    expect(codes.every((c) => typeof c === 'string' && c.length > 0)).toBe(
+      true,
+    );
+    expect(new Set(codes).size).toBe(frequencies.length);
+  },
+);
+
 /**
  * A valid LeetCode level order: the root, then for every node in order
  * its two slots, then possibly a few trailing nulls.

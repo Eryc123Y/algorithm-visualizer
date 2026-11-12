@@ -10,6 +10,7 @@ import type { Algorithm } from './algorithm.ts';
 import { editDistance } from './algorithms/dynamic-programming/edit-distance.ts';
 import { knapsack } from './algorithms/dynamic-programming/knapsack.ts';
 import { lcs } from './algorithms/dynamic-programming/lcs.ts';
+import { huffman } from './algorithms/greedy/huffman.ts';
 import { bellmanFord } from './algorithms/graphs/bellman-ford.ts';
 import { bfs } from './algorithms/graphs/bfs.ts';
 import { dfs } from './algorithms/graphs/dfs.ts';
@@ -84,6 +85,7 @@ export const algorithms: readonly Algorithm[] = [
   lcs,
   editDistance,
   knapsack,
+  huffman,
 ];
 
 /** The module with `id`, if there is one. */
