@@ -1,0 +1,13 @@
+{
+  "description": "move takes row positions of existing nodes: to is at most the last position.",
+  "input": {
+    "version": "0.7",
+    "structures": { "l": { "kind": "linkedList", "initial": [4, 2, 7] } },
+    "steps": [
+      { "actions": [{ "target": "l", "type": "move", "from": 0, "to": 3 }] }
+    ]
+  },
+  "expectedErrors": [
+    { "code": "OUT_OF_RANGE", "path": "$.steps[0].actions[0].to" }
+  ]
+}

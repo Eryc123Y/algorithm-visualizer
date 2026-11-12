@@ -328,7 +328,9 @@ function queueAction(s: QueueState, r: Dice): Fields {
 
 function listAction(s: LinkedListState, r: Dice): Fields {
   const n = s.data.length;
-  switch (r.int(8)) {
+  switch (r.int(9)) {
+    case 8:
+      return { type: 'move', from: r.index(n), to: r.index(n) };
     case 0:
       return {
         type: 'insert',

@@ -196,6 +196,16 @@ export function applyModel(m: ModelData, a: A): ModelData | undefined {
               k === a['index'] ? { ...x, value: a['value'] as Scalar } : x,
             ),
           };
+        case 'move': {
+          // The node leaves its place and is put back at `to`; links stay.
+          if (!inRange(a['from'], n) || !inRange(a['to'], n)) return undefined;
+          const node = xs[a['from']]!;
+          const rest = [...xs.slice(0, a['from']), ...xs.slice(a['from'] + 1)];
+          return {
+            ...m,
+            nodes: [...rest.slice(0, a['to']), node, ...rest.slice(a['to'])],
+          };
+        }
         case 'link': {
           const field = (a['field'] as 'next' | 'prev' | undefined) ?? 'next';
           if (!inRange(a['from'], n)) return undefined;
