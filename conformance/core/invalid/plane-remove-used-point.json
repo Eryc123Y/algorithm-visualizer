@@ -1,0 +1,22 @@
+{
+  "description": "A point that ends a segment cannot be removed before the segment.",
+  "input": {
+    "version": "0.9",
+    "structures": {
+      "P": {
+        "kind": "plane",
+        "points": [
+          { "id": "a", "x": 0, "y": 0 },
+          { "id": "b", "x": 4, "y": 1 }
+        ],
+        "segments": [{ "id": "ab", "from": "a", "to": "b" }]
+      }
+    },
+    "steps": [
+      { "actions": [{ "target": "P", "type": "removePoint", "id": "a" }] }
+    ]
+  },
+  "expectedErrors": [
+    { "code": "INVALID_OPERATION", "path": "$.steps[0].actions[0].id" }
+  ]
+}

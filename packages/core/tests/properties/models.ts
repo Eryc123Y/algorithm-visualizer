@@ -11,6 +11,11 @@ import {
   initBTreeModel,
   type BTreeModel,
 } from './btree-model.ts';
+import {
+  applyPlaneModel,
+  initPlaneModel,
+  type PlaneModel,
+} from './plane-model.ts';
 import { applyTreeModel, initTreeModel, type TreeModel } from './tree-model.ts';
 
 type Element = { id: string; value: Scalar };
@@ -32,7 +37,8 @@ export type ModelData =
   | { kind: 'hashTable'; buckets: Element[][] }
   | { kind: 'priorityQueue'; order: 'min' | 'max'; items: Item[] }
   | TreeModel
-  | BTreeModel;
+  | BTreeModel
+  | PlaneModel;
 
 export type ModelKind = ModelData['kind'];
 export const modelled: readonly string[] = [
@@ -45,6 +51,7 @@ export const modelled: readonly string[] = [
   'priorityQueue',
   'tree',
   'btree',
+  'plane',
 ];
 
 export function initModel(decl: StructureDecl): ModelData | undefined {
@@ -95,6 +102,8 @@ export function initModel(decl: StructureDecl): ModelData | undefined {
       return initTreeModel(decl);
     case 'btree':
       return initBTreeModel(decl);
+    case 'plane':
+      return initPlaneModel(decl);
     default:
       return undefined;
   }
@@ -112,6 +121,7 @@ export function applyModel(m: ModelData, a: A): ModelData | undefined {
   if (m.kind === 'priorityQueue') return applyPriorityQueue(m, a);
   if (m.kind === 'tree') return applyTreeModel(m, a);
   if (m.kind === 'btree') return applyBTreeModel(m, a);
+  if (m.kind === 'plane') return applyPlaneModel(m, a);
   switch (m.kind) {
     case 'array': {
       const xs = m.items;
@@ -418,6 +428,10 @@ export function dataOf(entry: { kind: string; state: unknown }): unknown {
       return { kind: 'hashTable', buckets: s['data'] };
     case 'priorityQueue':
       return { kind: 'priorityQueue', ...(s['data'] as object) };
+    case 'plane': {
+      const data = s['data'] as { points: unknown; segments: unknown };
+      return { kind: 'plane', points: data.points, segments: data.segments };
+    }
     case 'btree': {
       const data = s['data'] as { nodes: unknown; root: unknown };
       const marks = s['marks'] as { pointers: unknown; notes: unknown };

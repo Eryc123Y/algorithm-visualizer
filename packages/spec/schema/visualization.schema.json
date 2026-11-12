@@ -12,7 +12,8 @@
         "0.5",
         "0.6",
         "0.7",
-        "0.8"
+        "0.8",
+        "0.9"
       ],
       "description": "Protocol version, \"major.minor\": the oldest version that has every feature the document uses."
     },
@@ -1375,6 +1376,111 @@
             ],
             "additionalProperties": false,
             "description": "A multiway search tree, such as a B-tree."
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "plane"
+              },
+              "label": {
+                "type": "string",
+                "maxLength": 2000
+              },
+              "place": {
+                "type": "string",
+                "enum": [
+                  "main",
+                  "side"
+                ],
+                "description": "Where the structure goes: \"main\" (default) with the main picture, or \"side\" for an auxiliary structure such as a queue, a call stack or a table of results. Side structures go right of the main ones in wide figures (slides, the player) and below them in narrow ones (notes)."
+              },
+              "axes": {
+                "description": "Draw the x and y axes (default false).",
+                "type": "boolean"
+              },
+              "points": {
+                "description": "The points; none by default.",
+                "maxItems": 64,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                      "description": "Identifier of an element, unique within its structure and stable for the whole trace."
+                    },
+                    "x": {
+                      "type": "number",
+                      "minimum": -1000000,
+                      "maximum": 1000000
+                    },
+                    "y": {
+                      "type": "number",
+                      "minimum": -1000000,
+                      "maximum": 1000000
+                    },
+                    "label": {
+                      "description": "Shown beside the point; its id if absent.",
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 16
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "x",
+                    "y"
+                  ],
+                  "additionalProperties": false,
+                  "description": "A point at (x, y)."
+                }
+              },
+              "segments": {
+                "maxItems": 128,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                      "description": "Identifier of an element, unique within its structure and stable for the whole trace."
+                    },
+                    "from": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                      "description": "The id of one end point."
+                    },
+                    "to": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                      "description": "The id of the other end point."
+                    },
+                    "label": {
+                      "description": "Shown beside the segment.",
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 16
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "from",
+                    "to"
+                  ],
+                  "additionalProperties": false,
+                  "description": "A segment between two points."
+                }
+              }
+            },
+            "required": [
+              "kind"
+            ],
+            "additionalProperties": false,
+            "description": "Points and segments in the plane, for computational geometry."
           }
         ]
       },
@@ -5059,6 +5165,426 @@
                       "additionalProperties": false
                     }
                   ]
+                },
+                {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "addPoint"
+                        },
+                        "point": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                              "description": "Identifier of an element, unique within its structure and stable for the whole trace."
+                            },
+                            "x": {
+                              "type": "number",
+                              "minimum": -1000000,
+                              "maximum": 1000000
+                            },
+                            "y": {
+                              "type": "number",
+                              "minimum": -1000000,
+                              "maximum": 1000000
+                            },
+                            "label": {
+                              "description": "Shown beside the point; its id if absent.",
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 16
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "x",
+                            "y"
+                          ],
+                          "additionalProperties": false,
+                          "description": "A point at (x, y)."
+                        },
+                        "target": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+                          "description": "Name of the structure this action applies to."
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "point",
+                        "target"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "removePoint"
+                        },
+                        "id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                          "description": "A point id."
+                        },
+                        "target": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+                          "description": "Name of the structure this action applies to."
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "id",
+                        "target"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "addSegment"
+                        },
+                        "segment": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                              "description": "Identifier of an element, unique within its structure and stable for the whole trace."
+                            },
+                            "from": {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                              "description": "The id of one end point."
+                            },
+                            "to": {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                              "description": "The id of the other end point."
+                            },
+                            "label": {
+                              "description": "Shown beside the segment.",
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 16
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "from",
+                            "to"
+                          ],
+                          "additionalProperties": false,
+                          "description": "A segment between two points."
+                        },
+                        "target": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+                          "description": "Name of the structure this action applies to."
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "segment",
+                        "target"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "removeSegment"
+                        },
+                        "id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                          "description": "A segment id."
+                        },
+                        "target": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+                          "description": "Name of the structure this action applies to."
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "id",
+                        "target"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "label"
+                        },
+                        "segment": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                          "description": "A segment id."
+                        },
+                        "text": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 16
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "target": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+                          "description": "Name of the structure this action applies to."
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "segment",
+                        "text",
+                        "target"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "highlight"
+                        },
+                        "points": {
+                          "maxItems": 64,
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                            "description": "A point id."
+                          }
+                        },
+                        "segments": {
+                          "maxItems": 128,
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                            "description": "A segment id."
+                          }
+                        },
+                        "target": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+                          "description": "Name of the structure this action applies to."
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "target"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "compare"
+                        },
+                        "points": {
+                          "minItems": 2,
+                          "maxItems": 3,
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                            "description": "A point id."
+                          }
+                        },
+                        "target": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+                          "description": "Name of the structure this action applies to."
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "points",
+                        "target"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "visit"
+                        },
+                        "point": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                          "description": "A point id."
+                        },
+                        "target": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+                          "description": "Name of the structure this action applies to."
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "point",
+                        "target"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "settle"
+                        },
+                        "point": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                          "description": "A point id."
+                        },
+                        "target": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+                          "description": "Name of the structure this action applies to."
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "point",
+                        "target"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "select"
+                        },
+                        "segment": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                          "description": "A segment id."
+                        },
+                        "on": {
+                          "type": "boolean"
+                        },
+                        "target": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+                          "description": "Name of the structure this action applies to."
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "segment",
+                        "on",
+                        "target"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "pointer"
+                        },
+                        "name": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,15}$",
+                          "description": "Pointer name, e.g. \"i\", \"lo\" or \"head\"."
+                        },
+                        "point": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9_.:-]{1,64}$",
+                              "description": "A point id."
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "target": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+                          "description": "Name of the structure this action applies to."
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "name",
+                        "point",
+                        "target"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "line"
+                        },
+                        "name": {
+                          "type": "string",
+                          "pattern": "^[^\\s][^\\n]{0,11}$",
+                          "description": "A line name of up to 12 characters, e.g. \"sweep\", \"l\" or \"l + δ\"."
+                        },
+                        "x": {
+                          "anyOf": [
+                            {
+                              "type": "number",
+                              "minimum": -1000000,
+                              "maximum": 1000000
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "target": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+                          "description": "Name of the structure this action applies to."
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "name",
+                        "x",
+                        "target"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
                 }
               ]
             },
@@ -5194,6 +5720,6 @@
       ]
     }
   },
-  "$id": "urn:algoviz:schema:visualization:0.8",
+  "$id": "urn:algoviz:schema:visualization:0.9",
   "title": "Visualization"
 }

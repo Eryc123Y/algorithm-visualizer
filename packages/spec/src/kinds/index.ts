@@ -8,6 +8,7 @@ import { graphSpec } from './graph.ts';
 import { hashTableSpec } from './hash-table.ts';
 import type { KindSpec, KindTypes } from './kind.ts';
 import { linkedListSpec } from './linked-list.ts';
+import { planeSpec } from './plane.ts';
 import { priorityQueueSpec } from './priority-queue.ts';
 import { queueSpec } from './queue.ts';
 import { stackSpec } from './stack.ts';
@@ -20,6 +21,7 @@ export * from './graph.ts';
 export * from './hash-table.ts';
 export * from './kind.ts';
 export * from './linked-list.ts';
+export * from './plane.ts';
 export * from './priority-queue.ts';
 export * from './queue.ts';
 export * from './stack.ts';
@@ -37,6 +39,7 @@ const registry = {
   hashTable: hashTableSpec,
   priorityQueue: priorityQueueSpec,
   btree: btreeSpec,
+  plane: planeSpec,
 };
 
 export type StructureKindName = keyof typeof registry;

@@ -8,6 +8,7 @@ import {
   isCodeLine,
   type ArrayState,
   type BTreeState,
+  type PlaneState,
   type GraphState,
   type HashTableState,
   type KindedState,
@@ -33,6 +34,7 @@ type StateOf = {
   hashTable: HashTableState;
   priorityQueue: PriorityQueueState;
   btree: BTreeState;
+  plane: PlaneState;
 };
 
 /** A structure seen across the trace: its name and its states by frame. */

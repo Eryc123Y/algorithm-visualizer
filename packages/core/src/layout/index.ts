@@ -26,6 +26,7 @@ import type { Scene, SceneItem } from './scene.ts';
 
 export * from './array.ts';
 export * from './btree.ts';
+export * from './plane.ts';
 export * from './graph.ts';
 export * from './hash-table.ts';
 export * from './table.ts';
