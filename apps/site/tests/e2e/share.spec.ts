@@ -132,11 +132,10 @@ test('reports a link it cannot read, as text', async ({ page }) => {
   await expect(problem).toContainText('made by a newer algoviz');
   await expect(player(page)).toHaveCount(0);
 
-  // The message quotes the pair it could not read.
-  await page.goto(`/play/#v=1&${encodeURIComponent('<img src=x onerror=1>')}`);
-  await expect(page.getByRole('alert')).toContainText(
-    'Expected key=value in the link, not "%3Cimg',
-  );
+  // A key this page does not know is skipped, markup and all (ADR 0041).
+  await page.goto(`/play/#v=1&alg=bfs&${encodeURIComponent(attack(8))}`);
+  await expect(page).toHaveTitle('bfs · algoviz');
+  expect(await injected(page)).toEqual({ elements: [], ran: null });
   // The version error quotes the decoded value.
   await page.goto(
     `/play/#v=${encodeURIComponent('<img src=x onerror="window.pwned=2">')}&alg=bfs`,

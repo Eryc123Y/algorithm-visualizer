@@ -9,6 +9,7 @@ import {
   err,
   readShareFragment,
   type Diagnostic,
+  type Result,
   type ShareContent,
 } from '@algoviz/spec';
 
@@ -42,7 +43,7 @@ export async function showFragment(
   page: PlayPage,
 ): Promise<void> {
   const request = ++latest;
-  let read: Awaited<ReturnType<typeof readShareFragment>>;
+  let read: Read;
   try {
     read = await readShareFragment(fragment);
   } catch (e) {
@@ -56,11 +57,10 @@ export async function showFragment(
   }
 }
 
-function show(
-  read: Awaited<ReturnType<typeof readShareFragment>>,
-  page: PlayPage,
-  request: number,
-): void {
+/** What reading a fragment gave, or why the page could not. */
+type Read = Result<ShareContent | undefined, readonly Diagnostic[]>;
+
+function show(read: Read, page: PlayPage, request: number): void {
   page.stage.replaceChildren();
   page.errors.replaceChildren();
   page.intro.hidden = !(read.ok && read.value === undefined);
