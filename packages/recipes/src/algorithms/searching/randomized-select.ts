@@ -14,7 +14,8 @@ import { z } from 'zod';
 import { defineAlgorithm } from '../../algorithm.ts';
 import { callStack } from '../../call-stack.ts';
 import { seedField, seededRandom } from '../../random.ts';
-import { SortInput } from '../sorting/input.ts';
+import { listField } from '../../notation/schema.ts';
+import { MAX_VALUES } from '../sorting/input.ts';
 import { partitioner } from '../sorting/partition.ts';
 
 /** 1st, 2nd, 3rd, 4th, …, 11th, 12th, 13th, 21st. */
@@ -27,22 +28,34 @@ export const ordinal = (n: number): string => {
 /** The lower median's rank, the default i. */
 export const lowerMedian = (n: number): number => Math.floor((n + 1) / 2);
 
-export const SelectInput = SortInput.extend({
-  i: z
-    .int()
-    .min(1)
-    .optional()
-    .describe(
-      'The rank to find, from 1 for the smallest to n for the largest; the lower median by default.',
-    ),
-}).superRefine(({ values, i }, ctx) => {
-  if (i !== undefined && i > values.length)
-    ctx.addIssue({
-      code: 'custom',
-      path: ['i'],
-      message: `i must be at most n = ${values.length}, the number of values, not ${i}`,
+/** The input of the selection modules: values, at most `max`, and a rank. */
+export const selectInput = (max: number) =>
+  z
+    .strictObject({
+      values: listField(
+        z
+          .array(z.number())
+          .min(1)
+          .max(max)
+          .describe('The numbers to select from, e.g. [5, 3, 8, 1, 9, 2, 7].'),
+        'number',
+      ),
+      i: z
+        .int()
+        .min(1)
+        .optional()
+        .describe(
+          'The rank to find, from 1 for the smallest to n for the largest; the lower median by default.',
+        ),
+    })
+    .superRefine(({ values, i }, ctx) => {
+      if (i !== undefined && i > values.length)
+        ctx.addIssue({
+          code: 'custom',
+          path: ['i'],
+          message: `i must be at most n = ${values.length}, the number of values, not ${i}`,
+        });
     });
-});
 
 const PARTITION_CODE = {
   pseudocode: `
@@ -85,7 +98,7 @@ export const randomizedSelect = defineAlgorithm({
   topic: 'searching',
   summary:
     'Finds the i-th smallest value by partitioning around a random pivot and searching only the side that holds it, in expected linear time.',
-  input: SelectInput.extend({ seed: seedField }),
+  input: selectInput(MAX_VALUES).extend({ seed: seedField }),
   main: 'values',
   examples: [
     { values: [5, 3, 8, 1, 9, 2, 7], i: 3, seed: 2 },
