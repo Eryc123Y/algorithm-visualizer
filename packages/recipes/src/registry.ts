@@ -18,6 +18,7 @@ import { dagShortestPaths } from './algorithms/graphs/dag-shortest-paths.ts';
 import { dijkstra } from './algorithms/graphs/dijkstra.ts';
 import { edmondsKarp } from './algorithms/graphs/edmonds-karp.ts';
 import { bipartiteMatching } from './algorithms/graphs/bipartite-matching.ts';
+import { hopcroftKarp } from './algorithms/graphs/hopcroft-karp.ts';
 import { floydWarshall } from './algorithms/graphs/floyd-warshall.ts';
 import { transitiveClosure } from './algorithms/graphs/transitive-closure.ts';
 import { johnson } from './algorithms/graphs/johnson.ts';
@@ -107,6 +108,7 @@ export const algorithms: readonly Algorithm[] = [
   johnson,
   edmondsKarp,
   bipartiteMatching,
+  hopcroftKarp,
   lcs,
   editDistance,
   knapsack,
