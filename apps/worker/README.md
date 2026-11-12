@@ -16,6 +16,10 @@ The button works once the repository is public, and needs a Cloudflare account. 
 
 The guide and the player page are built into the Worker, which needs no other bindings than the rate limit.
 
+### Share links
+
+Set the variable `ALGOVIZ_SHARE_URL` to the address of a share page you serve (the site's `play/` page, built by `apps/site`), such as `https://example.org/play/`, and `algoviz_show` and `algoviz_run_recipe` also return a share link that opens the visualization in any browser ([ADR 0040](../../docs/adr/0040-share-links.md)). Uncomment `vars` in `wrangler.jsonc`, or set it in the Cloudflare dashboard. Without it the tools make no links. An address that is not an absolute `http:` or `https:` URL makes every request fail with 500 and the reason in the Worker's logs.
+
 ## Connecting clients
 
 Replace `https://YOUR-WORKER.YOUR-SUBDOMAIN.workers.dev` with the Worker's address.
