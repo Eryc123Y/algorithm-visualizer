@@ -105,7 +105,7 @@ export const dynamicTable = defineAlgorithm({
         cost += num;
         trace.step(
           'expand',
-          `${size === 1 ? 'The 1 slot is' : `All ${size} slots are`} full: allocate ${2 * size} slots and copy the ${num === 1 ? 'item' : `${num} items`} into them, ${num} of this insertion’s cost.`,
+          `${size === 1 ? 'The 1 slot is' : `All ${size} slots are`} full: allocate ${2 * size} slots and copy the ${num === 1 ? 'item' : `${num} items`} into them. Copying costs ${num}, plus 1 to insert the new item.`,
           { vars: { num, size: 2 * size } },
         );
         T.highlight({ indices: Array.from({ length: num }, (_, k) => k) });
@@ -116,7 +116,8 @@ export const dynamicTable = defineAlgorithm({
       trace.step(
         'insert',
         `Insert ${x} into slot ${num}. This insertion cost ${cost}; ${num === 0 ? 'it is the only one so far' : `the ${num + 1} insertions have cost ${total} in all`}, and Φ = 2·${num + 1} − ${size} = ${phi}.`,
-        { vars: { num: num + 1, size } },
+        // num as the line reads it, before T.num grows.
+        { vars: { num, size } },
       );
       T.set({ index: num, value: x }).highlight({ indices: [num] });
       const row = num;

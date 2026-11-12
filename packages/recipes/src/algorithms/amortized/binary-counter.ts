@@ -80,8 +80,7 @@ export const binaryCounter = defineAlgorithm({
     for (let t = 1; t <= n; t++) {
       let i = 0;
       let flips = 0;
-      const record = (last: boolean) => {
-        if (!last) return;
+      const record = () => {
         total += flips;
         const ones = bits.filter((b) => b === 1).length;
         const row = t - 1;
@@ -98,13 +97,13 @@ export const binaryCounter = defineAlgorithm({
         trace.step(
           'reset',
           wraps
-            ? `Increment ${t}: A[${i}] is 1, so it flips to 0 too. Every bit was 1: the counter wraps around to 0, after ${flips} flips.`
+            ? `Increment ${t}: A[${i}] is 1, so it flips to 0 too. Every bit was 1: the counter wraps around to 0, after ${flips === 1 ? '1 flip' : `${flips} flips`}.`
             : `Increment ${t}: A[${i}] is 1, so it flips to 0 and the carry moves on.`,
           { vars: { i } },
         );
         A.set({ cell: col(i), value: 0 }).highlight({ cells: [col(i)] });
         i += 1;
-        record(wraps);
+        if (wraps) record();
       }
       if (i < k) {
         bits[i] = 1;
@@ -116,7 +115,7 @@ export const binaryCounter = defineAlgorithm({
           { vars: { i } },
         );
         A.set({ cell: col(i), value: 1 }).highlight({ cells: [col(i)] });
-        record(true);
+        record();
       }
     }
   },
