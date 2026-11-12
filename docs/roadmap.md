@@ -192,7 +192,7 @@ Independent of Phase 2, so the two can interleave.
 
 - [ ] **3.1 Streamable HTTP transport** for the MCP server, next to stdio. The server and the MCP App page must run on Workers.
 - [ ] **3.2 Cloudflare Worker** with a "Deploy to Cloudflare" button. It is stateless and rate-limited, and its README shows how to connect Claude and other clients.
-- [ ] **3.3 Share links.** A player page that reads a compressed document from the URL fragment. MCP tools return the link alongside the document.
+- [~] **3.3 Share links.** _ADR_ [ADR 0040](adr/0040-share-links.md). A player page that reads a compressed document, or an algorithm and its input, from the URL fragment. MCP tools return the link alongside the document.
 - [ ] **3.4 Documentation site** on Cloudflare Pages, generated from the registry. It is grouped structure → operation, with the player and the export snippets for every algorithm.
 
 ## Phase 4: release 1.0
