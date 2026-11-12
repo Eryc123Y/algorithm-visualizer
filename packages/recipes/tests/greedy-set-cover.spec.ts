@@ -95,5 +95,32 @@ describe('greedy-set-cover', () => {
       /at most 16/,
     );
     expect(runError('greedy-set-cover', 'A:').message).toMatch(/no elements/);
+    // A missing comma reads as an empty subset, which is refused.
+    expect(runError('greedy-set-cover', 'A: 1:2').message).toMatch(
+      /A has no elements/,
+    );
+    const eleven = Array.from({ length: 11 }, (_, k) => `S${k}: x`).join(', ');
+    expect(runError('greedy-set-cover', { subsets: eleven }).path).toBe(
+      '$.input.subsets',
+    );
+  });
+
+  it('breaks ties for the subset given first, and sorts elements naturally', () => {
+    const { document } = runOk('greedy-set-cover', 'A: 1, B: 1');
+    const pick = document.steps.find((s) => s.meta?.at === 'pick')!;
+    expect(pick.meta?.narration).toBe(
+      'A covers the most elements still in U, 1, tied with 1 other given after it: choose it.',
+    );
+    expect(document.steps.at(-1)!.meta?.narration).toMatch(
+      /^U is empty: the chosen subset, A, covers X\./,
+    );
+    const sorted = runOk('greedy-set-cover', 'A: x10 x2 b, B: x1 a 1');
+    expect(stateOf(replay(sorted.document), 'F', 'table').data.length).toBe(2);
+    expect(
+      (
+        sorted.document.structures?.['F'] as
+          { columnLabels?: string[] } | undefined
+      )?.columnLabels,
+    ).toEqual(['1', 'a', 'b', 'x1', 'x2', 'x10', 'new']);
   });
 });

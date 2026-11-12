@@ -23,6 +23,23 @@ export const MAX_ELEMENTS = 16;
 
 const NAME = /^[A-Za-z0-9_.-]{1,8}$/;
 
+/**
+ * Natural order: runs of digits compare as numbers, so 2 comes before 10.
+ * Written out rather than with Intl, which the Typst plugin's JavaScript
+ * engine lacks.
+ */
+function natural(a: string, b: string): number {
+  const [x, y] = [a.match(/\d+|\D+/g) ?? [], b.match(/\d+|\D+/g) ?? []];
+  for (let i = 0; i < Math.min(x.length, y.length); i++) {
+    const [p, q] = [x[i]!, y[i]!];
+    if (p === q) continue;
+    if (/^\d/.test(p) && /^\d/.test(q))
+      return Number(p) - Number(q) || p.length - q.length;
+    return p < q ? -1 : 1;
+  }
+  return x.length - y.length;
+}
+
 const FORM =
   'each subset with a colon and then its elements, e.g. "S1: 1 2 3, S2: 2 4, S3: 3 4 5"';
 
@@ -54,6 +71,14 @@ const Subsets = z
               message: `${JSON.stringify(name)} names two subsets`,
             });
           names.add(name);
+          // An empty subset covers nothing; in the notation it is most
+          // likely a slip, such as "A: 1:2" for "A: 1, B: 2".
+          if (members.length === 0)
+            ctx.addIssue({
+              code: 'custom',
+              path: [k, 1],
+              message: `${name} has no elements; every subset has at least one`,
+            });
           const twice = members.find((x, i) => members.indexOf(x) !== i);
           if (twice !== undefined)
             ctx.addIssue({
@@ -125,7 +150,7 @@ export const greedySetCover = defineAlgorithm({
     const sets = input.subsets;
     // In natural order, so 2 comes before 10.
     const elements = [...new Set(sets.flatMap(([, members]) => members))].sort(
-      (a, b) => a.localeCompare(b, 'en', { numeric: true }),
+      natural,
     );
     const count = elements.length;
     const table = trace.add('F', {
@@ -164,10 +189,13 @@ export const greedySetCover = defineAlgorithm({
           value: chosen.includes(sets[k]![0]) ? '✓' : g,
         }),
       );
-      table.highlight({
-        cells: elements.map((_, j) => [best, j] as [number, number]),
-      });
+      // The members it would cover, the ones still in U.
       const fresh = members.filter((x) => left.has(x));
+      table.highlight({
+        cells: fresh.map(
+          (x) => [best, elements.indexOf(x)] as [number, number],
+        ),
+      });
       for (const x of fresh) left.delete(x);
       chosen.push(name);
       trace.step(
@@ -189,7 +217,7 @@ export const greedySetCover = defineAlgorithm({
     );
     trace.step(
       'done',
-      `U is empty: the ${chosen.length} chosen subset${chosen.length === 1 ? '' : 's'}, ${chosen.join(', ')}, cover X. The largest subset has ${d} element${d === 1 ? '' : 's'}, so this cover is at most H(${d}) ≈ ${h.toFixed(2)} times the smallest.`,
+      `U is empty: ${chosen.length === 1 ? `the chosen subset, ${chosen[0]}, covers` : `the ${chosen.length} chosen subsets, ${chosen.join(', ')}, cover`} X. The largest subset has ${d} element${d === 1 ? '' : 's'}, so this cover is at most H(${d}) ≈ ${h.toFixed(2)} times the smallest.`,
     );
     return { results: [chosen.length] };
   },
