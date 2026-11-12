@@ -45,6 +45,24 @@ function costOf(
 
 const cents = (xs: readonly number[]) => xs.map((x) => Math.round(x * 100));
 
+/** e(i, j) and the first best root, by recursion over the range, in hundredths. */
+function solve(
+  p: number[],
+  q: number[],
+  i: number,
+  j: number,
+): { e: number; root: number } {
+  if (i > j) return { e: q[i - 1]!, root: 0 };
+  let w = q[i - 1]!;
+  for (let k = i; k <= j; k++) w += p[k]! + q[k]!;
+  let best = { e: Infinity, root: 0 };
+  for (let r = i; r <= j; r++) {
+    const t = solve(p, q, i, r - 1).e + solve(p, q, r + 1, j).e + w;
+    if (t < best.e) best = { e: t, root: r };
+  }
+  return best;
+}
+
 /** The drawn tree as a Tree, from its node ids k1..kn. */
 function drawn(state: TreeState): Tree {
   const byId = new Map(state.data.nodes.map((nd) => [nd.id, nd]));
@@ -72,6 +90,13 @@ function check(
   const trace = replay(doc);
   const e = stateOf(trace, 'e', 'table').data;
   expect(Math.round(Number(e[0]![n]) * 100)).toBe(least);
+  const root = stateOf(trace, 'root', 'table').data;
+  for (let i = 1; i <= n + 1; i++)
+    for (let j = i - 1; j <= n; j++) {
+      const want = solve(p, q, i, j);
+      expect(Math.round(Number(e[i - 1]![j]) * 100)).toBe(want.e);
+      if (j >= i) expect(root[i - 1]![j - 1]).toBe(want.root);
+    }
   const tree = drawn(stateOf(trace, 'tree', 'tree'));
   expect(costOf(tree, 1, n, p, q)).toBe(least);
   // An in-order walk of a BST on k1..kn gives 1..n.
@@ -89,6 +114,23 @@ describe('optimal-bst', () => {
     const tree = drawn(stateOf(replay(doc), 'tree', 'tree'));
     expect(tree?.root).toBe(2);
     expect(stateOf(replay(doc), 'e', 'table').data[0]![5]).toBe('2.75');
+  });
+
+  it('breaks ties by the first root, as CLRS’s strict < does', () => {
+    const doc = runOk('optimal-bst', {
+      p: [0, 0, 0],
+      q: [0, 0, 0, 0],
+    }).document;
+    // Every tree costs 0, so k1 is the root, with k2 and k3 to its right.
+    expect(drawn(stateOf(replay(doc), 'tree', 'tree'))).toEqual({
+      root: 1,
+      left: null,
+      right: {
+        root: 2,
+        left: null,
+        right: { root: 3, left: null, right: null },
+      },
+    });
   });
 
   it('handles one key, and zero probabilities', () => {
