@@ -90,6 +90,22 @@ describe('modular-exponentiation', () => {
     ).toEqual([1]);
   });
 
+  it('works at the bounds, a step at most a few actions', () => {
+    const [a, b, n] = [1_000_000_000, 2 ** 31 - 1, 999_999_999];
+    const { document, results } = runOk('modular-exponentiation', { a, b, n });
+    expect(results).toEqual([Number(power(a, b, n))]);
+    expect(document.steps).toHaveLength(2 + 31 + 31);
+    for (const step of document.steps)
+      expect(step.actions.length).toBeLessThanOrEqual(100);
+    const one = runOk('modular-exponentiation', { a: 5, b: 0, n: 1 });
+    expect(stateOf(replay(one.document), 'bits', 'table').data[2]).toEqual([
+      '0',
+    ]);
+    expect(one.document.steps[1]!.meta?.narration).toMatch(
+      /leaves it 0, and squares d: \(1 · 1\) mod 1 = 0/,
+    );
+  });
+
   it('refuses a modulus of 0 and an exponent too large', () => {
     expect(runError('modular-exponentiation', { a: 2, b: 3, n: 0 }).path).toBe(
       '$.input.n',
