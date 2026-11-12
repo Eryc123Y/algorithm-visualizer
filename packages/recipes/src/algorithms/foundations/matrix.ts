@@ -54,6 +54,8 @@ function parseRows(text: string): number[][] {
   return text.split(';').map((part) => {
     const at = offset;
     offset += part.length + 1;
+    if (part.trim() === '')
+      throw new NotationError('Expected a row of entries', at);
     try {
       return parseList(part, 'number', Entry);
     } catch (e) {

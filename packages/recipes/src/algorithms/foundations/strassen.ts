@@ -350,9 +350,10 @@ class Strassen {
       const left = quadrant(operands[m], q);
       const right = quadrant(operands[m2], q2);
       const values = entries(h).map(([i, j]) =>
+        // + 0 turns -0, from an input of -0, into 0.
         op === '+'
-          ? left.at(i, j) + right.at(i, j)
-          : left.at(i, j) - right.at(i, j),
+          ? left.at(i, j) + right.at(i, j) + 0
+          : left.at(i, j) - right.at(i, j) + 0,
       );
       sp[k] = values;
       const name = `S${k + 1}`;
@@ -364,8 +365,8 @@ class Strassen {
           : `${inCall}${formula} = ${show(values)}, entry by entry.`,
         { vars: { n: x.size } },
       );
-      highlight([left, right]);
       values.forEach((v, e) => table.set({ cell: [e, k], value: v }));
+      highlight([left, right, column(k)]);
     });
 
     PRODUCTS.forEach(([l, r], k) => {

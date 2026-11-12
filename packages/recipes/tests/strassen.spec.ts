@@ -160,6 +160,29 @@ describe('strassen', () => {
     ).toContain('character 8');
   });
 
+  it('names an empty row in the text form, and keeps -0 out of the tables', () => {
+    for (const a of ['1 2;', '', '1 2; ; 3 4'])
+      expect(runError('strassen', { a, b: '1 0; 0 1' })).toMatchObject({
+        code: 'INVALID_NOTATION',
+        path: '$.input.a',
+      });
+    const trace = replay(
+      runOk('strassen', {
+        a: [
+          [-0, 0],
+          [0, -0],
+        ],
+        b: [
+          [-0, 1],
+          [1, -0],
+        ],
+      }).document,
+    );
+    for (const name of ['SP', 'C'])
+      for (const v of cells(trace, name).flat())
+        expect(Object.is(v, -0), `${name} holds -0`).toBe(false);
+  });
+
   it('takes square matrices of size 1, 2 or 4, both of one size', () => {
     expect(runError('strassen', { a: [[1, 2]], b: [[1]] })).toMatchObject({
       path: '$.input.a[0]',
