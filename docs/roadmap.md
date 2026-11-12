@@ -156,7 +156,7 @@ Each entry is one registry module, or one per operation for data structures. Eac
 - [x] bipartite matching (#94)
 - [x] Hopcroft–Karp (#95)
 - [x] stable matching (Gale–Shapley) (#96)
-- [ ] Hungarian algorithm
+- [x] Hungarian algorithm (#97)
 
 **VII Selected topics**
 
