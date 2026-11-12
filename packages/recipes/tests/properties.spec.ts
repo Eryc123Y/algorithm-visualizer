@@ -2149,3 +2149,22 @@ recipe(
       expect(groups[a] === 0 || groups[b] === 0).toBe(true);
   },
 );
+
+// Approximate TSP tour: distinct points on a small grid.
+recipe(
+  'approx-tsp-tour',
+  fc.uniqueArray(
+    fc.tuple(fc.integer({ min: -9, max: 9 }), fc.integer({ min: -9, max: 9 })),
+    { minLength: 2, maxLength: 10, selector: ([x, y]) => `${x} ${y}` },
+  ),
+  (points) => runOk('approx-tsp-tour', { points }).document,
+  (trace, points) => {
+    // Every point is numbered once, 1 to n.
+    const notes = Object.values(stateOf(trace, 'g', 'graph').marks.notes).map(
+      Number,
+    );
+    expect([...notes].sort((a, b) => a - b)).toEqual(
+      points.map((_, k) => k + 1),
+    );
+  },
+);

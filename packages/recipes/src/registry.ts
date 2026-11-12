@@ -22,6 +22,7 @@ import { hopcroftKarp } from './algorithms/graphs/hopcroft-karp.ts';
 import { galeShapley } from './algorithms/graphs/gale-shapley.ts';
 import { hungarian } from './algorithms/graphs/hungarian.ts';
 import { approxVertexCover } from './algorithms/graphs/approx-vertex-cover.ts';
+import { approxTspTour } from './algorithms/graphs/approx-tsp-tour.ts';
 import { floydWarshall } from './algorithms/graphs/floyd-warshall.ts';
 import { transitiveClosure } from './algorithms/graphs/transitive-closure.ts';
 import { johnson } from './algorithms/graphs/johnson.ts';
@@ -119,6 +120,7 @@ export const algorithms: readonly Algorithm[] = [
   galeShapley,
   hungarian,
   approxVertexCover,
+  approxTspTour,
   lcs,
   editDistance,
   knapsack,
