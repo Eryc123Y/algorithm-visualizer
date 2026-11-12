@@ -36,6 +36,7 @@ import {
 } from './algorithms/trees/tree-walks.ts';
 import { runModule, type AlgorithmRun } from './run-module.ts';
 import { avl } from './structures/avl/index.ts';
+import { bTree } from './structures/b-tree/index.ts';
 import { bst } from './structures/bst/index.ts';
 import { disjointSet } from './structures/disjoint-set/index.ts';
 import { hashChaining } from './structures/hashing/chaining.ts';
@@ -64,6 +65,7 @@ export const algorithms: readonly Algorithm[] = [
   ...redBlackTree.modules,
   ...orderStatisticTree.modules,
   ...intervalTree.modules,
+  ...bTree.modules,
   inorderTreeWalk,
   preorderTreeWalk,
   postorderTreeWalk,
