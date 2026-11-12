@@ -163,7 +163,7 @@ Each entry is one registry module, or one per operation for data structures. Eac
 - [x] move-to-front (S7, [ADR 0036](adr/0036-linked-list-move.md), #80, #81)
 - [x] LUP decomposition (#98)
 - [ ] FFT
-- [ ] Euclid and extended Euclid
+- [x] Euclid and extended Euclid (#PR)
 - [ ] modular exponentiation
 - [x] string matching: naive, Rabin–Karp, finite automaton, KMP (S9, [ADR 0037](adr/0037-array-pattern.md), #82, #83)
 - [ ] suffix array
