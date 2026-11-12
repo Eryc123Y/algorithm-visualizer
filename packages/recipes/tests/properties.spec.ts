@@ -2047,3 +2047,25 @@ recipe(
     expect([0, 2]).toContain(P.marks.selected.length);
   },
 );
+
+// LUP decomposition: small integer matrices, singular ones included.
+recipe(
+  'lup-decomposition',
+  fc.integer({ min: 1, max: 4 }).chain((n) =>
+    fc.array(
+      fc.array(fc.integer({ min: -5, max: 5 }), {
+        minLength: n,
+        maxLength: n,
+      }),
+      { minLength: n, maxLength: n },
+    ),
+  ),
+  (a) => runOk('lup-decomposition', { a }).document,
+  (trace, a) => {
+    // π stays a permutation of the rows.
+    const pi = stateOf(trace, 'pi', 'table').data[0]!.map(Number);
+    expect([...pi].sort((x, y) => x - y)).toEqual(
+      Array.from({ length: a.length }, (_, i) => i + 1),
+    );
+  },
+);

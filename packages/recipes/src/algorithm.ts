@@ -23,6 +23,7 @@ export const TOPICS = [
   'greedy',
   'strings',
   'geometry',
+  'math',
   'foundations',
 ] as const;
 export type Topic = (typeof TOPICS)[number];
@@ -40,6 +41,7 @@ export const TOPIC_TITLES: Readonly<Record<Topic, string>> = {
   greedy: 'Greedy algorithms',
   strings: 'String matching',
   geometry: 'Computational geometry',
+  math: 'Algebra and number theory',
   foundations: 'Divide and conquer, randomization',
 };
 
