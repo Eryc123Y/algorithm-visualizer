@@ -208,8 +208,8 @@ function labelAngles(
     const boxAt = (angle: number) =>
       noteRegion(outline, angle, labelHalf, font);
     const others = discs.filter((d) => d.x !== c.x || d.y !== c.y);
-    // In order of what text must not go under: a badge, which hides it;
-    // then a point or another label; then the clearest of lines.
+    // In order of what text must not go under (ADR 0042): a badge, which
+    // hides it; then a point or another label; then the clearest of lines.
     let pool: readonly number[] = LABEL_ANGLES;
     for (const tier of [
       { segments: [], discs: [], boxes: badges },
