@@ -7,6 +7,8 @@
  */
 import { defineAlgorithm } from '../../algorithm.ts';
 import { callStack } from '../../call-stack.ts';
+import type { Random } from '../../random.ts';
+import type { Trace } from '../../trace.ts';
 import { SAMPLE, SortInput } from './input.ts';
 
 export const quicksort = defineAlgorithm({
@@ -54,80 +56,112 @@ export const quicksort = defineAlgorithm({
           return i + 1
     `,
   },
-  run({ values }, outer) {
-    const a = [...values];
-    const arr = outer.add('a', { kind: 'array', initial: [...values] });
-    const calls = callStack(outer);
-    const { trace } = calls;
-
-    const partition = (p: number, r: number): number => {
-      const x = a[r]!;
-      trace.step(
-        'pivot',
-        `Partition a[${p}..${r}] around the pivot ${x}, its last value.`,
-        { vars: { p, r, x } },
-      );
-      calls.push(`call-${p}-${r}`, `sort a[${p}..${r}]`);
-      arr.pointer({ name: 'pivot', index: r }).highlight({ indices: [r] });
-      let i = p - 1;
-      for (let j = p; j < r; j++) {
-        const small = a[j]! <= x;
-        trace.step(
-          'compare',
-          small
-            ? `${a[j]} ≤ ${x}: it belongs on the left.`
-            : `${a[j]} > ${x}: it stays on the right.`,
-          { vars: { i, j, x } },
-        );
-        arr.pointer({ name: 'j', index: j }).compare({ i: j, j: r });
-        if (!small) continue;
-        i += 1;
-        trace.step(
-          'swap',
-          i === j
-            ? `The left part grows to a[${p}..${i}]; ${a[j]} is already there.`
-            : `The left part grows to a[${p}..${i}]: swap ${a[i]} and ${a[j]}.`,
-          { vars: { i, j, x } },
-        );
-        arr.pointer({ name: 'i', index: i });
-        if (i !== j) {
-          arr.swap({ i, j });
-          [a[i], a[j]] = [a[j]!, a[i]!];
-        }
-      }
-      const q = i + 1;
-      trace.step(
-        'place',
-        `Put the pivot ${x} between the parts, at position ${q}: it is in place.`,
-        { vars: { q } },
-      );
-      arr
-        .pointer({ name: 'j', index: null })
-        .pointer({ name: 'i', index: null })
-        .pointer({ name: 'pivot', index: null });
-      if (q !== r) {
-        arr.swap({ i: q, j: r });
-        [a[q], a[r]] = [a[r]!, a[q]!];
-      }
-      arr.settle({ index: q });
-      return q;
-    };
-
-    const sort = (p: number, r: number): void => {
-      if (p > r) return;
-      if (p === r) {
-        trace.step('single', `a[${p}] = ${a[p]} is alone: it is in place.`);
-        calls.push(`call-${p}-${r}`, `sort a[${p}..${r}]`);
-        arr.settle({ index: p });
-        calls.leave();
-        return;
-      }
-      const q = partition(p, r);
-      sort(p, q - 1);
-      sort(q + 1, r);
-      calls.leave();
-    };
-    sort(0, a.length - 1);
-    calls.close();
-  },
+  run: ({ values }, trace) => recordQuicksort(values, trace),
 });
+
+/**
+ * Records quicksort on `values`. With `random`, each partition first
+ * swaps a value drawn uniformly from a[p..r] into a[r], so that it is the
+ * pivot (RANDOMIZED-PARTITION), in a step of its own.
+ */
+export function recordQuicksort(
+  values: readonly number[],
+  outer: Trace,
+  random?: Random,
+): void {
+  const a = [...values];
+  const arr = outer.add('a', { kind: 'array', initial: [...values] });
+  const calls = callStack(outer);
+  const { trace } = calls;
+
+  const draw = (p: number, r: number): void => {
+    const k = random!.int(p, r);
+    trace.step(
+      'random',
+      k === r
+        ? `RANDOM(${p}, ${r}) draws ${k}: the pivot is ${a[r]}, already last.`
+        : a[k] === a[r]
+          ? `RANDOM(${p}, ${r}) draws ${k}: a[${k}] equals a[${r}], so the pivot is ${a[r]} either way.`
+          : `RANDOM(${p}, ${r}) draws ${k}: swap ${a[k]} into a[${r}], to be the pivot.`,
+      { vars: { p, r, k } },
+    );
+    calls.push(`call-${p}-${r}`, `sort a[${p}..${r}]`);
+    arr.highlight({ indices: k === r ? [r] : [k, r] });
+    if (k !== r) {
+      arr.swap({ i: k, j: r });
+      [a[k], a[r]] = [a[r]!, a[k]!];
+    }
+  };
+
+  const partition = (p: number, r: number): number => {
+    if (random !== undefined) draw(p, r);
+    const x = a[r]!;
+    trace.step(
+      'pivot',
+      `Partition a[${p}..${r}] around the pivot ${x}, ${random === undefined ? 'its' : 'now its'} last value.`,
+      { vars: { p, r, x } },
+    );
+    if (random === undefined)
+      calls.push(`call-${p}-${r}`, `sort a[${p}..${r}]`);
+    arr.pointer({ name: 'pivot', index: r }).highlight({ indices: [r] });
+    let i = p - 1;
+    for (let j = p; j < r; j++) {
+      const small = a[j]! <= x;
+      trace.step(
+        'compare',
+        small
+          ? `${a[j]} ≤ ${x}: it belongs on the left.`
+          : `${a[j]} > ${x}: it stays on the right.`,
+        { vars: { i, j, x } },
+      );
+      arr.pointer({ name: 'j', index: j }).compare({ i: j, j: r });
+      if (!small) continue;
+      i += 1;
+      trace.step(
+        'swap',
+        i === j
+          ? `The left part grows to a[${p}..${i}]; ${a[j]} is already there.`
+          : `The left part grows to a[${p}..${i}]: swap ${a[i]} and ${a[j]}.`,
+        { vars: { i, j, x } },
+      );
+      arr.pointer({ name: 'i', index: i });
+      if (i !== j) {
+        arr.swap({ i, j });
+        [a[i], a[j]] = [a[j]!, a[i]!];
+      }
+    }
+    const q = i + 1;
+    trace.step(
+      'place',
+      `Put the pivot ${x} between the parts, at position ${q}: it is in place.`,
+      { vars: { q } },
+    );
+    arr
+      .pointer({ name: 'j', index: null })
+      .pointer({ name: 'i', index: null })
+      .pointer({ name: 'pivot', index: null });
+    if (q !== r) {
+      arr.swap({ i: q, j: r });
+      [a[q], a[r]] = [a[r]!, a[q]!];
+    }
+    arr.settle({ index: q });
+    return q;
+  };
+
+  const sort = (p: number, r: number): void => {
+    if (p > r) return;
+    if (p === r) {
+      trace.step('single', `a[${p}] = ${a[p]} is alone: it is in place.`);
+      calls.push(`call-${p}-${r}`, `sort a[${p}..${r}]`);
+      arr.settle({ index: p });
+      calls.leave();
+      return;
+    }
+    const q = partition(p, r);
+    sort(p, q - 1);
+    sort(q + 1, r);
+    calls.leave();
+  };
+  sort(0, a.length - 1);
+  calls.close();
+}

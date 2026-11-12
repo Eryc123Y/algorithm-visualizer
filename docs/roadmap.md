@@ -102,7 +102,7 @@ Each entry is one registry module, or one per operation for data structures. Eac
 - [x] max-heap operations (`max-heap`, and `min-heap`)
 - [x] quicksort
 - [x] counting sort
-- [ ] randomized quicksort
+- [x] randomized quicksort (#108)
 - [ ] radix sort
 - [ ] bucket sort
 - [ ] randomized select
