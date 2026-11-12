@@ -125,7 +125,7 @@ Each entry is one registry module, or one per operation for data structures. Eac
 - [x] rod cutting (#115)
 - [x] matrix-chain multiplication (#116)
 - [x] optimal BST (#117)
-- [ ] activity selection
+- [x] activity selection (#118)
 - [x] Huffman codes (S1, S4) (#74)
 - [ ] offline caching
 - [ ] dynamic tables and binary counter (amortized analysis)
