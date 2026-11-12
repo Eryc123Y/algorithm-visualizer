@@ -137,6 +137,63 @@ describe('array pattern', () => {
     ).toEqual([{ code: 'INVALID_OPERATION', path: '$.steps[0].actions[0]' }]);
   });
 
+  it('keeps matches in order and never changes the state it is given', () => {
+    const trace = mustLoad(
+      doc([[{ type: 'check', j: 2 }], [{ type: 'check', j: 0 }]]),
+    );
+    const before = stateAt(trace, 1);
+    const copy = JSON.parse(JSON.stringify(before)) as unknown;
+    expect(stateAt(trace, 2).pattern?.matched).toEqual([0, 2]);
+    expect(JSON.parse(JSON.stringify(before))).toEqual(copy);
+    // Elements given with their ids keep them.
+    const own = mustLoad(
+      doc([], {
+        pattern: [
+          { id: 'x', value: 'a' },
+          { id: 'y', value: 'b' },
+        ],
+      }),
+    );
+    expect(stateAt(own, 0).pattern?.elements.map((e) => e.id)).toEqual([
+      'x',
+      'y',
+    ]);
+  });
+
+  it('lets the stronger mark win on a text cell', () => {
+    const trace = mustLoad(
+      doc([
+        [
+          { type: 'check', j: 0 },
+          { type: 'check', j: 1 },
+          { type: 'settle', index: 0 },
+          { type: 'compare', i: 1, j: 5 },
+        ],
+      ]),
+    );
+    const scene = layoutTrace(trace).sceneAt(1);
+    const cell = (i: number) =>
+      scene.items.find((x) => x.key === `T/element/e${i}`) as SceneBox;
+    // Matched and settled: matched is drawn, the settled check kept.
+    expect([cell(0).role, cell(0).settled]).toEqual(['highlight', true]);
+    // Matched and compared by the array itself: compare wins.
+    expect(cell(1).role).toBe('compare');
+  });
+
+  it('sizes cells for the pattern’s values, and drops its indices with the text’s', () => {
+    const wide = mustLoad(doc([], { initial: [1, 2, 3], pattern: [123456] }));
+    const scene = layoutTrace(wide).sceneAt(0);
+    expect(fitProblems(scene)).toEqual([]);
+    const plain = mustLoad(doc([]));
+    const shown = layoutTrace(plain).sceneAt(0);
+    const hidden = layoutTrace(plain, { showIndices: false }).sceneAt(0);
+    expect(hidden.items.some((i) => i.key.startsWith('T/pattern-index/'))).toBe(
+      false,
+    );
+    expect(hidden.height).toBeLessThan(shown.height);
+    for (const s of [shown, hidden]) expect(overlapProblems(s)).toEqual([]);
+  });
+
   it('draws the pattern under the text at its shift, keyed by id', () => {
     const trace = mustLoad(
       doc([

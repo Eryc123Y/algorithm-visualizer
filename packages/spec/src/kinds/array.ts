@@ -181,8 +181,8 @@ const actions = <E extends z.ZodType>(element: E) =>
     z
       .strictObject({
         type: z.literal('align'),
-        shift: z.int().min(0),
-        matched: z.int().min(0).optional(),
+        shift: z.int().min(0).max(LIMITS.elementsPerStructure),
+        matched: z.int().min(0).max(MAX_PATTERN).optional(),
       })
       .describe(
         'Move the pattern so that its first element is under text position `shift`; its first `matched` elements (default 0) are marked as matched, and must equal the text above them. Needs version 0.8.',

@@ -397,6 +397,31 @@ recipe(
   },
 );
 
+recipe(
+  'move-to-front',
+  fc
+    .tuple(
+      fc.uniqueArray(fc.integer({ min: 0, max: 30 }), {
+        minLength: 1,
+        maxLength: 12,
+      }),
+      fc.array(fc.nat(), { minLength: 1, maxLength: 32 }),
+    )
+    .map(([list, picks]) => ({
+      list,
+      requests: picks.map((p) => list[p % list.length]!),
+    })),
+  (input) => runOk('move-to-front', input).document,
+  (trace, { list, requests }) => {
+    // Each request ends at the front, so the last requests, most recent
+    // first, lead the list, and the keys never requested keep their order.
+    const recent = [...new Set([...requests].reverse())];
+    const rest = list.filter((k) => !recent.includes(k));
+    const drawn = stateOf(trace, 'L', 'linkedList').data.map((n) => n.value);
+    expect(drawn).toEqual([...recent, ...rest]);
+  },
+);
+
 function isBalanced(text: string): boolean {
   const stack: string[] = [];
   const opener: Record<string, string> = { ')': '(', ']': '[', '}': '{' };

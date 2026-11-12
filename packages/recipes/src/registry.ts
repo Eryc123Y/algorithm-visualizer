@@ -21,6 +21,7 @@ import { prim } from './algorithms/graphs/prim.ts';
 import { topologicalSort } from './algorithms/graphs/topological-sort.ts';
 import { balancedBrackets } from './algorithms/lists/balanced-brackets.ts';
 import { reverseLinkedList } from './algorithms/lists/reverse-linked-list.ts';
+import { moveToFront } from './algorithms/lists/move-to-front.ts';
 import { binarySearch } from './algorithms/searching/binary-search.ts';
 import { bubbleSort } from './algorithms/sorting/bubble-sort.ts';
 import { countingSort } from './algorithms/sorting/counting-sort.ts';
@@ -63,6 +64,7 @@ export const algorithms: readonly Algorithm[] = [
   selectionSort,
   binarySearch,
   reverseLinkedList,
+  moveToFront,
   balancedBrackets,
   ...bst.modules,
   ...avl.modules,

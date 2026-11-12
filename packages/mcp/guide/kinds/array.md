@@ -15,14 +15,14 @@ Declaration: `{ "kind": "array", "initial": [5, 3, 8], "label"?: "…", "view"?:
 | `pointer`   | `name`, `index`    | Point a named arrow (`"i"`, `"lo"`, `"mid"`) at `index`; `null` removes it. Persists.                    |
 | `settle`    | `index`            | Mark an element as final, e.g. sorted or found. Persists.                                                |
 
-**Patterns** (version `"0.8"`), for string matching: `"pattern": ["a", "b"]` draws a second row under the text, its first element under text position `"shift"` (default 0, up to the text's length, so it may hang past the end). Pattern values get the ids `p0`, `p1`, … (skipping ids in use), or are `{ "id", "value" }` elements. A pattern needs the row view, and while it is there the text is fixed: `set`, `swap`, `insert` and `remove` are refused.
+**Patterns** (version `"0.8"`), for string matching: `"pattern": ["a", "b"]` draws a second row under the text, its first element under text position `"shift"` (default 0, up to the text's length, so it may hang past the end). Pattern values get the ids `p0`, `p1`, … (skipping ids the array already uses; ids are unique within one array), or are `{ "id", "value" }` elements. A pattern needs the row view, and while it is there the text is fixed: `set`, `swap`, `insert` and `remove` are refused.
 
 | Action  | Fields              | Effect                                                                                                                                       |
 | ------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
 | `align` | `shift`, `matched`? | Move the pattern under text position `shift`; its first `matched` elements (default 0) are marked as matched, and must equal the text above. |
 | `check` | `j`                 | Compare pattern element `j` with the text above it (this step); if they are equal, `j` stays matched until the next `align`.                 |
 
-The engine decides whether characters match, so a document cannot show a false match. Matched pairs are drawn highlighted, the compared pair as compared. Pointers are drawn under the pattern, at their text column, which is the column of the pattern element under it: a pointer `i` at the compared text position also points at the compared pattern element. Mark an occurrence with `settle` on its text positions.
+The engine decides whether characters match, so a document cannot show a false match. A step shows one compared pair, that of its last `check`. Matched pairs are drawn highlighted, the compared pair as compared. Pointers are drawn under the pattern, at their text column, which is the column of the pattern element under it: a pointer `i` at the compared text position also points at the compared pattern element. Mark an occurrence with `settle` on its text positions.
 
 ```json
 {

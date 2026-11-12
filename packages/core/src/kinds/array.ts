@@ -135,8 +135,11 @@ function check(s: ArrayState, p: ArrayPattern, j: number): Reduced {
       hint: 'Check only the pattern elements under the text.',
     });
   const equal = p.elements[j]!.value === s.data[at]!.value;
+  // Kept in order, as `align` gives them.
   const matched =
-    equal && !p.matched.includes(j) ? [...p.matched, j] : p.matched;
+    equal && !p.matched.includes(j)
+      ? [...p.matched, j].sort((x, y) => x - y)
+      : p.matched;
   return ok({ ...s, pattern: { ...p, matched, compared: j } });
 }
 
