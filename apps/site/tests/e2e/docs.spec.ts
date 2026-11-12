@@ -36,8 +36,14 @@ test('the home page lists every module, and filters them', async ({ page }) => {
   await expect(
     catalog.getByRole('link', { name: 'Insertion sort' }),
   ).toBeHidden();
+  await page.getByLabel('Filter').fill('extract-min');
+  await expect(
+    catalog.getByRole('link', { name: 'extract-min' }),
+  ).toBeVisible();
   await page.getByLabel('Filter').fill('no such thing');
-  await expect(page.getByText('Nothing matches')).toBeVisible();
+  await expect(page.locator('.filter-status')).toHaveText(
+    'Nothing matches; try fewer words.',
+  );
   expect(await noSideScroll(page)).toBe(true);
 });
 
@@ -79,7 +85,9 @@ test('an algorithm’s page plays it, names its steps and gives every snippet', 
     await page
       .getByRole('button', { name: 'Copy: On the command line' })
       .click();
-    await expect(page.getByRole('status')).toHaveText('Copied');
+    await expect(page.locator('p.visually-hidden[role="status"]')).toHaveText(
+      'Copied',
+    );
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
       await cli.textContent(),
     );

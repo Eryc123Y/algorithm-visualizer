@@ -42,6 +42,24 @@ describe('copy buttons', () => {
     );
   });
 
+  it('restarts its reset when clicked again', async () => {
+    vi.useFakeTimers();
+    addCopyButtons(
+      document,
+      { writeText: () => Promise.resolve() },
+      'https://example.org/',
+    );
+    const button = document.querySelector<HTMLButtonElement>('button.copy')!;
+    button.click();
+    await vi.advanceTimersByTimeAsync(1000);
+    button.click();
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(button.textContent).toBe('Copied');
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(button.textContent).toBe('Copy');
+    vi.useRealTimers();
+  });
+
   it('says so when the clipboard refuses', async () => {
     addCopyButtons(
       document,
@@ -63,7 +81,7 @@ describe('the catalogue filter', () => {
   beforeEach(() => {
     document.body.innerHTML = `
       <input id="filter" />
-      <p class="empty" hidden>Nothing matches.</p>
+      <p class="filter-status" role="status"></p>
       <section class="topic"><h3>Sorting</h3><ul class="entries">
         <li data-search="insertion-sort insertion sort">a</li>
         <li data-search="heapsort heapsort heap">b</li>
@@ -93,10 +111,14 @@ describe('the catalogue filter', () => {
     expect(shown()).toEqual(['a']);
   });
 
-  it('says when nothing matches', () => {
+  it('says how many match, and when nothing does', () => {
+    const status = () =>
+      document.querySelector<HTMLElement>('.filter-status')!.textContent;
+    filterCatalog(document, 'heap');
+    expect(status()).toBe('1 of 3 shown.');
     filterCatalog(document, 'zzz');
-    expect(document.querySelector<HTMLElement>('.empty')!.hidden).toBe(false);
+    expect(status()).toBe('Nothing matches; try fewer words.');
     filterCatalog(document, '');
-    expect(document.querySelector<HTMLElement>('.empty')!.hidden).toBe(true);
+    expect(status()).toBe('');
   });
 });

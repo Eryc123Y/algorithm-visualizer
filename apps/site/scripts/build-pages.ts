@@ -14,7 +14,7 @@ import { algorithms, runAlgorithm } from '@algoviz/recipes';
 import { exportFigures, themeNames } from '@algoviz/svg';
 
 import { catalog, type Entry } from '../src/docs/catalog.ts';
-import type { Assets } from '../src/docs/html.ts';
+import { assetsOf, type Manifest } from '../src/docs/assets.ts';
 import { shortInput } from '../src/docs/short-input.ts';
 import {
   detailsOf,
@@ -31,30 +31,6 @@ const ENTRY = 'src/docs/main.ts';
 const DEMO = 'dijkstra';
 const THEME_STEP = 'improve#3';
 
-interface Chunk {
-  readonly file: string;
-  readonly css?: readonly string[];
-  readonly imports?: readonly string[];
-}
-
-/** The docs script, its styles and the modules it imports, from Vite. */
-function assetsOf(manifest: Readonly<Record<string, Chunk>>): Assets {
-  const entry = manifest[ENTRY];
-  if (entry === undefined)
-    throw new Error(`Vite built no ${ENTRY}; run vite build first`);
-  const preloads: string[] = [];
-  const styles = [...(entry.css ?? [])];
-  const visit = (key: string) => {
-    const chunk = manifest[key];
-    if (chunk === undefined || preloads.includes(chunk.file)) return;
-    preloads.push(chunk.file);
-    styles.push(...(chunk.css ?? []));
-    for (const next of chunk.imports ?? []) visit(next);
-  };
-  for (const key of entry.imports ?? []) visit(key);
-  return { scripts: [entry.file], styles, preloads };
-}
-
 function write(path: string, html: string): void {
   const file = join(DIST, path);
   mkdirSync(dirname(file), { recursive: true });
@@ -63,8 +39,8 @@ function write(path: string, html: string): void {
 
 const manifest = JSON.parse(
   readFileSync(join(DIST, '.vite/manifest.json'), 'utf8'),
-) as Record<string, Chunk>;
-const assets = assetsOf(manifest);
+) as Manifest;
+const assets = assetsOf(manifest, ENTRY);
 const groups = catalog(algorithms);
 const entries: Entry[] = groups.flatMap((g) => [
   ...g.algorithms,

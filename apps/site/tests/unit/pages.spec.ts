@@ -156,6 +156,8 @@ describe('the home page', () => {
       expect(html, a.id).toContain(`href="${a.id.split('.').join('/')}/"`);
     for (const g of groups) expect(html).toContain(`id="topic-${g.topic}"`);
     expect(html).toContain('<algo-player algorithm="dijkstra"');
+    // A structure is found by its operations' names.
+    expect(html).toMatch(/data-search="fibonacci-heap [^"]*extract-min/);
     expect(html).toContain('href="play/#v=1&amp;alg=dijkstra');
   });
 });

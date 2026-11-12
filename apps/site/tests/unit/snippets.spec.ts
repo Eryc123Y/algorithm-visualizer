@@ -52,6 +52,9 @@ describe('typstValue', () => {
     expect(typstValue({ 'a b': 1, in: 2, replaceWith: 'x' })).toBe(
       '("a b": 1, "in": 2, replaceWith: "x")',
     );
+    expect(typstValue({ '1st': 1, 'find-set': 2, none: 3 })).toBe(
+      '("1st": 1, find-set: 2, "none": 3)',
+    );
   });
 });
 
@@ -62,6 +65,7 @@ describe('latexText', () => {
     expect(latexText('"from": {"t": 3}')).toBe('"from": {"t": 3}');
     expect(latexText('"text": "{["')).toBe('"text": "\\{["');
     expect(latexText('"text": "}{"')).toBe('"text": "\\}\\{"');
+    expect(latexText('"text": "{50% #1"')).toBe('"text": "\\{50\\% \\#1"');
   });
 });
 
@@ -69,6 +73,8 @@ describe('shellQuote', () => {
   it('quotes for a POSIX shell', () => {
     expect(shellQuote('A-B 4')).toBe("'A-B 4'");
     expect(shellQuote("it's")).toBe("'it'\\''s'");
+    // The command takes the word after --input as its value, dash or not.
+    expect(shellQuote('-3 5 2')).toBe("'-3 5 2'");
   });
 });
 

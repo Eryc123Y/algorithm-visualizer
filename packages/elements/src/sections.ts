@@ -3,7 +3,7 @@
  * attribute, choosing the frame a selector opens at, and the strip of
  * sections under the timeline.
  */
-import { html } from 'lit';
+import { html, noChange } from 'lit';
 import {
   Directive,
   directive,
@@ -11,7 +11,6 @@ import {
   type ElementPart,
   type PartInfo,
 } from 'lit/directive.js';
-import { noChange } from 'lit';
 
 import { parseSelector, selectFrames, type SelectorError } from '@algoviz/core';
 import {

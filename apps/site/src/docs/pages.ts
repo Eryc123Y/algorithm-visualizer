@@ -115,8 +115,8 @@ const playerOf = (id: string, input: unknown): string =>
   `<algo-player algorithm="${attribute(id)}" input="${attribute(writeInput(input) ?? '')}"></algo-player>`;
 
 function snippetSection(s: Snippet): string {
-  // Focusable, so a keyboard can scroll a long line into view.
-  const code = `<pre tabindex="0" aria-label="${attribute(s.label)}"><code>${text(s.code)}</code></pre>`;
+  // A focusable region, so a keyboard can scroll a long line into view.
+  const code = `<pre tabindex="0" role="region" aria-label="${attribute(s.label)}"><code>${text(s.code)}</code></pre>`;
   const open =
     s.id === 'link'
       ? `<p><a href="${attribute(s.code)}">Open this run in the share page</a></p>`
@@ -147,7 +147,7 @@ export function entryPage(d: EntryDetails, assets: Assets): string {
     ...(d.structure === undefined
       ? []
       : [
-          `<li><a href="${root}${d.structure.path}">${text(d.structure.title)}</a></li>`,
+          `<li><a href="${attribute(root + d.structure.path)}">${text(d.structure.title)}</a></li>`,
         ]),
     `<li aria-current="page">${text(entry.title)}</li>`,
   ];
@@ -160,7 +160,7 @@ export function entryPage(d: EntryDetails, assets: Assets): string {
 ${d.operations
   .map(
     (op) =>
-      `  <li><a href="${root}${op.path}">${text(operationName(op))}</a><p>${text(op.summary)}</p></li>`,
+      `  <li><a href="${attribute(root + op.path)}">${text(operationName(op))}</a><p>${text(op.summary)}</p></li>`,
   )
   .join('\n')}
 </ul>`;
@@ -204,8 +204,13 @@ export function homePage(
   demo: EntryDetails,
   assets: Assets,
 ): string {
-  const item = (e: Entry, inner = '') =>
-    `<li data-search="${attribute(`${e.id} ${e.title} ${e.summary}`.toLowerCase())}"><a href="${e.path}">${text(e.title)}</a> <span>${text(e.summary)}</span>${inner}</li>`;
+  // A structure is found by its operations' names too.
+  const item = (e: Entry, operations: readonly Entry[] = [], inner = '') =>
+    `<li data-search="${attribute(
+      [e.id, e.title, e.summary, ...operations.flatMap((o) => [o.id, o.title])]
+        .join(' ')
+        .toLowerCase(),
+    )}"><a href="${attribute(e.path)}">${text(e.title)}</a> <span>${text(e.summary)}</span>${inner}</li>`;
   const topics = groups
     .map(
       (
@@ -219,10 +224,11 @@ ${[
     (s) =>
       `    ${item(
         s.entry,
+        s.operations,
         `<ul class="ops" aria-label="${attribute(s.entry.title)} operations">${s.operations
           .map(
             (op) =>
-              `<li><a href="${op.path}">${text(operationName(op))}</a></li>`,
+              `<li><a href="${attribute(op.path)}">${text(operationName(op))}</a></li>`,
           )
           .join('')}</ul>`,
       )}`,
@@ -259,7 +265,7 @@ ${demo.snippets.map(snippetSection).join('\n')}
 <h2 id="catalog-title">Algorithms and data structures</h2>
 <p>${count} modules, each with its player, its steps and its snippets. A data structure’s operations are listed under it.</p>
 <p class="filter"><label for="filter">Filter</label> <input id="filter" type="search" placeholder="dijkstra, heap, sort…" autocomplete="off" /></p>
-<p class="empty" hidden>Nothing matches; try fewer words.</p>
+<p class="filter-status" role="status"></p>
 ${topics}
 </section>`,
   });
@@ -333,7 +339,11 @@ ${figures
   });
 }
 
-/** The page for any address the site does not have. */
+/**
+ * The page for any address the site does not have. Cloudflare Pages
+ * serves it at whatever path was asked for, so its links start at `/`:
+ * the one page that assumes the site is at its origin's root.
+ */
 export function notFoundPage(assets: Assets): string {
   return page({
     title: 'Not found · algoviz',

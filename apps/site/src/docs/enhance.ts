@@ -11,6 +11,9 @@ export interface TextClipboard {
 
 const COPIED_MS = 1600;
 
+/** Each button's pending reset, so a second click restarts it. */
+const resets = new WeakMap<HTMLButtonElement, ReturnType<typeof setTimeout>>();
+
 /**
  * Puts a copy button beside each snippet's heading. A share link is copied as
  * a whole address, resolved against `page`.
@@ -56,29 +59,42 @@ function say(
 ): void {
   button.textContent = text;
   status.textContent = text;
-  setTimeout(() => {
-    button.textContent = 'Copy';
-    status.textContent = '';
-  }, COPIED_MS);
+  clearTimeout(resets.get(button));
+  resets.set(
+    button,
+    setTimeout(() => {
+      button.textContent = 'Copy';
+      status.textContent = '';
+    }, COPIED_MS),
+  );
 }
 
 /**
  * Shows the catalogue's entries whose words contain every word of
- * `query`, and the topics that still have one.
+ * `query`, and the topics that still have one, and says how many in the
+ * page's status line, which screen readers announce.
  */
 export function filterCatalog(doc: Document, query: string): void {
   const words = query.toLowerCase().split(/\s+/).filter(Boolean);
-  let any = false;
+  let shown = 0;
+  let total = 0;
   for (const topic of doc.querySelectorAll<HTMLElement>('.topic')) {
-    let shown = 0;
+    let here = 0;
     for (const item of topic.querySelectorAll<HTMLElement>('[data-search]')) {
       const haystack = item.dataset['search'] ?? '';
       item.hidden = !words.every((w) => haystack.includes(w));
-      if (!item.hidden) shown++;
+      total++;
+      if (!item.hidden) here++;
     }
-    topic.hidden = shown === 0;
-    any ||= shown > 0;
+    topic.hidden = here === 0;
+    shown += here;
   }
-  const empty = doc.querySelector<HTMLElement>('.empty');
-  if (empty !== null) empty.hidden = any;
+  const status = doc.querySelector<HTMLElement>('.filter-status');
+  if (status !== null)
+    status.textContent =
+      words.length === 0
+        ? ''
+        : shown === 0
+          ? 'Nothing matches; try fewer words.'
+          : `${shown} of ${total} shown.`;
 }

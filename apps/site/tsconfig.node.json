@@ -16,6 +16,7 @@
     "playwright.config.ts",
     "scripts",
     "src/headers.ts",
+    "src/docs/assets.ts",
     "src/docs/catalog.ts",
     "src/docs/html.ts",
     "src/docs/pages.ts",
