@@ -132,7 +132,7 @@ Each entry is one registry module, or one per operation for data structures. Eac
 
 **V Advanced data structures**
 
-- [ ] order-statistic tree (S3)
+- [x] order-statistic tree (S3) (#69)
 - [ ] interval tree (S3)
 - [ ] B-tree: search, insert, delete (S6)
 - [x] disjoint sets (union by rank, path compression)
