@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted; the sizes of figures in Beamer are superseded by ADR 0033
+Accepted; the sizes of figures in Beamer and the default of `scale` are superseded by ADR 0033
 
 ## Context
 
