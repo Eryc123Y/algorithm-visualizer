@@ -1,0 +1,33 @@
+{
+  "description": "The btree kind needs protocol version 0.6.",
+  "input": {
+    "version": "0.5",
+    "structures": {
+      "T": {
+        "kind": "btree",
+        "nodes": [
+          {
+            "id": "r",
+            "keys": ["G"],
+            "children": ["a", "b"]
+          },
+          {
+            "id": "a",
+            "keys": ["A", "C", "E"]
+          },
+          {
+            "id": "b",
+            "keys": ["H", "K"]
+          }
+        ]
+      }
+    },
+    "steps": []
+  },
+  "expectedErrors": [
+    {
+      "code": "VERSION_TOO_OLD",
+      "path": "$.version"
+    }
+  ]
+}

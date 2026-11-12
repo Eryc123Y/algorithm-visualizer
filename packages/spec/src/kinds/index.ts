@@ -3,6 +3,7 @@
  * writing its module and adding one entry here and in `visualization.ts`.
  */
 import { arraySpec } from './array.ts';
+import { btreeSpec } from './btree.ts';
 import { graphSpec } from './graph.ts';
 import { hashTableSpec } from './hash-table.ts';
 import type { KindSpec, KindTypes } from './kind.ts';
@@ -14,6 +15,7 @@ import { tableSpec } from './table.ts';
 import { treeSpec } from './tree.ts';
 
 export * from './array.ts';
+export * from './btree.ts';
 export * from './graph.ts';
 export * from './hash-table.ts';
 export * from './kind.ts';
@@ -34,6 +36,7 @@ const registry = {
   table: tableSpec,
   hashTable: hashTableSpec,
   priorityQueue: priorityQueueSpec,
+  btree: btreeSpec,
 };
 
 export type StructureKindName = keyof typeof registry;

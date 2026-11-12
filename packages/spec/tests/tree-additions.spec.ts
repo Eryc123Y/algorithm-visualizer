@@ -57,8 +57,8 @@ const version = (input: unknown) =>
   minimumVersion(input as Omit<VisualizationInput, 'version'>);
 
 describe('tree additions (ADR 0034)', () => {
-  it('is protocol 0.5, with five features', () => {
-    expect(PROTOCOL_VERSIONS.at(-1)).toBe('0.5');
+  it('is in protocol 0.5, with five features', () => {
+    expect(PROTOCOL_VERSIONS).toContain('0.5');
     expect(
       PROTOCOL_FEATURES.filter((f) => f.since === '0.5').map((f) => f.name),
     ).toEqual([
