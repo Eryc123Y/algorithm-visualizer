@@ -3,11 +3,10 @@
  * support MCP Apps: the tool checks the document and hands it to the
  * player page, which the host draws in the conversation.
  */
-import { readFileSync } from 'node:fs';
-
 import { formatErrors } from '@algoviz/spec';
 
 import { loadDocument, resolveFrame, type FrameSelector } from './document.ts';
+import { readPlayerFile } from './player-file.ts';
 import { sourceOf, type SourceArgs } from './source.ts';
 import { formatReport, validate } from './validate.ts';
 
@@ -52,13 +51,4 @@ export function show(input: unknown, frame: FrameSelector = 0): ShowResult {
 }
 
 /** The player page: one HTML file with every script inlined. */
-export function playerHtml(): string {
-  const file = new URL('../ui/player.html', import.meta.url);
-  try {
-    return readFileSync(file, 'utf8');
-  } catch {
-    throw new Error(
-      `The player page is missing at ${file.pathname}; build it with "npm run build -w @algoviz/mcp".`,
-    );
-  }
-}
+export const playerHtml = (): string => readPlayerFile();

@@ -1,6 +1,7 @@
 export * from './document.ts';
 export * from './export.ts';
 export * from './guide.ts';
+export * from './http.ts';
 export * from './inspect.ts';
 export * from './instructions.ts';
 export * from './recipes.ts';

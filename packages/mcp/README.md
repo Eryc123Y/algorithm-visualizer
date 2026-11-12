@@ -51,6 +51,17 @@ For Claude Desktop, in `claude_desktop_config.json`:
 }
 ```
 
+### Over HTTP
+
+`algoviz-mcp --http` serves the same tools over Streamable HTTP instead of stdio, at `http://127.0.0.1:8787/mcp` ([ADR 0039](../../docs/adr/0039-http-transport.md)). `--port` picks another port (0 for any free one) and `--host` another address. On 127.0.0.1 it serves only pages and hosts on this machine, as the MCP specification asks of local servers; any other `--host` serves every origin.
+
+```sh
+node packages/mcp/dist/mcp-server.js --http --port 8787
+claude mcp add --transport http algoviz http://127.0.0.1:8787/mcp
+```
+
+The transport is stateless: every POST gets one JSON answer, and there are no sessions. It refuses bodies over 1 MiB (413), anything but JSON (415), paths other than `/mcp` (404) and methods other than POST (405), gives up after 10 seconds (504), and answers an unexpected failure with a bare "Internal error". `createHttpHandler(options)` from `@algoviz/mcp` is the same server as a web-standard `{ fetch }` handler, for Workers, Deno or Bun; its options set the path, the limits, the allowed origins and the allowed hosts.
+
 The command line offers the same tools:
 
 ```sh

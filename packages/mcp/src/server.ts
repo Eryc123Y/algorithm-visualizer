@@ -27,7 +27,47 @@ const readOnly = {
   openWorldHint: false,
 };
 
-export function createServer(): McpServer {
+export interface ServerOptions {
+  /**
+   * Answer a tool or resource that throws with a bare "Internal error"
+   * rather than the error's message, which can name files: for servers
+   * open to the network (ADR 0039).
+   */
+  readonly hideInternalErrors?: boolean;
+}
+
+/** The text a failure shows when `hideInternalErrors` is on. */
+export const INTERNAL_ERROR_TEXT = 'Internal error';
+
+export function createServer(options: ServerOptions = {}): McpServer {
+  const hide = options.hideInternalErrors === true;
+  /** A tool callback that, when hiding, answers a throw with the bare text. */
+  const guarded =
+    <A, R>(run: (args: A) => R) =>
+    (
+      args: A,
+    ): R | { content: { type: 'text'; text: string }[]; isError: true } => {
+      if (!hide) return run(args);
+      try {
+        return run(args);
+      } catch {
+        return {
+          content: [{ type: 'text', text: INTERNAL_ERROR_TEXT }],
+          isError: true,
+        };
+      }
+    };
+  /** A resource callback that, when hiding, throws a bare error instead. */
+  const quiet =
+    <A extends unknown[], R>(read: (...args: A) => R) =>
+    (...args: A): R => {
+      if (!hide) return read(...args);
+      try {
+        return read(...args);
+      } catch {
+        throw new Error(INTERNAL_ERROR_TEXT);
+      }
+    };
   const server = new McpServer(
     { name: SERVER_NAME, version: SERVER_VERSION },
     { instructions: SERVER_INSTRUCTIONS },
@@ -42,13 +82,13 @@ export function createServer(): McpServer {
         inputSchema: t.input,
         annotations: readOnly,
       },
-      (args) => {
+      guarded((args: Record<string, unknown>) => {
         const result = t.run(args);
         return {
-          content: [{ type: 'text', text: result.text }],
+          content: [{ type: 'text' as const, text: result.text }],
           ...(result.isError ? { isError: true } : {}),
         };
-      },
+      }),
     );
 
   registerAppTool(
@@ -67,7 +107,7 @@ export function createServer(): McpServer {
       annotations: readOnly,
       _meta: { ui: { resourceUri: PLAYER_URI } },
     },
-    ({ frame, ...source }) => {
+    guarded(({ frame, ...source }) => {
       const result = showSource(source, frame);
       return result.ok
         ? {
@@ -75,7 +115,7 @@ export function createServer(): McpServer {
             structuredContent: { ...result.content },
           }
         : { content: [{ type: 'text', text: result.text }], isError: true };
-    },
+    }),
   );
   registerAppResource(
     server,
@@ -86,11 +126,11 @@ export function createServer(): McpServer {
       description: 'The interactive player that algoviz_show opens.',
       mimeType: RESOURCE_MIME_TYPE,
     },
-    (uri) => ({
+    quiet((uri: URL) => ({
       contents: [
         { uri: uri.href, mimeType: RESOURCE_MIME_TYPE, text: playerHtml() },
       ],
-    }),
+    })),
   );
 
   const full = guide();
@@ -118,7 +158,7 @@ export function createServer(): McpServer {
         description: `The ${kind} structure kind: declaration, actions and an example.`,
         mimeType: 'text/markdown',
       },
-      (uri) => ({
+      quiet((uri: URL) => ({
         contents: [
           {
             uri: uri.href,
@@ -126,7 +166,7 @@ export function createServer(): McpServer {
             text: guideSection(kind),
           },
         ],
-      }),
+      })),
     );
   server.registerResource(
     'schema',
