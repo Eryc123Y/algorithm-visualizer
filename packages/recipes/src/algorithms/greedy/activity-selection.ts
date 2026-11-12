@@ -37,7 +37,7 @@ export const activitySelection = defineAlgorithm({
       .min(1)
       .max(MAX_ACTIVITIES)
       .describe(
-        `The activities as [start, finish] pairs of integers from 0 to ${MAX_TIME}, e.g. [[1, 4], [3, 5], [0, 6], [5, 7]]. They are sorted by finish time first.`,
+        `The activities as [start, finish] pairs of integers from 0 to ${MAX_TIME}, e.g. [[1, 4], [3, 5], [0, 6], [5, 7]]. An activity occupies [start, finish), so another may start just as it finishes. They are sorted by finish time first.`,
       ),
   }),
   main: 'activities',
@@ -109,7 +109,7 @@ export const activitySelection = defineAlgorithm({
 
     trace.step(
       'first',
-      `${reordered ? 'Sorted by finish time, ' : ''}a1 = [${sorted[0]!.s}, ${sorted[0]!.f}) finishes first: take it.`,
+      `${reordered ? `Sorted by finish time, a1 to a${n} are the given activities ${sorted.map((a) => a.given + 1).join(', ')}. ` : ''}a1 = [${sorted[0]!.s}, ${sorted[0]!.f}) finishes first: take it.`,
       { vars: { k: 1 } },
     );
     table.settle({ cells: column(0) });
@@ -143,7 +143,7 @@ export const activitySelection = defineAlgorithm({
     }
     trace.step(
       'done',
-      `A holds ${taken === 1 ? 'one activity' : `${taken} activities`}, as many as can be held without overlap.`,
+      `A holds ${taken === 1 ? 'one activity' : `${taken} activities`} that do not overlap; no choice could hold more.`,
       { vars: { k: k + 1 } },
     );
   },

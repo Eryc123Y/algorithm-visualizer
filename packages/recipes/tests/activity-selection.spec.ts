@@ -67,7 +67,9 @@ describe('activity-selection', () => {
     ];
     const doc = runOk('activity-selection', activities).document;
     check(doc, activities);
-    expect(doc.steps[0]!.meta!.narration).toMatch(/^Sorted by finish time/);
+    expect(doc.steps[0]!.meta!.narration).toMatch(
+      /^Sorted by finish time, a1 to a4 are the given activities 2, 3, 4, 1\./,
+    );
   });
 
   it('chooses as many as any subset holds, on random activities', () => {
@@ -95,7 +97,14 @@ describe('activity-selection', () => {
 const activity = fc
   .tuple(fc.integer({ min: 0, max: 30 }), fc.integer({ min: 1, max: 8 }))
   .map(([s, d]): Activity => [s, s + d]);
-const inputs = fc.array(activity, { minLength: 1, maxLength: 12 });
+const inputs = fc.oneof(
+  fc.array(activity, { minLength: 1, maxLength: 12 }),
+  // Equal finish times and repeated activities.
+  fc.array(fc.tuple(fc.integer({ min: 0, max: 4 }), fc.constantFrom(5, 6)), {
+    minLength: 1,
+    maxLength: 10,
+  }),
+);
 
 recipe(
   'activity-selection',
