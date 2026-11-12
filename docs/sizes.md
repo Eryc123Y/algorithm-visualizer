@@ -31,4 +31,4 @@ Measured on 2026-11-12 at commit `b7674b8`, with Node 24.22.2; gzip at level 9 a
 
 - The Worker must stay within Cloudflare's 3 MB compressed limit on the free plan (10 MB on paid plans); its row is the number to watch.
 - The standalone executable is built for the platform that ran the script.
-- The CDN files are minified (#PR), as an app's bundler would ship them, and each has a source map next to it (`.js.map`, not counted above), which browsers fetch only with the developer tools open. Before, Vite's library mode kept their whitespace, and they were a quarter larger raw: 461 kB and 478 kB.
+- The CDN files are minified (#134), as an app's bundler would ship them, and each has a source map next to it (`.js.map`, not counted above), which browsers fetch only with the developer tools open. Before, Vite's library mode kept their whitespace, and they were a quarter larger raw: 461 kB and 478 kB.
