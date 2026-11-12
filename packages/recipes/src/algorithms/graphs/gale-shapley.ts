@@ -33,6 +33,11 @@ export function parsePreferences(text: string): Lists {
   for (const match of text.matchAll(/[^\s,]+/g)) {
     const token = match[0];
     const colon = token.indexOf(':');
+    if (token.indexOf(':', colon + 1) > colon && colon >= 0)
+      throw new NotationError(
+        `A name cannot contain a colon, as in ${quoted(token)}`,
+        match.index,
+      );
     if (colon === 0 || (colon < 0 && out.length === 0))
       throw new NotationError(
         `Expected a name and a colon, such as "a:", ${colon === 0 ? 'not' : 'before'} ${quoted(token)}`,

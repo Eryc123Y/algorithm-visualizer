@@ -131,6 +131,7 @@ describe('gale-shapley', () => {
             Array.from({ length: list.indexOf(got.get(p)!) + 1 }, (_, c) => c),
           );
         });
+        expect(results[0]).toBeGreaterThanOrEqual(n);
         expect(results[0]).toBeLessThanOrEqual(n * n - n + 1);
       }),
       fuzz,
@@ -163,6 +164,7 @@ describe('gale-shapley', () => {
     ]);
     expect(() => parsePreferences('x y, a: x y')).toThrow(/name and a colon/);
     expect(() => parsePreferences(':x y')).toThrow(/name and a colon/);
+    expect(() => parsePreferences('a:x:y')).toThrow(/cannot contain a colon/);
     expect(
       runOk('gale-shapley', {
         proposers: { a: ['x', 'y'], b: ['y', 'x'] },
@@ -176,9 +178,67 @@ describe('gale-shapley', () => {
       runError('gale-shapley', { proposers, receivers }).message;
     expect(run('a: x y, b: y x', 'x: a b')).toMatch(/as many/);
     expect(run('a: x, b: x', 'x: a b, y: a b')).toMatch(/rank y/);
-    expect(run('a: x x, b: y x', 'x: a b, y: a b')).toMatch(/twice/);
+    expect(run('a: x x, b: y x', 'x: a b, y: a b')).toMatch(
+      /list names "x" twice/,
+    );
     expect(run('a: x z, b: y x', 'x: a b, y: a b')).toMatch(/"z"/);
-    expect(run('a: x y, a: y x', 'x: a a, y: a a')).toMatch(/twice/);
+    expect(run('a: x y, a: y x', 'x: a b, y: a b')).toMatch(/appears twice/);
     expect(run('a: a b, b: a b', 'a: a b, b: a b')).toMatch(/both sides/);
+    expect(run('a:, b: y x', 'x: a b, y: a b')).toMatch(/does not rank x/);
+    expect(run('abcdefghi: x', 'x: abcdefghi')).toMatch(/1 to 8/);
+    const nine = Array.from({ length: 9 }, (_, k) => k);
+    expect(
+      run(
+        nine
+          .map((k) => `p${k}: ${nine.map((j) => `r${j}`).join(' ')}`)
+          .join(', '),
+        nine
+          .map((k) => `r${k}: ${nine.map((j) => `p${j}`).join(' ')}`)
+          .join(', '),
+      ),
+    ).toMatch(/8/);
+    expect(
+      runError('gale-shapley', {
+        proposers: { 1: ['x'] },
+        receivers: { x: ['1'] },
+      }).message,
+    ).toMatch(/losing the order/);
+  });
+
+  it('points each refusal at the list at fault', () => {
+    const at = (proposers: string, receivers: string) =>
+      runError('gale-shapley', { proposers, receivers }).path;
+    expect(at('a: x z, b: y x', 'x: a b, y: a b')).toBe(
+      '$.input.proposers[0][1]',
+    );
+    expect(at('a: x y, b: y x', 'x: a, y: a b')).toBe(
+      '$.input.receivers[0][1]',
+    );
+    expect(at('a: x! y, b: y x', 'x: a b, y: a b')).toBe(
+      '$.input.proposers[0][1][0]',
+    );
+  });
+
+  it('narrates one pair, and places on the lists', () => {
+    const said = (proposers: string, receivers: string) =>
+      runOk('gale-shapley', { proposers, receivers }).document.steps.map(
+        (s) => s.meta?.narration ?? '',
+      );
+    expect(said('a: x', 'x: a').at(-1)).toBe(
+      'No proposer is free: the engaged pair forms a stable matching, the best one for every proposer, after 1 proposal.',
+    );
+    const three = said(
+      'a: x y z, b: x z y, c: y x z',
+      'x: c b a, y: a c b, z: b a c',
+    );
+    expect(three).toContain(
+      'x ranks b second and its partner a third: it leaves a, who is free again, for b.',
+    );
+    expect(three).toContain(
+      'y ranks its partner a first and c second: it rejects c, who stays free.',
+    );
+    expect(three).toContain(
+      'c is free and proposes to x, the second on its list.',
+    );
   });
 });
