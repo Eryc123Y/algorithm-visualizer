@@ -2101,3 +2101,20 @@ recipe(
     expect(a * x! + b * y!).toBe(d);
   },
 );
+
+// Modular exponentiation: any base, exponent and modulus allowed.
+recipe(
+  'modular-exponentiation',
+  fc.record({
+    a: fc.integer({ min: 0, max: 1_000_000_000 }),
+    b: fc.integer({ min: 0, max: 2 ** 31 - 1 }),
+    n: fc.integer({ min: 1, max: 1_000_000_000 }),
+  }),
+  (input) => runOk('modular-exponentiation', input).document,
+  (trace, { b, n }) => {
+    // The last column has read all of b, and every d is below n.
+    const [, c, d] = stateOf(trace, 'bits', 'table').data;
+    expect(c!.at(-1)).toBe(b);
+    for (const x of d!) expect(Number(x)).toBeLessThan(n);
+  },
+);

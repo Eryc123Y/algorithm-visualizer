@@ -49,6 +49,7 @@ import { kmp } from './algorithms/strings/kmp.ts';
 import { strassen } from './algorithms/foundations/strassen.ts';
 import { lup } from './algorithms/math/lup.ts';
 import { euclid, extendedEuclid } from './algorithms/math/euclid.ts';
+import { modularExponentiation } from './algorithms/math/modular-exponentiation.ts';
 import { naiveStringMatcher } from './algorithms/strings/naive.ts';
 import { rabinKarp } from './algorithms/strings/rabin-karp.ts';
 import { closestPair } from './algorithms/geometry/closest-pair.ts';
@@ -130,6 +131,7 @@ export const algorithms: readonly Algorithm[] = [
   lup,
   euclid,
   extendedEuclid,
+  modularExponentiation,
   strassen,
 ];
 
