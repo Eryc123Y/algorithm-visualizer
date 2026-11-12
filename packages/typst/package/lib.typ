@@ -164,10 +164,16 @@
   value.to-absolute()
 }
 
+// A ratio of a side of the region; 0% is nothing even of an unbounded
+// side, where the product would not be a number.
+#let _share(ratio, base) = if ratio == 0% { 0pt } else { ratio * base }
+
 // A size resolved against a side of the region.
 #let _resolve(value, base) = {
-  if type(value) == ratio { value * base } else if type(value) == relative {
-    value.ratio * base + _absolute(value.length)
+  if type(value) == ratio { _share(value, base) } else if (
+    type(value) == relative
+  ) {
+    _share(value.ratio, base) + _absolute(value.length)
   } else { _absolute(value) }
 }
 
@@ -196,6 +202,9 @@
     )
   }
   let canvas = (width: figure.width * 1pt, height: figure.height * 1pt)
+  if canvas.width <= 0pt or canvas.height <= 0pt {
+    return _image(figure, auto, auto, fit, alt)
+  }
   let scales = ()
   if _finite(w) { scales.push(w / canvas.width) }
   if _finite(h) { scales.push(h / canvas.height) }

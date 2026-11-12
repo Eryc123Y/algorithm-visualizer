@@ -317,6 +317,15 @@ describe('algoviz-slides sizes (ADR 0033)', () => {
         expect([part.width, part.height], fit).toEqual([800, 300]);
   });
 
+  it('takes 0% of an unbounded side as nothing', () => {
+    for (const part of sized(
+      'dijkstra',
+      ', height: 0%',
+      '(width: 800pt, height: float.inf * 1pt)',
+    ))
+      expect([part.width, part.height]).toEqual([0, 0]);
+  });
+
   it('lets an unbounded side go, and keeps the natural size when both are', () => {
     for (const part of sized(
       'dijkstra',
@@ -456,6 +465,8 @@ describe('decks', () => {
           ...ids.map((id) =>
             filling[file](`algoviz-slides(only, "${id}", steps: -1)`),
           ),
+          // A series of two frames, on two subslides.
+          filling[file](`algoviz-slides(only, "dijkstra", steps: (0, -1))`),
         ].join('\n\n'),
       );
       const regions = JSON.parse(
@@ -470,14 +481,19 @@ describe('decks', () => {
         ]).stdout,
       ) as { width: string; height: string }[];
       const pages = pageSvgs(file, installed!.root).map(imageSizes);
-      expect(pages.map((p) => p.length)).toEqual([1, 1, 1]);
+      expect(pages.map((p) => p.length)).toEqual([1, 1, 1, 1, 1]);
+      expect(regions).toHaveLength(5);
       pages.forEach(([image], k) => {
         const region = regions[k]!;
         const w = Number.parseFloat(region.width);
         const h = 0.75 * Number.parseFloat(region.height);
-        expect(image!.width, ids[k]).toBeLessThanOrEqual(w + 0.01);
-        expect(image!.height, ids[k]).toBeLessThanOrEqual(h + 0.01);
+        expect(image!.width, `page ${k + 1}`).toBeLessThanOrEqual(w + 0.01);
+        expect(image!.height, `page ${k + 1}`).toBeLessThanOrEqual(h + 0.01);
       });
+      // Both frames of the series, placed in its box, get one size: the
+      // size of the hidden copy and of the frame drawn alone.
+      expect(pages[4]).toEqual(pages[3]);
+      expect(pages[3]![0]!.height).toBeCloseTo(pages[1]![0]!.height, 2);
       // Kruskal is bound by the height here too, by a hair: at 16:9 its
       // canvas is a little wider than the slide box.
       expect(pages[0]![0]!.height).toBeCloseTo(
