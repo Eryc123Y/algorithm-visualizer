@@ -124,7 +124,7 @@ Each entry is one registry module, or one per operation for data structures. Eac
 - [x] LCS
 - [x] rod cutting (#115)
 - [x] matrix-chain multiplication (#116)
-- [ ] optimal BST
+- [x] optimal BST (#117)
 - [ ] activity selection
 - [x] Huffman codes (S1, S4) (#74)
 - [ ] offline caching
