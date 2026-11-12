@@ -1509,6 +1509,19 @@ recipe(
 );
 
 recipe(
+  'transitive-closure',
+  graphs(nonNegative, { minNodes: 1 }),
+  (graph) => runOk('transitive-closure', { graph }).document,
+  (trace, g) => {
+    // The diagonal is 1, and every edge's entry is 1.
+    const t = stateOf(trace, 't', 'table').data;
+    g.nodes.forEach((_, i) => expect(t[i]![i]).toBe(1));
+    for (const [u, v] of g.edges)
+      expect(t[g.nodes.indexOf(u)]![g.nodes.indexOf(v)]).toBe(1);
+  },
+);
+
+recipe(
   'edmonds-karp',
   graphs(
     fc.option(fc.integer({ min: 0, max: 20 }), { nil: undefined, freq: 4 }),

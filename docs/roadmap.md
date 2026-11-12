@@ -150,7 +150,7 @@ Each entry is one registry module, or one per operation for data structures. Eac
 - [x] Kruskal
 - [x] strongly connected components (#86)
 - [x] DAG shortest paths (#88)
-- [ ] transitive closure
+- [x] transitive closure (#91)
 - [ ] Johnson
 - [x] Edmonds–Karp maximum flow (#93)
 - [ ] bipartite matching
