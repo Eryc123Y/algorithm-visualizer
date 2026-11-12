@@ -45,6 +45,45 @@ describe('euclid', () => {
     );
   });
 
+  it('takes 44 rows for F43 and F44, the most', () => {
+    const rows = (a: number, b: number) =>
+      stateOf(replay(runOk('euclid', { a, b }).document), 'calls', 'table').data
+        .length;
+    // F45 is past 10⁹, so no pair allowed takes more.
+    expect(rows(433_494_437, 701_408_733)).toBe(44);
+    expect(rows(701_408_733, 433_494_437)).toBe(43);
+  });
+
+  it('agrees with BigInt Bézout at operands up to 10⁹', () => {
+    fc.assert(
+      fc.property(
+        fc.integer({ min: 0, max: 1e9 }),
+        fc.integer({ min: 1, max: 1e9 }),
+        (a, b) => {
+          const [d, x, y] = runOk('extended-euclid', { a, b })
+            .results as number[];
+          expect(BigInt(a) * BigInt(x!) + BigInt(b) * BigInt(y!)).toBe(
+            BigInt(d!),
+          );
+          expect(a % d! === 0 && b % d! === 0).toBe(true);
+        },
+      ),
+      fuzz,
+    );
+  });
+
+  it('refuses operands that are not whole numbers from 0 to 10⁹', () => {
+    for (const input of [
+      { a: -1, b: 3 },
+      { a: 1.5, b: 3 },
+      { a: 1e9 + 1, b: 3 },
+      { a: '4', b: 3 },
+      { a: 4 },
+      { a: 4, b: 3, c: 1 },
+    ])
+      expect(() => runError('euclid', input)).not.toThrow();
+  });
+
   it('handles 0 and refuses gcd(0, 0)', () => {
     expect(runOk('euclid', { a: 0, b: 7 }).results).toEqual([7]);
     expect(runOk('euclid', { a: 7, b: 0 }).results).toEqual([7]);
