@@ -1557,6 +1557,44 @@ recipe(
   },
 );
 
+// The same graphs as bipartite matching.
+recipe(
+  'hopcroft-karp',
+  fc
+    .tuple(
+      fc.integer({ min: 1, max: 8 }),
+      fc.integer({ min: 1, max: 8 }),
+      fc.array(fc.tuple(fc.nat(7), fc.nat(7), fc.boolean()), {
+        maxLength: 20,
+      }),
+      fc.nat(),
+    )
+    .map(([l, r, raw, turn]) => {
+      // Nodes rotated, so a right vertex may come first; edges either way
+      // round, parallel ones kept.
+      const listed = [
+        ...Array.from({ length: l }, (_, k) => `l${k}`),
+        ...Array.from({ length: r }, (_, k) => `r${k}`),
+      ];
+      const t = turn % listed.length;
+      const nodes = [...listed.slice(t), ...listed.slice(0, t)];
+      const edges = raw.map(([a, b, flip]): [string, string] =>
+        flip ? [`r${b % r}`, `l${a % l}`] : [`l${a % l}`, `r${b % r}`],
+      );
+      return { nodes, edges };
+    }),
+  (graph) => runOk('hopcroft-karp', { graph }).document,
+  (trace) => {
+    // The marked edges share no vertex, and no note is left at the end.
+    const g = stateOf(trace, 'g', 'graph');
+    const ends = g.data.edges
+      .filter((e) => g.marks.edgeMarks[e.id] === 'selected')
+      .flatMap((e) => [e.from, e.to]);
+    expect(new Set(ends).size).toBe(ends.length);
+    expect(Object.keys(g.marks.notes)).toEqual([]);
+  },
+);
+
 describe('topological-sort input checks', () => {
   it(
     'refuses a graph with a cycle, and only such a graph',

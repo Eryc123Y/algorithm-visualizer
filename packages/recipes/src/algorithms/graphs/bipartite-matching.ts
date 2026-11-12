@@ -64,7 +64,7 @@ const pitchFor = (rows: number) =>
   rows <= 10 ? 60 : Math.max(44, 540 / (rows - 1));
 
 /** The graph drawn in two columns, the left side on the left. */
-function declareBipartite(
+export function declareBipartite(
   g: GraphInput,
   left: readonly string[],
   right: readonly string[],
@@ -85,6 +85,17 @@ function declareBipartite(
     ],
     edges: g.edges.map(([from, to], k) => ({ id: ids[k]!, from, to })),
   };
+}
+
+/** The id of the edge joining two vertices, keyed `a b` either way round. */
+export function edgesByPair(g: GraphInput): Map<string, string> {
+  const ids = edgeIds(g);
+  const edgeOf = new Map<string, string>();
+  g.edges.forEach(([a, b], k) => {
+    edgeOf.set(`${a} ${b}`, ids[k]!);
+    edgeOf.set(`${b} ${a}`, ids[k]!);
+  });
+  return edgeOf;
 }
 
 export const bipartiteMatching = defineAlgorithm({
@@ -142,12 +153,7 @@ export const bipartiteMatching = defineAlgorithm({
   run(input, trace) {
     const g: GraphInput = { ...graphOf(input.graph), directed: false };
     const { left, right } = sides(g);
-    const ids = edgeIds(g);
-    const edgeOf = new Map<string, string>();
-    g.edges.forEach(([a, b], k) => {
-      edgeOf.set(`${a} ${b}`, ids[k]!);
-      edgeOf.set(`${b} ${a}`, ids[k]!);
-    });
+    const edgeOf = edgesByPair(g);
     const adj = adjacency(g);
     const graph = trace.add('g', declareBipartite(g, left, right));
     const mate = new Map<string, string>();
