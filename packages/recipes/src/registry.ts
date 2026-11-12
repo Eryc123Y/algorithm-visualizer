@@ -18,6 +18,7 @@ import { dijkstra } from './algorithms/graphs/dijkstra.ts';
 import { floydWarshall } from './algorithms/graphs/floyd-warshall.ts';
 import { kruskal } from './algorithms/graphs/kruskal.ts';
 import { prim } from './algorithms/graphs/prim.ts';
+import { stronglyConnectedComponents } from './algorithms/graphs/scc.ts';
 import { topologicalSort } from './algorithms/graphs/topological-sort.ts';
 import { balancedBrackets } from './algorithms/lists/balanced-brackets.ts';
 import { reverseLinkedList } from './algorithms/lists/reverse-linked-list.ts';
@@ -85,6 +86,7 @@ export const algorithms: readonly Algorithm[] = [
   bfs,
   dfs,
   topologicalSort,
+  stronglyConnectedComponents,
   dijkstra,
   bellmanFord,
   prim,
