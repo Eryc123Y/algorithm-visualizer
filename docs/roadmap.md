@@ -117,7 +117,7 @@ Each entry is one registry module, or one per operation for data structures. Eac
 - [ ] double hashing
 - [x] BST operations (`bst`)
 - [x] tree walks
-- [~] red–black tree: insert (S2), delete (S2)
+- [x] red–black tree: insert (S2), delete (S2) (#68)
 
 **IV Design and analysis**
 
