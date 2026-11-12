@@ -198,7 +198,9 @@ export const stronglyConnectedComponents = defineAlgorithm({
       members[c]!.push(u);
       trace.step('assign', `${u} joins component ${c + 1}.`);
       // Coloured by component; a settled mark would hide the colour.
-      graph.group({ node: u, group: c % 6 }).pointer({ name: 'u', node: u });
+      graph
+        .group({ node: u, group: (c % 6) as 0 | 1 | 2 | 3 | 4 | 5 })
+        .pointer({ name: 'u', node: u });
       for (const { from: v, edge } of into.get(u)!) {
         const fresh = !component.has(v);
         trace.step(
@@ -214,7 +216,6 @@ export const stronglyConnectedComponents = defineAlgorithm({
         }
       }
     };
-    graph.pointer({ name: 'u', node: null });
     for (const u of list) {
       if (component.has(u)) continue;
       const c = members.length;
@@ -223,7 +224,7 @@ export const stronglyConnectedComponents = defineAlgorithm({
         'component',
         `${u} comes next in L and is in no component: the vertices that reach it, and are in no component yet, form component ${c + 1}.`,
       );
-      graph.highlight({ nodes: [u] });
+      graph.highlight({ nodes: [u] }).pointer({ name: 'u', node: u });
       assign(u, c);
       found.insert({
         index: c,

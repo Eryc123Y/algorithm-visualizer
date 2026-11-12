@@ -82,9 +82,26 @@ describe('strongly connected components', () => {
         expect(groupOf.size).toBe(nodes.length);
         for (const c of want)
           expect(new Set(c.map((v) => groupOf.get(v))).size).toBe(1);
+        // Different components, different colours, up to six.
+        if (want.length <= 6)
+          expect(new Set(groupOf.values()).size).toBe(want.length);
       }),
       fuzz,
     );
+  });
+
+  it('lists a large component by its first vertices and its size', () => {
+    // In the order the backward search reaches them.
+    const ring = Array.from(
+      { length: 8 },
+      (_, k) => `${'abcdefgh'[k]}->${'abcdefgh'[(k + 1) % 8]}`,
+    );
+    const { document } = runOk('strongly-connected-components', {
+      graph: ring.join(', '),
+    });
+    expect(
+      stateOf(replay(document), 'components', 'array').data.map((e) => e.value),
+    ).toEqual(['a h g f … (8)']);
   });
 
   it('refuses a graph it cannot read', () => {
