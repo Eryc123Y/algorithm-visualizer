@@ -57,3 +57,7 @@ packages/typst/package/engine.bc
 
 # Standalone algoviz: Rust build output and the bundle it compiles
 packages/mcp/standalone/target/
+
+# Agent tools' local state and the worktrees they check out inside the repository
+.claude/
+.delta/

@@ -20,6 +20,9 @@ export default defineConfigWithVueTs(
     '**/test-results/**',
     // The standalone executable's build output, bundle included.
     'packages/mcp/standalone/target/**',
+    // Agent tools' local state, with the worktrees they check out here.
+    '.claude/**',
+    '.delta/**',
   ]),
 
   pluginVue.configs['flat/recommended'],
