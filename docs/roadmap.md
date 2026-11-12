@@ -122,7 +122,7 @@ Each entry is one registry module, or one per operation for data structures. Eac
 **IV Design and analysis**
 
 - [x] LCS
-- [ ] rod cutting
+- [x] rod cutting (#115)
 - [ ] matrix-chain multiplication
 - [ ] optimal BST
 - [ ] activity selection
