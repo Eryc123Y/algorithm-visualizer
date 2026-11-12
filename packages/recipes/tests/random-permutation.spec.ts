@@ -34,11 +34,11 @@ function check(trace: Trace, values: readonly number[]): void {
   expect(stateOf(trace, 'a', 'array').marks.settled).toHaveLength(n);
 }
 
-const orderOf = (values: number[], seed: number) =>
-  valuesOf(
-    replay(runOk('random-permutation', { values, seed }).document),
-    'a',
-  ).join(',');
+/** The draws RANDOM(i, n - 1) of a run with `seed`, from the generator. */
+const draws = (n: number, seed: number) => {
+  const random = seededRandom(seed);
+  return Array.from({ length: n }, (_, i) => random.int(i, n - 1));
+};
 
 describe('seededRandom', () => {
   it('repeats its draws for a seed, and keeps them in range', () => {
@@ -55,6 +55,11 @@ describe('seededRandom', () => {
       }),
       fuzz,
     );
+  });
+
+  it('has no integer to draw from an empty range', () => {
+    expect(() => seededRandom(1).int(3, 2)).toThrow(RangeError);
+    expect(() => seededRandom(1).int(0, 1.5)).toThrow(RangeError);
   });
 
   it('draws each of 6 values about equally often', () => {
@@ -85,14 +90,35 @@ describe('random-permutation', () => {
     );
   });
 
+  it('draws what the generator gives for its seed', () => {
+    fc.assert(
+      fc.property(inputs, ({ values, seed }) => {
+        const trace = replay(
+          runOk('random-permutation', { values, seed }).document,
+        );
+        expect(valuesOf(trace, 'draws')).toEqual(draws(values.length, seed));
+      }),
+      fuzz,
+    );
+  });
+
+  // With those draws, every order of 3 values is equally likely: 5,000 ±
+  // 250 of 30,000 is about 4 standard deviations. The classic wrong
+  // shuffle, which draws from all of a[0..n-1] each time, is off by
+  // about 560.
   it('gives each of the 6 orders of 3 values about equally often', () => {
     const counts = new Map<string, number>();
-    for (let seed = 0; seed < 3_000; seed++) {
-      const order = orderOf([1, 2, 3], seed);
+    for (let seed = 0; seed < 30_000; seed++) {
+      const a = [1, 2, 3];
+      draws(3, seed).forEach((j, i) => {
+        [a[i], a[j]] = [a[j]!, a[i]!];
+      });
+      const order = a.join(',');
       counts.set(order, (counts.get(order) ?? 0) + 1);
     }
     expect(counts.size).toBe(6);
-    for (const c of counts.values()) expect(Math.abs(c - 500)).toBeLessThan(90);
+    for (const c of counts.values())
+      expect(Math.abs(c - 5_000)).toBeLessThan(250);
   });
 
   it('replays its draws into the final order on random inputs', () => {
