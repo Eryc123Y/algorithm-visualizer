@@ -39,7 +39,13 @@ export interface Scheme {
   /** h(k, i) for a table of `size` slots. */
   slot(key: number, i: number, size: number): number;
   /** The narration of the i-th probe, at slot q; `holds` says what is there. */
-  narrate(key: number, i: number, q: number, size: number, holds: string): string;
+  narrate(
+    key: number,
+    i: number,
+    q: number,
+    size: number,
+    holds: string,
+  ): string;
   /** Why a table of `size` slots cannot be used, if it cannot. */
   unfit?(size: number): string | undefined;
 }
@@ -126,9 +132,13 @@ export interface OpenAddressing {
   readonly code: { readonly insert: Listing; readonly search: Listing };
   /** What the operations' summaries say the probe sequence is. */
   readonly sequence: string;
-  /** The table of the operations' examples, and the run of the module. */
+  /** The table of the operations' examples. */
   readonly sample: TableFrom;
-  readonly keys: readonly number[];
+  /** The module's run, from an empty table of the sample's size. */
+  readonly run: readonly {
+    readonly op: 'insert' | 'search';
+    readonly key: number;
+  }[];
   readonly examples: {
     readonly insert: number;
     readonly found: number;
@@ -150,11 +160,7 @@ export function openAddressing(table: OpenAddressing) {
     examples: [
       {
         from: { size: sample.size, keys: [] },
-        ops: [
-          ...table.keys.map((key) => ({ op: 'insert', key })),
-          { op: 'search', key: table.examples.found },
-          { op: 'search', key: table.examples.missing },
-        ],
+        ops: table.run.map(({ op, key }) => ({ op, key })),
       },
     ],
     start(from) {
@@ -198,7 +204,8 @@ export function openAddressing(table: OpenAddressing) {
       op({
         name: 'search',
         title: 'search',
-        summary: `Looks for a key along its probe sequence, ${table.sequence}, stopping at the key, at an empty slot, or after m probes.`,
+        summary:
+          'Looks for a key along its probe sequence, stopping at the key, at an empty slot, or after m probes.',
         args: { key: Key.describe('The integer key to look for.') },
         examples: [
           { from: sample, key: table.examples.found },
