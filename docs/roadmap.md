@@ -165,7 +165,7 @@ Each entry is one registry module, or one per operation for data structures. Eac
 - [ ] FFT
 - [ ] Euclid and extended Euclid
 - [ ] modular exponentiation
-- [ ] string matching: naive, Rabin–Karp, finite automaton, KMP (S9)
+- [~] string matching: naive, Rabin–Karp, finite automaton, KMP (S9, [ADR 0037](adr/0037-array-pattern.md))
 - [ ] suffix array
 - [ ] approximation: vertex cover, TSP tour, set cover
 - [ ] computational geometry, 3rd edition: segment intersection, Graham scan, Jarvis march, closest pair (S8)
