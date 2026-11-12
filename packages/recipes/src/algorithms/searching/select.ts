@@ -14,8 +14,7 @@ import { defineAlgorithm } from '../../algorithm.ts';
 import { callStack } from '../../call-stack.ts';
 import type { Handle } from '../../recorder.ts';
 import { partitioner } from '../sorting/partition.ts';
-import { lowerMedian, ordinal, SelectInput } from './randomized-select.ts';
-import { z } from 'zod';
+import { lowerMedian, ordinal, selectInput } from './randomized-select.ts';
 
 /** At most 25 values, so that the medians of a call fit one group. */
 export const MAX_SELECT_VALUES = 25;
@@ -28,13 +27,7 @@ export const select = defineAlgorithm({
   topic: 'searching',
   summary:
     'Finds the i-th smallest value in worst-case linear time: partitions around the median of the medians of groups of five, and searches only the side that holds it.',
-  input: SelectInput.and(
-    z
-      .strictObject({
-        values: z.array(z.number()).max(MAX_SELECT_VALUES),
-      })
-      .partial(),
-  ),
+  input: selectInput(MAX_SELECT_VALUES),
   main: 'values',
   examples: [
     {
@@ -143,14 +136,15 @@ export const select = defineAlgorithm({
       const m: { value: number; at: number }[] = [];
       for (let s = p, g = 0; s <= r; s += GROUP, g++) {
         const e = Math.min(s + GROUP - 1, r);
-        sortRange(s, e);
         const mid = Math.floor((s + e) / 2);
-        m.push({ value: a[mid]!, at: mid });
+        const group = a.slice(s, e + 1).sort((x, y) => x - y);
         trace.step(
           'group',
-          `Sort the group a[${s}..${e}]: [${a.slice(s, e + 1).join(', ')}]. Its median is ${a[mid]}.`,
+          `Sort the group a[${s}..${e}]: [${group.join(', ')}]. Its median is ${group[mid - s]}.`,
           { vars: { p, r } },
         );
+        sortRange(s, e);
+        m.push({ value: a[mid]!, at: mid });
         if (g === 0) {
           calls.push(`call-${p}-${r}`, call);
           for (let c = 0; c < groups; c++)
