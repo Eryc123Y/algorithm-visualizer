@@ -42,6 +42,15 @@ function check(doc: VisualizationInput, prices: readonly number[]): void {
   });
   expect(pieces.reduce((a, b) => a + b, 0)).toBe(n);
   expect(pieces.reduce((a, b) => a + prices[b - 1]!, 0)).toBe(r[n]);
+  // s[j] is the first piece that reaches r[j], as CLRS's strict < keeps.
+  for (let j = 1; j <= n; j++) {
+    const first = prices.findIndex(
+      (price, k) =>
+        k < j &&
+        price + (k + 1 === j ? 0 : bruteForce(prices, j - k - 1)) === r[j],
+    );
+    expect(table[2]![j]).toBe(first + 1);
+  }
   expect(doc.steps.filter((s) => s.meta?.id === 'try')).toHaveLength(
     (n * (n + 1)) / 2,
   );
@@ -63,7 +72,19 @@ describe('rod-cutting', () => {
     );
   });
 
-  it('takes 1 to 12 prices from 0 to 1e6', () => {
+  it('cuts a rod of length 1, and one whose prices are all 0', () => {
+    check(runOk('rod-cutting', [7]).document, [7]);
+    check(runOk('rod-cutting', [0, 0, 0]).document, [0, 0, 0]);
+    check(runOk('rod-cutting', [0, 1e6]).document, [0, 1e6]);
+  });
+
+  it('takes 1 to 12 integer prices from 0 to 1e6', () => {
+    expect(runError('rod-cutting', { prices: [1e6 + 1] }).path).toBe(
+      '$.input.prices[0]',
+    );
+    expect(runError('rod-cutting', { prices: [1.5] }).path).toBe(
+      '$.input.prices[0]',
+    );
     expect(runError('rod-cutting', { prices: [] }).path).toBe('$.input.prices');
     expect(
       runError('rod-cutting', { prices: Array.from({ length: 13 }, () => 1) })
@@ -78,15 +99,7 @@ describe('rod-cutting', () => {
 const prices = fc.oneof(
   fc.array(fc.integer({ min: 0, max: 30 }), { minLength: 1, maxLength: 12 }),
   fc.array(fc.integer({ min: 0, max: 3 }), { minLength: 1, maxLength: 8 }),
-  fc.array(
-    fc
-      .double({ min: 0, max: 100, noNaN: true })
-      .map((x) => Math.round(x * 4) / 4),
-    {
-      minLength: 1,
-      maxLength: 6,
-    },
-  ),
+  fc.array(fc.integer({ min: 0, max: 1e6 }), { minLength: 1, maxLength: 6 }),
 );
 
 recipe(

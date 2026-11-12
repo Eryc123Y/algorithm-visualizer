@@ -16,7 +16,7 @@ import { listField } from '../../notation/schema.ts';
 
 /** The longest rod, so that the table stays readable. */
 export const MAX_ROD = 12;
-/** The largest price, so that sums stay exact. */
+/** The largest price; prices are integers, so that sums stay exact. */
 export const MAX_PRICE = 1e6;
 
 const ROW = { p: 0, r: 1, s: 2 } as const;
@@ -30,11 +30,11 @@ export const rodCutting = defineAlgorithm({
   input: z.strictObject({
     prices: listField(
       z
-        .array(z.number().min(0).max(MAX_PRICE))
+        .array(z.int().min(0).max(MAX_PRICE))
         .min(1)
         .max(MAX_ROD)
         .describe(
-          `The price of a piece of length 1, 2, …, n; the rod has length n, at most ${MAX_ROD}. E.g. [1, 5, 8, 9, 10, 17, 17, 20].`,
+          `The integer price of a piece of length 1, 2, …, n; the rod has length n, at most ${MAX_ROD}. E.g. [1, 5, 8, 9, 10, 17, 17, 20].`,
         ),
       'number',
     ),
@@ -110,7 +110,8 @@ export const rodCutting = defineAlgorithm({
             : better
               ? `First piece ${i}: p[${i}] + r[${j - i}] = ${p[i]} + ${r[j - i]} = ${value}, better than ${q}.`
               : `First piece ${i}: p[${i}] + r[${j - i}] = ${p[i]} + ${r[j - i]} = ${value}, no better than ${q}.`,
-          { vars: { j, i, q: better ? value : q } },
+          // q as the comparison reads it, before this piece can update it.
+          { vars: q === -Infinity ? { j, i } : { j, i, q } },
         );
         table.depend({
           cell: [ROW.r, j],
