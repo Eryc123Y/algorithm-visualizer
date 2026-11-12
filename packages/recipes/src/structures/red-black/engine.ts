@@ -255,11 +255,10 @@ function insertFixup<K>(t: RbTree<K>, z0: string, run: Run<K>): RbTree<K> {
     step('root', `The root ${say(root)} is red: colour it black.`);
     tree = paint(run, tree, [[root, 'black']]);
   } else
+    // A root z is red, so this is z's black parent ending the loop.
     step(
       'fixed',
-      z === root
-        ? `${say(z)} is the root and black: the tree is a red–black tree again.`
-        : `${say(z)}'s parent is black, so no red node has a red child: the tree is a red–black tree again.`,
+      `${say(z)}'s parent is black, so no red node has a red child: the tree is a red–black tree again.`,
     );
   return tree;
 }

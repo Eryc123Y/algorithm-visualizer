@@ -58,8 +58,7 @@ export const RB_INSERT = listing('insert', {
         elseif u == u.p.left
             u.p.left = v
         else u.p.right = v
-        if v ≠ NIL
-            v.p = u.p
+        v.p = u.p  // NIL is one black sentinel node, so it has a p too
   `,
   python: `
     def color(x):
@@ -134,6 +133,7 @@ export const RB_DELETE = listing('delete', {
         if z == NIL
             return  // not in the tree  // @missing
         lost = z.color  // the colour that leaves its place
+        // x may be the sentinel NIL; RB-TRANSPLANT sets its p
         if z.left == NIL
             x = z.right; RB-TRANSPLANT(T, z, x)  // @no-left
         elseif z.right == NIL
@@ -141,9 +141,9 @@ export const RB_DELETE = listing('delete', {
         else
             y = TREE-MINIMUM(z.right)  // @successor
             lost = y.color
-            x = y.right  // x.p is set even when x is NIL
+            x = y.right
             if y.p == z
-                x.p = y
+                x.p = y  // also when x is NIL
             else
                 RB-TRANSPLANT(T, y, x)
                 y.right = z.right; y.right.p = y
@@ -175,6 +175,11 @@ export const RB_DELETE = listing('delete', {
     LEFT-ROTATE, RIGHT-ROTATE and RB-TRANSPLANT as for insertion
   `,
   python: `
+    def minimum(x):
+        while x.left:
+            x = x.left
+        return x
+
     def delete(T, key):
         z = T.root
         while z and key != z.key:  # @find

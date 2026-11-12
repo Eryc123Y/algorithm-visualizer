@@ -64,8 +64,14 @@ export function fromSchema<K>(
 
 /** The state `from` describes: keys inserted one by one, or the tree. */
 export function startTree<K>(from: From<K>, family: Family<K>): RbTree<K> {
-  if (!Array.isArray(from))
-    return buildTree(from as Described<K>, family.keys, family.aug);
+  if (!Array.isArray(from)) {
+    const t = buildTree(from as Described<K>, family.keys, family.aug);
+    if (t.nodes.size > MAX_SIZE)
+      throw new RangeError(
+        `A tree holds at most ${MAX_SIZE} keys, not ${t.nodes.size}`,
+      );
+    return t;
+  }
   const run: Run<K> = {
     family,
     step: () => undefined,

@@ -150,6 +150,22 @@ describe('red-black-tree', () => {
     expect(bad([5, 3, 5], [3])).toMatch(/twice/);
     expect(bad([5, null, null, 4], [])).toMatch(/4 has no parent/);
     expect(bad([5, 3, 8], [9])).toMatch(/9 is listed as red/);
+    expect(bad([null, 5], [])).toMatch(/5 has no parent/);
+    // A perfect black tree of 63 keys is a red–black tree, but too big.
+    const perfect = (lo: number, hi: number, depth: number): number[][] =>
+      depth === 0
+        ? []
+        : [
+            [Math.floor((lo + hi) / 2)],
+            ...perfect(lo, Math.floor((lo + hi) / 2) - 1, depth - 1).map(
+              (row, k) => [
+                ...row,
+                ...(perfect(Math.floor((lo + hi) / 2) + 1, hi, depth - 1)[k] ??
+                  []),
+              ],
+            ),
+          ];
+    expect(bad(perfect(1, 63, 6).flat(), [])).toMatch(/at most 32 keys/);
   });
 
   it('changes nothing for a key it holds or lacks, and refuses a full tree', () => {

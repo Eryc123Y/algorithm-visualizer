@@ -500,6 +500,14 @@ recipe(
     }
     // The successor's pointer goes once it has moved up.
     expect(Object.keys(tree.marks.pointers)).not.toContain('y');
+    // Every frame, also in the middle of a deletion, draws one search
+    // tree: the moves of a step leave no stray root behind.
+    for (let k = 0; k <= trace.length; k++) {
+      const at = stateOf(trace, 'T', 'tree', k);
+      expect(at.data.roots.length, `frame ${k}`).toBeLessThanOrEqual(1);
+      const keys = inorder(at) as number[];
+      expect(keys, `frame ${k}`).toEqual(ascending(keys));
+    }
   },
 );
 

@@ -246,7 +246,7 @@ export function buildTree<K>(
   };
   const first = levelOrder[0] ?? null;
   const root = first === null ? null : fresh(first, null);
-  let at = first === null ? levelOrder.length : 1;
+  let at = 1;
   for (let k = 0; k < placed.length && at < levelOrder.length; k++) {
     const parent = placed[k]!;
     for (const side of ['left', 'right'] as const) {
