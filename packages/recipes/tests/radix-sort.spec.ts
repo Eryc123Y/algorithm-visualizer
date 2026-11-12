@@ -50,6 +50,36 @@ describe('radix-sort', () => {
     ]);
   });
 
+  it('sorts one-digit values and all zeros in one pass', () => {
+    for (const values of [[5, 3], [0, 0], [0]]) {
+      const doc = runOk('radix-sort', { values }).document;
+      check(doc, values);
+      expect(doc.steps.filter((s) => s.meta?.id === 'pass')).toHaveLength(1);
+      expect(doc.steps.at(-2)!.meta!.narration).toContain('its one digit');
+    }
+  });
+
+  it('keeps j on the last value counted and placed, and clears b each pass', () => {
+    const doc = runOk('radix-sort', undefined).document;
+    const trace = replay(doc);
+    for (const id of ['count', 'place']) {
+      const last = doc.steps.findLastIndex((s) => s.meta?.id === id);
+      const a = stateOf(trace, 'a', 'array', last + 1);
+      expect(a.marks.pointers['j']).toBeDefined();
+    }
+    const secondPass = doc.steps.findIndex(
+      (s, k) => k > 0 && s.meta?.id === 'pass',
+    );
+    expect(valuesAt(trace, 'b', secondPass + 1).every((v) => v === '')).toBe(
+      true,
+    );
+    // After counting the last digits of the example, c holds their counts.
+    const firstSum = doc.steps.findIndex((s) => s.meta?.id === 'sum');
+    expect(valuesAt(trace, 'c', firstSum)).toEqual([
+      1, 0, 0, 0, 0, 1, 1, 2, 0, 2,
+    ]);
+  });
+
   it('keeps values with fewer digits, reading their missing digits as 0', () => {
     check(
       runOk('radix-sort', '7 1000 42 0 999').document,

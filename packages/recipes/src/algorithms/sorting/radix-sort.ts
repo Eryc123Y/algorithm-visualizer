@@ -60,7 +60,7 @@ export const radixSort = defineAlgorithm({
     `,
     python: `
       def radix_sort(a, d):
-          for i in range(d):
+          for i in range(1, d + 1):
               a = counting_sort_on_digit(a, i)  # @pass
           return a  # @sorted
 
@@ -68,12 +68,12 @@ export const radixSort = defineAlgorithm({
           n = len(a)
           b, c = [None] * n, [0] * 10
           for j in range(n):
-              x = a[j] // 10 ** i % 10
+              x = a[j] // 10 ** (i - 1) % 10
               c[x] += 1  # @count
           for x in range(1, 10):
               c[x] += c[x - 1]  # @sum
           for j in range(n - 1, -1, -1):
-              x = a[j] // 10 ** i % 10
+              x = a[j] // 10 ** (i - 1) % 10
               c[x] -= 1  # @place
               b[c[x]] = a[j]
           return b  # @copy
@@ -102,8 +102,8 @@ export const radixSort = defineAlgorithm({
       trace.step(
         'pass',
         d === 1
-          ? 'Every value has one digit: one stable pass sorts them.'
-          : `Pass ${i + 1} of ${d}: sort on the ${which} digit, keeping ties in their order.`,
+          ? 'The largest value has one digit, so d = 1: one stable pass sorts them.'
+          : `Pass ${i + 1} of ${d}, as the largest value has ${d} digits: sort on the ${which} digit, keeping ties in their order${i === 0 ? '' : '; a missing digit counts as 0'}.`,
         { vars: { i: i + 1, d } },
       );
       const c = Array.from({ length: 10 }, () => 0);
@@ -121,12 +121,12 @@ export const radixSort = defineAlgorithm({
         arr.pointer({ name: 'j', index: j }).highlight({ indices: [j] });
         counts.set({ index: x, value: c[x]! }).highlight({ indices: [x] });
       });
-      arr.pointer({ name: 'j', index: null });
       for (let x = 1; x < 10; x++) c[x]! += c[x - 1]!;
       trace.step(
         'sum',
-        `Running sums: c[x] is now how many values have a ${which} digit of at most x.`,
+        `Running sums: for each digit x, c[x] is now how many values have a ${which} digit of at most x.`,
       );
+      arr.pointer({ name: 'j', index: null });
       c.forEach((value, x) => counts.set({ index: x, value }));
 
       const b: number[] = Array.from({ length: n }, () => 0);
@@ -144,15 +144,15 @@ export const radixSort = defineAlgorithm({
         counts.set({ index: x, value: c[x]! }).highlight({ indices: [x] });
         out.set({ index: c[x]!, value }).highlight({ indices: [c[x]!] });
       }
-      arr.pointer({ name: 'j', index: null });
       a = b;
       const last = i === d - 1;
       trace.step(
         'copy',
         last
-          ? `Copy b into a: sorted on all ${d} digits, a is sorted.`
+          ? `Copy b into a: sorted on ${d === 1 ? 'its one digit' : `all ${d} digits`}, a is sorted.`
           : `Copy b into a: it is now sorted on its last ${i === 0 ? 'digit' : `${i + 1} digits`}.`,
       );
+      arr.pointer({ name: 'j', index: null });
       a.forEach((value, j) => arr.set({ index: j, value }));
       if (last) a.forEach((_, j) => arr.settle({ index: j }));
     }
