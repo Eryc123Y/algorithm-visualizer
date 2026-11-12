@@ -109,20 +109,18 @@ const DELETE = listing('delete', {
       LIST-DELETE(L, x)
           if x.prev ≠ NIL
               x.prev.next = x.next  // @unlink
-          else L.head = x.next
+          else L.head = x.next  // @behead
           if x.next ≠ NIL
               x.next.prev = x.prev  // @back
-          remove x from the list  // @removed
   `,
   python: `${SEARCH_PYTHON}
       def list_delete(l, x):
           if x.prev is not None:
               x.prev.next = x.next  # @unlink
           else:
-              l.head = x.next
+              l.head = x.next  # @behead
           if x.next is not None:
               x.next.prev = x.prev  # @back
-          x.prev = x.next = None  # @removed
   `,
 });
 
@@ -140,7 +138,9 @@ function search(s: ListState, key: number, trace: Trace, on: On): number {
     `x = L.head, which holds ${s.keys[0]}${s.keys[0] === key ? `, the key ${key}` : ''}.`,
     { vars: { k: key } },
   );
-  on.pointer({ name: 'x', index: 0 }).highlight({ indices: [0] });
+  on.pointer({ name: 'head', index: 0 })
+    .pointer({ name: 'x', index: 0 })
+    .highlight({ indices: [0] });
   let at = 0;
   while (at < s.keys.length && s.keys[at] !== key) {
     at += 1;
@@ -201,6 +201,7 @@ function prepend(
   );
   const next = place(s, key, 0, on);
   on.pointer({ name: 'x', index: 0 }).highlight({ indices: [0] });
+  if (head !== undefined) on.pointer({ name: 'head', index: 1 });
   if (head !== undefined) {
     on.link({ from: 0, to: 1 });
     trace.step(
@@ -264,7 +265,7 @@ function remove(
   const prev = s.keys[at - 1];
   const succ = s.keys[at + 1];
   trace.step(
-    'unlink',
+    prev === undefined ? 'behead' : 'unlink',
     prev === undefined
       ? `x is the head: L.head = x.next, ${succ === undefined ? 'so the list becomes empty' : `the node of ${succ}`}.`
       : `x.prev.next = x.next: ${succ === undefined ? `${prev} is now last` : `${prev} now points to ${succ}`}.`,
@@ -287,10 +288,7 @@ function remove(
       field: 'prev',
     }).highlight({ indices: [at + 1] });
   }
-  trace.step(
-    'removed',
-    `Nothing points to the node of ${key}: it is out of the list.`,
-  );
+  // Nothing points to x any more: it leaves the drawing in the last step.
   on.pointer({ name: 'x', index: null }).remove({ index: at });
   if (prev === undefined && succ !== undefined)
     on.pointer({ name: 'head', index: 0 });

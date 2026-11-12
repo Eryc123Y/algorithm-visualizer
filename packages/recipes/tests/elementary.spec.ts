@@ -91,8 +91,11 @@ describe('stack', () => {
             from: one.after,
             ops: input.calls.slice(1),
           });
-          expect(cells(replay(rest.document), 'S')).toEqual(
-            stackReference(input.size, input.keys, input.calls).cells,
+          const end = stackReference(input.size, input.keys, input.calls);
+          const trace = replay(rest.document);
+          expect(cells(trace, 'S')).toEqual(end.cells);
+          expect(pointer(trace, 'S', 'top')).toBe(
+            end.top < 0 ? undefined : end.top,
           );
         }
       }),
@@ -240,7 +243,9 @@ function listReference(keys: number[], calls: ListCall[]) {
 function linked(trace: Trace): number[] {
   const list = stateOf(trace, 'L', 'linkedList');
   const byId = new Map(list.data.map((n) => [n.id, n]));
-  const head = list.marks.pointers['head'] ?? list.data[0]?.id;
+  const head = list.marks.pointers['head'];
+  // Every operation shows head; an empty list has none.
+  expect(head === undefined).toBe(list.data.length === 0);
   const order: string[] = [];
   for (let id = head ?? null; id !== null; id = byId.get(id)!.next)
     order.push(id);
