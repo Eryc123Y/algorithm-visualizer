@@ -30,10 +30,10 @@ export const matrixChain = defineAlgorithm({
     dims: listField(
       z
         .array(z.int().min(1).max(MAX_DIMENSION))
-        .min(2)
+        .min(3)
         .max(MAX_MATRICES + 1)
         .describe(
-          `The dimensions p[0], …, p[n]: matrix Aᵢ is p[i − 1] × p[i], for 1 to ${MAX_MATRICES} matrices. E.g. [30, 35, 15, 5, 10, 20, 25].`,
+          `The dimensions p[0], …, p[n]: matrix Aᵢ is p[i − 1] × p[i], for 2 to ${MAX_MATRICES} matrices. E.g. [30, 35, 15, 5, 10, 20, 25].`,
         ),
       'number',
     ),
@@ -49,19 +49,21 @@ export const matrixChain = defineAlgorithm({
           for l = 2 to n
               for i = 1 to n - l + 1
                   j = i + l - 1
-                  m[i, j] = ∞
+                  best = ∞
                   for k = i to j - 1
                       q = m[i, k] + m[k + 1, j] + p[i - 1]·p[k]·p[j]  // @try
-                      if q < m[i, j]
-                          m[i, j] = q
-                          s[i, j] = k
-                  record m[i, j] and s[i, j]  // @best
+                      if q < best
+                          best = q
+                          split = k
+                  m[i, j] = best  // @best
+                  s[i, j] = split
           return m and s
 
       PRINT-OPTIMAL-PARENS(s, i, j)
           if i == j
               print "A"ᵢ
-          else print "("
+          else
+              print "("
               PRINT-OPTIMAL-PARENS(s, i, s[i, j])  // @split
               PRINT-OPTIMAL-PARENS(s, s[i, j] + 1, j)
               print ")"
@@ -74,12 +76,12 @@ export const matrixChain = defineAlgorithm({
           for l in range(2, n + 1):
               for i in range(1, n - l + 2):
                   j = i + l - 1
-                  m[i][j] = float('inf')
+                  best, split = float('inf'), None
                   for k in range(i, j):
                       q = m[i][k] + m[k + 1][j] + p[i - 1] * p[k] * p[j]  # @try
-                      if q < m[i][j]:
-                          m[i][j], s[i][j] = q, k
-                  pass  # @best
+                      if q < best:
+                          best, split = q, k
+                  m[i][j], s[i][j] = best, split  # @best
           return m, s
 
       def optimal_parens(s, i, j):
@@ -93,11 +95,13 @@ export const matrixChain = defineAlgorithm({
     const p = dims;
     const n = p.length - 1;
     const labels = Array.from({ length: n }, (_, k) => k + 1);
-    const m: number[][] = labels.map((_, i) => labels.map((_, j) => (i === j ? 0 : Infinity)));
+    const m: number[][] = labels.map((_, i) =>
+      labels.map((_, j) => (i === j ? 0 : Infinity)),
+    );
     const s: number[][] = labels.map(() => labels.map(() => 0));
     const M = trace.add('m', {
       kind: 'table',
-      label: 'm[i, j]: fewest multiplications for Aᵢ⋯Aⱼ',
+      label: 'm[i, j]: fewest multiplications for Ai to Aj',
       initial: labels.map((_, i) => labels.map((_, j) => (i === j ? 0 : null))),
       rowLabels: labels,
       columnLabels: labels,
@@ -114,12 +118,6 @@ export const matrixChain = defineAlgorithm({
     // Cells are 0-based; the matrices, and the narration, count from 1.
     const cell = (i: number, j: number): [number, number] => [i - 1, j - 1];
 
-    if (n === 1) {
-      trace.step('best', `One matrix, A1, ${p[0]} × ${p[1]}: nothing to multiply, m[1, 1] = 0.`, {
-        vars: { n },
-      });
-      M.settle({ cells: [cell(1, 1)] });
-    }
     for (let l = 2; l <= n; l++)
       for (let i = 1; i <= n - l + 1; i++) {
         const j = i + l - 1;
@@ -146,12 +144,18 @@ export const matrixChain = defineAlgorithm({
           `m[${i}, ${j}] = ${best}: A${i}⋯A${j} is cheapest split after A${k}, so s[${i}, ${j}] = ${k}.`,
           { vars: { i, j, k } },
         );
-        M.set({ cell: cell(i, j), value: best }).highlight({ cells: [cell(i, j)] });
-        S.set({ cell: cell(i, j), value: k }).highlight({ cells: [cell(i, j)] });
+        M.set({ cell: cell(i, j), value: best }).highlight({
+          cells: [cell(i, j)],
+        });
+        S.set({ cell: cell(i, j), value: k }).highlight({
+          cells: [cell(i, j)],
+        });
       }
 
     const parens = (i: number, j: number): string =>
-      i === j ? `A${i}` : `(${parens(i, s[i - 1]![j - 1]!)}${parens(s[i - 1]![j - 1]! + 1, j)})`;
+      i === j
+        ? `A${i}`
+        : `(${parens(i, s[i - 1]![j - 1]!)}${parens(s[i - 1]![j - 1]! + 1, j)})`;
     const split = (i: number, j: number): void => {
       if (i === j) return;
       const k = s[i - 1]![j - 1]!;
@@ -167,6 +171,6 @@ export const matrixChain = defineAlgorithm({
       split(k + 1, j);
     };
     split(1, n);
-    if (n > 1) M.settle({ cells: [cell(1, n)] });
+    M.settle({ cells: [cell(1, n)] });
   },
 });
