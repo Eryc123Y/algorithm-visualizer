@@ -22,6 +22,7 @@ export const TOPICS = [
   'dynamic-programming',
   'greedy',
   'strings',
+  'foundations',
 ] as const;
 export type Topic = (typeof TOPICS)[number];
 
@@ -37,6 +38,7 @@ export const TOPIC_TITLES: Readonly<Record<Topic, string>> = {
   'dynamic-programming': 'Dynamic programming',
   greedy: 'Greedy algorithms',
   strings: 'String matching',
+  foundations: 'Divide and conquer, randomization',
 };
 
 /** What an operation returns: found or not, a popped value, or nothing. */
