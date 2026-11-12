@@ -80,8 +80,10 @@ export function recordQuicksort(
       'random',
       k === r
         ? `RANDOM(${p}, ${r}) draws ${k}: the pivot is ${a[r]}, already last.`
-        : `RANDOM(${p}, ${r}) draws ${k}: swap ${a[k]} into a[${r}], to be the pivot.`,
-      { vars: { p, r, i: k } },
+        : a[k] === a[r]
+          ? `RANDOM(${p}, ${r}) draws ${k}: a[${k}] equals a[${r}], so the pivot is ${a[r]} either way.`
+          : `RANDOM(${p}, ${r}) draws ${k}: swap ${a[k]} into a[${r}], to be the pivot.`,
+      { vars: { p, r, k } },
     );
     calls.push(`call-${p}-${r}`, `sort a[${p}..${r}]`);
     arr.highlight({ indices: k === r ? [r] : [k, r] });

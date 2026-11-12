@@ -15,13 +15,21 @@ import { fuzz, replay, runOk, stateOf } from './helpers.ts';
 import { recipe } from './recipe-properties.ts';
 
 /** The pivots, in the order the partitions take them. */
-function pivotsOf(values: readonly number[], seed: number): number[] {
+const pivotsOf = (values: readonly number[], seed: number) =>
+  reference(values, seed).pivots;
+/** The indices RANDOM drew, in the same order. */
+const drawsOf = (values: readonly number[], seed: number) =>
+  reference(values, seed).draws;
+
+function reference(values: readonly number[], seed: number) {
   const a = [...values];
   const random = seededRandom(seed);
   const pivots: number[] = [];
+  const draws: number[] = [];
   const sort = (p: number, r: number): void => {
     if (p >= r) return;
     const k = random.int(p, r);
+    draws.push(k);
     [a[k], a[r]] = [a[r]!, a[k]!];
     const x = a[r];
     pivots.push(x);
@@ -36,7 +44,7 @@ function pivotsOf(values: readonly number[], seed: number): number[] {
     sort(i + 2, r);
   };
   sort(0, a.length - 1);
-  return pivots;
+  return { pivots, draws };
 }
 
 const steps = (doc: VisualizationInput, id: string) =>
@@ -53,6 +61,9 @@ function check(
   expect(a.marks.settled).toHaveLength(values.length);
   expect(steps(doc, 'pivot').map((s) => s.meta?.vars?.['x'])).toEqual(
     pivotsOf(values, seed),
+  );
+  expect(steps(doc, 'random').map((s) => s.meta?.vars?.['k'])).toEqual(
+    drawsOf(values, seed),
   );
   expect(steps(doc, 'random')).toHaveLength(steps(doc, 'pivot').length);
   expect(stateOf(trace, 'calls', 'stack').data).toEqual([]);
@@ -97,7 +108,7 @@ describe('randomized-quicksort', () => {
     let total = 0;
     for (let seed = 0; seed < 100; seed++)
       total += steps(run(sorted, seed), 'compare').length;
-    // About 2n ln n - 2.85n, or 84 for n = 24 (CLRS 7.4).
+    // The expectation is 2(n + 1)H(n) - 4n, about 93 for n = 24 (CLRS 7.4).
     expect(total / 100).toBeLessThan(130);
   });
 });
