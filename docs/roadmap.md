@@ -136,7 +136,7 @@ Each entry is one registry module, or one per operation for data structures. Eac
 - [x] interval tree (S3) (#70)
 - [ ] B-tree: search, insert, delete (S6)
 - [x] disjoint sets (union by rank, path compression)
-- [ ] Fibonacci heap: insert, union, extract-min, decrease-key, delete (S1, S3, S5)
+- [x] Fibonacci heap: insert, union, extract-min, decrease-key, delete (S1, S3, S5) (#71)
 
 **VI Graph algorithms**
 
