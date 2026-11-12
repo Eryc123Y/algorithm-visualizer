@@ -1,8 +1,8 @@
-// The Worker's configuration. "algoviz-mcp-example" is a placeholder:
-// choose your own Worker name before deploying (README).
+// The Worker's configuration. The name is part of the Worker's workers.dev
+// address; a copy deployed to another account may pick its own (README).
 {
   "$schema": "../../node_modules/wrangler/config-schema.json",
-  "name": "algoviz-mcp-example",
+  "name": "algoviz-mcp",
   "main": "dist/worker.js",
   "compatibility_date": "2026-10-01",
   "no_bundle": true,
