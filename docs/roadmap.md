@@ -113,8 +113,8 @@ Each entry is one registry module, or one per operation for data structures. Eac
 - [ ] stack, queue and linked-list operations (search, insert, delete)
 - [x] separate chaining
 - [x] linear probing
-- [ ] quadratic probing
-- [ ] double hashing
+- [x] quadratic probing (#113)
+- [x] double hashing (#113)
 - [x] BST operations (`bst`)
 - [x] tree walks
 - [x] red–black tree: insert (S2), delete (S2) (#68)

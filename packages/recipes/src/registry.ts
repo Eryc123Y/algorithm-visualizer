@@ -74,7 +74,9 @@ import { bTree } from './structures/b-tree/index.ts';
 import { bst } from './structures/bst/index.ts';
 import { disjointSet } from './structures/disjoint-set/index.ts';
 import { hashChaining } from './structures/hashing/chaining.ts';
+import { doubleHashing } from './structures/hashing/double-hashing.ts';
 import { linearProbing } from './structures/hashing/linear-probing.ts';
+import { quadraticProbing } from './structures/hashing/quadratic-probing.ts';
 import { stack } from './structures/elementary/stack.ts';
 import { fibonacciHeap } from './structures/fibonacci-heap/index.ts';
 import { maxHeap, minHeap } from './structures/heap/index.ts';
@@ -118,6 +120,8 @@ export const algorithms: readonly Algorithm[] = [
   ...fibonacciHeap.modules,
   ...hashChaining.modules,
   ...linearProbing.modules,
+  ...quadraticProbing.modules,
+  ...doubleHashing.modules,
   bfs,
   dfs,
   topologicalSort,
