@@ -202,7 +202,7 @@ Independent of Phase 2, so the two can interleave.
 ## Phase 4: release 1.0
 
 - [ ] **4.1 Name** _owner_. Check availability on npm, Typst Universe and CTAN.
-- [ ] **4.2 Freeze the protocol at 1.0** under 0.4's rules. Regenerate the JSON Schema and fixtures.
+- [~] **4.2 Freeze the protocol at 1.0** under 0.4's rules. Regenerate the JSON Schema and fixtures. _ADR_ [ADR 0043](adr/0043-protocol-1-0.md).
 - [ ] **4.3 Publish** _owner_: npm packages, the CDN bundle, the Typst package, the LaTeX package and the standalone executable.
 - [ ] **4.4 Release check.**
   - Deep fuzz (`FUZZ_RUNS=5000`) and the full E2E suite pass.
