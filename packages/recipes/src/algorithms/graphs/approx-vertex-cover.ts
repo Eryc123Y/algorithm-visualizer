@@ -20,6 +20,9 @@ import {
   type GraphInput,
 } from './graph.ts';
 
+/** Most edges dimmed in one step, under the 100 actions a step may hold. */
+const MAX_DIMMED = 90;
+
 export const approxVertexCover = defineAlgorithm({
   id: 'approx-vertex-cover',
   title: 'Approximate vertex cover',
@@ -84,9 +87,9 @@ export const approxVertexCover = defineAlgorithm({
       const k = Math.min(...left);
       const [u, v] = g.edges[k]!;
       taken.push(k);
-      const fresh = [u, v].filter(
-        (x, i, all) => all.indexOf(x) === i && !cover.includes(x),
-      );
+      // Neither end is in the cover yet: every edge touching the cover is
+      // gone. A loop has one end.
+      const fresh = u === v ? [u] : [u, v];
       cover.push(...fresh);
       trace.step(
         'take',
@@ -108,14 +111,23 @@ export const approxVertexCover = defineAlgorithm({
           ? `No other edge touches ${u === v ? u : `${u} or ${v}`}: ${left.size === 0 ? 'none is left' : `${left.size} still to cover`}.`
           : `Remove the ${others.length} other edge${others.length === 1 ? '' : 's'} touching ${u === v ? u : `${u} or ${v}`}, now covered: ${left.size === 0 ? 'none is left' : `${left.size} still to cover`}.`,
       );
-      for (const j of others)
-        graph.markEdge({ edge: ids[j]!, mark: 'rejected' });
+      // A step holds at most 100 actions: a star's edges are dimmed over
+      // several.
+      for (let i = 0; i < others.length; i += MAX_DIMMED) {
+        if (i > 0)
+          trace.step(
+            'remove',
+            `More of the ${others.length} edges touching ${u === v ? u : `${u} or ${v}`}.`,
+          );
+        for (const j of others.slice(i, i + MAX_DIMMED))
+          graph.markEdge({ edge: ids[j]!, mark: 'rejected' });
+      }
     }
     trace.step(
       'done',
       cover.length === 0
         ? 'The graph has no edges, so the empty cover covers them all.'
-        : `No edge is left: ${cover.length === 1 ? `the vertex ${cover[0]} covers` : `the ${cover.length} vertices ${cover.join(' ')} cover`} every edge. ${taken.length === 1 ? 'Every cover holds' : `The ${taken.length} edges taken share no vertex, and every cover holds`} an end of ${taken.length === 1 ? 'the edge taken' : 'each'}, so the smallest cover has at least ${taken.length} vertex${taken.length === 1 ? '' : 'es'}: this one is at most twice that.`,
+        : `No edge is left: ${cover.length === 1 ? `the vertex ${cover[0]} covers` : `the ${cover.length} vertices ${cover.join(', ')} cover`} every edge. ${taken.length === 1 ? 'Every cover holds' : `The ${taken.length} edges taken share no vertex, and every cover holds`} an end of ${taken.length === 1 ? 'the edge taken' : 'each'}, so the smallest cover has at least ${taken.length} vertex${taken.length === 1 ? '' : 'es'}: this one is at most twice that.`,
     );
     return { results: [cover.length] };
   },

@@ -166,8 +166,8 @@ Each entry is one registry module, or one per operation for data structures. Eac
 - [x] Euclid and extended Euclid (#100)
 - [x] modular exponentiation (#101)
 - [x] string matching: naive, Rabin–Karp, finite automaton, KMP (S9, [ADR 0037](adr/0037-array-pattern.md), #82, #83)
-- [ ] suffix array
-- [ ] approximation: vertex cover (#PR), TSP tour (#PR), set cover (three PRs, each hard to review with the others)
+- [x] suffix array (#102)
+- [ ] approximation: vertex cover (#103), TSP tour (#PR), set cover (three PRs, each hard to review with the others)
 - [x] computational geometry, 3rd edition: segment intersection, Graham scan, Jarvis march, closest pair (S8, [ADR 0038](adr/0038-plane-kind.md), #84, #85)
 
 Recipes that exist beyond CLRS stay: bubble and selection sort, binary search, list reversal, bracket matching, AVL, trie, binary heap run, edit distance and 0/1 knapsack.

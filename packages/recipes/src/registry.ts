@@ -48,6 +48,7 @@ import {
 } from './algorithms/trees/tree-walks.ts';
 import { finiteAutomatonMatcher } from './algorithms/strings/finite-automaton.ts';
 import { kmp } from './algorithms/strings/kmp.ts';
+import { suffixArray } from './algorithms/strings/suffix-array.ts';
 import { strassen } from './algorithms/foundations/strassen.ts';
 import { lup } from './algorithms/math/lup.ts';
 import { fft } from './algorithms/math/fft.ts';
@@ -129,6 +130,7 @@ export const algorithms: readonly Algorithm[] = [
   rabinKarp,
   finiteAutomatonMatcher,
   kmp,
+  suffixArray,
   anySegmentsIntersect,
   grahamScan,
   jarvisMarch,

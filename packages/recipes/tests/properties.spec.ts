@@ -2137,6 +2137,23 @@ recipe(
   },
 );
 
+// Suffix array: texts over a few letters, so suffixes share prefixes.
+recipe(
+  'suffix-array',
+  fc.string({
+    unit: fc.constantFrom('a', 'b', 'n'),
+    minLength: 1,
+    maxLength: 16,
+  }),
+  (text) => runOk('suffix-array', { text }).document,
+  (trace, text) => {
+    // The suffix column is in increasing order.
+    const suffixes = stateOf(trace, 'S', 'table').data.map((r) => String(r[1]));
+    expect(suffixes).toEqual([...suffixes].sort());
+    expect(suffixes).toHaveLength(text.length);
+  },
+);
+
 // Approximate vertex cover: any graph.
 recipe(
   'approx-vertex-cover',

@@ -73,6 +73,37 @@ describe('approx-vertex-cover', () => {
     );
   });
 
+  it('keeps every step within its action limit on a star and parallel edges', () => {
+    const nodes = Array.from({ length: 40 }, (_, k) => `v${k}`);
+    const star = Array.from({ length: 200 }, (_, i): Pair => [
+      'v0',
+      `v${1 + (i % 39)}`,
+    ]);
+    const parallel = Array.from({ length: 200 }, (): Pair => ['v1', 'v2']);
+    for (const edges of [star, parallel]) {
+      const { document, results } = runOk('approx-vertex-cover', {
+        graph: { nodes, edges },
+      });
+      expect(results).toEqual([2]);
+      for (const step of document.steps)
+        expect(step.actions.length).toBeLessThanOrEqual(100);
+    }
+    // Directed edges are taken as undirected.
+    expect(
+      runOk('approx-vertex-cover', {
+        graph: {
+          directed: true,
+          nodes: ['a', 'b', 'c'],
+          edges: [
+            ['a', 'b'],
+            ['b', 'a'],
+            ['c', 'b'],
+          ],
+        },
+      }).results,
+    ).toEqual([2]);
+  });
+
   it('narrates a graph with no edges, and a loop', () => {
     const none = runOk('approx-vertex-cover', {
       graph: { nodes: ['a'], edges: [] },

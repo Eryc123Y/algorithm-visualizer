@@ -72,7 +72,7 @@ The registry holds these modules, by topic ([ADR 0022](docs/adr/0022-registry-de
 - **Graphs:** `bfs`, `dfs`, `topological-sort`, `strongly-connected-components`, `dijkstra`, `bellman-ford`, `dag-shortest-paths`, `prim`, `kruskal`, `floyd-warshall`, `transitive-closure`, `johnson`, `edmonds-karp`, `bipartite-matching`, `hopcroft-karp`, `gale-shapley`, `hungarian`, `approx-vertex-cover`, `approx-tsp-tour`.
 - **Dynamic programming:** `lcs`, `edit-distance`, `knapsack`.
 - **Greedy algorithms:** `huffman`.
-- **String matching:** `naive-string-matcher`, `rabin-karp`, `finite-automaton-matcher`, `kmp`.
+- **String matching:** `naive-string-matcher`, `rabin-karp`, `finite-automaton-matcher`, `kmp`, `suffix-array`.
 - **Computational geometry:** `any-segments-intersect`, `graham-scan`, `jarvis-march`, `closest-pair`.
 - **Algebra and number theory:** `lup-decomposition`, `fft`, `euclid`, `extended-euclid`, `modular-exponentiation`.
 
