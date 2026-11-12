@@ -37,5 +37,6 @@ Each file records one architectural decision: the context, what we decided, and 
 | [0031](0031-painter-fixes.md)                       | Marks, notes and pointer bands that read in every frame              | Accepted                            |
 | [0032](0032-algorithm-and-input.md)                 | Every output takes an algorithm and its input, in short notations    | Accepted                            |
 | [0033](0033-slide-figures-fill-the-frame.md)        | Slide figures fill the frame                                         | Accepted                            |
+| [0034](0034-tree-additions.md)                      | Trees get root order, NIL slots, named notes, edge marks, root lists | Accepted                            |
 
 Template: Status · Context · Decision · Consequences.
