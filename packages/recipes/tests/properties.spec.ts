@@ -2070,6 +2070,24 @@ recipe(
   },
 );
 
+// FFT: coefficients of every allowed length.
+recipe(
+  'fft',
+  fc.constantFrom(1, 2, 4, 8, 16).chain((n) =>
+    fc.array(fc.integer({ min: -99, max: 99 }), {
+      minLength: n,
+      maxLength: n,
+    }),
+  ),
+  (coefficients) => runOk('fft', { coefficients }).document,
+  (trace, coefficients) => {
+    // y_0 is the sum of the coefficients, a real number.
+    const y0 = stateOf(trace, 'T', 'table').data[0]![1];
+    const sum = coefficients.reduce((s, x) => s + x, 0);
+    expect(String(y0).replace('−', '-')).toBe(String(sum));
+  },
+);
+
 // Euclid and extended Euclid: pairs of whole numbers, not both 0.
 const euclidPairs = fc
   .tuple(fc.nat(100_000), fc.nat(100_000))
