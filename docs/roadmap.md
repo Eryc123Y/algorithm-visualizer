@@ -153,7 +153,7 @@ Each entry is one registry module, or one per operation for data structures. Eac
 - [x] transitive closure (#91)
 - [ ] Johnson
 - [ ] Edmonds–Karp maximum flow
-- [ ] bipartite matching
+- [x] bipartite matching (#94)
 - [ ] Hopcroft–Karp
 - [ ] stable matching (Gale–Shapley)
 - [ ] Hungarian algorithm
