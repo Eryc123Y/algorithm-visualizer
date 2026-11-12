@@ -102,6 +102,46 @@ describe('johnson', () => {
     );
   });
 
+  it('takes names it would give s, parallel edges and decimals', () => {
+    const names = runOk('johnson', {
+      graph: {
+        directed: true,
+        nodes: ['s', 's1', 's:a', 'a'],
+        edges: [
+          ['s', 's1', -1],
+          ['s1', 's:a', 2],
+          ['s:a', 'a', 1],
+        ],
+      },
+    });
+    expect(stateOf(replay(names.document), 'D', 'table').data[0]).toEqual([
+      '0',
+      '−1',
+      '1',
+      '2',
+    ]);
+    const parallel = runOk('johnson', {
+      graph: {
+        directed: true,
+        nodes: ['a', 'b'],
+        edges: [
+          ['a', 'b', 3],
+          ['a', 'b', -1],
+        ],
+      },
+    });
+    expect(stateOf(replay(parallel.document), 'D', 'table').data).toEqual([
+      ['0', '−1'],
+      ['∞', '0'],
+    ]);
+    const decimals = runOk('johnson', {
+      graph: 'a->b 0.1, b->c 0.2, a->c 0.3, c->a -0.25',
+    });
+    const g = stateOf(replay(decimals.document), 'g', 'graph');
+    for (const e of g.data.edges)
+      expect(String(e.weight).startsWith('−'), e.id).toBe(false);
+  });
+
   it('reports a negative cycle, and refuses more than 8 vertices', () => {
     expect(runOk('johnson', { graph: 'a->b 1, b->a -2' }).results).toEqual([
       false,

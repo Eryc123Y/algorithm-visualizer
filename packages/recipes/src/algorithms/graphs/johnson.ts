@@ -79,8 +79,9 @@ export const johnson = defineAlgorithm({
     `,
     python: `
       def johnson(g):
+          vs = list(g.vertices())
           s = g.add_vertex()  # @extend
-          for v in g.vertices():
+          for v in vs:
               g.add_edge(s, v, 0)
           h = bellman_ford(g, s)  # @potential
           if h is None:
@@ -137,7 +138,7 @@ export const johnson = defineAlgorithm({
     if (cycle !== undefined) {
       trace.step(
         'cycle',
-        `Bellman–Ford from ${s}: ${cycle.u} → ${cycle.v} still improves after every round, so a negative-weight cycle exists and there are no shortest paths.`,
+        `Bellman–Ford from ${s}: ${cycle.u} → ${cycle.v} still improves after ${n} rounds, so a negative-weight cycle is reachable and there are no shortest paths.`,
       );
       graph
         .highlight({ edges: [cycle.id] })
@@ -151,8 +152,12 @@ export const johnson = defineAlgorithm({
     for (const v of g.nodes)
       graph.annotate({ node: v, text: `h=${num(h.get(v)!)}` });
 
+    // Rounded to 12 digits, so decimal weights leave no residue below 0.
     const hat = new Map(
-      edges.map(({ u, v, w, id }) => [id, w + h.get(u)! - h.get(v)!]),
+      edges.map(({ u, v, w, id }) => [
+        id,
+        Number((w + h.get(u)! - h.get(v)!).toPrecision(12)),
+      ]),
     );
     trace.step(
       'reweight',
@@ -166,6 +171,8 @@ export const johnson = defineAlgorithm({
     g.nodes.forEach((u, row) => {
       trace.step('source', `Run Dijkstra from ${u} on the new weights.`);
       graph.resetMarks().pointer({ name: 'u', node: u });
+      for (const v of g.nodes)
+        graph.annotate({ node: v, text: v === u ? '0' : '∞' });
       table.highlight({
         cells: g.nodes.map((_, c) => [row, c] as [number, number]),
       });
@@ -200,7 +207,7 @@ export const johnson = defineAlgorithm({
       }
       trace.step(
         'row',
-        `Shift each result back: D[${u}][v] = d̂(${u}, v) + h(v) − h(${u}), the distance on the original weights.`,
+        `Shift each result back: the distance from ${u} to v on the original weights is d̂(${u}, v) + h(v) − h(${u}).`,
       );
       g.nodes.forEach((v, c) => {
         const dv = d.get(v)!;
