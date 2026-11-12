@@ -20,7 +20,7 @@ function gcd(a: bigint, b: bigint): bigint {
 /** n / d, reduced, with d > 0. */
 export function rational(n: bigint, d = 1n): Rational {
   if (d === 0n) throw new RangeError('A fraction cannot have denominator 0');
-  const g = gcd(n, d) || 1n;
+  const g = gcd(n, d);
   const sign = d < 0n ? -1n : 1n;
   return { n: (sign * n) / g, d: (sign * d) / g };
 }

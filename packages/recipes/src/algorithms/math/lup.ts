@@ -197,7 +197,7 @@ export const lup = defineAlgorithm({
       if (isZero(a[kk]![k]!)) {
         trace.step(
           'singular',
-          `Every entry of column ${ordinal(k)} at or below the diagonal is 0, so A is singular: it has no LUP decomposition, and det A = 0.`,
+          `Every entry of column ${ordinal(k)} at or below the diagonal is 0, so A is singular: it has no LUP decomposition, and det A = 0.${b === undefined ? '' : ' Ax = b has no unique solution, so there is nothing to substitute.'}`,
         );
         table.highlight({ cells: below });
         return { results: [0] };
@@ -217,6 +217,11 @@ export const lup = defineAlgorithm({
         swaps++;
         for (const i of [k, kk])
           a[i]!.forEach((v, j) => table.set({ cell: [i, j], value: show(v) }));
+        table.highlight({
+          cells: [k, kk].flatMap((i) =>
+            a[i]!.map((_, j) => [i, j] as [number, number]),
+          ),
+        });
         perm
           .set({ cell: [0, k], value: pi[k]! + 1 })
           .set({ cell: [0, kk], value: pi[kk]! + 1 })
@@ -255,13 +260,23 @@ export const lup = defineAlgorithm({
           a[i]![j] = sub(a[i]![j]!, mul(a[i]![k]!, a[k]![j]!));
           table.set({ cell: [i, j], value: show(a[i]![j]!) });
         }
+      table.highlight({
+        cells: Array.from(
+          { length: rest * rest },
+          (_, c) =>
+            [k + 1 + Math.floor(c / rest), k + 1 + (c % rest)] as [
+              number,
+              number,
+            ],
+        ),
+      });
     }
 
     const product = a.reduce((p, row, k) => mul(p, row[k]!), fromInt(1));
     const det = swaps % 2 === 0 ? product : sub(fromInt(0), product);
     trace.step(
       'done',
-      `A now holds L below the diagonal, whose 1s on the diagonal are not stored, and U on and above it: PA = LU, where row i of PA is row π[i] of the input. det A is the product of U's diagonal${swaps % 2 === 0 ? '' : `, negated for the ${swaps} exchanges`}: ${show(det)}.`,
+      `A now holds L below the diagonal, whose 1s on the diagonal are not stored, and U on and above it: PA = LU, where row i of PA is row π[i] of the input. det A is the product of U's diagonal${swaps % 2 === 0 ? '' : `, negated since there ${swaps === 1 ? 'was 1 exchange' : `were ${swaps} exchanges`}`}: ${show(det)}.`,
     );
     if (b !== undefined && side !== undefined)
       solve(a, pi, b, trace, table, side);
