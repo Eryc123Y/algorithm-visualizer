@@ -544,6 +544,37 @@ recipe(
   },
 );
 
+const intervals = fc
+  .tuple(fc.integer({ min: -20, max: 20 }), fc.integer({ min: 0, max: 9 }))
+  .map(([low, length]): [number, number] => [low, low + length]);
+
+recipe(
+  'interval-tree',
+  fc
+    .tuple(
+      fc.uniqueArray(intervals, { maxLength: 24, selector: (i) => i.join() }),
+      fc.array(
+        fc.record({
+          op: fc.constantFrom('insert', 'delete', 'search'),
+          interval: intervals,
+        }),
+        { minLength: 1, maxLength: 8 },
+      ),
+    )
+    .map(([from, ops]) => ({ from, ops })),
+  (input) => runOk('interval-tree', input).document,
+  (trace, { from, ops }) => {
+    const keys = new Map(from.map((i) => [i.join(), i]));
+    for (const { op, interval } of ops)
+      if (op === 'insert') keys.set(interval.join(), interval);
+      else if (op === 'delete') keys.delete(interval.join());
+    const sorted = [...keys.values()]
+      .sort((a, b) => a[0] - b[0] || a[1] - b[1])
+      .map(([a, b]) => `[${a},${b}]`);
+    expect(inorder(stateOf(trace, 'T', 'tree'))).toEqual(sorted);
+  },
+);
+
 /**
  * A valid LeetCode level order: the root, then for every node in order
  * its two slots, then possibly a few trailing nulls.
