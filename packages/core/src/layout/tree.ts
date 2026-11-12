@@ -43,7 +43,7 @@ import {
   sidePointerWidth,
   treeEdge,
 } from './node-tree.ts';
-import { clearestAngle, noteRegion } from './notes.ts';
+import { CLEAR, clearance, clearestAngle, noteRegion } from './notes.ts';
 import type { LayoutFonts } from './options.ts';
 import type { ElementRole, SceneItem } from './scene.ts';
 import {
@@ -458,24 +458,25 @@ export function layoutTree({
       ];
       return points.slice(1).map((p, k) => [points[k]!, p]);
     });
+    const badgeBoxes = aboveItems.flatMap((i): LabelBox[] =>
+      i.type === 'badge'
+        ? [
+            {
+              x: i.x,
+              y: i.y,
+              halfWidth: i.width / 2,
+              halfHeight: i.height / 2,
+            },
+          ]
+        : [],
+    );
     const placed: LabelBox[] = [
       ...[...nilCentre.values()].map((c) => ({
         ...c,
         halfWidth: box.width / 2,
         halfHeight: box.height / 2,
       })),
-      ...aboveItems.flatMap((i): LabelBox[] =>
-        i.type === 'badge'
-          ? [
-              {
-                x: i.x,
-                y: i.y,
-                halfWidth: i.width / 2,
-                halfHeight: i.height / 2,
-              },
-            ]
-          : [],
-      ),
+      ...badgeBoxes,
     ];
     const inside = (b: LabelBox) =>
       b.x - b.halfWidth >= origin.x &&
@@ -495,13 +496,28 @@ export function layoutTree({
             inside(noteAt(c.x, c.y, a)),
         ),
       ];
-      const angle = clearestAngle(candidates, (a) => noteAt(c.x, c.y, a), {
+      const discs = state.data.nodes.flatMap((n) =>
+        n.id === node.id ? [] : [{ ...centre(n.id), radius: halfWidth }],
+      );
+      let angle = clearestAngle(candidates, (a) => noteAt(c.x, c.y, a), {
         segments: [...treeLines, ...lines],
-        discs: state.data.nodes.flatMap((n) =>
-          n.id === node.id ? [] : [{ ...centre(n.id), radius: halfWidth }],
-        ),
+        discs,
         boxes: placed,
       });
+      // With no clear place, a note may cross a line, which its halo
+      // keeps readable, but not cover a pointer above a root (ADR 0034).
+      const onBadge = (a: number) =>
+        clearance(noteAt(c.x, c.y, a), {
+          segments: [],
+          discs: [],
+          boxes: badgeBoxes,
+        }) < CLEAR;
+      if (badgeBoxes.length > 0 && onBadge(angle))
+        angle = clearestAngle(candidates, (a) => noteAt(c.x, c.y, a), {
+          segments: [],
+          discs,
+          boxes: placed,
+        });
       angles.set(node.id, angle);
       placed.push(noteAt(c.x, c.y, angle));
     }
