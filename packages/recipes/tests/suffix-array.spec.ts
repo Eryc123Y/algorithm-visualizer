@@ -8,6 +8,7 @@ import { describe, expect, it } from 'vitest';
 
 import { fuzz, replay, runError, runOk, stateOf } from './helpers.ts';
 
+/** The starts of the suffixes in sorted order; no two suffixes are equal. */
 const sorted = (t: string) =>
   [...t].map((_, i) => i).sort((x, y) => (t.slice(x) < t.slice(y) ? -1 : 1));
 
@@ -18,7 +19,7 @@ const common = (a: string, b: string) => {
 };
 
 const texts = fc.string({
-  unit: fc.constantFrom('a', 'b', 'c', 'n', '1'),
+  unit: fc.constantFrom('a', 'b', 'c', 'd', 'n', '1', 'Z'),
   minLength: 1,
   maxLength: 16,
 });
@@ -50,8 +51,12 @@ describe('suffix-array', () => {
           (s) => s.meta?.at === 'sort',
         ).length;
         expect(rounds).toBeLessThanOrEqual(Math.ceil(Math.log2(n)));
-        for (const step of document.steps)
+        for (const step of document.steps) {
           expect(step.actions.length).toBeLessThanOrEqual(100);
+          expect(['start', 'pairs', 'sort', 'order', 'lcp', 'done']).toContain(
+            step.meta?.at,
+          );
+        }
       }),
       fuzz,
     );
@@ -63,6 +68,13 @@ describe('suffix-array', () => {
     expect(document.steps.map((s) => s.meta?.at).slice(0, 2)).toEqual([
       'start',
       'order',
+    ]);
+    // The order step itself re-sorts the rows, with no pairs.
+    expect(stateOf(replay(document), 'S', 'table').data).toEqual([
+      [3, 'a', 1, '', '–'],
+      [2, 'ba', 2, '', 0],
+      [1, 'cba', 3, '', 0],
+      [0, 'dcba', 4, '', 0],
     ]);
   });
 
