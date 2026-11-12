@@ -45,5 +45,6 @@ Each file records one architectural decision: the context, what we decided, and 
 | [0039](0039-http-transport.md)                      | The MCP server speaks Streamable HTTP, statelessly, on Node and on Workers | Accepted                            |
 | [0040](0040-share-links.md)                         | Share links carry their content in the URL fragment                        | Accepted, amended by 0041           |
 | [0041](0041-share-link-limits.md)                   | Share links: tighter reader limits, a stricter base, own origin            | Accepted                            |
+| [0042](0042-arrows-and-badges-clear-of-text.md)     | Table arrows join only touching cells; point labels avoid badges first     | Accepted                            |
 
 Template: Status · Context · Decision · Consequences.
