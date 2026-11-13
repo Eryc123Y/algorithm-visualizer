@@ -48,10 +48,11 @@ export interface PageFrame {
 export const REPOSITORY = 'https://github.com/Eryc123Y/algorithm-visualizer';
 
 /**
- * The wordmark's glyph: three frames of a run, the last one current. It is
- * decorative; the link's name is the word beside it.
+ * The wordmark's glyph, a placeholder until the owner picks a logo: a play
+ * head over a sorted run of bars. It is decorative; the link's name is the
+ * word beside it.
  */
-const GLYPH = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect class="glyph-frame" x="1.5" y="12.5" width="7" height="7" rx="1.5"/><rect class="glyph-frame" x="8.5" y="8.5" width="7" height="7" rx="1.5"/><rect class="glyph-now" x="15.5" y="4.5" width="7" height="7" rx="1.5"/></svg>`;
+const GLYPH = `<svg viewBox="0 0 64 64" aria-hidden="true" focusable="false"><path class="glyph-now" d="M22 8H42L32 20Z"/><g class="glyph-bars"><rect x="12" y="40" width="10" height="14"/><rect x="27" y="30" width="10" height="24"/><rect x="42" y="20" width="10" height="34"/></g></svg>`;
 
 /** A whole page. Its Content Security Policy is added after the charset. */
 export function page({
