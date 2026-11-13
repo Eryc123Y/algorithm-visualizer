@@ -4,6 +4,7 @@
  * output, the themes, and the way into the catalogue.
  */
 import type { TopicGroup } from './catalog.ts';
+import { homeWhy } from './home-why.ts';
 import { attribute, page, text, type Assets } from './html.ts';
 import type { EntryDetails } from './pages.ts';
 import type { Snippet } from './snippets.ts';
@@ -295,6 +296,7 @@ ${plate(art)}
   </div>
   ${outputTabs(demo.snippets, art)}
 </section>
+${homeWhy()}
 ${AUDIENCES}
 ${themesStrip(art)}
 ${catalogTeaser(groups, count)}`,

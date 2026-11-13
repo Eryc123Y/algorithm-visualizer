@@ -6,6 +6,7 @@ The algomotion website, built as static files for Cloudflare Pages or any static
   - the home page, with one run in every output and the catalogue of every module by topic, a data structure's operations listed under it;
   - a page per module, `dijkstra/`, `bst/` and `bst/delete/`: its player on the first example, the names of its steps, and the same run as a snippet for a web page, Typst, LaTeX, the command line, MCP and a share link;
   - `themes/`: one figure in every built-in theme, and how each output picks one;
+  - `why/` (roadmap 5.4): what algomotion is for, its differences shown with figures drawn from real runs, a comparison with drawing by hand, Manim and visualization websites, its limits, and three walk-throughs whose runs the unit tests check (`src/docs/why.ts`); the home page links to it from a short section below the outputs (`src/docs/home-why.ts`);
   - `changelog/`, `roadmap/` and `contributing/` (roadmap 5.5), built from the repository's `CHANGELOG.md`, `docs/roadmap.md` and `CONTRIBUTING.md` by a small Markdown renderer (`src/docs/markdown.ts`) that escapes everything and links only http(s) and relative targets;
   - `404.html`.
 

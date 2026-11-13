@@ -21,11 +21,13 @@
     "src/docs/guide.ts",
     "src/docs/guides",
     "src/docs/home.ts",
+    "src/docs/home-why.ts",
     "src/docs/html.ts",
     "src/docs/markdown.ts",
     "src/docs/pages.ts",
     "src/docs/project.ts",
     "src/docs/short-input.ts",
-    "src/docs/snippets.ts"
+    "src/docs/snippets.ts",
+    "src/docs/why.ts"
   ]
 }

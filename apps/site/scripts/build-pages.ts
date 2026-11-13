@@ -37,10 +37,17 @@ import {
   countOf,
   detailsOf,
   entryPage,
+  stepsOf,
   notFoundPage,
   themesPage,
 } from '../src/docs/pages.ts';
 import { shortInput } from '../src/docs/short-input.ts';
+import {
+  WHY_FIGURES,
+  WHY_RUN,
+  whyPage,
+  type FigureLayout,
+} from '../src/docs/why.ts';
 import { snippetsFor } from '../src/docs/snippets.ts';
 import { withPolicy } from '../src/headers.ts';
 
@@ -79,8 +86,17 @@ function documentOf(algorithm: string, input: unknown): unknown {
 }
 
 /** One frame of `document` in `theme`. */
-function figureOf(document: unknown, step: string, theme: ThemeName): Figure {
-  const series = exportFigures(document, { theme, steps: [step] });
+function figureOf(
+  document: unknown,
+  step: string,
+  theme: ThemeName,
+  layout?: FigureLayout,
+): Figure {
+  const series = exportFigures(document, {
+    theme,
+    steps: [step],
+    ...(layout === undefined ? {} : { layout }),
+  });
   if (!series.ok)
     throw new Error(`${step} in ${theme}: ${JSON.stringify(series.error)}`);
   return series.value.figures[0]!;
@@ -96,9 +112,11 @@ function drawArt(
   stem: string,
   alt: string,
   theme?: ThemeName,
+  layout?: FigureLayout,
 ): Art {
-  const light = figureOf(document, step, theme ?? 'light');
-  const dark = theme === undefined ? figureOf(document, step, 'dark') : light;
+  const light = figureOf(document, step, theme ?? 'light', layout);
+  const dark =
+    theme === undefined ? figureOf(document, step, 'dark', layout) : light;
   write(`${stem}-light.svg`, light.svg);
   write(`${stem}-dark.svg`, dark.svg);
   return {
@@ -261,6 +279,34 @@ for (const guide of GUIDES) {
 
 write('404.html', withPolicy(notFoundPage(assets), '404.html'));
 
+// Why algomotion: its figures, and the facts it states, from real runs.
+const whyArt: Record<string, Art> = {};
+for (const f of WHY_FIGURES)
+  whyArt[f.key] = drawArt(
+    documentOf(f.algorithm, f.input),
+    f.step,
+    `why/${f.key}`,
+    f.alt,
+    f.theme,
+    f.layout,
+  );
+const whyDocument = documentOf(WHY_RUN.algorithm, WHY_RUN.input);
+write(
+  'why/index.html',
+  withPolicy(
+    whyPage(
+      whyArt,
+      {
+        steps: stepsOf(whyDocument),
+        checked: figureOf(whyDocument, 'improve#3', 'light').narration ?? '',
+        modules: algorithms.length,
+      },
+      assets,
+    ),
+    'why/',
+  ),
+);
+
 // The project pages, from the repository's own files.
 const PROJECT = [
   ['changelog/', changelogPage(repoFile('CHANGELOG.md'), assets)],
@@ -271,5 +317,5 @@ for (const [path, html] of PROJECT)
   write(`${path}index.html`, withPolicy(html, path));
 
 process.stdout.write(
-  `Wrote ${entries.length + 4 + GUIDES.length + PROJECT.length} pages and ${figures.length} theme figures to dist/\n`,
+  `Wrote ${entries.length + 5 + GUIDES.length + PROJECT.length} pages and ${figures.length} theme figures to dist/\n`,
 );
