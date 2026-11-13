@@ -121,9 +121,7 @@ describe('the roadmap', () => {
     expect(
       doc.querySelector(`a[href="${REPOSITORY}/pull/141"]`),
     ).not.toBeNull();
-    expect(doc.querySelector('#owner + p + ul li')!.textContent).toContain(
-      '4.3',
-    );
+    expect(doc.querySelector('#owner-items li')!.textContent).toContain('4.3');
     // Long details of done items fold away.
     expect(doc.querySelectorAll('.phase details').length).toBeGreaterThan(5);
   });

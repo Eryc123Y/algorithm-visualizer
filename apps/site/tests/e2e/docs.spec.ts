@@ -262,8 +262,11 @@ test('the roadmap shows each phase’s progress and what waits for the owner', a
   await expect(bars.first()).toHaveAccessibleName(
     /Phase 0: foundations: \d+ of \d+ done/,
   );
-  await expect(page.locator('#owner + p + ul')).toContainText('4.3 Publish');
-  await page.getByRole('link', { name: 'Phase 5' }).first().click();
+  await expect(page.locator('#owner-items')).toContainText('4.3 Publish');
+  await page
+    .locator('#next-items')
+    .getByRole('link', { name: 'Phase 5: a site worth visiting' })
+    .click();
   await expect(page).toHaveURL(/#phase-5-a-site-worth-visiting$/);
 });
 

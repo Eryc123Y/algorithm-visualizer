@@ -167,13 +167,19 @@ function phaseBlocks(blocks: readonly Block[], options: RenderOptions): string {
     .join('\n');
 }
 
-const itemList = (items: readonly RoadmapItem[], options: RenderOptions) =>
-  `<ul class="short">${items
+/** Items grouped under their phase, which links to its section. */
+function itemList(items: readonly RoadmapItem[], id: string): string {
+  const phases = [...new Set(items.map((i) => i.phase))];
+  return `<div class="state" id="${attribute(id)}">${phases
     .map(
-      (i) =>
-        `<li><a href="#${attribute(slug(i.phase))}">${text(i.phase.replace(/:.*/, ''))}</a>: ${inline(/^\*\*.+?\*\*/.exec(i.text)?.[0] ?? i.text, options)}</li>`,
+      (phase) =>
+        `<p class="state-phase"><a href="#${attribute(slug(phase))}">${text(plain(phase))}</a></p><ul class="short">${items
+          .filter((i) => i.phase === phase)
+          .map((i) => `<li>${text(i.title)}</li>`)
+          .join('')}</ul>`,
     )
-    .join('')}</ul>`;
+    .join('')}</div>`;
+}
 
 /** `docs/roadmap.md` as a page: the state first, then each phase. */
 export function roadmapPage(markdown: string, assets: Assets): string {
@@ -216,12 +222,12 @@ ${phaseBlocks(p.blocks, options)}
     `<p class="lede">The way to 1.0: ${summary.done} of ${summary.total} items done. Built from ${sourceLink('docs/roadmap.md', 'docs/roadmap.md')}, where each item names its pull requests and design records.</p>
 <h2 id="state">Where it stands</h2>
 <ul class="phases-progress">${progress}</ul>
-${summary.doing.length === 0 ? '' : `<h3 id="doing">In progress</h3>${itemList(summary.doing, options)}`}
+${summary.doing.length === 0 ? '' : `<h3 id="doing">In progress</h3>${itemList(summary.doing, 'doing-items')}`}
 <h3 id="next">Next</h3>
-${summary.next.length === 0 ? '<p>Nothing is waiting to be picked up.</p>' : itemList(summary.next, options)}
+${summary.next.length === 0 ? '<p>Nothing is waiting to be picked up.</p>' : itemList(summary.next, 'next-items')}
 <h3 id="owner">Waiting for the owner</h3>
 <p>Names, publishing and accounts are the owner’s to decide; these items wait for that.</p>
-${itemList(summary.owner, options)}
+${itemList(summary.owner, 'owner-items')}
 <h2 id="how">How it is worked</h2>
 ${render(intro, { ...options, shift: 1 })}
 ${phases}
