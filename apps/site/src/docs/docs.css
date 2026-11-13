@@ -753,10 +753,6 @@ picture img {
   overflow: hidden;
 }
 
-.card > a:hover .thumb {
-  border-color: var(--ink);
-}
-
 .thumb picture,
 .thumb img {
   inline-size: 100%;
