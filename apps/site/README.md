@@ -20,15 +20,16 @@ npm run preview -w @algomotion/site   # serves it at http://localhost:4173
 
 Every page sends the same Content Security Policy, in a `<meta>` and in `_headers`: the site's own scripts, styles and fonts only, no connections, and Trusted Types enforced. The pages' links are relative, so the site works at any path. Only `404.html` assumes the root, as Cloudflare Pages serves it for any missing address.
 
-## Deploying to Cloudflare Pages
+## Deploying to Cloudflare
 
-Nothing is deployed from this repository. The domain, and so the base URL of share links, is the owner's decision. To deploy, create a Pages project connected to the repository with:
+The site is deployed as static assets on Cloudflare Workers, at <https://algomotion.turing2234.com>; `wrangler.jsonc` in this folder names the Worker and its folder of assets. To deploy:
 
-| Setting                | Value                               |
-| ---------------------- | ----------------------------------- |
-| Build command          | `npm run build -w @algomotion/site` |
-| Build output directory | `apps/site/dist`                    |
-| Node.js version        | 22.12 or later (`NODE_VERSION=22`)  |
+```sh
+npm run build -w @algomotion/site
+cd apps/site && npx wrangler deploy
+```
+
+Cloudflare reads `_headers` from the assets, so the security headers are sent as on Cloudflare Pages. A copy on another account or host changes the name in `wrangler.jsonc`, or serves `dist/` from any static host.
 
 The site must have an origin of its own, not a path on a shared one (ADR 0041). Then point the MCP server's `ALGOMOTION_SHARE_URL` at its `play/` page.
 

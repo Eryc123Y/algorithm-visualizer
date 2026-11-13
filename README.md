@@ -250,7 +250,7 @@ Every output draws in the same nine built-in themes, and every theme works in ev
 
 ## Documentation site
 
-[`apps/site`](apps/site) builds the documentation from the registry: a page for every algorithm and every operation of a data structure, grouped by topic and by structure. Each page has its player, the names of its steps, and the same run as a snippet for a web page, Typst, LaTeX, the command line, MCP and a share link. A themes page shows every theme and how each output picks one. The site also holds the share page, and is built for Cloudflare Pages (`npm run build -w @algomotion/site`; deploying waits for the owner's domain).
+[`apps/site`](apps/site) builds the documentation from the registry: a page for every algorithm and every operation of a data structure, grouped by topic and by structure. Each page has its player, the names of its steps, and the same run as a snippet for a web page, Typst, LaTeX, the command line, MCP and a share link. A themes page shows every theme and how each output picks one. The site also holds the share page, and is deployed on Cloudflare at <https://algomotion.turing2234.com> (`npm run build -w @algomotion/site`, then `npx wrangler deploy` in `apps/site`).
 
 ## Packages
 

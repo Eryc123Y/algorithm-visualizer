@@ -1,0 +1,15 @@
+// The site as static assets on Cloudflare Workers: the documentation and
+// the share page (play/). Deploy with `npm run build`, then
+// `npx wrangler deploy`, from this folder. `_headers` in dist/ sets the
+// security headers (ADR 0041).
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "algomotion",
+  "compatibility_date": "2026-10-01",
+  "routes": [{ "pattern": "algomotion.turing2234.com", "custom_domain": true }],
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page",
+  },
+  "observability": { "enabled": false },
+}
