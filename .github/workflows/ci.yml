@@ -1,10 +1,9 @@
 name: CI
 
-# The repository is private on GitHub Free, so Actions minutes are limited
-# (2,000 a month). Each run is one job of about 6 minutes, billed rounded up
-# to the minute. Pull requests run it; merges to main do not run it again,
-# as the pull request already tested the merge result. Changes that only
-# touch documentation skip it, and a newer push cancels a running check.
+# The repository has been public since 2026-11-13, so Actions minutes are free.
+# Pull requests run CI; merges to main do not run it again, as the pull request
+# already tested the merge result. Changes that only touch documentation skip
+# it, and a newer push cancels a running check.
 on:
   pull_request:
     paths-ignore:
