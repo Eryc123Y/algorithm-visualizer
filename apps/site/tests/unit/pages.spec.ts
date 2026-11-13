@@ -9,10 +9,10 @@ import { describe, expect, it } from 'vitest';
 import { catalog, type Entry } from '../../src/docs/catalog.ts';
 import { attribute, page, text } from '../../src/docs/html.ts';
 import {
+  algorithmsPage,
   detailsOf,
   entryPage,
   exampleStep,
-  homePage,
   notFoundPage,
   stepsOf,
   themesPage,
@@ -111,7 +111,8 @@ describe('a module’s page', () => {
     );
     expect(html).toContain('[step=extract#2]');
     for (const s of details.snippets) expect(html).toContain(text(s.label));
-    expect(html).toContain('href="../#topic-graphs"');
+    expect(html).toContain('href="../algorithms/#topic-graphs"');
+    expect(html).toContain('<a href="../">algomotion</a>');
     expect(html).toContain('href="../play/#v=1&amp;alg=dijkstra');
   });
 
@@ -145,20 +146,16 @@ describe('a module’s page', () => {
   });
 });
 
-describe('the home page', () => {
-  it('lists every module under its topic, and operations under their structure', async () => {
-    const html = homePage(
-      groups,
-      await detailsOf(entry('dijkstra'), groups, 0),
-      assets,
-    );
+describe('the algorithms page', () => {
+  it('lists every module under its topic, and operations under their structure', () => {
+    const html = algorithmsPage(groups, assets);
     for (const a of algorithms)
-      expect(html, a.id).toContain(`href="${a.id.split('.').join('/')}/"`);
+      expect(html, a.id).toContain(`href="../${a.id.split('.').join('/')}/"`);
     for (const g of groups) expect(html).toContain(`id="topic-${g.topic}"`);
-    expect(html).toContain('<algo-player algorithm="dijkstra"');
     // A structure is found by its operations' names.
     expect(html).toMatch(/data-search="fibonacci-heap [^"]*extract-min/);
-    expect(html).toContain('href="play/#v=1&amp;alg=dijkstra');
+    expect(html).toContain('id="catalog"');
+    expect(html).toContain('<label for="filter">Filter</label>');
   });
 });
 

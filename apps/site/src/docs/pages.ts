@@ -143,7 +143,7 @@ export function entryPage(d: EntryDetails, assets: Assets): string {
   const root = rootOf(depthOf(entry.path));
   const crumbs = [
     `<li><a href="${root || './'}">algomotion</a></li>`,
-    `<li><a href="${root}#topic-${entry.topic}">${text(d.topicTitle)}</a></li>`,
+    `<li><a href="${root}algorithms/#topic-${entry.topic}">${text(d.topicTitle)}</a></li>`,
     ...(d.structure === undefined
       ? []
       : [
@@ -183,6 +183,7 @@ ${d.steps.map((s) => `  <li><code>${text(s.name)}</code> <span>× ${s.count}</sp
     description: entry.summary,
     root,
     assets,
+    section: 'algorithms',
     body: `<nav class="crumbs" aria-label="Breadcrumb"><ol>${crumbs.join('')}</ol></nav>
 <h1>${text(entry.title)}</h1>
 <p class="lede">${text(entry.summary)}</p>
@@ -198,10 +199,19 @@ ${d.snippets.map(snippetSection).join('\n')}
   });
 }
 
-/** The home page: what algomotion is, one run in every output, the catalogue. */
-export function homePage(
+/** How many pages the catalogue has: modules, structures and operations. */
+export const countOf = (groups: readonly TopicGroup[]): number =>
+  groups.reduce(
+    (n, g) =>
+      n +
+      g.algorithms.length +
+      g.structures.reduce((m, s) => m + 1 + s.operations.length, 0),
+    0,
+  );
+
+/** The catalogue: every module by topic, with a filter. */
+export function algorithmsPage(
   groups: readonly TopicGroup[],
-  demo: EntryDetails,
   assets: Assets,
 ): string {
   // A structure is found by its operations' names too.
@@ -210,13 +220,13 @@ export function homePage(
       [e.id, e.title, e.summary, ...operations.flatMap((o) => [o.id, o.title])]
         .join(' ')
         .toLowerCase(),
-    )}"><a href="${attribute(e.path)}">${text(e.title)}</a> <span>${text(e.summary)}</span>${inner}</li>`;
+    )}"><a href="${attribute('../' + e.path)}">${text(e.title)}</a> <span>${text(e.summary)}</span>${inner}</li>`;
   const topics = groups
     .map(
       (
         g,
       ) => `<section class="topic" id="topic-${g.topic}" aria-labelledby="h-${g.topic}">
-  <h3 id="h-${g.topic}">${text(g.title)}</h3>
+  <h2 id="h-${g.topic}">${text(g.title)}</h2>
   <ul class="entries">
 ${[
   ...g.algorithms.map((e) => `    ${item(e)}`),
@@ -228,7 +238,7 @@ ${[
         `<ul class="ops" aria-label="${attribute(s.entry.title)} operations">${s.operations
           .map(
             (op) =>
-              `<li><a href="${attribute(op.path)}">${text(operationName(op))}</a></li>`,
+              `<li><a href="${attribute('../' + op.path)}">${text(operationName(op))}</a></li>`,
           )
           .join('')}</ul>`,
       )}`,
@@ -238,35 +248,27 @@ ${[
 </section>`,
     )
     .join('\n');
-  const count = groups.reduce(
-    (n, g) =>
-      n +
-      g.algorithms.length +
-      g.structures.reduce((m, s) => m + 1 + s.operations.length, 0),
-    0,
-  );
+  const count = countOf(groups);
+  const index = groups
+    .map((g) => `<li><a href="#topic-${g.topic}">${text(g.title)}</a></li>`)
+    .join('');
   return page({
-    title: 'algomotion: step-by-step algorithms',
-    description:
-      'Step-by-step pictures and animations of algorithms and data structures, from one algorithm name and your input, for web pages, Typst, LaTeX, slides and AI conversations.',
-    root: '',
+    title: 'Algorithms and data structures · algomotion',
+    description: `All ${count} algorithms, data structures and operations algomotion draws, by topic.`,
+    root: '../',
     assets,
-    body: `<section class="hero">
-<h1>Step-by-step pictures of algorithms</h1>
-<p class="lede">Name an algorithm, give it your input in a notation you already know, and get every step: an interactive player for web pages, vector figures for Typst and LaTeX notes, overlays for slides, and a player in AI conversations.</p>
-</section>
-${playerOf(demo.entry.id, demo.input)}
-<h2 id="outputs">One run, every output</h2>
-<p>Dijkstra’s algorithm on the graph above, written for each place it can go.</p>
-<div class="snippets">
-${demo.snippets.map(snippetSection).join('\n')}
-</div>
+    section: 'algorithms',
+    body: `<nav class="crumbs" aria-label="Breadcrumb"><ol><li><a href="../">algomotion</a></li><li aria-current="page">Algorithms</li></ol></nav>
+<h1>Algorithms and data structures</h1>
+<p class="lede">${count} modules, each with its own page: a player, the names of its steps, and the same run written for a web page, Typst, LaTeX, the command line, an AI assistant and a share link. A data structure’s operations are listed under it.</p>
 <section id="catalog" aria-labelledby="catalog-title">
-<h2 id="catalog-title">Algorithms and data structures</h2>
-<p>${count} modules, each with its player, its steps and its snippets. A data structure’s operations are listed under it.</p>
+<h2 id="catalog-title" class="visually-hidden">Catalogue</h2>
 <p class="filter"><label for="filter">Filter</label> <input id="filter" type="search" placeholder="dijkstra, heap, sort…" autocomplete="off" /></p>
 <p class="filter-status" role="status"></p>
+<nav class="topic-index" aria-label="Topics"><ul>${index}</ul></nav>
+<div class="topic-list">
 ${topics}
+</div>
 </section>`,
   });
 }
@@ -312,6 +314,7 @@ export function themesPage(
       'The built-in themes of algomotion, and how to pick one in each output.',
     root: '../',
     assets,
+    section: 'themes',
     body: `<nav class="crumbs" aria-label="Breadcrumb"><ol><li><a href="../">algomotion</a></li><li aria-current="page">Themes</li></ol></nav>
 <h1>Themes</h1>
 <p class="lede">Every output draws in the same built-in themes, and every theme works in every output. <code>light</code> is the default; the player’s <code>auto</code> follows the reader’s light or dark setting, and a pair such as <code>textbook textbook-dark</code> picks a day and a night theme.</p>
@@ -351,6 +354,6 @@ export function notFoundPage(assets: Assets): string {
     root: '/',
     assets,
     body: `<h1>Not found</h1>
-<p class="lede">There is no page at this address. The <a href="/">home page</a> lists every algorithm and data structure.</p>`,
+<p class="lede">There is no page at this address. The <a href="/algorithms/">catalogue</a> lists every algorithm and data structure, and <a href="/guide/">the guide</a> shows how to use them.</p>`,
   });
 }

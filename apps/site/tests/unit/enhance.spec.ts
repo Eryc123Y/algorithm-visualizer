@@ -4,7 +4,11 @@
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { addCopyButtons, filterCatalog } from '../../src/docs/enhance.ts';
+import {
+  addCopyButtons,
+  filterCatalog,
+  setUpTabs,
+} from '../../src/docs/enhance.ts';
 
 describe('copy buttons', () => {
   beforeEach(() => {
@@ -74,6 +78,79 @@ describe('copy buttons', () => {
   it('adds nothing without a clipboard', () => {
     addCopyButtons(document, undefined, 'https://example.org/');
     expect(document.querySelector('button.copy')).toBeNull();
+  });
+});
+
+describe('output tabs', () => {
+  let tabs: HTMLButtonElement[];
+  let panels: HTMLElement[];
+
+  beforeEach(() => {
+    document.body.innerHTML = `<div role="tablist">${['web', 'typst', 'latex'].map((name, i) => `<button role="tab" id="tab-${name}" aria-selected="${i === 0}" tabindex="${i === 0 ? 0 : -1}">${name}</button>`).join('')}</div>
+      ${['web', 'typst', 'latex'].map((name, i) => `<div role="tabpanel" aria-labelledby="tab-${name}"${i === 0 ? '' : ' hidden="until-found"'}>${name}</div>`).join('')}`;
+    tabs = [...document.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+    panels = [...document.querySelectorAll<HTMLElement>('[role="tabpanel"]')];
+    setUpTabs(document);
+  });
+
+  const selected = (index: number) => {
+    tabs.forEach((tab, i) => {
+      expect(tab.getAttribute('aria-selected')).toBe(String(i === index));
+      expect(tab.tabIndex).toBe(i === index ? 0 : -1);
+      expect(tab.hasAttribute('focusgroupstart')).toBe(i === index);
+      expect(panels[i]!.getAttribute('hidden')).toBe(
+        i === index ? null : 'until-found',
+      );
+    });
+  };
+  const press = (index: number, key: string) => {
+    const event = new KeyboardEvent('keydown', {
+      key,
+      bubbles: true,
+      cancelable: true,
+    });
+    tabs[index]!.dispatchEvent(event);
+    return event;
+  };
+
+  it('selects the clicked tab and hides the other panels until found', () => {
+    tabs[1]!.click();
+    selected(1);
+  });
+
+  it('moves selection and focus with arrow keys, wrapping at both ends', () => {
+    tabs[0]!.focus();
+    expect(press(0, 'ArrowLeft').defaultPrevented).toBe(true);
+    selected(2);
+    expect(document.activeElement).toBe(tabs[2]);
+    press(2, 'ArrowRight');
+    selected(0);
+    press(0, 'ArrowRight');
+    selected(1);
+    expect(document.activeElement).toBe(tabs[1]);
+  });
+
+  it('moves to Home and End and leaves unrelated keys alone', () => {
+    press(0, 'End');
+    selected(2);
+    expect(document.activeElement).toBe(tabs[2]);
+    press(2, 'Home');
+    selected(0);
+    expect(document.activeElement).toBe(tabs[0]);
+    expect(press(0, 'Escape').defaultPrevented).toBe(false);
+    selected(0);
+  });
+
+  it('selects a panel found by the browser without moving focus', () => {
+    tabs[0]!.focus();
+    panels[2]!.dispatchEvent(new Event('beforematch', { bubbles: true }));
+    selected(2);
+    expect(document.activeElement).toBe(tabs[0]);
+  });
+
+  it('follows focus changes supplied by the browser', () => {
+    tabs[1]!.focus();
+    selected(1);
   });
 });
 
