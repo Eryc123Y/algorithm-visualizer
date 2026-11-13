@@ -13,12 +13,12 @@ const conditions = [
 // before a release gets time in proportion. Coverage (CI runs
 // test:coverage) instruments the engine the plugin's bundle is built from,
 // which makes drawing every registry example in every theme about twice as
-// slow: about 170 s on a GitHub runner, past the 120 s it needs without.
+// slow: 170 to 280 s on a GitHub runner, past the 120 s it needs without.
 const coverage = process.argv.some((arg) => arg.startsWith('--coverage'));
 const testTimeout =
   120_000 *
   Math.max(1, Number(process.env['FUZZ_RUNS'] ?? 30) / 30) *
-  (coverage ? 3 : 1);
+  (coverage ? 4 : 1);
 
 export default defineConfig({
   resolve: { conditions },

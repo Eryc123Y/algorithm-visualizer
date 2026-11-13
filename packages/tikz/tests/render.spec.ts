@@ -10,6 +10,7 @@ import {
 } from '@algomotion/core';
 import {
   createTheme,
+  darkTheme,
   lightTheme,
   type SvgTheme,
   type ThemeName,
@@ -393,7 +394,9 @@ describe('renderTikz', () => {
       drawing(renderTikz(sceneOf(box()), { theme: 'print' })),
     ).toHaveLength(2);
     const dark = colours(renderTikz(sceneOf(box()), { theme: 'dark' }));
-    expect([...dark.values()]).toContain('1C2522');
+    expect([...dark.values()]).toContain(
+      darkTheme.cell.default.fill.slice(1).toUpperCase(),
+    );
     const filled = renderTikz(sceneOf(box()), {
       theme: createTheme(lightTheme, { background: '#fafafa' }),
     });
