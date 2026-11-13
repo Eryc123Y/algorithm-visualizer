@@ -989,3 +989,39 @@ main.guide > .guide-body {
   font-size: var(--step--1);
   font-weight: 400;
 }
+
+/* ── Polish: syntax colour (roadmap 5.6) ─────────────────────────────── */
+
+/*
+ * Like a printed book more than an editor: structure by weight, and the
+ * one accent for what the reader writes, the values. The light shade of
+ * the amber is darkened to 5:1 on the code's background, for text.
+ */
+:root {
+  --code-value: light-dark(#8a5300, var(--mark));
+}
+
+.tok-name {
+  font-weight: 600;
+}
+
+.tok-key,
+.tok-comment {
+  color: var(--muted);
+}
+
+.tok-string {
+  color: var(--code-value);
+}
+
+/* ── Polish: stable type while the fonts load (roadmap 5.6) ──────────── */
+
+/*
+ * The fallback faces scaled to the web fonts' x-height, so text keeps its
+ * size if the preloaded fonts arrive late.
+ */
+body,
+h1,
+h2 {
+  font-size-adjust: from-font;
+}

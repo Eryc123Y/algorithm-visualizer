@@ -1,7 +1,7 @@
 /**
  * The files a documentation page loads, from Vite's manifest: the docs
  * script, its styles and those of every module it imports, and those
- * modules, to preload.
+ * modules and the first screen's fonts, to preload.
  */
 import type { Assets } from './html.ts';
 
@@ -12,6 +12,16 @@ export interface Chunk {
 }
 
 export type Manifest = Readonly<Record<string, Chunk>>;
+
+/**
+ * The faces the first screen of every page sets, preloaded so they arrive
+ * with the styles rather than swap in later and move the text: Inter for
+ * the body and STIX Two Text for the headings.
+ */
+export const FIRST_FONTS: readonly string[] = [
+  'inter-400-latin.woff2',
+  'stix-two-text-600-latin.woff2',
+];
 
 /** The assets of `entry`, each once, in the order the script needs them. */
 export function assetsOf(manifest: Manifest, entry: string): Assets {
@@ -33,5 +43,9 @@ export function assetsOf(manifest: Manifest, entry: string): Assets {
   };
   addStyles(main);
   for (const key of main.imports ?? []) visit(key);
-  return { scripts: [main.file], styles, preloads };
+  const fonts = FIRST_FONTS.flatMap((name) => {
+    const key = Object.keys(manifest).find((k) => k.endsWith(`/${name}`));
+    return key === undefined ? [] : [manifest[key]!.file];
+  });
+  return { scripts: [main.file], styles, preloads, fonts };
 }

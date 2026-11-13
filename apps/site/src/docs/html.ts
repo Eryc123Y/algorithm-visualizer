@@ -26,6 +26,8 @@ export interface Assets {
   readonly styles: readonly string[];
   /** Modules the script imports, preloaded. */
   readonly preloads: readonly string[];
+  /** Web fonts the first screen sets, preloaded. */
+  readonly fonts?: readonly string[];
 }
 
 /** The site's sections, for the bar's current-page mark. */
@@ -76,6 +78,11 @@ export function page({
     ),
     ...assets.preloads.map(
       (href) => `<link rel="modulepreload" href="${attribute(root + href)}" />`,
+    ),
+    // Fonts are fetched in CORS mode, so a preload must be too.
+    ...(assets.fonts ?? []).map(
+      (href) =>
+        `<link rel="preload" href="${attribute(root + href)}" as="font" type="font/woff2" crossorigin />`,
     ),
     ...assets.scripts.map(
       (src) => `<script type="module" src="${attribute(root + src)}"></script>`,

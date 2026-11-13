@@ -23,6 +23,7 @@ const assets = {
   scripts: ['assets/docs.js'],
   styles: ['assets/docs.css'],
   preloads: ['assets/chunk.js'],
+  fonts: ['assets/inter.woff2'],
 };
 const entry = (id: string): Entry =>
   groups
@@ -48,6 +49,9 @@ describe('the frame', () => {
     );
     expect(html).toContain(
       '<link rel="modulepreload" href="../../assets/chunk.js" />',
+    );
+    expect(html).toContain(
+      '<link rel="preload" href="../../assets/inter.woff2" as="font" type="font/woff2" crossorigin />',
     );
     expect(html).toContain('<a href="../../themes/">Themes</a>');
     expect(html.indexOf('<meta charset="utf-8" />')).toBeLessThan(
