@@ -43,6 +43,8 @@ interface Parts {
   readonly input: HTMLTextAreaElement;
   readonly reset: HTMLButtonElement;
   readonly error: HTMLElement;
+  /** The one live region: says an error once the reader pauses. */
+  readonly announce: HTMLElement;
   readonly stage: HTMLElement;
   readonly player: HTMLElement & { visualization?: unknown };
   readonly caption: HTMLElement;
@@ -57,6 +59,7 @@ function partsOf(doc: Document): Parts | undefined {
     input: root.querySelector('textarea'),
     reset: root.querySelector('.pg-reset'),
     error: root.querySelector('.pg-error'),
+    announce: root.querySelector('.pg-announce'),
     stage: root.querySelector('.pg-stage'),
     player: root.querySelector('algo-player'),
     caption: root.querySelector('.pg-caption'),
@@ -141,12 +144,14 @@ export function setUpPlayground(
   select.addEventListener('change', toExample);
   reset.addEventListener('click', toExample);
   input.addEventListener('input', later);
-  // An input is one line: Enter runs it at once, without waiting.
+  // An input is one line: Enter runs it at once, without waiting. While
+  // an input method composes (Chinese, Japanese, Korean), Enter confirms
+  // the candidate instead; keyCode 229 catches Safari's late keydown.
   input.addEventListener('keydown', (event) => {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      void run();
-    }
+    if (event.key !== 'Enter') return;
+    event.preventDefault();
+    if (event.isComposing || event.keyCode === 229) return;
+    void run();
   });
   keepHeight(doc, stage);
 
@@ -188,18 +193,37 @@ function setCaption(
   caption.replaceChildren(`${title} on `, code, '.');
 }
 
-/** Shows `error` beside the field, or clears it. */
+const ANNOUNCE_MS = 500;
+const announcing = new WeakMap<HTMLElement, ReturnType<typeof setTimeout>>();
+
+/**
+ * Shows `error` beside the field, or clears it. The field points at the
+ * error only while there is one, and the page's live region says it a
+ * moment later, once, so it does not talk over the typing.
+ */
 function showError(
   doc: Document,
-  { input, error: box }: Parts,
+  { input, error: box, announce }: Parts,
   error: InputError | undefined,
 ): void {
+  clearTimeout(announcing.get(announce));
   if (error === undefined) {
-    input.removeAttribute('aria-invalid');
+    input.setAttribute('aria-invalid', 'false');
+    input.removeAttribute('aria-describedby');
     box.replaceChildren();
+    announce.textContent = '';
     return;
   }
   input.setAttribute('aria-invalid', 'true');
+  input.setAttribute('aria-describedby', box.id);
+  const said = `This input does not run. ${error.message}`;
+  if (announce.textContent !== said)
+    announcing.set(
+      announce,
+      setTimeout(() => {
+        announce.textContent = said;
+      }, ANNOUNCE_MS),
+    );
   const p = (className: string, ...nodes: (Node | string)[]) => {
     const el = doc.createElement('p');
     el.className = className;

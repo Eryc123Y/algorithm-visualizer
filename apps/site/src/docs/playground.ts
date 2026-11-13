@@ -108,12 +108,13 @@ export function playgroundMarkup(
     <div class="pg-field pg-text">
       <label for="pg-input">Input</label>
       <div class="pg-row">
-        <textarea id="pg-input" rows="1" spellcheck="false" autocomplete="off" autocapitalize="off" aria-describedby="pg-error">${text(run.input)}</textarea>
+        <textarea id="pg-input" rows="1" spellcheck="false" autocomplete="off" autocapitalize="off" aria-invalid="false">${text(run.input)}</textarea>
         <button type="button" class="pg-reset">Example</button>
       </div>
     </div>
   </div>
-  <div id="pg-error" class="pg-error" aria-live="polite"></div>
+  <div id="pg-error" class="pg-error"></div>
+  <p class="pg-announce visually-hidden" aria-live="polite"></p>
   <div class="pg-stage">
     ${player}
   </div>

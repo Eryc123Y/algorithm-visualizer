@@ -372,6 +372,12 @@ describe('the page', () => {
     input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
     await playground.settled();
     expect(input.getAttribute('aria-invalid')).toBe('true');
+    expect(input.getAttribute('aria-describedby')).toBe('pg-error');
+    await vi.waitFor(() =>
+      expect(document.querySelector('.pg-announce')!.textContent).toMatch(
+        /^This input does not run\. Expected a weight/,
+      ),
+    );
     const box = document.querySelector('.pg-error')!;
     expect(box.querySelector('mark')!.textContent).toBe('x');
     expect(box.textContent).toContain('This input does not run.');
@@ -382,8 +388,10 @@ describe('the page', () => {
     document.querySelector<HTMLButtonElement>('.pg-reset')!.click();
     await playground.settled();
     expect(input.value).toBe(inputOf('dijkstra'));
-    expect(input.hasAttribute('aria-invalid')).toBe(false);
+    expect(input.getAttribute('aria-invalid')).toBe('false');
+    expect(input.hasAttribute('aria-describedby')).toBe(false);
     expect(box.textContent).toBe('');
+    expect(document.querySelector('.pg-announce')!.textContent).toBe('');
   });
 
   it('opens on the run its address asks for', async () => {
@@ -394,6 +402,30 @@ describe('the page', () => {
     expect(document.querySelector('select')!.value).toBe('bfs');
     expect(document.querySelector('textarea')!.value).toBe('A-B, B-C');
     expect(code('web')).toContain('algorithm="bfs"');
+  });
+
+  it('lets Enter confirm an input method’s candidate', () => {
+    page();
+    const load = vi.fn(() => Promise.resolve({ runPlayground }));
+    setUpPlayground(document, {
+      location: { search: '', hash: '', pathname: '/' },
+      history: { replaceState: vi.fn() },
+      load,
+      delay: 10_000,
+    });
+    const input = document.querySelector('textarea')!;
+    const composing = new KeyboardEvent('keydown', {
+      key: 'Enter',
+      isComposing: true,
+      cancelable: true,
+    });
+    input.dispatchEvent(composing);
+    expect(composing.defaultPrevented).toBe(true);
+    expect(load).not.toHaveBeenCalled();
+    input.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Enter', cancelable: true }),
+    );
+    expect(load).toHaveBeenCalledTimes(1);
   });
 
   it('does nothing on a page without a playground', () => {

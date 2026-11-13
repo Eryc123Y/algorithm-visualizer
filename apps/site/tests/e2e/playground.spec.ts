@@ -75,7 +75,8 @@ test('an input that does not run shows its error and keeps the last run', async 
   await page.getByRole('button', { name: 'Example' }).click();
   await expect(field(page)).toHaveValue('5 3 8 1 9 2 7');
   await expect(error).toBeEmpty();
-  await expect(field(page)).not.toHaveAttribute('aria-invalid', 'true');
+  await expect(field(page)).toHaveAttribute('aria-invalid', 'false');
+  await expect(field(page)).not.toHaveAttribute('aria-describedby');
 });
 
 test('the share page opens the same run', async ({ page }) => {
