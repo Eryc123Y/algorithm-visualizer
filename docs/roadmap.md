@@ -217,6 +217,21 @@ Independent of Phase 2, so the two can interleave.
       - Every property test passed at `FUZZ_RUNS=5000`, with no counterexample. Their timeouts now grow with `FUZZ_RUNS`; at 5,000 runs `properties.spec.ts` alone takes about 85 minutes.
       - `npm run check`, the build, the E2E suites (217 and 34), `test:typst` (39), `test:latex` (62), `test:standalone` (141) and `test:worker` (5) pass; the sizes were remeasured.
 
+## Phase 5: a site worth visiting
+
+The owner's brief (2026-11-14): the site still looks bare and says too little. Make it show the product, give reasons to use it, look maintained, and read in Chinese too. The project is not commercial; the aim is that people use it, star it and contribute. The design canvas and the palette (neutral greys, ink buttons, the amber accent) stay as #141 left them. Every item keeps the site's rules: figures drawn by the engine at build time, the strict Content Security Policy, no new runtime dependencies without an ADR, and unit and E2E tests.
+
+- [x] **5.0 The redesign**: the home page, the guide of ten pages, `/algorithms/`, the neutral dark theme and a placeholder logo (#140, #141).
+- [ ] **5.1 A home page you can play with.** The hero becomes a small playground: pick an algorithm, edit its input, and the player and the snippets for every output follow. An input that does not fit shows its error in place. It works without a server, and the page still reads without script.
+- [ ] **5.2 A gallery for the catalogue.** `/algorithms/` shows a thumbnail of each module, drawn by the engine in the light and the dark theme, with the filter and topics it has. Thumbnails load lazily and the page stays fast with all 132.
+- [ ] **5.3 Real scenes.** The home page and the guides show the outputs as they really look: a page of Typst notes and a Beamer slide compiled from the examples, a terminal run, and the player in an AI conversation. Each is made by a script from the real tools, so it can be remade.
+- [ ] **5.4 Why algomotion.** A page that says what it is for and how it differs from drawing by hand, from Manim and from visualization websites, with honest limits, and three walk-throughs: a student's notes, a teacher's slides, and an assistant explaining an algorithm.
+- [ ] **5.5 Signs of life.** A changelog page and a roadmap page built from the repository's own files, the version in the footer, a contributing page, and issue templates. No tracking and no third-party requests.
+- [ ] **5.6 Polish.** Syntax colour in code blocks at build time, the home page's figures playing as a loop, transitions on the tabs, and a pass over spacing and type on every page, in both colour schemes and at phone width.
+- [ ] **5.7 The site in Chinese.** `/zh/` holds the home page, the guide and the other pages in Simplified Chinese, with a language switch and `hreflang`. Module pages stay in English until 5.8.
+- [ ] **5.8 Chinese in the product** _ADR_: the player's chrome and the recipes' narration in Chinese. It needs a decision on where a document keeps several languages.
+- [ ] **5.9 A logo** _owner_: the owner picks one of the candidates on the design canvas, or asks for more.
+
 ## After 1.0
 
 - More languages: C++, Java and JavaScript (ADR 0017).
