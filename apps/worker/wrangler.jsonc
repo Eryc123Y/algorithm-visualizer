@@ -18,9 +18,12 @@
       "simple": { "limit": 60, "period": 60 },
     },
   ],
-  // Share links (ADR 0040): set the address of your share page, the
-  // site's play/ page, and algomotion_show and algomotion_run_recipe return a
-  // link to it. Without it they make none.
-  // "vars": { "ALGOMOTION_SHARE_URL": "https://example.org/play/" },
+  // Share links (ADR 0040): the address of the share page, the site's
+  // play/ page. algomotion_show and algomotion_run_recipe return a link to
+  // it. A copy on another account sets its own page, or removes "vars" to
+  // make no links.
+  "vars": {
+    "ALGOMOTION_SHARE_URL": "https://algomotion.ericyxy123.workers.dev/play/",
+  },
   "observability": { "enabled": false },
 }

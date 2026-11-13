@@ -18,7 +18,7 @@ The guide and the player page are built into the Worker, which needs no other bi
 
 ### Share links
 
-Set the variable `ALGOMOTION_SHARE_URL` to the address of a share page you serve (the site's `play/` page, built by `apps/site`), such as `https://example.org/play/`, and `algomotion_show` and `algomotion_run_recipe` also return a share link that opens the visualization in any browser ([ADR 0040](../../docs/adr/0040-share-links.md)). Uncomment `vars` in `wrangler.jsonc`, or set it in the Cloudflare dashboard. Without it the tools make no links. An address that is not an absolute `http:` or `https:` URL makes every request fail with 500 and the reason in the Worker's logs.
+Set the variable `ALGOMOTION_SHARE_URL` to the address of a share page you serve (the site's `play/` page, built by `apps/site`), such as `https://example.org/play/`, and `algomotion_show` and `algomotion_run_recipe` also return a share link that opens the visualization in any browser ([ADR 0040](../../docs/adr/0040-share-links.md)). `vars` in `wrangler.jsonc` sets it to this project's site; a copy on another account changes it there or in the Cloudflare dashboard. Without it the tools make no links. An address that is not an absolute `http:` or `https:` URL makes every request fail with 500 and the reason in the Worker's logs.
 
 ## Connecting clients
 
