@@ -109,7 +109,7 @@ export function playgroundMarkup(
       <label for="pg-input">Input</label>
       <div class="pg-row">
         <textarea id="pg-input" rows="1" spellcheck="false" autocomplete="off" autocapitalize="off" aria-invalid="false">${text(run.input)}</textarea>
-        <button type="button" class="pg-reset">Example</button>
+        <button type="button" class="pg-reset">Use example</button>
       </div>
     </div>
   </div>

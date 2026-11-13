@@ -420,11 +420,14 @@ describe('the page', () => {
       cancelable: true,
     });
     input.dispatchEvent(composing);
-    expect(composing.defaultPrevented).toBe(true);
+    expect(composing.defaultPrevented).toBe(false);
     expect(load).not.toHaveBeenCalled();
-    input.dispatchEvent(
-      new KeyboardEvent('keydown', { key: 'Enter', cancelable: true }),
-    );
+    const enter = new KeyboardEvent('keydown', {
+      key: 'Enter',
+      cancelable: true,
+    });
+    input.dispatchEvent(enter);
+    expect(enter.defaultPrevented).toBe(true);
     expect(load).toHaveBeenCalledTimes(1);
   });
 

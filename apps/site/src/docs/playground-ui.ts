@@ -146,11 +146,12 @@ export function setUpPlayground(
   input.addEventListener('input', later);
   // An input is one line: Enter runs it at once, without waiting. While
   // an input method composes (Chinese, Japanese, Korean), Enter confirms
-  // the candidate instead; keyCode 229 catches Safari's late keydown.
+  // the candidate, so it is left alone; keyCode 229 catches Safari's late
+  // keydown.
   input.addEventListener('keydown', (event) => {
     if (event.key !== 'Enter') return;
-    event.preventDefault();
     if (event.isComposing || event.keyCode === 229) return;
+    event.preventDefault();
     void run();
   });
   keepHeight(doc, stage);

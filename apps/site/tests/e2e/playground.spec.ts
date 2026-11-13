@@ -72,7 +72,7 @@ test('an input that does not run shows its error and keeps the last run', async 
   );
   await expect(page).toHaveURL(/input=4\+1\+3$/);
 
-  await page.getByRole('button', { name: 'Example' }).click();
+  await page.getByRole('button', { name: 'Use example' }).click();
   await expect(field(page)).toHaveValue('5 3 8 1 9 2 7');
   await expect(error).toBeEmpty();
   await expect(field(page)).toHaveAttribute('aria-invalid', 'false');
