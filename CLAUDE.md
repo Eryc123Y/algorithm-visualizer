@@ -29,7 +29,7 @@ The owner (Eric) hands this project to Claude to iterate on unattended, one road
    - Write that mention only as such a comment. In a PR body or a commit message Codex reads it as a request for a cloud task, which this repository has no environment for, and it skips the review.
    - If Codex has not reviewed within 20 minutes, or says it cannot, run the code-reviewer agent once on the diff instead, and say so in the PR.
 7. **Record**: mark the item `[x]` with the PR number in `docs/roadmap.md` in the same PR, and update the README or the MCP guide if what users see changed.
-8. **Ship**: open a PR and turn on Auto-fix. Merge it yourself, without asking (merge commit, like the earlier PRs), once Codex's review is done (step 6), no finding is open and CI is green. If GitHub Actions cannot run (quota or billing), merge after the full local verification of step 5, and say so in the PR and the report. Then sync local `main`.
+8. **Ship**: open a PR and turn on Auto-fix. Merge it yourself, without asking (merge commit, like the earlier PRs), once Codex's review is done (step 6), no finding is open and CI is green. Then sync local `main`.
 9. **Report** to the owner in a few lines: what changed, how it was verified, the PR link, and the next item.
 
 ## Ask the owner first
@@ -48,15 +48,12 @@ Only these wait for the owner; everything else, including ADRs and merges, goes 
 - Copy pseudocode from CLRS. Write it in CLRS conventions, in our own words.
 - Leave the roadmap out of date.
 
-## CI budget
-
-The repository is private on GitHub Free: 2,000 Actions minutes a month, and one CI run costs about 6.
+## CI
 
 - Run `npm run check`, the E2E tests and any fuzzing locally before pushing. Push a pull request once it is ready, not after every commit.
 - Don't re-run CI to retry a flaky test without finding the cause first.
-- Changes to root Markdown files and `docs/` skip CI (`paths-ignore` in `.github/workflows/ci.yml`). Keep pure documentation PRs free of code, so they stay free.
+- Changes to root Markdown files and `docs/` skip CI (`paths-ignore` in `.github/workflows/ci.yml`). Keep pure documentation PRs free of code, so they skip CI.
 - Merges to `main` do not run CI again. Use the manual "Run workflow" button if `main` ever needs a check.
-- If minutes run low, tell the owner rather than cutting checks. The owner can see usage under GitHub Settings → Billing.
 
 ## Visual changes
 
