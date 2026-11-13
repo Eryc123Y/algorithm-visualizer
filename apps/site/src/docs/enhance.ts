@@ -32,12 +32,13 @@ export function addCopyButtons(
   for (const snippet of doc.querySelectorAll<HTMLElement>('.snippet')) {
     const heading = snippet.querySelector('h3');
     const code = snippet.querySelector('pre code');
-    if (heading === null || code === null) continue;
+    const label = heading?.textContent ?? snippet.dataset['label'];
+    if (code === null || label === undefined) continue;
     const button = doc.createElement('button');
     button.type = 'button';
     button.className = 'copy';
     button.textContent = 'Copy';
-    button.setAttribute('aria-label', `Copy: ${heading.textContent ?? ''}`);
+    button.setAttribute('aria-label', `Copy: ${label}`);
     button.addEventListener('click', () => {
       const text = code.textContent ?? '';
       const value =
@@ -47,8 +48,9 @@ export function addCopyButtons(
         () => say(button, status, 'Select and copy'),
       );
     });
-    // Beside the heading, so the heading's name stays its own.
-    heading.after(button);
+    // Beside the heading, so the heading's name stays its own; else first.
+    if (heading === null) snippet.prepend(button);
+    else heading.after(button);
   }
 }
 
@@ -97,4 +99,56 @@ export function filterCatalog(doc: Document, query: string): void {
         : shown === 0
           ? 'Nothing matches; try fewer words.'
           : `${shown} of ${total} shown.`;
+}
+
+/**
+ * Tabs (the home page's outputs): the selected tab shows its panel, and
+ * the others are hidden until found, so find-in-page still reaches them.
+ * Arrow keys, Home and End move between tabs; selection follows focus.
+ * Browsers with `focusgroup` move focus themselves.
+ */
+export function setUpTabs(doc: Document): void {
+  for (const list of doc.querySelectorAll<HTMLElement>('[role="tablist"]')) {
+    const tabs = [...list.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+    const panelOf = (tab: HTMLElement) =>
+      doc.querySelector<HTMLElement>(`[aria-labelledby="${tab.id}"]`);
+    const select = (selected: HTMLButtonElement, focus: boolean) => {
+      for (const tab of tabs) {
+        const on = tab === selected;
+        tab.setAttribute('aria-selected', String(on));
+        tab.toggleAttribute('focusgroupstart', on);
+        tab.tabIndex = on ? 0 : -1;
+        const panel = panelOf(tab);
+        if (panel === null) continue;
+        if (on) panel.removeAttribute('hidden');
+        else panel.setAttribute('hidden', 'until-found');
+      }
+      if (focus) selected.focus();
+    };
+    for (const tab of tabs) {
+      tab.addEventListener('click', () => select(tab, false));
+      tab.addEventListener('focus', () => {
+        if (tab.getAttribute('aria-selected') !== 'true') select(tab, false);
+      });
+      panelOf(tab)?.addEventListener('beforematch', () => select(tab, false));
+    }
+    if ('focusGroup' in HTMLElement.prototype) continue;
+    list.addEventListener('keydown', (event) => {
+      const at = tabs.indexOf(event.target as HTMLButtonElement);
+      if (at < 0) return;
+      const next =
+        event.key === 'ArrowRight'
+          ? (at + 1) % tabs.length
+          : event.key === 'ArrowLeft'
+            ? (at - 1 + tabs.length) % tabs.length
+            : event.key === 'Home'
+              ? 0
+              : event.key === 'End'
+                ? tabs.length - 1
+                : -1;
+      if (next < 0) return;
+      event.preventDefault();
+      select(tabs[next]!, true);
+    });
+  }
 }

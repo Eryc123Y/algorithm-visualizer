@@ -7,6 +7,8 @@ import AxeBuilder from '@axe-core/playwright';
 import { algorithms } from '@algomotion/recipes';
 import type { Page } from '@playwright/test';
 
+import { GUIDES } from '../../src/docs/guides/index.ts';
+
 import { expect, test } from './fixtures.ts';
 
 const player = (page: Page) => page.locator('main algo-player').first();
@@ -18,14 +20,15 @@ const noSideScroll = (page: Page) =>
       document.documentElement.clientWidth,
   );
 
-test('the home page lists every module, and filters them', async ({ page }) => {
-  await page.goto('/');
-  await expect(page).toHaveTitle('algomotion: step-by-step algorithms');
-  await expect(player(page).getByText('Initial state.')).toBeVisible();
+test('the algorithms page lists every module, and filters them', async ({
+  page,
+}) => {
+  await page.goto('/algorithms/');
+  await expect(page).toHaveTitle('Algorithms and data structures · algomotion');
   const catalog = page.locator('#catalog');
   for (const a of algorithms)
     await expect(
-      catalog.locator(`a[href="${a.id.split('.').join('/')}/"]`),
+      catalog.locator(`a[href="../${a.id.split('.').join('/')}/"]`),
       a.id,
     ).toHaveCount(1);
 
@@ -52,7 +55,7 @@ test('an algorithm’s page plays it, names its steps and gives every snippet', 
   context,
   browserName,
 }) => {
-  await page.goto('/');
+  await page.goto('/algorithms/');
   await page
     .locator('#catalog')
     .getByRole('link', { name: 'Dijkstra’s algorithm' })
@@ -61,6 +64,12 @@ test('an algorithm’s page plays it, names its steps and gives every snippet', 
   await expect(
     page.getByRole('heading', { level: 1, name: 'Dijkstra’s algorithm' }),
   ).toBeVisible();
+  const crumbs = page.getByRole('navigation', { name: 'Breadcrumb' });
+  await expect(crumbs.getByRole('link').first()).toHaveAttribute('href', '../');
+  await expect(crumbs.getByRole('link').nth(1)).toHaveAttribute(
+    'href',
+    '../algorithms/#topic-graphs',
+  );
 
   await player(page).getByRole('button', { name: 'Next step' }).click();
   await expect(player(page).getByText('Initial state.')).toBeHidden();
@@ -116,12 +125,66 @@ test('a structure lists its operations, and an operation leads back', async ({
   await expect(page).toHaveURL(/\/bst\/delete\/$/);
   await expect(player(page)).toHaveAttribute('algorithm', 'bst.delete');
   await expect(player(page).getByText('Initial state.')).toBeVisible();
+  const crumbs = page.getByRole('navigation', { name: 'Breadcrumb' });
+  await expect(crumbs.getByRole('link').first()).toHaveAttribute(
+    'href',
+    '../../',
+  );
+  await expect(crumbs.getByRole('link').nth(1)).toHaveAttribute(
+    'href',
+    '../../algorithms/#topic-trees',
+  );
   await page
     .getByRole('navigation', { name: 'Breadcrumb' })
     .getByRole('link', { name: 'Binary search tree' })
     .click();
   await expect(page).toHaveURL(/\/bst\/$/);
 });
+
+test('the home page links to the catalogue and switches output panels', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await expect(page).toHaveTitle('algomotion: step-by-step algorithms');
+  await expect(player(page).getByText('Initial state.')).toBeVisible();
+  for (const selector of ['.bar', '.hero', '.teaser'])
+    await expect(
+      page.locator(`${selector} a[href="algorithms/"]`).first(),
+    ).toBeVisible();
+  const tabs = page.getByRole('tab');
+  await expect(tabs).toHaveCount(7);
+  for (const tab of await tabs.all()) {
+    await tab.click();
+    await expect(tab).toHaveAttribute('aria-selected', 'true');
+    const id = await tab.getAttribute('id');
+    await expect(
+      page.locator(`[role="tabpanel"][aria-labelledby="${id}"]`),
+    ).not.toHaveAttribute('hidden');
+    await expect(
+      page.locator('[role="tabpanel"][hidden="until-found"]'),
+    ).toHaveCount(6);
+    await expect(page.getByRole('tab', { selected: true })).toHaveCount(1);
+  }
+  expect(await noSideScroll(page)).toBe(true);
+});
+
+for (const guide of GUIDES)
+  test(`guide ${guide.slug || 'start'} loads at 375px without errors or side scroll`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto(`/guide/${guide.slug === '' ? '' : `${guide.slug}/`}`);
+    await expect(
+      page.getByRole('heading', { level: 1, name: guide.title }),
+    ).toBeVisible();
+    for (const img of await page.locator('.guide-figure img').all()) {
+      await img.scrollIntoViewIfNeeded();
+      await expect
+        .poll(() => img.evaluate((el: HTMLImageElement) => el.naturalWidth))
+        .toBeGreaterThan(0);
+    }
+    expect(await noSideScroll(page)).toBe(true);
+  });
 
 test('the themes page shows a figure in every theme', async ({ page }) => {
   await page.goto('/themes/');
@@ -141,9 +204,15 @@ for (const colorScheme of ['light', 'dark'] as const)
     page,
   }) => {
     await page.emulateMedia({ colorScheme, reducedMotion: 'reduce' });
-    for (const path of ['/', '/dijkstra/', '/bst/delete/', '/themes/']) {
+    for (const path of [
+      '/',
+      '/algorithms/',
+      '/dijkstra/',
+      '/bst/delete/',
+      '/themes/',
+    ]) {
       await page.goto(path);
-      if (path !== '/themes/')
+      if (path !== '/themes/' && path !== '/algorithms/')
         await expect(player(page).getByText('Initial state.')).toBeVisible();
       const { violations } = await new AxeBuilder({ page })
         .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
