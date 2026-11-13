@@ -13,6 +13,9 @@ export default mergeConfig(
       include: ['tests/unit/**/*.spec.ts'],
       exclude: [...configDefaults.exclude, 'tests/e2e/**'],
       root: fileURLToPath(new URL('./', import.meta.url)),
+      // Several tests run every module of the registry: a few seconds each,
+      // and more under coverage or beside the other projects.
+      testTimeout: 30_000,
     },
   }),
 );
