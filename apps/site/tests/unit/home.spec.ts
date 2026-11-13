@@ -53,6 +53,7 @@ describe('the home page', () => {
       demo,
       homeArt,
       '<algo-player algorithm="dijkstra"></algo-player>',
+      '\\begin{frame}{Dijkstra’s algorithm} % slides',
       algorithms.length,
       { scripts: [], styles: [], preloads: [] },
     );
@@ -91,5 +92,12 @@ describe('the home page', () => {
       document.querySelectorAll('.teaser a[href^="algorithms/#topic-"]').length,
     ).toBeGreaterThan(0);
     expect(document.querySelector('#catalog')).toBeNull();
+  });
+
+  it('puts the slides code it is given in the slides tab', async () => {
+    document.documentElement.innerHTML = await render();
+    expect(
+      document.querySelector('#panel-slides .snippet code')?.textContent,
+    ).toBe('\\begin{frame}{Dijkstra’s algorithm} % slides');
   });
 });

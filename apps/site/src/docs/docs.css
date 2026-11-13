@@ -116,6 +116,12 @@ picture img {
   .home .hero {
     grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
     gap: 3.5rem;
+    /* The playground changes height with its run: keep the text still. */
+    align-items: start;
+  }
+
+  .hero-text {
+    padding-block-start: clamp(2rem, 8vh, 5rem);
   }
 }
 
@@ -147,6 +153,150 @@ picture img {
   margin: 0.75rem 0 0;
   color: var(--muted);
   font-size: var(--step--1);
+}
+
+/* ── Home: the playground (roadmap 5.1) ─────────────────────────────── */
+
+.playground {
+  display: grid;
+  gap: 0.75rem;
+  min-width: 0;
+  container-type: inline-size;
+}
+
+.pg-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.75rem 1rem;
+}
+
+@container (min-width: 34rem) {
+  .pg-controls {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    align-items: start;
+  }
+}
+
+.pg-field label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: var(--step--1);
+  font-weight: 600;
+}
+
+.pg-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.pg-field select,
+.pg-field textarea,
+.pg-reset {
+  min-block-size: 2.625rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--step--1);
+}
+
+.pg-field select {
+  inline-size: 100%;
+  padding: 0.5rem 0.625rem;
+}
+
+.pg-field textarea {
+  flex: 1;
+  min-inline-size: 0;
+  /* One line that grows with a long input, up to a few. */
+  field-sizing: content;
+  max-block-size: 8lh;
+  padding: 0.5rem 0.75rem;
+  font-family: var(--mono);
+  line-height: 1.5;
+  resize: none;
+  overflow-wrap: anywhere;
+}
+
+.pg-field textarea[aria-invalid='true'] {
+  border-color: var(--alert);
+}
+
+.pg-reset {
+  flex: none;
+  align-self: start;
+  padding: 0.5rem 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pg-reset:hover,
+.pg-field select:hover {
+  border-color: var(--ink);
+}
+
+.pg-error:empty {
+  display: none;
+}
+
+.pg-error {
+  padding: 0.625rem 0.875rem;
+  border: 1px solid var(--alert);
+  border-left-width: 3px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  font-size: var(--step--1);
+}
+
+.pg-error p {
+  margin: 0;
+}
+
+.pg-error p + p {
+  margin-top: 0.375rem;
+}
+
+.pg-message strong {
+  color: var(--alert);
+}
+
+.pg-where code {
+  overflow-wrap: anywhere;
+}
+
+.pg-where mark {
+  padding: 0 0.125em;
+  border-radius: 0.125rem;
+  background: color-mix(in oklab, var(--mark) 30%, transparent);
+  color: inherit;
+  text-decoration: underline wavy var(--alert);
+  text-underline-offset: 0.2em;
+}
+
+.pg-hint,
+.pg-kept {
+  color: var(--muted);
+}
+
+.pg-stage {
+  min-width: 0;
+}
+
+.pg-caption code {
+  overflow-wrap: anywhere;
+}
+
+.pg-share {
+  white-space: nowrap;
+}
+
+/* Without script the controls cannot run anything: show the run alone. */
+@media (scripting: none) {
+  .pg-controls,
+  .pg-error {
+    display: none;
+  }
 }
 
 /* ── Home: the plate ────────────────────────────────────────────────── */
