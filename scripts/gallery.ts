@@ -64,7 +64,7 @@ writeFileSync(
   `<!doctype html><meta charset="utf-8"><title>algomotion gallery</title><style>
 body{font:12px system-ui;margin:16px;background:#eceeed}h2{font-size:13px;margin:16px 0 6px}
 .row{display:flex;flex-wrap:wrap;gap:6px}figure{margin:0;padding:8px;background:#fff;border-radius:6px}
-figure.dark{background:#151b19;color:#9aa8a1}figcaption{color:#667;max-width:320px}pre{color:#b42318}
+figure.dark{background:#121214;color:#9d9da6}figcaption{color:#667;max-width:320px}pre{color:#b42318}
 </style>${sections.join('')}`,
 );
 console.log(`Wrote ${out} (${documents.length} documents)`);
