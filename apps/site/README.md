@@ -22,7 +22,7 @@ Every page sends the same Content Security Policy, in a `<meta>` and in `_header
 
 ## Deploying to Cloudflare
 
-The site is deployed as static assets on Cloudflare Workers, at <https://algomotion.ericyxy123.workers.dev>; `wrangler.jsonc` in this folder names the Worker and its folder of assets. To deploy:
+The site is deployed as static assets on Cloudflare Workers, at <https://algomotion.turing2234.com>; `wrangler.jsonc` in this folder names the Worker and its folder of assets. To deploy:
 
 ```sh
 npm run build -w @algomotion/site

@@ -6,6 +6,10 @@
   "main": "dist/worker.js",
   "compatibility_date": "2026-10-01",
   "no_bundle": true,
+  // This project's address; a copy on another account removes or changes it.
+  "routes": [
+    { "pattern": "algomotion-mcp.turing2234.com", "custom_domain": true },
+  ],
   "build": {
     "command": "npm run build",
   },
@@ -23,7 +27,7 @@
   // it. A copy on another account sets its own page, or removes "vars" to
   // make no links.
   "vars": {
-    "ALGOMOTION_SHARE_URL": "https://algomotion.ericyxy123.workers.dev/play/",
+    "ALGOMOTION_SHARE_URL": "https://algomotion.turing2234.com/play/",
   },
   "observability": { "enabled": false },
 }
