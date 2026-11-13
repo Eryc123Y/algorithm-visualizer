@@ -1,0 +1,40 @@
+name: Ask for an algorithm
+description: An algorithm or data structure you would like to see, with the input you would give it.
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Check the catalogue first: https://algomotion.turing2234.com/algorithms/ lists every algorithm and data structure that exists.
+  - type: input
+    id: name
+    attributes:
+      label: Algorithm or data structure
+      placeholder: Skip list
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Where it is described
+      description: A textbook section, a paper or a course page, so the steps can follow it.
+      placeholder: CLRS, 4th edition, section 17.1
+  - type: textarea
+    id: input
+    attributes:
+      label: An input you would give it
+      description: Written as you would on paper, such as `5 2 4 6 1 3`, `A-B 4, B-C 1` or `insert 4, delete 3`.
+      render: text
+  - type: textarea
+    id: steps
+    attributes:
+      label: What the steps should show
+      description: The moments that matter when you teach or learn it, and the structures it keeps beside its main one.
+    validations:
+      required: true
+  - type: checkboxes
+    id: help
+    attributes:
+      label: Helping
+      options:
+        - label: I would like to write the module myself (see the contributing page).

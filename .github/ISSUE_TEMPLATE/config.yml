@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: The guide
+    url: https://algomotion.turing2234.com/guide/
+    about: How to use algomotion in web pages, Typst, LaTeX, slides, the command line and AI assistants.
+  - name: How to contribute
+    url: https://algomotion.turing2234.com/contributing/
+    about: Setting up the repository and adding an algorithm.

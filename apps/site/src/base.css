@@ -62,6 +62,8 @@ body {
   min-height: 100dvh;
   display: grid;
   grid-template-rows: auto 1fr auto;
+  /* One column, never wider than the window, whatever a child's min-content. */
+  grid-template-columns: minmax(0, 1fr);
 }
 
 /* The bar: the wordmark and the site's sections. */
@@ -173,6 +175,20 @@ footer a:hover {
 footer .colophon {
   max-inline-size: 72rem;
   margin: 2rem auto 0;
+}
+
+footer .colophon p {
+  margin: 0.375rem 0 0;
+}
+
+/* Links inside a sentence keep their underline, so they never rely on colour. */
+footer .build time {
+  white-space: nowrap;
+}
+
+footer .build a {
+  text-decoration: underline;
+  text-decoration-color: var(--rule);
 }
 
 /* Content sits in a centred column; a .bleed child spans the window. */
