@@ -16,6 +16,7 @@ import { fileURLToPath } from 'node:url';
 import { algorithms, runAlgorithm } from '@algomotion/recipes';
 import {
   exportFigures,
+  prepareFigures,
   themeNames,
   type Figure,
   type ThemeName,
@@ -40,6 +41,8 @@ import {
   stepsOf,
   notFoundPage,
   themesPage,
+  thumbnailFrame,
+  thumbnailStem,
 } from '../src/docs/pages.ts';
 import { playgroundGroups, playgroundMarkup } from '../src/docs/playground.ts';
 import { shortInput } from '../src/docs/short-input.ts';
@@ -178,9 +181,40 @@ for (const entry of entries) {
   const html = entryPage(await detailsOf(entry, groups), assets);
   write(`${entry.path}index.html`, withPolicy(html, entry.path));
 }
+// The catalogue: a thumbnail of each algorithm and structure, from its
+// first example, at the frame `thumbnailFrame` picks, in light and dark.
+const thumbnails: Record<string, Art> = {};
+for (const entry of entries) {
+  if (entry.structure !== undefined) continue;
+  const algorithm = algorithms.find((a) => a.id === entry.id)!;
+  const doc = documentOf(entry.id, shortInput(entry.id, algorithm.examples[0]));
+  const [light, dark] = (['light', 'dark'] as const).map((theme) => {
+    const prepared = prepareFigures(doc, { theme });
+    if (!prepared.ok)
+      throw new Error(
+        `${entry.id} in ${theme}: ${JSON.stringify(prepared.error)}`,
+      );
+    const figure = prepared.value.figure(thumbnailFrame(prepared.value.frames));
+    if (!figure.ok)
+      throw new Error(
+        `${entry.id} in ${theme}: ${JSON.stringify(figure.error)}`,
+      );
+    return figure.value;
+  });
+  const stem = thumbnailStem(entry.id);
+  write(`algorithms/${stem}-light.svg`, light!.svg);
+  write(`algorithms/${stem}-dark.svg`, dark!.svg);
+  thumbnails[entry.id] = {
+    light: `${stem}-light.svg`,
+    dark: `${stem}-dark.svg`,
+    width: light!.width,
+    height: light!.height,
+    alt: '',
+  };
+}
 write(
   'algorithms/index.html',
-  withPolicy(algorithmsPage(groups, assets), 'algorithms/'),
+  withPolicy(algorithmsPage(groups, assets, thumbnails), 'algorithms/'),
 );
 
 // The themes page: the registry example at one step, in every theme.
