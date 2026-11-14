@@ -1025,3 +1025,33 @@ h1,
 h2 {
   font-size-adjust: from-font;
 }
+
+/* ── Polish: the slide's overlays as a loop (roadmap 5.6) ────────────── */
+
+/* Script adds .looping only for readers who allow motion. */
+.overlays.looping > li {
+  grid-area: 1 / 1;
+  opacity: 0;
+  transition: opacity 0.35s ease-out;
+}
+
+.overlays.looping > li.on {
+  opacity: 1;
+}
+
+.overlays-pause {
+  margin-top: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--step--1);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.overlays-pause:hover {
+  border-color: var(--ink);
+}

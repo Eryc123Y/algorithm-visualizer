@@ -101,6 +101,27 @@ export function filterCatalog(doc: Document, query: string): void {
           : `${shown} of ${total} shown.`;
 }
 
+/** How a panel comes in: a short fade, rising a few pixels. */
+const ENTER: Keyframe[] = [
+  { opacity: 0, translate: '0 0.375rem' },
+  { opacity: 1, translate: '0 0' },
+];
+
+/**
+ * Shows that `panel` replaced another, unless the reader asked for less
+ * motion; it always ends fully shown.
+ */
+function enter(doc: Document, panel: HTMLElement): void {
+  const view = doc.defaultView;
+  if (
+    typeof panel.animate !== 'function' ||
+    view?.matchMedia?.('(prefers-reduced-motion: no-preference)').matches !==
+      true
+  )
+    return;
+  panel.animate(ENTER, { duration: 180, easing: 'ease-out' });
+}
+
 /**
  * Tabs (the home page's outputs): the selected tab shows its panel, and
  * the others are hidden until found, so find-in-page still reaches them.
@@ -120,8 +141,11 @@ export function setUpTabs(doc: Document): void {
         tab.tabIndex = on ? 0 : -1;
         const panel = panelOf(tab);
         if (panel === null) continue;
-        if (on) panel.removeAttribute('hidden');
-        else panel.setAttribute('hidden', 'until-found');
+        if (on) {
+          const shown = !panel.hasAttribute('hidden');
+          panel.removeAttribute('hidden');
+          if (!shown) enter(doc, panel);
+        } else panel.setAttribute('hidden', 'until-found');
       }
       if (focus) selected.focus();
     };
@@ -151,4 +175,63 @@ export function setUpTabs(doc: Document): void {
       select(tabs[next]!, true);
     });
   }
+}
+
+const STEP_MS = 2400;
+
+/**
+ * The slides tab's overlays, played in one frame as a slide steps through
+ * them, with a button to pause. Only with script, so a reader can always
+ * stop it (WCAG 2.2.2), and only for readers who have not asked for less
+ * motion; it runs while it is on screen. Otherwise the overlays stay a
+ * list, side by side.
+ */
+export function loopOverlays(doc: Document, step = STEP_MS): void {
+  const view = doc.defaultView;
+  const list = doc.querySelector<HTMLElement>('.overlays');
+  if (
+    list === null ||
+    view === null ||
+    view.matchMedia?.('(prefers-reduced-motion: no-preference)').matches !==
+      true
+  )
+    return;
+  const items = [...list.querySelectorAll<HTMLElement>(':scope > li')];
+  if (items.length < 2) return;
+  let at = 0;
+  let paused = false;
+  let visible = false;
+  let timer: ReturnType<typeof setInterval> | undefined;
+  const show = () =>
+    items.forEach((item, k) => item.classList.toggle('on', k === at));
+  const sync = () => {
+    clearInterval(timer);
+    timer = undefined;
+    if (paused || !visible) return;
+    timer = setInterval(() => {
+      at = (at + 1) % items.length;
+      show();
+    }, step);
+  };
+  const button = doc.createElement('button');
+  button.type = 'button';
+  button.className = 'overlays-pause';
+  button.textContent = 'Pause';
+  button.addEventListener('click', () => {
+    paused = !paused;
+    button.textContent = paused ? 'Play' : 'Pause';
+    sync();
+  });
+  list.classList.add('looping');
+  show();
+  list.after(button);
+  if (!('IntersectionObserver' in view)) {
+    visible = true;
+    sync();
+    return;
+  }
+  new view.IntersectionObserver((entries) => {
+    visible = entries.some((e) => e.isIntersecting);
+    sync();
+  }).observe(list);
 }

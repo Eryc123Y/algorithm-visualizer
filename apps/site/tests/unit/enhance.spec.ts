@@ -7,6 +7,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   addCopyButtons,
   filterCatalog,
+  loopOverlays,
   setUpTabs,
 } from '../../src/docs/enhance.ts';
 
@@ -152,6 +153,26 @@ describe('output tabs', () => {
     tabs[1]!.focus();
     selected(1);
   });
+
+  it('fades a new panel in, unless the reader asks for less motion', () => {
+    const animate = vi.fn();
+    for (const panel of panels) panel.animate = animate;
+    const motion = (ok: boolean) =>
+      vi.spyOn(window, 'matchMedia').mockReturnValue({
+        matches: ok,
+      } as MediaQueryList);
+    motion(true);
+    tabs[1]!.click();
+    expect(animate).toHaveBeenCalledTimes(1);
+    expect(animate.mock.contexts[0]).toBe(panels[1]);
+    tabs[1]!.click();
+    expect(animate).toHaveBeenCalledTimes(1);
+    motion(false);
+    tabs[2]!.click();
+    expect(animate).toHaveBeenCalledTimes(1);
+    selected(2);
+    vi.restoreAllMocks();
+  });
 });
 
 describe('the catalogue filter', () => {
@@ -197,5 +218,57 @@ describe('the catalogue filter', () => {
     expect(status()).toBe('Nothing matches; try fewer words.');
     filterCatalog(document, '');
     expect(status()).toBe('');
+  });
+});
+
+describe('the slide’s overlays', () => {
+  const setUp = (motion: boolean) => {
+    document.body.innerHTML =
+      '<ol class="overlays"><li>1</li><li>2</li><li>3</li></ol>';
+    vi.spyOn(window, 'matchMedia').mockReturnValue({
+      matches: motion,
+    } as MediaQueryList);
+    const list = document.querySelector('.overlays')!;
+    const on = () =>
+      [...list.querySelectorAll('li')].findIndex((li) =>
+        li.classList.contains('on'),
+      );
+    return { list, on };
+  };
+
+  it('play in one frame and pause with a button', () => {
+    vi.useFakeTimers();
+    vi.stubGlobal('IntersectionObserver', undefined);
+    delete (window as { IntersectionObserver?: unknown }).IntersectionObserver;
+    const { list, on } = setUp(true);
+    loopOverlays(document, 100);
+    expect(list.classList.contains('looping')).toBe(true);
+    expect(on()).toBe(0);
+    vi.advanceTimersByTime(100);
+    expect(on()).toBe(1);
+    vi.advanceTimersByTime(200);
+    expect(on()).toBe(0);
+    const button = document.querySelector<HTMLButtonElement>(
+      'button.overlays-pause',
+    )!;
+    button.click();
+    expect(button.textContent).toBe('Play');
+    vi.advanceTimersByTime(500);
+    expect(on()).toBe(0);
+    button.click();
+    expect(button.textContent).toBe('Pause');
+    vi.advanceTimersByTime(100);
+    expect(on()).toBe(1);
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  it('stay a list for readers who ask for less motion', () => {
+    const { list } = setUp(false);
+    loopOverlays(document, 100);
+    expect(list.classList.contains('looping')).toBe(false);
+    expect(document.querySelector('button.overlays-pause')).toBeNull();
+    vi.restoreAllMocks();
   });
 });
