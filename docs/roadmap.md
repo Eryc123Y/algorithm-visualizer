@@ -228,7 +228,7 @@ The owner's brief (2026-11-14): the site still looks bare and says too little. M
 - [x] **5.4 Why algomotion.** A page that says what it is for and how it differs from drawing by hand, from Manim and from visualization websites, with honest limits, and three walk-throughs: a student's notes, a teacher's slides, and an assistant explaining an algorithm (#146).
 - [x] **5.5 Signs of life.** A changelog page and a roadmap page built from the repository's own files, the version in the footer, a contributing page, and issue templates. No tracking and no third-party requests (#144).
 - [x] **5.6 Polish.** (#147) Syntax colour in code blocks at build time, the home page's figures playing as a loop, transitions on the tabs, and a pass over spacing and type on every page, in both colour schemes and at phone width.
-- [x] **5.7 The site in Chinese.** `/zh/` holds the home page, the guide and the other pages in Simplified Chinese, with a language switch and `hreflang`. Module pages stay in English until 5.8.
+- [x] **5.7 The site in Chinese.** `/zh/` holds the home page, the guide and the other pages in Simplified Chinese, with a language switch and `hreflang`. Module pages stay in English until 5.8 (#152).
 - [ ] **5.8 Chinese in the product** _ADR_: the player's chrome and the recipes' narration in Chinese. It needs a decision on where a document keeps several languages.
 - [ ] **5.9 A logo** _owner_: the owner picks one of the candidates on the design canvas, or asks for more.
 

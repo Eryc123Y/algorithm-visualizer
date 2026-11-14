@@ -10,6 +10,7 @@ Nothing has been published yet: the npm packages, the CDN bundle, the Typst pack
 
 #### Added
 
+- The site in Simplified Chinese under `/zh/`: the home page, `/why/`, the guide, the catalogue, the themes, the project pages and the 404 page, with a language switch, `hreflang`, the reader's own CJK fonts, and a build that fails on any English page without a Chinese counterpart (#152).
 - Real scenes of the outputs: a page of Typst notes, the overlays of a Beamer frame, a terminal session and the player in a conversation, each remade from the real tools by `npm run scenes`, on the home page's output tabs, the guides and `/why/` (#148).
 - A gallery for `/algorithms/`: a thumbnail of each module in the light and the dark theme, loaded lazily (#145).
 - A playground in the home page's hero: pick an algorithm, edit its input, and the player and the snippets for every output follow (#143).
