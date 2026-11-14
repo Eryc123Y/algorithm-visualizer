@@ -1,8 +1,24 @@
 {
   "name": "@algomotion/recipes",
-  "version": "0.0.0",
-  "private": true,
+  "version": "1.0.0-alpha.1",
   "description": "A typed recorder for algomotion traces, and ready-made visualizations of classic algorithms and data structures.",
+  "keywords": [
+    "algorithms",
+    "visualization",
+    "education",
+    "algorithms",
+    "data-structures"
+  ],
+  "license": "GPL-3.0-or-later",
+  "homepage": "https://algomotion.turing2234.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Eryc123Y/algorithm-visualizer.git",
+    "directory": "packages/recipes"
+  },
+  "bugs": {
+    "url": "https://github.com/Eryc123Y/algorithm-visualizer/issues"
+  },
   "type": "module",
   "sideEffects": false,
   "exports": {
@@ -19,8 +35,12 @@
     "build": "tsc --build tsconfig.lib.json"
   },
   "dependencies": {
-    "@algomotion/core": "*",
-    "@algomotion/spec": "*",
+    "@algomotion/core": "1.0.0-alpha.1",
+    "@algomotion/spec": "1.0.0-alpha.1",
     "zod": "^4.6.7"
+  },
+  "publishConfig": {
+    "access": "public",
+    "tag": "alpha"
   }
 }

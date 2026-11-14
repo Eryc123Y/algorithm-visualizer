@@ -1,8 +1,24 @@
 {
   "name": "@algomotion/core",
-  "version": "0.0.0",
-  "private": true,
+  "version": "1.0.0-alpha.1",
   "description": "Structure kinds, reducers and the timeline engine for algomotion traces.",
+  "keywords": [
+    "algorithms",
+    "visualization",
+    "education",
+    "layout",
+    "timeline"
+  ],
+  "license": "GPL-3.0-or-later",
+  "homepage": "https://algomotion.turing2234.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Eryc123Y/algorithm-visualizer.git",
+    "directory": "packages/core"
+  },
+  "bugs": {
+    "url": "https://github.com/Eryc123Y/algorithm-visualizer/issues"
+  },
   "type": "module",
   "sideEffects": false,
   "exports": {
@@ -19,7 +35,11 @@
     "build": "tsc --build tsconfig.lib.json"
   },
   "dependencies": {
-    "@algomotion/fonts": "*",
-    "@algomotion/spec": "*"
+    "@algomotion/fonts": "1.0.0-alpha.1",
+    "@algomotion/spec": "1.0.0-alpha.1"
+  },
+  "publishConfig": {
+    "access": "public",
+    "tag": "alpha"
   }
 }

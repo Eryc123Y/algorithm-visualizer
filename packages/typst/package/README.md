@@ -211,4 +211,4 @@ There is no time limit. For very long documents, `algomotion export` writes the 
 
 ## Licence
 
-The package's licence will be chosen before it is published. The bundled fonts, whose outlines draw the figures' text (JetBrains Mono, Inter, STIX Two Text, Lexend, Noto Sans, Noto Sans Mono and DotGothic16), are under the SIL Open Font License 1.1 (`OFL.txt`).
+The package is free software under the GNU General Public License, version 3 or later (`LICENSE`). The figures it draws are yours. The bundled fonts, whose outlines draw the figures' text (JetBrains Mono, Inter, STIX Two Text, Lexend, Noto Sans, Noto Sans Mono and DotGothic16), are under the SIL Open Font License 1.1 (`OFL.txt`).

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 64" width="360" height="64" color="#f3f3f1" role="img" aria-labelledby="title desc">
+<title id="title">algomotion — Flipbook lockup for dark backgrounds</title>
+<desc id="desc">Three successive frames make an algorithm feel like something you can turn through, one state at a time.</desc>
+<g fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="round">
+  <path d="M10 40V10H40"/>
+  <path d="M18 48V18H48"/>
+  <rect x="26" y="26" width="28" height="28" rx="2"/>
+</g>
+<path d="M36 33L47 40L36 47Z" fill="currentColor"/>
+<g fill="currentColor" fill-rule="evenodd" aria-label="algomotion">
+  <path transform="translate(82 0)" d="M12 20C5 20 1 25 1 33S5 46 12 46C16 46 19 44 20 42V46H25V20H20V24C18 21 16 20 12 20ZM13 25C17 25 20 28 20 33S17 41 13 41S6 38 6 33S9 25 13 25Z"/>
+  <path transform="translate(112 0)" d="M2 9H7V38C7 40 8 41 10 41V46C4 46 2 43 2 38Z"/>
+  <path transform="translate(127 0)" d="M12 20C5 20 1 25 1 33S5 46 12 46C16 46 18 44 20 42V46C20 51 17 54 12 54C8 54 5 53 3 51V57C6 58 9 59 12 59C20 59 25 54 25 46V20H20V24C18 21 16 20 12 20ZM13 25C17 25 20 28 20 33S17 41 13 41S6 38 6 33S9 25 13 25Z"/>
+  <path transform="translate(157 0)" d="M13 20C5 20 1 25 1 33S5 46 13 46S25 41 25 33S21 20 13 20ZM13 25C18 25 20 28 20 33S18 41 13 41S6 38 6 33S8 25 13 25Z"/>
+  <path transform="translate(187 0)" d="M1 20H6V24C8 21 10 20 14 20C18 20 21 22 23 25C25 22 28 20 32 20C38 20 40 25 40 31V46H35V31C35 27 34 25 31 25C27 25 25 28 25 32V46H20V31C20 27 18 25 15 25C10 25 6 28 6 33V46H1Z"/>
+  <path transform="translate(230 0)" d="M13 20C5 20 1 25 1 33S5 46 13 46S25 41 25 33S21 20 13 20ZM13 25C18 25 20 28 20 33S18 41 13 41S6 38 6 33S8 25 13 25Z"/>
+  <path transform="translate(260 0)" d="M5 13H10V20H17V25H10V36C10 40 12 41 15 41H17V46H14C8 46 5 43 5 37V25H1V20H5Z"/>
+  <path transform="translate(282 0)" d="M1 20H6V46H1ZM1 9H6V14H1Z"/>
+  <path transform="translate(294 0)" d="M13 20C5 20 1 25 1 33S5 46 13 46S25 41 25 33S21 20 13 20ZM13 25C18 25 20 28 20 33S18 41 13 41S6 38 6 33S8 25 13 25Z"/>
+  <path transform="translate(324 0)" d="M1 20H6V24C9 21 12 20 16 20C23 20 26 25 26 32V46H21V32C21 27 19 25 15 25C10 25 6 29 6 34V46H1Z"/>
+</g>
+</svg>

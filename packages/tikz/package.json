@@ -1,8 +1,24 @@
 {
   "name": "@algomotion/tikz",
-  "version": "0.0.0",
-  "private": true,
+  "version": "1.0.0-alpha.1",
   "description": "Renders algomotion scenes as TikZ for LaTeX, with the document's fonts (ADR 0027).",
+  "keywords": [
+    "algorithms",
+    "visualization",
+    "education",
+    "tikz",
+    "latex"
+  ],
+  "license": "GPL-3.0-or-later",
+  "homepage": "https://algomotion.turing2234.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Eryc123Y/algorithm-visualizer.git",
+    "directory": "packages/tikz"
+  },
+  "bugs": {
+    "url": "https://github.com/Eryc123Y/algorithm-visualizer/issues"
+  },
   "type": "module",
   "sideEffects": false,
   "exports": {
@@ -19,11 +35,15 @@
     "build": "tsc --build tsconfig.lib.json"
   },
   "dependencies": {
-    "@algomotion/core": "*",
-    "@algomotion/spec": "*",
-    "@algomotion/svg": "*"
+    "@algomotion/core": "1.0.0-alpha.1",
+    "@algomotion/spec": "1.0.0-alpha.1",
+    "@algomotion/svg": "1.0.0-alpha.1"
   },
   "devDependencies": {
-    "@algomotion/recipes": "*"
+    "@algomotion/recipes": "1.0.0-alpha.1"
+  },
+  "publishConfig": {
+    "access": "public",
+    "tag": "alpha"
   }
 }

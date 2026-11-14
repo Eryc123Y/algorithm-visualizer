@@ -128,7 +128,7 @@ describe('the page', () => {
   it('states its limits plainly', () => {
     const limits = doc().querySelector('#limits')!.parentElement!.textContent;
     expect(limits).toMatch(/not on npm/i);
-    expect(limits).toMatch(/licence is still to be chosen/i);
+    expect(limits).toMatch(/GNU GPL, version 3 or later/);
     expect(limits).toMatch(/no video/i);
     expect(limits).toContain(String(algorithms.length));
   });

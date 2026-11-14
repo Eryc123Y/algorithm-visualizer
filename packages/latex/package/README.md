@@ -179,4 +179,4 @@ Shell escape lets a document run programs, so compile documents from others with
 
 - **Custom themes** made with `createTheme` reach the player and the library; a theme file for the command, so that they reach LaTeX too, is future work.
 
-The package's licence and its publishing to CTAN wait for the project's 1.0 release.
+The package is free software under the GNU General Public License, version 3 or later (`LICENSE`). Its publishing to CTAN waits for the project's 1.0 release.

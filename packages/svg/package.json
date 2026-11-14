@@ -1,8 +1,24 @@
 {
   "name": "@algomotion/svg",
-  "version": "0.0.0",
-  "private": true,
+  "version": "1.0.0-alpha.1",
   "description": "Renders algomotion scenes to standalone SVG strings, without a DOM.",
+  "keywords": [
+    "algorithms",
+    "visualization",
+    "education",
+    "svg",
+    "figures"
+  ],
+  "license": "GPL-3.0-or-later",
+  "homepage": "https://algomotion.turing2234.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Eryc123Y/algorithm-visualizer.git",
+    "directory": "packages/svg"
+  },
+  "bugs": {
+    "url": "https://github.com/Eryc123Y/algorithm-visualizer/issues"
+  },
   "type": "module",
   "sideEffects": false,
   "exports": {
@@ -19,8 +35,12 @@
     "build": "tsc --build tsconfig.lib.json"
   },
   "dependencies": {
-    "@algomotion/core": "*",
-    "@algomotion/fonts": "*",
-    "@algomotion/spec": "*"
+    "@algomotion/core": "1.0.0-alpha.1",
+    "@algomotion/fonts": "1.0.0-alpha.1",
+    "@algomotion/spec": "1.0.0-alpha.1"
+  },
+  "publishConfig": {
+    "access": "public",
+    "tag": "alpha"
   }
 }

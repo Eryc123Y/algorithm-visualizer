@@ -1,9 +1,24 @@
 {
   "name": "@algomotion/fonts",
-  "version": "0.0.0",
-  "private": true,
+  "version": "1.0.0-alpha.1",
   "description": "Metrics and glyph outlines of the fonts algomotion bundles, and text measurement. No DOM or Node.js APIs.",
+  "keywords": [
+    "algorithms",
+    "visualization",
+    "education",
+    "fonts",
+    "text-measurement"
+  ],
   "license": "MIT AND OFL-1.1",
+  "homepage": "https://algomotion.turing2234.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Eryc123Y/algorithm-visualizer.git",
+    "directory": "packages/fonts"
+  },
+  "bugs": {
+    "url": "https://github.com/Eryc123Y/algorithm-visualizer/issues"
+  },
   "type": "module",
   "sideEffects": false,
   "exports": {
@@ -24,5 +39,9 @@
   ],
   "scripts": {
     "build": "tsc --build tsconfig.lib.json"
+  },
+  "publishConfig": {
+    "access": "public",
+    "tag": "alpha"
   }
 }

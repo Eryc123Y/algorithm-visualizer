@@ -1,8 +1,25 @@
 {
   "name": "@algomotion/elements",
-  "version": "0.0.0",
-  "private": true,
+  "version": "1.0.0-alpha.1",
   "description": "Web Components for algomotion: the <algo-player> interactive player.",
+  "keywords": [
+    "algorithms",
+    "visualization",
+    "education",
+    "web-components",
+    "player",
+    "animation"
+  ],
+  "license": "GPL-3.0-or-later",
+  "homepage": "https://algomotion.turing2234.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Eryc123Y/algorithm-visualizer.git",
+    "directory": "packages/elements"
+  },
+  "bugs": {
+    "url": "https://github.com/Eryc123Y/algorithm-visualizer/issues"
+  },
   "type": "module",
   "sideEffects": [
     "./src/define.ts",
@@ -32,10 +49,14 @@
     "build": "tsc --build tsconfig.lib.json && vite build --config vite.cdn.config.ts"
   },
   "dependencies": {
-    "@algomotion/core": "*",
-    "@algomotion/recipes": "*",
-    "@algomotion/spec": "*",
-    "@algomotion/svg": "*",
+    "@algomotion/core": "1.0.0-alpha.1",
+    "@algomotion/recipes": "1.0.0-alpha.1",
+    "@algomotion/spec": "1.0.0-alpha.1",
+    "@algomotion/svg": "1.0.0-alpha.1",
     "lit": "^3.3.1"
+  },
+  "publishConfig": {
+    "access": "public",
+    "tag": "alpha"
   }
 }

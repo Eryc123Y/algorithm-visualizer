@@ -24,8 +24,11 @@
   z-index: 2;
 }
 
-.glyph-bars {
-  fill: currentColor;
+.glyph-frames {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 6;
+  stroke-linejoin: round;
 }
 
 .glyph-now {

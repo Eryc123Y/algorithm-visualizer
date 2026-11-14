@@ -1,8 +1,11 @@
 @import '../base.css';
 
 /* The wordmark's glyph, as on the documentation's pages. */
-.glyph-bars {
-  fill: currentColor;
+.glyph-frames {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 6;
+  stroke-linejoin: round;
 }
 
 .glyph-now {

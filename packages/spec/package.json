@@ -1,8 +1,24 @@
 {
   "name": "@algomotion/spec",
-  "version": "0.0.0",
-  "private": true,
+  "version": "1.0.0-alpha.1",
   "description": "Protocol schemas, types and validation for algomotion traces.",
+  "keywords": [
+    "algorithms",
+    "visualization",
+    "education",
+    "schema",
+    "protocol"
+  ],
+  "license": "GPL-3.0-or-later",
+  "homepage": "https://algomotion.turing2234.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Eryc123Y/algorithm-visualizer.git",
+    "directory": "packages/spec"
+  },
+  "bugs": {
+    "url": "https://github.com/Eryc123Y/algorithm-visualizer/issues"
+  },
   "type": "module",
   "sideEffects": false,
   "exports": {
@@ -23,5 +39,9 @@
   },
   "dependencies": {
     "zod": "^4.6.7"
+  },
+  "publishConfig": {
+    "access": "public",
+    "tag": "alpha"
   }
 }

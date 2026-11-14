@@ -4,7 +4,23 @@ All notable changes to algomotion, newest first. The format follows [Keep a Chan
 
 ## Unreleased
 
-Nothing has been published yet: the npm packages, the CDN bundle, the Typst package, the LaTeX package and the standalone executable all wait for roadmap item 4.3, which is the owner's. Everything below is on `main` and can be built from the repository. The hosted MCP server at `algomotion-mcp.turing2234.com` and the site at `algomotion.turing2234.com` run from it.
+Nothing yet.
+
+## 1.0.0-alpha.1 (2026-11-14)
+
+The first public release, for trying out and feedback. The eight npm packages (`@algomotion/spec`, `fonts`, `core`, `svg`, `tikz`, `recipes`, `elements` and `mcp`) are published with the `alpha` tag, and the GitHub release carries the CDN bundle, the Typst and LaTeX packages and the standalone executable. Typst Universe and CTAN wait for 1.0. Names and options may still change before 1.0; the protocol is frozen at 1.0 (ADR 0043).
+
+### Release (2026-11-14)
+
+#### Added
+
+- The licence: GNU General Public License, version 3 or later, in `LICENSE` and in every package. The bundled fonts keep the SIL Open Font License.
+- The logo, a flipbook of frames with the front one playing, in `docs/brand/`, the site's bar and its favicon.
+- A README in Chinese, `README.zh-CN.md`, and a README that opens with what algomotion draws, its status and a quick start.
+
+#### Changed
+
+- Every package is version `1.0.0-alpha.1` and depends on the others at that version; the eight libraries are no longer private.
 
 ### Phase 5: a site worth visiting (2026-11-14)
 
