@@ -37,7 +37,7 @@ The same run becomes any of these, drawn by one engine in nine themes. A model c
 
 The protocol is frozen at 1.0, and eleven structure kinds and 132 algorithms and data structure operations work end to end. `1.0.0-alpha.1` is the first public release, for trying out and feedback: names and options may still change before 1.0.
 
-- **npm:** every package is published with the `alpha` tag, so a plain `npm install` does not pick it up; ask for `@alpha`.
+- **npm:** every package is published as `1.0.0-alpha.1`, under the `alpha` tag. It is the only version so far, so a plain `npm install` gets it too; ask for `@alpha` to keep getting alphas once 1.0 is out.
 - **Typst Universe and CTAN:** not yet. Both review packages by hand and keep every version, so they wait for 1.0. Until then, install the Typst and LaTeX packages locally from the [GitHub release](https://github.com/Eryc123Y/algorithm-visualizer/releases) or from this repository, as the [Typst guide](https://algomotion.turing2234.com/guide/typst/) and the [LaTeX guide](https://algomotion.turing2234.com/guide/latex/) show.
 - **AI assistants:** the hosted MCP server at `https://algomotion-mcp.turing2234.com/mcp` works today.
 

@@ -33,7 +33,7 @@
 
 协议已冻结在 1.0，十一种数据结构和 132 个算法及数据结构操作都已完整可用。`1.0.0-alpha.1` 是第一个公开版本，供试用和反馈：在 1.0 之前，名称和选项仍可能调整。
 
-- **npm**：所有包都以 `alpha` 标签发布，直接 `npm install` 不会装到它，需要指定 `@alpha`。
+- **npm**：所有包都以 `1.0.0-alpha.1` 发布，带 `alpha` 标签。目前只有这一个版本，所以直接 `npm install` 也会装到它；想在 1.0 发布后继续用 alpha 版，就指定 `@alpha`。
 - **Typst Universe 和 CTAN**：暂未发布。这两个平台都由人工审核，并且会永久保留每个版本，所以等 1.0 再上。在那之前，可以从 [GitHub Release](https://github.com/Eryc123Y/algorithm-visualizer/releases) 或本仓库在本地安装 Typst 和 LaTeX 包，方法见 [Typst 指南](https://algomotion.turing2234.com/zh/guide/typst/)和 [LaTeX 指南](https://algomotion.turing2234.com/zh/guide/latex/)。
 - **AI 助手**：托管的 MCP 服务器 `https://algomotion-mcp.turing2234.com/mcp` 现在就能用。
 
