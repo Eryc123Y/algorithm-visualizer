@@ -363,3 +363,53 @@ test('in the looping slides, only the page on show can be clicked or focused', a
   );
   expect(href).toBe(shown.href);
 });
+
+test('in dark mode, figures in a fixed theme sit on their own paper', async ({
+  page,
+}) => {
+  await page.emulateMedia({ colorScheme: 'dark' });
+  const papers = (path: string) =>
+    page.goto(path).then(() =>
+      page.locator('.sheet').evaluateAll((sheets) =>
+        sheets.map((s) => ({
+          theme: [...s.classList].find((c) => c.startsWith('sheet-'))!,
+          paper: getComputedStyle(s).backgroundColor,
+        })),
+      ),
+    );
+  const white = 'rgb(255, 255, 255)';
+  const light = [
+    'sheet-light',
+    'sheet-print',
+    'sheet-textbook',
+    'sheet-blocks',
+    'sheet-answer-sheet',
+  ];
+  for (const path of [
+    '/',
+    '/why/',
+    '/themes/',
+    '/guide/typst/',
+    '/guide/latex/',
+    '/guide/cli/',
+  ]) {
+    const sheets = await papers(path);
+    expect(sheets.length, path).toBeGreaterThan(0);
+    for (const s of sheets)
+      if (light.includes(s.theme))
+        expect(s.paper, `${path} ${s.theme}`).toBe(white);
+      else expect(s.paper, `${path} ${s.theme}`).not.toBe(white);
+  }
+  // Every theme on the themes page, and the three places on /why/.
+  expect(
+    await page
+      .goto('/themes/')
+      .then(() => page.locator('.themes .sheet').count()),
+  ).toBe(9);
+  await page.goto('/why/');
+  await expect(page.locator('.triptych .sheet')).toHaveCount(3);
+  await expect(page.locator('.triptych .sheet-dark')).toHaveCSS(
+    'background-color',
+    'rgb(18, 18, 20)',
+  );
+});
