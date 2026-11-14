@@ -9,7 +9,7 @@
     "fonts",
     "text-measurement"
   ],
-  "license": "MIT AND OFL-1.1",
+  "license": "GPL-3.0-or-later AND OFL-1.1",
   "homepage": "https://algomotion.turing2234.com",
   "repository": {
     "type": "git",
