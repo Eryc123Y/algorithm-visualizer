@@ -283,6 +283,33 @@ picture img {
   min-width: 0;
 }
 
+/*
+ * Room for the player before it has drawn, so the page below does not
+ * move when it does. No taller than the default run's player at any
+ * width (an E2E test checks), so the reserve never shows as a gap. Only
+ * with script: without it the player never draws.
+ */
+@media (scripting: enabled) {
+  .pg-stage {
+    min-block-size: 36rem;
+  }
+
+  /*
+   * A module page's player: just under the smallest player of any module
+   * at that width, so it is never a gap and the page below drops by less
+   * when the player draws. Below 49rem the player stacks its code under
+   * the figure, and the smallest is taller (351px at 320px wide; 277px,
+   * bubble sort's, side by side).
+   */
+  main > algo-player {
+    min-block-size: 17rem;
+
+    @media (width < 49rem) {
+      min-block-size: 21.5rem;
+    }
+  }
+}
+
 .pg-caption code {
   overflow-wrap: anywhere;
 }
@@ -921,6 +948,11 @@ picture img {
 
 .thumb img {
   object-fit: contain;
+}
+
+/* Until its figure arrives, a quiet fill rather than an empty cell. */
+.thumb.pending {
+  background: color-mix(in oklab, var(--ink) 6%, var(--figure-paper));
 }
 
 .card-summary {

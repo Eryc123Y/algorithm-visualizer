@@ -220,6 +220,12 @@ export const countOf = (groups: readonly TopicGroup[]): number =>
 export const thumbnailFrame = (frames: number): number =>
   frames <= 1 ? 0 : Math.max(1, Math.floor((frames - 1) / 2));
 
+/**
+ * How many thumbnails load with the page rather than lazily: two rows on
+ * a desktop, the first screen; lazy ones start only after layout.
+ */
+export const EAGER_THUMBNAILS = 8;
+
 /** Where a module's thumbnails go, relative to the catalogue's page. */
 export const thumbnailStem = (id: string): string => `thumbs/${id}`;
 
@@ -233,11 +239,13 @@ export function algorithmsPage(
   thumbnails: Readonly<Record<string, Art>> = {},
 ): string {
   // The thumbnail is decorative: the card's link is named by its title.
+  // The first ones are on the first screen: they load with the page.
+  let shown = 0;
   const thumb = (e: Entry) => {
     const art = thumbnails[e.id];
-    return art === undefined
-      ? ''
-      : `<span class="thumb">${picture({ ...art, alt: '' }, '')}</span>`;
+    if (art === undefined) return '';
+    const loading = shown++ < EAGER_THUMBNAILS ? 'eager' : 'lazy';
+    return `<span class="thumb">${picture({ ...art, alt: '' }, '', loading)}</span>`;
   };
   // A structure is found by its operations' names too.
   const item = (e: Entry, operations: readonly Entry[] = [], inner = '') =>
