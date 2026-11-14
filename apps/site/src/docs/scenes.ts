@@ -54,7 +54,8 @@ export const SCENE_SOURCES: Readonly<Record<SceneName, string>> = {
 };
 
 /**
- * A scene as a figure; the Beamer pages as numbered overlays. `caption`
+ * A scene as a figure; the Beamer pages as numbered overlays, in an
+ * `.overlays` list, which the home page plays as a loop (`loopOverlays`). `caption`
  * is HTML; the alternative text comes from the manifest.
  */
 export function sceneFigure(
@@ -69,7 +70,7 @@ export function sceneFigure(
     `<a class="scene-full" href="${attribute(root + art.light)}">${inner}</a>`;
   const body =
     name === 'beamer'
-      ? `<ol class="scene-pages" aria-label="${attribute(`${scenes.beamer.length} overlays of one frame, in order`)}">${scenes.beamer
+      ? `<ol class="overlays scene-pages" aria-label="${attribute(`${scenes.beamer.length} overlays of one frame, in order`)}">${scenes.beamer
           .map(
             (page, k) =>
               `<li><span class="overlay-n">${k + 1}</span>${full(page, picture(page, root))}</li>`,

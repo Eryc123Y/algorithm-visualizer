@@ -96,6 +96,8 @@ describe('a scene as a figure', () => {
 
   it('numbers the Beamer pages as overlays, in order', () => {
     document.body.innerHTML = sceneFigure(manifest, 'beamer', '', 'Cap');
+    // The home page's loop plays the first .overlays list it finds.
+    expect(document.querySelector('ol.overlays')).not.toBeNull();
     expect(
       [...document.querySelectorAll('.overlay-n')].map((n) => n.textContent),
     ).toEqual(['1', '2', '3']);

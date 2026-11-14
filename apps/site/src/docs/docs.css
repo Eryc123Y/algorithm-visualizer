@@ -1687,8 +1687,10 @@ main.project > .project-body {
   list-style: none;
 }
 
-.scene-pages li {
+.overlays.scene-pages li {
   position: relative;
+  padding: 0;
+  background: none;
 }
 
 /* The slides are white in both schemes, so their numbers are dark too. */
