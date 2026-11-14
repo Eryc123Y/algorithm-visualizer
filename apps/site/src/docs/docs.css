@@ -286,26 +286,30 @@ picture img {
 /*
  * Room for the player before it has drawn, so the page below does not
  * move when it does. No taller than the default run's player at any
- * width (an E2E test checks), so the reserve never shows as a gap. Only
- * with script: without it the player never draws.
+ * width (an E2E test checks), so the reserve never shows as a gap. In
+ * pixels, as the player sizes itself: a reader's larger default font
+ * would grow a rem reserve but not the player. Only with script: without
+ * it the player never draws.
  */
 @media (scripting: enabled) {
   .pg-stage {
-    min-block-size: 36rem;
+    min-block-size: 576px;
   }
 
   /*
    * A module page's player: just under the smallest player of any module
    * at that width, so it is never a gap and the page below drops by less
-   * when the player draws. Below 49rem the player stacks its code under
-   * the figure, and the smallest is taller (351px at 320px wide; 277px,
-   * bubble sort's, side by side).
+   * when the player draws. Below 784px wide the player stacks its code
+   * under the figure (its own break is a 720px container), and the
+   * smallest is taller: 351px at 320px wide, 277px (bubble sort's) side by
+   * side. A narrower container than this guess only stacks the player,
+   * which makes it taller, never shorter.
    */
   main > algo-player {
-    min-block-size: 17rem;
+    min-block-size: 272px;
 
-    @media (width < 49rem) {
-      min-block-size: 21.5rem;
+    @media (width < 784px) {
+      min-block-size: 344px;
     }
   }
 }

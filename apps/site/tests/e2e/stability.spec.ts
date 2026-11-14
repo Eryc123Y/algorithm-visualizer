@@ -22,6 +22,13 @@ const watchShifts = (page: Page) =>
     }).observe({ type: 'layout-shift', buffered: true });
   });
 
+/** A reader's default font size, as the root's; rem follows it. */
+const largerDefault = (page: Page, size: string) =>
+  page.evaluate(async (value) => {
+    document.documentElement.style.fontSize = value;
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+  }, size);
+
 const shift = (page: Page) =>
   page.evaluate(() => (window as unknown as { shift: number }).shift);
 
@@ -36,30 +43,38 @@ for (const path of ['/', '/dijkstra/'])
     expect(await shift(page)).toBeLessThan(0.1);
   });
 
-test('the hero’s reserve is never taller than its player', async ({ page }) => {
-  await page.goto('/');
-  const player = page.locator('.pg-stage algo-player');
-  await expect(player.getByText('Initial state.')).toBeVisible();
-  const [stage, drawn] = await Promise.all([
-    page
-      .locator('.pg-stage')
-      .evaluate((el) => el.getBoundingClientRect().height),
-    player.evaluate((el) => el.getBoundingClientRect().height),
-  ]);
-  expect(stage - drawn).toBeLessThan(1);
-});
+for (const font of ['100%', '150%'])
+  test(`the hero’s reserve is never taller than its player (font ${font})`, async ({
+    page,
+  }) => {
+    await page.goto('/');
+    const player = page.locator('.pg-stage algo-player');
+    await expect(player.getByText('Initial state.')).toBeVisible();
+    const [stage, drawn] = await Promise.all([
+      page
+        .locator('.pg-stage')
+        .evaluate((el) => el.getBoundingClientRect().height),
+      player.evaluate((el) => el.getBoundingClientRect().height),
+    ]);
+    expect(stage - drawn).toBeLessThan(1);
+  });
 
-// The smallest players of the registry, at a desktop's and a phone's width.
-for (const id of [
-  'bubble-sort',
-  'random-permutation',
-  'fibonacci-heap.delete',
-  'activity-selection',
-])
-  test(`${id}'s page reserves no more than its player`, async ({ page }) => {
+// The smallest players of the registry, at a desktop's and a phone's width,
+// and with a reader's default font at 150%, which the player ignores.
+for (const [id, font] of [
+  ['bubble-sort', '100%'],
+  ['random-permutation', '100%'],
+  ['fibonacci-heap.delete', '100%'],
+  ['activity-selection', '100%'],
+  ['bubble-sort', '150%'],
+] as const)
+  test(`${id}'s page reserves no more than its player (font ${font})`, async ({
+    page,
+  }) => {
     await page.goto(`/${id.split('.').join('/')}/`);
     const player = page.locator('main > algo-player');
     await expect(player.getByText('Initial state.')).toBeVisible();
+    await largerDefault(page, font);
     const [reserve, drawn] = await player.evaluate((el) => [
       parseFloat(getComputedStyle(el).minBlockSize),
       el.shadowRoot!.firstElementChild!.getBoundingClientRect().height,
