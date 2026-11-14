@@ -18,8 +18,8 @@ export const zh: Guide = {
   ],
   body: ({ root, code, figure, note }) => `
 <h2 id="install">环境要求与安装</h2>
-<p>需要 LaTeX 2024-06-01 或更新版本，以及 TikZ。支持 pdfLaTeX、LuaLaTeX 和 XeLaTeX。这个包还没有发布到 CTAN。把 <code>packages/latex/package/algomotion.sty</code> 复制到文档旁边，或者放进本地的 <code>texmf/tex/latex/algomotion/</code> 目录树。</p>
-<p>从仓库构建命令。构建独立可执行文件需要 rustup 和 C 编译器，构建好之后运行时不依赖 Node.js：</p>
+<p>需要 LaTeX 2024-06-01 或更新版本，以及 TikZ。支持 pdfLaTeX、LuaLaTeX 和 XeLaTeX。这个包还没有发布到 CTAN，1.0 时会发布。从 <a href="https://github.com/Eryc123Y/algorithm-visualizer/releases/tag/v1.0.0-alpha.1">GitHub Release</a> 的 <code>algomotion-latex.zip</code> 或仓库的 <code>packages/latex/package/</code> 里取出 <code>algomotion.sty</code>，放到文档旁边，或者放进本地的 <code>texmf/tex/latex/algomotion/</code> 目录树。</p>
+<p>这个包要调用 <code>algomotion</code> 命令。装了 Node.js 的话，从 npm 安装：<code>npm install -g @algomotion/mcp@alpha</code>。没有 Node.js 的话，用独立可执行文件：Release 里有 Apple 芯片 macOS 版，其他平台可以在仓库里用 rustup 和 C 编译器构建：</p>
 ${code(
   `npm ci
 npm run build:standalone -w @algomotion/mcp`,
@@ -48,10 +48,10 @@ ${figure('tree', '引擎画出的同一棵树、同一个主题。在 LaTeX 中�
 <tr><td><code>steps</code></td><td>无</td><td>供 Beamer 使用的图组。不给值表示所有帧；多个选择器用逗号分隔，外面加花括号。</td></tr>
 <tr><td><code>start</code></td><td><code>+</code></td><td>图组的第一个叠层：递增计数，或一个明确的编号。</td></tr>
 <tr><td><code>theme</code></td><td><code>light</code></td><td>一个内置的固定主题。</td></tr>
-<tr><td><code>layout</code></td><td><code>auto</code></td><td>讲义中为 <code>narrow</code>，Beamer 中为 <code>wide</code>；两者都可以显式指定。</td></tr>
+<tr><td><code>layout</code></td><td><code>auto</code></td><td>笔记中为 <code>narrow</code>，Beamer 中为 <code>wide</code>；两者都可以显式指定。</td></tr>
 <tr><td><code>width</code>、<code>height</code></td><td>自然尺寸；Beamer 中填满</td><td>在给定尺寸内缩放，保持比例。</td></tr>
 <tr><td><code>scale</code></td><td>无</td><td>相对自然尺寸的缩放因子；不给值时恢复默认尺寸。</td></tr>
-<tr><td><code>value font</code></td><td>主题的字体族</td><td>单元格的值、结点、下标、边标签和指针所用的字体。</td></tr>
+<tr><td><code>value font</code></td><td>主题的字体族</td><td>单元格的值、节点、下标、边标签和指针所用的字体。</td></tr>
 <tr><td><code>label font</code></td><td>主题的字体族</td><td>标题和标签所用的字体。</td></tr>
 <tr><td><code>algorithm</code></td><td>无</td><td>与 <code>\\algomotionfile</code> 配合，把文件当作算法输入读取。</td></tr>
 <tr><td><code>command</code></td><td><code>algomotion</code></td><td>包选项：可执行文件，可带路径或参数。</td></tr>
@@ -69,7 +69,7 @@ ${code(
 <p>自然尺寸下，值的字号是周围正文的 1.25 倍，标签是正文的四分之三。图的宽度不超过行宽，除非显式给出的尺寸另有规定。主题有 <code>light</code>、<code>dark</code>、<code>print</code>、<code>textbook</code>、<code>textbook-dark</code>、<code>blocks</code>、<code>blocks-dark</code>、<code>answer-sheet</code> 和 <code>turbo-c</code>。</p>
 
 <h2 id="files">文档、输入文件和导出的图</h2>
-<p><code>\\algomotionfile{run.json}</code> 画出一份文档。加上 <code>algorithm=dijkstra</code>，则改为读取算法输入。生成下面这些示例文件和一份 TikZ 导出：</p>
+<p><code>\\algomotionfile{run.json}</code> 画出一份文档。加上 <code>algorithm=dijkstra</code>，则改为读取算法输入。生成下面这些示例文件，并导出一个 TikZ 文件：</p>
 ${code(
   `algomotion run dijkstra 'A-B 4, B-C 1, A-C 7' --out run.json
 printf '%s\n' '{"graph":"A-B 4, B-C 1, A-C 7"}' > graph.json
@@ -98,7 +98,7 @@ ${code(
 
 <h2 id="cache">shell escape 与缓存</h2>
 <p>第一次编译要加 <code>-shell-escape</code> 来运行命令。TeX 默认的受限 shell escape 不允许运行它。生成的每幅图都存进 <code>_algomotion/</code>，以输入或文件内容、算法、选择器、主题、布局、格式和包版本作为键。字体和尺寸在绘制时才生效，改动它们不需要重新导出。</p>
-<p>为了 arXiv 和合作者，请把缓存提交进版本库。所有用到的图都已缓存后，不开 shell escape、不装这个命令也能编译。在包发布到 CTAN 之前，也请把包和项目放在一起。包不会删除任何东西；更新命令后请自行清空缓存。旧的、不兼容的 TikZ 格式会报错，需要重新导出。</p>
+<p>如果要上传 arXiv 或与他人合作，请把缓存提交进版本库。所有用到的图都已缓存后，不开 shell escape、不装这个命令也能编译。在包发布到 CTAN 之前，也请把包和项目放在一起。包不会删除任何东西；更新命令后请自行清空缓存。旧的、不兼容的 TikZ 格式会报错，需要重新导出。</p>
 
 <h2 id="errors">错误与 TeX 引擎</h2>
 <p>输入、文档、选择器或主题无效时，会产生一个 LaTeX 错误，并画出一个带边框、写有完整诊断信息的框。缺少 shell escape、shell escape 受限和找不到可执行文件，各有不同的提示。如果命令没有生成图，请查看 <code>algomotion --help</code>。</p>

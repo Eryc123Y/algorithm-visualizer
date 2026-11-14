@@ -44,7 +44,7 @@ Open the first insert step.`,
 <p>A local server needs <code>ALGOMOTION_SHARE_URL</code>, or <code>createServer({ shareUrl })</code> in code. Use a page you serve, for example <code>https://example.org/play/</code>; no base address is assumed.</p>
 
 <h2 id="code">Make a link in code</h2>
-<p>Until npm publication, build and import <code>@algomotion/spec</code> from the repository workspace. <code>shareFragment</code> returns a result with a fragment without its leading hash. It uses the platform's compression APIs for documents.</p>
+<p>Until npm publication, build and import <code>@algomotion/spec</code> from the repository workspace. <code>shareFragment</code> returns a result containing the fragment without its leading hash. It uses the platform's compression APIs for documents.</p>
 ${code(
   `import { shareFragment, shareLink } from '@algomotion/spec';
 

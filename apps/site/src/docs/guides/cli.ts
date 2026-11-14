@@ -17,8 +17,14 @@ export const cli: Guide = {
     },
   ],
   body: ({ root, code, figure, note, scene }) => `
-<h2 id="install">Build from the repository</h2>
-<p>The command is not on npm yet. With Node.js and the repository checked out, install the workspace and build the MCP package:</p>
+<h2 id="install">Install</h2>
+<p>The command is on npm as a 1.0 alpha, in <code>@algomotion/mcp</code>. Run it without installing, or install it for every project:</p>
+${code(
+  `npx -p @algomotion/mcp@alpha algomotion --help
+npm install -g @algomotion/mcp@alpha`,
+  'Run or install the command',
+)}
+<p>To build it from a checkout of the repository instead, install the workspace and build the MCP package:</p>
 ${code(
   `npm ci
 npm run build -w @algomotion/mcp

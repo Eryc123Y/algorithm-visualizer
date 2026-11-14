@@ -16,14 +16,13 @@ export const zh: Guide = {
     },
   ],
   body: ({ root, code, figure, note }) => `
-<h2 id="bundle">构建并加载脚本包</h2>
-<p>这些包还没有发布到 npm。在仓库的检出目录里安装工作区依赖，然后构建这个元素：</p>
-${code(
-  `npm ci
-npm run build -w @algomotion/elements`,
-  '构建浏览器脚本包',
-)}
-<p>把 <code>packages/elements/dist/cdn/</code> 复制到你的网站。<code>algomotion-player.js</code> 和 <code>algomotion-recipes.js</code> 要放在一起，名字不要改，旁边放上 <code>fonts/</code> 文件夹。第二个脚本只在播放器运行算法时才加载。请通过 HTTP 提供这些文件，不要直接从磁盘打开 HTML。</p>
+<h2 id="bundle">安装并加载播放器</h2>
+<p>这些包已作为 1.0 alpha 发布到 npm，使用 <code>alpha</code> 标签。用打包工具时，安装元素包并注册一次：</p>
+${code(`npm install @algomotion/elements@alpha`, '安装播放器')}
+${code(`import '@algomotion/elements/define';`, '注册元素')}
+<p>不用打包工具时，可以从提供 npm 包的 CDN（比如 jsDelivr）加载独立脚本包：</p>
+${code(`<script type="module" src="https://cdn.jsdelivr.net/npm/@algomotion/elements@1.0.0-alpha.1/dist/cdn/algomotion-player.js"></script>`, '从 CDN 加载播放器')}
+<p>想自己托管的话，把包里的 <code>dist/cdn/</code> 复制到你的网站；也可以在仓库检出目录里运行 <code>npm run build -w @algomotion/elements</code>，再复制 <code>packages/elements/dist/cdn/</code>。<code>algomotion-player.js</code> 和 <code>algomotion-recipes.js</code> 要放在一起，名字不要改，旁边放上 <code>fonts/</code> 文件夹。第二个脚本只在播放器运行算法时才加载。请通过 HTTP 提供这些文件，不要直接从磁盘打开 HTML。</p>
 ${code(
   `<script type="module" src="/assets/algomotion-player.js"></script>
 <algo-player algorithm="dijkstra" input="A-B 4, B-C 1, A-C 7"
@@ -46,7 +45,7 @@ ${code(
 </algo-player>`,
   '文件文档与内嵌文档',
 )}
-<p><code>visualization</code> 属性接收一个文档对象，优先于其他所有来源。除此之外，有 <code>algorithm</code> 时，优先级依次是 <code>input</code>、<code>src</code>、内嵌 JSON、第一个示例；没有 <code>algorithm</code> 时，<code>src</code> 优先于内嵌 JSON。</p>
+<p><code>visualization</code> JS 属性接收一个文档对象，优先于其他所有来源。除此之外，有 <code>algorithm</code> 时，优先级依次是 <code>input</code>、<code>src</code>、内嵌 JSON、第一个示例；没有 <code>algorithm</code> 时，<code>src</code> 优先于内嵌 JSON。</p>
 
 <h2 id="attributes">属性</h2>
 <div class="scroll" role="region" aria-label="播放器属性" tabindex="0"><table class="params">
@@ -137,7 +136,7 @@ AlgoPlayer.fontsUrl = '/assets/fonts/fonts.css';
 customElements.define('algo-player', AlgoPlayer);`,
   '用打包工具注册',
 )}
-<p>把 <code>packages/elements/dist/fonts/</code> 复制到那个资源文件夹，保持样式表里字体的相对 URL 不变。<code>fontsUrl</code> 要在第一个播放器接入页面之前设置。<code>AlgoPlayer.fontsUrl = null</code> 不加载字体，改用系统的后备字体。如果只需要注册，导入 <code>@algomotion/elements/define</code> 即可。</p>
+<p>把 <code>packages/elements/dist/fonts/</code> 复制到那个资源文件夹，保持样式表里字体的相对 URL 不变。<code>fontsUrl</code> 要在第一个播放器挂载到页面之前设置。<code>AlgoPlayer.fontsUrl = null</code> 不加载字体，改用系统的后备字体。如果只需要注册，导入 <code>@algomotion/elements/define</code> 即可。</p>
 ${note('<p>两个独立的 JavaScript 文件来自同一次构建。打包工具会自行处理分块；不要只复制它的入口文件而漏掉入口导入的分块。</p>')}
 `,
 };
