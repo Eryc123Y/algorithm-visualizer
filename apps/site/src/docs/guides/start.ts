@@ -16,14 +16,14 @@ export const start: Guide = {
       alt: 'Insertion sort on 5 2 4 6 1 3, after the second insertion.',
     },
   ],
-  body: ({ root, figure, code, note }) => `
+  body: ({ root, site, figure, code, note }) => `
 <h2 id="idea">The idea</h2>
 <p>You name an algorithm and give it an input, written the way you would write it on paper: a list <code>5 2 4 6 1 3</code>, a graph <code>A-B 4, B-C 1</code>, or operations <code>insert 4, delete 3</code>. algomotion runs the algorithm and records every step: what changed, which line of the code ran, and a sentence that says why. Each step has a name, such as <code>insert#2</code>, the second insertion.</p>
 ${figure('insertion', 'Insertion sort on <code>5 2 4 6 1 3</code> at step <code>insert#2</code>, as every output draws it.')}
 <p>That record becomes whatever you need: a player on a web page, a figure in Typst or LaTeX, overlays on a slide, SVG files, or a player inside an AI conversation. Every output draws with the same engine and the same themes, so they all look alike.</p>
 
 <h2 id="try">Try it without installing anything</h2>
-<p>The <a href="${root}play/#v=1&amp;alg=insertion-sort&amp;in=5%202%204%206%201%203">share page</a> plays any algorithm from its link. Change the input after <code>in=</code> and reload, or pick any of the <a href="${root}algorithms/">algorithms</a>: each page has a player and the snippets for every output.</p>
+<p>The <a href="${site}play/#v=1&amp;alg=insertion-sort&amp;in=5%202%204%206%201%203">share page</a> plays any algorithm from its link. Change the input after <code>in=</code> and reload, or pick any of the <a href="${root}algorithms/">algorithms</a>: each page has a player and the snippets for every output.</p>
 <p>Or ask an AI assistant. Add algomotion to Claude Code with one command, then ask it to show you an algorithm:</p>
 ${code('claude mcp add --transport http algomotion https://algomotion-mcp.turing2234.com/mcp', 'Add algomotion to Claude Code')}
 <p><a href="${root}guide/ai/">Connecting an assistant</a> covers Claude’s apps and other clients.</p>

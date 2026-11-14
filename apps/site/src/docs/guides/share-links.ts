@@ -15,9 +15,9 @@ export const shareLinks: Guide = {
       alt: 'Insertion sort at the first insert step, the frame selected by the example link.',
     },
   ],
-  body: ({ root, code, figure, note }) => `
+  body: ({ root, site, code, figure, note }) => `
 <h2 id="open">Open a run at /play/</h2>
-<p>The <a href="${root}play/#v=1&amp;alg=insertion-sort&amp;in=5%202%204&amp;frame=insert">share page</a> opens a run without installing anything. An algorithm link is short enough to write by hand:</p>
+<p>The <a href="${site}play/#v=1&amp;alg=insertion-sort&amp;in=5%202%204&amp;frame=insert">share page</a> opens a run without installing anything. An algorithm link is short enough to write by hand:</p>
 ${code(`/play/#v=1&alg=insertion-sort&in=5%202%204&frame=insert&theme=auto`, 'A share link')}
 ${figure('linked', 'The link opens at <code>insert</code>, after putting 2 before 5.')}
 <p>Algorithm links run the current registry's implementation. To preserve the actions of a particular run, use a document link. Rendering can still improve in later releases.</p>
