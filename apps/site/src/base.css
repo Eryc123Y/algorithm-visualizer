@@ -300,11 +300,17 @@ a:hover {
   line-height: 1.75;
 }
 
-/* Han headings take no negative tracking, and wrap with more leading. */
+/*
+ * Han headings take no negative tracking, wrap with more leading, and
+ * break at punctuation and spaces rather than inside a phrase, unless a
+ * phrase is too long for the line.
+ */
 :lang(zh) h1,
 :lang(zh) h2 {
   letter-spacing: 0;
   line-height: 1.3;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 }
 
 /* The language switch: the other language's name, set apart as a control. */

@@ -1798,3 +1798,12 @@ main.project > .project-body {
   color: var(--muted);
   font-size: var(--step--1);
 }
+
+/*
+ * Han glyphs fill their whole em, so the hero's title is set a step
+ * smaller in Chinese, small enough for a phrase and its comma to share a
+ * line.
+ */
+.hero h1:lang(zh) {
+  font-size: clamp(2rem, 1.3rem + 2.6vw, 3.25rem);
+}
