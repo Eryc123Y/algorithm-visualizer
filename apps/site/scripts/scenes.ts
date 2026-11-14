@@ -20,7 +20,6 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import {
   chmodSync,
   copyFileSync,
-  existsSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
@@ -106,8 +105,9 @@ const withCommand = {
 
 function typstNotes(): Art {
   const pkg = join(REPO, 'packages/typst/package');
-  if (!existsSync(join(pkg, 'engine.bc')))
-    run('npm', ['run', 'build', '-w', '@algomotion/typst'], REPO);
+  // Always rebuilt: the package reads this bytecode, and an old build
+  // would draw the notes with an older engine than the other scenes.
+  run('npm', ['run', 'build', '-w', '@algomotion/typst'], REPO);
   const packages = join(work, 'typst-packages');
   mkdirSync(join(packages, 'local/algomotion'), { recursive: true });
   symlinkSync(pkg, join(packages, 'local/algomotion/0.1.0'));

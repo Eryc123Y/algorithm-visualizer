@@ -34,7 +34,7 @@ The home page, the guides and `/why/` show the outputs as they really look (road
 npm run scenes -w @algomotion/site
 ```
 
-- `notes.svg`: `scenes/notes.typ` compiled by `typst compile --format svg` with the repository's Typst package (it builds the package's engine first if needed).
+- `notes.svg`: `scenes/notes.typ` compiled by `typst compile --format svg` with the repository's Typst package, whose engine it builds first, so the page uses the same engine as the other scenes.
 - `beamer-1.svg` to `beamer-3.svg`: `scenes/slides.tex`, the very file the Beamer walk-through on `/why/` shows, compiled by `latexmk -pdf -shell-escape` with the LaTeX package and the `algomotion` command from source, then one SVG per page with `pdftocairo -svg`.
 - `terminal-light.svg` and `terminal-dark.svg`: the commands in `SESSION` run in a fresh folder with the command from source; their output, as printed, is drawn by `src/docs/terminal.ts`, which wraps long lines as a terminal does.
 - `chat-light.webp` and `chat-dark.webp`: the MCP server's player page after a real `algomotion_show` call, in the minimal MCP Apps host of the playground's E2E tests (`apps/playground/tests/e2e/mcp-host.ts`), photographed by Playwright at twice the size and compressed with `cwebp`. The conversation around it is plain and carries no product's look.
