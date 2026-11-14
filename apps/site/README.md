@@ -25,6 +25,21 @@ npm run preview -w @algomotion/site   # serves it at http://localhost:4173
 
 Every page sends the same Content Security Policy, in a `<meta>` and in `_headers`: the site's own scripts, styles and fonts only, no connections, and Trusted Types enforced. The pages' links are relative, so the site works at any path. Only `404.html` assumes the root, as Cloudflare Pages serves it for any missing address.
 
+## Real scenes
+
+The home page, the guides and `/why/` show the outputs as they really look (roadmap 5.3): a page of Typst notes, the overlays of a Beamer frame, a terminal session and the player in a conversation. They are files in `public/scenes/`, committed, with `scenes.json` naming each file, its size and its alternative text. `scripts/scenes.ts` makes them all again from the real tools:
+
+```sh
+npm run scenes -w @algomotion/site
+```
+
+- `notes.svg`: `scenes/notes.typ` compiled by `typst compile --format svg` with the repository's Typst package (it builds the package's engine first if needed).
+- `beamer-1.svg` to `beamer-3.svg`: `scenes/slides.tex`, the very file the Beamer walk-through on `/why/` shows, compiled by `latexmk -pdf -shell-escape` with the LaTeX package and the `algomotion` command from source, then one SVG per page with `pdftocairo -svg`.
+- `terminal-light.svg` and `terminal-dark.svg`: the commands in `SESSION` run in a fresh folder with the command from source; their output, as printed, is drawn by `src/docs/terminal.ts`, which wraps long lines as a terminal does.
+- `chat-light.webp` and `chat-dark.webp`: the MCP server's player page after a real `algomotion_show` call, in the minimal MCP Apps host of the playground's E2E tests (`apps/playground/tests/e2e/mcp-host.ts`), photographed by Playwright at twice the size and compressed with `cwebp`. The conversation around it is plain and carries no product's look.
+
+It needs Typst 0.15, TeX Live with `latexmk`, Poppler's `pdftocairo` and `pdfinfo`, `cwebp` and Playwright's Chromium. Run it after changing the engine's drawing, the packages or the player, and commit what changes. The unit tests check that the files match the manifest and stay under 800 KB together, and that `scenes/slides.tex` is the walk-through's file.
+
 ## Deploying to Cloudflare
 
 The site is deployed as static assets on Cloudflare Workers, at <https://algomotion.turing2234.com>; `wrangler.jsonc` in this folder names the Worker and its folder of assets. To deploy:

@@ -309,3 +309,24 @@ test('the home page leads to Why algomotion, which loads at 375px', async ({
   ).toBeVisible();
   expect(await noSideScroll(page)).toBe(true);
 });
+
+test('the home page’s output tabs show the real scenes', async ({ page }) => {
+  await page.goto('/');
+  for (const [tab, scene] of [
+    ['Typst', 'notes'],
+    ['Slides', 'beamer'],
+    ['Command line', 'terminal'],
+    ['AI assistants', 'chat'],
+  ] as const) {
+    await page.getByRole('tab', { name: tab }).click();
+    const figure = page.locator(
+      `[role="tabpanel"]:not([hidden]) .scene-${scene}`,
+    );
+    await expect(figure).toBeVisible();
+    for (const img of await figure.locator('img').all())
+      await expect
+        .poll(() => img.evaluate((el: HTMLImageElement) => el.naturalWidth))
+        .toBeGreaterThan(0);
+  }
+  expect(await noSideScroll(page)).toBe(true);
+});

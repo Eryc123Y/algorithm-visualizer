@@ -48,6 +48,7 @@ import {
   whyPage,
   type FigureLayout,
 } from '../src/docs/why.ts';
+import { parseScenes } from '../src/docs/scenes.ts';
 import { snippetsFor } from '../src/docs/snippets.ts';
 import { withPolicy } from '../src/headers.ts';
 
@@ -154,6 +155,14 @@ function buildInfo(): BuildInfo {
   }
 }
 
+/** The real scenes, made by `npm run scenes` and copied from public/. */
+const scenes = parseScenes(
+  readFileSync(
+    fileURLToPath(new URL('../public/scenes/scenes.json', import.meta.url)),
+    'utf8',
+  ),
+);
+
 const manifest = JSON.parse(
   readFileSync(join(DIST, '.vite/manifest.json'), 'utf8'),
 ) as Manifest;
@@ -222,6 +231,7 @@ const art: HomeArt = {
   slides: ['improve#2', 'extract#2', 'improve#3'].map((step, k) =>
     drawArt(home, step, `art/slide-${k + 1}`, '', 'dark'),
   ),
+  scenes,
   themes: themeNames.map((name) => ({
     name,
     art: drawArt(
@@ -273,7 +283,7 @@ for (const guide of GUIDES) {
   const path = `guide/${guide.slug === '' ? '' : `${guide.slug}/`}`;
   write(
     `${path}index.html`,
-    withPolicy(guidePage(guide, GUIDES, drawn, assets), path),
+    withPolicy(guidePage(guide, GUIDES, drawn, assets, scenes), path),
   );
 }
 
@@ -302,6 +312,7 @@ write(
         modules: algorithms.length,
       },
       assets,
+      scenes,
     ),
     'why/',
   ),

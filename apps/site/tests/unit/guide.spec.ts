@@ -135,6 +135,7 @@ describe('guide pages', () => {
       root: '../../',
       figure: () => '',
       note: () => '',
+      scene: () => '',
       code: (value, label) => {
         if (value.trimStart().startsWith('{')) {
           const doc = JSON.parse(value) as {

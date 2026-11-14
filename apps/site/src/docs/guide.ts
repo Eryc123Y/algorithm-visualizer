@@ -8,6 +8,7 @@ import type { ThemeName } from '@algomotion/svg';
 
 import { picture, type Art } from './home.ts';
 import { attribute, page, text, type Assets } from './html.ts';
+import { sceneFigure, type SceneManifest, type SceneName } from './scenes.ts';
 
 /** A figure a guide page shows: a run's step, drawn by the engine. */
 export interface GuideFigure {
@@ -34,6 +35,8 @@ export interface GuideContext {
   code(this: void, code: string, label: string): string;
   /** A note set apart from the text: a tip, or a limit to know about. */
   note(this: void, html: string): string;
+  /** A real scene (roadmap 5.3), with its caption as HTML. */
+  scene(this: void, name: SceneName, caption: string): string;
 }
 
 export interface Guide {
@@ -75,6 +78,7 @@ export function guidePage(
   guides: readonly Guide[],
   art: Readonly<Record<string, Art>>,
   assets: Assets,
+  scenes?: SceneManifest,
 ): string {
   const depth = guide.slug === '' ? 1 : 2;
   const root = '../'.repeat(depth);
@@ -93,6 +97,11 @@ export function guidePage(
     },
     note(html) {
       return `<aside class="note">${html}</aside>`;
+    },
+    scene(name, caption) {
+      if (scenes === undefined)
+        throw new Error(`guide/${guide.slug}: no scenes for ${name}`);
+      return sceneFigure(scenes, name, root, caption, 'guide-figure scene');
     },
   };
   const bySlug = new Map(guides.map((g) => [g.slug, g]));

@@ -1370,3 +1370,49 @@ main.project > .project-body {
   margin: 0;
   color: var(--muted);
 }
+
+/* ── Real scenes (roadmap 5.3) ──────────────────────────────────────── */
+
+/* A page or a slide is paper: a hairline marks its edge on any background. */
+.scene-notes img,
+.scene-pages img {
+  border: 1px solid var(--rule);
+  border-radius: 0.25rem;
+}
+
+.scene-chat img {
+  border-radius: var(--radius);
+}
+
+/* A tall page is shown whole but no taller than a screen. */
+.scene-notes img {
+  inline-size: auto;
+  max-block-size: min(40rem, 80vh);
+  margin-inline: auto;
+}
+
+.scene-pages {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.scene-pages li {
+  position: relative;
+}
+
+/* The slides are white in both schemes, so their numbers are dark too. */
+.scene-pages .overlay-n {
+  position: absolute;
+  inset: 0.375rem 0.5rem auto auto;
+  color: #5b5b5f;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+}
+
+.output-figure.scene figcaption code {
+  font-size: 0.85em;
+}
