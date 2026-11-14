@@ -8,6 +8,7 @@
  *
  *     node --conditions=@algomotion/source scripts/build-pages.ts
  */
+import { execFileSync } from 'node:child_process';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -15,6 +16,7 @@ import { fileURLToPath } from 'node:url';
 import { algorithms, runAlgorithm } from '@algomotion/recipes';
 import {
   exportFigures,
+  prepareFigures,
   themeNames,
   type Figure,
   type ThemeName,
@@ -25,7 +27,12 @@ import { catalog, type Entry } from '../src/docs/catalog.ts';
 import { figureFiles, guidePage } from '../src/docs/guide.ts';
 import { GUIDES } from '../src/docs/guides/index.ts';
 import { homePage, type Art, type HomeArt } from '../src/docs/home.ts';
-import { attribute } from '../src/docs/html.ts';
+import { attribute, type BuildInfo } from '../src/docs/html.ts';
+import {
+  changelogPage,
+  contributingPage,
+  roadmapPage,
+} from '../src/docs/project.ts';
 import {
   algorithmsPage,
   countOf,
@@ -33,12 +40,16 @@ import {
   entryPage,
   notFoundPage,
   themesPage,
+  thumbnailFrame,
+  thumbnailStem,
 } from '../src/docs/pages.ts';
+import { playgroundGroups, playgroundMarkup } from '../src/docs/playground.ts';
 import { shortInput } from '../src/docs/short-input.ts';
-import { snippetsFor } from '../src/docs/snippets.ts';
+import { inputText, slidesCode, snippetsFor } from '../src/docs/snippets.ts';
 import { withPolicy } from '../src/headers.ts';
 
 const DIST = fileURLToPath(new URL('../dist/', import.meta.url));
+const REPO = fileURLToPath(new URL('../../../', import.meta.url));
 const ENTRY = 'src/docs/main.ts';
 /** The run the home page and the themes show. */
 const DEMO = 'dijkstra';
@@ -103,10 +114,36 @@ function drawArt(
   };
 }
 
+/** A file of the repository, by its path from the root. */
+const repoFile = (path: string): string =>
+  readFileSync(join(REPO, path), 'utf8');
+
+/** The version and the commit built, for the footer. */
+function buildInfo(): BuildInfo {
+  const { version } = JSON.parse(repoFile('package.json')) as {
+    version: string;
+  };
+  try {
+    const [commit, date] = execFileSync(
+      'git',
+      ['log', '-1', '--format=%H %cs'],
+      { cwd: REPO, encoding: 'utf8' },
+    )
+      .trim()
+      .split(' ');
+    return commit === undefined || date === undefined
+      ? { version }
+      : { version, commit, date };
+  } catch {
+    // Built outside a Git checkout, such as from an archive.
+    return { version };
+  }
+}
+
 const manifest = JSON.parse(
   readFileSync(join(DIST, '.vite/manifest.json'), 'utf8'),
 ) as Manifest;
-const assets = assetsOf(manifest, ENTRY);
+const assets = { ...assetsOf(manifest, ENTRY), build: buildInfo() };
 const groups = catalog(algorithms);
 const entries: Entry[] = groups.flatMap((g) => [
   ...g.algorithms,
@@ -117,9 +154,40 @@ for (const entry of entries) {
   const html = entryPage(await detailsOf(entry, groups), assets);
   write(`${entry.path}index.html`, withPolicy(html, entry.path));
 }
+// The catalogue: a thumbnail of each algorithm and structure, from its
+// first example, at the frame `thumbnailFrame` picks, in light and dark.
+const thumbnails: Record<string, Art> = {};
+for (const entry of entries) {
+  if (entry.structure !== undefined) continue;
+  const algorithm = algorithms.find((a) => a.id === entry.id)!;
+  const doc = documentOf(entry.id, shortInput(entry.id, algorithm.examples[0]));
+  const [light, dark] = (['light', 'dark'] as const).map((theme) => {
+    const prepared = prepareFigures(doc, { theme });
+    if (!prepared.ok)
+      throw new Error(
+        `${entry.id} in ${theme}: ${JSON.stringify(prepared.error)}`,
+      );
+    const figure = prepared.value.figure(thumbnailFrame(prepared.value.frames));
+    if (!figure.ok)
+      throw new Error(
+        `${entry.id} in ${theme}: ${JSON.stringify(figure.error)}`,
+      );
+    return figure.value;
+  });
+  const stem = thumbnailStem(entry.id);
+  write(`algorithms/${stem}-light.svg`, light!.svg);
+  write(`algorithms/${stem}-dark.svg`, dark!.svg);
+  thumbnails[entry.id] = {
+    light: `${stem}-light.svg`,
+    dark: `${stem}-dark.svg`,
+    width: light!.width,
+    height: light!.height,
+    alt: '',
+  };
+}
 write(
   'algorithms/index.html',
-  withPolicy(algorithmsPage(groups, assets), 'algorithms/'),
+  withPolicy(algorithmsPage(groups, assets, thumbnails), 'algorithms/'),
 );
 
 // The themes page: the registry example at one step, in every theme.
@@ -187,18 +255,24 @@ const demo = await detailsOf(
   groups,
   0,
 );
-const player = `<algo-player algorithm="${DEMO}" input="${attribute(HOME_INPUT)}" theme="auto"></algo-player>`;
+const homeSnippets = await snippetsFor(DEMO, HOME_INPUT, 0, 'improve#3');
+const playground = playgroundMarkup(
+  playgroundGroups(groups, (id) =>
+    inputText(shortInput(id, algorithms.find((a) => a.id === id)!.examples[0])),
+  ),
+  { algorithm: DEMO, input: HOME_INPUT, title: demo.entry.title },
+  `<algo-player algorithm="${DEMO}" input="${attribute(HOME_INPUT)}" theme="auto"></algo-player>`,
+  homeSnippets.find((s) => s.id === 'link')!.code,
+);
 write(
   'index.html',
   withPolicy(
     homePage(
       groups,
-      {
-        ...demo,
-        snippets: await snippetsFor(DEMO, HOME_INPUT, 0, 'improve#3'),
-      },
+      { ...demo, snippets: homeSnippets },
       art,
-      player,
+      playground,
+      slidesCode(demo.entry.title, DEMO, HOME_INPUT),
       countOf(groups),
       assets,
     ),
@@ -228,6 +302,15 @@ for (const guide of GUIDES) {
 
 write('404.html', withPolicy(notFoundPage(assets), '404.html'));
 
+// The project pages, from the repository's own files.
+const PROJECT = [
+  ['changelog/', changelogPage(repoFile('CHANGELOG.md'), assets)],
+  ['roadmap/', roadmapPage(repoFile('docs/roadmap.md'), assets)],
+  ['contributing/', contributingPage(repoFile('CONTRIBUTING.md'), assets)],
+] as const;
+for (const [path, html] of PROJECT)
+  write(`${path}index.html`, withPolicy(html, path));
+
 process.stdout.write(
-  `Wrote ${entries.length + 4 + GUIDES.length} pages and ${figures.length} theme figures to dist/\n`,
+  `Wrote ${entries.length + 4 + GUIDES.length + PROJECT.length} pages and ${figures.length} theme figures to dist/\n`,
 );

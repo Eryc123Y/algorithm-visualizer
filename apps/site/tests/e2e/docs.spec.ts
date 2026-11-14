@@ -210,9 +210,12 @@ for (const colorScheme of ['light', 'dark'] as const)
       '/dijkstra/',
       '/bst/delete/',
       '/themes/',
+      '/roadmap/',
+      '/changelog/',
+      '/contributing/',
     ]) {
       await page.goto(path);
-      if (path !== '/themes/' && path !== '/algorithms/')
+      if (['/', '/dijkstra/', '/bst/delete/'].includes(path))
         await expect(player(page).getByText('Initial state.')).toBeVisible();
       const { violations } = await new AxeBuilder({ page })
         .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
@@ -227,3 +230,53 @@ for (const colorScheme of ['light', 'dark'] as const)
       ).toEqual([]);
     }
   });
+
+for (const path of ['changelog', 'roadmap', 'contributing'])
+  test(`the ${path} page loads at 375px without errors or side scroll`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto('/');
+    await page
+      .locator('footer')
+      .getByRole('link', {
+        name: path[0]!.toUpperCase() + path.slice(1),
+        exact: true,
+      })
+      .click();
+    await expect(page).toHaveURL(new RegExp(`/${path}/$`));
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    for (const details of await page.locator('details').all()) {
+      await details.locator('summary').click();
+      await expect(details).toHaveAttribute('open');
+    }
+    expect(await noSideScroll(page)).toBe(true);
+  });
+
+test('the roadmap shows each phase’s progress and what waits for the owner', async ({
+  page,
+}) => {
+  await page.goto('/roadmap/');
+  const bars = page.locator('.phases-progress progress');
+  expect(await bars.count()).toBeGreaterThanOrEqual(6);
+  await expect(bars.first()).toHaveAccessibleName(
+    /Phase 0: foundations: \d+ of \d+ done/,
+  );
+  await expect(page.locator('#owner-items')).toContainText('4.3 Publish');
+  await page
+    .locator('#next-items')
+    .getByRole('link', { name: 'Phase 5: a site worth visiting' })
+    .click();
+  await expect(page).toHaveURL(/#phase-5-a-site-worth-visiting$/);
+});
+
+test('the footer names the version and the commit the site was built from', async ({
+  page,
+}) => {
+  await page.goto('/');
+  const build = page.locator('footer .build');
+  await expect(build).toContainText(/Version \d+\.\d+\.\d+/);
+  await expect(build.locator('a[href*="/commit/"]')).toHaveText(
+    /^[0-9a-f]{7}$/,
+  );
+});

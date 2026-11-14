@@ -23,7 +23,11 @@
     "src/docs/highlight.ts",
     "src/docs/home.ts",
     "src/docs/html.ts",
+    "src/docs/markdown.ts",
     "src/docs/pages.ts",
+    "src/docs/playground.ts",
+    "src/docs/playground-state.ts",
+    "src/docs/project.ts",
     "src/docs/short-input.ts",
     "src/docs/snippets.ts"
   ]

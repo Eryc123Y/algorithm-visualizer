@@ -16,6 +16,8 @@ import {
   notFoundPage,
   stepsOf,
   themesPage,
+  thumbnailFrame,
+  thumbnailStem,
 } from '../../src/docs/pages.ts';
 
 const groups = catalog(algorithms);
@@ -181,6 +183,67 @@ describe('the algorithms page', () => {
     expect(html).toMatch(/data-search="fibonacci-heap [^"]*extract-min/);
     expect(html).toContain('id="catalog"');
     expect(html).toContain('<label for="filter">Filter</label>');
+  });
+});
+
+describe('the catalogue’s thumbnails', () => {
+  it('show a frame of the run at work, not its input or its end', () => {
+    expect(thumbnailFrame(0)).toBe(0);
+    expect(thumbnailFrame(1)).toBe(0);
+    expect(thumbnailFrame(2)).toBe(1);
+    expect(thumbnailFrame(3)).toBe(1);
+    expect(thumbnailFrame(15)).toBe(7);
+    for (let frames = 3; frames < 200; frames++) {
+      const frame = thumbnailFrame(frames);
+      expect(frame).toBeGreaterThan(0);
+      expect(frame).toBeLessThan(frames - 1);
+    }
+  });
+
+  it('give every algorithm and structure a card with a sized, lazy thumbnail', () => {
+    const cards = groups.flatMap((g) => [
+      ...g.algorithms,
+      ...g.structures.map((s) => s.entry),
+    ]);
+    const thumbnails = Object.fromEntries(
+      cards.map((e) => [
+        e.id,
+        {
+          light: `${thumbnailStem(e.id)}-light.svg`,
+          dark: `${thumbnailStem(e.id)}-dark.svg`,
+          width: 320,
+          height: 200,
+          alt: 'ignored',
+        },
+      ]),
+    );
+    document.body.innerHTML = algorithmsPage(groups, assets, thumbnails);
+    const items = [...document.querySelectorAll('#catalog .card')];
+    expect(items).toHaveLength(cards.length);
+    for (const item of items) {
+      const img = item.querySelector('.thumb img')!;
+      expect(img.getAttribute('loading')).toBe('lazy');
+      expect(img.getAttribute('width')).toBe('320');
+      expect(img.getAttribute('height')).toBe('200');
+      // Decorative: the link is named by the title beside it.
+      expect(img.getAttribute('alt')).toBe('');
+      expect(item.querySelector('source')!.getAttribute('srcset')).toMatch(
+        /^thumbs\/.+-dark\.svg$/,
+      );
+      expect(item.querySelector('a')!.textContent).toBe(
+        item.querySelector('.card-title')!.textContent,
+      );
+    }
+    // Operations stay as links under their structure.
+    expect(
+      document.querySelectorAll('.card .ops a[href="../bst/delete/"]'),
+    ).toHaveLength(1);
+  });
+
+  it('leave a card without one as a plain card', () => {
+    document.body.innerHTML = algorithmsPage(groups, assets);
+    expect(document.querySelectorAll('.thumb')).toHaveLength(0);
+    expect(document.querySelectorAll('.card').length).toBeGreaterThan(0);
   });
 });
 
