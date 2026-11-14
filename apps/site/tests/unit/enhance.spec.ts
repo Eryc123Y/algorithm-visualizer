@@ -8,6 +8,7 @@ import {
   addCopyButtons,
   filterCatalog,
   loopOverlays,
+  markLoadingThumbnails,
   setUpTabs,
 } from '../../src/docs/enhance.ts';
 
@@ -270,5 +271,29 @@ describe('the slide’s overlays', () => {
     expect(list.classList.contains('looping')).toBe(false);
     expect(document.querySelector('button.overlays-pause')).toBeNull();
     vi.restoreAllMocks();
+  });
+});
+
+describe('the catalogue’s thumbnails', () => {
+  it('show a placeholder until their figure loads or fails', () => {
+    document.body.innerHTML = [1, 2, 3]
+      .map(
+        () =>
+          '<span class="thumb"><picture><img src="x.svg" /></picture></span>',
+      )
+      .join('');
+    const imgs = [...document.querySelectorAll('img')];
+    imgs.forEach((img, k) =>
+      Object.defineProperty(img, 'complete', { value: k === 2 }),
+    );
+    markLoadingThumbnails(document);
+    const pending = () =>
+      [...document.querySelectorAll('.thumb')].map((t) =>
+        t.classList.contains('pending'),
+      );
+    expect(pending()).toEqual([true, true, false]);
+    imgs[0]!.dispatchEvent(new Event('load'));
+    imgs[1]!.dispatchEvent(new Event('error'));
+    expect(pending()).toEqual([false, false, false]);
   });
 });

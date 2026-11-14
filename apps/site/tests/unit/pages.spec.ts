@@ -16,6 +16,7 @@ import {
   notFoundPage,
   stepsOf,
   themesPage,
+  EAGER_THUMBNAILS,
   thumbnailFrame,
   thumbnailStem,
 } from '../../src/docs/pages.ts';
@@ -27,6 +28,8 @@ const assets = {
   preloads: ['assets/chunk.js'],
   fonts: ['assets/inter.woff2'],
 };
+/** No files, so a page put in the test's document loads nothing. */
+const noAssets = { scripts: [], styles: [], preloads: [] };
 const entry = (id: string): Entry =>
   groups
     .flatMap((g) => [
@@ -124,7 +127,7 @@ describe('a module’s page', () => {
 
   it('colours each snippet in its language, and leaves a link plain', async () => {
     const details = await detailsOf(entry('dijkstra'), groups);
-    document.body.innerHTML = entryPage(details, assets);
+    document.body.innerHTML = entryPage(details, noAssets);
     const code = (id: string) =>
       document.querySelector(`.snippet[data-snippet="${id}"] pre code`)!;
     expect(code('web').querySelector('.tok-name')!.textContent).toBe('script');
@@ -217,12 +220,15 @@ describe('the catalogue’s thumbnails', () => {
         },
       ]),
     );
-    document.body.innerHTML = algorithmsPage(groups, assets, thumbnails);
+    document.body.innerHTML = algorithmsPage(groups, noAssets, thumbnails);
     const items = [...document.querySelectorAll('#catalog .card')];
     expect(items).toHaveLength(cards.length);
-    for (const item of items) {
+    items.forEach((item, k) => {
       const img = item.querySelector('.thumb img')!;
-      expect(img.getAttribute('loading')).toBe('lazy');
+      // The first screen loads with the page, the rest as it nears.
+      expect(img.getAttribute('loading')).toBe(
+        k < EAGER_THUMBNAILS ? 'eager' : 'lazy',
+      );
       expect(img.getAttribute('width')).toBe('320');
       expect(img.getAttribute('height')).toBe('200');
       // Decorative: the link is named by the title beside it.
@@ -233,7 +239,7 @@ describe('the catalogue’s thumbnails', () => {
       expect(item.querySelector('a')!.textContent).toBe(
         item.querySelector('.card-title')!.textContent,
       );
-    }
+    });
     // Operations stay as links under their structure.
     expect(
       document.querySelectorAll('.card .ops a[href="../bst/delete/"]'),
@@ -241,7 +247,7 @@ describe('the catalogue’s thumbnails', () => {
   });
 
   it('leave a card without one as a plain card', () => {
-    document.body.innerHTML = algorithmsPage(groups, assets);
+    document.body.innerHTML = algorithmsPage(groups, noAssets);
     expect(document.querySelectorAll('.thumb')).toHaveLength(0);
     expect(document.querySelectorAll('.card').length).toBeGreaterThan(0);
   });

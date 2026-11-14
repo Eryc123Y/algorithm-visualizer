@@ -14,6 +14,7 @@ import {
   addCopyButtons,
   filterCatalog,
   loopOverlays,
+  markLoadingThumbnails,
   setUpTabs,
 } from './enhance.ts';
 import { setUpPlayground } from './playground-ui.ts';
@@ -25,6 +26,7 @@ if (!customElements.get('algo-player'))
 addCopyButtons(document, navigator.clipboard, location.href);
 setUpTabs(document);
 loopOverlays(document);
+markLoadingThumbnails(document);
 setUpPlayground(document, {
   location,
   history,
