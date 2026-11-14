@@ -25,6 +25,8 @@
     "src/docs/html.ts",
     "src/docs/markdown.ts",
     "src/docs/pages.ts",
+    "src/docs/playground.ts",
+    "src/docs/playground-state.ts",
     "src/docs/scenes.ts",
     "src/docs/project.ts",
     "src/docs/short-input.ts",
