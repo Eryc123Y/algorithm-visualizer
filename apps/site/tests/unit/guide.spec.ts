@@ -133,6 +133,7 @@ describe('guide pages', () => {
     let checked = 0;
     documents.body({
       root: '../../',
+      site: '../../',
       figure: () => '',
       note: () => '',
       scene: () => '',

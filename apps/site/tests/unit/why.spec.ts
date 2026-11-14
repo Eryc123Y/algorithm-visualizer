@@ -9,6 +9,7 @@ import { describe, expect, it } from 'vitest';
 
 import { page } from '../../src/docs/html.ts';
 import { homeWhy } from '../../src/docs/home-why.ts';
+import { HOME } from '../../src/docs/text/home.ts';
 import {
   COMPARISON,
   WALKTHROUGHS,
@@ -152,7 +153,7 @@ describe('links to it', () => {
   });
 
   it('from a section of the home page', () => {
-    const d = load(`<main>${homeWhy()}</main>`);
+    const d = load(`<main>${homeWhy(HOME.en.why)}</main>`);
     expect(d.querySelector('section a[href="why/"]')).not.toBeNull();
     expect(d.querySelectorAll('section li').length).toBeGreaterThanOrEqual(3);
   });

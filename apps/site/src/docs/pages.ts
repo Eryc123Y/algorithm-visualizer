@@ -10,6 +10,9 @@ import type { ThemeName } from '@algomotion/svg';
 
 import { depthOf, type Entry, type TopicGroup } from './catalog.ts';
 import { picture, sheet, type Art } from './home.ts';
+import { PREFIX, rootsOf, type Locale } from './locale.ts';
+import { CHROME } from './text/chrome.ts';
+import { PAGES } from './text/pages.ts';
 import { highlighted, SNIPPET_LANGUAGES } from './highlight.ts';
 import { attribute, page, rootOf, text, type Assets } from './html.ts';
 import { shortInput } from './short-input.ts';
@@ -237,7 +240,13 @@ export function algorithmsPage(
   groups: readonly TopicGroup[],
   assets: Assets,
   thumbnails: Readonly<Record<string, Art>> = {},
+  locale: Locale = 'en',
 ): string {
+  const t = PAGES[locale].algorithms;
+  const topicNames = CHROME[locale].topics;
+  const { site } = rootsOf(locale, 'algorithms/');
+  // The thumbnails live beside the English page; a translation reaches them.
+  const own = locale === 'en' ? '' : `${site}algorithms/`;
   // The thumbnail is decorative: the card's link is named by its title.
   // The first ones are on the first screen: they load with the page.
   let shown = 0;
@@ -245,21 +254,28 @@ export function algorithmsPage(
     const art = thumbnails[e.id];
     if (art === undefined) return '';
     const loading = shown++ < EAGER_THUMBNAILS ? 'eager' : 'lazy';
-    return `<span class="thumb">${picture({ ...art, alt: '' }, '', loading)}</span>`;
+    return `<span class="thumb">${picture({ ...art, alt: '' }, own, loading)}</span>`;
   };
   // A structure is found by its operations' names too.
   const item = (e: Entry, operations: readonly Entry[] = [], inner = '') =>
     `<li class="card" data-search="${attribute(
-      [e.id, e.title, e.summary, ...operations.flatMap((o) => [o.id, o.title])]
+      [
+        e.id,
+        e.title,
+        e.summary,
+        // A reader of the Chinese page may search by the topic's name.
+        ...(locale === 'en' ? [] : [topicNames[e.topic]]),
+        ...operations.flatMap((o) => [o.id, o.title]),
+      ]
         .join(' ')
         .toLowerCase(),
-    )}"><a href="${attribute('../' + e.path)}">${thumb(e)}<span class="card-title">${text(e.title)}</span></a> <span class="card-summary">${text(e.summary)}</span>${inner}</li>`;
+    )}"><a href="${attribute(site + e.path)}">${thumb(e)}<span class="card-title">${text(e.title)}</span></a> <span class="card-summary">${text(e.summary)}</span>${inner}</li>`;
   const topics = groups
     .map(
       (
         g,
       ) => `<section class="topic" id="topic-${g.topic}" aria-labelledby="h-${g.topic}">
-  <h2 id="h-${g.topic}">${text(g.title)}</h2>
+  <h2 id="h-${g.topic}">${text(topicNames[g.topic])}</h2>
   <ul class="entries">
 ${[
   ...g.algorithms.map((e) => `    ${item(e)}`),
@@ -268,10 +284,10 @@ ${[
       `    ${item(
         s.entry,
         s.operations,
-        `<ul class="ops" aria-label="${attribute(s.entry.title)} operations">${s.operations
+        `<ul class="ops" aria-label="${attribute(t.operations(s.entry.title))}">${s.operations
           .map(
             (op) =>
-              `<li><a href="${attribute('../' + op.path)}">${text(operationName(op))}</a></li>`,
+              `<li><a href="${attribute(site + op.path)}">${text(operationName(op))}</a></li>`,
           )
           .join('')}</ul>`,
       )}`,
@@ -283,40 +299,35 @@ ${[
     .join('\n');
   const count = countOf(groups);
   const index = groups
-    .map((g) => `<li><a href="#topic-${g.topic}">${text(g.title)}</a></li>`)
+    .map(
+      (g) =>
+        `<li><a href="#topic-${g.topic}">${text(topicNames[g.topic])}</a></li>`,
+    )
     .join('');
+  const crumbs = CHROME[locale].breadcrumb;
   return page({
-    title: 'Algorithms and data structures · algomotion',
-    description: `All ${count} algorithms, data structures and operations algomotion draws, by topic.`,
-    root: '../',
+    title: t.title,
+    description: t.description(count),
+    root: site,
     assets,
     section: 'algorithms',
-    body: `<nav class="crumbs" aria-label="Breadcrumb"><ol><li><a href="../">algomotion</a></li><li aria-current="page">Algorithms</li></ol></nav>
-<h1>Algorithms and data structures</h1>
-<p class="lede">${count} modules, each with its own page: a player, the names of its steps, and the same run written for a web page, Typst, LaTeX, the command line, an AI assistant and a share link. A data structure’s operations are listed under it.</p>
+    locale,
+    alternate: 'algorithms/',
+    body: `<nav class="crumbs" aria-label="${attribute(crumbs)}"><ol><li><a href="../">algomotion</a></li><li aria-current="page">${text(t.heading)}</li></ol></nav>
+<h1>${text(t.heading)}</h1>
+<p class="lede">${text(t.lede(count))}</p>
+${t.englishNote === '' ? '' : `<p class="note-en">${text(t.englishNote)}</p>`}
 <section id="catalog" aria-labelledby="catalog-title">
-<h2 id="catalog-title" class="visually-hidden">Catalogue</h2>
-<p class="filter"><label for="filter">Filter</label> <input id="filter" type="search" placeholder="dijkstra, heap, sort…" autocomplete="off" /></p>
+<h2 id="catalog-title" class="visually-hidden">${text(t.catalogue)}</h2>
+<p class="filter"><label for="filter">${text(t.filter)}</label> <input id="filter" type="search" placeholder="dijkstra, heap, sort…" autocomplete="off" /></p>
 <p class="filter-status" role="status"></p>
-<nav class="topic-index" aria-label="Topics"><ul>${index}</ul></nav>
+<nav class="topic-index" aria-label="${attribute(t.topics)}"><ul>${index}</ul></nav>
 <div class="topic-list">
 ${topics}
 </div>
 </section>`,
   });
 }
-
-const THEME_NOTES: Partial<Record<ThemeName, string>> = {
-  light: 'The default: web pages, notes and slides.',
-  dark: 'Dark pages and slides.',
-  print: 'Greyscale handouts; every role keeps a cue that is not colour.',
-  textbook: 'A textbook figure marked up with highlighter and pens.',
-  'textbook-dark': 'The same page in a reader’s night mode.',
-  blocks: 'Classroom blocks in bold colours, for introductory classes.',
-  'blocks-dark': 'The same blocks on a dark mat.',
-  'answer-sheet': 'An exam answer sheet: red printed frames, pencil marks.',
-  'turbo-c': 'The blue Turbo C screen of university computer labs.',
-};
 
 export interface ThemeFigure {
   readonly name: ThemeName;
@@ -329,45 +340,48 @@ export interface ThemeFigure {
 export function themesPage(
   figures: readonly ThemeFigure[],
   assets: Assets,
+  locale: Locale = 'en',
 ): string {
-  const how: [string, string][] = [
-    [
-      'Web page',
-      '<algo-player algorithm="dijkstra" theme="textbook"></algo-player>',
-    ],
-    ['Typst', '#algomotion("dijkstra", input, theme: "textbook")'],
-    ['LaTeX', '\\algomotion[theme=textbook]{dijkstra}{…}'],
-    ['Command line', 'algomotion export dijkstra --theme textbook'],
-    ['MCP', 'algomotion_render { "recipe": "dijkstra", "theme": "textbook" }'],
-    ['Share link', 'play/#v=1&alg=dijkstra&theme=textbook'],
+  const t = PAGES[locale].themes;
+  const { site } = rootsOf(locale, 'themes/');
+  // The figures live beside the English page; a translation reaches them.
+  const own = locale === 'en' ? '' : `${site}themes/`;
+  const codes = [
+    '<algo-player algorithm="dijkstra" theme="textbook"></algo-player>',
+    '#algomotion("dijkstra", input, theme: "textbook")',
+    '\\algomotion[theme=textbook]{dijkstra}{…}',
+    'algomotion export dijkstra --theme textbook',
+    'algomotion_render { "recipe": "dijkstra", "theme": "textbook" }',
+    'play/#v=1&alg=dijkstra&theme=textbook',
   ];
   return page({
-    title: 'Themes · algomotion',
-    description:
-      'The built-in themes of algomotion, and how to pick one in each output.',
-    root: '../',
+    title: t.title,
+    description: t.description,
+    root: site,
     assets,
     section: 'themes',
-    body: `<nav class="crumbs" aria-label="Breadcrumb"><ol><li><a href="../">algomotion</a></li><li aria-current="page">Themes</li></ol></nav>
-<h1>Themes</h1>
-<p class="lede">Every output draws in the same built-in themes, and every theme works in every output. <code>light</code> is the default; the player’s <code>auto</code> follows the reader’s light or dark setting, and a pair such as <code>textbook textbook-dark</code> picks a day and a night theme.</p>
-<h2>Picking a theme</h2>
-<div class="scroll" role="region" aria-label="How each output picks a theme" tabindex="0">
+    locale,
+    alternate: 'themes/',
+    body: `<nav class="crumbs" aria-label="${attribute(CHROME[locale].breadcrumb)}"><ol><li><a href="../">algomotion</a></li><li aria-current="page">${text(t.heading)}</li></ol></nav>
+<h1>${text(t.heading)}</h1>
+<p class="lede">${t.lede}</p>
+<h2>${text(t.picking)}</h2>
+<div class="scroll" role="region" aria-label="${attribute(t.table)}" tabindex="0">
 <table class="how">
-  <thead><tr><th scope="col">Output</th><th scope="col">How</th></tr></thead>
+  <thead><tr><th scope="col">${text(t.output)}</th><th scope="col">${text(t.how)}</th></tr></thead>
   <tbody>
-${how.map(([where, code]) => `    <tr><th scope="row">${text(where)}</th><td><code>${text(code)}</code></td></tr>`).join('\n')}
+${codes.map((code, k) => `    <tr><th scope="row">${text(t.outputs[k]!)}</th><td><code>${text(code)}</code></td></tr>`).join('\n')}
   </tbody>
 </table>
 </div>
-<h2>The themes</h2>
-<p>Dijkstra’s algorithm at its third improvement, in each theme.</p>
+<h2>${text(t.list)}</h2>
+<p>${text(t.listLede)}</p>
 <div class="themes">
 ${figures
   .map(
     (f) => `<figure>
-  ${sheet(f.name, `<img src="${attribute(f.file)}" width="${f.width}" height="${f.height}" alt="Dijkstra’s algorithm drawn in the ${attribute(f.name)} theme" loading="lazy" />`)}
-  <figcaption><code>${text(f.name)}</code> ${text(THEME_NOTES[f.name] ?? '')}</figcaption>
+  ${sheet(f.name, `<img src="${attribute(own + f.file)}" width="${f.width}" height="${f.height}" alt="${attribute(t.alt(f.name))}" loading="lazy" />`)}
+  <figcaption><code>${text(f.name)}</code> ${text(t.notes[f.name])}</figcaption>
 </figure>`,
   )
   .join('\n')}
@@ -380,13 +394,16 @@ ${figures
  * serves it at whatever path was asked for, so its links start at `/`:
  * the one page that assumes the site is at its origin's root.
  */
-export function notFoundPage(assets: Assets): string {
+export function notFoundPage(assets: Assets, locale: Locale = 'en'): string {
+  const t = PAGES[locale].notFound;
+  const home = `/${PREFIX[locale]}`;
   return page({
-    title: 'Not found · algomotion',
-    description: 'This page does not exist.',
+    title: t.title,
+    description: t.description,
     root: '/',
     assets,
-    body: `<h1>Not found</h1>
-<p class="lede">There is no page at this address. The <a href="/algorithms/">catalogue</a> lists every algorithm and data structure, and <a href="/guide/">the guide</a> shows how to use them.</p>`,
+    locale,
+    body: `<h1>${text(t.heading)}</h1>
+<p class="lede">${t.lede(`${home}algorithms/`, `${home}guide/`)}</p>`,
   });
 }

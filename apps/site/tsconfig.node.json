@@ -24,6 +24,8 @@
     "src/docs/home.ts",
     "src/docs/home-why.ts",
     "src/docs/html.ts",
+    "src/docs/locale.ts",
+    "src/docs/text",
     "src/docs/markdown.ts",
     "src/docs/pages.ts",
     "src/docs/playground.ts",

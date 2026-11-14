@@ -7,6 +7,7 @@
  * or properties, never as markup.
  */
 import { SNIPPET_LANGUAGES } from './highlight.ts';
+import { clientText } from './text/client.ts';
 import { fillCode } from './highlight-dom.ts';
 import type { PlaygroundFailure, PlaygroundResult } from './playground-run.ts';
 import {
@@ -22,6 +23,7 @@ export interface PlaygroundRunner {
     algorithm: string,
     title: string,
     input: string,
+    page?: { lang?: string; depth?: number },
   ): Promise<PlaygroundResult | PlaygroundFailure>;
 }
 
@@ -103,7 +105,15 @@ export function setUpPlayground(
     pending = env
       .load()
       .then((runner) =>
-        runner.runPlayground(wanted.algorithm, title, wanted.input),
+        runner.runPlayground(wanted.algorithm, title, wanted.input, {
+          lang: doc.documentElement.lang,
+          // The share link is relative to the site's root, which a page
+          // in a locale's folder is a folder further from.
+          depth: Number(
+            doc.querySelector<HTMLElement>('.playground')?.dataset['depth'] ??
+              '0',
+          ),
+        }),
       )
       .then(
         (result) => {
@@ -128,7 +138,11 @@ export function setUpPlayground(
         (e: unknown) => {
           if (request !== latest) return;
           showError(doc, parts, {
-            message: `The page could not run it: ${e instanceof Error ? e.message : String(e)}`,
+            message: clientText(
+              doc.documentElement.lang,
+            ).playground.couldNotRun(
+              e instanceof Error ? e.message : String(e),
+            ),
           });
         },
       );
@@ -193,7 +207,10 @@ function setCaption(
 ): void {
   const code = doc.createElement('code');
   code.textContent = input;
-  caption.replaceChildren(`${title} on `, code, '.');
+  const [before, after] = clientText(
+    doc.documentElement.lang,
+  ).playground.caption(title);
+  caption.replaceChildren(before, code, after);
 }
 
 const ANNOUNCE_MS = 500;
@@ -219,7 +236,8 @@ function showError(
   }
   input.setAttribute('aria-invalid', 'true');
   input.setAttribute('aria-describedby', box.id);
-  const said = `This input does not run. ${error.message}`;
+  const t = clientText(doc.documentElement.lang).playground;
+  const said = `${t.doesNotRun} ${error.message}`;
   if (announce.textContent !== said)
     announcing.set(
       announce,
@@ -234,7 +252,7 @@ function showError(
     return el;
   };
   const strong = doc.createElement('strong');
-  strong.textContent = 'This input does not run.';
+  strong.textContent = t.doesNotRun;
   const lines: HTMLElement[] = [p('pg-message', strong, ` ${error.message}`)];
   if (error.at !== undefined) {
     const code = doc.createElement('code');
@@ -244,7 +262,7 @@ function showError(
     lines.push(p('pg-where', code));
   }
   if (error.hint !== undefined) lines.push(p('pg-hint', error.hint));
-  lines.push(p('pg-kept', 'The player keeps the last input that ran.'));
+  lines.push(p('pg-kept', t.kept));
   box.replaceChildren(...lines);
 }
 

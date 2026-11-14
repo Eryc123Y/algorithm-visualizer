@@ -279,3 +279,47 @@ a:hover {
     border-bottom-color: CanvasText;
   }
 }
+
+/* ── Chinese pages (roadmap 5.7) ────────────────────────────────────── */
+
+/*
+ * STIX Two and Inter have no Han characters. Latin text keeps them, and
+ * Han falls back to the reader's own CJK faces: Songti or Noto/Source Han
+ * Serif under the serif headings, PingFang, Noto/Source Han Sans or
+ * Microsoft YaHei in the text. No CJK web font is downloaded.
+ */
+:root:lang(zh) {
+  --serif:
+    'STIX Two Text', 'Songti SC', 'Noto Serif CJK SC', 'Source Han Serif SC',
+    'Noto Serif SC', STSong, SimSun, serif;
+  --sans:
+    Inter, system-ui, -apple-system, 'PingFang SC', 'Hiragino Sans GB',
+    'Noto Sans CJK SC', 'Source Han Sans SC', 'Microsoft YaHei', sans-serif;
+
+  /* Han text needs more room between lines than Latin. */
+  line-height: 1.75;
+}
+
+/*
+ * Han headings take no negative tracking, wrap with more leading, and
+ * break at punctuation and spaces rather than inside a phrase, unless a
+ * phrase is too long for the line.
+ */
+:lang(zh) h1,
+:lang(zh) h2 {
+  letter-spacing: 0;
+  line-height: 1.3;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+/* The language switch: the other language's name, set apart as a control. */
+.bar .lang-switch a {
+  padding-inline: 0.5rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+}
+
+.bar .lang-switch a:hover {
+  border-color: var(--ink);
+}

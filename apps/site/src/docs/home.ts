@@ -7,7 +7,10 @@ import type { TopicGroup } from './catalog.ts';
 import { highlighted, SNIPPET_LANGUAGES } from './highlight.ts';
 import { homeWhy } from './home-why.ts';
 import { attribute, page, text, type Assets } from './html.ts';
-import { sceneFigure, type SceneManifest } from './scenes.ts';
+import { rootsOf, type Locale } from './locale.ts';
+import { sceneFigure, type SceneManifest, type SceneName } from './scenes.ts';
+import { CHROME, type ChromeText } from './text/chrome.ts';
+import { HOME, type HomeText, type OutputId } from './text/home.ts';
 import type { EntryDetails } from './pages.ts';
 import type { Snippet } from './snippets.ts';
 
@@ -68,55 +71,15 @@ function pictureOf(art: Art, root: string, loading: string): string {
 
 const LETTERS = 'abcdefghij';
 
-/** What each output's tab is called, and the guide that explains it. */
-const OUTPUTS: readonly {
-  readonly id: Snippet['id'] | 'slides';
-  readonly tab: string;
-  readonly guide: string;
-  readonly lede: string;
-}[] = [
-  {
-    id: 'web',
-    tab: 'Web page',
-    guide: 'guide/web/',
-    lede: 'One script and one element. The player has step controls, the code with its current line, narration, keyboard shortcuts, and light and dark themes.',
-  },
-  {
-    id: 'typst',
-    tab: 'Typst',
-    guide: 'guide/typst/',
-    lede: 'A function call in your notes draws the step you name as a vector figure. The engine runs inside the package, so there is nothing else to install.',
-  },
-  {
-    id: 'latex',
-    tab: 'LaTeX',
-    guide: 'guide/latex/',
-    lede: 'A command draws the figure in TikZ, so its text is set in your document’s own fonts. Figures are cached, so later runs need no shell escape.',
-  },
-  {
-    id: 'slides',
-    tab: 'Slides',
-    guide: 'guide/slides/',
-    lede: 'In Beamer, the steps key turns a figure into overlays of one picture, one slide per step. In Typst, algomotion-slides does the same with polylux’s or Touying’s only.',
-  },
-  {
-    id: 'cli',
-    tab: 'Command line',
-    guide: 'guide/cli/',
-    lede: 'Export any frames as SVG or TikZ files, run an algorithm to a JSON document, or check a document you wrote. A standalone build needs no Node.js.',
-  },
-  {
-    id: 'mcp',
-    tab: 'AI assistants',
-    guide: 'guide/ai/',
-    lede: 'Connect Claude or any MCP client, and ask. The model runs the algorithm with the tools and shows the player right in the conversation.',
-  },
-  {
-    id: 'link',
-    tab: 'Share link',
-    guide: 'guide/share-links/',
-    lede: 'A link carries the whole run after the #, so it opens in any browser and no server stores it. Paste it in a course page or a chat.',
-  },
+/** The outputs, in tab order, and the guide that explains each. */
+const OUTPUTS: readonly { readonly id: OutputId; readonly guide: string }[] = [
+  { id: 'web', guide: 'guide/web/' },
+  { id: 'typst', guide: 'guide/typst/' },
+  { id: 'latex', guide: 'guide/latex/' },
+  { id: 'slides', guide: 'guide/slides/' },
+  { id: 'cli', guide: 'guide/cli/' },
+  { id: 'mcp', guide: 'guide/ai/' },
+  { id: 'link', guide: 'guide/share-links/' },
 ];
 
 /** A code block with a copy button, as on the module pages. */
@@ -127,89 +90,79 @@ const snippetBlock = (s: Snippet): string =>
 
 /** The real scene of an output, where there is one. */
 function realScene(
-  id: (typeof OUTPUTS)[number]['id'],
+  id: OutputId,
   scenes: SceneManifest,
+  t: HomeText['outputs']['scenes'],
+  site: string,
+  locale: Locale,
 ): string {
+  const scene = (name: SceneName, caption: string) =>
+    sceneFigure(scenes, name, site, caption, 'output-figure scene', locale);
   switch (id) {
     case 'typst':
-      return sceneFigure(
-        scenes,
-        'notes',
-        '',
-        'A page of notes, as Typst compiles it.',
-        'output-figure scene',
-      );
+      return scene('notes', t.notes);
     case 'slides':
-      return sceneFigure(
-        scenes,
-        'beamer',
-        '',
-        'Three overlays of one Beamer frame, from <code>steps=extract\\#2..improve\\#3</code>, as <code>latexmk</code> compiles them.',
-        'output-figure scene',
-      );
+      return scene('beamer', t.beamer);
     case 'cli':
-      return sceneFigure(
-        scenes,
-        'terminal',
-        '',
-        'The command, run: what it printed.',
-        'output-figure scene',
-      );
+      return scene('terminal', t.terminal);
     case 'mcp':
-      return sceneFigure(
-        scenes,
-        'chat',
-        '',
-        'The player after a real <code>algomotion_show</code> call, in a minimal MCP Apps host.',
-        'output-figure scene',
-      );
+      return scene('chat', t.chat);
     default:
       return '';
   }
 }
 
 function preview(
-  id: (typeof OUTPUTS)[number]['id'],
+  id: OutputId,
   art: HomeArt,
   snippet: Snippet | undefined,
+  t: HomeText['outputs'],
+  site: string,
+  locale: Locale,
 ): string {
-  const scene = art.scenes === undefined ? '' : realScene(id, art.scenes);
+  const scene =
+    art.scenes === undefined
+      ? ''
+      : realScene(id, art.scenes, t.scenes, site, locale);
   if (scene !== '') return scene;
   if (id === 'slides')
-    return `<ol class="overlays" aria-label="Three overlays of one slide">${art.slides
+    return `<ol class="overlays" aria-label="${attribute(t.overlays)}">${art.slides
       .map(
         (a, k) =>
-          `<li><span class="overlay-n">${k + 1}</span>${picture(a, '')}</li>`,
+          `<li><span class="overlay-n">${k + 1}</span>${picture(a, site)}</li>`,
       )
       .join('')}</ol>`;
   if (id === 'mcp')
-    return `<div class="chat" role="group" aria-label="A conversation with an AI assistant">
-  <p class="said said-you"><span class="speaker">You</span> Show me Dijkstra’s algorithm from A on A-B 4, B-C 1, A-C 7, C-D 2.</p>
-  <p class="said said-tool"><span class="speaker">Tool</span> <code>algomotion_show</code> ran <code>dijkstra</code>: 14 steps.</p>
-  ${art.outputs.mcp === undefined ? '' : `<div class="said said-player">${picture(art.outputs.mcp, '')}</div>`}
-  <p class="said said-model"><span class="speaker">Assistant</span> Here it is. At step 7, C drops from 7 to 5: going through B is shorter than the direct edge. Step through it, and ask about any step.</p>
+    return `<div class="chat" role="group" aria-label="${attribute(t.chat.label)}">
+  <p class="said said-you"><span class="speaker">${text(t.chat.you)}</span> ${text(t.chat.asked)}</p>
+  <p class="said said-tool"><span class="speaker">${text(t.chat.tool)}</span> ${t.chat.ran}</p>
+  ${art.outputs.mcp === undefined ? '' : `<div class="said said-player">${picture(art.outputs.mcp, site)}</div>`}
+  <p class="said said-model"><span class="speaker">${text(t.chat.assistant)}</span> ${text(t.chat.answered)}</p>
 </div>`;
-  const a = art.outputs[id as Snippet['id']];
+  const a = art.outputs[id];
   if (a === undefined) return '';
   const caption =
     id === 'link'
-      ? 'The link opens this player, in any browser.'
+      ? t.linkCaption
       : id === 'web'
-        ? 'The element, as the reader sees it.'
+        ? t.webCaption
         : snippet === undefined
           ? ''
-          : `The example run, as the ${OUTPUTS.find((o) => o.id === id)!.tab} snippet draws it.`;
-  return `<figure class="output-figure">${picture(a, '')}<figcaption>${text(caption)}</figcaption></figure>`;
+          : t.exampleCaption(t.tabs[id].tab);
+  return `<figure class="output-figure">${picture(a, site)}<figcaption>${text(caption)}</figcaption></figure>`;
 }
 
 function outputTabs(
   snippets: readonly Snippet[],
   slides: string,
   art: HomeArt,
+  t: HomeText['outputs'],
+  site: string,
+  locale: Locale,
 ): string {
   const tabs = OUTPUTS.map(
     (o, k) =>
-      `<button type="button" role="tab" id="tab-${o.id}" aria-selected="${k === 0}"${k === 0 ? ' focusgroupstart' : ' tabindex="-1"'}>${text(o.tab)}</button>`,
+      `<button type="button" role="tab" id="tab-${o.id}" aria-selected="${k === 0}"${k === 0 ? ' focusgroupstart' : ' tabindex="-1"'}>${text(t.tabs[o.id].tab)}</button>`,
   ).join('');
   const panels = OUTPUTS.map((o, k) => {
     const snippet = snippets.find((s) => s.id === o.id);
@@ -217,7 +170,7 @@ function outputTabs(
       o.id === 'slides'
         ? snippetBlock({
             id: 'latex',
-            label: 'In slides',
+            label: t.inSlides,
             code: slides,
             note: '',
           })
@@ -227,27 +180,27 @@ function outputTabs(
     return `<div role="tabpanel" id="panel-${o.id}" aria-labelledby="tab-${o.id}"${k === 0 ? '' : ' hidden="until-found"'}>
   <div class="panel">
     <div class="panel-text">
-      <p>${text(o.lede)}</p>
+      <p>${text(t.tabs[o.id].lede)}</p>
       ${code}
-      <p class="panel-more"><a href="${attribute(o.guide)}">The ${text(o.tab)} guide</a></p>
+      <p class="panel-more"><a href="${attribute(o.guide)}">${text(t.guide(t.tabs[o.id].tab))}</a></p>
     </div>
-    <div class="panel-preview">${preview(o.id, art, snippet)}</div>
+    <div class="panel-preview">${preview(o.id, art, snippet, t, site, locale)}</div>
   </div>
 </div>`;
   }).join('\n');
   return `<div class="tabs">
-  <div role="tablist" focusgroup="tablist nomemory" aria-label="Outputs">${tabs}</div>
+  <div role="tablist" focusgroup="tablist nomemory" aria-label="${attribute(t.tablist)}">${tabs}</div>
   <div class="panels">
 ${panels}
   </div>
 </div>`;
 }
 
-function plate(art: HomeArt): string {
+function plate(art: HomeArt, t: HomeText['plate'], site: string): string {
   const figures = art.plate
     .map(
       (f, k) =>
-        `<li><span class="sub">(${LETTERS[k]})</span>${picture(f, '')}<code class="sub-step">${text(f.step)}</code></li>`,
+        `<li><span class="sub">(${LETTERS[k]})</span>${picture(f, site)}<code class="sub-step">${text(f.step)}</code></li>`,
     )
     .join('\n');
   const caption = art.plate
@@ -256,81 +209,88 @@ function plate(art: HomeArt): string {
   return `<section class="plate bleed" aria-labelledby="plate-title">
   <div class="plate-inner">
     <div class="plate-head">
-      <h2 id="plate-title">The same run, as figures for your notes</h2>
-      <p>Every step has a name, so a figure can be asked for by what happens in it: <code>extract#2</code> is the second vertex taken from the queue. Each one is a vector figure, in the theme you pick.</p>
+      <h2 id="plate-title">${text(t.title)}</h2>
+      <p>${t.lede}</p>
     </div>
     <figure class="plate-figure">
       <ol class="subfigures">
 ${figures}
       </ol>
-      <figcaption><b>Figure 1.</b> Dijkstra’s algorithm from A on the graph above. ${caption}</figcaption>
+      <figcaption><b>${text(t.figure)}</b> ${text(t.caption)} ${caption}</figcaption>
     </figure>
   </div>
 </section>`;
 }
 
-const AUDIENCES = `<section class="audiences" aria-labelledby="who-title">
-  <h2 id="who-title">Made for the places algorithms are taught</h2>
+function audiences(t: HomeText['audiences']): string {
+  return `<section class="audiences" aria-labelledby="who-title">
+  <h2 id="who-title">${text(t.title)}</h2>
   <div class="who">
-    <div>
-      <h3>Students</h3>
-      <p>Put the exact step you are writing about into your Typst or LaTeX notes, on your own input, and have it look like the textbook.</p>
-      <p><a href="guide/typst/">Figures in notes</a></p>
-    </div>
-    <div>
-      <h3>Teachers</h3>
-      <p>Step through a run on a slide, one click per step, or hand out a link that plays it. Themes for print, exams and dark rooms.</p>
-      <p><a href="guide/slides/">Figures on slides</a></p>
-    </div>
-    <div>
-      <h3>Developers and models</h3>
-      <p>Embed the player in any page, or let a model write and check a visualization through MCP, then show it in the chat.</p>
-      <p><a href="guide/ai/">Connect an assistant</a></p>
-    </div>
+${t.who
+  .map(
+    (w) => `    <div>
+      <h3>${text(w.title)}</h3>
+      <p>${text(w.text)}</p>
+      <p><a href="${attribute(w.href)}">${text(w.link)}</a></p>
+    </div>`,
+  )
+  .join('\n')}
   </div>
 </section>`;
+}
 
-function themesStrip(art: HomeArt): string {
+function themesStrip(
+  art: HomeArt,
+  t: HomeText['themes'],
+  site: string,
+  stop: string,
+): string {
   return `<section class="theme-strip" aria-labelledby="themes-title">
   <div class="section-head">
-    <h2 id="themes-title">Nine themes, every output</h2>
-    <p>The same figure for a screen, a handout, a highlighter-marked textbook page or the blue screen of a computer lab. <a href="themes/">See how to pick one</a>.</p>
+    <h2 id="themes-title">${text(t.title)}</h2>
+    <p>${text(t.lede)} <a href="themes/">${text(t.how)}</a>${stop}</p>
   </div>
-  <ul class="theme-thumbs" tabindex="0" aria-label="The nine themes">
+  <ul class="theme-thumbs" tabindex="0" aria-label="${attribute(t.list)}">
 ${art.themes
   .map(
     (t) =>
-      `    <li><figure>${sheet(t.name, `<img src="${attribute(t.art.light)}" width="${t.art.width}" height="${t.art.height}" alt="${attribute(t.art.alt)}" loading="lazy" decoding="async" />`)}<figcaption><code>${text(t.name)}</code></figcaption></figure></li>`,
+      `    <li><figure>${sheet(t.name, `<img src="${attribute(site + t.art.light)}" width="${t.art.width}" height="${t.art.height}" alt="${attribute(t.art.alt)}" loading="lazy" decoding="async" />`)}<figcaption><code>${text(t.name)}</code></figcaption></figure></li>`,
   )
   .join('\n')}
   </ul>
 </section>`;
 }
 
-function catalogTeaser(groups: readonly TopicGroup[], count: number): string {
+function catalogTeaser(
+  groups: readonly TopicGroup[],
+  count: number,
+  t: HomeText['catalog'],
+  topics: ChromeText['topics'],
+  comma: string,
+): string {
   const items = groups
     .map((g) => {
       const n = g.algorithms.length + g.structures.length;
       const names = [...g.algorithms, ...g.structures.map((s) => s.entry)]
         .slice(0, 3)
         .map((e) => text(e.title))
-        .join(', ');
-      return `<li><a href="algorithms/#topic-${g.topic}">${text(g.title)}</a> <span class="n">${n}</span><p>${names}${n > 3 ? ', …' : ''}</p></li>`;
+        .join(comma);
+      return `<li><a href="algorithms/#topic-${g.topic}">${text(topics[g.topic])}</a> <span class="n">${n}</span><p>${names}${n > 3 ? `${comma}…` : ''}</p></li>`;
     })
     .join('\n');
   return `<section class="teaser" aria-labelledby="teaser-title">
   <div class="section-head">
-    <h2 id="teaser-title">${count} algorithms and data structures</h2>
-    <p>The undergraduate canon, from insertion sort to maximum flow, each with its own page, player and snippets. Data structures come with every operation on its own.</p>
+    <h2 id="teaser-title">${text(t.title(count))}</h2>
+    <p>${text(t.lede)}</p>
   </div>
   <ul class="topics">
 ${items}
   </ul>
-  <p><a class="button" href="algorithms/">Browse all ${count}</a></p>
+  <p><a class="button" href="algorithms/">${text(t.browse(count))}</a></p>
 </section>`;
 }
 
-/** The home page. */
+/** The home page, in `locale`. */
 export function homePage(
   groups: readonly TopicGroup[],
   demo: EntryDetails,
@@ -341,37 +301,42 @@ export function homePage(
   slides: string,
   count: number,
   assets: Assets,
+  locale: Locale = 'en',
 ): string {
+  const t = HOME[locale];
+  const { site } = rootsOf(locale, '');
+  const zh = locale === 'zh';
   return page({
-    title: 'algomotion: step-by-step algorithms',
-    description:
-      'Step-by-step pictures and animations of algorithms and data structures, from one algorithm name and your input, for web pages, Typst, LaTeX, slides and AI conversations.',
-    root: '',
+    title: t.title,
+    description: t.description,
+    root: site,
     assets,
     section: 'home',
     layout: 'home',
+    locale,
+    alternate: '',
     body: `<section class="hero" aria-labelledby="hero-title">
   <div class="hero-text">
-    <h1 id="hero-title">Every step of an algorithm, drawn.</h1>
-    <p class="lede">Name an algorithm and give it your input, in the notation you already write. algomotion runs it and draws each step: an animation for a web page, figures for Typst and LaTeX notes, overlays for slides, and a player inside AI conversations.</p>
-    <p class="actions"><a class="button" href="guide/">Get started</a> <a class="button quiet" href="algorithms/">Browse ${count} algorithms</a></p>
-    <p class="fine">Open source. The player runs in the reader’s browser, and share links carry their run in the link itself.</p>
+    <h1 id="hero-title">${text(t.hero.title)}</h1>
+    <p class="lede">${text(t.hero.lede)}</p>
+    <p class="actions"><a class="button" href="guide/">${text(t.hero.getStarted)}</a> <a class="button quiet" href="algorithms/">${text(t.hero.browse(count))}</a></p>
+    <p class="fine">${text(t.hero.fine)}</p>
   </div>
   <div class="hero-player">
     ${player}
   </div>
 </section>
-${plate(art)}
+${plate(art, t.plate, site)}
 <section class="outputs" aria-labelledby="outputs-title">
   <div class="section-head">
-    <h2 id="outputs-title">One input, wherever you write</h2>
-    <p>The run above, written for each place it can go: change the algorithm or its input, and every snippet follows. Every output draws with the same engine, so a figure in your notes matches the player on your course page.</p>
+    <h2 id="outputs-title">${text(t.outputs.title)}</h2>
+    <p>${text(t.outputs.lede)}</p>
   </div>
-  ${outputTabs(demo.snippets, slides, art)}
+  ${outputTabs(demo.snippets, slides, art, t.outputs, site, locale)}
 </section>
-${homeWhy()}
-${AUDIENCES}
-${themesStrip(art)}
-${catalogTeaser(groups, count)}`,
+${homeWhy(t.why)}
+${audiences(t.audiences)}
+${themesStrip(art, t.themes, site, zh ? '。' : '.')}
+${catalogTeaser(groups, count, t.catalog, CHROME[locale].topics, zh ? '、' : ', ')}`,
   });
 }

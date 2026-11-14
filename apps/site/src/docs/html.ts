@@ -4,6 +4,16 @@
  * `attribute`, so no title or summary can become markup.
  */
 
+import {
+  LANG,
+  LOCALES,
+  otherLocale,
+  PREFIX,
+  SITE_URL,
+  type Locale,
+} from './locale.ts';
+import { CHROME, type ChromeText } from './text/chrome.ts';
+
 const ENTITIES: Readonly<Record<string, string>> = {
   '&': '&amp;',
   '<': '&lt;',
@@ -57,6 +67,15 @@ export interface PageFrame {
   readonly section?: Section;
   /** A class for `<main>`, such as `guide` for the guide's two columns. */
   readonly layout?: string;
+  /** The page's language; English by default. */
+  readonly locale?: Locale;
+  /**
+   * The page's path within its locale, such as `guide/web/`, when the
+   * other locale has the same page: the language switch leads there and
+   * `hreflang` names both. Without it, the switch leads to the other
+   * locale's home page.
+   */
+  readonly alternate?: string;
 }
 
 /** The project's repository. */
@@ -70,13 +89,37 @@ export const REPOSITORY = 'https://github.com/Eryc123Y/algorithm-visualizer';
 const GLYPH = `<svg viewBox="0 0 64 64" aria-hidden="true" focusable="false"><path class="glyph-now" d="M22 8H42L32 20Z"/><g class="glyph-bars"><rect x="12" y="40" width="10" height="14"/><rect x="27" y="30" width="10" height="24"/><rect x="42" y="20" width="10" height="34"/></g></svg>`;
 
 /** The footer's line about the build: version, commit and date. */
-function buildLine(build: BuildInfo | undefined, root: string): string {
+function buildLine(
+  build: BuildInfo | undefined,
+  home: string,
+  t: ChromeText['footer'],
+): string {
   if (build === undefined) return '';
-  const commit =
-    build.commit === undefined
-      ? ''
-      : `, built from commit <a href="${attribute(`${REPOSITORY}/commit/${build.commit}`)}"><code>${text(build.commit.slice(0, 7))}</code></a>${build.date === undefined ? '' : ` of <time datetime="${attribute(build.date)}">${text(build.date)}</time>`}`;
-  return `<p class="build">Version ${text(build.version)}${commit}. <a href="${attribute(root)}changelog/">What changed</a>.</p>`;
+  return `<p class="build">${t.build({
+    version: text(build.version),
+    ...(build.commit === undefined
+      ? {}
+      : {
+          commit: `<a href="${attribute(`${REPOSITORY}/commit/${build.commit}`)}"><code>${text(build.commit.slice(0, 7))}</code></a>`,
+        }),
+    ...(build.date === undefined
+      ? {}
+      : {
+          date: `<time datetime="${attribute(build.date)}">${text(build.date)}</time>`,
+        }),
+    changelog: `<a href="${attribute(home)}changelog/">${text(t.whatChanged)}</a>`,
+  })}</p>`;
+}
+
+/** The `hreflang` alternates of a page that exists in every locale. */
+function alternates(path: string): string[] {
+  return [
+    ...LOCALES.map(
+      (l) =>
+        `<link rel="alternate" hreflang="${LANG[l]}" href="${attribute(SITE_URL + PREFIX[l] + path)}" />`,
+    ),
+    `<link rel="alternate" hreflang="x-default" href="${attribute(SITE_URL + path)}" />`,
+  ];
 }
 
 /** A whole page. Its Content Security Policy is added after the charset. */
@@ -88,7 +131,14 @@ export function page({
   body,
   section,
   layout,
+  locale = 'en',
+  alternate,
 }: PageFrame): string {
+  const t = CHROME[locale];
+  const f = t.footer;
+  const other = otherLocale(locale);
+  // The locale's own root: the bar, footer and home link stay within it.
+  const home = root + PREFIX[locale];
   const head = [
     '<meta charset="utf-8" />',
     '<meta name="viewport" content="width=device-width, initial-scale=1" />',
@@ -96,6 +146,7 @@ export function page({
     `<meta name="description" content="${attribute(description)}" />`,
     `<title>${text(title)}</title>`,
     `<link rel="icon" href="${attribute(root)}favicon.svg" type="image/svg+xml" />`,
+    ...(alternate === undefined ? [] : alternates(alternate)),
     ...assets.styles.map(
       (href) => `<link rel="stylesheet" href="${attribute(root + href)}" />`,
     ),
@@ -111,25 +162,28 @@ export function page({
       (src) => `<script type="module" src="${attribute(root + src)}"></script>`,
     ),
   ];
-  const home = root || './';
   const link = (href: string, label: string, here: boolean) =>
     `<li><a href="${attribute(href)}"${here ? ' aria-current="page"' : ''}>${text(label)}</a></li>`;
+  const item = (href: string, label: string) =>
+    `<li><a href="${attribute(href)}">${text(label)}</a></li>`;
+  const switchHref = root + PREFIX[other] + (alternate ?? '');
   return `<!doctype html>
-<html lang="en">
+<html lang="${LANG[locale]}">
   <head>
     ${head.join('\n    ')}
   </head>
   <body>
-    <a class="skip" href="#main">Skip to the content</a>
+    <a class="skip" href="#main">${text(t.skip)}</a>
     <header class="bar">
-      <a class="mark" href="${attribute(home)}">${GLYPH}<span>algomotion</span></a>
-      <nav aria-label="Site">
+      <a class="mark" href="${attribute(home || './')}">${GLYPH}<span>algomotion</span></a>
+      <nav aria-label="${attribute(t.siteNav)}">
         <ul>
-          ${link(`${root}why/`, 'Why', section === 'why')}
-          ${link(`${root}guide/`, 'Guide', section === 'guide')}
-          ${link(`${root}algorithms/`, 'Algorithms', section === 'algorithms')}
-          ${link(`${root}themes/`, 'Themes', section === 'themes')}
+          ${link(`${home}why/`, t.nav.why, section === 'why')}
+          ${link(`${home}guide/`, t.nav.guide, section === 'guide')}
+          ${link(`${home}algorithms/`, t.nav.algorithms, section === 'algorithms')}
+          ${link(`${home}themes/`, t.nav.themes, section === 'themes')}
           ${link(REPOSITORY, 'GitHub', false)}
+          <li class="lang-switch"><a href="${attribute(switchHref || './')}" hreflang="${LANG[other]}" lang="${LANG[other]}">${text(t.switchTo)}</a></li>
         </ul>
       </nav>
     </header>
@@ -139,48 +193,48 @@ ${body}
     <footer>
       <div class="columns">
         <section aria-labelledby="f-use">
-          <h2 id="f-use">Use it</h2>
+          <h2 id="f-use">${text(f.useIt)}</h2>
           <ul>
-            <li><a href="${root}guide/web/">On a web page</a></li>
-            <li><a href="${root}guide/typst/">In Typst</a></li>
-            <li><a href="${root}guide/latex/">In LaTeX</a></li>
-            <li><a href="${root}guide/slides/">In slides</a></li>
+            ${item(`${home}guide/web/`, f.web)}
+            ${item(`${home}guide/typst/`, f.typst)}
+            ${item(`${home}guide/latex/`, f.latex)}
+            ${item(`${home}guide/slides/`, f.slides)}
           </ul>
         </section>
         <section aria-labelledby="f-more">
-          <h2 id="f-more">More ways</h2>
+          <h2 id="f-more">${text(f.moreWays)}</h2>
           <ul>
-            <li><a href="${root}guide/cli/">Command line</a></li>
-            <li><a href="${root}guide/ai/">AI assistants</a></li>
-            <li><a href="${root}guide/share-links/">Share links</a></li>
-            <li><a href="${root}play/">Share page</a></li>
+            ${item(`${home}guide/cli/`, f.cli)}
+            ${item(`${home}guide/ai/`, f.ai)}
+            ${item(`${home}guide/share-links/`, f.shareLinks)}
+            ${item(`${root}play/`, f.sharePage)}
           </ul>
         </section>
         <section aria-labelledby="f-learn">
-          <h2 id="f-learn">Reference</h2>
+          <h2 id="f-learn">${text(f.reference)}</h2>
           <ul>
-            <li><a href="${root}guide/inputs/">Inputs</a></li>
-            <li><a href="${root}guide/documents/">Documents</a></li>
-            <li><a href="${root}algorithms/">Algorithms</a></li>
-            <li><a href="${root}themes/">Themes</a></li>
+            ${item(`${home}guide/inputs/`, f.inputs)}
+            ${item(`${home}guide/documents/`, f.documents)}
+            ${item(`${home}algorithms/`, f.algorithms)}
+            ${item(`${home}themes/`, f.themes)}
           </ul>
         </section>
         <section aria-labelledby="f-project">
-          <h2 id="f-project">Project</h2>
+          <h2 id="f-project">${text(f.project)}</h2>
           <ul>
-            <li><a href="${root}why/">Why algomotion</a></li>
-            <li><a href="${REPOSITORY}">Source on GitHub</a></li>
-            <li><a href="${root}changelog/">Changelog</a></li>
-            <li><a href="${root}roadmap/">Roadmap</a></li>
-            <li><a href="${root}contributing/">Contributing</a></li>
-            <li><a href="${root}contributing/#report">Report a problem</a></li>
-            <li><a href="${REPOSITORY}/tree/main/docs/adr">Design records</a></li>
+            ${item(`${home}why/`, f.why)}
+            ${item(REPOSITORY, f.source)}
+            ${item(`${home}changelog/`, f.changelog)}
+            ${item(`${home}roadmap/`, f.roadmap)}
+            ${item(`${home}contributing/`, f.contributing)}
+            ${item(`${home}contributing/#report`, f.report)}
+            ${item(`${REPOSITORY}/tree/main/docs/adr`, f.designRecords)}
           </ul>
         </section>
       </div>
       <div class="colophon">
-        <p>Every figure on this site is drawn by algomotion’s own engine, from the same registry the packages ship.</p>
-        ${buildLine(assets.build, root)}
+        <p>${text(f.colophon)}</p>
+        ${buildLine(assets.build, home, f)}
       </div>
     </footer>
   </body>

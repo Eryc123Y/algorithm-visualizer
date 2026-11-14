@@ -3,6 +3,7 @@
  * button on each snippet, and a filter over the catalogue. The pages read
  * and work without them. Everything is set as text, never as markup.
  */
+import { clientText } from './text/client.ts';
 
 /** The part of the Clipboard API used here. */
 export interface TextClipboard {
@@ -24,6 +25,7 @@ export function addCopyButtons(
   page: string,
 ): void {
   if (clipboard === undefined) return;
+  const t = clientText(doc.documentElement.lang);
   // One live region tells screen readers what a button did.
   const status = doc.createElement('p');
   status.className = 'visually-hidden';
@@ -37,15 +39,15 @@ export function addCopyButtons(
     const button = doc.createElement('button');
     button.type = 'button';
     button.className = 'copy';
-    button.textContent = 'Copy';
-    button.setAttribute('aria-label', `Copy: ${label}`);
+    button.textContent = t.copy;
+    button.setAttribute('aria-label', t.copyLabel(label));
     button.addEventListener('click', () => {
       const text = code.textContent ?? '';
       const value =
         snippet.dataset['snippet'] === 'link' ? new URL(text, page).href : text;
       clipboard.writeText(value).then(
-        () => say(button, status, 'Copied'),
-        () => say(button, status, 'Select and copy'),
+        () => say(button, status, t.copied, t.copy),
+        () => say(button, status, t.selectToCopy, t.copy),
       );
     });
     // Beside the heading, so the heading's name stays its own; else first.
@@ -58,6 +60,7 @@ function say(
   button: HTMLButtonElement,
   status: HTMLElement,
   text: string,
+  idle: string,
 ): void {
   button.textContent = text;
   status.textContent = text;
@@ -65,7 +68,7 @@ function say(
   resets.set(
     button,
     setTimeout(() => {
-      button.textContent = 'Copy';
+      button.textContent = idle;
       status.textContent = '';
     }, COPIED_MS),
   );
@@ -97,8 +100,8 @@ export function filterCatalog(doc: Document, query: string): void {
       words.length === 0
         ? ''
         : shown === 0
-          ? 'Nothing matches; try fewer words.'
-          : `${shown} of ${total} shown.`;
+          ? clientText(doc.documentElement.lang).filterNone
+          : clientText(doc.documentElement.lang).filterCount(shown, total);
 }
 
 /** How a panel comes in: a short fade, rising a few pixels. */
@@ -216,10 +219,11 @@ export function loopOverlays(doc: Document, step = STEP_MS): void {
   const button = doc.createElement('button');
   button.type = 'button';
   button.className = 'overlays-pause';
-  button.textContent = 'Pause';
+  const t = clientText(doc.documentElement.lang);
+  button.textContent = t.pause;
   button.addEventListener('click', () => {
     paused = !paused;
-    button.textContent = paused ? 'Play' : 'Pause';
+    button.textContent = paused ? t.play : t.pause;
     sync();
   });
   list.classList.add('looping');
