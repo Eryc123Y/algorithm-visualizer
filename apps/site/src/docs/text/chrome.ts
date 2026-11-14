@@ -150,7 +150,7 @@ const zh: ChromeText = {
   skip: '跳到正文',
   siteNav: '站点',
   nav: {
-    why: '为什么',
+    why: '为什么用它',
     guide: '指南',
     algorithms: '算法',
     themes: '主题',
@@ -181,7 +181,7 @@ const zh: ChromeText = {
     report: '报告问题',
     designRecords: '设计决策记录',
     colophon:
-      '本站的每一幅图都由 algomotion 自己的引擎绘制，所用的算法注册表和发布的包是同一份。',
+      '本站的每一幅图都由 algomotion 自己的引擎绘制，所用的算法注册表与发布的包保持一致。',
     build: ({ version, commit, date, changelog }) =>
       `版本 ${version}${commit === undefined ? '' : `，构建自${date === undefined ? '' : ` ${date} 的`}提交 ${commit}`}。${changelog}`,
     whatChanged: '更新日志',

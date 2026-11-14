@@ -27,7 +27,7 @@ algomotion run dijkstra`,
 )}
 
 <h2 id="lists">列表和树</h2>
-<p>数字之间用空格或逗号分隔。在记法字符串里，方括号可写可不写。在命令行中，以 <code>[</code> 开头的值会按 JSON 读取，所以那里要用 JSON 的逗号。树的层序写法用 <code>null</code> 表示空位。单词列表适用于 trie 等算法。</p>
+<p>数字之间用空格或逗号分隔。在记法字符串里，方括号可写可不写。在命令行中，以 <code>[</code> 开头的值会按 JSON 读取，所以里面必须用逗号分隔，符合 JSON 语法。树的层序写法用 <code>null</code> 表示空位。单词列表适用于 trie 等算法。</p>
 ${code(
   `algomotion run insertion-sort '5, 2, 4, 6, 1, 3'
 algomotion run insertion-sort '[5, 2, 4, 6, 1, 3]'
@@ -36,8 +36,8 @@ algomotion run trie '{"from":"cat car", "ops":"insert dog, search cat"}'`,
   '列表与层序',
 )}
 
-<h2 id="tree-shapes">B 树结点和斐波那契堆森林</h2>
-<p>B 树结点先在方括号里写关键字，再在圆括号里写子结点。斐波那契堆写出各棵根树，用空格或逗号分隔；每个关键字后面可以用圆括号跟上它的子结点。星号标记失去过一个子结点的结点。这些记法要放在输入对象的 <code>from</code> 字段里。</p>
+<h2 id="tree-shapes">B 树节点和斐波那契堆森林</h2>
+<p>B 树节点先在方括号里写关键字，再在圆括号里写子节点。斐波那契堆写出各棵根树，用空格或逗号分隔；每个关键字后面可以用圆括号跟上它的子节点。星号标记失去过一个子节点的节点。这些记法要放在输入对象的 <code>from</code> 字段里。</p>
 ${code(
   `algomotion run b-tree.insert '{"from":"[G M] ([A C] [H K] [N R])", "key":"B"}'
 algomotion run fibonacci-heap.extract-min '{"from":"7 3(18 52) 17"}'`,
@@ -110,6 +110,6 @@ ${code(
   '一个记法错误',
 )}
 <p>错误信息包含错误码、路径、说明，常常还有提示。<code>$.input.graph</code> 指向对象内部的字段；<code>$.input</code> 指单独给出的主字段。<code>INVALID_JSON</code> 表示文本无法读取，<code>INVALID_SHAPE</code> 表示某个字段类型不对或缺失，<code>INVALID_ARGUMENT</code> 表示算法无法用这份输入运行。</p>
-${note('<p>改正路径指出的字段，再运行一次。一个算法接受的输入，可能超出另一个算法的限制；每份输入的 schema 见算法目录和 <code>algomotion recipes</code>。</p>')}
+${note('<p>改正路径指出的字段，再运行一次。一个算法接受的输入，可能超出另一个算法的限制；每个算法的输入 schema 见算法目录和 <code>algomotion recipes</code>。</p>')}
 `,
 };

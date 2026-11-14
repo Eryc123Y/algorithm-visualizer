@@ -257,7 +257,7 @@ const en: WhyText = {
       'The outputs are the player in a browser and still figures (SVG and TikZ). There is no video or GIF export.',
       `Code is shown in pseudocode and Python. Narration and the player’s controls are in English for now; Chinese is <a href="${root}roadmap/">on the roadmap</a>.`,
       'Small inputs read best: with dozens of vertices or hundreds of values a figure gets crowded.',
-      `Nothing is published yet: the packages are not on npm, Typst Universe or CTAN, so the guides install them from <a href="${REPOSITORY}">the repository</a>. The hosted MCP server and share links work today.`,
+      `This is a 1.0 alpha: the npm packages carry the <code>alpha</code> tag, and names and options may still change before 1.0. The Typst and LaTeX packages are not on Typst Universe or CTAN yet; the guides install them locally from <a href="${REPOSITORY}/releases">the GitHub release</a>.`,
       'algomotion is under the GNU GPL, version 3 or later: a program that includes its code must be released under the GPL too. The figures and documents it makes are yours, under any licence you like.',
     ],
   },
@@ -283,7 +283,7 @@ const en: WhyText = {
               'Compile as usual. Change the graph or the step, and the figure follows.',
             label: 'Compile the notes',
             caption:
-              'A page of notes as Typst compiles them, from a fuller version of this file.',
+              'A page of notes as Typst compiles it, from a fuller version of this file.',
           },
         ],
       },
@@ -476,9 +476,9 @@ const zh: WhyText = {
       '图的布局是自动的。你能选主题，选宽或窄的版式；文档里可以手动指定图中节点的位置，但没有拖动节点的编辑器。',
       '输出只有浏览器里的播放器和静态图（SVG 和 TikZ），不能导出视频或 GIF。',
       `代码以伪代码和 Python 显示。解说和播放器的控件目前只有英文；中文已<a href="${root}roadmap/">列入路线图</a>。`,
-      '输入小的时候图最清楚：顶点到了几十个、数值到了几百个，图就会变得拥挤。',
-      `目前还没有发布任何东西：这些包不在 npm、Typst Universe 或 CTAN 上，所以指南都从<a href="${REPOSITORY}">代码仓库</a>安装。托管的 MCP 服务器和分享链接现在就能用。`,
-      'algomotion 采用 GNU GPL 第 3 版或更高版本：包含它代码的程序也必须以 GPL 发布。它画出的图和生成的文档归你所有，用什么许可证都可以。',
+      '输入小的时候图最清楚：顶点有几十个、元素有几百个时，图就会变得拥挤。',
+      `目前是 1.0 alpha：npm 上的包都带 <code>alpha</code> 标签，1.0 之前名称和选项仍可能调整。Typst 包和 LaTeX 包还没有发布到 Typst Universe 或 CTAN，指南会说明如何从 <a href="${REPOSITORY}/releases">GitHub Release</a> 在本地安装。`,
+      'algomotion 采用 GNU GPL 第 3 版或更高版本：包含其代码的程序也必须以 GPL 发布。它画出的图和生成的文档归你所有，用什么许可证都可以。',
     ],
   },
   walks: {
@@ -501,7 +501,7 @@ const zh: WhyText = {
           {
             html: () => '照常编译。换一张图或换一个步骤，插图都会跟着更新。',
             label: '编译笔记',
-            caption: 'Typst 编译出的一页笔记，源文件是这个文件的完整版。',
+            caption: 'Typst 编译出的一页笔记，源文件是上述示例的完整版。',
           },
         ],
       },
@@ -539,7 +539,7 @@ const zh: WhyText = {
               '提问：“在 A-B 4, B-C 1, A-C 7, C-D 2 上从 A 出发，演示一下 Dijkstra 算法。”模型按名字运行内置的算法，不写任何文档；在能显示 MCP Apps 的客户端里，播放器会直接在对话中打开。',
             label: '工具调用',
             caption:
-              '这次调用之后的播放器，显示在项目测试所用的最小 MCP Apps 宿主里。',
+              '这次调用之后的播放器，显示在项目测试所用的极简 MCP Apps 宿主里。',
           },
           {
             html: () =>
