@@ -128,10 +128,12 @@ describe('the roadmap', () => {
 });
 
 describe('the changelog', () => {
-  it('says plainly that nothing is published yet', () => {
+  it('says plainly what is published, and with which tag', () => {
     expect(CHANGELOG).toMatch(/^# Changelog/);
     expect(CHANGELOG).toMatch(/## \[?Unreleased\]?/);
-    expect(CHANGELOG).toMatch(/nothing has been published yet/i);
+    expect(CHANGELOG).toMatch(/## 1\.0\.0-alpha\.1/);
+    expect(CHANGELOG).toMatch(/published with the `alpha` tag/);
+    expect(CHANGELOG).toMatch(/Typst Universe and CTAN wait for 1\.0/);
   });
 
   it('cites only pull requests that the roadmap or history knows', () => {
@@ -159,7 +161,7 @@ describe('the contributing page', () => {
     const body = doc.querySelector('main')!.textContent;
     expect(body).toContain('defineAlgorithm');
     expect(body).toContain('npm run check');
-    expect(body).toMatch(/licen[cs]e is still to be chosen/i);
+    expect(body).toMatch(/GNU General Public License, version 3 or later/);
   });
 
   it('links each issue form', () => {

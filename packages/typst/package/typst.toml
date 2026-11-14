@@ -8,6 +8,6 @@ description = "Step-by-step figures of algorithms and data structures, from an a
 keywords = ["algorithm", "data structure", "visualization", "CLRS", "graph", "tree", "sorting", "figure"]
 categories = ["visualization"]
 disciplines = ["computer-science", "education"]
-# The licence is the owner's choice when the package is published
-# (roadmap 4.3). OFL.txt covers the outlines of the bundled fonts, which the
-# engine draws text with.
+license = "GPL-3.0-or-later"
+# OFL.txt covers the outlines of the bundled fonts, which the engine draws
+# text with.

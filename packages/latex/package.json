@@ -1,6 +1,6 @@
 {
   "name": "@algomotion/latex",
-  "version": "0.0.0",
+  "version": "1.0.0-alpha.1",
   "private": true,
   "description": "The algomotion LaTeX package: figures drawn with TikZ in the document's fonts, made by the algomotion command (ADR 0027).",
   "type": "module",
@@ -8,10 +8,10 @@
     "test:latex": "vitest run --config vitest.latex.config.ts"
   },
   "devDependencies": {
-    "@algomotion/core": "*",
-    "@algomotion/mcp": "*",
-    "@algomotion/recipes": "*",
-    "@algomotion/svg": "*",
-    "@algomotion/tikz": "*"
+    "@algomotion/core": "1.0.0-alpha.1",
+    "@algomotion/mcp": "1.0.0-alpha.1",
+    "@algomotion/recipes": "1.0.0-alpha.1",
+    "@algomotion/svg": "1.0.0-alpha.1",
+    "@algomotion/tikz": "1.0.0-alpha.1"
   }
 }

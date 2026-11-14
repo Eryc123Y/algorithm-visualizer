@@ -72,5 +72,6 @@
     "apps/playground",
     "apps/site",
     "apps/worker"
-  ]
+  ],
+  "license": "GPL-3.0-or-later"
 }

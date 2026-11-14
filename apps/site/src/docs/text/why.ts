@@ -258,7 +258,7 @@ const en: WhyText = {
       `Code is shown in pseudocode and Python. Narration and the player’s controls are in English for now; Chinese is <a href="${root}roadmap/">on the roadmap</a>.`,
       'Small inputs read best: with dozens of vertices or hundreds of values a figure gets crowded.',
       `Nothing is published yet: the packages are not on npm, Typst Universe or CTAN, so the guides install them from <a href="${REPOSITORY}">the repository</a>. The hosted MCP server and share links work today.`,
-      'The licence is still to be chosen: the repository has no LICENSE file yet.',
+      'algomotion is under the GNU GPL, version 3 or later: a program that includes its code must be released under the GPL too. The figures and documents it makes are yours, under any licence you like.',
     ],
   },
   walks: {
@@ -478,7 +478,7 @@ const zh: WhyText = {
       `代码以伪代码和 Python 显示。解说和播放器的控件目前只有英文；中文已<a href="${root}roadmap/">列入路线图</a>。`,
       '输入小的时候图最清楚：顶点到了几十个、数值到了几百个，图就会变得拥挤。',
       `目前还没有发布任何东西：这些包不在 npm、Typst Universe 或 CTAN 上，所以指南都从<a href="${REPOSITORY}">代码仓库</a>安装。托管的 MCP 服务器和分享链接现在就能用。`,
-      '许可证尚未确定：仓库里还没有 LICENSE 文件。',
+      'algomotion 采用 GNU GPL 第 3 版或更高版本：包含它代码的程序也必须以 GPL 发布。它画出的图和生成的文档归你所有，用什么许可证都可以。',
     ],
   },
   walks: {

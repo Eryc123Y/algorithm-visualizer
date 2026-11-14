@@ -10,7 +10,7 @@
     "test:worker": "npm run build && vitest run --config vitest.worker.config.ts"
   },
   "dependencies": {
-    "@algomotion/mcp": "*"
+    "@algomotion/mcp": "1.0.0-alpha.1"
   },
   "devDependencies": {
     "@modelcontextprotocol/client": "^2.3.1",

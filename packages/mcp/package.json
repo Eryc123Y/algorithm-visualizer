@@ -1,8 +1,25 @@
 {
   "name": "@algomotion/mcp",
-  "version": "0.0.0",
-  "private": true,
+  "version": "1.0.0-alpha.1",
   "description": "An MCP server and CLI that let LLMs write, check and render algomotion visualizations.",
+  "keywords": [
+    "algorithms",
+    "visualization",
+    "education",
+    "mcp",
+    "cli",
+    "model-context-protocol"
+  ],
+  "license": "GPL-3.0-or-later",
+  "homepage": "https://algomotion.turing2234.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Eryc123Y/algorithm-visualizer.git",
+    "directory": "packages/mcp"
+  },
+  "bugs": {
+    "url": "https://github.com/Eryc123Y/algorithm-visualizer/issues"
+  },
   "type": "module",
   "sideEffects": false,
   "exports": {
@@ -24,11 +41,11 @@
     "test:standalone": "vitest run --config vitest.standalone.config.ts"
   },
   "dependencies": {
-    "@algomotion/core": "*",
-    "@algomotion/recipes": "*",
-    "@algomotion/spec": "*",
-    "@algomotion/svg": "*",
-    "@algomotion/tikz": "*",
+    "@algomotion/core": "1.0.0-alpha.1",
+    "@algomotion/recipes": "1.0.0-alpha.1",
+    "@algomotion/spec": "1.0.0-alpha.1",
+    "@algomotion/svg": "1.0.0-alpha.1",
+    "@algomotion/tikz": "1.0.0-alpha.1",
     "@modelcontextprotocol/ext-apps": "^2.0.3",
     "@modelcontextprotocol/server": "^2.3.1",
     "zod": "^4.6.7"
@@ -38,7 +55,11 @@
     "algomotion-mcp": "./dist/mcp-server.js"
   },
   "devDependencies": {
-    "@algomotion/elements": "^0.0.0",
+    "@algomotion/elements": "1.0.0-alpha.1",
     "@modelcontextprotocol/client": "^2.3.1"
+  },
+  "publishConfig": {
+    "access": "public",
+    "tag": "alpha"
   }
 }

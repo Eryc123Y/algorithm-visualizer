@@ -82,11 +82,11 @@ export interface PageFrame {
 export const REPOSITORY = 'https://github.com/Eryc123Y/algorithm-visualizer';
 
 /**
- * The wordmark's glyph, a placeholder until the owner picks a logo: a play
- * head over a sorted run of bars. It is decorative; the link's name is the
- * word beside it.
+ * The wordmark's glyph, the logo's mark (docs/brand): frames of a run
+ * stacked like a flipbook, the front one playing. It is decorative; the
+ * link's name is the word beside it.
  */
-const GLYPH = `<svg viewBox="0 0 64 64" aria-hidden="true" focusable="false"><path class="glyph-now" d="M22 8H42L32 20Z"/><g class="glyph-bars"><rect x="12" y="40" width="10" height="14"/><rect x="27" y="30" width="10" height="24"/><rect x="42" y="20" width="10" height="34"/></g></svg>`;
+const GLYPH = `<svg viewBox="0 0 64 64" aria-hidden="true" focusable="false"><g class="glyph-frames"><path d="M10 40V10H40"/><path d="M18 48V18H48"/><rect x="26" y="26" width="28" height="28" rx="2"/></g><path class="glyph-now" d="M36 33L47 40L36 47Z"/></svg>`;
 
 /** The footer's line about the build: version, commit and date. */
 function buildLine(

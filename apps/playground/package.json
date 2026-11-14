@@ -10,15 +10,15 @@
     "test:e2e": "NODE_OPTIONS=--conditions=@algomotion/source playwright test"
   },
   "dependencies": {
-    "@algomotion/core": "*",
-    "@algomotion/elements": "*",
-    "@algomotion/recipes": "*",
-    "@algomotion/spec": "*",
-    "@algomotion/svg": "*",
+    "@algomotion/core": "1.0.0-alpha.1",
+    "@algomotion/elements": "1.0.0-alpha.1",
+    "@algomotion/recipes": "1.0.0-alpha.1",
+    "@algomotion/spec": "1.0.0-alpha.1",
+    "@algomotion/svg": "1.0.0-alpha.1",
     "vue": "^3.5.43"
   },
   "devDependencies": {
-    "@algomotion/mcp": "^0.0.0",
+    "@algomotion/mcp": "1.0.0-alpha.1",
     "@axe-core/playwright": "^4.13.0",
     "@modelcontextprotocol/client": "^2.3.1",
     "@modelcontextprotocol/ext-apps": "^2.0.3"

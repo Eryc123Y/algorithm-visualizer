@@ -357,7 +357,7 @@ ${take('Adding an algorithm')}
 <p>Open the pull request against <code>main</code>. Its template asks for the roadmap item, how you checked the change, and screenshots for anything drawn. <code>npm run check</code> runs what CI runs first; changes to the player or the site also need <code>npm run test:e2e</code>.</p>
 ${take('Git workflow')}
 <p>Changes to the protocol, a new structure kind or a public interface start with a design record in <a href="${REPOSITORY}/tree/main/docs/adr">docs/adr</a>. The <a href="${ROOT}roadmap/">roadmap</a> shows what is planned.</p>
-<aside class="note"><p>The licence is still to be chosen: the repository has no LICENSE file yet.</p></aside>`,
+<aside class="note"><p>algomotion is free software under the GNU General Public License, version 3 or later (<a href="${REPOSITORY}/blob/main/LICENSE">LICENSE</a>). Contributions are accepted under the same licence. The bundled fonts keep their own licence, the SIL Open Font License.</p></aside>`,
     assets,
     locale,
     'contributing/',
@@ -428,7 +428,7 @@ ${setup === undefined || setup.type !== 'code' ? '' : `<pre tabindex="0"><code>$
 <li>提交信息采用 <code>type(scope): description</code> 的格式，比如 <code>feat(spec): add tree actions</code>；类型有 <code>feat</code>、<code>fix</code>、<code>docs</code>、<code>test</code>、<code>refactor</code> 和 <code>chore</code>。</li>
 </ul>
 <p>改协议、加新的结构种类或改公开接口，都要先在 <a href="${REPOSITORY}/tree/main/docs/adr">docs/adr</a> 里写一份设计决策记录。计划中的工作见<a href="${ROOT}roadmap/">路线图</a>。</p>
-<aside class="note"><p>许可证尚未选定：仓库里还没有 LICENSE 文件。</p></aside>`,
+<aside class="note"><p>algomotion 是自由软件，采用 GNU 通用公共许可证第 3 版或更高版本（<a href="${REPOSITORY}/blob/main/LICENSE">LICENSE</a>）。贡献的代码也以同一许可证接收。随附的字体保留各自的许可证，即 SIL 开放字体许可证。</p></aside>`,
     assets,
     'zh',
     'contributing/',

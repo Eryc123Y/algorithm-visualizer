@@ -1,12 +1,94 @@
-# algomotion
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/brand/lockup-dark.svg">
+    <img src="docs/brand/lockup-light.svg" alt="algomotion" width="360">
+  </picture>
+</p>
 
-An AI-native library for step-by-step visualizations of algorithms and data structures, for developers and teachers.
+<p align="center">Every step of an algorithm, drawn: a player for web pages, figures for Typst and LaTeX notes, overlays for slides, and a player in AI conversations, all from one algorithm name and your input.</p>
 
-The project was called algoviz until [ADR 0044](docs/adr/0044-the-name-algomotion.md); earlier ADRs and pull requests use that name.
+<p align="center">
+  <a href="https://algomotion.turing2234.com">Website</a> ·
+  <a href="https://algomotion.turing2234.com/zh/">中文</a> ·
+  <a href="https://algomotion.turing2234.com/guide/">Guide</a> ·
+  <a href="https://algomotion.turing2234.com/algorithms/">132 algorithms</a> ·
+  <a href="https://algomotion.turing2234.com/play/#v=1&amp;alg=dijkstra&amp;in=A-B%204%2C%20B-C%201%2C%20A-C%207%2C%20C-D%202">Try it</a>
+</p>
 
-A visualization is a declarative JSON document: the structures involved and a timeline of steps, each applying actions such as `compare` or `swap`. People write it with code, LLMs write it directly, and the library validates it and renders it as an interactive player, a static image, or a figure in Typst or LaTeX.
+<p align="center">
+  <a href="https://github.com/Eryc123Y/algorithm-visualizer/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/Eryc123Y/algorithm-visualizer/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://www.npmjs.com/package/@algomotion/elements"><img alt="npm (alpha)" src="https://img.shields.io/npm/v/@algomotion/elements/alpha?label=npm%20alpha"></a>
+  <a href="LICENSE"><img alt="Licence: GPL-3.0-or-later" src="https://img.shields.io/badge/licence-GPL--3.0--or--later-blue"></a>
+</p>
 
-> Status: release candidate for 1.0, not yet published (roadmap 4.3). The protocol is frozen at 1.0. Eleven structure kinds work end to end (protocol, timeline engine, layout, static SVG, the interactive player, Typst and LaTeX), with ready-made visualizations of the algorithms and data structures of CLRS, and an MCP server through which models write, check and render documents.
+[中文说明](README.zh-CN.md)
+
+## What it does
+
+You name an algorithm and give it an input, written the way you would write it on paper: a list `5 2 4 6 1 3`, a graph `A-B 4, B-C 1`, or operations `insert 4, delete 3`. algomotion runs the algorithm and records every step: what changed, which line of the code ran, and a sentence that says why. Each step has a name, such as `relax#3`, so notes, slides and links can point at it.
+
+| A page of Typst notes                                                                                           | A Beamer slide                                                                                                          | An AI conversation                                                                                         |
+| --------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| <img src="apps/site/public/scenes/notes.svg" alt="A page of Typst notes with an algomotion figure" width="260"> | <img src="apps/site/public/scenes/beamer-1.svg" alt="A Beamer slide stepping through Dijkstra's algorithm" width="260"> | <img src="apps/site/public/scenes/chat-light.webp" alt="The player inside an AI conversation" width="260"> |
+
+The same run becomes any of these, drawn by one engine in nine themes. A model can also write a visualization of its own through the MCP server, check it step by step, and show it in the conversation.
+
+## Status: 1.0 alpha
+
+The protocol is frozen at 1.0, and eleven structure kinds and 132 algorithms and data structure operations work end to end. `1.0.0-alpha.1` is the first public release, for trying out and feedback: names and options may still change before 1.0.
+
+- **npm:** every package is published with the `alpha` tag, so a plain `npm install` does not pick it up; ask for `@alpha`.
+- **Typst Universe and CTAN:** not yet. Both review packages by hand and keep every version, so they wait for 1.0. Until then, install the Typst and LaTeX packages locally from the [GitHub release](https://github.com/Eryc123Y/algorithm-visualizer/releases) or from this repository, as the [Typst guide](https://algomotion.turing2234.com/guide/typst/) and the [LaTeX guide](https://algomotion.turing2234.com/guide/latex/) show.
+- **AI assistants:** the hosted MCP server at `https://algomotion-mcp.turing2234.com/mcp` works today.
+
+## Quick start
+
+On a web page, with the player from npm:
+
+```sh
+npm install @algomotion/elements@alpha
+```
+
+```js
+import '@algomotion/elements/define';
+```
+
+```html
+<algo-player
+  algorithm="dijkstra"
+  input="A-B 4, B-C 1, A-C 7, C-D 2"
+></algo-player>
+```
+
+On the command line:
+
+```sh
+npx -p @algomotion/mcp@alpha algomotion export dijkstra --input 'A-B 4, B-C 1, A-C 7, C-D 2' --step improve#3 --out figures
+```
+
+In Claude Code:
+
+```sh
+claude mcp add --transport http algomotion https://algomotion-mcp.turing2234.com/mcp
+```
+
+In Typst, after installing the package locally (see the [Typst guide](https://algomotion.turing2234.com/guide/typst/)):
+
+```typ
+#import "@local/algomotion:0.1.0": algomotion
+#algomotion("dijkstra", "A-B 4, B-C 1, A-C 7, C-D 2", step: "improve#3")
+```
+
+In LaTeX, with `algomotion.sty` and the `algomotion` command on your path (see the [LaTeX guide](https://algomotion.turing2234.com/guide/latex/)):
+
+```latex
+\usepackage{algomotion}
+\algomotion[step=improve\#3]{dijkstra}{A-B 4, B-C 1, A-C 7, C-D 2}
+```
+
+## A document
+
+Anything the catalogue does not have is a declarative JSON document: the structures involved and a timeline of steps, each applying actions such as `compare` or `swap`. People write it with code, models write it directly, and the library validates it and renders it as an interactive player, a static image, or a figure in Typst or LaTeX.
 
 ```json
 {
@@ -24,6 +106,8 @@ A visualization is a declarative JSON document: the structures involved and a ti
   ]
 }
 ```
+
+The project was called algoviz until [ADR 0044](docs/adr/0044-the-name-algomotion.md); earlier ADRs and pull requests use that name.
 
 ## Structures
 
@@ -278,3 +362,7 @@ The architecture is documented as decision records in [`docs/adr/`](docs/adr). I
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Licence
+
+algomotion is free software under the GNU General Public License, version 3 or later ([LICENSE](LICENSE)). The figures and documents it makes are yours. The bundled fonts keep their own licence, the SIL Open Font License 1.1.
