@@ -4,7 +4,7 @@
  * `public/scenes/`. `scenes.json` there names each file and its size.
  */
 import { picture, type Art } from './home.ts';
-import { text } from './html.ts';
+import { attribute } from './html.ts';
 
 export interface SceneManifest {
   /** A page of Typst notes. */
@@ -64,14 +64,20 @@ export function sceneFigure(
   caption: string,
   className = 'scene',
 ): string {
+  // A link to the image at its own size, for reading it on a phone.
+  const full = (art: Art, inner: string) =>
+    `<a class="scene-full" href="${attribute(root + art.light)}">${inner}</a>`;
   const body =
     name === 'beamer'
-      ? `<ol class="scene-pages" aria-label="${text(`${scenes.beamer.length} overlays of one frame, in order`)}">${scenes.beamer
+      ? `<ol class="scene-pages" aria-label="${attribute(`${scenes.beamer.length} overlays of one frame, in order`)}">${scenes.beamer
           .map(
             (page, k) =>
-              `<li><span class="overlay-n">${k + 1}</span>${picture(page, root)}</li>`,
+              `<li><span class="overlay-n">${k + 1}</span>${full(page, picture(page, root))}</li>`,
           )
           .join('')}</ol>`
-      : picture(scenes[name], root);
+      : name === 'terminal'
+        ? // Terminal text stays readable: on a narrow screen it scrolls.
+          `<div class="scene-scroll" role="region" tabindex="0" aria-label="${attribute(scenes.terminal.alt)}">${picture(scenes.terminal, root)}</div>`
+        : full(scenes[name], picture(scenes[name], root));
   return `<figure class="${className} scene-${name}">${body}<figcaption>${caption}</figcaption></figure>`;
 }

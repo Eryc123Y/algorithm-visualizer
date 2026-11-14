@@ -1563,6 +1563,19 @@ main.project > .project-body {
   font-size: 0.75rem;
 }
 
+.scene-full {
+  display: block;
+}
+
+/* The terminal keeps its size, so its text stays readable; it scrolls. */
+.scene-scroll {
+  overflow-x: auto;
+}
+
+.scene-scroll img {
+  min-inline-size: 36rem;
+}
+
 .output-figure.scene figcaption code {
   font-size: 0.85em;
 }

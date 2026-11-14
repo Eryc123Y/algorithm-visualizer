@@ -54,6 +54,14 @@ const escape = (s: string): string =>
       ]!,
   );
 
+/** Tabs as spaces up to the next stop of eight, as a terminal shows them. */
+export function expandTabs(text: string): string {
+  let out = '';
+  for (const c of text)
+    out += c === '\t' ? ' '.repeat(8 - ([...out].length % 8)) : c;
+  return out;
+}
+
 /** Splits `text` into rows of at most `columns` characters. */
 export function wrap(text: string, columns: number): string[] {
   const chars = [...text];
@@ -79,7 +87,7 @@ export function terminalSvg(
 ): TerminalSvg {
   const rows = lines.flatMap((line) => {
     const prefix = line.kind === 'command' ? '$ ' : '';
-    return wrap(prefix + line.text, columns).map((row, k) => ({
+    return wrap(expandTabs(prefix + line.text), columns).map((row, k) => ({
       kind: line.kind,
       row,
       first: k === 0,

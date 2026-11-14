@@ -13,7 +13,12 @@ import {
   sceneFigure,
   type SceneManifest,
 } from '../../src/docs/scenes.ts';
-import { TERMINAL_THEMES, terminalSvg, wrap } from '../../src/docs/terminal.ts';
+import {
+  expandTabs,
+  TERMINAL_THEMES,
+  terminalSvg,
+  wrap,
+} from '../../src/docs/terminal.ts';
 import { WALKTHROUGHS } from '../../src/docs/why.ts';
 
 const SITE = join(import.meta.dirname, '../..');
@@ -98,6 +103,11 @@ describe('a scene as a figure', () => {
 });
 
 describe('the terminal drawing', () => {
+  it('shows tabs as spaces to the next stop of eight', () => {
+    expect(expandTabs('ab\tc')).toBe('ab      c');
+    expect(expandTabs('12345678\tx')).toBe('12345678        x');
+  });
+
   it('wraps long lines at the terminal’s width, by characters', () => {
     expect(wrap('abcdef', 4)).toEqual(['abcd', 'ef']);
     expect(wrap('', 4)).toEqual(['']);
