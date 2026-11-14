@@ -43,8 +43,9 @@ import {
   thumbnailFrame,
   thumbnailStem,
 } from '../src/docs/pages.ts';
+import { playgroundGroups, playgroundMarkup } from '../src/docs/playground.ts';
 import { shortInput } from '../src/docs/short-input.ts';
-import { snippetsFor } from '../src/docs/snippets.ts';
+import { inputText, slidesCode, snippetsFor } from '../src/docs/snippets.ts';
 import { withPolicy } from '../src/headers.ts';
 
 const DIST = fileURLToPath(new URL('../dist/', import.meta.url));
@@ -254,18 +255,24 @@ const demo = await detailsOf(
   groups,
   0,
 );
-const player = `<algo-player algorithm="${DEMO}" input="${attribute(HOME_INPUT)}" theme="auto"></algo-player>`;
+const homeSnippets = await snippetsFor(DEMO, HOME_INPUT, 0, 'improve#3');
+const playground = playgroundMarkup(
+  playgroundGroups(groups, (id) =>
+    inputText(shortInput(id, algorithms.find((a) => a.id === id)!.examples[0])),
+  ),
+  { algorithm: DEMO, input: HOME_INPUT, title: demo.entry.title },
+  `<algo-player algorithm="${DEMO}" input="${attribute(HOME_INPUT)}" theme="auto"></algo-player>`,
+  homeSnippets.find((s) => s.id === 'link')!.code,
+);
 write(
   'index.html',
   withPolicy(
     homePage(
       groups,
-      {
-        ...demo,
-        snippets: await snippetsFor(DEMO, HOME_INPUT, 0, 'improve#3'),
-      },
+      { ...demo, snippets: homeSnippets },
       art,
-      player,
+      playground,
+      slidesCode(demo.entry.title, DEMO, HOME_INPUT),
       countOf(groups),
       assets,
     ),

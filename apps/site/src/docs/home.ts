@@ -97,11 +97,6 @@ const snippetBlock = (s: Snippet): string =>
   <pre tabindex="0" role="region" aria-label="${attribute(s.label)}"><code>${text(s.code)}</code></pre>
 </div>`;
 
-const SLIDES_CODE = `\\begin{frame}{Dijkstra’s algorithm}
-  \\centering
-  \\algomotion[steps]{dijkstra}{A-B 4, B-C 1, A-C 7, C-D 2}
-\\end{frame}`;
-
 function preview(
   id: (typeof OUTPUTS)[number]['id'],
   art: HomeArt,
@@ -130,11 +125,15 @@ function preview(
         ? 'The element, as the reader sees it.'
         : snippet === undefined
           ? ''
-          : `What the ${OUTPUTS.find((o) => o.id === id)!.tab} snippet draws.`;
+          : `The example run, as the ${OUTPUTS.find((o) => o.id === id)!.tab} snippet draws it.`;
   return `<figure class="output-figure">${picture(a, '')}<figcaption>${text(caption)}</figcaption></figure>`;
 }
 
-function outputTabs(snippets: readonly Snippet[], art: HomeArt): string {
+function outputTabs(
+  snippets: readonly Snippet[],
+  slides: string,
+  art: HomeArt,
+): string {
   const tabs = OUTPUTS.map(
     (o, k) =>
       `<button type="button" role="tab" id="tab-${o.id}" aria-selected="${k === 0}"${k === 0 ? ' focusgroupstart' : ' tabindex="-1"'}>${text(o.tab)}</button>`,
@@ -146,7 +145,7 @@ function outputTabs(snippets: readonly Snippet[], art: HomeArt): string {
         ? snippetBlock({
             id: 'latex',
             label: 'In slides',
-            code: SLIDES_CODE,
+            code: slides,
             note: '',
           })
         : snippet === undefined
@@ -263,7 +262,10 @@ export function homePage(
   groups: readonly TopicGroup[],
   demo: EntryDetails,
   art: HomeArt,
+  /** The hero: the playground around its player. */
   player: string,
+  /** The run as Beamer overlays, for the slides tab. */
+  slides: string,
   count: number,
   assets: Assets,
 ): string {
@@ -284,16 +286,15 @@ export function homePage(
   </div>
   <div class="hero-player">
     ${player}
-    <p class="player-caption">Dijkstra’s algorithm on <code>A-B 4, B-C 1, A-C 7, C-D 2</code>. Press play, or step with the arrow keys.</p>
   </div>
 </section>
 ${plate(art)}
 <section class="outputs" aria-labelledby="outputs-title">
   <div class="section-head">
     <h2 id="outputs-title">One input, wherever you write</h2>
-    <p>The run above, written for each place it can go. Every output draws with the same engine, so a figure in your notes matches the player on your course page.</p>
+    <p>The run above, written for each place it can go: change the algorithm or its input, and every snippet follows. Every output draws with the same engine, so a figure in your notes matches the player on your course page.</p>
   </div>
-  ${outputTabs(demo.snippets, art)}
+  ${outputTabs(demo.snippets, slides, art)}
 </section>
 ${AUDIENCES}
 ${themesStrip(art)}
