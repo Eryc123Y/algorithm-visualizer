@@ -8,6 +8,7 @@
  *
  *     node --conditions=@algomotion/source scripts/build-pages.ts
  */
+import { execFileSync } from 'node:child_process';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -25,7 +26,12 @@ import { catalog, type Entry } from '../src/docs/catalog.ts';
 import { figureFiles, guidePage } from '../src/docs/guide.ts';
 import { GUIDES } from '../src/docs/guides/index.ts';
 import { homePage, type Art, type HomeArt } from '../src/docs/home.ts';
-import { attribute } from '../src/docs/html.ts';
+import { attribute, type BuildInfo } from '../src/docs/html.ts';
+import {
+  changelogPage,
+  contributingPage,
+  roadmapPage,
+} from '../src/docs/project.ts';
 import {
   algorithmsPage,
   countOf,
@@ -39,6 +45,7 @@ import { snippetsFor } from '../src/docs/snippets.ts';
 import { withPolicy } from '../src/headers.ts';
 
 const DIST = fileURLToPath(new URL('../dist/', import.meta.url));
+const REPO = fileURLToPath(new URL('../../../', import.meta.url));
 const ENTRY = 'src/docs/main.ts';
 /** The run the home page and the themes show. */
 const DEMO = 'dijkstra';
@@ -103,10 +110,36 @@ function drawArt(
   };
 }
 
+/** A file of the repository, by its path from the root. */
+const repoFile = (path: string): string =>
+  readFileSync(join(REPO, path), 'utf8');
+
+/** The version and the commit built, for the footer. */
+function buildInfo(): BuildInfo {
+  const { version } = JSON.parse(repoFile('package.json')) as {
+    version: string;
+  };
+  try {
+    const [commit, date] = execFileSync(
+      'git',
+      ['log', '-1', '--format=%H %cs'],
+      { cwd: REPO, encoding: 'utf8' },
+    )
+      .trim()
+      .split(' ');
+    return commit === undefined || date === undefined
+      ? { version }
+      : { version, commit, date };
+  } catch {
+    // Built outside a Git checkout, such as from an archive.
+    return { version };
+  }
+}
+
 const manifest = JSON.parse(
   readFileSync(join(DIST, '.vite/manifest.json'), 'utf8'),
 ) as Manifest;
-const assets = assetsOf(manifest, ENTRY);
+const assets = { ...assetsOf(manifest, ENTRY), build: buildInfo() };
 const groups = catalog(algorithms);
 const entries: Entry[] = groups.flatMap((g) => [
   ...g.algorithms,
@@ -228,6 +261,15 @@ for (const guide of GUIDES) {
 
 write('404.html', withPolicy(notFoundPage(assets), '404.html'));
 
+// The project pages, from the repository's own files.
+const PROJECT = [
+  ['changelog/', changelogPage(repoFile('CHANGELOG.md'), assets)],
+  ['roadmap/', roadmapPage(repoFile('docs/roadmap.md'), assets)],
+  ['contributing/', contributingPage(repoFile('CONTRIBUTING.md'), assets)],
+] as const;
+for (const [path, html] of PROJECT)
+  write(`${path}index.html`, withPolicy(html, path));
+
 process.stdout.write(
-  `Wrote ${entries.length + 4 + GUIDES.length} pages and ${figures.length} theme figures to dist/\n`,
+  `Wrote ${entries.length + 4 + GUIDES.length + PROJECT.length} pages and ${figures.length} theme figures to dist/\n`,
 );
