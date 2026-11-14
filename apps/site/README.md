@@ -3,7 +3,7 @@
 The algomotion website, built as static files for Cloudflare Pages or any static host:
 
 - **The documentation** (roadmap 3.4), generated from the registry, so a new module needs no change here (requirement R7):
-  - the home page, with one run in every output and the catalogue of every module by topic, a data structure's operations listed under it;
+  - the home page: a playground, where a choice of any module and an input drive the player and every output's snippet (`src/docs/playground*.ts`), the run as a plate of figures, and the catalogue by topic. The address keeps the run (`?algorithm=bfs&input=…`); without script the page shows the default run;
   - a page per module, `dijkstra/`, `bst/` and `bst/delete/`: its player on the first example, the names of its steps, and the same run as a snippet for a web page, Typst, LaTeX, the command line, MCP and a share link;
   - `themes/`: one figure in every built-in theme, and how each output picks one;
   - `why/` (roadmap 5.4): what algomotion is for, its differences shown with figures drawn from real runs, a comparison with drawing by hand, Manim and visualization websites, its limits, and three walk-throughs whose runs the unit tests check (`src/docs/why.ts`); the home page links to it from a short section below the outputs (`src/docs/home-why.ts`);

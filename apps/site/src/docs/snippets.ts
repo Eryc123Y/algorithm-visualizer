@@ -118,6 +118,16 @@ const scriptJson = (value: unknown): string =>
   JSON.stringify(value, null, 2).replaceAll('<', '\\u003c');
 
 /**
+ * A Beamer frame that shows module `id`, titled `title`, on the input
+ * `text`, one overlay per step.
+ */
+export const slidesCode = (title: string, id: string, text: string): string =>
+  `\\begin{frame}{${latexText(title)}}
+  \\centering
+  \\algomotion[steps]{${id}}{${latexText(text)}}
+\\end{frame}`;
+
+/**
  * The snippets of module `id` run on `input`, for a page `depth` folders
  * below the site's root, whose share page is `play/`; `step` is a step of
  * the run that the notes use as their example.
