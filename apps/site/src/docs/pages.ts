@@ -9,7 +9,7 @@ import { shareFragment } from '@algomotion/spec';
 import type { ThemeName } from '@algomotion/svg';
 
 import { depthOf, type Entry, type TopicGroup } from './catalog.ts';
-import { picture, type Art } from './home.ts';
+import { picture, sheet, type Art } from './home.ts';
 import { highlighted, SNIPPET_LANGUAGES } from './highlight.ts';
 import { attribute, page, rootOf, text, type Assets } from './html.ts';
 import { shortInput } from './short-input.ts';
@@ -358,7 +358,7 @@ ${how.map(([where, code]) => `    <tr><th scope="row">${text(where)}</th><td><co
 ${figures
   .map(
     (f) => `<figure>
-  <img src="${attribute(f.file)}" width="${f.width}" height="${f.height}" alt="Dijkstra’s algorithm drawn in the ${attribute(f.name)} theme" loading="lazy" />
+  ${sheet(f.name, `<img src="${attribute(f.file)}" width="${f.width}" height="${f.height}" alt="Dijkstra’s algorithm drawn in the ${attribute(f.name)} theme" loading="lazy" />`)}
   <figcaption><code>${text(f.name)}</code> ${text(THEME_NOTES[f.name] ?? '')}</figcaption>
 </figure>`,
   )

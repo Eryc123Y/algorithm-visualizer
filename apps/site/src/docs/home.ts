@@ -19,6 +19,11 @@ export interface Art {
   readonly height: number;
   /** What the figure shows, for its alternative text and caption. */
   readonly alt: string;
+  /**
+   * The one theme it was drawn in, if not a light and dark pair: it is
+   * then shown on that theme's paper, as a sheet (`sheet`).
+   */
+  readonly theme?: string;
 }
 
 /** One subfigure of the plate. */
@@ -38,8 +43,26 @@ export interface HomeArt {
   readonly scenes?: SceneManifest;
 }
 
-/** A `<picture>` that follows the reader's light or dark setting. */
+/**
+ * Markup on the paper of `theme`, padded like a sheet, in either colour
+ * scheme; without a theme, the markup alone. Each theme's paper is a
+ * `.sheet-<name>` rule in docs.css, pinned to the theme by a unit test.
+ */
+export function sheet(theme: string | undefined, html: string): string {
+  return theme === undefined
+    ? html
+    : `<span class="sheet sheet-${attribute(theme)}">${html}</span>`;
+}
+
+/**
+ * A `<picture>` that follows the reader's light or dark setting; a figure
+ * in one fixed theme sits on its own paper instead.
+ */
 export function picture(art: Art, root: string, loading = 'lazy'): string {
+  return sheet(art.theme, pictureOf(art, root, loading));
+}
+
+function pictureOf(art: Art, root: string, loading: string): string {
   return `<picture><source srcset="${attribute(root + art.dark)}" media="(prefers-color-scheme: dark)" /><img src="${attribute(root + art.light)}" width="${art.width}" height="${art.height}" alt="${attribute(art.alt)}" loading="${loading}" decoding="async" /></picture>`;
 }
 
@@ -277,7 +300,7 @@ function themesStrip(art: HomeArt): string {
 ${art.themes
   .map(
     (t) =>
-      `    <li><figure><img src="${attribute(t.art.light)}" width="${t.art.width}" height="${t.art.height}" alt="${attribute(t.art.alt)}" loading="lazy" decoding="async" /><figcaption><code>${text(t.name)}</code></figcaption></figure></li>`,
+      `    <li><figure>${sheet(t.name, `<img src="${attribute(t.art.light)}" width="${t.art.width}" height="${t.art.height}" alt="${attribute(t.art.alt)}" loading="lazy" decoding="async" />`)}<figcaption><code>${text(t.name)}</code></figcaption></figure></li>`,
   )
   .join('\n')}
   </ul>

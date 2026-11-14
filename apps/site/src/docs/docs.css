@@ -1729,3 +1729,64 @@ main.project > .project-body {
 .output-figure.scene figcaption code {
   font-size: 0.85em;
 }
+
+/* ── Figure sheets: a fixed theme on its own paper ──────────────────── */
+
+/*
+ * A figure drawn in one fixed theme is shown on that theme's paper, as a
+ * padded sheet, in both colour schemes, so a print figure's black ink
+ * never lands on the dark page. Light and dark pairs follow the page and
+ * get no sheet. Each paper is the theme's own background, or white where
+ * the theme paints none; tests/unit/sheets.spec.ts pins every value.
+ */
+.sheet {
+  display: block;
+  padding: 0.75rem;
+  border: 1px solid color-mix(in oklab, var(--sheet-paper) 82%, var(--ink));
+  border-radius: 0.25rem;
+  background: var(--sheet-paper);
+}
+
+.sheet picture,
+.sheet img {
+  display: block;
+  margin-inline: auto;
+  max-inline-size: 100%;
+  block-size: auto;
+}
+
+/* The sheet is the frame: an image inside it draws none of its own. */
+.sheet img {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+
+.sheet-light {
+  --sheet-paper: #ffffff;
+}
+.sheet-dark {
+  --sheet-paper: #121214;
+}
+.sheet-print {
+  --sheet-paper: #ffffff;
+}
+.sheet-textbook {
+  --sheet-paper: #ffffff;
+}
+.sheet-textbook-dark {
+  --sheet-paper: #1b1b1a;
+}
+.sheet-blocks {
+  --sheet-paper: #ffffff;
+}
+.sheet-blocks-dark {
+  --sheet-paper: #1b2342;
+}
+.sheet-answer-sheet {
+  --sheet-paper: #ffffff;
+}
+.sheet-turbo-c {
+  --sheet-paper: #0000aa;
+}

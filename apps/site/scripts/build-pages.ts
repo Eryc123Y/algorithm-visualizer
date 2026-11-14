@@ -130,6 +130,8 @@ function drawArt(
     width: light.width,
     height: light.height,
     alt: alt || light.narration || 'The initial state.',
+    // One fixed theme: shown on that theme's paper in both schemes.
+    ...(theme === undefined ? {} : { theme }),
   };
 }
 
