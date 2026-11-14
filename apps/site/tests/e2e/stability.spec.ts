@@ -22,12 +22,18 @@ const watchShifts = (page: Page) =>
     }).observe({ type: 'layout-shift', buffered: true });
   });
 
-/** A reader's default font size, as the root's; rem follows it. */
-const largerDefault = (page: Page, size: string) =>
-  page.evaluate(async (value) => {
-    document.documentElement.style.fontSize = value;
-    await new Promise((resolve) => requestAnimationFrame(resolve));
-  }, size);
+/**
+ * The browser's default font size, as a reader sets it, before the page
+ * loads: rem follows it, the player's pixels do not. Both projects run
+ * Chromium, which takes it through the DevTools protocol.
+ */
+const defaultFont = async (page: Page, percent: number) => {
+  if (percent === 100) return;
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send('Page.setFontSizes', {
+    fontSizes: { standard: (16 * percent) / 100 },
+  });
+};
 
 const shift = (page: Page) =>
   page.evaluate(() => (window as unknown as { shift: number }).shift);
@@ -43,14 +49,17 @@ for (const path of ['/', '/dijkstra/'])
     expect(await shift(page)).toBeLessThan(0.1);
   });
 
-for (const font of ['100%', '150%'])
-  test(`the hero’s reserve is never taller than its player (font ${font})`, async ({
+for (const font of [100, 150])
+  test(`the hero’s reserve is never taller than its player (font ${font}%)`, async ({
     page,
   }) => {
+    await defaultFont(page, font);
+    // At 900px the hero has one column and the player its code beside
+    // the figure, the shortest it gets.
+    if (font === 100) await page.setViewportSize({ width: 900, height: 900 });
     await page.goto('/');
     const player = page.locator('.pg-stage algo-player');
     await expect(player.getByText('Initial state.')).toBeVisible();
-    await largerDefault(page, font);
     const [stage, drawn] = await Promise.all([
       page
         .locator('.pg-stage')
@@ -63,19 +72,19 @@ for (const font of ['100%', '150%'])
 // The smallest players of the registry, at a desktop's and a phone's width,
 // and with a reader's default font at 150%, which the player ignores.
 for (const [id, font] of [
-  ['bubble-sort', '100%'],
-  ['random-permutation', '100%'],
-  ['fibonacci-heap.delete', '100%'],
-  ['activity-selection', '100%'],
-  ['bubble-sort', '150%'],
+  ['bubble-sort', 100],
+  ['random-permutation', 100],
+  ['fibonacci-heap.delete', 100],
+  ['activity-selection', 100],
+  ['bubble-sort', 150],
 ] as const)
-  test(`${id}'s page reserves no more than its player (font ${font})`, async ({
+  test(`${id}'s page reserves no more than its player (font ${font}%)`, async ({
     page,
   }) => {
+    await defaultFont(page, font);
     await page.goto(`/${id.split('.').join('/')}/`);
     const player = page.locator('main > algo-player');
     await expect(player.getByText('Initial state.')).toBeVisible();
-    await largerDefault(page, font);
     const [reserve, drawn] = await player.evaluate((el) => [
       parseFloat(getComputedStyle(el).minBlockSize),
       el.shadowRoot!.firstElementChild!.getBoundingClientRect().height,

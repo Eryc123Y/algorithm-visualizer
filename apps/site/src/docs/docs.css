@@ -297,6 +297,18 @@ picture img {
   }
 
   /*
+   * From a 720px container the player sets its code beside the figure,
+   * and the default run's is shorter (447px at least; 633px stacked).
+   * The playground's width is the player's, so its query matches the
+   * player's own break exactly.
+   */
+  @container (width >= 720px) {
+    .pg-stage {
+      min-block-size: 432px;
+    }
+  }
+
+  /*
    * A module page's player: just under the smallest player of any module
    * at that width, so it is never a gap and the page below drops by less
    * when the player draws. Below 784px wide the player stacks its code
