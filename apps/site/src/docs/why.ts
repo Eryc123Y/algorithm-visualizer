@@ -11,6 +11,7 @@ export type FigureLayout = NonNullable<ExportOptions['layout']>;
 
 import { picture, type Art } from './home.ts';
 import { attribute, page, REPOSITORY, text, type Assets } from './html.ts';
+import { sceneFigure, type SceneManifest, type SceneName } from './scenes.ts';
 import type { StepName } from './pages.ts';
 
 const ROOT = '../';
@@ -87,20 +88,9 @@ export const WHY_FIGURES: readonly WhyFigure[] = [
     theme: 'answer-sheet',
   }),
   run(
-    'typst',
-    'improve#3',
-    'C improves to 5 through B, with the queue Q below the graph.',
-    {
-      layout: 'narrow',
-    },
-  ),
-  run('overlay-1', 'extract#2', 'Overlay 1: B is final, at 4.'),
-  run('overlay-2', 'relax#1', 'Overlay 2: the edge back to A changes nothing.'),
-  run('overlay-3', 'improve#3', 'Overlay 3: C improves to 5, through B.'),
-  run(
     'assistant',
     'improve#3',
-    'The player in the conversation, at C’s improvement to 5.',
+    'C improves to 5 through B, with the queue Q beside the graph.',
   ),
 ];
 
@@ -200,10 +190,10 @@ export interface WalkStep {
   readonly html: string;
   readonly code?: string;
   readonly label?: string;
-  /** Figures drawn by this step, by key; several are overlays. */
-  readonly figures?: readonly string[];
   /** Quote the narration the check returns after this step. */
   readonly reply?: boolean;
+  /** A real scene of what this step makes (roadmap 5.3). */
+  readonly scene?: { readonly name: SceneName; readonly caption: string };
 }
 
 export interface Walkthrough {
@@ -273,7 +263,11 @@ export const WALKTHROUGHS: readonly Walkthrough[] = [
         html: 'Compile as usual. Change the graph or the step, and the figure follows.',
         code: 'typst compile notes.typ',
         label: 'Compile the notes',
-        figures: ['typst'],
+        scene: {
+          name: 'notes',
+          caption:
+            'A page of notes as Typst compiles them, from a fuller version of this file.',
+        },
       },
     ],
     runs: [{ ...WHY_RUN, steps: ['improve#3'] }],
@@ -295,7 +289,11 @@ export const WALKTHROUGHS: readonly Walkthrough[] = [
         html: 'The first compile runs the command through shell escape and caches the figures; later compiles need neither.',
         code: 'latexmk -pdf -shell-escape slides.tex',
         label: 'Compile the slides',
-        figures: ['overlay-1', 'overlay-2', 'overlay-3'],
+        scene: {
+          name: 'beamer',
+          caption:
+            'The three overlays this file makes, as <code>latexmk</code> compiles them.',
+        },
       },
     ],
     runs: [{ ...WHY_RUN, steps: ['extract#2..improve#3'], frames: 3 }],
@@ -314,7 +312,11 @@ export const WALKTHROUGHS: readonly Walkthrough[] = [
         html: 'Ask: “Show me Dijkstra’s algorithm from A on A-B 4, B-C 1, A-C 7, C-D 2.” The model runs the recipe by name and writes no document; in clients that show MCP Apps, the player opens in the conversation.',
         code: SHOW_CALL,
         label: 'The tool call',
-        figures: ['assistant'],
+        scene: {
+          name: 'chat',
+          caption:
+            'The player after this call, in the minimal MCP Apps host that the project’s tests use.',
+        },
       },
       {
         html: 'Ask why C ends at 5. Before answering, the model can look at the state at that step instead of guessing.',
@@ -441,31 +443,17 @@ function limits(modules: number): string {
 </section>`;
 }
 
-function drawn(
-  keys: readonly string[],
-  art: Readonly<Record<string, Art>>,
-): string {
-  if (keys.length <= 1)
-    return keys.map((k) => figureOf(art, k, text(art[k]?.alt ?? ''))).join('');
-  const items = keys.map((k, n) => {
-    const a = art[k];
-    if (a === undefined) throw new Error(`why: no figure ${k}`);
-    return `<li><span class="overlay-n">${n + 1}</span>${picture(a, ROOT)}</li>`;
-  });
-  return `<ol class="overlays why-overlays" aria-label="The overlays, in order">${items.join('')}</ol>`;
-}
-
 function walkthrough(
   w: Walkthrough,
-  art: Readonly<Record<string, Art>>,
   checked: string,
+  scenes: SceneManifest,
 ): string {
   const steps = w.steps
     .map(
       (s) => `<li>
   <p>${s.html}</p>
   ${s.code === undefined ? '' : codeBlock(s.code, s.label ?? w.title)}
-  ${drawn(s.figures ?? [], art)}
+  ${s.scene === undefined ? '' : sceneFigure(scenes, s.scene.name, ROOT, s.scene.caption, 'why-figure scene')}
   ${s.reply === true ? `<p class="reply">The reply includes the step’s narration: <q>${text(checked)}</q></p>` : ''}
 </li>`,
     )
@@ -484,6 +472,7 @@ export function whyPage(
   art: Readonly<Record<string, Art>>,
   facts: WhyFacts,
   assets: Assets,
+  scenes: SceneManifest,
 ): string {
   return page({
     title: 'Why algomotion',
@@ -504,7 +493,7 @@ ${limits(facts.modules)}
 <section aria-labelledby="walks">
 <h2 id="walks">Three walk-throughs</h2>
 <p>Each one is real code on the run above. Copy it, change the input, and the figures follow.</p>
-${WALKTHROUGHS.map((w) => walkthrough(w, art, facts.checked)).join('\n')}
+${WALKTHROUGHS.map((w) => walkthrough(w, facts.checked, scenes)).join('\n')}
 </section>
 </article>`,
   });

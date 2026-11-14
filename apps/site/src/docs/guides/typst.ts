@@ -23,7 +23,7 @@ export const typst: Guide = {
       alt: 'A completed inorder traversal of a binary tree, in the print theme.',
     },
   ],
-  body: ({ root, code, figure, note }) => `
+  body: ({ root, code, figure, note, scene }) => `
 <h2 id="install">Install from the repository</h2>
 <p>The package is not on Typst Universe yet. Install Typst 0.15 or later, then build the engine from the repository. The committed WebAssembly plugin needs no Rust build for normal use.</p>
 ${code(
@@ -50,6 +50,7 @@ ${code(
   'A figure in notes',
 )}
 ${figure('insert', 'The figure made by <code>algomotion</code> at <code>insert#2</code>.')}
+${scene('notes', 'A whole page, as Typst compiles it: the figure sits in the notes like any other, with its caption, and the queue goes below the graph in a column. Made from <code>apps/site/scenes/notes.typ</code> by <code>npm run scenes</code>.')}
 <p><code>algomotion(source, input, ...)</code> returns an image. Use it in <code>figure</code>, <code>grid</code> or <code>box</code>. The source is an algorithm id with its input, or a document alone. An algorithm without input runs its first example. The <a href="${root}guide/inputs/">input notations</a> work as strings; structured inputs use Typst arrays and dictionaries.</p>
 <div class="scroll" role="region" aria-label="Typst options" tabindex="0"><table class="params">
 <thead><tr><th>Option</th><th>Default</th><th>Use</th></tr></thead><tbody>

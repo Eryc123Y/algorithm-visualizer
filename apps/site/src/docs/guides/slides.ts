@@ -29,7 +29,7 @@ export const slides: Guide = {
       alt: 'The sorted row: 2, 4, 5.',
     },
   ],
-  body: ({ root, code, figure, note }) => `
+  body: ({ root, code, figure, note, scene }) => `
 <h2 id="frames">Choose what the audience sees</h2>
 <p>Use a few named steps when explaining one idea, or every frame for a worked exercise. A series shares one canvas, so structures do not jump as you advance.</p>
 <div class="overlays" role="group" aria-label="Three steps of insertion sort">
@@ -40,6 +40,7 @@ ${figure('after', 'Last frame, <code>-1</code>.')}
 
 <h2 id="beamer">Beamer overlays</h2>
 <p>Install the <a href="${root}guide/latex/">LaTeX package and command</a> first. <code>steps</code> without a value selects every frame. A range, section or braced list selects fewer. <code>start</code> sets the first overlay.</p>
+${scene('beamer', 'The three overlays of one Beamer frame with <code>steps=extract\\#2..improve\\#3</code>, as <code>latexmk</code> compiles them. Made from <code>apps/site/scenes/slides.tex</code> by <code>npm run scenes</code>.')}
 ${code(
   String.raw`\documentclass{beamer}
 \usepackage{algomotion}

@@ -6,16 +6,7 @@ export const ai: Guide = {
   nav: 'AI assistants',
   summary:
     'Connect an MCP client, then ask it to run an algorithm or write and check a document for a custom example.',
-  figures: [
-    {
-      key: 'show',
-      algorithm: 'dijkstra',
-      input: 'A-B 4, B-C 1, A-C 7',
-      step: 'improve#3',
-      alt: 'The Dijkstra frame an assistant can show while explaining why C’s distance becomes 5.',
-    },
-  ],
-  body: ({ root, code, figure, note }) => `
+  body: ({ root, code, note, scene }) => `
 <h2 id="hosted">Connect to the hosted server</h2>
 <p>The hosted endpoint is <code>https://algomotion-mcp.turing2234.com/mcp</code>. It speaks Streamable HTTP and needs no authentication. In Claude Code, add it with:</p>
 ${code(`claude mcp add --transport http algomotion https://algomotion-mcp.turing2234.com/mcp`, 'Add the hosted server to Claude Code')}
@@ -44,7 +35,7 @@ Show bst.delete with from [8,3,10,1,6] and key 3.
 Give me a share link so I can put the run in my notes.`,
   'Example prompts',
 )}
-${figure('show', 'At <code>improve#3</code>, the path from A through B costs 5, less than the direct edge’s 7.')}
+${scene('chat', 'The player after a real <code>algomotion_show</code> call, in the minimal MCP Apps host that the project’s tests use. Clients that show MCP Apps put the same page in the conversation. At <code>improve#3</code>, the path from A through B costs 5, less than the direct edge’s 7. Made by <code>npm run scenes</code>.')}
 <p>A recipe is a ready-made algorithm run. The assistant should prefer one when it fits. It can show a recipe directly without copying a document:</p>
 ${code(`{"recipe":"dijkstra","input":"A-B 4, B-C 1, A-C 7","frame":"improve#3"}`, 'Arguments for algomotion_show')}
 

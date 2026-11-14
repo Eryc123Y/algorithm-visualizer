@@ -38,6 +38,19 @@ const facts: WhyFacts = {
   checked: '4 + 1 = 5 < 7: C improves to 5, through B.',
   modules: algorithms.length,
 };
+const scene = (name: string) => ({
+  light: `${name}.svg`,
+  dark: `${name}.svg`,
+  width: 400,
+  height: 300,
+  alt: `The ${name} scene`,
+});
+const scenes = {
+  notes: scene('notes'),
+  beamer: [scene('b1'), scene('b2'), scene('b3')],
+  terminal: scene('terminal'),
+  chat: scene('chat'),
+};
 const load = (html: string) => {
   document.documentElement.innerHTML = html;
   return document;
@@ -80,7 +93,7 @@ describe('the figures and walk-throughs', () => {
 });
 
 describe('the page', () => {
-  const doc = () => load(whyPage(art, facts, assets));
+  const doc = () => load(whyPage(art, facts, assets, scenes));
 
   it('has one title, the triptych, and a figure for each difference', () => {
     const d = doc();
@@ -126,7 +139,7 @@ describe('the page', () => {
   });
 
   it('fails the build on a figure it did not declare', () => {
-    expect(() => whyPage({}, facts, assets)).toThrow(/no figure/);
+    expect(() => whyPage({}, facts, assets, scenes)).toThrow(/no figure/);
   });
 });
 

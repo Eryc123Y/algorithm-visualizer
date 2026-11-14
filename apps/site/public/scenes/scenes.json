@@ -1,0 +1,46 @@
+{
+  "notes": {
+    "light": "scenes/notes.svg",
+    "dark": "scenes/notes.svg",
+    "width": 567,
+    "height": 762,
+    "alt": "A page of notes typeset by Typst: a section on shortest paths, a paragraph, and the figure of Dijkstra’s algorithm at step improve#3, captioned, with the queue below the graph."
+  },
+  "beamer": [
+    {
+      "light": "scenes/beamer-1.svg",
+      "dark": "scenes/beamer-1.svg",
+      "width": 484,
+      "height": 363,
+      "alt": "Beamer slide 1 of 3, “Dijkstra’s algorithm”: B is final, at 4."
+    },
+    {
+      "light": "scenes/beamer-2.svg",
+      "dark": "scenes/beamer-2.svg",
+      "width": 484,
+      "height": 363,
+      "alt": "Beamer slide 2 of 3, “Dijkstra’s algorithm”: The edge from B back to A changes nothing."
+    },
+    {
+      "light": "scenes/beamer-3.svg",
+      "dark": "scenes/beamer-3.svg",
+      "width": 484,
+      "height": 363,
+      "alt": "Beamer slide 3 of 3, “Dijkstra’s algorithm”: C improves to 5, through B."
+    }
+  ],
+  "terminal": {
+    "light": "scenes/terminal-light.svg",
+    "dark": "scenes/terminal-dark.svg",
+    "width": 645,
+    "height": 429,
+    "alt": "A terminal: algomotion export writes four figures of Dijkstra’s algorithm, ls lists them, algomotion run writes the document, algomotion inspect shows step improve#3, and a mistyped input is reported with where it went wrong."
+  },
+  "chat": {
+    "light": "scenes/chat-light.webp",
+    "dark": "scenes/chat-dark.webp",
+    "width": 720,
+    "height": 1000,
+    "alt": "A conversation: the question asks for Dijkstra’s algorithm on A-B 4, B-C 1, A-C 7, C-D 2; a line says algomotion_show was called; the interactive player shows step improve#3 with its controls and code; the answer explains why C drops from 7 to 5."
+  }
+}

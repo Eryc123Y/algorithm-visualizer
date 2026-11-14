@@ -7,6 +7,7 @@ import type { TopicGroup } from './catalog.ts';
 import { highlighted, SNIPPET_LANGUAGES } from './highlight.ts';
 import { homeWhy } from './home-why.ts';
 import { attribute, page, text, type Assets } from './html.ts';
+import { sceneFigure, type SceneManifest } from './scenes.ts';
 import type { EntryDetails } from './pages.ts';
 import type { Snippet } from './snippets.ts';
 
@@ -33,6 +34,8 @@ export interface HomeArt {
   /** Overlays of a slide, in order. */
   readonly slides: readonly Art[];
   readonly themes: readonly { readonly name: string; readonly art: Art }[];
+  /** Real scenes (roadmap 5.3), shown instead of plain figures. */
+  readonly scenes?: SceneManifest;
 }
 
 /** A `<picture>` that follows the reader's light or dark setting. */
@@ -99,11 +102,56 @@ const snippetBlock = (s: Snippet): string =>
   <pre tabindex="0" role="region" aria-label="${attribute(s.label)}"><code>${highlighted(s.code, SNIPPET_LANGUAGES[s.id])}</code></pre>
 </div>`;
 
+/** The real scene of an output, where there is one. */
+function realScene(
+  id: (typeof OUTPUTS)[number]['id'],
+  scenes: SceneManifest,
+): string {
+  switch (id) {
+    case 'typst':
+      return sceneFigure(
+        scenes,
+        'notes',
+        '',
+        'A page of notes, as Typst compiles it.',
+        'output-figure scene',
+      );
+    case 'slides':
+      return sceneFigure(
+        scenes,
+        'beamer',
+        '',
+        'Three overlays of one Beamer frame, from <code>steps=extract\\#2..improve\\#3</code>, as <code>latexmk</code> compiles them.',
+        'output-figure scene',
+      );
+    case 'cli':
+      return sceneFigure(
+        scenes,
+        'terminal',
+        '',
+        'The command, run: what it printed.',
+        'output-figure scene',
+      );
+    case 'mcp':
+      return sceneFigure(
+        scenes,
+        'chat',
+        '',
+        'The player after a real <code>algomotion_show</code> call, in a minimal MCP Apps host.',
+        'output-figure scene',
+      );
+    default:
+      return '';
+  }
+}
+
 function preview(
   id: (typeof OUTPUTS)[number]['id'],
   art: HomeArt,
   snippet: Snippet | undefined,
 ): string {
+  const scene = art.scenes === undefined ? '' : realScene(id, art.scenes);
+  if (scene !== '') return scene;
   if (id === 'slides')
     return `<ol class="overlays" aria-label="Three overlays of one slide">${art.slides
       .map(

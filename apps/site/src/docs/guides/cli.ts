@@ -16,7 +16,7 @@ export const cli: Guide = {
       alt: 'An exported Dijkstra frame showing C improved through B, in greyscale.',
     },
   ],
-  body: ({ root, code, figure, note }) => `
+  body: ({ root, code, figure, note, scene }) => `
 <h2 id="install">Build from the repository</h2>
 <p>The command is not on npm yet. With Node.js and the repository checked out, install the workspace and build the MCP package:</p>
 ${code(
@@ -78,6 +78,7 @@ algomotion export sort.json --step 0 --step insert..-1 --layout narrow --out fig
   'Export selected SVG frames',
 )}
 ${figure('export', 'The Dijkstra export at <code>improve#3</code> in the <code>print</code> theme.')}
+${scene('terminal', 'A session with the command, as it ran: an export, a run, an inspection and an input with a mistake. The output is what the commands printed. Made by <code>npm run scenes</code>.')}
 <div class="scroll" role="region" aria-label="Export options" tabindex="0"><table class="params">
 <thead><tr><th>Option</th><th>Default</th><th>Use</th></tr></thead><tbody>
 <tr><td><code>--input</code></td><td>none</td><td>Run the source id on this text or input file; <code>-</code> reads stdin. A <code>.json</code> name always means a file.</td></tr>
