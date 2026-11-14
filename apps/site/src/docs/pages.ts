@@ -9,6 +9,7 @@ import { shareFragment } from '@algomotion/spec';
 import type { ThemeName } from '@algomotion/svg';
 
 import { depthOf, type Entry, type TopicGroup } from './catalog.ts';
+import { picture, type Art } from './home.ts';
 import { attribute, page, rootOf, text, type Assets } from './html.ts';
 import { shortInput } from './short-input.ts';
 import { snippetsFor, type Snippet } from './snippets.ts';
@@ -209,18 +210,41 @@ export const countOf = (groups: readonly TopicGroup[]): number =>
     0,
   );
 
-/** The catalogue: every module by topic, with a filter. */
+/**
+ * The frame a thumbnail shows, of a run of `frames`: the middle one, where
+ * the algorithm is at work. The first frame is only the input and the
+ * last often only the answer; half-way, a sort is half sorted, a search
+ * has a frontier and a tree is half built.
+ */
+export const thumbnailFrame = (frames: number): number =>
+  frames <= 1 ? 0 : Math.max(1, Math.floor((frames - 1) / 2));
+
+/** Where a module's thumbnails go, relative to the catalogue's page. */
+export const thumbnailStem = (id: string): string => `thumbs/${id}`;
+
+/**
+ * The catalogue: every module by topic, with a filter, each algorithm and
+ * structure as a card with its thumbnail from `thumbnails`, by id.
+ */
 export function algorithmsPage(
   groups: readonly TopicGroup[],
   assets: Assets,
+  thumbnails: Readonly<Record<string, Art>> = {},
 ): string {
+  // The thumbnail is decorative: the card's link is named by its title.
+  const thumb = (e: Entry) => {
+    const art = thumbnails[e.id];
+    return art === undefined
+      ? ''
+      : `<span class="thumb">${picture({ ...art, alt: '' }, '')}</span>`;
+  };
   // A structure is found by its operations' names too.
   const item = (e: Entry, operations: readonly Entry[] = [], inner = '') =>
-    `<li data-search="${attribute(
+    `<li class="card" data-search="${attribute(
       [e.id, e.title, e.summary, ...operations.flatMap((o) => [o.id, o.title])]
         .join(' ')
         .toLowerCase(),
-    )}"><a href="${attribute('../' + e.path)}">${text(e.title)}</a> <span>${text(e.summary)}</span>${inner}</li>`;
+    )}"><a href="${attribute('../' + e.path)}">${thumb(e)}<span class="card-title">${text(e.title)}</span></a> <span class="card-summary">${text(e.summary)}</span>${inner}</li>`;
   const topics = groups
     .map(
       (

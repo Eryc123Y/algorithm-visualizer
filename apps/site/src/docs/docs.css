@@ -856,18 +856,64 @@ picture img {
 
 .entries {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 21rem), 1fr));
-  gap: 0.875rem 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+  gap: 1.75rem 1.5rem;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.entries > li > a {
-  font-weight: 600;
+/* ── The catalogue: cards with thumbnails (roadmap 5.2) ──────────────── */
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
 }
 
-.entries > li > span {
+.card[hidden] {
+  display: none;
+}
+
+.card > a {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  color: var(--ink);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.card > a:hover .card-title {
+  text-decoration: underline;
+  text-decoration-color: var(--mark);
+  text-underline-offset: 0.2em;
+}
+
+/* A fixed frame: any figure fits it, so nothing moves as images load. */
+.thumb {
+  display: block;
+  aspect-ratio: 16 / 10;
+  padding: 0.5rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  /* In dark mode, the dark theme's own paper, which its figures paint. */
+  background: light-dark(var(--surface), #121214);
+  overflow: hidden;
+}
+
+.thumb picture,
+.thumb img {
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.thumb img {
+  object-fit: contain;
+}
+
+.card-summary {
   display: block;
   color: var(--muted);
   font-size: var(--step--1);
