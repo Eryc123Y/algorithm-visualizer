@@ -330,3 +330,36 @@ test('the home page’s output tabs show the real scenes', async ({ page }) => {
   }
   expect(await noSideScroll(page)).toBe(true);
 });
+
+test('in the looping slides, only the page on show can be clicked or focused', async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto('/');
+  await page.getByRole('tab', { name: 'Slides' }).click();
+  const list = page.locator('#panel-slides .overlays');
+  await expect(list).toHaveClass(/looping/);
+  await list.scrollIntoViewIfNeeded();
+  await page.getByRole('button', { name: 'Pause' }).click();
+  const state = () =>
+    list.locator(':scope > li').evaluateAll((items) =>
+      items.map((li) => ({
+        on: li.classList.contains('on'),
+        visible: getComputedStyle(li).visibility === 'visible',
+        href: li.querySelector('a')!.getAttribute('href'),
+      })),
+    );
+  // Pages that are not on show finish fading, then hide.
+  await expect
+    .poll(async () => (await state()).every((p) => p.on === p.visible))
+    .toBe(true);
+  const shown = (await state()).find((p) => p.on)!;
+  // The link under the pointer is the page on show.
+  const box = (await list.boundingBox())!;
+  const href = await page.evaluate(
+    ([x, y]) =>
+      document.elementFromPoint(x!, y!)?.closest('a')?.getAttribute('href'),
+    [box.x + box.width / 2, box.y + box.height / 2],
+  );
+  expect(href).toBe(shown.href);
+});
