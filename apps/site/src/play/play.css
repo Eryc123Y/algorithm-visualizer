@@ -1,16 +1,20 @@
 @import '../base.css';
 
-.tagline {
-  color: var(--muted);
-  font-size: 0.875rem;
+/* The wordmark's glyph, as on the documentation's pages. */
+.glyph-bars {
+  fill: currentColor;
+}
+
+.glyph-now {
+  fill: var(--mark);
 }
 
 .note {
   max-width: 40rem;
   padding: 1.25rem 1.5rem;
-  border: 1px solid var(--line);
-  border-radius: 0.75rem;
-  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--surface);
 }
 
 .note h1 {
