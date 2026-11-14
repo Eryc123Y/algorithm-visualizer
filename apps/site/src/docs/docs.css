@@ -1687,8 +1687,21 @@ main.project > .project-body {
   list-style: none;
 }
 
-.scene-pages li {
+.overlays.scene-pages li {
   position: relative;
+  padding: 0;
+  background: none;
+}
+
+/*
+ * In the loop, a page that is not showing is out of reach too: no clicks,
+ * no keyboard focus on its link. It hides once it has faded out.
+ */
+.overlays.looping > li:not(.on) {
+  visibility: hidden;
+  transition:
+    opacity 0.35s ease-out,
+    visibility 0s 0.35s;
 }
 
 /* The slides are white in both schemes, so their numbers are dark too. */
