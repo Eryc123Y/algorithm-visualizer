@@ -10,6 +10,7 @@ Nothing has been published yet: the npm packages, the CDN bundle, the Typst pack
 
 #### Added
 
+- `/why/`: what algomotion is for, what makes it different, a comparison with drawing by hand, Manim and visualization websites, its limits, and three walk-throughs; linked from the bar and from a short section on the home page (#146).
 - A changelog, a roadmap page and a contributing page on the site, built from this file, `docs/roadmap.md` and `CONTRIBUTING.md`; the version and the commit in every page's footer; issue forms and a pull request template (#144).
 - The site's redesign: a home page with a live player, a plate of figures and every output in tabs; a guide of ten pages; `/algorithms/` by topic; a neutral dark theme and a placeholder logo (#140, #141).
 - Phase 5 in the roadmap.
