@@ -31,7 +31,8 @@
   },
   "files": [
     "dist",
-    "schema"
+    "schema",
+    "!dist/.tsbuildinfo"
   ],
   "scripts": {
     "build": "tsc --build tsconfig.lib.json",

@@ -35,7 +35,8 @@
   },
   "files": [
     "dist",
-    "OFL.txt"
+    "OFL.txt",
+    "!dist/.tsbuildinfo"
   ],
   "scripts": {
     "build": "tsc --build tsconfig.lib.json"
