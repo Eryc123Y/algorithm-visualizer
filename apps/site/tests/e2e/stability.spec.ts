@@ -50,6 +50,7 @@ for (const font of ['100%', '150%'])
     await page.goto('/');
     const player = page.locator('.pg-stage algo-player');
     await expect(player.getByText('Initial state.')).toBeVisible();
+    await largerDefault(page, font);
     const [stage, drawn] = await Promise.all([
       page
         .locator('.pg-stage')
