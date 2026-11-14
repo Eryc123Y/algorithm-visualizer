@@ -51,16 +51,20 @@ export function rootsOf(
  * English pages that have no Chinese counterpart yet, by path; the build
  * fails on any other English page without one. Empty once 5.7 is done.
  */
-export const PENDING_ZH: readonly string[] = [
-  'why/',
-  'guide/',
-  'guide/inputs/',
-  'guide/web/',
-  'guide/typst/',
-  'guide/latex/',
-  'guide/slides/',
-  'guide/cli/',
-  'guide/ai/',
-  'guide/share-links/',
-  'guide/documents/',
-];
+export const PENDING_ZH: readonly string[] = [];
+
+/**
+ * The English pages, by path, that lack a Chinese counterpart: every page
+ * needs one except those in `englishOnly` and the pending ones.
+ */
+export function missingCounterparts(
+  englishPages: readonly string[],
+  englishOnly: ReadonlySet<string>,
+  hasChinese: (path: string) => boolean,
+  pending: readonly string[] = PENDING_ZH,
+): string[] {
+  return englishPages.filter(
+    (path) =>
+      !englishOnly.has(path) && !pending.includes(path) && !hasChinese(path),
+  );
+}

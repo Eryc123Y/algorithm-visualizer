@@ -122,7 +122,14 @@ export function guidePage(
     scene(name, caption) {
       if (scenes === undefined)
         throw new Error(`guide/${guide.slug}: no scenes for ${name}`);
-      return sceneFigure(scenes, name, site, caption, 'guide-figure scene');
+      return sceneFigure(
+        scenes,
+        name,
+        site,
+        caption,
+        'guide-figure scene',
+        locale,
+      );
     },
   };
   const bySlug = new Map(guides.map((g) => [g.slug, g]));

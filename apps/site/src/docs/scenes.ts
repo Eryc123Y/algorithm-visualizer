@@ -5,6 +5,7 @@
  */
 import { picture, type Art } from './home.ts';
 import { attribute } from './html.ts';
+import type { Locale } from './locale.ts';
 
 export interface SceneManifest {
   /** A page of Typst notes. */
@@ -64,13 +65,15 @@ export function sceneFigure(
   root: string,
   caption: string,
   className = 'scene',
+  locale: Locale = 'en',
 ): string {
+  const shown = locale === 'en' ? scenes : inChinese(scenes);
   // A link to the image at its own size, for reading it on a phone.
   const full = (art: Art, inner: string) =>
     `<a class="scene-full" href="${attribute(root + art.light)}">${inner}</a>`;
   const body =
     name === 'beamer'
-      ? `<ol class="overlays scene-pages" aria-label="${attribute(`${scenes.beamer.length} overlays of one frame, in order`)}">${scenes.beamer
+      ? `<ol class="overlays scene-pages" aria-label="${attribute(locale === 'en' ? `${shown.beamer.length} overlays of one frame, in order` : `同一帧的 ${shown.beamer.length} 个叠层，按顺序排列`)}">${shown.beamer
           .map(
             (page, k) =>
               `<li><span class="overlay-n">${k + 1}</span>${full(page, picture(page, root))}</li>`,
@@ -78,7 +81,39 @@ export function sceneFigure(
           .join('')}</ol>`
       : name === 'terminal'
         ? // Terminal text stays readable: on a narrow screen it scrolls.
-          `<div class="scene-scroll" role="region" tabindex="0" aria-label="${attribute(scenes.terminal.alt)}">${picture(scenes.terminal, root)}</div>`
-        : full(scenes[name], picture(scenes[name], root));
+          `<div class="scene-scroll" role="region" tabindex="0" aria-label="${attribute(shown.terminal.alt)}">${picture(shown.terminal, root)}</div>`
+        : full(shown[name], picture(shown[name], root));
   return `<figure class="${className} scene-${name}">${body}<figcaption>${caption}</figcaption></figure>`;
+}
+
+/** The Beamer pages' alternative text in Chinese, by page. */
+const BEAMER_ZH = [
+  'B 已确定，距离为 4。',
+  '从 B 回到 A 的边没有改变任何距离。',
+  'C 经由 B 被改进为 5。',
+];
+
+/**
+ * The scenes with Chinese alternative text. The images are the same; the
+ * manifest's English text describes them for English pages.
+ */
+function inChinese(scenes: SceneManifest): SceneManifest {
+  return {
+    notes: {
+      ...scenes.notes,
+      alt: 'Typst 排出的一页笔记：一节讲最短路径的文字，以及 Dijkstra 算法在 improve#3 这一步的插图和图注，队列排在图的下方。',
+    },
+    beamer: scenes.beamer.map((page, k) => ({
+      ...page,
+      alt: `Beamer 幻灯片“Dijkstra's algorithm”，第 ${k + 1} 页，共 ${scenes.beamer.length} 页：${BEAMER_ZH[k] ?? ''}`,
+    })),
+    terminal: {
+      ...scenes.terminal,
+      alt: '一段终端会话：algomotion export 写出 Dijkstra 算法的四幅图，ls 列出它们，algomotion run 写出文档，algomotion inspect 显示 improve#3 这一步，最后一个写错的输入报告了出错的位置。',
+    },
+    chat: {
+      ...scenes.chat,
+      alt: '一段对话：用户请求在 A-B 4, B-C 1, A-C 7, C-D 2 上演示 Dijkstra 算法；一行说明调用了 algomotion_show；交互式播放器停在 improve#3，显示控制按钮和代码；回答解释了 C 为什么从 7 降到 5。界面文字为英文。',
+    },
+  };
 }

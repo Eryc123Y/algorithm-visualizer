@@ -74,8 +74,9 @@ describe('the Chinese guide', () => {
     it(`${pathOf(en.slug)} matches the English page`, async () => {
       const zh = ((await import(join(ZH, `${file}.ts`))) as { zh: Guide }).zh;
       expect(zh.slug).toBe(en.slug);
-      for (const words of [zh.title, zh.nav, zh.summary])
-        expect(words, 'title, nav and summary are Chinese').toMatch(CJK);
+      // A sidebar name may be a product's own, such as Typst.
+      for (const words of [zh.title, zh.summary])
+        expect(words, 'title and summary are Chinese').toMatch(CJK);
       // The same figures, drawn from the same runs; only the alt changes.
       const run = (g: Guide) =>
         (g.figures ?? []).map((f) => ({ ...f, alt: '' }));

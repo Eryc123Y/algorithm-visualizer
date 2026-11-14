@@ -9,7 +9,13 @@
  *     node --conditions=@algomotion/source scripts/build-pages.ts
  */
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  writeFileSync,
+} from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -26,6 +32,7 @@ import { assetsOf, type Manifest } from '../src/docs/assets.ts';
 import { catalog, type Entry } from '../src/docs/catalog.ts';
 import { figureFiles, guidePage } from '../src/docs/guide.ts';
 import { GUIDES } from '../src/docs/guides/index.ts';
+import { GUIDES_ZH } from '../src/docs/guides/zh/index.ts';
 import { homePage, type Art, type HomeArt } from '../src/docs/home.ts';
 import { attribute, type BuildInfo } from '../src/docs/html.ts';
 import {
@@ -53,7 +60,10 @@ import {
   whyPage,
   type FigureLayout,
 } from '../src/docs/why.ts';
+import { missingCounterparts, PREFIX } from '../src/docs/locale.ts';
 import { parseScenes } from '../src/docs/scenes.ts';
+import { CHROME } from '../src/docs/text/chrome.ts';
+import { HOME } from '../src/docs/text/home.ts';
 import { withPolicy } from '../src/headers.ts';
 
 const DIST = fileURLToPath(new URL('../dist/', import.meta.url));
@@ -218,6 +228,13 @@ write(
   'algorithms/index.html',
   withPolicy(algorithmsPage(groups, assets, thumbnails), 'algorithms/'),
 );
+write(
+  'zh/algorithms/index.html',
+  withPolicy(
+    algorithmsPage(groups, assets, thumbnails, 'zh'),
+    'zh/algorithms/',
+  ),
+);
 
 // The themes page: the registry example at one step, in every theme.
 const example = documentOf(
@@ -231,6 +248,10 @@ const figures = themeNames.map((name) => {
   return { name, file, width: figure.width, height: figure.height };
 });
 write('themes/index.html', withPolicy(themesPage(figures, assets), 'themes/'));
+write(
+  'zh/themes/index.html',
+  withPolicy(themesPage(figures, assets, 'zh'), 'zh/themes/'),
+);
 
 // The home page: the hero's run, its plate, and a figure per output.
 const home = documentOf(DEMO, HOME_INPUT);
@@ -310,6 +331,60 @@ write(
   ),
 );
 
+// The home page in Chinese: the same art and run, its own words. The
+// share link and the playground's snippets are one folder further from
+// the site's root.
+const zhText = HOME.zh;
+const zhArt: HomeArt = {
+  ...art,
+  outputs: Object.fromEntries(
+    Object.entries(art.outputs).map(([id, a]) => [
+      id,
+      {
+        ...a,
+        alt: zhText.outputs.alts[id as keyof typeof zhText.outputs.alts],
+      },
+    ]),
+  ),
+  themes: art.themes.map((t) => ({
+    ...t,
+    art: { ...t.art, alt: zhText.themes.alt(t.name) },
+  })),
+};
+const zhSnippets = (await snippetsFor(DEMO, HOME_INPUT, 1, 'improve#3')).map(
+  (sn) => ({ ...sn, label: CHROME.zh.snippets[sn.id] }),
+);
+const zhPlayground = playgroundMarkup(
+  playgroundGroups(
+    groups,
+    (id) =>
+      inputText(
+        shortInput(id, algorithms.find((a) => a.id === id)!.examples[0]),
+      ),
+    'zh',
+  ),
+  { algorithm: DEMO, input: HOME_INPUT, title: demo.entry.title },
+  `<algo-player algorithm="${DEMO}" input="${attribute(HOME_INPUT)}" theme="auto"></algo-player>`,
+  zhSnippets.find((sn) => sn.id === 'link')!.code,
+  'zh',
+);
+write(
+  'zh/index.html',
+  withPolicy(
+    homePage(
+      groups,
+      { ...demo, snippets: zhSnippets },
+      zhArt,
+      zhPlayground,
+      slidesCode(demo.entry.title, DEMO, HOME_INPUT),
+      countOf(groups),
+      assets,
+      'zh',
+    ),
+    'zh/',
+  ),
+);
+
 // The guide, each page's figures drawn from its own runs.
 for (const guide of GUIDES) {
   const drawn: Record<string, Art> = {};
@@ -326,11 +401,32 @@ for (const guide of GUIDES) {
   const path = `guide/${guide.slug === '' ? '' : `${guide.slug}/`}`;
   write(
     `${path}index.html`,
-    withPolicy(guidePage(guide, GUIDES, drawn, assets, scenes), path),
+    withPolicy(
+      guidePage(guide, GUIDES, drawn, assets, scenes, { translated: true }),
+      path,
+    ),
+  );
+  // The Chinese page shows the same figures, with its own alternative text.
+  const zh = GUIDES_ZH.find((g) => g.slug === guide.slug);
+  if (zh === undefined) continue;
+  const zhDrawn = Object.fromEntries(
+    (zh.figures ?? []).map((f) => [f.key, { ...drawn[f.key]!, alt: f.alt }]),
+  );
+  write(
+    `zh/${path}index.html`,
+    withPolicy(
+      guidePage(zh, GUIDES_ZH, zhDrawn, assets, scenes, {
+        locale: 'zh',
+        translated: true,
+      }),
+      `zh/${path}`,
+    ),
   );
 }
 
 write('404.html', withPolicy(notFoundPage(assets), '404.html'));
+// Cloudflare serves the nearest 404.html, so addresses under zh/ get this.
+write('zh/404.html', withPolicy(notFoundPage(assets, 'zh'), 'zh/404.html'));
 
 // Why algomotion: its figures, and the facts it states, from real runs.
 const whyArt: Record<string, Art> = {};
@@ -344,32 +440,59 @@ for (const f of WHY_FIGURES)
     f.layout,
   );
 const whyDocument = documentOf(WHY_RUN.algorithm, WHY_RUN.input);
-write(
-  'why/index.html',
-  withPolicy(
-    whyPage(
-      whyArt,
-      {
-        steps: stepsOf(whyDocument),
-        checked: figureOf(whyDocument, 'improve#3', 'light').narration ?? '',
-        modules: algorithms.length,
-      },
-      assets,
-      scenes,
+const whyFacts = {
+  steps: stepsOf(whyDocument),
+  checked: figureOf(whyDocument, 'improve#3', 'light').narration ?? '',
+  modules: algorithms.length,
+};
+for (const locale of ['en', 'zh'] as const)
+  write(
+    `${PREFIX[locale]}why/index.html`,
+    withPolicy(
+      whyPage(whyArt, whyFacts, assets, scenes, locale),
+      `${PREFIX[locale]}why/`,
     ),
-    'why/',
-  ),
-);
+  );
 
 // The project pages, from the repository's own files.
 const PROJECT = [
-  ['changelog/', changelogPage(repoFile('CHANGELOG.md'), assets)],
-  ['roadmap/', roadmapPage(repoFile('docs/roadmap.md'), assets)],
-  ['contributing/', contributingPage(repoFile('CONTRIBUTING.md'), assets)],
+  ['changelog/', changelogPage, 'CHANGELOG.md'],
+  ['roadmap/', roadmapPage, 'docs/roadmap.md'],
+  ['contributing/', contributingPage, 'CONTRIBUTING.md'],
 ] as const;
-for (const [path, html] of PROJECT)
-  write(`${path}index.html`, withPolicy(html, path));
+for (const [path, render, file] of PROJECT)
+  for (const locale of ['en', 'zh'] as const)
+    write(
+      `${PREFIX[locale]}${path}index.html`,
+      withPolicy(
+        render(repoFile(file), assets, locale),
+        `${PREFIX[locale]}${path}`,
+      ),
+    );
+
+// Every English page but the module pages and the share page has a
+// Chinese counterpart, or the build fails: the two cannot drift apart.
+const englishOnly = new Set([...entries.map((e) => e.path), 'play/']);
+const pagesUnder = (dir: string): string[] =>
+  readdirSync(join(DIST, dir), { withFileTypes: true }).flatMap((d) =>
+    d.isDirectory()
+      ? d.name === 'zh' || d.name === 'assets' || d.name.startsWith('.')
+        ? []
+        : pagesUnder(`${dir}${d.name}/`)
+      : d.name.endsWith('.html')
+        ? [`${dir}${d.name === 'index.html' ? '' : d.name}`]
+        : [],
+  );
+const missing = missingCounterparts(pagesUnder(''), englishOnly, (path) =>
+  existsSync(
+    join(DIST, 'zh', path, path.endsWith('.html') ? '' : 'index.html'),
+  ),
+);
+if (missing.length > 0)
+  throw new Error(
+    `These English pages have no Chinese counterpart under zh/: ${missing.join(', ')}`,
+  );
 
 process.stdout.write(
-  `Wrote ${entries.length + 5 + GUIDES.length + PROJECT.length} pages and ${figures.length} theme figures to dist/\n`,
+  `Wrote ${entries.length + 5 + GUIDES.length + PROJECT.length} English pages, ${5 + GUIDES_ZH.length + PROJECT.length} Chinese pages and ${figures.length} theme figures to dist/\n`,
 );

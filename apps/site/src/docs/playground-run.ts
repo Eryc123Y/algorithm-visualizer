@@ -8,6 +8,7 @@
 import { readInput, runAlgorithm } from '@algomotion/recipes';
 
 import { inputError, type InputError } from './playground-state.ts';
+import { clientText } from './text/client.ts';
 import {
   inputText,
   slidesCode,
@@ -31,23 +32,25 @@ export interface PlaygroundFailure {
   readonly error: InputError;
 }
 
-const EMPTY: InputError = {
-  message: 'The input is empty.',
-  hint: 'Write an input, or choose the algorithm again to get its example back.',
-};
-
-/** Runs `algorithm`, titled `title`, on the text `input`. */
+/**
+ * Runs `algorithm`, titled `title`, on the text `input`, for a page in
+ * the language `lang` that is `depth` folders below the site's root.
+ */
 export async function runPlayground(
   algorithm: string,
   title: string,
   input: string,
+  { lang = 'en', depth = 0 }: { lang?: string; depth?: number } = {},
 ): Promise<PlaygroundResult | PlaygroundFailure> {
   const read = readInput(input);
   if (!read.ok) return { ok: false, error: inputError(input, read.error[0]!) };
-  if (read.value === undefined) return { ok: false, error: EMPTY };
+  if (read.value === undefined) {
+    const t = clientText(lang).playground;
+    return { ok: false, error: { message: t.empty, hint: t.emptyHint } };
+  }
   const ran = runAlgorithm(algorithm, read.value);
   if (!ran.ok) return { ok: false, error: inputError(input, ran.error[0]!) };
-  const snippets = await snippetsFor(algorithm, read.value, 0);
+  const snippets = await snippetsFor(algorithm, read.value, depth);
   return {
     ok: true,
     document: ran.value.document,
