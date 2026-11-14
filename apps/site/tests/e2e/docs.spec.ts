@@ -210,6 +210,7 @@ for (const colorScheme of ['light', 'dark'] as const)
       '/dijkstra/',
       '/bst/delete/',
       '/themes/',
+      '/why/',
       '/roadmap/',
       '/changelog/',
       '/contributing/',
@@ -279,4 +280,32 @@ test('the footer names the version and the commit the site was built from', asyn
   await expect(build.locator('a[href*="/commit/"]')).toHaveText(
     /^[0-9a-f]{7}$/,
   );
+});
+
+test('the home page leads to Why algomotion, which loads at 375px', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.goto('/');
+  await page.getByRole('link', { name: 'Why algomotion, compared' }).click();
+  await expect(page).toHaveURL(/\/why\/$/);
+  await expect(
+    page.getByRole('heading', { level: 1, name: 'Why algomotion' }),
+  ).toBeVisible();
+  await expect(
+    page
+      .getByRole('navigation', { name: 'Site' })
+      .getByRole('link', { name: 'Why' }),
+  ).toHaveAttribute('aria-current', 'page');
+  for (const img of await page.locator('main img').all()) {
+    await img.scrollIntoViewIfNeeded();
+    await expect
+      .poll(() => img.evaluate((el: HTMLImageElement) => el.naturalWidth))
+      .toBeGreaterThan(0);
+  }
+  // The comparison scrolls inside its own region, not the page.
+  await expect(
+    page.getByRole('region', { name: 'The comparison table' }),
+  ).toBeVisible();
+  expect(await noSideScroll(page)).toBe(true);
 });

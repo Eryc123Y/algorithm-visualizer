@@ -41,7 +41,8 @@ export interface Assets {
 }
 
 /** The site's sections, for the bar's current-page mark. */
-export type Section = 'home' | 'guide' | 'algorithms' | 'themes' | 'project';
+export type Section =
+  'home' | 'why' | 'guide' | 'algorithms' | 'themes' | 'project';
 
 export interface PageFrame {
   readonly title: string;
@@ -117,6 +118,7 @@ export function page({
       <a class="mark" href="${attribute(home)}">${GLYPH}<span>algomotion</span></a>
       <nav aria-label="Site">
         <ul>
+          ${link(`${root}why/`, 'Why', section === 'why')}
           ${link(`${root}guide/`, 'Guide', section === 'guide')}
           ${link(`${root}algorithms/`, 'Algorithms', section === 'algorithms')}
           ${link(`${root}themes/`, 'Themes', section === 'themes')}
@@ -159,6 +161,7 @@ ${body}
         <section aria-labelledby="f-project">
           <h2 id="f-project">Project</h2>
           <ul>
+            <li><a href="${root}why/">Why algomotion</a></li>
             <li><a href="${REPOSITORY}">Source on GitHub</a></li>
             <li><a href="${root}changelog/">Changelog</a></li>
             <li><a href="${root}roadmap/">Roadmap</a></li>
