@@ -235,3 +235,20 @@ export function loopOverlays(doc: Document, step = STEP_MS): void {
     sync();
   }).observe(list);
 }
+
+/**
+ * Marks each catalogue thumbnail still loading, so its frame shows a
+ * quiet placeholder rather than an empty cell, until the figure arrives
+ * or fails.
+ */
+export function markLoadingThumbnails(doc: Document): void {
+  for (const img of doc.querySelectorAll<HTMLImageElement>('.thumb img')) {
+    if (img.complete) continue;
+    const frame = img.closest('.thumb');
+    if (frame === null) continue;
+    frame.classList.add('pending');
+    const done = () => frame.classList.remove('pending');
+    img.addEventListener('load', done, { once: true });
+    img.addEventListener('error', done, { once: true });
+  }
+}
