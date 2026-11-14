@@ -20,6 +20,7 @@
     "src/docs/catalog.ts",
     "src/docs/guide.ts",
     "src/docs/guides",
+    "src/docs/highlight.ts",
     "src/docs/home.ts",
     "src/docs/html.ts",
     "src/docs/pages.ts",

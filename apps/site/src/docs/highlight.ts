@@ -147,24 +147,12 @@ export function highlighted(code: string, language?: Language): string {
     .join('');
 }
 
-/** Fills `element` with `code`'s tokens as text and spans, no markup. */
-export function fillCode(
-  element: Element,
-  code: string,
-  language?: Language,
-): void {
-  const doc = element.ownerDocument;
-  if (language === undefined) {
-    element.textContent = code;
-    return;
-  }
-  element.replaceChildren(
-    ...tokenize(code, language).map((t) => {
-      if (t.kind === undefined) return t.text;
-      const span = doc.createElement('span');
-      span.className = `tok-${t.kind}`;
-      span.textContent = t.text;
-      return span;
-    }),
-  );
-}
+/** The language of each output's snippet; a share link is plain. */
+export const SNIPPET_LANGUAGES: Readonly<Record<string, Language>> = {
+  web: 'html',
+  typst: 'typst',
+  latex: 'latex',
+  slides: 'latex',
+  cli: 'shell',
+  mcp: 'mcp',
+};

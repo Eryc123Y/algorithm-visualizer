@@ -4,6 +4,7 @@
  * output, the themes, and the way into the catalogue.
  */
 import type { TopicGroup } from './catalog.ts';
+import { highlighted, SNIPPET_LANGUAGES } from './highlight.ts';
 import { attribute, page, text, type Assets } from './html.ts';
 import type { EntryDetails } from './pages.ts';
 import type { Snippet } from './snippets.ts';
@@ -94,7 +95,7 @@ const OUTPUTS: readonly {
 /** A code block with a copy button, as on the module pages. */
 const snippetBlock = (s: Snippet): string =>
   `<div class="snippet" data-snippet="${s.id}" data-label="${attribute(s.label)}">
-  <pre tabindex="0" role="region" aria-label="${attribute(s.label)}"><code>${text(s.code)}</code></pre>
+  <pre tabindex="0" role="region" aria-label="${attribute(s.label)}"><code>${highlighted(s.code, SNIPPET_LANGUAGES[s.id])}</code></pre>
 </div>`;
 
 const SLIDES_CODE = `\\begin{frame}{Dijkstra’s algorithm}

@@ -120,6 +120,27 @@ describe('a module’s page', () => {
     expect(html).toContain('href="../play/#v=1&amp;alg=dijkstra');
   });
 
+  it('colours each snippet in its language, and leaves a link plain', async () => {
+    const details = await detailsOf(entry('dijkstra'), groups);
+    document.body.innerHTML = entryPage(details, assets);
+    const code = (id: string) =>
+      document.querySelector(`.snippet[data-snippet="${id}"] pre code`)!;
+    expect(code('web').querySelector('.tok-name')!.textContent).toBe('script');
+    expect(code('typst').querySelector('.tok-name')!.textContent).toBe(
+      '#import',
+    );
+    expect(code('latex').querySelector('.tok-name')!.textContent).toBe(
+      '\\usepackage',
+    );
+    expect(code('cli').querySelector('.tok-name')!.textContent).toBe(
+      'algomotion',
+    );
+    expect(code('mcp').querySelector('.tok-key')!.textContent).toBe('"recipe"');
+    expect(code('link').children).toHaveLength(0);
+    for (const s of details.snippets)
+      expect(code(s.id).textContent).toBe(s.code);
+  });
+
   it('lists a structure’s operations, and an operation names its structure', async () => {
     const bst = entryPage(await detailsOf(entry('bst'), groups), assets);
     for (const op of ['search', 'insert', 'delete'])
