@@ -1,0 +1,42 @@
+name: A figure looks wrong
+description: Text overlaps, a mark is in the wrong place, a theme is hard to read, or a step does not show what its narration says.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A picture helps most. Attach a screenshot, or the SVG that `algomotion export` wrote.
+  - type: input
+    id: algorithm
+    attributes:
+      label: Algorithm
+      description: Its id, as in the catalogue.
+      placeholder: dijkstra
+    validations:
+      required: true
+  - type: textarea
+    id: input
+    attributes:
+      label: Input
+      description: The input you gave it, in any notation, or a share link.
+      render: text
+    validations:
+      required: true
+  - type: input
+    id: step
+    attributes:
+      label: Step
+      description: The step's name or number, such as `relax#3`.
+  - type: input
+    id: theme
+    attributes:
+      label: Theme and output
+      description: Which theme, and where you saw it (player, Typst, LaTeX, SVG file, slides).
+      placeholder: textbook, in Typst
+  - type: textarea
+    id: what
+    attributes:
+      label: What is wrong
+      description: What looks wrong, and what you expected instead. Attach a screenshot here.
+    validations:
+      required: true

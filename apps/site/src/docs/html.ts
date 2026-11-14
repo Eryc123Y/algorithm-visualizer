@@ -20,16 +20,28 @@ export const text = (value: string): string =>
 export const attribute = (value: string): string =>
   value.replace(/[&<>"']/g, (c) => ENTITIES[c]!);
 
+/** The build a page came from, for the footer. */
+export interface BuildInfo {
+  /** The repository's version, from its `package.json`. */
+  readonly version: string;
+  /** The commit built, as a full hash, if Git was there to ask. */
+  readonly commit?: string;
+  /** That commit's date, `YYYY-MM-DD`. */
+  readonly date?: string;
+}
+
 /** The files a page loads, relative to the site's root. */
 export interface Assets {
   readonly scripts: readonly string[];
   readonly styles: readonly string[];
   /** Modules the script imports, preloaded. */
   readonly preloads: readonly string[];
+  /** The build the files came from; the footer names it. */
+  readonly build?: BuildInfo;
 }
 
 /** The site's sections, for the bar's current-page mark. */
-export type Section = 'home' | 'guide' | 'algorithms' | 'themes';
+export type Section = 'home' | 'guide' | 'algorithms' | 'themes' | 'project';
 
 export interface PageFrame {
   readonly title: string;
@@ -53,6 +65,16 @@ export const REPOSITORY = 'https://github.com/Eryc123Y/algorithm-visualizer';
  * word beside it.
  */
 const GLYPH = `<svg viewBox="0 0 64 64" aria-hidden="true" focusable="false"><path class="glyph-now" d="M22 8H42L32 20Z"/><g class="glyph-bars"><rect x="12" y="40" width="10" height="14"/><rect x="27" y="30" width="10" height="24"/><rect x="42" y="20" width="10" height="34"/></g></svg>`;
+
+/** The footer's line about the build: version, commit and date. */
+function buildLine(build: BuildInfo | undefined, root: string): string {
+  if (build === undefined) return '';
+  const commit =
+    build.commit === undefined
+      ? ''
+      : `, built from commit <a href="${attribute(`${REPOSITORY}/commit/${build.commit}`)}"><code>${text(build.commit.slice(0, 7))}</code></a>${build.date === undefined ? '' : ` of <time datetime="${attribute(build.date)}">${text(build.date)}</time>`}`;
+  return `<p class="build">Version ${text(build.version)}${commit}. <a href="${attribute(root)}changelog/">What changed</a>.</p>`;
+}
 
 /** A whole page. Its Content Security Policy is added after the charset. */
 export function page({
@@ -138,12 +160,18 @@ ${body}
           <h2 id="f-project">Project</h2>
           <ul>
             <li><a href="${REPOSITORY}">Source on GitHub</a></li>
-            <li><a href="${REPOSITORY}/issues">Report a problem</a></li>
+            <li><a href="${root}changelog/">Changelog</a></li>
+            <li><a href="${root}roadmap/">Roadmap</a></li>
+            <li><a href="${root}contributing/">Contributing</a></li>
+            <li><a href="${root}contributing/#report">Report a problem</a></li>
             <li><a href="${REPOSITORY}/tree/main/docs/adr">Design records</a></li>
           </ul>
         </section>
       </div>
-      <p class="colophon">Every figure on this site is drawn by algomotion’s own engine, from the same registry the packages ship.</p>
+      <div class="colophon">
+        <p>Every figure on this site is drawn by algomotion’s own engine, from the same registry the packages ship.</p>
+        ${buildLine(assets.build, root)}
+      </div>
     </footer>
   </body>
 </html>
