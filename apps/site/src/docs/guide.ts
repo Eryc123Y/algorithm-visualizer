@@ -7,6 +7,7 @@
 import type { ThemeName } from '@algomotion/svg';
 
 import { picture, type Art } from './home.ts';
+import { highlighted, languageOf } from './highlight.ts';
 import { attribute, page, text, type Assets } from './html.ts';
 
 /** A figure a guide page shows: a run's step, drawn by the engine. */
@@ -89,7 +90,7 @@ export function guidePage(
       return `<figure class="guide-figure">${picture(a, root)}<figcaption>${caption}</figcaption></figure>`;
     },
     code(code, label) {
-      return `<div class="snippet" data-snippet="guide" data-label="${attribute(label)}"><pre tabindex="0" role="region" aria-label="${attribute(label)}"><code>${text(code)}</code></pre></div>`;
+      return `<div class="snippet" data-snippet="guide" data-label="${attribute(label)}"><pre tabindex="0" role="region" aria-label="${attribute(label)}"><code>${highlighted(code, languageOf(code))}</code></pre></div>`;
     },
     note(html) {
       return `<aside class="note">${html}</aside>`;

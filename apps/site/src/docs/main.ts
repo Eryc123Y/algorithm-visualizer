@@ -10,7 +10,12 @@ import { AlgoPlayer } from '@algomotion/elements';
 import '@algomotion/elements/fonts.css';
 
 import './docs.css';
-import { addCopyButtons, filterCatalog, setUpTabs } from './enhance.ts';
+import {
+  addCopyButtons,
+  filterCatalog,
+  loopOverlays,
+  setUpTabs,
+} from './enhance.ts';
 import { setUpPlayground } from './playground-ui.ts';
 
 AlgoPlayer.fontsUrl = null;
@@ -19,6 +24,7 @@ if (!customElements.get('algo-player'))
 
 addCopyButtons(document, navigator.clipboard, location.href);
 setUpTabs(document);
+loopOverlays(document);
 setUpPlayground(document, {
   location,
   history,

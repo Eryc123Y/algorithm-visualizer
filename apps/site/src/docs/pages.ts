@@ -10,6 +10,7 @@ import type { ThemeName } from '@algomotion/svg';
 
 import { depthOf, type Entry, type TopicGroup } from './catalog.ts';
 import { picture, type Art } from './home.ts';
+import { highlighted, SNIPPET_LANGUAGES } from './highlight.ts';
 import { attribute, page, rootOf, text, type Assets } from './html.ts';
 import { shortInput } from './short-input.ts';
 import { snippetsFor, type Snippet } from './snippets.ts';
@@ -117,7 +118,7 @@ const playerOf = (id: string, input: unknown): string =>
 
 function snippetSection(s: Snippet): string {
   // A focusable region, so a keyboard can scroll a long line into view.
-  const code = `<pre tabindex="0" role="region" aria-label="${attribute(s.label)}"><code>${text(s.code)}</code></pre>`;
+  const code = `<pre tabindex="0" role="region" aria-label="${attribute(s.label)}"><code>${highlighted(s.code, SNIPPET_LANGUAGES[s.id])}</code></pre>`;
   const open =
     s.id === 'link'
       ? `<p><a href="${attribute(s.code)}">Open this run in the share page</a></p>`

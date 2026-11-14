@@ -24,6 +24,8 @@ npm run preview -w @algomotion/site   # serves it at http://localhost:4173
 
 `vite build` builds the share page and the documentation's script and styles. Then `scripts/build-pages.ts` writes the pages from the registry, with the asset names from Vite's manifest, and draws the themes' figures with `@algomotion/svg`. Each snippet's input is the shortest form that runs to the example's document (`src/docs/short-input.ts`); the unit tests check every snippet of every module against the registry.
 
+Code blocks are coloured at build time by a small tokenizer per language the site shows (`src/docs/highlight.ts`: HTML, Typst, LaTeX, shell, JSON and an MCP call), written as `tok-*` spans; the playground rebuilds the same spans with DOM calls (`highlight-dom.ts`). Every page preloads the two faces its first screen sets, so the text does not move when they arrive.
+
 Every page sends the same Content Security Policy, in a `<meta>` and in `_headers`: the site's own scripts, styles and fonts only, no connections, and Trusted Types enforced. The pages' links are relative, so the site works at any path. Only `404.html` assumes the root, as Cloudflare Pages serves it for any missing address.
 
 ## Deploying to Cloudflare

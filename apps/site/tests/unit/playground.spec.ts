@@ -336,6 +336,9 @@ describe('the page', () => {
       ran.ok && ran.value.document,
     );
     expect(code('web')).toContain('algorithm="insertion-sort"');
+    expect(
+      document.querySelector('#panel-web code .tok-name')!.textContent,
+    ).toBe('script');
     expect(code('slides')).toContain('{insertion-sort}');
     expect(code('link')).toMatch(/^play\/#/);
     expect(document.querySelector('.pg-share')!.getAttribute('href')).toBe(

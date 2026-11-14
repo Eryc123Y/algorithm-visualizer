@@ -6,6 +6,8 @@
  * address keeps the run, so it can be shared. Everything is set as text
  * or properties, never as markup.
  */
+import { SNIPPET_LANGUAGES } from './highlight.ts';
+import { fillCode } from './highlight-dom.ts';
 import type { PlaygroundFailure, PlaygroundResult } from './playground-run.ts';
 import {
   runFromSearch,
@@ -177,10 +179,10 @@ export function setUpPlayground(
   };
 }
 
-/** Sets the code of the snippet in output `id`'s panel. */
+/** Sets the code of the snippet in output `id`'s panel, coloured. */
 function setCode(doc: Document, id: string, code: string): void {
   const el = doc.querySelector(`#panel-${id} .snippet pre code`);
-  if (el !== null) el.textContent = code;
+  if (el !== null) fillCode(el, code, SNIPPET_LANGUAGES[id]);
 }
 
 function setCaption(

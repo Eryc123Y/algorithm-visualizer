@@ -435,6 +435,14 @@ picture img {
   grid-area: 1 / 1;
 }
 
+/*
+ * The panels share one cell, so the tallest sets the height; a hidden one
+ * lies on top of the shown one and must not take its clicks.
+ */
+.panels > [role='tabpanel'][hidden] {
+  pointer-events: none;
+}
+
 .panel {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -734,6 +742,8 @@ picture img {
 }
 
 .snippet .note {
+  grid-column: 1 / -1;
+  margin: 0.625rem 0 0.375rem;
   color: var(--muted);
   font-size: var(--step--1);
 }
@@ -899,7 +909,7 @@ picture img {
   border: 1px solid var(--rule);
   border-radius: var(--radius);
   /* In dark mode, the dark theme's own paper, which its figures paint. */
-  background: light-dark(var(--surface), #121214);
+  background: var(--figure-paper);
   overflow: hidden;
 }
 
@@ -1119,18 +1129,18 @@ main.guide > .guide-body {
   font-size: 1.0625rem;
 }
 
-.note {
+aside.note {
   margin: 1.5rem 0;
   padding: 0.875rem 1.125rem;
   border-left: 3px solid var(--mark);
   background: var(--surface);
 }
 
-.note > :first-child {
+aside.note > :first-child {
   margin-top: 0;
 }
 
-.note > :last-child {
+aside.note > :last-child {
   margin-bottom: 0;
 }
 
@@ -1184,6 +1194,87 @@ main.guide > .guide-body {
   color: var(--muted);
   font-size: var(--step--1);
   font-weight: 400;
+}
+
+/* ── Polish: syntax colour (roadmap 5.6) ─────────────────────────────── */
+
+/*
+ * Like a printed book more than an editor: structure by weight, and the
+ * one accent for what the reader writes, the values. The light shade of
+ * the amber is darkened to 5:1 on the code's background, for text.
+ */
+:root {
+  --code-value: light-dark(#8a5300, var(--mark));
+}
+
+.tok-name {
+  font-weight: 600;
+}
+
+.tok-key,
+.tok-comment {
+  color: var(--muted);
+}
+
+.tok-string {
+  color: var(--code-value);
+}
+
+/* ── Polish: stable type while the fonts load (roadmap 5.6) ──────────── */
+
+/*
+ * The fallback faces scaled to the web fonts' x-height, so text keeps its
+ * size if the preloaded fonts arrive late.
+ */
+body,
+h1,
+h2 {
+  font-size-adjust: from-font;
+}
+
+/* ── Polish: the slide's overlays as a loop (roadmap 5.6) ────────────── */
+
+/* Script adds .looping only for readers who allow motion. */
+.overlays.looping > li {
+  grid-area: 1 / 1;
+  opacity: 0;
+  transition: opacity 0.35s ease-out;
+}
+
+.overlays.looping > li.on {
+  opacity: 1;
+}
+
+.overlays-pause {
+  margin-top: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--step--1);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.overlays-pause:hover {
+  border-color: var(--ink);
+}
+
+/* ── Polish: figure frames in their figures' paper (roadmap 5.6) ─────── */
+
+/*
+ * A dark figure paints the dark theme's paper; its frame takes the same,
+ * so no second box shows inside it.
+ */
+:root {
+  --figure-paper: light-dark(var(--surface), #121214);
+}
+
+.output-figure,
+.guide-figure {
+  background: var(--figure-paper);
 }
 
 /* ── Project pages: changelog, roadmap, contributing (roadmap 5.5) ──── */
