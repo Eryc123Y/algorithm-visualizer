@@ -14,6 +14,7 @@
  * Record steps through `trace`, which starts each step by taking off the
  * entries of calls that have left since the step before.
  */
+import type { Text } from './text.ts';
 import type { Trace } from './trace.ts';
 
 export interface CallStack {
@@ -29,11 +30,14 @@ export interface CallStack {
   close(): void;
 }
 
+/** The stack's label unless a recipe gives its own. */
+const CALL_STACK: Text = { en: 'call stack', zh: '调用栈' };
+
 /** Declares the stack, `calls`, in the side panel of the figure. */
-export function callStack(trace: Trace, label = 'call stack'): CallStack {
+export function callStack(trace: Trace, label: Text = CALL_STACK): CallStack {
   const calls = trace.add('calls', {
     kind: 'stack',
-    label,
+    label: trace.say(label),
     place: 'side',
     initial: [],
   });
@@ -45,6 +49,8 @@ export function callStack(trace: Trace, label = 'call stack'): CallStack {
   };
   return {
     trace: {
+      locale: trace.locale,
+      say: (text) => trace.say(text),
       add: (name, decl) => trace.add(name, decl),
       section: (id, title) => trace.section(id, title),
       step(anchor, narration, options) {

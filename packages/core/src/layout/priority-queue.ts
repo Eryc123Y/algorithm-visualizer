@@ -31,6 +31,7 @@
  * key changes. The block's size depends only on the metrics, so it is the
  * same in every frame.
  */
+import { LAYOUT_WORDS } from './words.ts';
 import type {
   PriorityItem,
   PriorityKey,
@@ -72,8 +73,9 @@ export interface PriorityQueueMetrics {
 export const formatKey = (key: PriorityKey, order: PriorityOrder): string =>
   key === null ? (order === 'min' ? '∞' : '−∞') : formatScalar(key);
 
-/** The label that marks the front. */
-const frontLabel = (order: PriorityOrder) => order;
+/** The label that marks the front, in the figure's locale. */
+const frontLabel = (order: PriorityOrder, o: LayoutOptions) =>
+  LAYOUT_WORDS[o.locale][order];
 
 export const measurePriorityQueue = (
   s: PriorityQueueState,
@@ -141,10 +143,11 @@ function itemCells(
   ];
 }
 
-const EMPTY = '(empty)';
 /** Room the "(empty)" label needs, so a queue that empties keeps its size. */
 const emptyWidth = (o: LayoutOptions) =>
-  ceilWidth(maxWidth([EMPTY], o.fonts.label) * o.indexFontSize);
+  ceilWidth(
+    maxWidth([LAYOUT_WORDS[o.locale].empty], o.fonts.label) * o.indexFontSize,
+  );
 
 const emptyLabel = (name: string, x: number, y: number, o: LayoutOptions) => ({
   type: 'text' as const,
@@ -153,7 +156,7 @@ const emptyLabel = (name: string, x: number, y: number, o: LayoutOptions) => ({
   y,
   anchor: 'start' as const,
   role: 'label' as const,
-  text: EMPTY,
+  text: LAYOUT_WORDS[o.locale].empty,
   fontSize: o.indexFontSize,
 });
 
@@ -186,7 +189,7 @@ function layoutRow({
   );
   const keyHeight = Math.round(o.cellHeight * 0.6);
   const pitch = width + o.cellGap;
-  const label = frontLabel(order);
+  const label = frontLabel(order, o);
   const overhang = badgeOverhang(maxWidth([label], o.fonts.value), width, o);
   const left = origin.x + overhang;
   const top = origin.y + titleRowHeight(o);
@@ -256,7 +259,7 @@ function layoutColumn({
   const top = origin.y + titleRowHeight(o);
   const right = left + valueWidth + keyWidth;
   const slots = Math.max(1, metrics.slots);
-  const label = frontLabel(order);
+  const label = frontLabel(order, o);
 
   const items: SceneItem[] = titleItems(name, title, origin, o);
   const front = queueOrder(state.data);

@@ -16,7 +16,15 @@ import {
   type Scene,
   type Trace,
 } from '@algomotion/core';
-import { err, ok, type Diagnostic, type Result } from '@algomotion/spec';
+import {
+  err,
+  isLocale,
+  LOCALES,
+  ok,
+  type Diagnostic,
+  type Locale,
+  type Result,
+} from '@algomotion/spec';
 
 import { renderSvg } from './render.ts';
 import {
@@ -58,6 +66,11 @@ export interface SeriesOptions {
    * the main ones (`'wide'`, the default) or below them (`'narrow'`).
    */
   readonly layout?: FigureLayout;
+  /**
+   * The language of the words the layout draws itself, such as "(empty)"
+   * (ADR 0045); the document's own text is as it was written. Default `'en'`.
+   */
+  readonly locale?: Locale;
 }
 
 /** The figure layouts, for checking a name from another language. */
@@ -130,6 +143,7 @@ function framerOf(
   trace: Trace,
   theme: SvgTheme,
   layout: FigureLayout = defaultLayoutOptions.layout,
+  locale: Locale = defaultLayoutOptions.locale,
 ): Framer {
   let measured:
     | {
@@ -143,7 +157,11 @@ function framerOf(
     const kept = new Map<number, Scene>();
     if (measured === undefined) {
       const wanted = new Set(frames);
-      const laid = layoutTrace(trace, { fonts: theme.fontMetrics, layout });
+      const laid = layoutTrace(trace, {
+        fonts: theme.fontMetrics,
+        layout,
+        locale,
+      });
       let width = 0;
       let height = 0;
       for (let f = 0; f <= trace.length; f++) {
@@ -209,6 +227,7 @@ export function renderSeries(
     trace,
     theme,
     options.layout,
+    options.locale,
   )(frames).map((f) => figureOf(f, theme));
 }
 
@@ -225,7 +244,7 @@ export function prepareScenes(
   options: SeriesOptions = {},
 ): Result<PreparedScenes, readonly Diagnostic[]> {
   // Callers from other languages, such as the Typst plugin, pass any text.
-  const { theme, layout } = options;
+  const { theme, layout, locale } = options;
   if (typeof theme === 'string' && !isThemeName(theme))
     return err([
       {
@@ -244,12 +263,21 @@ export function prepareScenes(
         hint: `Layouts: ${LAYOUTS.join(', ')}.`,
       },
     ]);
+  if (locale !== undefined && !isLocale(locale))
+    return err([
+      {
+        code: 'UNKNOWN_LOCALE',
+        path: '$.locale',
+        message: `No locale named ${JSON.stringify(locale)}`,
+        hint: `Locales: ${LOCALES.join(', ')}.`,
+      },
+    ]);
   const loaded = loadTrace(document);
   if (!loaded.ok) return loaded;
   const trace = loaded.value;
   const doc = trace.visualization;
   const resolved = resolveTheme(theme);
-  const frame = framerOf(trace, resolved, layout);
+  const frame = framerOf(trace, resolved, layout, locale);
   return ok({
     frames: trace.length + 1,
     theme: resolved,

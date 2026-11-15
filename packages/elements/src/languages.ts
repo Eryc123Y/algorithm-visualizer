@@ -7,6 +7,9 @@
  * event, and players in other tabs through the `storage` event.
  */
 import type { CodeListing } from '@algomotion/core';
+import type { Locale } from '@algomotion/spec';
+
+import { CHROME_TEXT } from './chrome-text.ts';
 
 /** The local storage key of the reader's choice, one for the whole site. */
 export const LANGUAGE_KEY = 'algomotion:language';
@@ -96,8 +99,16 @@ const NAMES = new Map([
   ['ts', 'TypeScript'],
 ]);
 
-/** A language's name for the switcher, e.g. "Pseudocode" or "Python". */
-export function languageName(language: string | undefined): string {
-  if (language === undefined) return 'Code';
+/**
+ * A language's name for the switcher, e.g. "Pseudocode" or "Python"; in
+ * `locale`, the words among them (ADR 0045).
+ */
+export function languageName(
+  language: string | undefined,
+  locale: Locale = 'en',
+): string {
+  const words = CHROME_TEXT[locale];
+  if (language === undefined) return words.code;
+  if (language === 'pseudocode') return words.pseudocode;
   return NAMES.get(language) ?? language;
 }

@@ -15,6 +15,7 @@
  * that is clear. NIL leaves, root lists and pointers above linked roots
  * (ADR 0034) are drawn by tree-extras.ts.
  */
+import { LAYOUT_WORDS } from './words.ts';
 import type { TreeDecl } from '@algomotion/spec';
 
 import type { Block, LayoutInput } from '../kind.ts';
@@ -360,7 +361,7 @@ export function layoutTree({
       y: top + radius,
       anchor: 'start',
       role: 'label',
-      text: '(empty)',
+      text: LAYOUT_WORDS[o.locale].empty,
       fontSize: o.indexFontSize,
     });
 

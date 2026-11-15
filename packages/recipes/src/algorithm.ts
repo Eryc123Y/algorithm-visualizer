@@ -3,11 +3,12 @@
  * registry (ADR 0019): its id, what it is, its input schema, examples, its
  * code in every language and how it records a run.
  */
-import type { AnchoredSource } from '@algomotion/spec';
+import type { AnchoredSource, Locale } from '@algomotion/spec';
 import type { z } from 'zod';
 
 import { withMainField } from './notation/schema.ts';
 import { LANGUAGES, listing, type Language, type Snippet } from './snippet.ts';
+import { textIn, type Text } from './text.ts';
 import type { Trace } from './trace.ts';
 
 /** Topics that group modules in menus, in the order menus show them. */
@@ -47,6 +48,28 @@ export const TOPIC_TITLES: Readonly<Record<Topic, string>> = {
   amortized: 'Amortized analysis',
 };
 
+/** The heading of each topic in Chinese, after CLRS's Chinese edition. */
+const TOPIC_TITLES_ZH: Readonly<Record<Topic, string>> = {
+  sorting: '排序',
+  searching: '查找',
+  lists: '链表、栈与队列',
+  trees: '树',
+  heaps: '堆',
+  hashing: '散列',
+  graphs: '图',
+  'dynamic-programming': '动态规划',
+  greedy: '贪心算法',
+  strings: '字符串匹配',
+  geometry: '计算几何',
+  math: '代数与数论',
+  foundations: '分治与随机化',
+  amortized: '摊还分析',
+};
+
+/** The heading of `topic` in `locale` (ADR 0045). */
+export const topicTitle = (topic: Topic, locale: Locale): string =>
+  locale === 'zh' ? TOPIC_TITLES_ZH[topic] : TOPIC_TITLES[topic];
+
 /** What an operation returns: found or not, a popped value, or nothing. */
 export type OpResult = number | boolean | null;
 
@@ -76,6 +99,15 @@ export interface Algorithm<I = unknown> {
   readonly topic: Topic;
   /** One sentence, for catalogues and MCP. */
   readonly summary: string;
+  /**
+   * The title and summary in the other locales, where translated
+   * (ADR 0045); `titleOf` and `summaryOf` read them.
+   */
+  readonly translations?: Readonly<
+    Partial<
+      Record<Locale, { readonly title: string; readonly summary: string }>
+    >
+  >;
   /** The only definition of the input: validation, types, JSON Schema. */
   readonly input: z.ZodType<I>;
   /** At least one; the first is the default in menus and tests. */
@@ -85,14 +117,41 @@ export interface Algorithm<I = unknown> {
   /**
    * The title and code a run on `input` shows, when they depend on the
    * input: a sequence of operations shows only the code of the operations
-   * it runs. By default, `title` and `code`.
+   * it runs. By default, `title` and `code`. The title is in `locale`.
    */
-  present?(input: I): Presentation;
+  present?(input: I, locale: Locale): Presentation;
   /**
    * Records the run on `trace`, for an input that passed `input`. Throws a
    * RangeError for an input it cannot show, saying why.
    */
   run(input: I, trace: Trace): RunOutcome | void;
+}
+
+/** The title of `algorithm` in `locale`, or in English if untranslated. */
+export const titleOf = (algorithm: Algorithm, locale: Locale): string =>
+  algorithm.translations?.[locale]?.title ?? algorithm.title;
+
+/** The summary of `algorithm` in `locale`, or in English if untranslated. */
+export const summaryOf = (algorithm: Algorithm, locale: Locale): string =>
+  algorithm.translations?.[locale]?.summary ?? algorithm.summary;
+
+/**
+ * An algorithm's English title and summary, and those of the other
+ * locales that `title` and `summary` translate.
+ */
+export function namesOf(
+  title: Text,
+  summary: Text,
+): Pick<Algorithm, 'title' | 'summary' | 'translations'> {
+  if (typeof title === 'string' && typeof summary === 'string')
+    return { title, summary };
+  return {
+    title: textIn(title, 'en'),
+    summary: textIn(summary, 'en'),
+    translations: {
+      zh: { title: textIn(title, 'zh'), summary: textIn(summary, 'zh') },
+    },
+  };
 }
 
 /** The anchored sources of code in every language. */
@@ -109,9 +168,9 @@ export function sourcesOf(
 /** An algorithm whose code is given as text with `@anchor` markers. */
 export interface AlgorithmDef<S extends z.ZodType> {
   readonly id: string;
-  readonly title: string;
+  readonly title: Text;
   readonly topic: Topic;
-  readonly summary: string;
+  readonly summary: Text;
   readonly input: S;
   /**
    * The field a run cannot do without, when it is the only one: the input
@@ -131,13 +190,14 @@ export interface AlgorithmDef<S extends z.ZodType> {
 export function defineAlgorithm<S extends z.ZodType>(
   def: AlgorithmDef<S>,
 ): Algorithm<z.output<S>> {
-  const { code, input, main, ...rest } = def;
+  const { code, input, main, title, summary, ...rest } = def;
   const schema =
     main === undefined
       ? input
       : withMainField(input as unknown as z.ZodObject, main);
   return {
     ...rest,
+    ...namesOf(title, summary),
     // Zod types an arbitrary schema's output loosely; `S` restates it.
     input: schema as z.ZodType<z.output<S>>,
     code: listing(def.id, code).code,

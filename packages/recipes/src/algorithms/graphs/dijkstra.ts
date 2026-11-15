@@ -21,10 +21,12 @@ import {
 
 export const dijkstra = defineAlgorithm({
   id: 'dijkstra',
-  title: 'Dijkstra’s algorithm',
+  title: { en: 'Dijkstra’s algorithm', zh: 'Dijkstra 算法' },
   topic: 'graphs',
-  summary:
-    'Finds shortest paths from a source in a graph with non-negative weights, fixing the closest remaining vertex at each step.',
+  summary: {
+    en: 'Finds shortest paths from a source in a graph with non-negative weights, fixing the closest remaining vertex at each step.',
+    zh: '在边权非负的图中求从一个源点出发的最短路径，每一步确定剩余顶点中距离最近的一个。',
+  },
   input: z.strictObject({
     graph: Graph,
     source: z
@@ -85,10 +87,10 @@ export const dijkstra = defineAlgorithm({
     const d = new Map(g.nodes.map((v) => [v, v === s ? 0 : Infinity]));
     const via = new Map<string, string>();
     const queue = new Set(g.nodes);
-    trace.step(
-      'start',
-      `Every distance is ∞, except ${s}'s, which is 0. Every vertex goes into the queue Q, keyed by its distance.`,
-    );
+    trace.step('start', {
+      en: `Every distance is ∞, except ${s}'s, which is 0. Every vertex goes into the queue Q, keyed by its distance.`,
+      zh: `除 ${s} 的距离为 0 外，每个顶点的距离都是 ∞。所有顶点都进入队列 Q，以距离为关键字。`,
+    });
     for (const v of g.nodes) {
       graph.annotate({ node: v, text: shown(d.get(v)!) });
       queueOf.insert({
@@ -102,35 +104,35 @@ export const dijkstra = defineAlgorithm({
       queue.delete(u);
       const du = d.get(u)!;
       if (du === Infinity) {
-        trace.step(
-          'extract',
-          `${u} leaves the queue with distance ∞: it cannot be reached from ${s}.`,
-        );
+        trace.step('extract', {
+          en: `${u} leaves the queue with distance ∞: it cannot be reached from ${s}.`,
+          zh: `${u} 出队时距离为 ∞：从 ${s} 无法到达它。`,
+        });
         graph.pointer({ name: 'u', node: u });
         queueOf.extract();
         continue;
       }
-      trace.step(
-        'extract',
-        `${u} has the least distance left, ${du}: it is final.`,
-      );
+      trace.step('extract', {
+        en: `${u} has the least distance left, ${du}: it is final.`,
+        zh: `${u} 在剩余顶点中距离最小，为 ${du}：它的距离已确定。`,
+      });
       graph.pointer({ name: 'u', node: u }).settle({ node: u });
       queueOf.extract();
       for (const { to: v, weight, edge } of adj.get(u)!) {
         const c = du + weight;
         const dv = d.get(v)!;
         if (c >= dv) {
-          trace.step(
-            'relax',
-            `${du} + ${weight} = ${c} ≥ ${shown(dv)}: keep ${v} at ${shown(dv)}.`,
-          );
+          trace.step('relax', {
+            en: `${du} + ${weight} = ${c} ≥ ${shown(dv)}: keep ${v} at ${shown(dv)}.`,
+            zh: `${du} + ${weight} = ${c} ≥ ${shown(dv)}：${v} 保持 ${shown(dv)}。`,
+          });
           graph.highlight({ nodes: [v], edges: [edge] });
           continue;
         }
-        trace.step(
-          'improve',
-          `${du} + ${weight} = ${c} < ${shown(dv)}: ${v} improves to ${c}, through ${u}.`,
-        );
+        trace.step('improve', {
+          en: `${du} + ${weight} = ${c} < ${shown(dv)}: ${v} improves to ${c}, through ${u}.`,
+          zh: `${du} + ${weight} = ${c} < ${shown(dv)}：${v} 经由 ${u} 改进为 ${c}。`,
+        });
         const old = via.get(v);
         if (old !== undefined) graph.markEdge({ edge: old, mark: null });
         d.set(v, c);
@@ -142,10 +144,10 @@ export const dijkstra = defineAlgorithm({
         queueOf.setKey({ id: v, key: c });
       }
     }
-    trace.step(
-      'done',
-      'The queue is empty: every distance is final, and the selected edges form a shortest-path tree.',
-    );
+    trace.step('done', {
+      en: 'The queue is empty: every distance is final, and the selected edges form a shortest-path tree.',
+      zh: '队列已空：所有距离都已确定，选中的边构成一棵最短路径树。',
+    });
     graph.pointer({ name: 'u', node: null });
   },
 });

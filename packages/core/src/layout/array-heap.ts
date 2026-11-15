@@ -15,6 +15,7 @@
  * animates as two nodes trading places; edges are keyed by position, since
  * they belong to the shape, not to the values.
  */
+import { LAYOUT_WORDS } from './words.ts';
 import type { ArrayDecl } from '@algomotion/spec';
 
 import type { Block, LayoutInput } from '../kind.ts';
@@ -101,7 +102,7 @@ export function layoutArrayHeap({
       y: top + radius,
       anchor: 'start',
       role: 'label',
-      text: '(empty)',
+      text: LAYOUT_WORDS[o.locale].empty,
       fontSize: o.indexFontSize,
     });
   // A settled element is out of the heap (ADR 0031): no edge links it.

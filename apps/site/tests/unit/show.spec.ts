@@ -173,3 +173,25 @@ describe('the share page', () => {
     expect(page.intro.hidden).toBe(false);
   });
 });
+
+describe('the language of a shared run (ADR 0045)', () => {
+  it('is the link’s, when it names one', async () => {
+    await showFragment(
+      await fragmentOf({ algorithm: 'dijkstra', lang: 'zh' }),
+      page,
+    );
+    expect(player()!.getAttribute('lang')).toBe('zh-Hans');
+  });
+
+  it('is the reader’s otherwise, from their browser’s languages', async () => {
+    const languages = vi
+      .spyOn(navigator, 'languages', 'get')
+      .mockReturnValue(['fr-FR', 'zh-TW', 'en']);
+    await showFragment(await fragmentOf({ algorithm: 'dijkstra' }), page);
+    expect(player()!.getAttribute('lang')).toBe('zh-Hans');
+    languages.mockReturnValue(['en-GB']);
+    await showFragment(await fragmentOf({ algorithm: 'bfs' }), page);
+    expect(player()!.getAttribute('lang')).toBe('en');
+    languages.mockRestore();
+  });
+});

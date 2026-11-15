@@ -2,6 +2,7 @@
  * Layout for the `queue` kind: a row inside an open pipe, with "front" and
  * "back" markers below the ends.
  */
+import { LAYOUT_WORDS } from './words.ts';
 import type { QueueDecl } from '@algomotion/spec';
 
 import type { Block, LayoutInput } from '../kind.ts';
@@ -54,7 +55,6 @@ export const mergeQueueMetrics = (
 
 /** Gap between the cells and the pipe walls. */
 const PIPE = 6;
-const MARKERS = ['front', 'back'] as const;
 
 export function layoutQueue({
   name,
@@ -67,9 +67,10 @@ export function layoutQueue({
   const cellWidth = cellWidthFor(metrics.valueWidth, o);
   const pitch = cellWidth + o.cellGap;
   // Room for the "front" and "back" badges, in the font they are set in.
+  const { front, back } = LAYOUT_WORDS[o.locale];
   const overhang = Math.max(
     PIPE * 2,
-    badgeOverhang(maxWidth(MARKERS, o.fonts.value), cellWidth, o),
+    badgeOverhang(maxWidth([front, back], o.fonts.value), cellWidth, o),
   );
   const cellsLeft = origin.x + overhang;
   const centerX = (k: number) => cellsLeft + k * pitch + cellWidth / 2;
@@ -124,8 +125,8 @@ export function layoutQueue({
   });
   if (n > 0) {
     const ends = groupPointers<number>([
-      ['front', 0],
-      ['back', n - 1],
+      [front, 0],
+      [back, n - 1],
     ]);
     items.push(...pointerItems(name, ends, centerX, cellsBottom + PIPE, o));
   }

@@ -28,6 +28,7 @@ export * from './run-module.ts';
 export type { Language, Snippet } from './snippet.ts';
 export { LANGUAGES } from './snippet.ts';
 export * from './structure.ts';
+export * from './text.ts';
 export * from './structures/avl/index.ts';
 export * from './structures/bst/index.ts';
 export * from './structures/disjoint-set/index.ts';

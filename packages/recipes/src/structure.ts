@@ -6,15 +6,20 @@
  * describes, declared rather than animated, so its steps cover only the
  * operations asked for.
  */
-import type { StructureDeclInput, StructureKindName } from '@algomotion/spec';
+import type {
+  Locale,
+  StructureDeclInput,
+  StructureKindName,
+} from '@algomotion/spec';
 import { z } from 'zod';
 
-import type {
-  Algorithm,
-  OpResult,
-  Presentation,
-  RunOutcome,
-  Topic,
+import {
+  namesOf,
+  type Algorithm,
+  type OpResult,
+  type Presentation,
+  type RunOutcome,
+  type Topic,
 } from './algorithm.ts';
 import type { Handle } from './recorder.ts';
 import { sectionIds } from './section-id.ts';
@@ -25,6 +30,7 @@ import {
   type Listing,
   type Snippet,
 } from './snippet.ts';
+import { textIn, type Text } from './text.ts';
 import { listingTrace, type Trace } from './trace.ts';
 import { printOperations } from './notation/operations.ts';
 import { operationsField } from './notation/schema.ts';
@@ -58,9 +64,9 @@ export interface Operation<
    */
   readonly name: string;
   /** Lower-case, e.g. "decrease key"; the module's title follows the structure's. */
-  readonly title: string;
+  readonly title: Text;
   /** One sentence, for catalogues. */
-  readonly summary: string;
+  readonly summary: Text;
   /** The arguments besides `from`. */
   readonly args: Shape;
   /** At least one input of the operation's module. */
@@ -72,8 +78,11 @@ export interface Operation<
   readonly code: Listing;
   /** The code a call shows, if it depends on the arguments. */
   codeOf?(args: Args<Shape>): Listing;
-  /** Lower-case title of a call, e.g. "delete 3". */
-  titleOf(args: Args<Shape>): string;
+  /**
+   * Lower-case title of a call, e.g. "delete 3". Its English names the
+   * call's section, a selector the same in every locale (ADR 0045).
+   */
+  titleOf(args: Args<Shape>): Text;
   /**
    * Applies the operation to `state`, recording its steps on `trace` and
    * its actions on `on`, and on `sides` for the side structures the run
@@ -114,10 +123,10 @@ export interface StructureDef<S, From, K extends StructureKindName> {
   /** Lower-case kebab-case id of the sequence module, e.g. `bst`. */
   readonly id: string;
   /** E.g. "Binary search tree". */
-  readonly title: string;
+  readonly title: Text;
   readonly topic: Topic;
   /** One sentence about the sequence module. */
-  readonly summary: string;
+  readonly summary: Text;
   /** Name of the structure in the document. */
   readonly name: string;
   readonly kind: K;
@@ -164,6 +173,29 @@ export interface Structure {
 
 const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
+/** How a title joins its parts in each locale. */
+const PUNCTUATION: Readonly<Record<Locale, { colon: string; comma: string }>> =
+  {
+    en: { colon: ': ', comma: ', ' },
+    zh: { colon: '：', comma: '，' },
+  };
+
+/**
+ * `structure: call, call` in each locale: a plain string if every part is
+ * one, so an untranslated structure keeps plain titles.
+ */
+function joined(structure: Text, calls: readonly Text[]): Text {
+  const line = (locale: Locale) => {
+    const { colon, comma } = PUNCTUATION[locale];
+    return `${textIn(structure, locale)}${colon}${calls
+      .map((c) => textIn(c, locale))
+      .join(comma)}`;
+  };
+  return [structure, ...calls].every((t) => typeof t === 'string')
+    ? line('en')
+    : { en: line('en'), zh: line('zh') };
+}
+
 /** Splits a call into its operation and arguments. */
 function resolve<S, From, K extends StructureKindName>(
   def: StructureDef<S, From, K>,
@@ -184,10 +216,17 @@ function resolve<S, From, K extends StructureKindName>(
 function present<S, From, K extends StructureKindName>(
   def: StructureDef<S, From, K>,
   calls: readonly Call[],
+  locale: Locale,
 ): Presentation {
   const resolved = calls.map((call) => resolve(def, call));
   return {
-    title: `${def.title}: ${resolved.map((r) => r.title).join(', ')}`,
+    title: textIn(
+      joined(
+        def.title,
+        resolved.map((r) => r.title),
+      ),
+      locale,
+    ),
     sources: joinListings(resolved.map((r) => r.listing)).sources,
   };
 }
@@ -202,7 +241,8 @@ function runCalls<S, From, K extends StructureKindName>(
   const resolved = calls.map((call) => resolve(def, call));
   let state = def.start(from);
   const code = joinListings(resolved.map((r) => r.listing));
-  const ids = sectionIds(resolved.map((r) => r.title));
+  // Section ids are selectors: English in every locale.
+  const ids = sectionIds(resolved.map((r) => textIn(r.title, 'en')));
   const on = trace.add(def.name, def.declare(state)) as Handle<K>;
   const sides: Sides = Object.fromEntries(
     Object.entries(def.auxiliary?.(from, calls) ?? {}).map(([name, decl]) => [
@@ -212,7 +252,10 @@ function runCalls<S, From, K extends StructureKindName>(
   );
   const results = resolved.map(({ op, args, title, listing }, k) => {
     // Each operation is a section (ADR 0020).
-    trace.section(ids[k]!, capitalize(title));
+    trace.section(ids[k]!, {
+      en: capitalize(textIn(title, 'en')),
+      zh: textIn(title, 'zh'),
+    });
     const clear = k > 0 ? () => def.clear(on, sides) : undefined;
     const applied = op.apply(
       state,
@@ -242,13 +285,12 @@ export function defineStructure<S, From, K extends StructureKindName>(
   checkOperations(def.operations);
   const operations = def.operations.map((op): Algorithm => ({
     id: `${def.id}.${op.name}`,
-    title: `${def.title}: ${op.title}`,
+    ...namesOf(joined(def.title, [op.title]), op.summary),
     topic: def.topic,
-    summary: op.summary,
     input: z.strictObject({ from: def.from, ...op.args }),
     examples: op.examples,
     code: op.code.code,
-    present: (input) => present(def, [callOf(op.name, input)]),
+    present: (input, locale) => present(def, [callOf(op.name, input)], locale),
     run: (input, trace) =>
       runCalls(def, fromOf(input), [callOf(op.name, input)], trace),
   }));
@@ -278,13 +320,12 @@ export function defineStructure<S, From, K extends StructureKindName>(
   });
   const sequence: Algorithm = {
     id: def.id,
-    title: def.title,
+    ...namesOf(def.title, def.summary),
     topic: def.topic,
-    summary: def.summary,
     input: Sequence,
     examples: def.examples,
     code: joinedCode(def.operations.map((op) => op.code)),
-    present: (input) => present(def, opsOf(input)),
+    present: (input, locale) => present(def, opsOf(input), locale),
     run: (input, trace) => runCalls(def, fromOf(input), opsOf(input), trace),
   };
   return { sequence, operations, modules: [...operations, sequence] };
