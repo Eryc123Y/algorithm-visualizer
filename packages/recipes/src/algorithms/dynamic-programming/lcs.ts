@@ -14,10 +14,12 @@ import { TwoStrings } from './strings.ts';
 
 export const lcs = defineAlgorithm({
   id: 'lcs',
-  title: 'Longest common subsequence',
+  title: { en: 'Longest common subsequence', zh: '最长公共子序列' },
   topic: 'dynamic-programming',
-  summary:
-    'Fills a table of the longest common subsequence of every pair of prefixes of two strings, then traces one back from the corner.',
+  summary: {
+    en: 'Fills a table of the longest common subsequence of every pair of prefixes of two strings, then traces one back from the corner.',
+    zh: '填一张表：两个字符串每一对前缀的最长公共子序列的长度，再从右下角回溯出一个子序列。',
+  },
   input: TwoStrings,
   examples: [{ first: 'ABCBDAB', second: 'BDCABA' }],
   code: {
@@ -93,7 +95,10 @@ export const lcs = defineAlgorithm({
           c[i]![j] = c[i - 1]![j - 1]! + 1;
           trace.step(
             'match',
-            `${a[i - 1]} = ${b[j - 1]}: one more than the diagonal, ${c[i]![j]}.`,
+            {
+              en: `${a[i - 1]} = ${b[j - 1]}: one more than the diagonal, ${c[i]![j]}.`,
+              zh: `${a[i - 1]} = ${b[j - 1]}：比左上角多一，为 ${c[i]![j]}。`,
+            },
             { vars: { i, j } },
           );
           table.depend({ cell: [i, j], on: [[i - 1, j - 1]] });
@@ -101,7 +106,10 @@ export const lcs = defineAlgorithm({
           c[i]![j] = Math.max(c[i - 1]![j]!, c[i]![j - 1]!);
           trace.step(
             'best',
-            `${a[i - 1]} ≠ ${b[j - 1]}: the better of above and left, ${c[i]![j]}.`,
+            {
+              en: `${a[i - 1]} ≠ ${b[j - 1]}: the better of above and left, ${c[i]![j]}.`,
+              zh: `${a[i - 1]} ≠ ${b[j - 1]}：取上面和左边中较大的，为 ${c[i]![j]}。`,
+            },
             { vars: { i, j } },
           );
           table.depend({
@@ -114,10 +122,10 @@ export const lcs = defineAlgorithm({
         }
         table.set({ cell: [i, j], value: c[i]![j]! });
       }
-    trace.step(
-      'done',
-      `The table is complete: a longest common subsequence has length ${c[m]![n]}.`,
-    );
+    trace.step('done', {
+      en: `The table is complete: a longest common subsequence has length ${c[m]![n]}.`,
+      zh: `表已填完：最长公共子序列的长度是 ${c[m]![n]}。`,
+    });
     // Trace back from the corner, preferring up on a tie, as CLRS does.
     const path: Cell[] = [];
     let common = '';
@@ -134,8 +142,14 @@ export const lcs = defineAlgorithm({
     trace.step(
       'trace',
       path.length === 0
-        ? 'Walk back from the corner: no characters match, so the subsequence is empty.'
-        : `Walk back from the corner, keeping each match: "${common}" is a longest common subsequence.`,
+        ? {
+            en: 'Walk back from the corner: no characters match, so the subsequence is empty.',
+            zh: '从右下角往回走：没有相同的字符，所以子序列为空。',
+          }
+        : {
+            en: `Walk back from the corner, keeping each match: "${common}" is a longest common subsequence.`,
+            zh: `从右下角往回走，记下每个匹配：“${common}”是一个最长公共子序列。`,
+          },
     );
     if (path.length > 0) table.settle({ cells: path });
   },

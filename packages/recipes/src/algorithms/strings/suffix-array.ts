@@ -43,10 +43,12 @@ const byPair = (x: readonly [number, number], y: readonly [number, number]) =>
 
 export const suffixArray = defineAlgorithm({
   id: 'suffix-array',
-  title: 'Suffix array',
+  title: { en: 'Suffix array', zh: '后缀数组' },
   topic: 'strings',
-  summary:
-    'Sorts the suffixes of a text by prefix doubling, ranking them by their first 1, 2, 4, … characters, then finds the longest common prefix of each with the one before it by Kasai’s method.',
+  summary: {
+    en: 'Sorts the suffixes of a text by prefix doubling, ranking them by their first 1, 2, 4, … characters, then finds the longest common prefix of each with the one before it by Kasai’s method.',
+    zh: '用倍增法给文本的后缀排序，依次按前 1、2、4、…… 个字符给它们排秩，再用 Kasai 的方法求出每个后缀与前一个后缀的最长公共前缀。',
+  },
   input: z.strictObject({
     text: z
       .string()
@@ -114,15 +116,21 @@ export const suffixArray = defineAlgorithm({
     let order = [...t].map((_, i) => i);
     const table = trace.add('S', {
       kind: 'table',
-      label: 'Suffixes',
+      label: trace.say({ en: 'Suffixes', zh: '后缀' }),
       initial: order.map((i) => [i, t.slice(i), '', '', '']),
-      columnLabels: ['i', 'suffix', 'rank', 'pair', 'lcp'],
+      columnLabels: [
+        'i',
+        trace.say({ en: 'suffix', zh: '后缀' }),
+        trace.say({ en: 'rank', zh: '秩' }),
+        trace.say({ en: 'pair', zh: '对' }),
+        'lcp',
+      ],
     });
     const chars = [...new Set(t)].sort();
-    trace.step(
-      'start',
-      `Rank each suffix by its first character: ${chars.map((c, k) => `${c} = ${k + 1}`).join(', ')}.`,
-    );
+    trace.step('start', {
+      en: `Rank each suffix by its first character: ${chars.map((c, k) => `${c} = ${k + 1}`).join(', ')}.`,
+      zh: `按第一个字符给每个后缀排秩：${chars.map((c, k) => `${c} = ${k + 1}`).join(', ')}。`,
+    });
     order.forEach((i, row) => table.set({ cell: [row, 2], value: rank[i]! }));
 
     const distinct = () => new Set(rank).size;
@@ -130,7 +138,10 @@ export const suffixArray = defineAlgorithm({
       const pairs = rank.map((r, i): [number, number] => [r, rank[i + k] ?? 0]);
       trace.step(
         'pairs',
-        `Pair each suffix's rank with the rank of the suffix ${k} place${k === 1 ? '' : 's'} on, 0 past the end: the pair orders the suffixes by their first ${2 * k} characters.`,
+        {
+          en: `Pair each suffix's rank with the rank of the suffix ${k} place${k === 1 ? '' : 's'} on, 0 past the end: the pair orders the suffixes by their first ${2 * k} characters.`,
+          zh: `把每个后缀的秩与它后面第 ${k} 个位置上的后缀的秩配成一对，超出末尾的记为 0：这一对按前 ${2 * k} 个字符给后缀排序。`,
+        },
         { vars: { k } },
       );
       order.forEach((i, row) =>
@@ -141,7 +152,10 @@ export const suffixArray = defineAlgorithm({
       const tied = n - distinct();
       trace.step(
         'sort',
-        `Sort the suffixes by their pairs and number the distinct pairs from 1: the new ranks order the suffixes by their first ${2 * k} characters${tied === 0 ? ', and no two are tied' : ', but some still share a rank'}.`,
+        {
+          en: `Sort the suffixes by their pairs and number the distinct pairs from 1: the new ranks order the suffixes by their first ${2 * k} characters${tied === 0 ? ', and no two are tied' : ', but some still share a rank'}.`,
+          zh: `按这些对给后缀排序，再从 1 开始给不同的对编号：新的秩按前 ${2 * k} 个字符给后缀排序${tied === 0 ? '，没有两个并列' : '，但仍有一些后缀的秩相同'}。`,
+        },
         { vars: { k } },
       );
       order.forEach((i, row) =>
@@ -156,10 +170,10 @@ export const suffixArray = defineAlgorithm({
     // With every first character different, no round sorted the rows.
     const sa = [...rank.keys()].sort((x, y) => rank[x]! - rank[y]!);
     const moved = sa.some((i, row) => order[row] !== i);
-    trace.step(
-      'order',
-      `Every rank differs, so ${moved ? 'sorting by rank puts the suffixes' : 'the suffixes are'} in order: the column i, top to bottom, is the suffix array, ${sa.join(' ')}.`,
-    );
+    trace.step('order', {
+      en: `Every rank differs, so ${moved ? 'sorting by rank puts the suffixes' : 'the suffixes are'} in order: the column i, top to bottom, is the suffix array, ${sa.join(' ')}.`,
+      zh: `所有秩都不同，所以${moved ? '按秩排序后，后缀就' : '后缀已经'}有序了：i 这一列从上到下就是后缀数组 ${sa.join(' ')}。`,
+    });
     if (moved)
       sa.forEach((i, row) =>
         table
@@ -176,7 +190,10 @@ export const suffixArray = defineAlgorithm({
       if (row === 0) {
         trace.step(
           'lcp',
-          `Suffix ${i}, ${t.slice(i)}, comes first in order: no suffix is above it.`,
+          {
+            en: `Suffix ${i}, ${t.slice(i)}, comes first in order: no suffix is above it.`,
+            zh: `后缀 ${i}（${t.slice(i)}）排在最前面：它上面没有后缀。`,
+          },
           { vars: { i, h } },
         );
         table.set({ cell: [0, 4], value: '–' }).highlight({ cells: [[0, 1]] });
@@ -188,7 +205,10 @@ export const suffixArray = defineAlgorithm({
       lcp[row] = h;
       trace.step(
         'lcp',
-        `Suffix ${i}, ${t.slice(i)}, and suffix ${j} above it, ${t.slice(j)}, share ${h} character${h === 1 ? '' : 's'}${from > 0 ? `; the first ${from === 1 ? 'character was' : `${from} were`} known from suffix ${i - 1}, whose common prefix was one longer` : ''}.`,
+        {
+          en: `Suffix ${i}, ${t.slice(i)}, and suffix ${j} above it, ${t.slice(j)}, share ${h} character${h === 1 ? '' : 's'}${from > 0 ? `; the first ${from === 1 ? 'character was' : `${from} were`} known from suffix ${i - 1}, whose common prefix was one longer` : ''}.`,
+          zh: `后缀 ${i}（${t.slice(i)}）与它上面的后缀 ${j}（${t.slice(j)}）有 ${h} 个公共字符${from > 0 ? `；其中前 ${from} 个从后缀 ${i - 1} 已知，它的公共前缀长一个字符` : ''}。`,
+        },
         { vars: { i, h } },
       );
       table.set({ cell: [row, 4], value: h }).highlight({
@@ -199,10 +219,10 @@ export const suffixArray = defineAlgorithm({
       });
       if (h > 0) h--;
     }
-    trace.step(
-      'done',
-      'The lcp column holds the longest common prefix of each suffix with the one above it in the suffix array.',
-    );
+    trace.step('done', {
+      en: 'The lcp column holds the longest common prefix of each suffix with the one above it in the suffix array.',
+      zh: 'lcp 这一列是每个后缀与后缀数组中它上面那个后缀的最长公共前缀的长度。',
+    });
     table.settle({ cells: sa.map((_, row) => [row, 4] as [number, number]) });
     return { results: sa };
   },

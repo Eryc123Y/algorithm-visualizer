@@ -14,6 +14,7 @@ import {
   patternFits,
   record,
   shiftsFound,
+  shiftsFoundZh,
 } from './common.ts';
 
 /** The radix and digit values of a text and pattern, or undefined. */
@@ -38,10 +39,12 @@ const mod = (x: number, q: number) => ((x % q) + q) % q;
 
 export const rabinKarp = defineAlgorithm({
   id: 'rabin-karp',
-  title: 'Rabin–Karp',
+  title: { en: 'Rabin–Karp', zh: 'Rabin–Karp 算法' },
   topic: 'strings',
-  summary:
-    'Reads the pattern and each window of the text as numbers modulo a prime, sliding the window in constant time, and checks the characters only where the two numbers agree.',
+  summary: {
+    en: 'Reads the pattern and each window of the text as numbers modulo a prime, sliding the window in constant time, and checks the characters only where the two numbers agree.',
+    zh: '把模式和文本的每个窗口都看作模一个素数的数，以常数时间滑动窗口，只在两个数相等时才逐个比较字符。',
+  },
   input: z
     .strictObject({
       ...MatchFields,
@@ -126,12 +129,15 @@ export const rabinKarp = defineAlgorithm({
     const values = trace.add('hash', {
       kind: 'table',
       place: 'side',
-      label: `values mod ${q}`,
+      label: trace.say({ en: `values mod ${q}`, zh: `模 ${q} 的值` }),
       rows: windows + 1,
       columns: 2,
       initial: Array.from({ length: windows + 1 }, () => [null, null]),
       rowLabels: ['p', ...Array.from({ length: windows }, (_, s) => `t${s}`)],
-      columnLabels: ['value', 'check'],
+      columnLabels: [
+        trace.say({ en: 'value', zh: '值' }),
+        trace.say({ en: 'check', zh: '检查' }),
+      ],
     });
     let h = 1;
     for (let k = 1; k < m; k++) h = (h * d) % q;
@@ -142,10 +148,10 @@ export const rabinKarp = defineAlgorithm({
       t = mod(d * t + digit(text[i]!), q);
     }
     const window = (s: number) => Array.from({ length: m }, (_, k) => s + k);
-    trace.step(
-      'hash',
-      `Read P and the first window of T as ${m}-digit numbers in radix ${d}, modulo ${q}: p = ${p} and t0 = ${t}. The leading digit of a window is worth h = ${d} to the power ${m - 1}, modulo ${q}, which is ${h}.`,
-    );
+    trace.step('hash', {
+      en: `Read P and the first window of T as ${m}-digit numbers in radix ${d}, modulo ${q}: p = ${p} and t0 = ${t}. The leading digit of a window is worth h = ${d} to the power ${m - 1}, modulo ${q}, which is ${h}.`,
+      zh: `把 P 和 T 的第一个窗口都看作 ${d} 进制的 ${m} 位数，模 ${q}：p = ${p}，t0 = ${t}。窗口最高位的权值是 h = ${d} 的 ${m - 1} 次方模 ${q}，即 ${h}。`,
+    });
     values
       .set({ cell: [0, 0], value: p })
       .set({ cell: [1, 0], value: t })
@@ -162,8 +168,14 @@ export const rabinKarp = defineAlgorithm({
       trace.step(
         'window',
         t === p
-          ? `Shift ${s}: t${s} = ${t} equals p = ${p}, so the characters must be checked.`
-          : `Shift ${s}: t${s} = ${t} is not p = ${p}, so shift ${s} is not valid; no character is compared.`,
+          ? {
+              en: `Shift ${s}: t${s} = ${t} equals p = ${p}, so the characters must be checked.`,
+              zh: `偏移 ${s}：t${s} = ${t} 等于 p = ${p}，所以需要逐个检查字符。`,
+            }
+          : {
+              en: `Shift ${s}: t${s} = ${t} is not p = ${p}, so shift ${s} is not valid; no character is compared.`,
+              zh: `偏移 ${s}：t${s} = ${t} 不等于 p = ${p}，所以偏移 ${s} 无效，不用比较字符。`,
+            },
       );
       T.align({ shift: s }).pointer({ name: 's', index: s });
       T.highlight({ indices: window(s) });
@@ -180,19 +192,28 @@ export const rabinKarp = defineAlgorithm({
         trace.step(
           'verify',
           valid
-            ? `The ${m} characters match one by one.`
-            : `P[${j}] is ${pattern[j]} but T[${s + j}] is ${text[s + j]}.`,
+            ? {
+                en: `The ${m} characters match one by one.`,
+                zh: `${m} 个字符逐个匹配。`,
+              }
+            : {
+                en: `P[${j}] is ${pattern[j]} but T[${s + j}] is ${text[s + j]}.`,
+                zh: `P[${j}] 是 ${pattern[j]}，但 T[${s + j}] 是 ${text[s + j]}。`,
+              },
         );
         for (let k = 0; k <= Math.min(j, m - 1); k++) T.check({ j: k });
         if (valid) {
-          trace.step('found', `${s} is a valid shift.`);
+          trace.step('found', {
+            en: `${s} is a valid shift.`,
+            zh: `${s} 是一个有效偏移。`,
+          });
           values.set({ cell: [s + 1, 1], value: 'match' });
           record(handles, s, m, found);
         } else {
-          trace.step(
-            'spurious',
-            `The values agree but the strings differ: a spurious hit, and shift ${s} is not valid.`,
-          );
+          trace.step('spurious', {
+            en: `The values agree but the strings differ: a spurious hit, and shift ${s} is not valid.`,
+            zh: `数值相等但字符串不同：这是一次伪命中，偏移 ${s} 无效。`,
+          });
           values.set({ cell: [s + 1, 1], value: 'spurious' });
           spurious++;
         }
@@ -202,20 +223,20 @@ export const rabinKarp = defineAlgorithm({
         const added = digit(text[s + m]!);
         const before = t;
         t = mod(d * (t - dropped * h) + added, q);
-        trace.step(
-          'roll',
-          `Slide the window: take away the leading digit ${dropped} times h, shift the rest up one place, and bring in ${added}: t${s + 1} = (${d} · (${before} − ${dropped} · ${h}) + ${added}) mod ${q} = ${t}.`,
-        );
+        trace.step('roll', {
+          en: `Slide the window: take away the leading digit ${dropped} times h, shift the rest up one place, and bring in ${added}: t${s + 1} = (${d} · (${before} − ${dropped} · ${h}) + ${added}) mod ${q} = ${t}.`,
+          zh: `滑动窗口：减去最高位 ${dropped} 乘以 h，其余各位左移一位，再加入 ${added}：t${s + 1} = (${d} · (${before} − ${dropped} · ${h}) + ${added}) mod ${q} = ${t}。`,
+        });
         values
           .set({ cell: [s + 2, 0], value: t })
           .highlight({ cells: [[s + 2, 0]] });
         T.highlight({ indices: window(s + 1) });
       }
     }
-    trace.step(
-      'done',
-      `Every window tried: ${shiftsFound(found)}${spurious === 0 ? ', with no spurious hit' : `, after ${spurious} spurious hit${spurious === 1 ? '' : 's'}`}.`,
-    );
+    trace.step('done', {
+      en: `Every window tried: ${shiftsFound(found)}${spurious === 0 ? ', with no spurious hit' : `, after ${spurious} spurious hit${spurious === 1 ? '' : 's'}`}.`,
+      zh: `每个窗口都试过了：${shiftsFoundZh(found)}${spurious === 0 ? '，没有伪命中' : `，其间有 ${spurious} 次伪命中`}。`,
+    });
     T.pointer({ name: 's', index: null });
     return { results: found };
   },

@@ -34,10 +34,12 @@ const Block = z
 
 export const offlineCaching = defineAlgorithm({
   id: 'offline-caching',
-  title: 'Offline caching',
+  title: { en: 'Offline caching', zh: '离线缓存' },
   topic: 'greedy',
-  summary:
-    'Serves a known sequence of requests with a cache of k blocks, evicting on each full miss the block requested furthest in the future, for the fewest misses possible.',
+  summary: {
+    en: 'Serves a known sequence of requests with a cache of k blocks, evicting on each full miss the block requested furthest in the future, for the fewest misses possible.',
+    zh: '用容量为 k 个块的缓存处理一串已知的请求：缓存满时未命中，就换出下一次请求最晚的块，使未命中次数最少。',
+  },
   input: z.strictObject({
     requests: listField(
       z
@@ -104,7 +106,10 @@ export const offlineCaching = defineAlgorithm({
     const R = trace.add('r', { kind: 'array', initial: [...requests] });
     const C = trace.add('cache', {
       kind: 'array',
-      label: `the cache, ${k} block${k === 1 ? '' : 's'}`,
+      label: trace.say({
+        en: `the cache, ${k} block${k === 1 ? '' : 's'}`,
+        zh: `缓存，${k} 个块`,
+      }),
       place: 'side',
       initial: Array.from({ length: k }, () => ''),
     });
@@ -126,7 +131,10 @@ export const offlineCaching = defineAlgorithm({
       if (slot >= 0) {
         trace.step(
           'check',
-          `Request ${i}, ${block}: it is in the cache, a hit.`,
+          {
+            en: `Request ${i}, ${block}: it is in the cache, a hit.`,
+            zh: `请求 ${i}，${block}：它在缓存中，命中。`,
+          },
           {
             vars: { i, misses },
           },
@@ -140,7 +148,10 @@ export const offlineCaching = defineAlgorithm({
         cache.push(block);
         trace.step(
           'miss',
-          `Request ${i}, ${block}: a miss, the ${ordinal(misses)}. The cache has room: ${block} goes into slot ${cache.length - 1}.`,
+          {
+            en: `Request ${i}, ${block}: a miss, the ${ordinal(misses)}. The cache has room: ${block} goes into slot ${cache.length - 1}.`,
+            zh: `请求 ${i}，${block}：未命中，这是第 ${misses} 次。缓存还有空位：${block} 放进位置 ${cache.length - 1}。`,
+          },
           { vars: { i, misses } },
         );
         R.pointer({ name: 'i', index: i }).highlight({ indices: [i] });
@@ -156,9 +167,14 @@ export const offlineCaching = defineAlgorithm({
       const z = uses.indexOf(Math.max(...uses));
       const when = (b: string, j: number) =>
         j === Infinity ? `${b} never again` : `${b} at ${j}`;
+      const whenZh = (b: string, j: number) =>
+        j === Infinity ? `${b} 不再需要` : `${b} 在 ${j}`;
       trace.step(
         'evict',
-        `Request ${i}, ${block}: a miss, the ${ordinal(misses)}, and the cache is full. Next requests: ${cache.map((b, s) => when(b, uses[s]!)).join(', ')}. Evict ${cache[z]}, ${uses[z] === Infinity ? 'never needed again' : 'needed furthest in the future'}, for ${block}.`,
+        {
+          en: `Request ${i}, ${block}: a miss, the ${ordinal(misses)}, and the cache is full. Next requests: ${cache.map((b, s) => when(b, uses[s]!)).join(', ')}. Evict ${cache[z]}, ${uses[z] === Infinity ? 'never needed again' : 'needed furthest in the future'}, for ${block}.`,
+          zh: `请求 ${i}，${block}：未命中，这是第 ${misses} 次，而且缓存已满。各块的下一次请求：${cache.map((b, s) => whenZh(b, uses[s]!)).join('，')}。换出${uses[z] === Infinity ? '不再需要的' : '下一次请求最晚的'} ${cache[z]}，放入 ${block}。`,
+        },
         { vars: { i, misses } },
       );
       R.pointer({ name: 'i', index: i }).highlight({
@@ -170,7 +186,10 @@ export const offlineCaching = defineAlgorithm({
     });
     trace.step(
       'done',
-      `${n} request${n === 1 ? '' : 's'}, ${misses} miss${misses === 1 ? '' : 'es'}: no strategy misses fewer.`,
+      {
+        en: `${n} request${n === 1 ? '' : 's'}, ${misses} miss${misses === 1 ? '' : 'es'}: no strategy misses fewer.`,
+        zh: `${n} 个请求，未命中 ${misses} 次：没有哪种策略的未命中次数更少。`,
+      },
       { vars: { misses } },
     );
     R.pointer({ name: 'i', index: null });

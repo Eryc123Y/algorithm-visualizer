@@ -27,10 +27,12 @@ const Activity = z
 
 export const activitySelection = defineAlgorithm({
   id: 'activity-selection',
-  title: 'Activity selection',
+  title: { en: 'Activity selection', zh: '活动选择' },
   topic: 'greedy',
-  summary:
-    'Chooses the most activities that do not overlap by always taking, next, the compatible activity that finishes first.',
+  summary: {
+    en: 'Chooses the most activities that do not overlap by always taking, next, the compatible activity that finishes first.',
+    zh: '选出最多的互不重叠的活动：每次都选与已选活动兼容、最早结束的那个。',
+  },
   input: z.strictObject({
     activities: z
       .array(Activity)
@@ -97,7 +99,7 @@ export const activitySelection = defineAlgorithm({
     });
     const chosen = trace.add('A', {
       kind: 'array',
-      label: 'A: the activities chosen',
+      label: trace.say({ en: 'A: the activities chosen', zh: 'A：选中的活动' }),
       place: 'side',
       initial: names.map(() => ''),
     });
@@ -109,7 +111,10 @@ export const activitySelection = defineAlgorithm({
 
     trace.step(
       'first',
-      `${reordered ? `Sorted by finish time, a1 to a${n} are the given activities ${sorted.map((a) => a.given + 1).join(', ')}. ` : ''}a1 = [${sorted[0]!.s}, ${sorted[0]!.f}) finishes first: take it.`,
+      {
+        en: `${reordered ? `Sorted by finish time, a1 to a${n} are the given activities ${sorted.map((a) => a.given + 1).join(', ')}. ` : ''}a1 = [${sorted[0]!.s}, ${sorted[0]!.f}) finishes first: take it.`,
+        zh: `${reordered ? `按结束时间排序后，a1 到 a${n} 依次是给定的第 ${sorted.map((a) => a.given + 1).join(', ')} 个活动。` : ''}a1 = [${sorted[0]!.s}, ${sorted[0]!.f}) 最早结束：选它。`,
+      },
       { vars: { k: 1 } },
     );
     table.settle({ cells: column(0) });
@@ -123,8 +128,14 @@ export const activitySelection = defineAlgorithm({
       trace.step(
         'check',
         fits
-          ? `a${m + 1} starts at ${a.s}, no earlier than a${k + 1} finishes, at ${last.f}: take it.`
-          : `a${m + 1} starts at ${a.s}, before a${k + 1} finishes, at ${last.f}: it overlaps, so skip it.`,
+          ? {
+              en: `a${m + 1} starts at ${a.s}, no earlier than a${k + 1} finishes, at ${last.f}: take it.`,
+              zh: `a${m + 1} 在 ${a.s} 开始，不早于 a${k + 1} 的结束时间 ${last.f}：选它。`,
+            }
+          : {
+              en: `a${m + 1} starts at ${a.s}, before a${k + 1} finishes, at ${last.f}: it overlaps, so skip it.`,
+              zh: `a${m + 1} 在 ${a.s} 开始，早于 a${k + 1} 的结束时间 ${last.f}：两者重叠，跳过它。`,
+            },
         { vars: { m: m + 1, k: k + 1 } },
       );
       table.highlight({
@@ -143,7 +154,10 @@ export const activitySelection = defineAlgorithm({
     }
     trace.step(
       'done',
-      `A holds ${taken === 1 ? 'one activity' : `${taken} activities`} that do not overlap; no choice could hold more.`,
+      {
+        en: `A holds ${taken === 1 ? 'one activity' : `${taken} activities`} that do not overlap; no choice could hold more.`,
+        zh: `A 中有 ${taken} 个互不重叠的活动；任何选法都不会更多。`,
+      },
       { vars: { k: k + 1 } },
     );
   },
