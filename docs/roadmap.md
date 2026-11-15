@@ -234,7 +234,7 @@ The owner's brief (2026-11-14): the site still looks bare and says too little. M
 - [x] **5.9 A logo** _owner_: the owner picked candidate 1, frames stacked like a flipbook with the front one playing; it is in `docs/brand/`, the site's bar and its favicon (#153).
 - [x] **5.10 The drafting redesign.** The owner asked for the site to look like a portal, not a documentation site, and picked a direction on the design canvas: a drafting sheet (grid paper, ink-blue frames, red annotations, IBM Plex) laid out flat and large. In two parts:
   - part 1 (#157): the design system on every page, and the home page's story, where the run's steps scroll by beside a pinned sheet that draws the step being read;
-  - part 2 (#PR2): the catalogue's thumbnails flip through four frames of their run on hover, with a ruler marking the frame; pages cross-fade into each other and a card's title grows into its page's heading (cross-document view transitions, off for reduced motion); and the share page's player and notes get the same finish. The guide, module and project pages needed nothing more than part 1's design system.
+  - part 2 (#158): the catalogue's thumbnails flip through four frames of their run on hover, with a ruler marking the frame; pages cross-fade into each other and a card's title grows into its page's heading (cross-document view transitions, off for reduced motion); and the share page's player and notes get the same finish. The guide, module and project pages needed nothing more than part 1's design system.
 
 ## After 1.0
 
