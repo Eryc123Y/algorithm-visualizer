@@ -158,10 +158,12 @@ const op = operationsOf<BTree, From, 'btree'>();
 /** B-trees: search, and CLRS's one-pass insertion and deletion. */
 export const bTree = defineStructure<BTree, From, 'btree'>({
   id: 'b-tree',
-  title: 'B-tree',
+  title: { en: 'B-tree', zh: 'B 树' },
   topic: 'trees',
-  summary:
-    'A balanced search tree whose nodes hold between t − 1 and 2t − 1 keys: insertion splits full nodes on the way down, and deletion makes sure each node it enters has a key to spare.',
+  summary: {
+    en: 'A balanced search tree whose nodes hold between t − 1 and 2t − 1 keys: insertion splits full nodes on the way down, and deletion makes sure each node it enters has a key to spare.',
+    zh: '一种平衡搜索树，每个节点有 t − 1 到 2t − 1 个关键字：插入时在向下的路上分裂满节点，删除时保证进入的每个节点都有多余的关键字。',
+  },
   name: 'T',
   kind: 'btree',
   from: FromSchema,
@@ -191,8 +193,10 @@ export const bTree = defineStructure<BTree, From, 'btree'>({
     op({
       name: 'search',
       title: { en: 'search', zh: '查找' },
-      summary:
-        'Walks down from the root, comparing the key with each node’s keys left to right, to the key or to a leaf.',
+      summary: {
+        en: 'Walks down from the root, comparing the key with each node’s keys left to right, to the key or to a leaf.',
+        zh: '从根往下走，把关键字和每个节点中的关键字从左到右比较，直到找到它或者到达叶子。',
+      },
       args: { key: Key.describe('The key to find.') },
       examples: [
         { from: SAMPLE, key: 'R' },
@@ -211,8 +215,10 @@ export const bTree = defineStructure<BTree, From, 'btree'>({
     op({
       name: 'insert',
       title: { en: 'insert', zh: '插入' },
-      summary:
-        'Inserts a key into a leaf in one pass down, splitting every full node first; a full root splits under a new root, which is how the tree grows.',
+      summary: {
+        en: 'Inserts a key into a leaf in one pass down, splitting every full node first; a full root splits under a new root, which is how the tree grows.',
+        zh: '一趟向下把关键字插入叶子，先分裂遇到的每个满节点；满的根在一个新根下面分裂，树就是这样长高的。',
+      },
       args: { key: Key.describe('The key to insert.') },
       examples: [
         { from: CLRS_DELETE, key: 'H' },
@@ -231,8 +237,10 @@ export const bTree = defineStructure<BTree, From, 'btree'>({
     op({
       name: 'delete',
       title: { en: 'delete', zh: '删除' },
-      summary:
-        'Deletes a key in one pass down, merging or borrowing so that every node it enters has at least t keys, as in CLRS’s cases 1 to 3.',
+      summary: {
+        en: 'Deletes a key in one pass down, merging or borrowing so that every node it enters has at least t keys, as in CLRS’s cases 1 to 3.',
+        zh: '一趟向下删除关键字，通过合并或借用，使进入的每个节点至少有 t 个关键字，即 CLRS 中的情况 1 到 3。',
+      },
       args: { key: Key.describe('The key to delete.') },
       examples: [
         { from: CLRS_DELETE, key: 'M' },

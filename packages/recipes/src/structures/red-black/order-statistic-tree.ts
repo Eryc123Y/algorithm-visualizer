@@ -41,6 +41,7 @@ const family: Family<number> = {
   keys: numberKeys,
   aug: {
     field: 'size',
+    fieldZh: '大小',
     of: (_, left, right) => 1 + (left ?? 0) + (right ?? 0),
     down: (size) => size + 1,
     note: (size) => `s=${size}`,
@@ -80,23 +81,27 @@ function select(t: State, i: number, run: Run<number>): Applied<State> {
     const left = fieldOf(t, node.left) ?? 0;
     const r = left + 1;
     const head = `At ${node.key}: ${keysBelow(left)} on its left make it the ${ordinal(r)} here`;
+    const headZh = `在 ${node.key}：它左边有 ${left} 个关键字，所以它在这里排第 ${r}`;
     if (want === r) {
-      step(
-        'found',
-        `${head}, the one we want: ${node.key} is the ${ordinal(i)} smallest key.`,
-      );
+      step('found', {
+        en: `${head}, the one we want: ${node.key} is the ${ordinal(i)} smallest key.`,
+        zh: `${headZh}，正是要找的：${node.key} 是第 ${i} 小的关键字。`,
+      });
       on.pointer({ name: 'x', node: x }).settle({ node: x });
       return { state: t, result: node.key };
     }
     if (want < r) {
-      step('left', `${head}; we want the ${ordinal(want)}: go left.`);
+      step('left', {
+        en: `${head}; we want the ${ordinal(want)}: go left.`,
+        zh: `${headZh}；要找的是第 ${want} 个：往左走。`,
+      });
       on.pointer({ name: 'x', node: x }).highlight({ nodes: [x] });
       x = node.left!;
     } else {
-      step(
-        'right',
-        `${head}; we want the ${ordinal(want)}, so skip ${keysBelow(r)} and look for the ${ordinal(want - r)} on the right.`,
-      );
+      step('right', {
+        en: `${head}; we want the ${ordinal(want)}, so skip ${keysBelow(r)} and look for the ${ordinal(want - r)} on the right.`,
+        zh: `${headZh}；要找的是第 ${want} 个，所以跳过这 ${r} 个关键字，在右边找第 ${want - r} 个。`,
+      });
       on.pointer({ name: 'x', node: x }).highlight({ nodes: [x] });
       want -= r;
       x = node.right!;
@@ -111,28 +116,31 @@ function rank(t: State, key: number, run: Run<number>): Applied<State> {
   while (x !== null) {
     const node = nodeOf(t, x);
     if (node.key === key) {
-      step('find', `Found ${key}.`);
+      step('find', { en: `Found ${key}.`, zh: `找到 ${key}。` });
       on.pointer({ name: 'x', node: x }).highlight({ nodes: [x] });
       break;
     }
     const side = key < node.key ? 'left' : 'right';
-    step(
-      'find',
-      `${key} ${side === 'left' ? '<' : '>'} ${node.key}: go ${side}.`,
-    );
+    step('find', {
+      en: `${key} ${side === 'left' ? '<' : '>'} ${node.key}: go ${side}.`,
+      zh: `${key} ${side === 'left' ? '<' : '>'} ${node.key}：往${side === 'left' ? '左' : '右'}走。`,
+    });
     on.pointer({ name: 'x', node: x }).highlight({ nodes: [x] });
     x = node[side];
   }
   if (x === null) {
-    step('missing', `${key} is not in the tree, so it has no rank.`);
+    step('missing', {
+      en: `${key} is not in the tree, so it has no rank.`,
+      zh: `${key} 不在树中，所以没有秩。`,
+    });
     on.pointer({ name: 'x', node: null });
     return { state: t, result: null };
   }
   let r = (fieldOf(t, nodeOf(t, x).left) ?? 0) + 1;
-  step(
-    'start',
-    `${key} has ${keysBelow(r - 1)} on its left, so it is the ${ordinal(r)} in its own subtree.`,
-  );
+  step('start', {
+    en: `${key} has ${keysBelow(r - 1)} on its left, so it is the ${ordinal(r)} in its own subtree.`,
+    zh: `${key} 左边有 ${r - 1} 个关键字，所以它在自己的子树中排第 ${r}。`,
+  });
   on.pointer({ name: 'y', node: x });
   for (let y = x; y !== t.root;) {
     const p = nodeOf(t, y).parent!;
@@ -140,21 +148,24 @@ function rank(t: State, key: number, run: Run<number>): Applied<State> {
     if (sideOf(t, y) === 'right') {
       const left = fieldOf(t, nodeOf(t, p).left) ?? 0;
       r += left + 1;
-      step(
-        'add',
-        `${yk} is a right child, so its parent ${pk} and the ${keysBelow(left)} on ${pk}'s left come before ${key} too: ${key} is the ${ordinal(r)} so far.`,
-      );
+      step('add', {
+        en: `${yk} is a right child, so its parent ${pk} and the ${keysBelow(left)} on ${pk}'s left come before ${key} too: ${key} is the ${ordinal(r)} so far.`,
+        zh: `${yk} 是右孩子，所以它的父节点 ${pk} 和 ${pk} 左边的 ${left} 个关键字也排在 ${key} 前面：${key} 目前排第 ${r}。`,
+      });
       on.highlight({ nodes: [p] });
-      step('up', `Go up to ${pk}.`);
+      step('up', { en: `Go up to ${pk}.`, zh: `往上走到 ${pk}。` });
     } else
-      step(
-        'up',
-        `${yk} is a left child, so ${pk} and its right subtree come after ${key}: nothing to add. Go up to ${pk}.`,
-      );
+      step('up', {
+        en: `${yk} is a left child, so ${pk} and its right subtree come after ${key}: nothing to add. Go up to ${pk}.`,
+        zh: `${yk} 是左孩子，所以 ${pk} 和它的右子树都排在 ${key} 后面：不用加。往上走到 ${pk}。`,
+      });
     on.pointer({ name: 'y', node: p }).highlight({ nodes: [p] });
     y = p;
   }
-  step('rank', `At the root: ${key} is the ${ordinal(r)} smallest key.`);
+  step('rank', {
+    en: `At the root: ${key} is the ${ordinal(r)} smallest key.`,
+    zh: `到达根：${key} 是第 ${r} 小的关键字。`,
+  });
   on.pointer({ name: 'y', node: null }).settle({ node: x });
   return { state: t, result: r };
 }
@@ -178,10 +189,12 @@ const op = operationsOf<State, From<number>, 'tree'>();
 /** Selection and rank in a red–black tree that keeps subtree sizes. */
 export const orderStatisticTree = defineStructure<State, From<number>, 'tree'>({
   id: 'order-statistic-tree',
-  title: 'Order-statistic tree',
+  title: { en: 'Order-statistic tree', zh: '顺序统计树' },
   topic: 'trees',
-  summary:
-    'A red–black tree whose nodes keep their subtree sizes, so that the key of any rank, and the rank of any key, is found on one path.',
+  summary: {
+    en: 'A red–black tree whose nodes keep their subtree sizes, so that the key of any rank, and the rank of any key, is found on one path.',
+    zh: '节点记录子树大小的红黑树，这样任意秩的关键字和任意关键字的秩，都能沿一条路径找到。',
+  },
   name: 'T',
   kind: 'tree',
   from: fromSchema(
@@ -210,8 +223,10 @@ export const orderStatisticTree = defineStructure<State, From<number>, 'tree'>({
     op({
       name: 'select',
       title: { en: 'select', zh: '选择' },
-      summary:
-        'Finds the key of rank i (the ith smallest, from 1), going left or right by the size of each left subtree.',
+      summary: {
+        en: 'Finds the key of rank i (the ith smallest, from 1), going left or right by the size of each left subtree.',
+        zh: '找出秩为 i 的关键字（第 i 小，从 1 算起），根据每个左子树的大小决定往左还是往右。',
+      },
       args: {
         i: z
           .number()
@@ -229,8 +244,10 @@ export const orderStatisticTree = defineStructure<State, From<number>, 'tree'>({
     op({
       name: 'rank',
       title: { en: 'rank', zh: '求秩' },
-      summary:
-        'Finds a key, then counts the keys before it, adding a parent and its left subtree whenever it climbs from a right child.',
+      summary: {
+        en: 'Finds a key, then counts the keys before it, adding a parent and its left subtree whenever it climbs from a right child.',
+        zh: '找到一个关键字，再数出排在它前面的关键字：每次从右孩子往上走时，加上父节点和它的左子树。',
+      },
       args: { key: Key.describe('The key whose rank to find.') },
       examples: [
         { from: SAMPLE, key: 38 },
@@ -244,8 +261,10 @@ export const orderStatisticTree = defineStructure<State, From<number>, 'tree'>({
     op({
       name: 'insert',
       title: { en: 'insert', zh: '插入' },
-      summary:
-        'Inserts a key as in a red–black tree, adding one to the size of every node on the way down; the fixup’s rotations recompute the sizes they change.',
+      summary: {
+        en: 'Inserts a key as in a red–black tree, adding one to the size of every node on the way down; the fixup’s rotations recompute the sizes they change.',
+        zh: '像在红黑树中一样插入关键字，向下走时给路上每个节点的大小加一；修复时的旋转会重新计算它们改变的大小。',
+      },
       args: { key: Key.describe('The key to insert.') },
       examples: [{ from: SAMPLE, key: 15 }],
       code: OS_INSERT,
@@ -262,8 +281,10 @@ export const orderStatisticTree = defineStructure<State, From<number>, 'tree'>({
     op({
       name: 'delete',
       title: { en: 'delete', zh: '删除' },
-      summary:
-        'Deletes a key as in a red–black tree, then recomputes the sizes on the path from where the removed node’s place was filled up to the root.',
+      summary: {
+        en: 'Deletes a key as in a red–black tree, then recomputes the sizes on the path from where the removed node’s place was filled up to the root.',
+        zh: '像在红黑树中一样删除关键字，再从被删节点的位置被填补的地方往上走到根，重新计算路径上的大小。',
+      },
       args: { key: Key.describe('The key to delete.') },
       examples: [{ from: SAMPLE, key: 17 }],
       code: OS_DELETE,

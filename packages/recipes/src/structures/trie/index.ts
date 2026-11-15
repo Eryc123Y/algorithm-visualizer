@@ -120,7 +120,10 @@ function insert(
       `The trie is full: it holds at most ${MAX_WORDS} words`,
     );
   const t = marked(s, trace, on);
-  t.step('start', `Insert "${word}": start at the root.`);
+  t.step('start', {
+    en: `Insert "${word}": start at the root.`,
+    zh: `插入“${word}”：从根开始。`,
+  });
   on.pointer({ name: 'x', node: ROOT });
   let state = s;
   let at = ROOT;
@@ -128,7 +131,10 @@ function insert(
     const n = nodeOf(state, at);
     const child = childOf(n, ch);
     if (child !== undefined) {
-      t.step('follow', `Follow the child "${ch}".`);
+      t.step('follow', {
+        en: `Follow the child "${ch}".`,
+        zh: `沿孩子“${ch}”往下走。`,
+      });
       on.pointer({ name: 'x', node: child }).highlight({ nodes: [child] });
       at = child;
       continue;
@@ -146,7 +152,10 @@ function insert(
       children,
     });
     state = withNode(state, id, { ch, children: [], word: false });
-    t.step('add', `There is no child "${ch}" yet: add it and go down.`);
+    t.step('add', {
+      en: `There is no child "${ch}" yet: add it and go down.`,
+      zh: `还没有孩子“${ch}”：添加它，再往下走。`,
+    });
     on.addNode({ node: { id, value: ch }, parent: at, slot });
     on.pointer({ name: 'x', node: id });
     at = id;
@@ -155,8 +164,14 @@ function insert(
   t.step(
     'mark',
     end.word
-      ? `"${word}" was in the trie already: its last node stays marked.`
-      : `Mark the last node: it ends the word "${word}".`,
+      ? {
+          en: `"${word}" was in the trie already: its last node stays marked.`,
+          zh: `“${word}”已经在字典树中：它的最后一个节点保持标记。`,
+        }
+      : {
+          en: `Mark the last node: it ends the word "${word}".`,
+          zh: `标记最后一个节点：单词“${word}”在这里结束。`,
+        },
   );
   on.settle({ node: at }).pointer({ name: 'x', node: null });
   return { state: withNode(state, at, { ...end, word: true }), result: null };
@@ -190,20 +205,26 @@ function search(
   on: On,
 ): Applied<TrieState> {
   const t = marked(s, trace, on);
-  t.step('start', `Search for "${word}": start at the root.`);
+  t.step('start', {
+    en: `Search for "${word}": start at the root.`,
+    zh: `查找“${word}”：从根开始。`,
+  });
   on.pointer({ name: 'x', node: ROOT });
   let at = ROOT;
   for (const ch of word) {
     const child = childOf(nodeOf(s, at), ch);
     if (child === undefined) {
-      t.step(
-        'missing',
-        `There is no child "${ch}": "${word}" is not in the trie.`,
-      );
+      t.step('missing', {
+        en: `There is no child "${ch}": "${word}" is not in the trie.`,
+        zh: `没有孩子“${ch}”：“${word}”不在字典树中。`,
+      });
       on.pointer({ name: 'x', node: null });
       return { state: s, result: false };
     }
-    t.step('follow', `Follow the child "${ch}".`);
+    t.step('follow', {
+      en: `Follow the child "${ch}".`,
+      zh: `沿孩子“${ch}”往下走。`,
+    });
     on.pointer({ name: 'x', node: child }).highlight({ nodes: [child] });
     at = child;
   }
@@ -211,8 +232,14 @@ function search(
   t.step(
     'end',
     found
-      ? `The last node ends a word: "${word}" is in the trie.`
-      : `The last node ends no word: "${word}" is only a prefix of words in the trie.`,
+      ? {
+          en: `The last node ends a word: "${word}" is in the trie.`,
+          zh: `最后一个节点是一个单词的结尾：“${word}”在字典树中。`,
+        }
+      : {
+          en: `The last node ends no word: "${word}" is only a prefix of words in the trie.`,
+          zh: `最后一个节点不是单词的结尾：“${word}”只是字典树中某些单词的前缀。`,
+        },
   );
   on.highlight({ nodes: [at] });
   return { state: s, result: found };
@@ -232,10 +259,12 @@ const sample = ['tea', 'ten', 'to', 'in', 'inn'];
 /** A trie of words. */
 export const trie = defineStructure<TrieState, From, 'tree'>({
   id: 'trie',
-  title: 'Trie',
+  title: { en: 'Trie', zh: '字典树' },
   topic: 'trees',
-  summary:
-    'Inserts and searches words one after another in a trie, where each word is a path of characters from the root.',
+  summary: {
+    en: 'Inserts and searches words one after another in a trie, where each word is a path of characters from the root.',
+    zh: '在字典树中依次插入和查找单词，每个单词都是一条从根出发的字符路径。',
+  },
   name: 'trie',
   kind: 'tree',
   from: listField(
@@ -282,8 +311,10 @@ export const trie = defineStructure<TrieState, From, 'tree'>({
     op({
       name: 'insert',
       title: { en: 'insert', zh: '插入' },
-      summary:
-        'Inserts a word, adding the children its path lacks and marking the node that ends it.',
+      summary: {
+        en: 'Inserts a word, adding the children its path lacks and marking the node that ends it.',
+        zh: '插入一个单词：补上它的路径上缺少的孩子，并标记它结束的节点。',
+      },
       args: { word: Word.describe('The word to insert.') },
       examples: [{ from: sample, word: 'tent' }],
       code: INSERT,
@@ -293,8 +324,10 @@ export const trie = defineStructure<TrieState, From, 'tree'>({
     op({
       name: 'search',
       title: { en: 'search', zh: '查找' },
-      summary:
-        'Follows a word from the root and reports whether the node it ends at marks a word.',
+      summary: {
+        en: 'Follows a word from the root and reports whether the node it ends at marks a word.',
+        zh: '从根开始沿着单词走，报告它停在的节点是否标记为一个单词的结尾。',
+      },
       args: { word: Word.describe('The word to look for.') },
       examples: [
         { from: sample, word: 'ten' },

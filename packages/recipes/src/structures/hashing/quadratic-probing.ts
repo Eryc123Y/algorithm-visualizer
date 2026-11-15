@@ -12,16 +12,27 @@ const isPowerOf2 = (m: number) => (m & (m - 1)) === 0;
 
 export const quadraticProbing = openAddressing({
   id: 'quadratic-probing',
-  title: 'Hash table with quadratic probing',
-  summary:
-    'Inserts and searches integer keys one after another in a hash table that probes the slots (k + i(i + 1)/2) mod m, jumping 1, 2, 3, … slots further each time.',
-  sequence: '(k + i(i + 1)/2) mod m for i = 0, 1, and so on',
+  title: { en: 'Hash table with quadratic probing', zh: '二次探查散列表' },
+  summary: {
+    en: 'Inserts and searches integer keys one after another in a hash table that probes the slots (k + i(i + 1)/2) mod m, jumping 1, 2, 3, … slots further each time.',
+    zh: '在散列表中依次插入和查找整数关键字，依次探查槽 (k + i(i + 1)/2) mod m，每次比上一次多跳 1、2、3、…… 个槽。',
+  },
+  sequence: {
+    en: '(k + i(i + 1)/2) mod m for i = 0, 1, and so on',
+    zh: '(k + i(i + 1)/2) mod m（i = 0, 1, …）',
+  },
   scheme: {
     slot: (key, i, size) => mod(mod(key, size) + (i * (i + 1)) / 2, size),
     narrate: (key, i, q, size, holds) =>
       i === 0
-        ? `${key} mod ${size} = ${q}: probe slot ${q}; ${holds}.`
-        : `Jump ${i} further than the last probe: (${mod(key, size)} + ${(i * (i + 1)) / 2}) mod ${size} = ${q}; ${holds}.`,
+        ? {
+            en: `${key} mod ${size} = ${q}: probe slot ${q}; ${holds.en}.`,
+            zh: `${key} mod ${size} = ${q}：探查槽 ${q}；${holds.zh}。`,
+          }
+        : {
+            en: `Jump ${i} further than the last probe: (${mod(key, size)} + ${(i * (i + 1)) / 2}) mod ${size} = ${q}; ${holds.en}.`,
+            zh: `比上一次探查多跳 ${i} 个：(${mod(key, size)} + ${(i * (i + 1)) / 2}) mod ${size} = ${q}；${holds.zh}。`,
+          },
     unfit: (size) =>
       isPowerOf2(size)
         ? undefined

@@ -44,6 +44,8 @@ export interface Keys<K> {
 export interface Augment<K> {
   /** The note's field, e.g. "size". */
   readonly field: string;
+  /** The field's name in Chinese, for narration (ADR 0045). */
+  readonly fieldZh: string;
   /** A node's field from its key and its children's fields; null is NIL. */
   of(key: K, left: number | null, right: number | null): number;
   /** The field of a node on the path down to a new key, as CLRS updates it. */

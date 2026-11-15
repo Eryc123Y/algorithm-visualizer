@@ -48,10 +48,12 @@ const Key = z.number();
 /** Insertion and deletion in a red–black tree of distinct keys. */
 export const redBlackTree = defineStructure<State, From<number>, 'tree'>({
   id: 'red-black-tree',
-  title: 'Red–black tree',
+  title: { en: 'Red–black tree', zh: '红黑树' },
   topic: 'trees',
-  summary:
-    'Inserts and deletes keys in a red–black tree, recolouring and rotating so that no red node has a red child and every path has as many black nodes.',
+  summary: {
+    en: 'Inserts and deletes keys in a red–black tree, recolouring and rotating so that no red node has a red child and every path has as many black nodes.',
+    zh: '在红黑树中插入和删除关键字，通过重新着色和旋转，使红节点没有红孩子，并且每条路径上的黑节点数相同。',
+  },
   name: 'T',
   kind: 'tree',
   from: fromSchema(
@@ -79,8 +81,10 @@ export const redBlackTree = defineStructure<State, From<number>, 'tree'>({
     op({
       name: 'insert',
       title: { en: 'insert', zh: '插入' },
-      summary:
-        'Inserts a key as a red leaf, then recolours and rotates up the tree (RB-INSERT-FIXUP) until no red node has a red child.',
+      summary: {
+        en: 'Inserts a key as a red leaf, then recolours and rotates up the tree (RB-INSERT-FIXUP) until no red node has a red child.',
+        zh: '把关键字作为红色叶子插入，再沿树向上重新着色和旋转（RB-INSERT-FIXUP），直到没有红节点有红孩子。',
+      },
       args: { key: Key.describe('The key to insert.') },
       examples: [
         { from: SAMPLE, key: 4 },
@@ -96,8 +100,10 @@ export const redBlackTree = defineStructure<State, From<number>, 'tree'>({
     op({
       name: 'delete',
       title: { en: 'delete', zh: '删除' },
-      summary:
-        'Deletes a key: its child or its successor takes its place, and if a black node left its place, RB-DELETE-FIXUP restores the black heights.',
+      summary: {
+        en: 'Deletes a key: its child or its successor takes its place, and if a black node left its place, RB-DELETE-FIXUP restores the black heights.',
+        zh: '删除一个关键字：由它的孩子或后继取代它的位置；如果离开原位置的是黑节点，就用 RB-DELETE-FIXUP 恢复黑高。',
+      },
       args: { key: Key.describe('The key to delete.') },
       examples: [
         { from: SAMPLE, key: 1 },

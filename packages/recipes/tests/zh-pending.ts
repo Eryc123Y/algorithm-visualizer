@@ -4,16 +4,6 @@
  * modules; the list is empty when roadmap 5.8 is done.
  */
 export const PENDING_ZH: ReadonlySet<string> = new Set([
-  'red-black-tree',
-  'order-statistic-tree',
-  'interval-tree',
-  'b-tree',
-  'trie',
-  'fibonacci-heap',
-  'hash-chaining',
-  'linear-probing',
-  'quadratic-probing',
-  'double-hashing',
   'lcs',
   'edit-distance',
   'knapsack',
