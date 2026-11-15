@@ -231,8 +231,8 @@ The owner's brief (2026-11-14): the site still looks bare and says too little. M
 - [x] **5.6 Polish.** (#147) Syntax colour in code blocks at build time, the home page's figures playing as a loop, transitions on the tabs, and a pass over spacing and type on every page, in both colour schemes and at phone width.
 - [x] **5.7 The site in Chinese.** `/zh/` holds the home page, the guide and the other pages in Simplified Chinese, with a language switch and `hreflang`. Module pages stay in English until 5.8 (#152).
 - [ ] **5.8 Chinese in the product** _ADR_: the player's chrome and the recipes' narration in Chinese. ADR 0045 (#159): a document is in one language and the protocol stays 1.0; recipes write each text in both languages side by side, and every output is asked for a locale. In several PRs:
-  - the mechanism for the web (#PR): locales in `spec`, `Text` and `trace.say` in recipes, the layout's own words, the player's chrome and its inherited `lang`, share links' `lang`, and Dijkstra's algorithm translated as the first module;
-  - the mechanism for the other outputs (#PR2): the CLI's `--lang`, MCP's `locale` with instructions for models, Typst's `lang` (following `text.lang` in `algomotion`), LaTeX's `lang` key, and TikZ through the figure options;
+  - the mechanism for the web (#160): locales in `spec`, `Text` and `trace.say` in recipes, the layout's own words, the player's chrome and its inherited `lang`, share links' `lang`, and Dijkstra's algorithm translated as the first module;
+  - the mechanism for the other outputs (#161): the CLI's `--lang`, MCP's `locale` with instructions for models, Typst's `lang` (following `text.lang` in `algomotion`), LaTeX's `lang` key, and TikZ through the figure options;
   - the translations, a topic or two at a time, until `PENDING_ZH` is empty;
   - the site's module pages and catalogue in Chinese.
 - [x] **5.9 A logo** _owner_: the owner picked candidate 1, frames stacked like a flipbook with the front one playing; it is in `docs/brand/`, the site's bar and its favicon (#153).
