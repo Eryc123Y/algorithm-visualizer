@@ -23,10 +23,12 @@ import {
 
 export const kruskal = defineAlgorithm({
   id: 'kruskal',
-  title: 'Kruskal’s algorithm',
+  title: { en: 'Kruskal’s algorithm', zh: 'Kruskal 算法' },
   topic: 'graphs',
-  summary:
-    'Builds a minimum spanning forest by taking edges from lightest to heaviest and keeping each that joins two different trees.',
+  summary: {
+    en: 'Builds a minimum spanning forest by taking edges from lightest to heaviest and keeping each that joins two different trees.',
+    zh: '按从轻到重的顺序考虑每条边，保留连接两棵不同树的边，构造最小生成森林。',
+  },
   input: z.strictObject({
     graph: Graph.describe(
       'A graph whose edges are taken as undirected, with at most 100 edges: one column each in the table of edges by weight.',
@@ -72,7 +74,7 @@ export const kruskal = defineAlgorithm({
     const graph = trace.add('g', declareGraph(g, true));
     const table = trace.add('edges', {
       kind: 'table',
-      label: 'edges by weight',
+      label: trace.say({ en: 'edges by weight', zh: '按权重排序的边' }),
       rowLabels: ['w'],
       columnLabels: sorted.map(({ u, v }) => `${u}–${v}`),
       // One row, also when there are no edges.
@@ -81,7 +83,7 @@ export const kruskal = defineAlgorithm({
     });
     const sets = trace.add('sets', {
       kind: 'tree',
-      label: 'disjoint sets',
+      label: trace.say({ en: 'disjoint sets', zh: '不相交集合' }),
       place: 'side',
       nodes: g.nodes.map((v) => ({ id: v, value: v })),
     });
@@ -102,12 +104,18 @@ export const kruskal = defineAlgorithm({
         x = next;
       }
     };
-    trace.step('sort', 'Take the edges in order of weight, lightest first.');
+    trace.step('sort', {
+      en: 'Take the edges in order of weight, lightest first.',
+      zh: '按权重从轻到重依次考虑每条边。',
+    });
     for (const [k, { u, v, w, edge }] of sorted.entries()) {
       const cell: [number, number] = [0, k];
       trace.step(
         'compare',
-        `${u}–${v}, weight ${w}: find the sets of ${u} and ${v}.`,
+        {
+          en: `${u}–${v}, weight ${w}: find the sets of ${u} and ${v}.`,
+          zh: `${u}–${v}，权重 ${w}：找出 ${u} 和 ${v} 所在的集合。`,
+        },
         { vars: { w } },
       );
       graph.highlight({ edges: [edge] });
@@ -119,7 +127,10 @@ export const kruskal = defineAlgorithm({
         const r = find(u);
         trace.step(
           'compare',
-          `${u} and ${v} are both in the set of ${r}: ${u}–${v} would close a cycle, so skip it.`,
+          {
+            en: `${u} and ${v} are both in the set of ${r}: ${u}–${v} would close a cycle, so skip it.`,
+            zh: `${u} 和 ${v} 都在 ${r} 的集合中：${u}–${v} 会形成环，跳过。`,
+          },
           { id: 'skip' },
         );
         compress(u);
@@ -133,10 +144,10 @@ export const kruskal = defineAlgorithm({
       // UNION(u, v): the root of lower rank goes under the other; on a
       // tie, the root of u's set goes under the root of v's.
       const [child, root] = rank.get(ru)! > rank.get(rv)! ? [rv, ru] : [ru, rv];
-      trace.step(
-        'take',
-        `${u} is in the set of ${ru} and ${v} in the set of ${rv}: take ${u}–${v} and unite the sets, hanging ${child} under ${root}.`,
-      );
+      trace.step('take', {
+        en: `${u} is in the set of ${ru} and ${v} in the set of ${rv}: take ${u}–${v} and unite the sets, hanging ${child} under ${root}.`,
+        zh: `${u} 在 ${ru} 的集合中，${v} 在 ${rv} 的集合中：选取 ${u}–${v} 并合并两个集合，把 ${child} 挂到 ${root} 下面。`,
+      });
       compress(u);
       compress(v);
       sets.highlight({ nodes: [ru, rv] });
@@ -146,12 +157,18 @@ export const kruskal = defineAlgorithm({
       parent.set(child, root);
       if (rank.get(ru) === rank.get(rv)) {
         rank.set(root, rank.get(root)! + 1);
-        sets.annotate({ node: root, text: `rank ${rank.get(root)}` });
+        sets.annotate({
+          node: root,
+          text: trace.say({
+            en: `rank ${rank.get(root)}`,
+            zh: `秩 ${rank.get(root)}`,
+          }),
+        });
       }
     }
-    trace.step(
-      'done',
-      'Every edge is considered: the selected edges form a minimum spanning tree, or a forest if the graph is not connected.',
-    );
+    trace.step('done', {
+      en: 'Every edge is considered: the selected edges form a minimum spanning tree, or a forest if the graph is not connected.',
+      zh: '每条边都考虑过了：选中的边构成一棵最小生成树；如果图不连通，则构成一片最小生成森林。',
+    });
   },
 });

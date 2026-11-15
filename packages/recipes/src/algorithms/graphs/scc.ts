@@ -61,10 +61,12 @@ export const SCC_EXAMPLE: z.output<typeof Graph> = {
 
 export const stronglyConnectedComponents = defineAlgorithm({
   id: 'strongly-connected-components',
-  title: 'Strongly connected components',
+  title: { en: 'Strongly connected components', zh: '强连通分量' },
   topic: 'graphs',
-  summary:
-    'Splits a directed graph into its strongly connected components: one depth-first search orders the vertices by finishing time, and a second, following edges backwards in that order, finds one component at a time.',
+  summary: {
+    en: 'Splits a directed graph into its strongly connected components: one depth-first search orders the vertices by finishing time, and a second, following edges backwards in that order, finds one component at a time.',
+    zh: '把有向图划分为强连通分量：第一次深度优先搜索按完成时间排列顶点，第二次按这个顺序沿反向边搜索，每次找出一个分量。',
+  },
   input: z.strictObject({
     graph: Graph.describe('A graph whose edges are taken as directed.'),
   }),
@@ -145,7 +147,7 @@ export const stronglyConnectedComponents = defineAlgorithm({
     const order = trace.add('L', {
       kind: 'array',
       place: 'side',
-      label: 'L, by finishing time',
+      label: trace.say({ en: 'L, by finishing time', zh: 'L：按完成时间排列' }),
       initial: [],
     });
     const found = trace.add('components', {
@@ -160,24 +162,30 @@ export const stronglyConnectedComponents = defineAlgorithm({
     let time = 0;
     const visit = (u: string): void => {
       seen.add(u);
-      trace.step('discover', `Visit ${u}.`);
+      trace.step('discover', { en: `Visit ${u}.`, zh: `访问 ${u}。` });
       graph.visit({ node: u }).pointer({ name: 'u', node: u });
       for (const { to: v, edge } of adj.get(u)!) {
         const fresh = !seen.has(v);
         trace.step(
           'edge',
           fresh
-            ? `${u} → ${v}: ${v} is not visited yet, so visit it first.`
-            : `${u} → ${v}: ${v} is visited already.`,
+            ? {
+                en: `${u} → ${v}: ${v} is not visited yet, so visit it first.`,
+                zh: `${u} → ${v}：${v} 还没有访问过，先访问它。`,
+              }
+            : {
+                en: `${u} → ${v}: ${v} is visited already.`,
+                zh: `${u} → ${v}：${v} 已经访问过。`,
+              },
         );
         graph.pointer({ name: 'u', node: u }).highlight({ edges: [edge] });
         if (fresh) visit(v);
       }
       time++;
-      trace.step(
-        'finish',
-        `${u} finishes, number ${time}: put it at the front of L, so L lists the vertices by decreasing finishing time.`,
-      );
+      trace.step('finish', {
+        en: `${u} finishes, number ${time}: put it at the front of L, so L lists the vertices by decreasing finishing time.`,
+        zh: `${u} 完成，序号 ${time}：把它放到 L 的最前面，这样 L 按完成时间从晚到早列出顶点。`,
+      });
       graph
         .pointer({ name: 'u', node: u })
         .annotate({ node: u, text: `f=${time}` });
@@ -186,7 +194,10 @@ export const stronglyConnectedComponents = defineAlgorithm({
     };
     for (const u of g.nodes) {
       if (seen.has(u)) continue;
-      trace.step('root', `${u} is not visited yet: start a search there.`);
+      trace.step('root', {
+        en: `${u} is not visited yet: start a search there.`,
+        zh: `${u} 还没有访问过：从它开始一次搜索。`,
+      });
       visit(u);
     }
 
@@ -196,7 +207,10 @@ export const stronglyConnectedComponents = defineAlgorithm({
     const assign = (u: string, c: number): void => {
       component.set(u, c);
       members[c]!.push(u);
-      trace.step('assign', `${u} joins component ${c + 1}.`);
+      trace.step('assign', {
+        en: `${u} joins component ${c + 1}.`,
+        zh: `${u} 加入分量 ${c + 1}。`,
+      });
       // Coloured by component; a settled mark would hide the colour.
       graph
         .group({ node: u, group: (c % 6) as 0 | 1 | 2 | 3 | 4 | 5 })
@@ -206,8 +220,14 @@ export const stronglyConnectedComponents = defineAlgorithm({
         trace.step(
           'reverse',
           fresh
-            ? `Follow ${v} → ${u} backwards: ${v} is in no component yet, so it is in this one.`
-            : `Follow ${v} → ${u} backwards: ${v} is in component ${component.get(v)! + 1} already.`,
+            ? {
+                en: `Follow ${v} → ${u} backwards: ${v} is in no component yet, so it is in this one.`,
+                zh: `沿 ${v} → ${u} 反向走：${v} 还不属于任何分量，所以属于这一个。`,
+              }
+            : {
+                en: `Follow ${v} → ${u} backwards: ${v} is in component ${component.get(v)! + 1} already.`,
+                zh: `沿 ${v} → ${u} 反向走：${v} 已经属于分量 ${component.get(v)! + 1}。`,
+              },
         );
         graph.highlight({ edges: [edge] });
         if (fresh) {
@@ -220,10 +240,10 @@ export const stronglyConnectedComponents = defineAlgorithm({
       if (component.has(u)) continue;
       const c = members.length;
       members.push([]);
-      trace.step(
-        'component',
-        `${u} comes next in L and is in no component: the vertices that reach it, and are in no component yet, form component ${c + 1}.`,
-      );
+      trace.step('component', {
+        en: `${u} comes next in L and is in no component: the vertices that reach it, and are in no component yet, form component ${c + 1}.`,
+        zh: `L 中的下一个是 ${u}，它还不属于任何分量：能到达它且还不属于任何分量的顶点组成分量 ${c + 1}。`,
+      });
       graph.highlight({ nodes: [u] }).pointer({ name: 'u', node: u });
       assign(u, c);
       found.insert({
@@ -231,10 +251,10 @@ export const stronglyConnectedComponents = defineAlgorithm({
         element: { id: `C-${c + 1}`, value: listed(members[c]!) },
       });
     }
-    trace.step(
-      'done',
-      `Every vertex is in a component: ${members.length === 1 ? 'the graph is strongly connected' : `${members.length} components`}.`,
-    );
+    trace.step('done', {
+      en: `Every vertex is in a component: ${members.length === 1 ? 'the graph is strongly connected' : `${members.length} components`}.`,
+      zh: `每个顶点都属于一个分量：${members.length === 1 ? '这个图是强连通的' : `共 ${members.length} 个分量`}。`,
+    });
     graph.pointer({ name: 'u', node: null });
     return { results: [members.length] };
   },
