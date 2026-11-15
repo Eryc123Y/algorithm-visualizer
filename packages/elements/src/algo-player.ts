@@ -53,6 +53,7 @@ import {
   formatErrors,
   ok,
   type Diagnostic,
+  type Locale,
   type Section,
 } from '@algomotion/spec';
 import {
@@ -62,6 +63,7 @@ import {
   type ThemeName,
 } from '@algomotion/svg';
 
+import { CHROME_TEXT } from './chrome-text.ts';
 import { codeLines } from './code-panel.ts';
 import { documentOf } from './content.ts';
 import { PlayerController, type PlaybackState } from './controller.ts';
@@ -88,6 +90,7 @@ import {
   type FrameError,
   type FrameSelector,
 } from './sections.ts';
+import { localeAround, onLangChange } from './lang.ts';
 import { SceneStage } from './stage.ts';
 import { playerStyles } from './styles.ts';
 import { chromeStyles, resolvePlayerTheme } from './chrome.ts';
@@ -330,6 +333,29 @@ export class AlgoPlayer extends LitElement {
     return doc && sectionAt(doc, this.playback.index);
   }
 
+  /**
+   * The locale of the player's chrome and of the runs it records, from the
+   * `lang` it inherits (ADR 0045).
+   */
+  get locale(): Locale {
+    return this.#locale;
+  }
+
+  #locale: Locale = 'en';
+  #stopWatchingLang: (() => void) | undefined;
+
+  /** A `lang` changed somewhere: follow it if it changes the locale. */
+  #onLang = (): void => {
+    const locale = localeAround(this);
+    if (locale === this.#locale) return;
+    this.#locale = locale;
+    // A run is recorded in the locale; a document stays as written, but
+    // the layout's own words follow.
+    if (this.visualization === undefined && this.algorithm) void this.#load();
+    else this.#relayout();
+    this.requestUpdate();
+  };
+
   /** The language of the code on show, if the document names one. */
   get currentLanguage(): string | undefined {
     return this.#listing()?.language;
@@ -339,6 +365,8 @@ export class AlgoPlayer extends LitElement {
 
   override connectedCallback(): void {
     super.connectedCallback();
+    this.#locale = localeAround(this);
+    this.#stopWatchingLang = onLangChange(this.#onLang);
     linkFonts(
       AlgoPlayer.fontsUrl === undefined
         ? defaultFontsUrl()
@@ -368,6 +396,8 @@ export class AlgoPlayer extends LitElement {
 
   override disconnectedCallback(): void {
     super.disconnectedCallback();
+    this.#stopWatchingLang?.();
+    this.#stopWatchingLang = undefined;
     this.removeEventListener('keydown', this.#onKeyDown);
     this.#colorScheme?.removeEventListener('change', this.#onColorScheme);
     globalThis.removeEventListener?.('beforeprint', this.#onBeforePrint);
@@ -483,6 +513,7 @@ export class AlgoPlayer extends LitElement {
       input: this.input ?? undefined,
       src: this.src,
       inline: this.#inline,
+      locale: this.#locale,
     });
     // A document given directly loads at once, without a microtask.
     const content = pending instanceof Promise ? await pending : pending;
@@ -674,6 +705,7 @@ export class AlgoPlayer extends LitElement {
       ...(this.#isDisplay ? bareLayoutOptions : defaultLayoutOptions),
       layout: this.layout === 'narrow' ? 'narrow' : 'wide',
       fonts: this.#sceneTheme().fontMetrics,
+      locale: this.#locale,
     };
   }
 
@@ -771,6 +803,7 @@ export class AlgoPlayer extends LitElement {
     const vars = Object.entries(step?.meta?.vars ?? {});
     const sections = trace?.visualization.sections ?? [];
     const section = this.section;
+    const t = CHROME_TEXT[this.#locale];
 
     return html`
       <div class="player" part="container">
@@ -780,8 +813,8 @@ export class AlgoPlayer extends LitElement {
                 <strong
                   >${
                     this.algorithm && this.visualization === undefined
-                      ? 'This algorithm could not be run on its input.'
-                      : 'This visualization could not be loaded.'
+                      ? t.runFailed
+                      : t.loadFailed
                   }</strong
                 >
                 <pre>${formatErrors(this.errors)}</pre>
@@ -792,8 +825,9 @@ export class AlgoPlayer extends LitElement {
           this.frameError && trace
             ? html`<div class="errors frame-error" role="alert" part="errors">
                 <strong
-                  >Cannot open frame
-                  ${JSON.stringify(this.frameError.selector)}.</strong
+                  >${t.frameFailed(
+                    JSON.stringify(this.frameError.selector),
+                  )}</strong
                 >
                 <p>
                   ${this.frameError.error.message}.
@@ -815,7 +849,7 @@ export class AlgoPlayer extends LitElement {
                       ? html`<select
                           class="languages"
                           part="languages"
-                          aria-label="Code language"
+                          aria-label=${t.codeLanguage}
                           .value=${listing.language ?? ''}
                           @change=${(event: Event) =>
                             this.#chooseLanguage(
@@ -828,7 +862,7 @@ export class AlgoPlayer extends LitElement {
                                 value=${language ?? ''}
                                 ?selected=${language === listing.language}
                               >
-                                ${languageName(language)}
+                                ${languageName(language, this.#locale)}
                               </option>`,
                           )}
                         </select>`
@@ -838,7 +872,11 @@ export class AlgoPlayer extends LitElement {
                     class="code"
                     part="code"
                     role="region"
-                    aria-label=${listing.language === undefined ? 'Source code' : `Source code, ${languageName(listing.language)}`}
+                    aria-label=${t.sourceCode(
+                      listing.language === undefined
+                        ? undefined
+                        : languageName(listing.language, this.#locale),
+                    )}
                     tabindex="0"
                   >
 ${codeLines(listing.source, listing.lineOf(step))}</pre>
@@ -859,11 +897,11 @@ ${codeLines(listing.source, listing.lineOf(step))}</pre>
               : nothing
           }
           <p class="narration" aria-live="polite">
-            ${step?.meta?.narration ?? (index === 0 ? 'Initial state.' : '')}
+            ${step?.meta?.narration ?? (index === 0 ? t.initialState : '')}
           </p>
           ${
             vars.length > 0
-              ? html`<ul class="vars" aria-label="Variables">
+              ? html`<ul class="vars" aria-label=${t.variables}>
                   ${vars.map(([name, value]) => html`<li>${name} = ${JSON.stringify(value)}</li>`)}
                 </ul>`
               : nothing
@@ -876,7 +914,7 @@ ${codeLines(listing.source, listing.lineOf(step))}</pre>
         >
           <button
             type="button"
-            aria-label="Previous step"
+            aria-label=${t.previous}
             ?disabled=${index === 0}
             @click=${() => this.prev()}
           >
@@ -885,7 +923,7 @@ ${codeLines(listing.source, listing.lineOf(step))}</pre>
           <button
             type="button"
             class="primary"
-            aria-label=${playing ? 'Pause' : index === length ? 'Replay' : 'Play'}
+            aria-label=${playing ? t.pause : index === length ? t.replay : t.play}
             ?disabled=${length === 0}
             @click=${() => this.#controller.toggle()}
           >
@@ -893,7 +931,7 @@ ${codeLines(listing.source, listing.lineOf(step))}</pre>
           </button>
           <button
             type="button"
-            aria-label="Next step"
+            aria-label=${t.next}
             ?disabled=${index === length}
             @click=${() => this.next()}
           >
@@ -904,10 +942,10 @@ ${codeLines(listing.source, listing.lineOf(step))}</pre>
             min="0"
             max=${length}
             .value=${String(index)}
-            aria-label="Timeline"
+            aria-label=${t.timeline}
             aria-valuetext=${
               sections.length > 0
-                ? `Frame ${index} of ${length}${section ? `, ${section.title}` : ''}`
+                ? t.frameStatus(index, length, section?.title)
                 : nothing
             }
             @input=${(event: Event) => this.seek(Number((event.target as HTMLInputElement).value))}

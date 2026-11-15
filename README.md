@@ -258,7 +258,7 @@ In slides, a series steps through one frame per overlay, all in one picture ([AD
 #algomotion-slides(only, "dijkstra", "A-B 4, B-C 1, A-C 7, C-D 2", steps: "relax#1..-1")
 ```
 
-In code, `exportFigures(document, { steps, theme, layout })` from `@algomotion/svg` returns the same figures as strings, and `selectSeries` from `@algomotion/core` the frames that selectors name. `prepareFigures(document, { theme, layout })` loads a document once and then draws a figure of any frame, or any series, on demand.
+In code, `exportFigures(document, { steps, theme, layout })` from `@algomotion/svg` returns the same figures as strings, and `selectSeries` from `@algomotion/core` the frames that selectors name. `prepareFigures(document, { theme, layout, locale })` loads a document once and then draws a figure of any frame, or any series, on demand.
 
 ## Embedding
 
@@ -287,7 +287,7 @@ The registry is a second file of the bundle, `algomotion-recipes.js`, which the 
 </algo-player>
 ```
 
-Attributes: `algorithm`, `input`, `src`, `frame`, `theme` (a built-in theme, `auto` for light or dark by the reader's colour scheme, or a day and a night theme such as `"textbook textbook-dark"`), `layout` (`wide`, the default, or `narrow`, which puts side structures below the main one for a narrow column), `speed` (ms per step), `autoplay`, `loop`, `hide-controls`, `hide-code`, `language`. Style the chrome with CSS custom properties such as `--algo-accent`, or its corners with `--algo-radius` (the player), `--algo-control-radius` (buttons and menus) and `--algo-panel-radius` (the code panel), or pass a full scene theme as the `customTheme` property.
+Attributes: `algorithm`, `input`, `src`, `frame`, `theme` (a built-in theme, `auto` for light or dark by the reader's colour scheme, or a day and a night theme such as `"textbook textbook-dark"`), `layout` (`wide`, the default, or `narrow`, which puts side structures below the main one for a narrow column), `speed` (ms per step), `autoplay`, `loop`, `hide-controls`, `hide-code`, `language`, and `lang`, inherited like any `lang`: in Chinese (any `zh` tag) the player's controls and an algorithm's run are in Chinese ([ADR 0045](docs/adr/0045-chinese-in-the-product.md); the modules' narration is being translated). Style the chrome with CSS custom properties such as `--algo-accent`, or its corners with `--algo-radius` (the player), `--algo-control-radius` (buttons and menus) and `--algo-panel-radius` (the code panel), or pass a full scene theme as the `customTheme` property.
 
 Each theme draws in its own fonts. The player links `fonts/fonts.css`, next to its script, the first time a player shows, and the browser downloads only the font files a page draws. A bundler that puts the fonts elsewhere says where with `AlgoPlayer.fontsUrl = '/assets/fonts.css'`, and `AlgoPlayer.fontsUrl = null` turns loading off: text then falls back to similar fonts installed on the reader's system.
 

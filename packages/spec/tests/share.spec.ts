@@ -146,7 +146,7 @@ describe('readShareFragment', () => {
   });
 
   it('reads keys in any order and ignores unknown keys', async () => {
-    expect(await read('frame=2&alg=bfs&lang=python&v=1&')).toEqual({
+    expect(await read('frame=2&alg=bfs&code=python&v=1&')).toEqual({
       algorithm: 'bfs',
       frame: '2',
     });
@@ -359,5 +359,39 @@ describe('checkShareBase', () => {
     if (result.ok) return;
     expect(result.error[0]!.code).toBe('INVALID_LINK');
     expect(result.error[0]!.message).toMatch(message);
+  });
+});
+
+describe('a share link’s language (ADR 0045)', () => {
+  it('carries a locale, and reads one back', async () => {
+    const fragment = await shareFragment({
+      algorithm: 'dijkstra',
+      input: 'A-B 4',
+      lang: 'zh',
+    });
+    if (!fragment.ok) throw new Error('no fragment');
+    expect(fragment.value).toContain('lang=zh');
+    const read = await readShareFragment(fragment.value);
+    expect(read.ok && read.value).toMatchObject({
+      algorithm: 'dijkstra',
+      lang: 'zh',
+    });
+  });
+
+  it('reads any Chinese tag as Chinese and other tags as English', async () => {
+    for (const [tag, locale] of [
+      ['zh-TW', 'zh'],
+      ['zh-Hans', 'zh'],
+      ['en-GB', 'en'],
+      ['fr', 'en'],
+    ] as const) {
+      const read = await readShareFragment(`v=1&alg=bfs&lang=${tag}`);
+      expect(read.ok && read.value).toMatchObject({ lang: locale });
+    }
+  });
+
+  it('leaves the language to the reader when the link names none', async () => {
+    const read = await readShareFragment('v=1&alg=bfs');
+    expect(read.ok && read.value).not.toHaveProperty('lang');
   });
 });

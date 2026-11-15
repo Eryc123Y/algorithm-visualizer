@@ -17,6 +17,7 @@
  * antiparallel edges are spread apart, with their labels outside the pair;
  * a self-loop sits on top of its node.
  */
+import { LAYOUT_WORDS } from './words.ts';
 import type { GraphDecl } from '@algomotion/spec';
 
 import type { Block, LayoutInput } from '../kind.ts';
@@ -543,7 +544,7 @@ export function layoutGraph({
       y: top,
       anchor: 'start',
       role: 'label',
-      text: '(empty)',
+      text: LAYOUT_WORDS[o.locale].empty,
       fontSize: o.indexFontSize,
     });
 

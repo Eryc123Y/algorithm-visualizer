@@ -12,6 +12,7 @@
  * Typst plugin's, can still write and read algorithm links.
  */
 import type { Diagnostic } from './errors.ts';
+import { localeOf, type Locale } from './locale.ts';
 import { err, ok, type Result } from './result.ts';
 
 /** The version of the link format that this code writes and reads. */
@@ -44,6 +45,11 @@ interface ShareView {
   readonly frame?: string | number;
   /** A theme as the player's `theme` attribute takes it. */
   readonly theme?: string;
+  /**
+   * The language to show the run in (ADR 0045); without it, the share page
+   * follows the reader's. Readers that predate it ignore it.
+   */
+  readonly lang?: Locale;
 }
 
 /** What a share link carries: a document, or an algorithm and its input. */
@@ -103,6 +109,7 @@ async function fragmentWithin(
   if (content.frame !== undefined && String(content.frame) !== '0')
     pairs.push(['frame', String(content.frame)]);
   if (content.theme !== undefined) pairs.push(['theme', content.theme]);
+  if (content.lang !== undefined) pairs.push(['lang', content.lang]);
 
   const parts: string[] = [];
   for (const [key, value] of pairs) {
@@ -207,7 +214,15 @@ export function checkShareBase(
 
 // --- Reading ------------------------------------------------------------------
 
-const CONTENT_KEYS = ['v', 'doc', 'alg', 'in', 'frame', 'theme'] as const;
+const CONTENT_KEYS = [
+  'v',
+  'doc',
+  'alg',
+  'in',
+  'frame',
+  'theme',
+  'lang',
+] as const;
 type Key = (typeof CONTENT_KEYS)[number];
 
 /**
@@ -232,7 +247,7 @@ export async function readShareFragment(
 
   const version = checkVersion(get('v'));
   if (!version.ok) return version;
-  for (const key of ['alg', 'frame', 'theme'] as const) {
+  for (const key of ['alg', 'frame', 'theme', 'lang'] as const) {
     const value = get(key);
     if (value !== undefined && value.length > SHARE_LIMITS.textLength)
       return fail(
@@ -246,6 +261,7 @@ export async function readShareFragment(
   const view = {
     ...(get('frame') === undefined ? {} : { frame: get('frame')! }),
     ...(get('theme') === undefined ? {} : { theme: get('theme')! }),
+    ...(get('lang') === undefined ? {} : { lang: localeOf(get('lang')) }),
   };
   if (doc !== undefined && algorithm !== undefined)
     return fail(

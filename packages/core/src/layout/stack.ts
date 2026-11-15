@@ -11,6 +11,7 @@
  *  └───────┘
  * ```
  */
+import { LAYOUT_WORDS } from './words.ts';
 import type { StackDecl } from '@algomotion/spec';
 
 import type { Block, LayoutInput } from '../kind.ts';
@@ -138,7 +139,8 @@ export function layoutStack({
       y: markerY,
       anchor: 'start',
       role: 'label',
-      text: n === 0 ? 'top (empty)' : 'top',
+      text:
+        n === 0 ? LAYOUT_WORDS[o.locale].topEmpty : LAYOUT_WORDS[o.locale].top,
       fontSize: o.pointerFontSize,
     },
   );

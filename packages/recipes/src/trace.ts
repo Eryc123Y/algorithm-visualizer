@@ -6,6 +6,7 @@
  */
 import {
   actionTypesOf,
+  type Locale,
   type StepMeta,
   type StructureDeclInput,
   type StructureKindName,
@@ -13,6 +14,7 @@ import {
 
 import type { Handle, Recorder } from './recorder.ts';
 import type { JoinedCode, Listing } from './snippet.ts';
+import { textIn, type Text } from './text.ts';
 
 export interface StepOptions {
   /** The step's name (ADR 0020); by default its anchor. */
@@ -22,6 +24,13 @@ export interface StepOptions {
 }
 
 export interface Trace {
+  /** The locale the run is written in (ADR 0045). */
+  readonly locale: Locale;
+  /**
+   * `text` in the run's locale, for the labels, notes and annotations a
+   * recipe passes to its structures.
+   */
+  say(text: Text): string;
   /** Declares a structure and returns the handle that records its actions. */
   add<const D extends StructureDeclInput>(
     name: string,
@@ -34,9 +43,12 @@ export interface Trace {
    * it. The step is named after its anchor unless `id` says otherwise; a
    * step at `null` needs an `id` to be named.
    */
-  step(anchor: string | null, narration: string, options?: StepOptions): void;
-  /** Starts a section at the next step (ADR 0020). */
-  section(id: string, title: string): void;
+  step(anchor: string | null, narration: Text, options?: StepOptions): void;
+  /**
+   * Starts a section at the next step (ADR 0020). Its id is a selector, the
+   * same in every locale; its title is in the run's locale.
+   */
+  section(id: string, title: Text): void;
 }
 
 /** A handle whose methods record nothing. */
@@ -46,9 +58,11 @@ export function silentHandle<K extends StructureKindName>(kind: K): Handle<K> {
   return Object.freeze(handle) as unknown as Handle<K>;
 }
 
-/** A trace that records nothing. */
-export function silentTrace(): Trace {
+/** A trace that records nothing, though it still speaks `locale`. */
+export function silentTrace(locale: Locale = 'en'): Trace {
   return {
+    locale,
+    say: (text) => textIn(text, locale),
     add: <const D extends StructureDeclInput>(_: string, decl: D) =>
       silentHandle(decl.kind),
     step: () => undefined,
@@ -64,13 +78,17 @@ export function silentTrace(): Trace {
 export function recordingTrace(
   recorder: Recorder,
   anchors: ReadonlySet<string>,
+  locale: Locale = 'en',
 ): Trace {
   return {
+    locale,
+    say: (text) => textIn(text, locale),
     add: <const D extends StructureDeclInput>(name: string, decl: D) =>
       recorder.add(name, decl),
-    step(anchor, narration, { id, vars } = {}) {
+    step(anchor, text, { id, vars } = {}) {
       if (anchor !== null && !anchors.has(anchor))
         throw new Error(`No anchor "${anchor}" in the code`);
+      const narration = textIn(text, locale);
       if (narration.trim() === '') throw new Error('A step needs a narration');
       const name = id ?? anchor ?? undefined;
       recorder.step({
@@ -81,7 +99,7 @@ export function recordingTrace(
       });
     },
     section(id, title) {
-      recorder.section(id, title);
+      recorder.section(id, textIn(title, locale));
     },
   };
 }
@@ -100,6 +118,8 @@ export function listingTrace(
 ): Trace {
   let pending = first;
   return {
+    locale: trace.locale,
+    say: (text) => trace.say(text),
     add: <const D extends StructureDeclInput>(name: string, decl: D) =>
       trace.add(name, decl),
     step(marker, narration, options = {}) {
@@ -125,6 +145,8 @@ export function listingTrace(
 export function afterFirstStep(trace: Trace, first: () => void): Trace {
   let pending: (() => void) | undefined = first;
   return {
+    locale: trace.locale,
+    say: (text) => trace.say(text),
     add: <const D extends StructureDeclInput>(name: string, decl: D) =>
       trace.add(name, decl),
     step(anchor, narration, options) {

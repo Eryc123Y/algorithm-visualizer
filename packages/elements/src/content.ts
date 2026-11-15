@@ -5,7 +5,13 @@
  * it in a second file, `algomotion-recipes.js`, next to the player's.
  */
 import type * as Recipes from '@algomotion/recipes';
-import { err, ok, type Diagnostic, type Result } from '@algomotion/spec';
+import {
+  err,
+  ok,
+  type Diagnostic,
+  type Locale,
+  type Result,
+} from '@algomotion/spec';
 
 export interface Content {
   /** A document object; wins over everything else. */
@@ -18,6 +24,8 @@ export interface Content {
   readonly src: string | undefined;
   /** The parsed inline JSON: a document, or the algorithm's input. */
   readonly inline: unknown;
+  /** The locale an algorithm's run is recorded in (ADR 0045). */
+  readonly locale?: Locale;
 }
 
 type Loaded = Result<unknown, readonly Diagnostic[]>;
@@ -68,7 +76,9 @@ async function run(algorithm: string, content: Content): Promise<Loaded> {
       ? recipes.readInput(content.input)
       : ok(given.value);
   if (!input.ok) return input;
-  const ran = recipes.runAlgorithm(algorithm, input.value);
+  const ran = recipes.runAlgorithm(algorithm, input.value, {
+    locale: content.locale ?? 'en',
+  });
   return ran.ok ? ok(ran.value.document) : ran;
 }
 

@@ -31,6 +31,7 @@
  * key changes. The block's size depends only on the metrics, so it is the
  * same in every frame.
  */
+import { LAYOUT_WORDS } from './words.ts';
 import type {
   PriorityItem,
   PriorityKey,
@@ -141,10 +142,11 @@ function itemCells(
   ];
 }
 
-const EMPTY = '(empty)';
 /** Room the "(empty)" label needs, so a queue that empties keeps its size. */
 const emptyWidth = (o: LayoutOptions) =>
-  ceilWidth(maxWidth([EMPTY], o.fonts.label) * o.indexFontSize);
+  ceilWidth(
+    maxWidth([LAYOUT_WORDS[o.locale].empty], o.fonts.label) * o.indexFontSize,
+  );
 
 const emptyLabel = (name: string, x: number, y: number, o: LayoutOptions) => ({
   type: 'text' as const,
@@ -153,7 +155,7 @@ const emptyLabel = (name: string, x: number, y: number, o: LayoutOptions) => ({
   y,
   anchor: 'start' as const,
   role: 'label' as const,
-  text: EMPTY,
+  text: LAYOUT_WORDS[o.locale].empty,
   fontSize: o.indexFontSize,
 });
 

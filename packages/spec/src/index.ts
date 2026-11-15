@@ -24,4 +24,5 @@ export {
   VisualizationInput,
   type Step,
 } from './visualization.ts';
+export * from './locale.ts';
 export * from './share.ts';

@@ -9,14 +9,26 @@ import {
   err,
   ok,
   type Diagnostic,
+  type Locale,
   type Result,
   type VisualizationInput,
 } from '@algomotion/spec';
 
-import { sourcesOf, type Algorithm, type OpResult } from './algorithm.ts';
+import {
+  sourcesOf,
+  titleOf,
+  type Algorithm,
+  type OpResult,
+} from './algorithm.ts';
 import { inputDiagnostics } from './notation/issues.ts';
 import { Recorder } from './recorder.ts';
 import { recordingTrace } from './trace.ts';
+
+/** How to run a module. */
+export interface RunOptions {
+  /** The locale the run is written in (ADR 0045); English by default. */
+  readonly locale?: Locale;
+}
 
 /** A run's document, and what the run returned. */
 export interface AlgorithmRun {
@@ -39,6 +51,7 @@ export interface AlgorithmRun {
 export function runModule<I>(
   algorithm: Algorithm<I>,
   input?: unknown,
+  { locale = 'en' }: RunOptions = {},
 ): Result<AlgorithmRun, readonly Diagnostic[]> {
   const parsed = algorithm.input.safeParse(
     input === undefined ? algorithm.examples[0] : input,
@@ -46,7 +59,7 @@ export function runModule<I>(
   if (!parsed.success) return err(inputDiagnostics(parsed.error.issues));
   let run: AlgorithmRun;
   try {
-    run = record(algorithm, parsed.data);
+    run = record(algorithm, parsed.data, locale);
   } catch (e) {
     if (!(e instanceof RangeError)) throw e;
     return err([
@@ -57,15 +70,19 @@ export function runModule<I>(
   return loaded.ok ? ok(run) : loaded;
 }
 
-function record<I>(algorithm: Algorithm<I>, input: I): AlgorithmRun {
-  const { title, sources } = algorithm.present?.(input) ?? {
-    title: algorithm.title,
+function record<I>(
+  algorithm: Algorithm<I>,
+  input: I,
+  locale: Locale,
+): AlgorithmRun {
+  const { title, sources } = algorithm.present?.(input, locale) ?? {
+    title: titleOf(algorithm, locale),
     sources: sourcesOf(algorithm.code),
   };
   const anchors = new Set(sources.flatMap((s) => Object.keys(s.anchors)));
   const recorder = new Recorder({ title, sources });
   const { results = [], after } =
-    algorithm.run(input, recordingTrace(recorder, anchors)) ?? {};
+    algorithm.run(input, recordingTrace(recorder, anchors, locale)) ?? {};
   return {
     document: recorder.build(),
     results,

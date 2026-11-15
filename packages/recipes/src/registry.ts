@@ -75,7 +75,7 @@ import { closestPair } from './algorithms/geometry/closest-pair.ts';
 import { grahamScan } from './algorithms/geometry/graham-scan.ts';
 import { jarvisMarch } from './algorithms/geometry/jarvis-march.ts';
 import { anySegmentsIntersect } from './algorithms/geometry/segments-intersect.ts';
-import { runModule, type AlgorithmRun } from './run-module.ts';
+import { runModule, type AlgorithmRun, type RunOptions } from './run-module.ts';
 import { avl } from './structures/avl/index.ts';
 import { bTree } from './structures/b-tree/index.ts';
 import { bst } from './structures/bst/index.ts';
@@ -194,6 +194,7 @@ export const findAlgorithm = (id: string): Algorithm | undefined =>
 export function runAlgorithm(
   id: string,
   input?: unknown,
+  options: RunOptions = {},
 ): Result<AlgorithmRun, readonly Diagnostic[]> {
   const algorithm = findAlgorithm(id);
   if (algorithm === undefined)
@@ -205,5 +206,5 @@ export function runAlgorithm(
         hint: `Ids: ${algorithms.map((a) => a.id).join(', ')}.`,
       },
     ]);
-  return runModule(algorithm, input);
+  return runModule(algorithm, input, options);
 }

@@ -7,8 +7,10 @@
  */
 import {
   err,
+  localeOf,
   readShareFragment,
   type Diagnostic,
+  type Locale,
   type Result,
   type ShareContent,
 } from '@algomotion/spec';
@@ -74,7 +76,11 @@ function show(read: Read, page: PlayPage, request: number): void {
   }
   if (read.value === undefined) return;
   const content = read.value;
-  const player = createPlayer(doc, content);
+  const player = createPlayer(
+    doc,
+    content,
+    content.lang ?? localeOf(doc.defaultView?.navigator.languages),
+  );
   // Name the tab only once the player has accepted the content.
   player.addEventListener(
     'algo-load',
@@ -96,9 +102,20 @@ const internalError = (e: unknown): Diagnostic => ({
   hint: 'Reload the page; if it fails again, the link may be fine but this page is not.',
 });
 
-/** A player for the content, set up before it connects. */
-function createPlayer(doc: Document, content: ShareContent): Player {
+/** The `lang` a player in `locale` carries. */
+const LANG: Readonly<Record<Locale, string>> = { en: 'en', zh: 'zh-Hans' };
+
+/**
+ * A player for the content, set up before it connects, in the link's
+ * language or the reader's (ADR 0045).
+ */
+function createPlayer(
+  doc: Document,
+  content: ShareContent,
+  locale: Locale,
+): Player {
   const player = doc.createElement('algo-player') as Player;
+  player.setAttribute('lang', LANG[locale]);
   if ('document' in content) player.visualization = content.document;
   else {
     player.algorithm = content.algorithm;

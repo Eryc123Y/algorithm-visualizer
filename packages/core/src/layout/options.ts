@@ -1,3 +1,4 @@
+import type { Locale } from '@algomotion/spec';
 import {
   interSemiBold,
   jetbrainsMonoSemiBold,
@@ -67,6 +68,8 @@ export interface LayoutOptions {
   readonly showTitles: boolean;
   /** Draw index labels above array cells. */
   readonly showIndices: boolean;
+  /** The language of the words the layout draws itself (ADR 0045). */
+  readonly locale: Locale;
 }
 
 export const defaultLayoutOptions: LayoutOptions = {
@@ -85,6 +88,7 @@ export const defaultLayoutOptions: LayoutOptions = {
   fonts: defaultFonts,
   showTitles: true,
   showIndices: true,
+  locale: 'en',
 };
 
 /**
