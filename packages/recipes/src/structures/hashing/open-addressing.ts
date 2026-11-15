@@ -193,17 +193,17 @@ export function openAddressing(table: OpenAddressing) {
     operations: [
       op({
         name: 'insert',
-        title: 'insert',
+        title: { en: 'insert', zh: '插入' },
         summary: `Inserts a key into the first empty slot of its probe sequence, ${table.sequence}.`,
         args: { key: Key.describe('The integer key to insert.') },
         examples: [{ from: sample, key: table.examples.insert }],
         code: table.code.insert,
-        titleOf: ({ key }) => `insert ${key}`,
+        titleOf: ({ key }) => ({ en: `insert ${key}`, zh: `插入 ${key}` }),
         apply: (s, { key }, trace, on) => insert(scheme, s, key, trace, on),
       }),
       op({
         name: 'search',
-        title: 'search',
+        title: { en: 'search', zh: '查找' },
         summary:
           'Looks for a key along its probe sequence, stopping at the key, at an empty slot, or after m probes.',
         args: { key: Key.describe('The integer key to look for.') },
@@ -212,7 +212,7 @@ export function openAddressing(table: OpenAddressing) {
           { from: sample, key: table.examples.missing },
         ],
         code: table.code.search,
-        titleOf: ({ key }) => `search ${key}`,
+        titleOf: ({ key }) => ({ en: `search ${key}`, zh: `查找 ${key}` }),
         apply: (s, { key }, trace, on) => search(scheme, s, key, trace, on),
       }),
     ],

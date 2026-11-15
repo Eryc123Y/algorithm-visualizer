@@ -19,10 +19,12 @@ const OPENERS: Readonly<Record<string, string>> = {
 
 export const balancedBrackets = defineAlgorithm({
   id: 'balanced-brackets',
-  title: 'Balanced brackets',
+  title: { en: 'Balanced brackets', zh: '括号匹配' },
   topic: 'lists',
-  summary:
-    'Checks that brackets are balanced, pushing each opener onto a stack and popping it for the closer that matches.',
+  summary: {
+    en: 'Checks that brackets are balanced, pushing each opener onto a stack and popping it for the closer that matches.',
+    zh: '检查括号是否配对：把每个左括号压入栈中，遇到与之匹配的右括号时弹出。',
+  },
   input: z.strictObject({
     text: z
       .string()
@@ -76,53 +78,76 @@ export const balancedBrackets = defineAlgorithm({
     const open: string[] = [];
     for (const [k, ch] of chars.entries()) {
       if ('([{'.includes(ch)) {
-        trace.step('push', `"${ch}" opens: push it.`, { vars: { c: ch } });
+        trace.step(
+          'push',
+          { en: `"${ch}" opens: push it.`, zh: `“${ch}”是左括号：压入栈中。` },
+          { vars: { c: ch } },
+        );
         input.pointer({ name: 'c', index: k });
         stack.push({ element: { id: `b${k}`, value: ch } });
         open.push(ch);
         continue;
       }
       if (!(ch in OPENERS)) {
-        trace.step('skip', `"${ch}" is not a bracket: skip it.`, {
-          vars: { c: ch },
-        });
+        trace.step(
+          'skip',
+          {
+            en: `"${ch}" is not a bracket: skip it.`,
+            zh: `“${ch}”不是括号：跳过。`,
+          },
+          {
+            vars: { c: ch },
+          },
+        );
         input.pointer({ name: 'c', index: k });
         continue;
       }
       trace.step(
         'close',
-        `"${ch}" closes: it must match the top of the stack.`,
+        {
+          en: `"${ch}" closes: it must match the top of the stack.`,
+          zh: `“${ch}”是右括号：它必须和栈顶匹配。`,
+        },
         {
           vars: { c: ch },
         },
       );
       input.pointer({ name: 'c', index: k }).highlight({ indices: [k] });
       if (open.length === 0) {
-        trace.step(
-          'empty',
-          `The stack is empty, so "${ch}" has no partner: not balanced.`,
-        );
+        trace.step('empty', {
+          en: `The stack is empty, so "${ch}" has no partner: not balanced.`,
+          zh: `栈是空的，所以“${ch}”没有配对的括号：不匹配。`,
+        });
         return;
       }
       stack.peek();
       const top = open.pop()!;
       if (top !== OPENERS[ch]) {
-        trace.step(
-          'mismatch',
-          `Pop "${top}": it does not match "${ch}", so not balanced.`,
-        );
+        trace.step('mismatch', {
+          en: `Pop "${top}": it does not match "${ch}", so not balanced.`,
+          zh: `弹出“${top}”：它和“${ch}”不匹配，所以不匹配。`,
+        });
         stack.pop();
         return;
       }
-      trace.step('pop', `"${top}" matches "${ch}": pop it.`);
+      trace.step('pop', {
+        en: `"${top}" matches "${ch}": pop it.`,
+        zh: `“${top}”和“${ch}”匹配：弹出它。`,
+      });
       stack.pop();
       input.settle({ index: k });
     }
     trace.step(
       'end',
       open.length === 0
-        ? 'Every bracket found its partner and the stack is empty: balanced.'
-        : `${open.length} opening ${open.length === 1 ? 'bracket was' : 'brackets were'} never closed: not balanced.`,
+        ? {
+            en: 'Every bracket found its partner and the stack is empty: balanced.',
+            zh: '每个括号都找到了配对的括号，栈也空了：匹配。',
+          }
+        : {
+            en: `${open.length} opening ${open.length === 1 ? 'bracket was' : 'brackets were'} never closed: not balanced.`,
+            zh: `有 ${open.length} 个左括号始终没有闭合：不匹配。`,
+          },
     );
     input.pointer({ name: 'c', index: null });
   },

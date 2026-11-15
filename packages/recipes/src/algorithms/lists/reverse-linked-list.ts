@@ -12,10 +12,12 @@ export const MAX_LIST = 12;
 
 export const reverseLinkedList = defineAlgorithm({
   id: 'reverse-linked-list',
-  title: 'Reverse a linked list',
+  title: { en: 'Reverse a linked list', zh: '反转链表' },
   topic: 'lists',
-  summary:
-    'Reverses a singly linked list in place, turning one link around at a time.',
+  summary: {
+    en: 'Reverses a singly linked list in place, turning one link around at a time.',
+    zh: '原地反转一个单链表，每次把一个链接调转方向。',
+  },
   input: z.strictObject({
     values: listField(
       z
@@ -58,10 +60,10 @@ export const reverseLinkedList = defineAlgorithm({
       initial: [...values],
     });
     const n = values.length;
-    trace.step(
-      'start',
-      'Start at the head, with no node before it: prev is empty.',
-    );
+    trace.step('start', {
+      en: 'Start at the head, with no node before it: prev is empty.',
+      zh: '从表头开始，它前面没有节点：prev 为空。',
+    });
     list
       .pointer({ name: 'head', index: 0 })
       .pointer({ name: 'curr', index: 0 });
@@ -71,22 +73,40 @@ export const reverseLinkedList = defineAlgorithm({
       trace.step(
         'save',
         next === null
-          ? `${values[curr]} is the last node: there is no next node to remember.`
-          : `Remember the next node, ${values[next]}, before its link is lost.`,
+          ? {
+              en: `${values[curr]} is the last node: there is no next node to remember.`,
+              zh: `${values[curr]} 是最后一个节点：没有下一个节点需要记住。`,
+            }
+          : {
+              en: `Remember the next node, ${values[next]}, before its link is lost.`,
+              zh: `在链接丢失之前，先记住下一个节点 ${values[next]}。`,
+            },
       );
       list.pointer({ name: 'next', index: next });
       trace.step(
         'link',
         prev === null
-          ? `${values[curr]} becomes the tail: its link points to nothing.`
-          : `Point ${values[curr]} back to ${values[prev]}.`,
+          ? {
+              en: `${values[curr]} becomes the tail: its link points to nothing.`,
+              zh: `${values[curr]} 成为表尾：它的链接指向空。`,
+            }
+          : {
+              en: `Point ${values[curr]} back to ${values[prev]}.`,
+              zh: `让 ${values[curr]} 反过来指向 ${values[prev]}。`,
+            },
       );
       list.link({ from: curr, to: prev }).highlight({ indices: [curr] });
       trace.step(
         'advance',
         next === null
-          ? `Move prev to ${values[curr]}; curr runs off the end.`
-          : `Move prev to ${values[curr]} and curr to ${values[next]}.`,
+          ? {
+              en: `Move prev to ${values[curr]}; curr runs off the end.`,
+              zh: `把 prev 移到 ${values[curr]}；curr 走出了链表末尾。`,
+            }
+          : {
+              en: `Move prev to ${values[curr]} and curr to ${values[next]}.`,
+              zh: `把 prev 移到 ${values[curr]}，curr 移到 ${values[next]}。`,
+            },
       );
       prev = curr;
       list
@@ -94,7 +114,10 @@ export const reverseLinkedList = defineAlgorithm({
         .pointer({ name: 'curr', index: next })
         .visit({ index: curr });
     }
-    trace.step('done', `curr is empty: ${values[n - 1]} is the new head.`);
+    trace.step('done', {
+      en: `curr is empty: ${values[n - 1]} is the new head.`,
+      zh: `curr 为空：${values[n - 1]} 是新的表头。`,
+    });
     list
       .pointer({ name: 'next', index: null })
       .pointer({ name: 'head', index: prev });

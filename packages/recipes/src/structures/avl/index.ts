@@ -42,6 +42,8 @@ export interface AvlState {
 
 type On = Handle<'tree'>;
 type Side = 'left' | 'right';
+/** The sides in Chinese (ADR 0045). */
+const SIDE_ZH = { left: '左', right: '右' } as const;
 
 const EMPTY: AvlState = { root: null, nodes: new Map(), next: 0 };
 
@@ -189,17 +191,17 @@ function balance(s: AvlState, x: string, trace: Trace, on: On): Inserted {
   const child = n[heavy]!;
   const c = nodeOf(s, child);
   if (height(s, c[heavy]) < height(s, c[turn])) {
-    trace.step(
-      heavy === 'left' ? 'left-right' : 'right-left',
-      `${n.key} is ${heavy}-heavy and its ${heavy} child ${c.key} leans ${turn}: rotate ${c.key} ${heavy} first.`,
-    );
+    trace.step(heavy === 'left' ? 'left-right' : 'right-left', {
+      en: `${n.key} is ${heavy}-heavy and its ${heavy} child ${c.key} leans ${turn}: rotate ${c.key} ${heavy} first.`,
+      zh: `${n.key} 偏${SIDE_ZH[heavy]}，它的${SIDE_ZH[heavy]}孩子 ${c.key} 却偏${SIDE_ZH[turn]}：先把 ${c.key} 向${SIDE_ZH[heavy]}旋转。`,
+    });
     const r = rotate(state, child, heavy, on);
     state = withNode(r.state, x, { ...nodeOf(r.state, x), [heavy]: r.id });
   }
-  trace.step(
-    heavy === 'left' ? 'rotate-right' : 'rotate-left',
-    `${n.key} is ${heavy}-heavy: rotate it ${turn}, lifting its ${heavy} child.`,
-  );
+  trace.step(heavy === 'left' ? 'rotate-right' : 'rotate-left', {
+    en: `${n.key} is ${heavy}-heavy: rotate it ${turn}, lifting its ${heavy} child.`,
+    zh: `${n.key} 偏${SIDE_ZH[heavy]}：把它向${SIDE_ZH[turn]}旋转，提升它的${SIDE_ZH[heavy]}孩子。`,
+  });
   const r = rotate(state, x, turn, on);
   return { state: r.state, id: r.id, changed: true };
 }
@@ -218,8 +220,14 @@ function insertAt(
     trace.step(
       'new',
       parent === null
-        ? `The tree is empty: ${key} becomes the root, of height 1.`
-        : `Insert ${key} here, as the ${side} child of ${nodeOf(s, parent).key}, with height 1.`,
+        ? {
+            en: `The tree is empty: ${key} becomes the root, of height 1.`,
+            zh: `树是空的：${key} 成为根，高度为 1。`,
+          }
+        : {
+            en: `Insert ${key} here, as the ${side} child of ${nodeOf(s, parent).key}, with height 1.`,
+            zh: `在这里插入 ${key}，作为 ${nodeOf(s, parent).key} 的${SIDE_ZH[side]}孩子，高度为 1。`,
+          },
     );
     on.addNode({
       node: { id, value: key },
@@ -237,15 +245,18 @@ function insertAt(
   }
   const n = nodeOf(s, at);
   if (key === n.key) {
-    trace.step(
-      'present',
-      `${key} is already in the tree: nothing changes, so no height does either.`,
-    );
+    trace.step('present', {
+      en: `${key} is already in the tree: nothing changes, so no height does either.`,
+      zh: `${key} 已经在树中：什么都不变，高度也都不变。`,
+    });
     on.pointer({ name: 'x', node: at }).highlight({ nodes: [at] });
     return { state: s, id: at, changed: false };
   }
   const to: Side = key < n.key ? 'left' : 'right';
-  trace.step('go', `${key} ${to === 'left' ? '<' : '>'} ${n.key}: go ${to}.`);
+  trace.step('go', {
+    en: `${key} ${to === 'left' ? '<' : '>'} ${n.key}: go ${to}.`,
+    zh: `${key} ${to === 'left' ? '<' : '>'} ${n.key}：往${SIDE_ZH[to]}走。`,
+  });
   on.pointer({ name: 'x', node: at }).highlight({ nodes: [at] });
   const below = insertAt(s, n[to], key, at, to, trace, on);
   if (!below.changed) return { ...below, id: at };
@@ -258,7 +269,10 @@ function insertAt(
   const [hl, hr] = [height(state, left), height(state, right)];
   trace.step(
     'height',
-    `Back at ${n.key}: height ${h}, balance ${hl - hr} (left ${hl}, right ${hr}).`,
+    {
+      en: `Back at ${n.key}: height ${h}, balance ${hl - hr} (left ${hl}, right ${hr}).`,
+      zh: `回到 ${n.key}：高度 ${h}，平衡因子 ${hl - hr}（左 ${hl}，右 ${hr}）。`,
+    },
     { vars: { h, balance: hl - hr } },
   );
   on.pointer({ name: 'x', node: at }).highlight({ nodes: [at] });
@@ -317,10 +331,12 @@ const op = operationsOf<AvlState, From, 'tree'>();
 /** Insertion into an AVL tree given as keys in insertion order. */
 export const avl = defineStructure<AvlState, From, 'tree'>({
   id: 'avl',
-  title: 'AVL tree',
+  title: { en: 'AVL tree', zh: 'AVL 树' },
   topic: 'trees',
-  summary:
-    'Inserts keys one after another into an AVL tree, rebalancing it with rotations so that sibling heights differ by at most one.',
+  summary: {
+    en: 'Inserts keys one after another into an AVL tree, rebalancing it with rotations so that sibling heights differ by at most one.',
+    zh: '向 AVL 树中依次插入关键字，用旋转重新平衡，使兄弟子树的高度至多相差一。',
+  },
   name: 'avl',
   kind: 'tree',
   from: listField(
@@ -364,16 +380,18 @@ export const avl = defineStructure<AvlState, From, 'tree'>({
   operations: [
     op({
       name: 'insert',
-      title: 'insert',
-      summary:
-        'Inserts a key as a leaf, then on the way back up updates heights and rotates where siblings differ by more than one.',
+      title: { en: 'insert', zh: '插入' },
+      summary: {
+        en: 'Inserts a key as a leaf, then on the way back up updates heights and rotates where siblings differ by more than one.',
+        zh: '把关键字作为叶子插入，再在返回的路上更新高度，并在兄弟子树高度相差超过一的地方旋转。',
+      },
       args: { key: z.number().describe('The key to insert.') },
       examples: [
         { from: [10, 20, 30, 40, 50], key: 25 },
         { from: [30, 20], key: 10 },
       ],
       code: INSERT,
-      titleOf: ({ key }) => `insert ${key}`,
+      titleOf: ({ key }) => ({ en: `insert ${key}`, zh: `插入 ${key}` }),
       apply: (s, { key }, trace, on) => insert(s, key, trace, on),
     }),
   ],

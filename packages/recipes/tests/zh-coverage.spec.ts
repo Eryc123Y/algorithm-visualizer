@@ -44,6 +44,15 @@ function texts(
         ['narration', 'title', 'label', 'text'].includes(key)
       )
         out.push({ path: `${path}.${key}`, key, text: value });
+      // A table's row and column labels are labels too.
+      else if (
+        Array.isArray(value) &&
+        ['rowLabels', 'columnLabels'].includes(key)
+      )
+        value.forEach((text, k) => {
+          if (typeof text === 'string')
+            out.push({ path: `${path}.${key}[${k}]`, key: 'label', text });
+        });
       else texts(value, `${path}.${key}`, out);
     }
   return out;

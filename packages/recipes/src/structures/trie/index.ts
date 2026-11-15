@@ -281,18 +281,18 @@ export const trie = defineStructure<TrieState, From, 'tree'>({
   operations: [
     op({
       name: 'insert',
-      title: 'insert',
+      title: { en: 'insert', zh: '插入' },
       summary:
         'Inserts a word, adding the children its path lacks and marking the node that ends it.',
       args: { word: Word.describe('The word to insert.') },
       examples: [{ from: sample, word: 'tent' }],
       code: INSERT,
-      titleOf: ({ word }) => `insert ${word}`,
+      titleOf: ({ word }) => ({ en: `insert ${word}`, zh: `插入 ${word}` }),
       apply: (s, { word }, trace, on) => insert(s, word, trace, on),
     }),
     op({
       name: 'search',
-      title: 'search',
+      title: { en: 'search', zh: '查找' },
       summary:
         'Follows a word from the root and reports whether the node it ends at marks a word.',
       args: { word: Word.describe('The word to look for.') },
@@ -301,7 +301,7 @@ export const trie = defineStructure<TrieState, From, 'tree'>({
         { from: sample, word: 'te' },
       ],
       code: SEARCH,
-      titleOf: ({ word }) => `search ${word}`,
+      titleOf: ({ word }) => ({ en: `search ${word}`, zh: `查找 ${word}` }),
       apply: (s, { word }, trace, on) => search(s, word, trace, on),
     }),
   ],

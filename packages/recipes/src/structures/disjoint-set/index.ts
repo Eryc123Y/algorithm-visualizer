@@ -39,8 +39,11 @@ export interface DisjointSetState {
 type On = Handle<'tree'>;
 
 const id = (x: number) => String(x);
-const note = (on: On, x: number, rank: number) =>
-  on.annotate({ node: id(x), text: `rank ${rank}` });
+const note = (on: On, x: number, rank: number, trace: Trace) =>
+  on.annotate({
+    node: id(x),
+    text: trace.say({ en: `rank ${rank}`, zh: `秩 ${rank}` }),
+  });
 
 /** Moves x under p, in the model. */
 function hang(s: DisjointSetState, x: number, p: number): DisjointSetState {
@@ -102,21 +105,38 @@ interface Found {
 function findSet(s: DisjointSetState, x: number, trace: Trace, on: On): Found {
   const p = s.parent[x]!;
   if (p === x) {
-    trace.step('root', `${x} is a root: it names the set.`, {
-      vars: { x },
-    });
+    trace.step(
+      'root',
+      {
+        en: `${x} is a root: it names the set.`,
+        zh: `${x} 是根：它代表这个集合。`,
+      },
+      {
+        vars: { x },
+      },
+    );
     on.highlight({ nodes: [id(x)] });
     return { state: s, root: x };
   }
-  trace.step('up', `${x} is not a root: find the root of its parent, ${p}.`, {
-    vars: { x },
-  });
+  trace.step(
+    'up',
+    {
+      en: `${x} is not a root: find the root of its parent, ${p}.`,
+      zh: `${x} 不是根：找它的父节点 ${p} 的根。`,
+    },
+    {
+      vars: { x },
+    },
+  );
   on.highlight({ nodes: [id(x)] });
   const found = findSet(s, p, trace, on);
   if (p === found.root) return found;
   trace.step(
     'compress',
-    `Path compression: hang ${x} directly under the root ${found.root}.`,
+    {
+      en: `Path compression: hang ${x} directly under the root ${found.root}.`,
+      zh: `路径压缩：把 ${x} 直接挂到根 ${found.root} 下面。`,
+    },
     { vars: { x } },
   );
   on.setChild({ parent: id(found.root), child: id(x) });
@@ -135,7 +155,7 @@ function checkElement(s: DisjointSetState, x: number): void {
 const ranked = (s: DisjointSetState, trace: Trace, on: On) =>
   afterFirstStep(trace, () =>
     s.rank.forEach((r, x) => {
-      if (r > 0) note(on, x, r);
+      if (r > 0) note(on, x, r, trace);
     }),
   );
 
@@ -160,24 +180,35 @@ function union(
   checkElement(s, x);
   checkElement(s, y);
   const t = ranked(s, trace, on);
-  t.step('find-x', `Find the root of ${x}.`, { vars: { x, y } });
+  t.step(
+    'find-x',
+    { en: `Find the root of ${x}.`, zh: `找 ${x} 的根。` },
+    { vars: { x, y } },
+  );
   const fa = findSet(s, x, t, on);
-  t.step('find-y', `Find the root of ${y}.`, { vars: { x, y } });
+  t.step(
+    'find-y',
+    { en: `Find the root of ${y}.`, zh: `找 ${y} 的根。` },
+    { vars: { x, y } },
+  );
   const fb = findSet(fa.state, y, t, on);
   const [a, b] = [fa.root, fb.root];
   let state = fb.state;
   if (a === b) {
-    t.step(
-      'same',
-      `${x} and ${y} are in the same set already, named ${a}: nothing to do.`,
-    );
+    t.step('same', {
+      en: `${x} and ${y} are in the same set already, named ${a}: nothing to do.`,
+      zh: `${x} 和 ${y} 已经在同一个集合中，由 ${a} 代表：不用做什么。`,
+    });
     return { state, result: null };
   }
   const [ra, rb] = [state.rank[a]!, state.rank[b]!];
   if (ra > rb) {
     t.step(
       'hang-b',
-      `Root ${b} has the lower rank (${rb} < ${ra}): hang it under ${a}.`,
+      {
+        en: `Root ${b} has the lower rank (${rb} < ${ra}): hang it under ${a}.`,
+        zh: `根 ${b} 的秩较低（${rb} < ${ra}）：把它挂到 ${a} 下面。`,
+      },
       { vars: { a, b } },
     );
     on.setChild({ parent: id(a), child: id(b) });
@@ -186,15 +217,28 @@ function union(
   t.step(
     'hang-a',
     ra === rb
-      ? `Both roots have rank ${ra}: hang ${a} under ${b}.`
-      : `Root ${a} has the lower rank (${ra} < ${rb}): hang it under ${b}.`,
+      ? {
+          en: `Both roots have rank ${ra}: hang ${a} under ${b}.`,
+          zh: `两个根的秩都是 ${ra}：把 ${a} 挂到 ${b} 下面。`,
+        }
+      : {
+          en: `Root ${a} has the lower rank (${ra} < ${rb}): hang it under ${b}.`,
+          zh: `根 ${a} 的秩较低（${ra} < ${rb}）：把它挂到 ${b} 下面。`,
+        },
     { vars: { a, b } },
   );
   on.setChild({ parent: id(b), child: id(a) });
   state = hang(state, a, b);
   if (ra === rb) {
-    t.step('rank', `The rank of ${b} rises to ${rb + 1}.`, { vars: { a, b } });
-    note(on, b, rb + 1);
+    t.step(
+      'rank',
+      {
+        en: `The rank of ${b} rises to ${rb + 1}.`,
+        zh: `${b} 的秩增加到 ${rb + 1}。`,
+      },
+      { vars: { a, b } },
+    );
+    note(on, b, rb + 1, t);
     state = { ...state, rank: state.rank.map((r, k) => (k === b ? r + 1 : r)) };
   }
   return { state, result: null };
@@ -305,10 +349,12 @@ const sample: From = {
 /** A disjoint-set forest. */
 export const disjointSet = defineStructure<DisjointSetState, From, 'tree'>({
   id: 'disjoint-set',
-  title: 'Disjoint-set forest',
+  title: { en: 'Disjoint-set forest', zh: '不相交集合森林' },
   topic: 'trees',
-  summary:
-    'Unites sets and finds the set of an element in a disjoint-set forest, with union by rank and path compression.',
+  summary: {
+    en: 'Unites sets and finds the set of an element in a disjoint-set forest, with union by rank and path compression.',
+    zh: '在不相交集合森林中合并集合、查找元素所在的集合，使用按秩合并和路径压缩。',
+  },
   name: 'sets',
   kind: 'tree',
   from: From.describe(
@@ -351,9 +397,11 @@ export const disjointSet = defineStructure<DisjointSetState, From, 'tree'>({
   operations: [
     op({
       name: 'union',
-      title: 'union',
-      summary:
-        'Unites the sets of two elements: finds both roots, then hangs the root of lower rank under the other.',
+      title: { en: 'union', zh: '合并' },
+      summary: {
+        en: 'Unites the sets of two elements: finds both roots, then hangs the root of lower rank under the other.',
+        zh: '合并两个元素所在的集合：找出两个根，再把秩较低的根挂到另一个下面。',
+      },
       args: {
         x: Element.describe('An element of the first set.'),
         y: Element.describe('An element of the second set.'),
@@ -372,18 +420,20 @@ export const disjointSet = defineStructure<DisjointSetState, From, 'tree'>({
         },
       ],
       code: CODE,
-      titleOf: ({ x, y }) => `union ${x} ${y}`,
+      titleOf: ({ x, y }) => ({ en: `union ${x} ${y}`, zh: `合并 ${x} ${y}` }),
       apply: (s, { x, y }, trace, on) => union(s, x, y, trace, on),
     }),
     op({
       name: 'find-set',
-      title: 'find set',
-      summary:
-        'Finds the root that names the set of an element, then hangs every node on the way directly under it.',
+      title: { en: 'find set', zh: '查找集合' },
+      summary: {
+        en: 'Finds the root that names the set of an element, then hangs every node on the way directly under it.',
+        zh: '找出代表元素所在集合的根，再把路上的每个节点直接挂到它下面。',
+      },
       args: { x: Element.describe('The element whose set to find.') },
       examples: [{ from: sample, x: 0 }],
       code: CODE,
-      titleOf: ({ x }) => `find set ${x}`,
+      titleOf: ({ x }) => ({ en: `find set ${x}`, zh: `查找 ${x} 的集合` }),
       apply: (s, { x }, trace, on) => find(s, x, trace, on),
     }),
   ],

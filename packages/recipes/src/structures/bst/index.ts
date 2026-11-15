@@ -35,6 +35,8 @@ export interface BstState {
 
 type On = Handle<'tree'>;
 type Side = 'left' | 'right';
+/** The sides in Chinese (ADR 0045). */
+const SIDE_ZH = { left: '左', right: '右' } as const;
 
 const EMPTY: BstState = { root: null, nodes: new Map(), next: 0 };
 
@@ -76,19 +78,22 @@ function search(
   for (let at = s.root; at !== null;) {
     const n = nodeOf(s, at);
     if (n.key === key) {
-      trace.step('found', `Found ${key}.`);
+      trace.step('found', { en: `Found ${key}.`, zh: `找到 ${key}。` });
       point(on, at).highlight({ nodes: [at] });
       return { state: s, result: true };
     }
     const side: Side = key < n.key ? 'left' : 'right';
-    trace.step(
-      'go',
-      `${key} ${side === 'left' ? '<' : '>'} ${n.key}: go ${side}.`,
-    );
+    trace.step('go', {
+      en: `${key} ${side === 'left' ? '<' : '>'} ${n.key}: go ${side}.`,
+      zh: `${key} ${side === 'left' ? '<' : '>'} ${n.key}：往${SIDE_ZH[side]}走。`,
+    });
     point(on, at).highlight({ nodes: [at] });
     at = n[side];
   }
-  trace.step('missing', `Reached an empty spot: ${key} is not in the tree.`);
+  trace.step('missing', {
+    en: `Reached an empty spot: ${key} is not in the tree.`,
+    zh: `到达空位：${key} 不在树中。`,
+  });
   point(on, null);
   return { state: s, result: false };
 }
@@ -146,24 +151,27 @@ function insert(
     right: null,
   });
   if (s.root === null) {
-    trace.step('root', `The tree is empty: ${key} becomes the root.`);
+    trace.step('root', {
+      en: `The tree is empty: ${key} becomes the root.`,
+      zh: `树是空的：${key} 成为根。`,
+    });
     on.addNode({ node: { id, value: key }, parent: null });
     return { state: { ...added, root: id }, result: null };
   }
   for (let at = s.root; ;) {
     const n = nodeOf(s, at);
     const side: Side = key < n.key ? 'left' : 'right';
-    trace.step(
-      'go',
-      `${key} ${side === 'left' ? '<' : '≥'} ${n.key}: go ${side}.`,
-    );
+    trace.step('go', {
+      en: `${key} ${side === 'left' ? '<' : '≥'} ${n.key}: go ${side}.`,
+      zh: `${key} ${side === 'left' ? '<' : '≥'} ${n.key}：往${SIDE_ZH[side]}走。`,
+    });
     point(on, at).highlight({ nodes: [at] });
     const next = n[side];
     if (next === null) {
-      trace.step(
-        side,
-        `Empty spot: insert ${key} as the ${side} child of ${n.key}.`,
-      );
+      trace.step(side, {
+        en: `Empty spot: insert ${key} as the ${side} child of ${n.key}.`,
+        zh: `空位：把 ${key} 插入为 ${n.key} 的${SIDE_ZH[side]}孩子。`,
+      });
       on.addNode({ node: { id, value: key }, parent: at, slot: side });
       point(on, null);
       return { state: withNode(added, at, { ...n, [side]: id }), result: null };
@@ -283,16 +291,22 @@ function replaceAndDelete(
     by === 'successor'
       ? 'smallest key in its right'
       : 'largest key in its left';
-  trace.step(
-    'replacement',
-    `${n.key} has two children: its ${by} ${key} is the ${where} subtree.`,
-  );
+  trace.step('replacement', {
+    en: `${n.key} has two children: its ${by} ${key} is the ${where} subtree.`,
+    zh: `${n.key} 有两个孩子：它的${by === 'successor' ? '后继' : '前驱'} ${key} 是${by === 'successor' ? '右子树中最小的关键字' : '左子树中最大的关键字'}。`,
+  });
   point(on, at)
     .pointer({ name: by === 'successor' ? 'succ' : 'pred', node: r })
     .highlight({ nodes: [r] });
-  trace.step('copy', `Copy ${key} into the node.`);
+  trace.step('copy', {
+    en: `Copy ${key} into the node.`,
+    zh: `把 ${key} 复制到这个节点。`,
+  });
   on.setValue({ node: at, value: key });
-  trace.step('remove', `Now delete the old ${key} from the ${near} subtree.`);
+  trace.step('remove', {
+    en: `Now delete the old ${key} from the ${near} subtree.`,
+    zh: `再从${SIDE_ZH[near]}子树中删除原来的 ${key}。`,
+  });
   on.pointer({ name: by === 'successor' ? 'succ' : 'pred', node: null });
   const copied = withNode(s, at, { ...n, key });
   const d = del(
@@ -321,17 +335,20 @@ function del(
   on: On,
 ): Deleted {
   if (at === null) {
-    trace.step('missing', `Reached an empty spot: ${key} is not in the tree.`);
+    trace.step('missing', {
+      en: `Reached an empty spot: ${key} is not in the tree.`,
+      zh: `到达空位：${key} 不在树中。`,
+    });
     point(on, null);
     return { state: s, sub: null, found: false };
   }
   const n = nodeOf(s, at);
   if (key !== n.key) {
     const side: Side = key < n.key ? 'left' : 'right';
-    trace.step(
-      side,
-      `${key} ${side === 'left' ? '<' : '>'} ${n.key}: delete from the ${side} subtree.`,
-    );
+    trace.step(side, {
+      en: `${key} ${side === 'left' ? '<' : '>'} ${n.key}: delete from the ${side} subtree.`,
+      zh: `${key} ${side === 'left' ? '<' : '>'} ${n.key}：在${SIDE_ZH[side]}子树中删除。`,
+    });
     point(on, at).highlight({ nodes: [at] });
     const d = del(s, n[side], key, { parent: at, side }, by, trace, on);
     const state = withNode(d.state, at, {
@@ -347,8 +364,11 @@ function del(
   trace.step(
     anchor,
     child === null
-      ? `${key} is a leaf: remove it.`
-      : `${key} has one child: its subtree takes the node's place.`,
+      ? { en: `${key} is a leaf: remove it.`, zh: `${key} 是叶子：删去它。` }
+      : {
+          en: `${key} has one child: its subtree takes the node's place.`,
+          zh: `${key} 只有一个孩子：它的子树取代这个节点。`,
+        },
   );
   point(on, at).highlight({ nodes: [at] });
   splice(on, at, child, place);
@@ -369,33 +389,39 @@ const sample = [8, 3, 10, 1, 6, 14, 4, 7, 13];
 
 const searchOp = op({
   name: 'search',
-  title: 'search',
-  summary:
-    'Searches for a key from the root, going left or right at each node.',
+  title: { en: 'search', zh: '查找' },
+  summary: {
+    en: 'Searches for a key from the root, going left or right at each node.',
+    zh: '从根开始查找一个关键字，在每个节点往左或往右走。',
+  },
   args: { key: Key.describe('The key to look for.') },
   examples: [{ from: sample, key: 7 }],
   code: SEARCH,
-  titleOf: ({ key }) => `search ${key}`,
+  titleOf: ({ key }) => ({ en: `search ${key}`, zh: `查找 ${key}` }),
   apply: (s, { key }, trace, on) => search(s, key, trace, on),
 });
 
 const insertOp = op({
   name: 'insert',
-  title: 'insert',
-  summary:
-    'Inserts a key at the empty spot a search for it reaches; equal keys go right.',
+  title: { en: 'insert', zh: '插入' },
+  summary: {
+    en: 'Inserts a key at the empty spot a search for it reaches; equal keys go right.',
+    zh: '把关键字插入到查找它时到达的空位；相等的关键字放到右边。',
+  },
   args: { key: Key.describe('The key to insert.') },
   examples: [{ from: sample, key: 5 }],
   code: INSERT,
-  titleOf: ({ key }) => `insert ${key}`,
+  titleOf: ({ key }) => ({ en: `insert ${key}`, zh: `插入 ${key}` }),
   apply: (s, { key }, trace, on) => insert(s, key, trace, on),
 });
 
 const deleteOp = op({
   name: 'delete',
-  title: 'delete',
-  summary:
-    'Deletes a key; a node with two children takes the key of its successor (or predecessor), which is then deleted.',
+  title: { en: 'delete', zh: '删除' },
+  summary: {
+    en: 'Deletes a key; a node with two children takes the key of its successor (or predecessor), which is then deleted.',
+    zh: '删除一个关键字；有两个孩子的节点改存它后继（或前驱）的关键字，再删除那个后继（或前驱）。',
+  },
   args: {
     key: Key.describe('The key to delete.'),
     replaceWith: z
@@ -409,7 +435,7 @@ const deleteOp = op({
   ],
   code: DELETE.successor,
   codeOf: ({ replaceWith }) => DELETE[replaceWith ?? 'successor'],
-  titleOf: ({ key }) => `delete ${key}`,
+  titleOf: ({ key }) => ({ en: `delete ${key}`, zh: `删除 ${key}` }),
   apply(s, { key, replaceWith }, trace, on) {
     const d = del(s, s.root, key, null, replaceWith ?? 'successor', trace, on);
     return { state: { ...d.state, root: d.sub }, result: d.found };
@@ -419,10 +445,12 @@ const deleteOp = op({
 /** Operations on a binary search tree given as keys in insertion order. */
 export const bst = defineStructure<BstState, From, 'tree'>({
   id: 'bst',
-  title: 'Binary search tree',
+  title: { en: 'Binary search tree', zh: '二叉搜索树' },
   topic: 'trees',
-  summary:
-    'Searches, inserts and deletes keys one after another in a binary search tree.',
+  summary: {
+    en: 'Searches, inserts and deletes keys one after another in a binary search tree.',
+    zh: '在二叉搜索树中依次查找、插入和删除关键字。',
+  },
   name: 'bst',
   kind: 'tree',
   from: listField(

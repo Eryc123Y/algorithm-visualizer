@@ -78,7 +78,7 @@ export const redBlackTree = defineStructure<State, From<number>, 'tree'>({
   operations: [
     op({
       name: 'insert',
-      title: 'insert',
+      title: { en: 'insert', zh: '插入' },
       summary:
         'Inserts a key as a red leaf, then recolours and rotates up the tree (RB-INSERT-FIXUP) until no red node has a red child.',
       args: { key: Key.describe('The key to insert.') },
@@ -87,7 +87,7 @@ export const redBlackTree = defineStructure<State, From<number>, 'tree'>({
         { from: [], key: 7 },
       ],
       code: RB_INSERT,
-      titleOf: ({ key }) => `insert ${key}`,
+      titleOf: ({ key }) => ({ en: `insert ${key}`, zh: `插入 ${key}` }),
       apply: (s, { key }, trace, on) => ({
         state: insert(s, key, runOf(s, trace, on, RB_INSERT, family)),
         result: null,
@@ -95,7 +95,7 @@ export const redBlackTree = defineStructure<State, From<number>, 'tree'>({
     }),
     op({
       name: 'delete',
-      title: 'delete',
+      title: { en: 'delete', zh: '删除' },
       summary:
         'Deletes a key: its child or its successor takes its place, and if a black node left its place, RB-DELETE-FIXUP restores the black heights.',
       args: { key: Key.describe('The key to delete.') },
@@ -104,7 +104,7 @@ export const redBlackTree = defineStructure<State, From<number>, 'tree'>({
         { from: SAMPLE, key: 11 },
       ],
       code: RB_DELETE,
-      titleOf: ({ key }) => `delete ${key}`,
+      titleOf: ({ key }) => ({ en: `delete ${key}`, zh: `删除 ${key}` }),
       apply: (s, { key }, trace, on) => ({
         state: remove(s, key, runOf(s, trace, on, RB_DELETE, family)),
         result: null,

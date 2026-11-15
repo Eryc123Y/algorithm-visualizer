@@ -80,7 +80,10 @@ function swapStep(
   i: number,
   j: number,
 ) {
-  trace.step('swap', `Swap ${items[i]!.value} and ${items[j]!.value}.`);
+  trace.step('swap', {
+    en: `Swap ${items[i]!.value} and ${items[j]!.value}.`,
+    zh: `交换 ${items[i]!.value} 和 ${items[j]!.value}。`,
+  });
   on.swap({ i, j });
   return swapItems(items, i, j);
 }
@@ -97,10 +100,10 @@ function siftUp(
     const p = parentOf(i);
     const [x, y] = [h[i]!.value, h[p]!.value];
     const up = o.above(x, y);
-    trace.step(
-      'compare',
-      `${x} ${up ? o.less : o.notLess} ${y}, its parent: ${up ? 'swap up' : 'stop'}.`,
-    );
+    trace.step('compare', {
+      en: `${x} ${up ? o.less : o.notLess} ${y}, its parent: ${up ? 'swap up' : 'stop'}.`,
+      zh: `${x} ${up ? o.less : o.notLess} ${y}，${y} 是它的父节点：${up ? '向上交换' : '停止'}。`,
+    });
     on.compare({ i, j: p });
     if (!up) break;
     h = swapStep(trace, on, h, i, p);
@@ -116,10 +119,10 @@ function siftDown(items: readonly Item[], o: Order, trace: Trace, on: On) {
     if (c + 1 < h.length && o.above(h[c + 1]!.value, h[c]!.value)) c += 1;
     const [x, y] = [h[i]!.value, h[c]!.value];
     const down = o.above(y, x);
-    trace.step(
-      'compare',
-      `${x} ${down ? o.more : o.notMore} ${y}, the ${o.child} child: ${down ? 'swap down' : 'stop'}.`,
-    );
+    trace.step('compare', {
+      en: `${x} ${down ? o.more : o.notMore} ${y}, the ${o.child} child: ${down ? 'swap down' : 'stop'}.`,
+      zh: `${x} ${down ? o.more : o.notMore} ${y}，${y} 是${o.order === 'min' ? '较小' : '较大'}的孩子：${down ? '向下交换' : '停止'}。`,
+    });
     on.compare({ i, j: c });
     if (!down) break;
     h = swapStep(trace, on, h, i, c);
@@ -225,7 +228,10 @@ function push(
       `The heap is full: it holds at most ${MAX_SIZE} values`,
     );
   const item = { id: `h${s.next}`, value };
-  trace.step('append', `Put ${value} at the end.`);
+  trace.step('append', {
+    en: `Put ${value} at the end.`,
+    zh: `把 ${value} 放到末尾。`,
+  });
   on.insert({ index: s.items.length, element: item });
   const items = siftUp([...s.items, item], s.items.length, o, trace, on);
   return { state: { items, next: s.next + 1 }, result: null };
@@ -237,13 +243,16 @@ function pop(s: HeapState, o: Order, trace: Trace, on: On): Applied<HeapState> {
   const last = s.items.length - 1;
   const top = s.items[0]!.value;
   if (last > 0) {
-    trace.step(
-      'swap-last',
-      `Move the last value ${s.items[last]!.value} to the root, and ${top} to the end.`,
-    );
+    trace.step('swap-last', {
+      en: `Move the last value ${s.items[last]!.value} to the root, and ${top} to the end.`,
+      zh: `把最后一个值 ${s.items[last]!.value} 移到根，把 ${top} 移到末尾。`,
+    });
     on.swap({ i: 0, j: last });
   }
-  trace.step('remove', `Remove ${top}: it is the ${o.extreme}.`);
+  trace.step('remove', {
+    en: `Remove ${top}: it is the ${o.extreme}.`,
+    zh: `删去 ${top}：它是${o.order === 'min' ? '最小值' : '最大值'}。`,
+  });
   on.remove({ index: last });
   const items = siftDown(
     swapItems(s.items, 0, last).slice(0, last),
@@ -273,7 +282,10 @@ function changeKey(
       `${o.change} must not ${o.order === 'min' ? 'increase' : 'decrease'} h[${index}] (${old}) to ${value}`,
     );
   const verb = o.order === 'min' ? 'Decrease' : 'Increase';
-  trace.step('set', `${verb} h[${index}] from ${old} to ${value}.`);
+  trace.step('set', {
+    en: `${verb} h[${index}] from ${old} to ${value}.`,
+    zh: `把 h[${index}] 从 ${old} ${o.order === 'min' ? '减小' : '增大'}到 ${value}。`,
+  });
   on.set({ index, value });
   const changed = s.items.map((x, k) => (k === index ? { ...x, value } : x));
   return {
@@ -360,11 +372,20 @@ function heapStructure(order: HeapOrder): Structure {
   const op = operationsOf<HeapState, HeapFrom, 'array'>();
   const [change, way] =
     order === 'min' ? ['decrease', 'smaller'] : ['increase', 'larger'];
+  // The same in Chinese (ADR 0045).
+  const changeZh = order === 'min' ? '减小' : '增大';
+  const extremeZh = order === 'min' ? '最小值' : '最大值';
   return defineStructure<HeapState, HeapFrom, 'array'>({
     id: `${order}-heap`,
-    title: `Binary ${order}-heap`,
+    title: {
+      en: `Binary ${order}-heap`,
+      zh: `二叉${order === 'min' ? '最小' : '最大'}堆`,
+    },
     topic: 'heaps',
-    summary: `Pushes, pops and ${change}s keys one after another in a binary ${order}-heap stored as an array.`,
+    summary: {
+      en: `Pushes, pops and ${change}s keys one after another in a binary ${order}-heap stored as an array.`,
+      zh: `在用数组存放的二叉${order === 'min' ? '最小' : '最大'}堆中，依次插入、弹出和${changeZh}关键字。`,
+    },
     name: 'heap',
     kind: 'array',
     from: From,
@@ -393,28 +414,37 @@ function heapStructure(order: HeapOrder): Structure {
     operations: [
       op({
         name: 'push',
-        title: 'push',
-        summary: `Puts a value at the end of a binary ${order}-heap and sifts it up.`,
+        title: { en: 'push', zh: '插入' },
+        summary: {
+          en: `Puts a value at the end of a binary ${order}-heap and sifts it up.`,
+          zh: `把一个值放到二叉${order === 'min' ? '最小' : '最大'}堆的末尾，再让它上浮。`,
+        },
         args: { value: Value.describe('The value to push.') },
         examples: [{ from: sample, value: order === 'min' ? 0 : 10 }],
         code: code.push,
-        titleOf: ({ value }) => `push ${value}`,
+        titleOf: ({ value }) => ({ en: `push ${value}`, zh: `插入 ${value}` }),
         apply: (s, { value }, trace, on) => push(s, value, o, trace, on),
       }),
       op({
         name: 'pop',
-        title: 'pop',
-        summary: `Removes the ${o.extreme} of a binary ${order}-heap: the last value moves to the root and sifts down.`,
+        title: { en: 'pop', zh: `弹出${extremeZh}` },
+        summary: {
+          en: `Removes the ${o.extreme} of a binary ${order}-heap: the last value moves to the root and sifts down.`,
+          zh: `删去二叉${order === 'min' ? '最小' : '最大'}堆的${extremeZh}：最后一个值移到根，再让它下沉。`,
+        },
         args: {},
         examples: [{ from: sample }],
         code: code.pop,
-        titleOf: () => 'pop',
+        titleOf: () => ({ en: 'pop', zh: `弹出${extremeZh}` }),
         apply: (s, _, trace, on) => pop(s, o, trace, on),
       }),
       op({
         name: `${change}-key`,
-        title: `${change} key`,
-        summary: `Makes the value at an index of a binary ${order}-heap ${way} and sifts it up.`,
+        title: { en: `${change} key`, zh: `${changeZh}关键字` },
+        summary: {
+          en: `Makes the value at an index of a binary ${order}-heap ${way} and sifts it up.`,
+          zh: `把二叉${order === 'min' ? '最小' : '最大'}堆中某个位置的值${changeZh}，再让它上浮。`,
+        },
         args: {
           index: Index,
           value: Value.describe(
@@ -423,7 +453,10 @@ function heapStructure(order: HeapOrder): Structure {
         },
         examples: [{ from: sample, index: 4, value: order === 'min' ? 0 : 10 }],
         code: code.change,
-        titleOf: ({ index, value }) => `${change} key at ${index} to ${value}`,
+        titleOf: ({ index, value }) => ({
+          en: `${change} key at ${index} to ${value}`,
+          zh: `把位置 ${index} 的关键字${changeZh}为 ${value}`,
+        }),
         apply: (s, { index, value }, trace, on) =>
           changeKey(s, index, value, o, trace, on),
       }),

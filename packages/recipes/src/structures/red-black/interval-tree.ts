@@ -217,7 +217,7 @@ export const intervalTree = defineStructure<State, From<Interval>, 'tree'>({
   operations: [
     op({
       name: 'search',
-      title: 'search',
+      title: { en: 'search', zh: '查找' },
       summary:
         'Finds an interval that overlaps the given one, or none: it goes left whenever the left subtree reaches the low end, since an overlap is then on the left if anywhere.',
       args: { interval: IntervalSchema.describe('The interval to overlap.') },
@@ -226,7 +226,10 @@ export const intervalTree = defineStructure<State, From<Interval>, 'tree'>({
         { from: SAMPLE, interval: [11, 14] },
       ],
       code: INTERVAL_SEARCH,
-      titleOf: ({ interval }) => `search ${show(interval)}`,
+      titleOf: ({ interval }) => ({
+        en: `search ${show(interval)}`,
+        zh: `查找 ${show(interval)}`,
+      }),
       apply: (s, { interval }, trace, on) =>
         search(
           s,
@@ -236,13 +239,16 @@ export const intervalTree = defineStructure<State, From<Interval>, 'tree'>({
     }),
     op({
       name: 'insert',
-      title: 'insert',
+      title: { en: 'insert', zh: '插入' },
       summary:
         'Inserts an interval as in a red–black tree, raising the max of every node on the way down to its high end where it is higher.',
       args: { interval: IntervalSchema.describe('The interval to insert.') },
       examples: [{ from: SAMPLE, interval: [12, 13] }],
       code: INTERVAL_INSERT,
-      titleOf: ({ interval }) => `insert ${show(interval)}`,
+      titleOf: ({ interval }) => ({
+        en: `insert ${show(interval)}`,
+        zh: `插入 ${show(interval)}`,
+      }),
       apply: (s, { interval }, trace, on) => ({
         state: insert(
           s,
@@ -254,13 +260,16 @@ export const intervalTree = defineStructure<State, From<Interval>, 'tree'>({
     }),
     op({
       name: 'delete',
-      title: 'delete',
+      title: { en: 'delete', zh: '删除' },
       summary:
         'Deletes an interval as in a red–black tree, then recomputes the maxima from where the removed node’s place was filled up to the root.',
       args: { interval: IntervalSchema.describe('The interval to delete.') },
       examples: [{ from: SAMPLE, interval: [16, 21] }],
       code: INTERVAL_DELETE,
-      titleOf: ({ interval }) => `delete ${show(interval)}`,
+      titleOf: ({ interval }) => ({
+        en: `delete ${show(interval)}`,
+        zh: `删除 ${show(interval)}`,
+      }),
       apply: (s, { interval }, trace, on) => ({
         state: remove(
           s,

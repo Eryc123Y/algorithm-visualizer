@@ -190,7 +190,7 @@ export const bTree = defineStructure<BTree, From, 'btree'>({
   operations: [
     op({
       name: 'search',
-      title: 'search',
+      title: { en: 'search', zh: '查找' },
       summary:
         'Walks down from the root, comparing the key with each node’s keys left to right, to the key or to a leaf.',
       args: { key: Key.describe('The key to find.') },
@@ -199,7 +199,7 @@ export const bTree = defineStructure<BTree, From, 'btree'>({
         { from: SAMPLE, key: 'G' },
       ],
       code: BT_SEARCH,
-      titleOf: ({ key }) => `search ${key}`,
+      titleOf: ({ key }) => ({ en: `search ${key}`, zh: `查找 ${key}` }),
       apply: (s, { key }, trace, on) => {
         checkKind(s, key);
         return {
@@ -210,7 +210,7 @@ export const bTree = defineStructure<BTree, From, 'btree'>({
     }),
     op({
       name: 'insert',
-      title: 'insert',
+      title: { en: 'insert', zh: '插入' },
       summary:
         'Inserts a key into a leaf in one pass down, splitting every full node first; a full root splits under a new root, which is how the tree grows.',
       args: { key: Key.describe('The key to insert.') },
@@ -219,7 +219,7 @@ export const bTree = defineStructure<BTree, From, 'btree'>({
         { from: { t: 2, keys: [10, 20, 30] }, key: 40 },
       ],
       code: BT_INSERT,
-      titleOf: ({ key }) => `insert ${key}`,
+      titleOf: ({ key }) => ({ en: `insert ${key}`, zh: `插入 ${key}` }),
       apply: (s, { key }, trace, on) => {
         checkKind(s, key);
         return {
@@ -230,7 +230,7 @@ export const bTree = defineStructure<BTree, From, 'btree'>({
     }),
     op({
       name: 'delete',
-      title: 'delete',
+      title: { en: 'delete', zh: '删除' },
       summary:
         'Deletes a key in one pass down, merging or borrowing so that every node it enters has at least t keys, as in CLRS’s cases 1 to 3.',
       args: { key: Key.describe('The key to delete.') },
@@ -239,7 +239,7 @@ export const bTree = defineStructure<BTree, From, 'btree'>({
         { from: CLRS_DELETE, key: 'D' },
       ],
       code: BT_DELETE,
-      titleOf: ({ key }) => `delete ${key}`,
+      titleOf: ({ key }) => ({ en: `delete ${key}`, zh: `删除 ${key}` }),
       apply: (s, { key }, trace, on) => {
         checkKind(s, key);
         return {

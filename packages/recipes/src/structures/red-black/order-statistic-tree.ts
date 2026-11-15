@@ -209,7 +209,7 @@ export const orderStatisticTree = defineStructure<State, From<number>, 'tree'>({
   operations: [
     op({
       name: 'select',
-      title: 'select',
+      title: { en: 'select', zh: '选择' },
       summary:
         'Finds the key of rank i (the ith smallest, from 1), going left or right by the size of each left subtree.',
       args: {
@@ -222,13 +222,13 @@ export const orderStatisticTree = defineStructure<State, From<number>, 'tree'>({
         { from: SAMPLE, i: 1 },
       ],
       code: OS_SELECT,
-      titleOf: ({ i }) => `select ${i}`,
+      titleOf: ({ i }) => ({ en: `select ${i}`, zh: `选择第 ${i} 小` }),
       apply: (s, { i }, trace, on) =>
         select(s, i, runOf(s, trace, on, OS_SELECT, family)),
     }),
     op({
       name: 'rank',
-      title: 'rank',
+      title: { en: 'rank', zh: '求秩' },
       summary:
         'Finds a key, then counts the keys before it, adding a parent and its left subtree whenever it climbs from a right child.',
       args: { key: Key.describe('The key whose rank to find.') },
@@ -237,19 +237,19 @@ export const orderStatisticTree = defineStructure<State, From<number>, 'tree'>({
         { from: SAMPLE, key: 11 },
       ],
       code: OS_RANK,
-      titleOf: ({ key }) => `rank ${key}`,
+      titleOf: ({ key }) => ({ en: `rank ${key}`, zh: `求 ${key} 的秩` }),
       apply: (s, { key }, trace, on) =>
         rank(s, key, runOf(s, trace, on, OS_RANK, family)),
     }),
     op({
       name: 'insert',
-      title: 'insert',
+      title: { en: 'insert', zh: '插入' },
       summary:
         'Inserts a key as in a red–black tree, adding one to the size of every node on the way down; the fixup’s rotations recompute the sizes they change.',
       args: { key: Key.describe('The key to insert.') },
       examples: [{ from: SAMPLE, key: 15 }],
       code: OS_INSERT,
-      titleOf: ({ key }) => `insert ${key}`,
+      titleOf: ({ key }) => ({ en: `insert ${key}`, zh: `插入 ${key}` }),
       apply: (s, { key }, trace, on) => ({
         state: insert(
           s,
@@ -261,13 +261,13 @@ export const orderStatisticTree = defineStructure<State, From<number>, 'tree'>({
     }),
     op({
       name: 'delete',
-      title: 'delete',
+      title: { en: 'delete', zh: '删除' },
       summary:
         'Deletes a key as in a red–black tree, then recomputes the sizes on the path from where the removed node’s place was filled up to the root.',
       args: { key: Key.describe('The key to delete.') },
       examples: [{ from: SAMPLE, key: 17 }],
       code: OS_DELETE,
-      titleOf: ({ key }) => `delete ${key}`,
+      titleOf: ({ key }) => ({ en: `delete ${key}`, zh: `删除 ${key}` }),
       apply: (s, { key }, trace, on) => ({
         state: remove(
           s,

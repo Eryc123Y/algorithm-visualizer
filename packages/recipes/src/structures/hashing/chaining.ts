@@ -168,18 +168,18 @@ export const hashChaining = defineStructure<ChainState, TableFrom, 'hashTable'>(
     operations: [
       op({
         name: 'insert',
-        title: 'insert',
+        title: { en: 'insert', zh: '插入' },
         summary:
           'Inserts a key at the head of the chain of its bucket, k mod m.',
         args: { key: Key.describe('The integer key to insert.') },
         examples: [{ from: sample, key: 29 }],
         code: INSERT,
-        titleOf: ({ key }) => `insert ${key}`,
+        titleOf: ({ key }) => ({ en: `insert ${key}`, zh: `插入 ${key}` }),
         apply: (s, { key }, trace, on) => insert(s, key, trace, on),
       }),
       op({
         name: 'search',
-        title: 'search',
+        title: { en: 'search', zh: '查找' },
         summary:
           'Looks for a key along the chain of its bucket, k mod m, from the head.',
         args: { key: Key.describe('The integer key to look for.') },
@@ -188,7 +188,7 @@ export const hashChaining = defineStructure<ChainState, TableFrom, 'hashTable'>(
           { from: sample, key: 4 },
         ],
         code: SEARCH,
-        titleOf: ({ key }) => `search ${key}`,
+        titleOf: ({ key }) => ({ en: `search ${key}`, zh: `查找 ${key}` }),
         apply: (s, { key }, trace, on) => search(s, key, trace, on),
       }),
     ],

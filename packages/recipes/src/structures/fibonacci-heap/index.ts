@@ -242,13 +242,13 @@ export const fibonacciHeap = defineStructure<FibState, From, 'tree'>({
   operations: [
     op({
       name: 'insert',
-      title: 'insert',
+      title: { en: 'insert', zh: '插入' },
       summary:
         'Puts a new one-node tree in the root list, just left of the minimum, and makes it the minimum if its key is less.',
       args: { key: Key.describe('The key to insert.') },
       examples: [{ from: parseForest(SAMPLE), key: 21 }],
       code: FIB_INSERT,
-      titleOf: ({ key }) => `insert ${key}`,
+      titleOf: ({ key }) => ({ en: `insert ${key}`, zh: `插入 ${key}` }),
       apply: (s, { key }, trace, on, sides) => ({
         state: insert(fresh(s), key, runOf(s, trace, on, sides, FIB_INSERT)),
         result: null,
@@ -256,7 +256,7 @@ export const fibonacciHeap = defineStructure<FibState, From, 'tree'>({
     }),
     op({
       name: 'union',
-      title: 'union',
+      title: { en: 'union', zh: '合并' },
       summary:
         'Joins the root list of a second heap to this one’s and keeps the lesser minimum; nothing else moves.',
       args: {
@@ -269,7 +269,7 @@ export const fibonacciHeap = defineStructure<FibState, From, 'tree'>({
         },
       ],
       code: FIB_UNION,
-      titleOf: () => 'union',
+      titleOf: () => ({ en: 'union', zh: '合并' }),
       apply: (s, args, trace, on, sides) => ({
         state: union(
           fresh(s),
@@ -281,7 +281,7 @@ export const fibonacciHeap = defineStructure<FibState, From, 'tree'>({
     }),
     op({
       name: 'extract-min',
-      title: 'extract-min',
+      title: { en: 'extract-min', zh: '抽取最小值' },
       summary:
         'Removes the minimum, moves its children to the root list, then consolidates: roots of equal degree are linked until every degree is different.',
       args: {},
@@ -293,7 +293,7 @@ export const fibonacciHeap = defineStructure<FibState, From, 'tree'>({
         },
       ],
       code: FIB_EXTRACT_MIN,
-      titleOf: () => 'extract-min',
+      titleOf: () => ({ en: 'extract-min', zh: '抽取最小值' }),
       apply: (s, _, trace, on, sides) => {
         const { state, key } = extractMin(
           fresh(s),
@@ -304,7 +304,7 @@ export const fibonacciHeap = defineStructure<FibState, From, 'tree'>({
     }),
     op({
       name: 'decrease-key',
-      title: 'decrease key',
+      title: { en: 'decrease key', zh: '减小关键字' },
       summary:
         'Lowers a key; if it falls below its parent’s, the node is cut to the root list, and marked ancestors are cut too, up to the first unmarked one, which is marked.',
       args: {
@@ -324,7 +324,10 @@ export const fibonacciHeap = defineStructure<FibState, From, 'tree'>({
         },
       ],
       code: FIB_DECREASE_KEY,
-      titleOf: ({ key, to }) => `decrease ${key} to ${to}`,
+      titleOf: ({ key, to }) => ({
+        en: `decrease ${key} to ${to}`,
+        zh: `把 ${key} 减小为 ${to}`,
+      }),
       apply: (s, { key, to }, trace, on, sides) => ({
         state: decreaseKey(
           fresh(s),
@@ -337,13 +340,13 @@ export const fibonacciHeap = defineStructure<FibState, From, 'tree'>({
     }),
     op({
       name: 'delete',
-      title: 'delete',
+      title: { en: 'delete', zh: '删除' },
       summary:
         'Deletes a key by decreasing it to −∞, which makes it the minimum, and extracting the minimum.',
       args: { key: Key.describe('The key to delete.') },
       examples: [{ from: parseForest(SAMPLE), key: 26 }],
       code: FIB_DELETE,
-      titleOf: ({ key }) => `delete ${key}`,
+      titleOf: ({ key }) => ({ en: `delete ${key}`, zh: `删除 ${key}` }),
       apply: (s, { key }, trace, on, sides) => ({
         state: deleteKey(
           fresh(s),
