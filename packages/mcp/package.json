@@ -32,7 +32,9 @@
   "files": [
     "dist",
     "guide",
-    "ui"
+    "ui",
+    "!dist/.tsbuildinfo",
+    "!dist/standalone"
   ],
   "scripts": {
     "build": "tsc --build tsconfig.lib.json && vite build --config vite.app.config.ts",
@@ -51,8 +53,8 @@
     "zod": "^4.6.7"
   },
   "bin": {
-    "algomotion": "./dist/algomotion.js",
-    "algomotion-mcp": "./dist/mcp-server.js"
+    "algomotion": "dist/algomotion.js",
+    "algomotion-mcp": "dist/mcp-server.js"
   },
   "devDependencies": {
     "@algomotion/elements": "1.0.0-alpha.1",

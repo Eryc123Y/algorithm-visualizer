@@ -43,7 +43,8 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "!dist/.tsbuildinfo"
   ],
   "scripts": {
     "build": "tsc --build tsconfig.lib.json && vite build --config vite.cdn.config.ts"
