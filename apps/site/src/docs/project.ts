@@ -412,22 +412,22 @@ ${setup === undefined || setup.type !== 'code' ? '' : `<pre tabindex="0"><code>$
 <li><strong>模块：</strong>新建 <code>packages/recipes/src/algorithms/&lt;topic&gt;/&lt;id&gt;.ts</code>，导出用 <code>defineAlgorithm</code> 定义的模块：
 <ul>
 <li>kebab-case 的 <code>id</code>、<code>title</code>、<code>topic</code>，以及一句话的 <code>summary</code>；</li>
-<li>Zod 写的 <code>input</code> 模式和若干 <code>examples</code>，第一个示例是菜单里的默认值，也是不给输入时运行的那个。列表、图和操作序列通过 <code>listField</code>、<code>Graph</code> 和 <code>defineStructure</code> 支持对应的记法；</li>
+<li>用 Zod 写的 <code>input</code> schema和若干 <code>examples</code>，第一个示例是菜单里的默认值，也是不给输入时运行的那个。列表、图和操作序列通过 <code>listField</code>、<code>Graph</code> 和 <code>defineStructure</code> 支持对应的记法；</li>
 <li>伪代码（CLRS 的约定，下标从 0 开始，用自己的话写）和 Python 两种 <code>code</code>，在步骤指向的行上加 <code>// @name</code> 和 <code># @name</code> 标记；</li>
 <li><code>run(input, trace)</code>：用 <code>trace.add</code> 声明结构，每一步以 <code>trace.step(anchor, narration)</code> 开始。解说要说出具体的值，不要描述某种语言的语法。模块画不了的输入，抛出 <code>RangeError</code>。</li>
 </ul>
 数据结构放在 <code>packages/recipes/src/structures/&lt;name&gt;/</code>，用 <code>defineStructure</code> 定义。</li>
-<li><strong>注册：</strong>把模块加进 <code>packages/recipes/src/registry.ts</code> 的 <code>algorithms</code>，放在它所属领域旁边。</li>
+<li><strong>注册：</strong>把模块加进 <code>packages/recipes/src/registry.ts</code> 的 <code>algorithms</code>，放在同领域的模块旁边。</li>
 <li><strong>测试：</strong><code>tests/registry.spec.ts</code> 会检查每个模块（示例、锚点、解说、步骤名、确定性）。再为它写一个对照独立参考实现的测试，并在 <code>tests/properties.spec.ts</code> 里加性质测试。</li>
 <li><strong>亲眼看看：</strong>在 playground 里打开它，两种语言都看一遍。</li>
 </ol>
 <h2 id="pull-requests">提交拉取请求</h2>
-<p>拉取请求的目标分支是 <code>main</code>。模板会问对应的路线图条目、你怎么检查的改动，以及画出来的东西的截图。<code>npm run check</code> 跑的就是 CI 最先跑的那些检查；改了播放器或网站，还要跑 <code>npm run test:e2e</code>。</p>
+<p>拉取请求的目标分支是 <code>main</code>。模板会询问对应的路线图条目、你如何验证这次改动，以及绘制效果的截图。<code>npm run check</code> 跑的就是 CI 最先跑的那些检查；改了播放器或网站，还要跑 <code>npm run test:e2e</code>。</p>
 <ul>
 <li>在功能分支上开发，CI 通过后再合并。</li>
 <li>提交信息采用 <code>type(scope): description</code> 的格式，比如 <code>feat(spec): add tree actions</code>；类型有 <code>feat</code>、<code>fix</code>、<code>docs</code>、<code>test</code>、<code>refactor</code> 和 <code>chore</code>。</li>
 </ul>
-<p>改协议、加新的结构种类或改公开接口，都要先在 <a href="${REPOSITORY}/tree/main/docs/adr">docs/adr</a> 里写一份设计决策记录。计划中的工作见<a href="${ROOT}roadmap/">路线图</a>。</p>
+<p>改协议、加新的结构类型或改公开接口，都要先在 <a href="${REPOSITORY}/tree/main/docs/adr">docs/adr</a> 里写一份设计决策记录。计划中的工作见<a href="${ROOT}roadmap/">路线图</a>。</p>
 <aside class="note"><p>algomotion 是自由软件，采用 GNU 通用公共许可证第 3 版或更高版本（<a href="${REPOSITORY}/blob/main/LICENSE">LICENSE</a>）。贡献的代码也以同一许可证接收。随附的字体保留各自的许可证，即 SIL 开放字体许可证。</p></aside>`,
     assets,
     'zh',

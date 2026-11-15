@@ -126,7 +126,7 @@ const en: HomeText = {
   },
   plate: {
     title: 'The same run, as figures for your notes',
-    lede: 'Every step has a name, so a figure can be asked for by what happens in it: <code>extract#2</code> is the second vertex taken from the queue. Each one is a vector figure, in the theme you pick.',
+    lede: 'Every step has a name, so you can ask for a figure by what happens in it: <code>extract#2</code> is the second vertex taken from the queue. Each one is a vector figure, in the theme you pick.',
     figure: 'Figure 1.',
     caption: 'Dijkstra’s algorithm from A on the graph above.',
   },
@@ -171,7 +171,7 @@ const en: HomeText = {
       notes: 'A page of notes, as Typst compiles it.',
       beamer:
         'Three overlays of one Beamer frame, from <code>steps=extract\\#2..improve\\#3</code>, as <code>latexmk</code> compiles them.',
-      terminal: 'The command, run: what it printed.',
+      terminal: 'The command and what it printed.',
       chat: 'The player after a real <code>algomotion_show</code> call, in a minimal MCP Apps host.',
     },
     linkCaption: 'The link opens this player, in any browser.',
@@ -257,13 +257,17 @@ const en: HomeText = {
 const spaced = (word: string): string =>
   /[A-Za-z0-9]$/.test(word) ? `${word} ` : word;
 
+/** A word between Chinese: a space on each side that touches Latin text. */
+const between = (word: string): string =>
+  `${/^[A-Za-z0-9]/.test(word) ? ' ' : ''}${spaced(word)}`;
+
 const zh: HomeText = {
   title: 'algomotion：一步一步画出算法',
   description:
     '给出算法名和你的输入，algomotion 就把算法和数据结构的每一步画出来：用在网页、Typst、LaTeX、幻灯片和 AI 对话里。',
   hero: {
     title: '算法的每一步，都画出来。',
-    lede: '说出算法名，用你平时就在写的记法给出输入。algomotion 运行它，画出每一步：网页上是动画，Typst 和 LaTeX 笔记里是插图，幻灯片上是逐步显示的叠层，AI 对话里是播放器。',
+    lede: '说出算法名，用你平时习惯的记法给出输入。algomotion 运行后画出每一步：网页上是动画，Typst 和 LaTeX 笔记里是插图，幻灯片上是逐步显示的叠层，AI 对话里是播放器。',
     getStarted: '开始使用',
     browse: (n) => `浏览 ${n} 个算法`,
     fine: '源码公开。播放器在读者自己的浏览器里运行，分享链接把整个运行过程写在链接本身里。',
@@ -280,13 +284,13 @@ const zh: HomeText = {
   },
   plate: {
     title: '同一次运行，变成笔记里的插图',
-    lede: '每一步都有名字，所以可以按发生了什么来要一幅图：<code>extract#2</code> 是第二个从队列中取出的顶点。每一幅都是矢量图，主题由你选。',
+    lede: '每一步都有名字，所以可以按步骤里发生了什么来指定插图：<code>extract#2</code> 是第二个从队列中取出的顶点。每一幅都是矢量图，主题由你选。',
     figure: '图 1',
     caption: '在上面的图上从 A 出发运行 Dijkstra 算法。',
   },
   outputs: {
     title: '一份输入，写到哪里都行',
-    lede: '上面这次运行，写成它能去的每个地方的代码。换算法或改输入，每段代码都会跟着变。所有输出用的是同一个引擎，所以笔记里的图和课程网页上的播放器一模一样。',
+    lede: '以下是上面这次运行在各类输出中的写法。换算法或改输入，每段代码都会跟着变。所有输出用的是同一个引擎，所以笔记里的图和课程网页上的播放器一模一样。',
     tablist: '输出',
     tabs: {
       web: {
@@ -295,7 +299,7 @@ const zh: HomeText = {
       },
       typst: {
         tab: 'Typst',
-        lede: '在笔记里调用一个函数，就能把你点名的那一步画成矢量图。引擎就在包里运行，不用再装别的。',
+        lede: '在笔记里调用一个函数，就能把你指定的那一步画成矢量图。引擎就在包里运行，不用再装别的。',
       },
       latex: {
         tab: 'LaTeX',
@@ -311,11 +315,11 @@ const zh: HomeText = {
       },
       mcp: {
         tab: 'AI 助手',
-        lede: '接上 Claude 或任何 MCP 客户端，然后提问。模型用这些工具运行算法，直接在对话里显示播放器。',
+        lede: '接上 Claude 或任何 MCP 客户端，然后提问。模型调用工具运行算法，直接在对话里显示播放器。',
       },
       link: {
         tab: '分享链接',
-        lede: '整个运行过程都写在链接的 # 后面，所以任何浏览器都能打开，也没有服务器保存它。贴到课程网页或聊天里就行。',
+        lede: '整个运行过程都写在链接的 # 后面，所以任何浏览器都能打开，也无需服务器存储。贴到课程网页或聊天里就行。',
       },
     },
     guide: (tab) => `${spaced(tab)}指南`,
@@ -326,19 +330,19 @@ const zh: HomeText = {
       beamer:
         '一个 Beamer 帧的三个叠层，由 <code>steps=extract\\#2..improve\\#3</code> 生成，经 <code>latexmk</code> 编译。',
       terminal: '命令真实运行后的输出。',
-      chat: '一次真实的 <code>algomotion_show</code> 调用之后，播放器在一个最小的 MCP Apps 宿主里显示的样子。',
+      chat: '一次真实的 <code>algomotion_show</code> 调用之后，播放器在一个极简 MCP Apps 宿主里显示的样子。',
     },
     linkCaption: '这个链接在任何浏览器里都能打开这个播放器。',
     webCaption: '读者看到的元素。',
     alts: {
-      web: '播放器停在 C 被改进为 5 的那一步，blocks 主题。',
-      typst: 'C 经由 B 被改进为 5，textbook 主题。',
-      latex: 'C 经由 B 被改进为 5，print 主题。',
+      web: '播放器停在 C 的距离降到 5 的那一步，blocks 主题。',
+      typst: 'C 的距离经由 B 降到 5，textbook 主题。',
+      latex: 'C 的距离经由 B 降到 5，print 主题。',
       cli: 'C 已确定，距离为 5。',
-      mcp: 'C 被改进为 5。',
+      mcp: 'C 的距离降到 5。',
       link: '所有距离都已确定。',
     },
-    exampleCaption: (tab) => `示例运行，按${spaced(tab)}代码片段画出的样子。`,
+    exampleCaption: (tab) => `示例运行，按${between(tab)}代码片段画出的样子。`,
     chat: {
       label: '与 AI 助手的一段对话',
       you: '你',
@@ -348,7 +352,7 @@ const zh: HomeText = {
         '在 A-B 4, B-C 1, A-C 7, C-D 2 上从 A 出发，演示一下 Dijkstra 算法。',
       ran: '<code>algomotion_show</code> 运行了 <code>dijkstra</code>：共 14 步。',
       answered:
-        '在这里。第 7 步，C 从 7 降到 5：经过 B 比直接走那条边更短。你可以逐步查看，任何一步都可以问我。',
+        '演示如下。第 7 步，C 的距离从 7 降到 5：经过 B 比直接走那条边更短。你可以逐步查看，任何一步都可以问我。',
     },
   },
   why: {
@@ -364,7 +368,7 @@ const zh: HomeText = {
         text: '笔记里的图、幻灯片上的叠层、课程网页上的播放器，都是同一次运行，同一个主题。',
       },
       {
-        title: '坦白它的局限',
+        title: '坦诚说明局限',
         text: '它只画目录里的算法和你自己写的文档，自动排版，输出静态图或播放器。不做视频。',
       },
     ],
@@ -395,7 +399,7 @@ const zh: HomeText = {
   },
   themes: {
     title: '九种主题，所有输出通用',
-    lede: '同一幅图，可以适合屏幕、讲义、用荧光笔标过的教材页，或者机房里的蓝色屏幕。',
+    lede: '同一幅图，可适配屏幕、讲义、用荧光笔标过的教材页，或者机房里的蓝色屏幕。',
     how: '看看怎么选主题',
     list: '九种主题',
     alt: (t) => `用 ${t} 主题画的 Dijkstra 算法。`,

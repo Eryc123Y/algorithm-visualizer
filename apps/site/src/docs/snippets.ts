@@ -155,7 +155,7 @@ export async function snippetsFor(
       id: 'web',
       label: 'On a web page',
       code: `<script type="module" src="algomotion-player.js"></script>\n${player}`,
-      note: 'The player is one script, the standalone bundle; until it is on a CDN, build it with npm run build -w @algomotion/elements.',
+      note: 'The player is one script, the standalone bundle, in the @algomotion/elements package on npm (tag alpha) or from a CDN such as jsDelivr.',
     },
     {
       id: 'typst',

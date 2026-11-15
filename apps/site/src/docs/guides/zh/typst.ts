@@ -24,8 +24,9 @@ export const zh: Guide = {
     },
   ],
   body: ({ root, code, figure, note, scene }) => `
-<h2 id="install">从仓库安装</h2>
-<p>这个包还没有发布到 Typst Universe。先安装 Typst 0.15 或更高版本，再从仓库构建引擎。仓库里已提交编译好的 WebAssembly 插件，正常使用不需要构建 Rust。</p>
+<h2 id="install">在本地安装</h2>
+<p>这个包还没有发布到 Typst Universe，1.0 时会发布。先安装 Typst 0.15 或更高版本。最快的办法是用 <a href="https://github.com/Eryc123Y/algorithm-visualizer/releases/tag/v1.0.0-alpha.1">GitHub Release</a>：把 <code>algomotion-typst-0.1.0.zip</code> 解压到本地 Typst 包目录（见下文），让它包含 <code>local/algomotion/0.1.0/</code>，然后导入 <code>@local/algomotion:0.1.0</code>。</p>
+<p>也可以从仓库构建引擎。仓库里已提交编译好的 WebAssembly 插件，正常使用不需要编译 Rust 代码。</p>
 ${code(
   `npm ci
 npm run build -w @algomotion/typst`,
@@ -47,16 +48,16 @@ ${code(
   algomotion("insertion-sort", "5 2 4 6 1 3", step: "insert#2", width: 100%),
   caption: [The second insertion puts 4 between 2 and 5.],
 )`,
-  '讲义中的一幅图',
+  '笔记中的一幅图',
 )}
 ${figure('insert', '<code>algomotion</code> 在 <code>insert#2</code> 画出的图。')}
-${scene('notes', 'Typst 编译出的一整页：这幅图和讲义里的其他图一样带着图注；版面只有一栏，队列排到了图的下方。由 <code>npm run scenes</code> 从 <code>apps/site/scenes/notes.typ</code> 生成。')}
+${scene('notes', 'Typst 编译出的一整页：这幅图和笔记里的其他图一样带着图注；版面只有一栏，队列排到了图的下方。由 <code>npm run scenes</code> 从 <code>apps/site/scenes/notes.typ</code> 生成。')}
 <p><code>algomotion(source, input, ...)</code> 返回一张图片，可以放进 <code>figure</code>、<code>grid</code> 或 <code>box</code>。第一个参数是算法 id，后面跟它的输入；也可以只传一份文档。不给输入的算法运行它的第一个示例。<a href="${root}guide/inputs/">输入记法</a>可以直接写成字符串；结构化输入用 Typst 的数组和字典。</p>
 <div class="scroll" role="region" aria-label="Typst 选项" tabindex="0"><table class="params">
 <thead><tr><th>选项</th><th>默认值</th><th>用途</th></tr></thead><tbody>
 <tr><td><code>step</code></td><td><code>-1</code></td><td>一帧：编号、步骤名，或带分节限定的步骤。</td></tr>
 <tr><td><code>theme</code></td><td><code>"light"</code></td><td>一个固定的内置主题。</td></tr>
-<tr><td><code>layout</code></td><td><code>auto</code></td><td>讲义中默认 <code>"narrow"</code>；<code>"wide"</code> 把辅助结构放在主结构旁边。</td></tr>
+<tr><td><code>layout</code></td><td><code>auto</code></td><td>笔记中默认 <code>"narrow"</code>；<code>"wide"</code> 把辅助结构放在主结构旁边。</td></tr>
 <tr><td><code>strict</code></td><td><code>false</code></td><td>遇到诊断信息时中止编译，而不是画一个错误框。</td></tr>
 <tr><td><code>width</code>、<code>height</code></td><td><code>auto</code></td><td>传给 <code>image</code>。自然尺寸是每像素 0.75 pt。</td></tr>
 <tr><td><code>fit</code></td><td><code>"contain"</code></td><td>图片的适配方式：<code>"contain"</code>、<code>"cover"</code> 或 <code>"stretch"</code>。</td></tr>

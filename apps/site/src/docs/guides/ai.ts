@@ -72,12 +72,17 @@ Validate the document and inspect frames 0 and -1 before showing it.`,
 <p>The hosted server can return <a href="${root}guide/share-links/">share links</a> from <code>algomotion_show</code> and <code>algomotion_run_recipe</code>. Recipe links carry the id and input; custom-document links carry the compressed document. If a link would exceed 16,384 characters, the text explains why no link was made.</p>
 
 <h2 id="local">Run locally over stdio</h2>
-<p>Nothing is on npm yet. Build from the repository, then register the resulting server. Replace the absolute checkout path:</p>
+<p>The server is on npm as a 1.0 alpha. Register it in Claude Code, and npx fetches it on first use:</p>
+${code(
+  `claude mcp add algomotion -- npx -y -p @algomotion/mcp@alpha algomotion-mcp`,
+  'Register a local stdio server',
+)}
+<p>To run your own build instead, build from a checkout of the repository and give the server's path:</p>
 ${code(
   `npm ci
 npm run build -w @algomotion/mcp
 claude mcp add algomotion -- node /absolute/path/packages/mcp/dist/mcp-server.js`,
-  'Register a local stdio server',
+  'Register a server built from the repository',
 )}
 <p>For Claude Desktop's local server configuration, use:</p>
 ${code(

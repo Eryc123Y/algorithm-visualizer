@@ -34,7 +34,7 @@ ${code('claude mcp add --transport http algomotion https://algomotion-mcp.turing
   <thead><tr><th scope="col">你想要</th><th scope="col">用什么</th><th scope="col">指南</th></tr></thead>
   <tbody>
     <tr><td>网页或课程网站上的交互式播放器</td><td><code>&lt;algo-player&gt;</code></td><td><a href="${root}guide/web/">网页</a></td></tr>
-    <tr><td>讲义、论文或试卷里某一步的图</td><td>Typst 或 LaTeX 包</td><td><a href="${root}guide/typst/">Typst</a>、<a href="${root}guide/latex/">LaTeX</a></td></tr>
+    <tr><td>笔记、论文或试卷里某一步的图</td><td>Typst 或 LaTeX 包</td><td><a href="${root}guide/typst/">Typst</a>、<a href="${root}guide/latex/">LaTeX</a></td></tr>
     <tr><td>在幻灯片上逐步演示一次运行</td><td>Beamer 叠层、polylux 或 Touying</td><td><a href="${root}guide/slides/">幻灯片</a></td></tr>
     <tr><td>SVG 或 TikZ 文件，或一份 JSON 文档</td><td><code>algomotion</code> 命令</td><td><a href="${root}guide/cli/">命令行</a></td></tr>
     <tr><td>能演示和讲解算法的 AI 助手</td><td>MCP 服务器</td><td><a href="${root}guide/ai/">AI 助手</a></td></tr>
@@ -55,6 +55,6 @@ ${code('claude mcp add --transport http algomotion https://algomotion-mcp.turing
   <dd>一次运行的 JSON 记录，包含数据结构和步骤。算法会替你生成文档；目录里没有的内容，你或者模型也可以手写一份。见<a href="${root}guide/documents/">文档格式</a>。</dd>
 </dl>
 
-${note(`<p>这些包还没有发布到 npm、Typst Universe 或 CTAN。在那之前，各篇指南会说明如何从<a href="https://github.com/Eryc123Y/algorithm-visualizer">代码仓库</a>构建；分享页和托管的 AI 服务器现在就能用。</p>`)}
+${note(`<p>algomotion 目前是 1.0 alpha。npm 上的包都以 <code>alpha</code> 标签发布，<a href="https://github.com/Eryc123Y/algorithm-visualizer/releases/tag/v1.0.0-alpha.1">GitHub Release</a> 里有 Typst 包、LaTeX 包和独立命令。Typst Universe 和 CTAN 要等 1.0 再上，所以 Typst 和 LaTeX 两篇指南会说明如何在本地安装。1.0 之前，名称和选项仍可能调整。</p>`)}
 `,
 };

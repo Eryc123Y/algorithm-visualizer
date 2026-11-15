@@ -36,7 +36,7 @@ Give me a share link so I can put the run in my notes.`,
   '示例提示词',
 )}
 ${scene('chat', '一次真实的 <code>algomotion_show</code> 调用之后的播放器，运行在项目测试所用的极简 MCP Apps 宿主中。支持 MCP Apps 的客户端会把同样的页面放进对话。在 <code>improve#3</code> 处，从 A 经 B 的路径代价为 5，小于直连边的 7。用 <code>npm run scenes</code> 生成。')}
-<p>recipe 是现成的算法运行。合适时助手应优先用它。助手可以直接展示一个 recipe，不必复制文档：</p>
+<p>recipe 是预置好的算法。合适时助手应优先用它。助手可以直接展示一个 recipe，不必复制文档：</p>
 ${code(`{"recipe":"dijkstra","input":"A-B 4, B-C 1, A-C 7","frame":"improve#3"}`, 'algomotion_show 的参数')}
 
 <h2 id="tools">七个工具</h2>
@@ -47,7 +47,7 @@ ${code(`{"recipe":"dijkstra","input":"A-B 4, B-C 1, A-C 7","frame":"improve#3"}`
 <tr><td><code>algomotion_inspect</code></td><td>返回所选帧上的结构状态和标记，附带步骤名、分节和解说。</td><td><code>{"recipe":"insertion-sort","input":"5 2 4","frames":[0,"insert",-1]}</code></td></tr>
 <tr><td><code>algomotion_render</code></td><td>以固定主题返回一张独立的 SVG。</td><td><code>{"recipe":"insertion-sort","input":"5 2 4","frame":"insert","theme":"print"}</code></td></tr>
 <tr><td><code>algomotion_list_recipes</code></td><td>列出 id、标题、领域、简介和输入 schema。</td><td><code>{}</code></td></tr>
-<tr><td><code>algomotion_run_recipe</code></td><td>用给定输入运行某个 id，返回 JSON 文档。</td><td><code>{"id":"insertion-sort","input":"5 2 4"}</code></td></tr>
+<tr><td><code>algomotion_run_recipe</code></td><td>用给定输入按 id 运行算法，返回 JSON 文档。</td><td><code>{"id":"insertion-sort","input":"5 2 4"}</code></td></tr>
 <tr><td><code>algomotion_show</code></td><td>在 MCP Apps 播放器中展示文档或 recipe。</td><td><code>{"recipe":"insertion-sort","input":"5 2 4"}</code></td></tr>
 </tbody></table></div>
 <p><code>inspect</code>、<code>render</code> 和 <code>show</code> 接受 <code>document</code>，或 <code>recipe</code> 加可选的 <code>input</code>，二者不能同时给。<code>validate</code> 只接受文档。<code>inspect</code> 接受分节和范围，最多 20 帧。<code>render</code> 和 <code>show</code> 只取一帧。请求文档时，<code>run_recipe</code> 用的键是 <code>id</code>。</p>
@@ -72,12 +72,17 @@ Validate the document and inspect frames 0 and -1 before showing it.`,
 <p>托管服务器可以从 <code>algomotion_show</code> 和 <code>algomotion_run_recipe</code> 返回<a href="${root}guide/share-links/">分享链接</a>。recipe 链接带 id 和输入；自定义文档的链接带压缩后的文档。链接超过 16,384 个字符时，不生成链接，并在文本中说明原因。</p>
 
 <h2 id="local">通过 stdio 在本地运行</h2>
-<p>目前还没有任何包发布到 npm。先从仓库构建，再注册构建出的服务器。把绝对路径换成你检出仓库的位置：</p>
+<p>这个服务器已作为 1.0 alpha 发布到 npm。在 Claude Code 里注册它，npx 会在第一次使用时下载：</p>
+${code(
+  `claude mcp add algomotion -- npx -y -p @algomotion/mcp@alpha algomotion-mcp`,
+  '注册本地 stdio 服务器',
+)}
+<p>想用自己构建的版本时，在仓库检出目录里构建，再填上服务器的路径（把绝对路径换成你检出仓库的位置）：</p>
 ${code(
   `npm ci
 npm run build -w @algomotion/mcp
 claude mcp add algomotion -- node /absolute/path/packages/mcp/dist/mcp-server.js`,
-  '注册本地 stdio 服务器',
+  '注册从仓库构建的服务器',
 )}
 <p>Claude Desktop 的本地服务器配置这样写：</p>
 ${code(
@@ -92,7 +97,7 @@ ${code(
 }`,
   '本地 stdio 配置',
 )}
-${note('<p>可选的 <code>ALGOMOTION_SHARE_URL</code> 必须指向你自己提供的分享页。不设置时，本地工具不生成链接。它必须是绝对的 HTTP 或 HTTPS URL，不能含凭据、片段、反斜杠、空格或控制字符。</p>')}
+${note('<p>可选的 <code>ALGOMOTION_SHARE_URL</code> 必须指向你自己提供的分享页。不设置时，本地工具不生成链接。该地址必须是绝对 HTTP 或 HTTPS URL，不能含凭据、片段、反斜杠、空格或控制字符。</p>')}
 <p>如果改用本地 HTTP 客户端，用 <code>--http</code> 启动同一个服务器。<code>--port</code> 和 <code>--host</code> 指定地址，默认 <code>127.0.0.1:8787</code>。</p>
 ${code(
   `node packages/mcp/dist/mcp-server.js --http --port 8787

@@ -57,9 +57,9 @@ const zh: ClientText = {
   playground: {
     doesNotRun: '这个输入无法运行。',
     kept: '播放器保留上一次能运行的输入。',
-    couldNotRun: (m) => `页面无法运行它：${m}`,
+    couldNotRun: (m) => `页面无法运行该输入：${m}`,
     empty: '输入为空。',
-    emptyHint: '写一个输入，或重新选择算法，示例就会回来。',
+    emptyHint: '输入新的内容，或重新选择算法以恢复示例。',
     caption: (title) => [`${title}，输入为 `, '。'],
   },
 };

@@ -46,7 +46,7 @@ const kinds = [
   {
     kind: 'linkedList',
     summary:
-      '节点按行内顺序排列，带显式的 next 链接和可选的 prev 链接。移动节点不会改接它的链接。',
+      '节点按横向顺序排列，带显式的 next 链接和可选的 prev 链接。移动节点不会改接它的链接。',
     example:
       '{\n  "version": "1.0",\n  "structures": {\n    "s": {\n      "kind": "linkedList",\n      "initial": [\n        1,\n        2\n      ]\n    }\n  },\n  "steps": [\n    {\n      "actions": [\n        {\n          "target": "s",\n          "type": "link",\n          "from": 0,\n          "to": null\n        }\n      ],\n      "meta": {\n        "id": "change",\n        "narration": "Apply one action to the declared structure."\n      }\n    }\n  ]\n}',
     actions: [
@@ -247,7 +247,7 @@ ${code(
   '一份完整的文档：stack.json',
 )}
 ${figure('stack', '括号匹配用同一种栈类型保存尚未匹配的左括号。')}
-<p>学习者应该看到的每一处变化，各占一步。<code>actions</code> 为空列表的步骤可以只带解说，不改动数据。结构名是标识符，如 <code>a</code> 或 <code>call_stack</code>。给结构加 <code>label</code> 作为说明文字；调用栈这类辅助结构可以加 <code>place: "side"</code>。</p>
+<p>读者应该看到的每一处变化，各占一步。<code>actions</code> 为空列表的步骤可以只带解说，不改动数据。结构名是标识符，如 <code>a</code> 或 <code>call_stack</code>。给结构加 <code>label</code> 作为说明文字；调用栈这类辅助结构可以加 <code>place: "side"</code>。</p>
 
 <h2 id="names">步骤名、解说和分节</h2>
 <p><code>meta.id</code> 是可以重复的步骤名，如 <code>compare</code>。用连字符连接的小写单词，以字母开头，最多 40 个字符。每一步都要命名。<code>meta.narration</code> 说明发生了什么、为什么；<code>meta.vars</code> 可以显示变量的当前值。</p>
@@ -294,7 +294,7 @@ ${code(
 
 <h2 id="kinds">结构类型与动作</h2>
 <p>下面每个示例都是只含一个动作的完整文档。下标从 0 开始。直接给出的值会得到稳定的自动生成 id；元素也可以写成 <code>{"id":"x","value":5}</code>。删除后不要复用 id。每个动作都基于之前的动作留下的状态，包括同一步中更早的动作。</p>
-<p>表格列出每个动作及其字段（<code>target</code> 和 <code>type</code> 之外）。带问号的字段可选。完整的约束和演练示例，可以运行 <code>algomotion guide KIND</code>，或用 <code>algomotion_guide</code> 请求该类型。</p>
+<p>表格列出每个动作在 <code>target</code> 和 <code>type</code> 之外的字段。带问号的字段可选。完整的约束和演练示例，可以运行 <code>algomotion guide KIND</code>，或用 <code>algomotion_guide</code> 请求该类型。</p>
 ${kinds
   .map(
     (k) => `
@@ -320,19 +320,19 @@ ${k.actions
   .join('')}
 
 <h2 id="marks">标记与引用</h2>
-<p>比较、高亮、peek、表格依赖和交换标记只持续一步。访问、已确定标记、指针、分组、注释、边标记、平面上的选中、标签和直线会一直保留，直到被改动或目标消失。图、表格和散列表有 <code>resetMarks</code>。指针目标为 null 时移除该指针。</p>
-<p>数组的模式串需要行视图，并且文本保持不变：存在模式串时，<code>set</code>、<code>swap</code>、<code>insert</code> 和 <code>remove</code> 都会被拒绝。模式串的 <code>check</code> 与实际文本比较，所以引擎会拒绝错误的匹配声明。树的边按子节点寻址，图的边按边 id 寻址。无向边 <code>["B","A"]</code> 的 id 仍是 <code>B-A</code>。</p>
+<p>比较、高亮、peek、表格依赖和交换标记只持续一步。访问、已确定标记、指针、分组、注释、边标记、平面的选中状态、标签和直线会一直保留，直到被改动或目标消失。图、表格和散列表有 <code>resetMarks</code>。指针目标为 null 时移除该指针。</p>
+<p>数组的模式串需要行视图，并要求文本保持不变：存在模式串时，<code>set</code>、<code>swap</code>、<code>insert</code> 和 <code>remove</code> 都会被拒绝。模式串的 <code>check</code> 与实际文本比较，所以引擎会拒绝错误的匹配声明。树的边按子节点寻址，图的边按边 id 寻址。无向边 <code>["B","A"]</code> 的 id 仍是 <code>B-A</code>。</p>
 
 <h2 id="validate">分享前校验和查看</h2>
 <p>把第一个完整示例存为 <code>stack.json</code>，然后用<a href="${root}guide/cli/">命令行</a>：</p>
 ${code('algomotion validate stack.json\nalgomotion inspect stack.json 0 push -1', '检查手写的文档')}
 <p>也可以先用 <code>{"document": ...}</code> 调用 <code>algomotion_validate</code>，再用这份文档和 <code>frames: [0, "push", -1]</code> 调用 <code>algomotion_inspect</code>。校验同时检查 schema 和重放。查看则确认这些合法的动作确实讲出了你想讲的内容。</p>
-${code('OUT_OF_RANGE at $.steps[3].actions[0].j: j=4 is out of range for an array of length 4 (hint: Valid values are 0 to 3.)', '一条动作诊断')}
+${code('OUT_OF_RANGE at $.steps[3].actions[0].j: j=4 is out of range for an array of length 4 (hint: Valid values are 0 to 3.)', '一条动作诊断信息')}
 <p>这个路径指向第四步的第一个动作。重放在第一个出错的动作处停止；改好后再校验一次。JSON Schema 的 id 是 <code>urn:algomotion:schema:visualization:1.0</code>；可以通过 <code>algomotion://schema</code> 获取，也可以用 <code>@algomotion/spec</code> 中的 <code>visualizationJsonSchema()</code>。</p>
 
 <h2 id="limits">限制与兼容性</h2>
 <p>一份文档最多声明 16 个结构、10,000 个步骤，每步最多 100 个动作。结构的一般上限是 1,000 个元素和 4,000 条边；表格另有 100 行、100 列的上限。平面最多 64 个点、128 条线段。源代码清单最多 8 份，每份最多 20,000 个字符。个别算法对输入的限制可能更小。</p>
-${note('<p>协议 1.x 只会新增可选字段、动作、类型、标记，或放宽限制。所有合法的 1.0 文档始终合法，含义不变。不兼容的改动需要 2.0 版本和升级。未知字段一律报错：将来的字段需要对应的新版本和新的读取端。写文档时，用能覆盖你所用功能的最老版本。</p>')}
+${note('<p>协议 1.x 只会新增可选字段、动作、类型、标记，或放宽限制。所有合法的 1.0 文档始终合法，含义不变。不兼容的改动需要 2.0 版本和升级。未知字段一律报错：将来的字段需要对应的新版本和新的解析器。写文档时，用能覆盖你所用功能的最老版本。</p>')}
 <p>这一承诺由 ADR 0043 规定。诊断代码的含义在 1.x 中保持不变，措辞可能调整。布局、绘制和播放器属性不属于协议，可以在不升主版本的情况下改进。旧的 0.1–0.9 文档会升级到 1.0，并给出 <code>UPGRADED_VERSION</code> 警告；新文档应写 <code>1.0</code>。</p>
 `,
 };

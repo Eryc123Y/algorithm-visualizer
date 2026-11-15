@@ -16,8 +16,14 @@ export const zh: Guide = {
     },
   ],
   body: ({ root, code, figure, note, scene }) => `
-<h2 id="install">从仓库构建</h2>
-<p>这个命令还没有发布到 npm。装好 Node.js、检出仓库后，安装工作区依赖并构建 MCP 包：</p>
+<h2 id="install">安装</h2>
+<p>这个命令已作为 1.0 alpha 发布到 npm，在 <code>@algomotion/mcp</code> 包里。可以不安装直接运行，也可以全局安装：</p>
+${code(
+  `npx -p @algomotion/mcp@alpha algomotion --help
+npm install -g @algomotion/mcp@alpha`,
+  '运行或安装命令',
+)}
+<p>也可以从仓库检出目录构建：安装工作区依赖，再构建 MCP 包：</p>
 ${code(
   `npm ci
 npm run build -w @algomotion/mcp
@@ -44,7 +50,7 @@ algomotion run bst.delete '"from":"8 3 10 1 6", "key":3'
 algomotion run kruskal`,
   '列出并运行算法',
 )}
-<p>记法和 JSON 形式见<a href="${root}guide/inputs/">输入</a>。</p>
+<p>记法和 JSON 形式见<a href="${root}guide/inputs/">输入写法</a>。</p>
 
 <h2 id="guide">阅读编写指南</h2>
 <p><code>guide</code> 打印文档指南和所有结构类型。传入类型名则只打印这几部分。AI 助手拿到的也是这份指南。</p>
@@ -80,13 +86,13 @@ ${figure('export', 'Dijkstra 算法在 <code>improve#3</code> 处的导出图，
 ${scene('terminal', '命令的一次实际会话：一次导出、一次运行、一次查看，以及一个写错的输入。输出就是命令当时打印的内容。用 <code>npm run scenes</code> 生成。')}
 <div class="scroll" role="region" aria-label="导出选项" tabindex="0"><table class="params">
 <thead><tr><th>选项</th><th>默认值</th><th>用途</th></tr></thead><tbody>
-<tr><td><code>--input</code></td><td>无</td><td>用这段文本或这个输入文件运行源 id；<code>-</code> 读标准输入。以 <code>.json</code> 结尾的名字总是当作文件。</td></tr>
+<tr><td><code>--input</code></td><td>无</td><td>用这段文本或输入文件运行指定的源 id；<code>-</code> 读标准输入。以 <code>.json</code> 结尾的名字总是当作文件。</td></tr>
 <tr><td><code>--input-hex</code></td><td>无</td><td>供程序使用的十六进制 UTF-8 输入，代替 <code>--input</code>。</td></tr>
 <tr><td><code>--step</code></td><td>所有帧</td><td>选择器；可以重复这个选项，也可以用逗号分隔多个选择器。</td></tr>
 <tr><td><code>--theme</code></td><td><code>light</code></td><td>任一内置的固定主题，见<a href="${root}themes/">主题</a>。</td></tr>
 <tr><td><code>--layout</code></td><td><code>wide</code></td><td><code>wide</code> 或 <code>narrow</code>。</td></tr>
 <tr><td><code>--format</code></td><td><code>svg</code></td><td><code>svg</code> 或 <code>tikz</code>。</td></tr>
-<tr><td><code>--one-file</code></td><td>关闭</td><td>仅限 TikZ：把各帧合并成一组幻灯片帧。</td></tr>
+<tr><td><code>--one-file</code></td><td>关闭</td><td>仅限 TikZ：把各帧合并成一个用于幻灯片的图组。</td></tr>
 <tr><td><code>--out</code>, <code>-o</code></td><td>当前目录</td><td>输出目录，不存在时自动创建。</td></tr>
 <tr><td><code>--name</code></td><td><code>{name}-{frame}</code></td><td>文件名主干的模式；单文件导出用 <code>{name}</code>。</td></tr>
 <tr><td><code>--error-file</code></td><td>无</td><td>失败时另把错误信息写到这里；成功后删除该文件。</td></tr>
@@ -97,7 +103,7 @@ ${code(
 algomotion export insertion-sort --input-hex 3520322034 --step -1 --out figures --name sorted --error-file export-error.txt`,
   'TikZ 和程序化输入',
 )}
-<p>上面的十六进制输入就是 <code>5 2 4</code>。用 <code>\\algomotioninput{figures/insertion.tex}</code> 引入 TikZ 帧组，见<a href="${root}guide/slides/">幻灯片</a>。要用输入文件，把 <code>[5,2,4]</code> 存为 <code>values.json</code>，然后运行：</p>
+<p>上面的十六进制输入就是 <code>5 2 4</code>。用 <code>\\algomotioninput{figures/insertion.tex}</code> 引入导出的 TikZ 图组，见<a href="${root}guide/slides/">幻灯片</a>。要用输入文件，把 <code>[5,2,4]</code> 存为 <code>values.json</code>，然后运行：</p>
 ${code(`algomotion export insertion-sort --input values.json --step -1 --out figures`, '读取输入文件')}
 
 <h2 id="errors">失败与帮助</h2>

@@ -43,7 +43,7 @@ Open the first insert step.`,
 <p>本地服务器需要设置 <code>ALGOMOTION_SHARE_URL</code>，或在代码中用 <code>createServer({ shareUrl })</code>。填你自己提供的页面，例如 <code>https://example.org/play/</code>；服务器不预设任何基础地址。</p>
 
 <h2 id="code">用代码生成链接</h2>
-<p>在发布到 npm 之前，从仓库的工作区构建并导入 <code>@algomotion/spec</code>。<code>shareFragment</code> 返回一个结果，其中的片段不带开头的井号。编码文档时它使用平台自带的压缩 API。</p>
+<p>在发布到 npm 之前，从仓库的工作区构建并导入 <code>@algomotion/spec</code>。<code>shareFragment</code> 返回一个结果，其中的片段不带开头的井号。编码文档时会调用平台自带的压缩 API。</p>
 ${code(
   `import { shareFragment, shareLink } from '@algomotion/spec';
 
@@ -65,7 +65,7 @@ if (!link.ok) throw new Error(link.error[0].message);
 console.log(link.value);`,
   '编码一个算法或一份文档',
 )}
-<p><code>shareLink(base, content)</code> 会检查基础地址，并执行生成端对整条链接的长度限制。单独用 <code>shareFragment</code> 不检查这个长度；对外分发链接时用 <code>shareLink</code>。如果输入是从对象构造出来的，先序列化成 JSON 再填进 <code>input</code> 字段。</p>
+<p><code>shareLink(base, content)</code> 会检查基础地址，并检查整条链接的长度上限。单独用 <code>shareFragment</code> 不检查这个长度；对外分发链接时用 <code>shareLink</code>。如果输入是从对象构造出来的，先序列化成 JSON 再填进 <code>input</code> 字段。</p>
 
 <h2 id="limits">限制</h2>
 <div class="scroll" role="region" aria-label="分享链接的限制" tabindex="0"><table class="params">
@@ -76,11 +76,11 @@ console.log(link.value);`,
 <tr><td>解码后的 <code>in</code></td><td>65,536 个字符</td></tr>
 <tr><td>解压后的文档</td><td>4 MiB 的 UTF-8</td></tr>
 </tbody></table></div>
-<p>文档还要满足<a href="${root}guide/documents/#limits">协议的限制</a>。链接过长时报告 <code>LINK_TOO_LARGE</code>。大的运行可以改成以算法加输入的形式分享，或者把文档作为文件发送。</p>
+<p>文档还要满足<a href="${root}guide/documents/#limits">协议的限制</a>。链接过长时报告 <code>LINK_TOO_LARGE</code>。较大的运行可以改用算法加输入的形式分享，或者把文档作为文件发送。</p>
 
 <h2 id="privacy">隐私与课程页面</h2>
 <p>浏览器不会在 HTTP 请求中发送片段。分享页在读者的浏览器里解码并运行，不上传文档。但链接本身包含输入或文档，任何拿到完整链接的人都能读到。链接也可能留在浏览器历史记录里，或留在你粘贴它的地方。</p>
-<p>分享页允许被嵌入框架，课程页面可以直接嵌入。课程网站与分享页不同源时，使用绝对 URL：</p>
+<p>分享页允许用 iframe 嵌入，课程页面可以直接放进去。课程网站与分享页不同源时，使用绝对 URL：</p>
 ${code(
   `<iframe title="Insertion sort on 5 2 4"
   src="https://example.org/play/#v=1&alg=insertion-sort&in=5%202%204&frame=insert"

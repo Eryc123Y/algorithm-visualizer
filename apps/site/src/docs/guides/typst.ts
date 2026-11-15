@@ -24,8 +24,9 @@ export const typst: Guide = {
     },
   ],
   body: ({ root, code, figure, note, scene }) => `
-<h2 id="install">Install from the repository</h2>
-<p>The package is not on Typst Universe yet. Install Typst 0.15 or later, then build the engine from the repository. The committed WebAssembly plugin needs no Rust build for normal use.</p>
+<h2 id="install">Install locally</h2>
+<p>The package is not on Typst Universe yet; it will be at 1.0. Install Typst 0.15 or later. The quickest way is the <a href="https://github.com/Eryc123Y/algorithm-visualizer/releases/tag/v1.0.0-alpha.1">GitHub release</a>: unzip <code>algomotion-typst-0.1.0.zip</code> into your local Typst packages directory (shown below), so that it holds <code>local/algomotion/0.1.0/</code>, and import <code>@local/algomotion:0.1.0</code>.</p>
+<p>To build it from the repository instead, build the engine. The committed WebAssembly plugin needs no Rust build for normal use.</p>
 ${code(
   `npm ci
 npm run build -w @algomotion/typst`,
