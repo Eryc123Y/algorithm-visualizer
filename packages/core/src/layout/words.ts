@@ -13,6 +13,9 @@ export interface LayoutWords {
   /** The queue's ends. */
   readonly front: string;
   readonly back: string;
+  /** The front of a min- or max-priority queue. */
+  readonly min: string;
+  readonly max: string;
 }
 
 export const LAYOUT_WORDS: Readonly<Record<Locale, LayoutWords>> = {
@@ -22,6 +25,8 @@ export const LAYOUT_WORDS: Readonly<Record<Locale, LayoutWords>> = {
     topEmpty: 'top (empty)',
     front: 'front',
     back: 'back',
+    min: 'min',
+    max: 'max',
   },
   zh: {
     empty: '（空）',
@@ -29,5 +34,7 @@ export const LAYOUT_WORDS: Readonly<Record<Locale, LayoutWords>> = {
     topEmpty: '栈顶（空）',
     front: '队头',
     back: '队尾',
+    min: '最小',
+    max: '最大',
   },
 };

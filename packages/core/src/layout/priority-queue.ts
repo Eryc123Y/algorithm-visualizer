@@ -73,8 +73,9 @@ export interface PriorityQueueMetrics {
 export const formatKey = (key: PriorityKey, order: PriorityOrder): string =>
   key === null ? (order === 'min' ? '∞' : '−∞') : formatScalar(key);
 
-/** The label that marks the front. */
-const frontLabel = (order: PriorityOrder) => order;
+/** The label that marks the front, in the figure's locale. */
+const frontLabel = (order: PriorityOrder, o: LayoutOptions) =>
+  LAYOUT_WORDS[o.locale][order];
 
 export const measurePriorityQueue = (
   s: PriorityQueueState,
@@ -188,7 +189,7 @@ function layoutRow({
   );
   const keyHeight = Math.round(o.cellHeight * 0.6);
   const pitch = width + o.cellGap;
-  const label = frontLabel(order);
+  const label = frontLabel(order, o);
   const overhang = badgeOverhang(maxWidth([label], o.fonts.value), width, o);
   const left = origin.x + overhang;
   const top = origin.y + titleRowHeight(o);
@@ -258,7 +259,7 @@ function layoutColumn({
   const top = origin.y + titleRowHeight(o);
   const right = left + valueWidth + keyWidth;
   const slots = Math.max(1, metrics.slots);
-  const label = frontLabel(order);
+  const label = frontLabel(order, o);
 
   const items: SceneItem[] = titleItems(name, title, origin, o);
   const front = queueOrder(state.data);

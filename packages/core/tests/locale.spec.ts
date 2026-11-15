@@ -21,7 +21,10 @@ const doc = (initial: boolean) =>
       s: { kind: 'stack', initial: initial ? [1, 2] : [] },
       q: { kind: 'queue', initial: initial ? [1, 2] : [] },
       h: { kind: 'array', view: 'heap', initial: initial ? [3, 1] : [] },
-      p: { kind: 'priorityQueue', initial: [] },
+      p: {
+        kind: 'priorityQueue',
+        initial: initial ? [{ value: 'x', key: 1 }] : [],
+      },
       g: { kind: 'graph', nodes: [], edges: [] },
       t: { kind: 'tree', levelOrder: [] },
     },
@@ -39,7 +42,9 @@ describe('the layout’s own words', () => {
     expect(empty).toContain('(empty)');
     expect(empty).toContain('top (empty)');
     const full = words(layoutTrace(doc(true)).sceneAt(0));
-    expect(full).toEqual(expect.arrayContaining(['top', 'front', 'back']));
+    expect(full).toEqual(
+      expect.arrayContaining(['top', 'front', 'back', 'min']),
+    );
   });
 
   it('are Chinese in Chinese, and nothing English is left', () => {
@@ -47,7 +52,9 @@ describe('the layout’s own words', () => {
     expect(empty).toContain('（空）');
     expect(empty).toContain('栈顶（空）');
     const full = words(layoutTrace(doc(true), { locale: 'zh' }).sceneAt(0));
-    expect(full).toEqual(expect.arrayContaining(['栈顶', '队头', '队尾']));
+    expect(full).toEqual(
+      expect.arrayContaining(['栈顶', '队头', '队尾', '最小']),
+    );
     for (const w of [...empty, ...full]) expect(w).not.toMatch(/[a-z]{2,}/);
   });
 
