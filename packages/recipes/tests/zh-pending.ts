@@ -4,19 +4,6 @@
  * modules; the list is empty when roadmap 5.8 is done.
  */
 export const PENDING_ZH: ReadonlySet<string> = new Set([
-  'insertion-sort',
-  'merge-sort',
-  'heapsort',
-  'quicksort',
-  'randomized-quicksort',
-  'counting-sort',
-  'radix-sort',
-  'bucket-sort',
-  'bubble-sort',
-  'selection-sort',
-  'binary-search',
-  'randomized-select',
-  'select',
   'reverse-linked-list',
   'move-to-front',
   'balanced-brackets',

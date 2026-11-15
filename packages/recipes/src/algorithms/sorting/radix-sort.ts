@@ -17,13 +17,17 @@ import { listField } from '../../notation/schema.ts';
 export const RADIX_LIMITS = { values: 16, value: 9999 } as const;
 
 const ORDINALS = ['last', 'second to last', 'third to last', 'fourth to last'];
+/** The same digits in Chinese: the lowest, then counting up from it. */
+const ORDINALS_ZH = ['最低', '倒数第二', '倒数第三', '倒数第四'];
 
 export const radixSort = defineAlgorithm({
   id: 'radix-sort',
-  title: 'Radix sort',
+  title: { en: 'Radix sort', zh: '基数排序' },
   topic: 'sorting',
-  summary:
-    'Sorts integers digit by digit, from the last digit to the first, with a stable counting sort on each digit.',
+  summary: {
+    en: 'Sorts integers digit by digit, from the last digit to the first, with a stable counting sort on each digit.',
+    zh: '逐位排序整数，从最低位到最高位，每一位都用稳定的计数排序。',
+  },
   input: z.strictObject({
     values: listField(
       z
@@ -86,7 +90,10 @@ export const radixSort = defineAlgorithm({
     const arr = trace.add('a', { kind: 'array', initial: [...values] });
     const counts = trace.add('c', {
       kind: 'array',
-      label: 'c: digits counted, then running sums',
+      label: trace.say({
+        en: 'c: digits counted, then running sums',
+        zh: 'c：先统计各位数字，再求累计和',
+      }),
       place: 'side',
       initial: Array.from({ length: 10 }, () => ''),
     });
@@ -99,11 +106,18 @@ export const radixSort = defineAlgorithm({
 
     for (let i = 0; i < d; i++) {
       const which = ORDINALS[i]!;
+      const whichZh = ORDINALS_ZH[i]!;
       trace.step(
         'pass',
         d === 1
-          ? 'The largest value has one digit, so d = 1: one stable pass sorts them.'
-          : `Pass ${i + 1} of ${d}, as the largest value has ${d} digits: sort on the ${which} digit, keeping ties in their order${i === 0 ? '' : '; a missing digit counts as 0'}.`,
+          ? {
+              en: 'The largest value has one digit, so d = 1: one stable pass sorts them.',
+              zh: '最大值只有一位，所以 d = 1：一趟稳定的排序就排好了。',
+            }
+          : {
+              en: `Pass ${i + 1} of ${d}, as the largest value has ${d} digits: sort on the ${which} digit, keeping ties in their order${i === 0 ? '' : '; a missing digit counts as 0'}.`,
+              zh: `第 ${i + 1} 趟，共 ${d} 趟（最大值有 ${d} 位）：按${whichZh}位排序，这一位相同的保持原有顺序${i === 0 ? '' : '；没有这一位的按 0 算'}。`,
+            },
         { vars: { i: i + 1, d } },
       );
       const c = Array.from({ length: 10 }, () => 0);
@@ -115,17 +129,20 @@ export const radixSort = defineAlgorithm({
         c[x]! += 1;
         trace.step(
           'count',
-          `${value} has ${x} as its ${which} digit: c[${x}] becomes ${c[x]}.`,
+          {
+            en: `${value} has ${x} as its ${which} digit: c[${x}] becomes ${c[x]}.`,
+            zh: `${value} 的${whichZh}位是 ${x}：c[${x}] 变为 ${c[x]}。`,
+          },
           { vars: { j, x } },
         );
         arr.pointer({ name: 'j', index: j }).highlight({ indices: [j] });
         counts.set({ index: x, value: c[x]! }).highlight({ indices: [x] });
       });
       for (let x = 1; x < 10; x++) c[x]! += c[x - 1]!;
-      trace.step(
-        'sum',
-        `Running sums: for each digit x, c[x] is now how many values have a ${which} digit of at most x.`,
-      );
+      trace.step('sum', {
+        en: `Running sums: for each digit x, c[x] is now how many values have a ${which} digit of at most x.`,
+        zh: `累计和：对每个数字 x，c[x] 现在是${whichZh}位不超过 x 的值的个数。`,
+      });
       arr.pointer({ name: 'j', index: null });
       c.forEach((value, x) => counts.set({ index: x, value }));
 
@@ -137,7 +154,10 @@ export const radixSort = defineAlgorithm({
         b[c[x]!] = value;
         trace.step(
           'place',
-          `${value}, digit ${x}: c[${x}] drops to ${c[x]}, so it goes to b[${c[x]}].`,
+          {
+            en: `${value}, digit ${x}: c[${x}] drops to ${c[x]}, so it goes to b[${c[x]}].`,
+            zh: `${value}，这一位是 ${x}：c[${x}] 减为 ${c[x]}，所以它放到 b[${c[x]}]。`,
+          },
           { vars: { j, x } },
         );
         arr.pointer({ name: 'j', index: j }).highlight({ indices: [j] });
@@ -149,13 +169,22 @@ export const radixSort = defineAlgorithm({
       trace.step(
         'copy',
         last
-          ? `Copy b into a: sorted on ${d === 1 ? 'its one digit' : `all ${d} digits`}, a is sorted.`
-          : `Copy b into a: it is now sorted on its last ${i === 0 ? 'digit' : `${i + 1} digits`}.`,
+          ? {
+              en: `Copy b into a: sorted on ${d === 1 ? 'its one digit' : `all ${d} digits`}, a is sorted.`,
+              zh: `把 b 复制回 a：${d === 1 ? '唯一的一位' : `全部 ${d} 位`}都已排过，a 已排好序。`,
+            }
+          : {
+              en: `Copy b into a: it is now sorted on its last ${i === 0 ? 'digit' : `${i + 1} digits`}.`,
+              zh: `把 b 复制回 a：现在已按最低的 ${i + 1} 位排好序。`,
+            },
       );
       arr.pointer({ name: 'j', index: null });
       a.forEach((value, j) => arr.set({ index: j, value }));
       if (last) a.forEach((_, j) => arr.settle({ index: j }));
     }
-    trace.step('sorted', `a holds the values in sorted order.`);
+    trace.step('sorted', {
+      en: `a holds the values in sorted order.`,
+      zh: `a 按从小到大的顺序存放了所有值。`,
+    });
   },
 });
