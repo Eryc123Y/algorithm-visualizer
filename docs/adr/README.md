@@ -48,6 +48,7 @@ Each file records one architectural decision: the context, what we decided, and 
 | [0042](0042-arrows-and-badges-clear-of-text.md)     | Table arrows join only touching cells; point labels avoid badges first     | Accepted                            |
 | [0043](0043-protocol-1-0.md)                        | The protocol is 1.0: 0.9 as it stands, read with 0.x upgraded              | Accepted                            |
 | [0044](0044-the-name-algomotion.md)                 | The project is named algomotion; nothing keeps the old name algoviz        | Accepted                            |
+| [0045](0045-chinese-in-the-product.md)              | Chinese in the product: a document is in one language, recipes write both  | Accepted                            |
 
 The project was called algoviz until ADR 0044, so the records before it use that name.
 
