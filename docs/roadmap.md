@@ -204,6 +204,7 @@ Independent of Phase 2, so the two can interleave.
 - [x] **4.1 Name** _owner_. Check availability on npm, Typst Universe and CTAN. The owner chose algomotion: _ADR_ [ADR 0044](adr/0044-the-name-algomotion.md) (#135), then the rename (#136): packages, commands, MCP tools, the Typst and LaTeX packages, the CDN files, the environment variables, the schema id, the Worker and the docs.
 - [x] **4.2 Freeze the protocol at 1.0** under 0.4's rules. Regenerate the JSON Schema and fixtures. _ADR_ [ADR 0043](adr/0043-protocol-1-0.md) (#130), then the code (#133): 1.0 is 0.9 as it stands, and 0.x documents are read as 1.0 with an `UPGRADED_VERSION` warning.
 - [ ] **4.3 Publish** _owner_: npm packages, the CDN bundle, the Typst package, the LaTeX package and the standalone executable.
+  - `1.0.0-alpha.1` (2026-11-14): the eight npm packages under the `alpha` tag (it is also `latest`, as their only version), and a [GitHub pre-release](https://github.com/Eryc123Y/algorithm-visualizer/releases/tag/v1.0.0-alpha.1) with the Typst and LaTeX packages, the standalone command for macOS on Apple silicon and the player's files; licence GPL-3.0-or-later (#153, #154, #155). Left for 1.0: the final npm release, Typst Universe, CTAN, and standalone executables for other platforms.
 - [x] **4.4 Release check.**
   - Deep fuzz (`FUZZ_RUNS=5000`) and the full E2E suite pass.
   - Evals cover the new kinds.
@@ -230,7 +231,7 @@ The owner's brief (2026-11-14): the site still looks bare and says too little. M
 - [x] **5.6 Polish.** (#147) Syntax colour in code blocks at build time, the home page's figures playing as a loop, transitions on the tabs, and a pass over spacing and type on every page, in both colour schemes and at phone width.
 - [x] **5.7 The site in Chinese.** `/zh/` holds the home page, the guide and the other pages in Simplified Chinese, with a language switch and `hreflang`. Module pages stay in English until 5.8 (#152).
 - [ ] **5.8 Chinese in the product** _ADR_: the player's chrome and the recipes' narration in Chinese. It needs a decision on where a document keeps several languages.
-- [ ] **5.9 A logo** _owner_: the owner picks one of the candidates on the design canvas, or asks for more.
+- [x] **5.9 A logo** _owner_: the owner picked candidate 1, frames stacked like a flipbook with the front one playing; it is in `docs/brand/`, the site's bar and its favicon (#153).
 
 ## After 1.0
 
