@@ -64,10 +64,12 @@ const span = (v: string, from: number, to: number) =>
 
 export const lup = defineAlgorithm({
   id: 'lup-decomposition',
-  title: 'LUP decomposition',
+  title: { en: 'LUP decomposition', zh: 'LUP 分解' },
   topic: 'math',
-  summary:
-    'Factors a square matrix as PA = LU by Gaussian elimination with partial pivoting, in place, and solves Ax = b by forward and back substitution when b is given.',
+  summary: {
+    en: 'Factors a square matrix as PA = LU by Gaussian elimination with partial pivoting, in place, and solves Ax = b by forward and back substitution when b is given.',
+    zh: '用带部分主元选择的高斯消元法，原地把方阵分解为 PA = LU；给出 b 时，再用前向替换和回代求解 Ax = b。',
+  },
   input: z
     .strictObject({
       a: matrixField('A', EXAMPLE),
@@ -175,15 +177,15 @@ export const lup = defineAlgorithm({
         : trace.add('S', {
             kind: 'table',
             place: 'side',
-            label: 'b, y and x',
+            label: trace.say({ en: 'b, y and x', zh: 'b、y 和 x' }),
             initial: b.map((v) => [String(v), '', '']),
             rowLabels: labels,
             columnLabels: ['b', 'y', 'x'],
           });
-    trace.step(
-      'start',
-      'π starts as the identity: row i of A is row i of the input. Decompose A in place, a column at a time.',
-    );
+    trace.step('start', {
+      en: 'π starts as the identity: row i of A is row i of the input. Decompose A in place, a column at a time.',
+      zh: 'π 开始时是恒等置换：A 的第 i 行就是输入的第 i 行。原地分解 A，每次处理一列。',
+    });
 
     let swaps = 0;
     for (let k = 0; k < n; k++) {
@@ -195,23 +197,23 @@ export const lup = defineAlgorithm({
         (_, d) => [k + d, k] as [number, number],
       );
       if (isZero(a[kk]![k]!)) {
-        trace.step(
-          'singular',
-          `Every entry of column ${ordinal(k)} at or below the diagonal is 0, so A is singular: it has no LUP decomposition, and det A = 0.${b === undefined ? '' : ' Ax = b has no unique solution, so there is nothing to substitute.'}`,
-        );
+        trace.step('singular', {
+          en: `Every entry of column ${ordinal(k)} at or below the diagonal is 0, so A is singular: it has no LUP decomposition, and det A = 0.${b === undefined ? '' : ' Ax = b has no unique solution, so there is nothing to substitute.'}`,
+          zh: `第 ${ordinal(k)} 列在对角线及以下的元素都是 0，所以 A 是奇异的：它没有 LUP 分解，det A = 0。${b === undefined ? '' : 'Ax = b 没有唯一解，所以不做替换求解。'}`,
+        });
         table.highlight({ cells: below });
         return { results: [0] };
       }
-      trace.step(
-        'pivot',
-        `Column ${ordinal(k)}: the entry of largest absolute value at or below the diagonal is ${show(a[kk]![k]!)}, in row ${ordinal(kk)}. It becomes the pivot${kk === k ? ', and its row is already in place' : ''}.`,
-      );
+      trace.step('pivot', {
+        en: `Column ${ordinal(k)}: the entry of largest absolute value at or below the diagonal is ${show(a[kk]![k]!)}, in row ${ordinal(kk)}. It becomes the pivot${kk === k ? ', and its row is already in place' : ''}.`,
+        zh: `第 ${ordinal(k)} 列：对角线及以下绝对值最大的元素是 ${show(a[kk]![k]!)}，在第 ${ordinal(kk)} 行。它成为主元${kk === k ? '，它所在的行已经就位' : ''}。`,
+      });
       table.highlight({ cells: below });
       if (kk !== k) {
-        trace.step(
-          'swap',
-          `Exchange rows ${ordinal(k)} and ${ordinal(kk)} of A, and entries ${ordinal(k)} and ${ordinal(kk)} of π, which records where each row came from.`,
-        );
+        trace.step('swap', {
+          en: `Exchange rows ${ordinal(k)} and ${ordinal(kk)} of A, and entries ${ordinal(k)} and ${ordinal(kk)} of π, which records where each row came from.`,
+          zh: `交换 A 的第 ${ordinal(k)} 行和第 ${ordinal(kk)} 行，以及 π 的第 ${ordinal(k)} 项和第 ${ordinal(kk)} 项，π 记录每一行原来在哪里。`,
+        });
         [a[k], a[kk]] = [a[kk]!, a[k]!];
         [pi[k], pi[kk]] = [pi[kk]!, pi[k]!];
         swaps++;
@@ -242,19 +244,19 @@ export const lup = defineAlgorithm({
         table.settle({ cells: uRow });
         continue;
       }
-      trace.step(
-        'multipliers',
-        `Divide the ${rest === 1 ? 'entry' : `${rest} entries`} below the pivot by it, ${show(pivot)}: ${rest === 1 ? 'it is' : 'they are'} column ${ordinal(k)} of L. Row ${ordinal(k)} of U is the pivot's row, from the pivot on.`,
-      );
+      trace.step('multipliers', {
+        en: `Divide the ${rest === 1 ? 'entry' : `${rest} entries`} below the pivot by it, ${show(pivot)}: ${rest === 1 ? 'it is' : 'they are'} column ${ordinal(k)} of L. Row ${ordinal(k)} of U is the pivot's row, from the pivot on.`,
+        zh: `把主元下面的 ${rest} 个元素都除以主元 ${show(pivot)}：${rest === 1 ? '它' : '它们'}就是 L 的第 ${ordinal(k)} 列。U 的第 ${ordinal(k)} 行是主元所在的行从主元开始的部分。`,
+      });
       for (let i = k + 1; i < n; i++) {
         a[i]![k] = div(a[i]![k]!, pivot);
         table.set({ cell: [i, k], value: show(a[i]![k]!) });
       }
       table.settle({ cells: [...uRow, ...below.slice(1)] });
-      trace.step(
-        'update',
-        `Subtract each multiplier times row ${ordinal(k)} of U from the row it is in: the lower-right ${rest} × ${rest} block becomes the Schur complement, still to decompose.`,
-      );
+      trace.step('update', {
+        en: `Subtract each multiplier times row ${ordinal(k)} of U from the row it is in: the lower-right ${rest} × ${rest} block becomes the Schur complement, still to decompose.`,
+        zh: `从每一行减去它的乘数乘以 U 的第 ${ordinal(k)} 行：右下角的 ${rest} × ${rest} 块成为 Schur 补，还要继续分解。`,
+      });
       for (let i = k + 1; i < n; i++)
         for (let j = k + 1; j < n; j++) {
           a[i]![j] = sub(a[i]![j]!, mul(a[i]![k]!, a[k]![j]!));
@@ -274,10 +276,10 @@ export const lup = defineAlgorithm({
 
     const product = a.reduce((p, row, k) => mul(p, row[k]!), fromInt(1));
     const det = swaps % 2 === 0 ? product : sub(fromInt(0), product);
-    trace.step(
-      'done',
-      `A now holds L below the diagonal, whose 1s on the diagonal are not stored, and U on and above it: PA = LU, where row i of PA is row π[i] of the input. det A is the product of U's diagonal${swaps % 2 === 0 ? '' : `, negated since there ${swaps === 1 ? 'was 1 exchange' : `were ${swaps} exchanges`}`}: ${show(det)}.`,
-    );
+    trace.step('done', {
+      en: `A now holds L below the diagonal, whose 1s on the diagonal are not stored, and U on and above it: PA = LU, where row i of PA is row π[i] of the input. det A is the product of U's diagonal${swaps % 2 === 0 ? '' : `, negated since there ${swaps === 1 ? 'was 1 exchange' : `were ${swaps} exchanges`}`}: ${show(det)}.`,
+      zh: `现在 A 的对角线以下是 L（它对角线上的 1 不存储），对角线及以上是 U：PA = LU，其中 PA 的第 i 行是输入的第 π[i] 行。det A 是 U 的对角线元素之积${swaps % 2 === 0 ? '' : `，因为交换了 ${swaps} 次，还要取负`}：${show(det)}。`,
+    });
     if (b !== undefined && side !== undefined)
       solve(a, pi, b, trace, table, side);
     return { results: [Number(det.n)] };
@@ -301,10 +303,10 @@ function solve(
     let v = fromInt(b[pi[i]!]!);
     for (let j = 0; j < i; j++) v = sub(v, mul(a[i]![j]!, y[j]!));
     y.push(v);
-    trace.step(
-      'forward',
-      `Forward substitution: y${ordinal(i)} is b${ordinal(pi[i]!)}, the entry π[${ordinal(i)}] picks${i === 0 ? '' : `, less row ${ordinal(i)} of L times ${span('y', 1, i)}`}: ${show(v)}.`,
-    );
+    trace.step('forward', {
+      en: `Forward substitution: y${ordinal(i)} is b${ordinal(pi[i]!)}, the entry π[${ordinal(i)}] picks${i === 0 ? '' : `, less row ${ordinal(i)} of L times ${span('y', 1, i)}`}: ${show(v)}.`,
+      zh: `前向替换：y${ordinal(i)} 是 π[${ordinal(i)}] 选出的 b${ordinal(pi[i]!)}${i === 0 ? '' : `，减去 L 的第 ${ordinal(i)} 行与 ${span('y', 1, i)} 的乘积`}：${show(v)}。`,
+    });
     side
       .set({ cell: [i, 1], value: show(v) })
       .highlight({ cells: [[pi[i]!, 0]] });
@@ -318,10 +320,10 @@ function solve(
     let v = y[i]!;
     for (let j = i + 1; j < n; j++) v = sub(v, mul(a[i]![j]!, x[j]!));
     x[i] = div(v, a[i]![i]!);
-    trace.step(
-      'back',
-      `Back substitution: x${ordinal(i)} is y${ordinal(i)}${i === n - 1 ? '' : `, less the rest of row ${ordinal(i)} of U times ${span('x', i + 2, n)}`}, divided by u${ordinal(i)}${ordinal(i)} = ${show(a[i]![i]!)}: ${show(x[i]!)}.${i === 0 ? ' x solves Ax = b.' : ''}`,
-    );
+    trace.step('back', {
+      en: `Back substitution: x${ordinal(i)} is y${ordinal(i)}${i === n - 1 ? '' : `, less the rest of row ${ordinal(i)} of U times ${span('x', i + 2, n)}`}, divided by u${ordinal(i)}${ordinal(i)} = ${show(a[i]![i]!)}: ${show(x[i]!)}.${i === 0 ? ' x solves Ax = b.' : ''}`,
+      zh: `回代：x${ordinal(i)} 是 y${ordinal(i)}${i === n - 1 ? '' : `，减去 U 的第 ${ordinal(i)} 行其余部分与 ${span('x', i + 2, n)} 的乘积`}，再除以 u${ordinal(i)}${ordinal(i)} = ${show(a[i]![i]!)}：${show(x[i]!)}。${i === 0 ? 'x 就是 Ax = b 的解。' : ''}`,
+    });
     side.set({ cell: [i, 2], value: show(x[i]!) });
     table.highlight({
       cells: Array.from(

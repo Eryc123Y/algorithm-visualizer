@@ -39,6 +39,10 @@ export const turn = (c: number) =>
       ? 'a right turn'
       : 'no turn: they are on one line';
 
+/** The same in Chinese (ADR 0045). */
+export const turnZh = (c: number) =>
+  c > 0 ? '向左转' : c < 0 ? '向右转' : '不转：它们在一条直线上';
+
 /** Names for the unnamed, `prefix` and a number, skipping names given. */
 function namer(given: Iterable<string>, prefix: string, from: number) {
   const taken = new Set(given);
@@ -271,9 +275,10 @@ export const segmentsField = (max: number) =>
 export const planeOf = (
   points: readonly Pt[],
   segments: readonly Seg[] = [],
+  label = 'points',
 ) => ({
   kind: 'plane' as const,
-  label: 'points',
+  label,
   points: points.map((p) => ({ id: p.id, x: p.x, y: p.y })),
   ...(segments.length === 0
     ? {}

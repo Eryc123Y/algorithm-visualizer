@@ -9,6 +9,7 @@
 import { z } from 'zod';
 
 import { defineAlgorithm } from '../../algorithm.ts';
+import type { Localized } from '../../text.ts';
 import {
   cross,
   planeOf,
@@ -67,10 +68,12 @@ const slope = (s: Seg) => {
 
 export const anySegmentsIntersect = defineAlgorithm({
   id: 'any-segments-intersect',
-  title: 'Any segments intersect',
+  title: { en: 'Any segments intersect', zh: '任意线段相交' },
   topic: 'geometry',
-  summary:
-    'Decides whether any two segments intersect by sweeping a vertical line left to right, testing only segments that are next to each other along the line.',
+  summary: {
+    en: 'Decides whether any two segments intersect by sweeping a vertical line left to right, testing only segments that are next to each other along the line.',
+    zh: '用一条从左往右扫过的竖线判定是否有两条线段相交，只检查沿扫描线相邻的线段。',
+  },
   input: z
     .strictObject({ segments: segmentsField(MAX_SEGMENTS_SWEPT) })
     .superRefine(({ segments }, ctx) => {
@@ -143,11 +146,17 @@ export const anySegmentsIntersect = defineAlgorithm({
   },
   run({ segments: raw }, trace) {
     const { points, segments } = segmentsOf(raw);
-    const P = trace.add('P', planeOf(points, segments));
+    const P = trace.add(
+      'P',
+      planeOf(points, segments, trace.say({ en: 'points', zh: '点' })),
+    );
     const T = trace.add('T', {
       kind: 'array',
       place: 'side',
-      label: 'sweep-line status, bottom to top',
+      label: trace.say({
+        en: 'sweep-line status, bottom to top',
+        zh: '扫描线状态，从下到上',
+      }),
       initial: [],
     });
     type Event = { x: number; y: number; left: boolean; s: Seg };
@@ -163,20 +172,20 @@ export const anySegmentsIntersect = defineAlgorithm({
         (a, b) => a.x - b.x || Number(b.left) - Number(a.left) || a.y - b.y,
       );
     const order: Seg[] = [];
-    const test = (a: Seg, b: Seg, step: string, lead: string): boolean => {
+    const test = (a: Seg, b: Seg, step: string, lead: Localized): boolean => {
       const hit = segmentsIntersect(a, b);
-      trace.step(
-        step,
-        `${lead} ${hit ? 'they intersect.' : 'they do not intersect.'}`,
-      );
+      trace.step(step, {
+        en: `${lead.en} ${hit ? 'they intersect.' : 'they do not intersect.'}`,
+        zh: `${lead.zh}${hit ? '它们相交。' : '它们不相交。'}`,
+      });
       P.highlight({ segments: [a.id, b.id] });
       return hit;
     };
     const found = (a: Seg, b: Seg) => {
-      trace.step(
-        'found',
-        `${a.id} and ${b.id} intersect, so some two segments do: the answer is yes.`,
-      );
+      trace.step('found', {
+        en: `${a.id} and ${b.id} intersect, so some two segments do: the answer is yes.`,
+        zh: `${a.id} 和 ${b.id} 相交，所以有两条线段相交：答案是肯定的。`,
+      });
       P.select({ segment: a.id, on: true }).select({ segment: b.id, on: true });
       return { results: [true] };
     };
@@ -192,68 +201,65 @@ export const anySegmentsIntersect = defineAlgorithm({
               (slope(t) < slope(s) || (slope(t) === slope(s) && t.id < s.id)))
           );
         }).length;
-        trace.step(
-          'event',
-          `The sweep line reaches x = ${e.x}, the left end of ${s.id}.`,
-        );
+        trace.step('event', {
+          en: `The sweep line reaches x = ${e.x}, the left end of ${s.id}.`,
+          zh: `扫描线到达 x = ${e.x}，即 ${s.id} 的左端点。`,
+        });
         P.line({ name: 'sweep', x: e.x }).highlight({ segments: [s.id] });
-        trace.step(
-          'insert',
-          `Insert ${s.id} into the order at the line: ${at === 0 ? 'at the bottom' : `above ${order[at - 1]!.id}`}${at < order.length ? `, below ${order[at]!.id}` : ''}.`,
-        );
+        trace.step('insert', {
+          en: `Insert ${s.id} into the order at the line: ${at === 0 ? 'at the bottom' : `above ${order[at - 1]!.id}`}${at < order.length ? `, below ${order[at]!.id}` : ''}.`,
+          zh: `把 ${s.id} 插入扫描线上的次序中：${at === 0 ? '放在最下面' : `在 ${order[at - 1]!.id} 上面`}${at < order.length ? `，在 ${order[at]!.id} 下面` : ''}。`,
+        });
         order.splice(at, 0, s);
         T.insert({ index: at, element: s.id }).highlight({ indices: [at] });
         const above = order[at + 1];
         const below = order[at - 1];
         if (
           above !== undefined &&
-          test(
-            s,
-            above,
-            'test',
-            `Test ${s.id} against ${above.id}, just above it:`,
-          )
+          test(s, above, 'test', {
+            en: `Test ${s.id} against ${above.id}, just above it:`,
+            zh: `检查 ${s.id} 和紧挨在它上面的 ${above.id}：`,
+          })
         )
           return found(s, above);
         if (
           below !== undefined &&
-          test(
-            s,
-            below,
-            'test',
-            `Test ${s.id} against ${below.id}, just below it:`,
-          )
+          test(s, below, 'test', {
+            en: `Test ${s.id} against ${below.id}, just below it:`,
+            zh: `检查 ${s.id} 和紧挨在它下面的 ${below.id}：`,
+          })
         )
           return found(s, below);
       } else {
         const at = order.indexOf(s);
-        trace.step(
-          'event',
-          `The sweep line reaches x = ${e.x}, the right end of ${s.id}.`,
-        );
+        trace.step('event', {
+          en: `The sweep line reaches x = ${e.x}, the right end of ${s.id}.`,
+          zh: `扫描线到达 x = ${e.x}，即 ${s.id} 的右端点。`,
+        });
         P.line({ name: 'sweep', x: e.x }).highlight({ segments: [s.id] });
         T.highlight({ indices: [at] });
         const [above, below] = [order[at + 1], order[at - 1]];
         if (
           above !== undefined &&
           below !== undefined &&
-          test(
-            above,
-            below,
-            'test-around',
-            `${s.id} ends, so ${above.id} and ${below.id}, on either side of it, become neighbours: test them, and`,
-          )
+          test(above, below, 'test-around', {
+            en: `${s.id} ends, so ${above.id} and ${below.id}, on either side of it, become neighbours: test them, and`,
+            zh: `${s.id} 结束了，它两边的 ${above.id} 和 ${below.id} 成为相邻的线段：检查它们，`,
+          })
         )
           return found(above, below);
-        trace.step('delete', `Delete ${s.id} from the order.`);
+        trace.step('delete', {
+          en: `Delete ${s.id} from the order.`,
+          zh: `从次序中删除 ${s.id}。`,
+        });
         order.splice(at, 1);
         T.remove({ index: at });
       }
     }
-    trace.step(
-      'done',
-      'The sweep has passed every endpoint without finding an intersection: the answer is no.',
-    );
+    trace.step('done', {
+      en: 'The sweep has passed every endpoint without finding an intersection: the answer is no.',
+      zh: '扫描线经过了所有端点，没有发现相交：答案是否定的。',
+    });
     P.line({ name: 'sweep', x: null });
     return { results: [false] };
   },

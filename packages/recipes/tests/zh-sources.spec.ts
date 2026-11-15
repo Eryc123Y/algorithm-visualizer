@@ -16,12 +16,7 @@ import { PENDING_ZH } from './zh-pending.ts';
 const SRC = fileURLToPath(new URL('../src/', import.meta.url));
 
 /** Folders whose modules are still on PENDING_ZH. */
-const PENDING_DIRS: readonly string[] = [
-  'algorithms/geometry',
-  'algorithms/math',
-  'algorithms/foundations',
-  'algorithms/amortized',
-];
+const PENDING_DIRS: readonly string[] = [];
 
 function sources(dir: string): string[] {
   return readdirSync(dir).flatMap((name) => {

@@ -15,6 +15,7 @@ import {
   pointsField,
   show,
   turn,
+  turnZh,
   type Pt,
 } from './common.ts';
 import { parsePoints } from './common.ts';
@@ -54,10 +55,12 @@ const edgeId = (a: Pt, b: Pt) => `${a.id}-${b.id}`;
 
 export const grahamScan = defineAlgorithm({
   id: 'graham-scan',
-  title: 'Graham’s scan',
+  title: { en: 'Graham’s scan', zh: 'Graham 扫描法' },
   topic: 'geometry',
-  summary:
-    'Finds the convex hull: sorts the points by polar angle about the lowest one, then keeps a stack of hull points, popping each that a new point shows is not a left turn.',
+  summary: {
+    en: 'Finds the convex hull: sorts the points by polar angle about the lowest one, then keeps a stack of hull points, popping each that a new point shows is not a left turn.',
+    zh: '求凸包：以最低的点为中心按极角给其他点排序，再用一个栈保存凸包上的点，新点表明某个点不构成左转时就把它弹出。',
+  },
   input: hullInput,
   main: 'points',
   examples: [
@@ -95,40 +98,43 @@ export const grahamScan = defineAlgorithm({
     `,
   },
   run({ points }, trace) {
-    const P = trace.add('P', planeOf(points));
+    const P = trace.add(
+      'P',
+      planeOf(points, [], trace.say({ en: 'points', zh: '点' })),
+    );
     const order = trace.add('order', {
       kind: 'array',
       place: 'side',
-      label: 'by polar angle',
+      label: trace.say({ en: 'by polar angle', zh: '按极角排序' }),
       initial: [],
     });
     const S = trace.add('S', {
       kind: 'stack',
       place: 'side',
-      label: 'stack S',
+      label: trace.say({ en: 'stack S', zh: '栈 S' }),
       initial: [],
     });
     const p0 = lowest(points);
-    trace.step(
-      'p0',
-      `p0 is ${show(p0)}: the lowest point, the leftmost of the lowest. Every other point is above it or to its right, so it is on the hull.`,
-    );
+    trace.step('p0', {
+      en: `p0 is ${show(p0)}: the lowest point, the leftmost of the lowest. Every other point is above it or to its right, so it is on the hull.`,
+      zh: `p0 是 ${show(p0)}：最低的点，最低的点中最左边的那个。其他每个点都在它上方或右边，所以它在凸包上。`,
+    });
     P.pointer({ name: 'p0', point: p0.id });
     const { kept, dropped } = polarOrder(
       p0,
       points.filter((p) => p !== p0),
     );
-    trace.step(
-      'sort',
-      `Sort the other points by polar angle about p0, comparing two points by the sign of a cross product rather than by angles${dropped.length === 0 ? '' : `; ${dropped.map((p) => p.id).join(', ')} ${dropped.length === 1 ? 'is' : 'are'} at the angle of a farther point and cannot be on the hull`}.`,
-    );
+    trace.step('sort', {
+      en: `Sort the other points by polar angle about p0, comparing two points by the sign of a cross product rather than by angles${dropped.length === 0 ? '' : `; ${dropped.map((p) => p.id).join(', ')} ${dropped.length === 1 ? 'is' : 'are'} at the angle of a farther point and cannot be on the hull`}.`,
+      zh: `以 p0 为中心按极角给其他点排序，用叉积的符号而不是角度比较两点${dropped.length === 0 ? '' : `；${dropped.map((p) => p.id).join(', ')} 与更远的点极角相同，不可能在凸包上`}。`,
+    });
     kept.forEach((p, k) => order.insert({ index: k, element: p.id }));
     for (const p of dropped) P.visit({ point: p.id });
     const stack: Pt[] = [p0, kept[0]!, kept[1]!];
-    trace.step(
-      'start',
-      `Push p0, ${kept[0]!.id} and ${kept[1]!.id}: the first and second in angle are on the hull so far.`,
-    );
+    trace.step('start', {
+      en: `Push p0, ${kept[0]!.id} and ${kept[1]!.id}: the first and second in angle are on the hull so far.`,
+      zh: `压入 p0、${kept[0]!.id} 和 ${kept[1]!.id}：极角最小的两个点目前在凸包上。`,
+    });
     stack.forEach((p) => S.push({ element: p.id }));
     P.addSegment({
       segment: { id: edgeId(p0, kept[0]!), from: p0.id, to: kept[0]!.id },
@@ -143,31 +149,34 @@ export const grahamScan = defineAlgorithm({
       for (;;) {
         const [a, b] = [stack.at(-2)!, stack.at(-1)!];
         const c = cross(a, b, p);
-        trace.step(
-          'turn',
-          `From ${a.id} to ${b.id} to ${p.id}: the cross product of ${b.id} − ${a.id} and ${p.id} − ${a.id} is ${c}, ${turn(c)}.`,
-        );
+        trace.step('turn', {
+          en: `From ${a.id} to ${b.id} to ${p.id}: the cross product of ${b.id} − ${a.id} and ${p.id} − ${a.id} is ${c}, ${turn(c)}.`,
+          zh: `从 ${a.id} 到 ${b.id} 再到 ${p.id}：${b.id} − ${a.id} 与 ${p.id} − ${a.id} 的叉积是 ${c}，${turnZh(c)}。`,
+        });
         P.compare({ points: [a.id, b.id, p.id] });
         if (c > 0) break;
-        trace.step(
-          'pop',
-          `${b.id} is not a left turn on the way to ${p.id}, so it is inside the hull: pop it.`,
-        );
+        trace.step('pop', {
+          en: `${b.id} is not a left turn on the way to ${p.id}, so it is inside the hull: pop it.`,
+          zh: `在去往 ${p.id} 的路上，${b.id} 处不是左转，所以它在凸包内部：弹出它。`,
+        });
         S.pop();
         P.removeSegment({ id: edgeId(a, b) }).visit({ point: b.id });
         stack.pop();
       }
       const top = stack.at(-1)!;
-      trace.step('push', `The turn at ${top.id} is left: push ${p.id}.`);
+      trace.step('push', {
+        en: `The turn at ${top.id} is left: push ${p.id}.`,
+        zh: `${top.id} 处是左转：压入 ${p.id}。`,
+      });
       S.push({ element: p.id });
       P.addSegment({ segment: { id: edgeId(top, p), from: top.id, to: p.id } });
       stack.push(p);
     }
     const last = stack.at(-1)!;
-    trace.step(
-      'done',
-      `Every point is scanned: the stack holds the ${stack.length} hull vertices in counterclockwise order, and ${last.id} joins back to p0.`,
-    );
+    trace.step('done', {
+      en: `Every point is scanned: the stack holds the ${stack.length} hull vertices in counterclockwise order, and ${last.id} joins back to p0.`,
+      zh: `每个点都扫描过了：栈中按逆时针顺序存放着凸包的 ${stack.length} 个顶点，${last.id} 再连回 p0。`,
+    });
     P.addSegment({
       segment: { id: edgeId(last, p0), from: last.id, to: p0.id },
     });

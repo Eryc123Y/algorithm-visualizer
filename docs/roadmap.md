@@ -233,7 +233,7 @@ The owner's brief (2026-11-14): the site still looks bare and says too little. M
 - [ ] **5.8 Chinese in the product** _ADR_: the player's chrome and the recipes' narration in Chinese. ADR 0045 (#159): a document is in one language and the protocol stays 1.0; recipes write each text in both languages side by side, and every output is asked for a locale. In several PRs:
   - the mechanism for the web (#PR): locales in `spec`, `Text` and `trace.say` in recipes, the layout's own words, the player's chrome and its inherited `lang`, share links' `lang`, and Dijkstra's algorithm translated as the first module;
   - the mechanism for the other outputs: the CLI's `--lang`, MCP's `locale`, Typst's `lang`, LaTeX's `lang` key and TikZ;
-  - the translations, a topic or two at a time, until `PENDING_ZH` is empty;
+  - the translations (#PR3): every module's title, summary, narration, sections and labels in both languages, a topic per commit, with a test that reads the sources so no narration stays in one language;
   - the site's module pages and catalogue in Chinese.
 - [x] **5.9 A logo** _owner_: the owner picked candidate 1, frames stacked like a flipbook with the front one playing; it is in `docs/brand/`, the site's bar and its favicon (#153).
 - [x] **5.10 The drafting redesign.** The owner asked for the site to look like a portal, not a documentation site, and picked a direction on the design canvas: a drafting sheet (grid paper, ink-blue frames, red annotations, IBM Plex) laid out flat and large. In two parts:

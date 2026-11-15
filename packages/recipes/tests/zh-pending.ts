@@ -3,19 +3,4 @@
  * a structure's operations (ADR 0045). Each translation removes its
  * modules; the list is empty when roadmap 5.8 is done.
  */
-export const PENDING_ZH: ReadonlySet<string> = new Set([
-  'any-segments-intersect',
-  'graham-scan',
-  'jarvis-march',
-  'closest-pair',
-  'lup-decomposition',
-  'fft',
-  'euclid',
-  'extended-euclid',
-  'modular-exponentiation',
-  'strassen',
-  'recursion-tree',
-  'random-permutation',
-  'dynamic-table',
-  'binary-counter',
-]);
+export const PENDING_ZH: ReadonlySet<string> = new Set([]);

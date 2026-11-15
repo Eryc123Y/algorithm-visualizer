@@ -73,10 +73,12 @@ const FORM = 'integers separated by spaces or commas, e.g. "1 2 3 4"';
 
 export const fft = defineAlgorithm({
   id: 'fft',
-  title: 'Fast Fourier transform',
+  title: { en: 'Fast Fourier transform', zh: '快速傅里叶变换' },
   topic: 'math',
-  summary:
-    'Evaluates a polynomial at the complex roots of unity, its discrete Fourier transform, in O(n lg n) time: the coefficients go in bit-reversed order, and each stage combines pairs of smaller transforms by butterflies.',
+  summary: {
+    en: 'Evaluates a polynomial at the complex roots of unity, its discrete Fourier transform, in O(n lg n) time: the coefficients go in bit-reversed order, and each stage combines pairs of smaller transforms by butterflies.',
+    zh: '用 O(n lg n) 的时间在复数单位根处对多项式求值，即它的离散傅里叶变换：系数按位逆序排列，每一级用蝴蝶操作把一对较小的变换合成一个。',
+  },
   input: z.strictObject({
     coefficients: z
       .union([
@@ -154,7 +156,7 @@ export const fft = defineAlgorithm({
     const A: Complex[] = a.map(() => ({ re: 0, im: 0 }));
     const table = trace.add('T', {
       kind: 'table',
-      label: 'a and A',
+      label: trace.say({ en: 'a and A', zh: 'a 和 A' }),
       initial: a.map((ak) => [String(ak), '']),
       rowLabels: a.map((_, k) => String(k)),
       columnLabels: ['a', 'A'],
@@ -162,8 +164,14 @@ export const fft = defineAlgorithm({
     trace.step(
       'copy',
       n === 1
-        ? 'One coefficient: the transform of a constant is itself.'
-        : `Copy each coefficient a_k to A[rev(k)], the index whose ${bits === 1 ? '1 bit is that of k, which reversed is itself' : `${bits} bits are those of k reversed`}: then each stage combines neighbouring blocks. Values are shown to three decimals.`,
+        ? {
+            en: 'One coefficient: the transform of a constant is itself.',
+            zh: '只有一个系数：常数的变换就是它自己。',
+          }
+        : {
+            en: `Copy each coefficient a_k to A[rev(k)], the index whose ${bits === 1 ? '1 bit is that of k, which reversed is itself' : `${bits} bits are those of k reversed`}: then each stage combines neighbouring blocks. Values are shown to three decimals.`,
+            zh: `把每个系数 a_k 复制到 A[rev(k)]，${bits === 1 ? '这个下标只有 1 位，逆序后不变' : `这个下标的 ${bits} 位是 k 的各位逆序`}：然后每一级合并相邻的块。数值保留三位小数。`,
+          },
     );
     for (let k = 0; k < n; k++) {
       const r = reverseBits(k, bits);
@@ -176,7 +184,10 @@ export const fft = defineAlgorithm({
       const half = m / 2;
       trace.step(
         'stage',
-        `Stage ${s}: combine each pair of neighbouring DFTs of size ${half} into one of size ${m}, with ω_${m} = e^(2πi/${m})${m <= 4 ? ` = ${showComplex(root(1, m))}` : ''}.`,
+        {
+          en: `Stage ${s}: combine each pair of neighbouring DFTs of size ${half} into one of size ${m}, with ω_${m} = e^(2πi/${m})${m <= 4 ? ` = ${showComplex(root(1, m))}` : ''}.`,
+          zh: `第 ${s} 级：把每一对大小为 ${half} 的相邻 DFT 合成一个大小为 ${m} 的 DFT，ω_${m} = e^(2πi/${m})${m <= 4 ? ` = ${showComplex(root(1, m))}` : ''}。`,
+        },
         { vars: { s, m } },
       );
       for (let k = 0; k < n; k += m)
@@ -189,7 +200,10 @@ export const fft = defineAlgorithm({
           A[hi] = minus(u, t);
           trace.step(
             'butterfly',
-            `Butterfly on A[${lo}] and A[${hi}] with ω = ω_${m}^${j} = ${showComplex(w)}: t = ω A[${hi}] = ${showComplex(t)} and u = A[${lo}] = ${showComplex(u)}, so A[${lo}] = u + t = ${showComplex(A[lo])} and A[${hi}] = u − t = ${showComplex(A[hi])}.`,
+            {
+              en: `Butterfly on A[${lo}] and A[${hi}] with ω = ω_${m}^${j} = ${showComplex(w)}: t = ω A[${hi}] = ${showComplex(t)} and u = A[${lo}] = ${showComplex(u)}, so A[${lo}] = u + t = ${showComplex(A[lo])} and A[${hi}] = u − t = ${showComplex(A[hi])}.`,
+              zh: `对 A[${lo}] 和 A[${hi}] 做蝴蝶操作，ω = ω_${m}^${j} = ${showComplex(w)}：t = ω A[${hi}] = ${showComplex(t)}，u = A[${lo}] = ${showComplex(u)}，所以 A[${lo}] = u + t = ${showComplex(A[lo])}，A[${hi}] = u − t = ${showComplex(A[hi])}。`,
+            },
             { vars: { s, m, k, j } },
           );
           table
@@ -203,10 +217,10 @@ export const fft = defineAlgorithm({
             });
         }
     }
-    trace.step(
-      'done',
-      `A holds the DFT: A[k] = y_k, the polynomial's value at ω_${n}^k, for k = 0 to ${n - 1}.`,
-    );
+    trace.step('done', {
+      en: `A holds the DFT: A[k] = y_k, the polynomial's value at ω_${n}^k, for k = 0 to ${n - 1}.`,
+      zh: `A 中是 DFT：A[k] = y_k，即多项式在 ω_${n}^k 处的值，k = 0 到 ${n - 1}。`,
+    });
     table.settle({ cells: a.map((_, k) => [k, 1] as [number, number]) });
     return {};
   },
