@@ -22,12 +22,14 @@ describe('assetsOf', () => {
           },
           _fonts: { file: 'assets/fonts.js', css: ['assets/fonts.css'] },
           'play/index.html': { file: 'assets/play.js' },
-          '../../packages/elements/src/fonts/inter-400-latin.woff2': {
-            file: 'assets/inter-400-latin-x.woff2',
-          },
-          '../../packages/elements/src/fonts/stix-two-text-600-latin.woff2': {
-            file: 'assets/stix-two-text-600-latin-y.woff2',
-          },
+          '../../node_modules/@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-400-normal.woff2':
+            {
+              file: 'assets/ibm-plex-sans-latin-400-normal-x.woff2',
+            },
+          '../../node_modules/@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-700-normal.woff2':
+            {
+              file: 'assets/ibm-plex-sans-latin-700-normal-y.woff2',
+            },
           '../../packages/elements/src/fonts/inter-600-latin.woff2': {
             file: 'assets/inter-600-latin-z.woff2',
           },
@@ -39,8 +41,8 @@ describe('assetsOf', () => {
       styles: ['assets/docs.css', 'assets/fonts.css'],
       preloads: ['assets/shared.js', 'assets/fonts.js'],
       fonts: [
-        'assets/inter-400-latin-x.woff2',
-        'assets/stix-two-text-600-latin-y.woff2',
+        'assets/ibm-plex-sans-latin-400-normal-x.woff2',
+        'assets/ibm-plex-sans-latin-700-normal-y.woff2',
       ],
     });
   });

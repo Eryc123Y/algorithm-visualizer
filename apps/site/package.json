@@ -16,6 +16,8 @@
     "@algomotion/recipes": "1.0.0-alpha.1",
     "@algomotion/spec": "1.0.0-alpha.1",
     "@algomotion/svg": "1.0.0-alpha.1",
+    "@fontsource/ibm-plex-mono": "^5.3.0",
+    "@fontsource/ibm-plex-sans": "^5.3.0",
     "zod": "^4.6.7"
   },
   "devDependencies": {

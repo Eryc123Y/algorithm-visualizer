@@ -15,12 +15,15 @@ export type Manifest = Readonly<Record<string, Chunk>>;
 
 /**
  * The faces the first screen of every page sets, preloaded so they arrive
- * with the styles rather than swap in later and move the text: Inter for
- * the body and STIX Two Text for the headings.
+ * with the styles rather than swap in later and move the text: IBM Plex
+ * Sans for the body (400), the bar (500) and the headings (700), and IBM
+ * Plex Mono for code and labels, in Latin.
  */
 export const FIRST_FONTS: readonly string[] = [
-  'inter-400-latin.woff2',
-  'stix-two-text-600-latin.woff2',
+  'ibm-plex-sans-latin-400-normal.woff2',
+  'ibm-plex-sans-latin-500-normal.woff2',
+  'ibm-plex-sans-latin-700-normal.woff2',
+  'ibm-plex-mono-latin-400-normal.woff2',
 ];
 
 /** The assets of `entry`, each once, in the order the script needs them. */

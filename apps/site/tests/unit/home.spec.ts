@@ -18,7 +18,10 @@ const art: Art = {
   alt: 'A < B & "C"',
 };
 const homeArt: HomeArt = {
-  plate: [{ ...art, step: 'improve#3' }],
+  story: [
+    { ...art, step: 'start', narration: 'Every distance is ∞.' },
+    { ...art, step: 'extract', narration: 'A is final.' },
+  ],
   outputs: { web: art, typst: art, latex: art, cli: art, mcp: art, link: art },
   slides: [art, art, art],
   themes: [{ name: 'light', art }],
@@ -86,7 +89,15 @@ describe('the home page', () => {
     expect(
       document.querySelector('main algo-player')?.getAttribute('algorithm'),
     ).toBe('dijkstra');
-    expect(document.querySelector('.plate picture')).not.toBeNull();
+    // The story: every step in the list, each with its figure, and a
+    // pinned sheet holding one frame per step with a ruler cell each.
+    expect(document.querySelectorAll('.story-step')).toHaveLength(2);
+    expect(document.querySelectorAll('.story-inline picture')).toHaveLength(2);
+    expect(document.querySelectorAll('.story-frame')).toHaveLength(2);
+    expect(document.querySelectorAll('.story .ruler > span')).toHaveLength(2);
+    expect(document.querySelector('.story-step code')?.textContent).toBe(
+      'start',
+    );
     expect(document.querySelectorAll('.overlays picture')).toHaveLength(3);
     expect(
       document.querySelectorAll('.teaser a[href^="algorithms/#topic-"]').length,

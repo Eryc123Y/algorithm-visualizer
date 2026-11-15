@@ -30,13 +30,16 @@ export interface Art {
 }
 
 /** One subfigure of the plate. */
-export interface PlateFigure extends Art {
-  /** The step, as a selector: `extract#2`. */
+export interface StoryFrame extends Art {
+  /** The step's most specific selector: `improve#3`. */
   readonly step: string;
+  /** The step's narration, the figure's caption. */
+  readonly narration: string;
 }
 
 export interface HomeArt {
-  readonly plate: readonly PlateFigure[];
+  /** Every step of the home page's run, in order: frames 1 to the last. */
+  readonly story: readonly StoryFrame[];
   /** The figure each output's tab shows. */
   readonly outputs: Readonly<Partial<Record<Snippet['id'], Art>>>;
   /** Overlays of a slide, in order. */
@@ -68,8 +71,6 @@ export function picture(art: Art, root: string, loading = 'lazy'): string {
 function pictureOf(art: Art, root: string, loading: string): string {
   return `<picture><source srcset="${attribute(root + art.dark)}" media="(prefers-color-scheme: dark)" /><img src="${attribute(root + art.light)}" width="${art.width}" height="${art.height}" alt="${attribute(art.alt)}" loading="${loading}" decoding="async" /></picture>`;
 }
-
-const LETTERS = 'abcdefghij';
 
 /** The outputs, in tab order, and the guide that explains each. */
 const OUTPUTS: readonly { readonly id: OutputId; readonly guide: string }[] = [
@@ -196,28 +197,48 @@ ${panels}
 </div>`;
 }
 
-function plate(art: HomeArt, t: HomeText['plate'], site: string): string {
-  const figures = art.plate
+/**
+ * Every step of the run, told in order: the steps scroll by on one side
+ * while a pinned sheet on the other draws the step being read, with a ruler
+ * under it (story.ts). Each step also carries its own figure, which shows
+ * on narrow screens and without script.
+ */
+function story(art: HomeArt, t: HomeText['plate'], site: string): string {
+  const count = art.story.length;
+  const steps = art.story
     .map(
-      (f, k) =>
-        `<li><span class="sub">(${LETTERS[k]})</span>${picture(f, site)}<code class="sub-step">${text(f.step)}</code></li>`,
+      (f, k) => `      <li class="story-step" data-frame="${k + 1}">
+        <p class="story-label"><span class="sub">${text(t.figure)}${k + 1}</span> <code>${text(f.step)}</code></p>
+        <p class="story-text">${text(f.narration)}</p>
+        <div class="story-inline">${picture(f, site)}</div>
+      </li>`,
     )
     .join('\n');
-  const caption = art.plate
-    .map((f, k) => `<b>(${LETTERS[k]})</b> ${text(f.alt)}`)
-    .join(' ');
-  return `<section class="plate bleed" aria-labelledby="plate-title">
-  <div class="plate-inner">
-    <div class="plate-head">
-      <h2 id="plate-title">${text(t.title)}</h2>
+  const frames = art.story
+    .map(
+      (f, k) =>
+        `<div class="story-frame${k === 0 ? ' now' : ''}" data-frame="${k + 1}">${picture({ ...f, alt: '' }, site, k < 2 ? 'eager' : 'lazy')}</div>`,
+    )
+    .join('');
+  const cells = Array.from({ length: count }, (_, k) =>
+    k === 0 ? '<span class="now"></span>' : '<span></span>',
+  ).join('');
+  return `<section class="story bleed" aria-labelledby="story-title" data-step="${attribute(t.step)}">
+  <div class="story-inner">
+    <div class="story-head">
+      <h2 id="story-title">${text(t.title)}</h2>
       <p>${t.lede}</p>
     </div>
-    <figure class="plate-figure">
-      <ol class="subfigures">
-${figures}
+    <div class="story-body">
+      <ol class="story-steps">
+${steps}
       </ol>
-      <figcaption><b>${text(t.figure)}</b> ${text(t.caption)} ${caption}</figcaption>
-    </figure>
+      <div class="story-figure" aria-hidden="true">
+        <div class="story-sheet">${frames}</div>
+        <div class="ruler">${cells}</div>
+        <p class="ruler-status"><b class="ruler-step">${text(t.caption)}</b></p>
+      </div>
+    </div>
   </div>
 </section>`;
 }
@@ -316,17 +337,23 @@ export function homePage(
     locale,
     alternate: '',
     body: `<section class="hero" aria-labelledby="hero-title">
-  <div class="hero-text">
-    <h1 id="hero-title">${text(t.hero.title)}</h1>
-    <p class="lede">${text(t.hero.lede)}</p>
-    <p class="actions"><a class="button" href="guide/">${text(t.hero.getStarted)}</a> <a class="button quiet" href="algorithms/">${text(t.hero.browse(count))}</a></p>
-    <p class="fine">${text(t.hero.fine)}</p>
-  </div>
-  <div class="hero-player">
-    ${player}
+  <div class="hero-pin">
+    <div class="hero-grid">
+      <div class="hero-text">
+        <p class="fig-label"><span>${text(t.hero.figure)}</span> <span class="fig-title"></span></p>
+        <h1 id="hero-title">${text(t.hero.title)}</h1>
+        <p class="lede">${text(t.hero.lede)}</p>
+        <p class="actions"><a class="button" href="guide/">${text(t.hero.getStarted)}</a> <a class="button quiet" href="algorithms/">${text(t.hero.browse(count))}</a></p>
+        <p class="install"><code>npm i @algomotion/elements@alpha</code></p>
+        <p class="fine">${text(t.hero.fine)}</p>
+      </div>
+      <div class="hero-player">
+        ${player}
+      </div>
+    </div>
   </div>
 </section>
-${plate(art, t.plate, site)}
+${story(art, t.plate, site)}
 <section class="outputs" aria-labelledby="outputs-title">
   <div class="section-head">
     <h2 id="outputs-title">${text(t.outputs.title)}</h2>

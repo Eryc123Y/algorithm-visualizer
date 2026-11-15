@@ -8,6 +8,13 @@ import '../no-eval.ts';
 import { AlgoPlayer } from '@algomotion/elements';
 // The themes' web fonts, bundled with the page (ADR 0030).
 import '@algomotion/elements/fonts.css';
+// The site's own faces, IBM Plex Sans and Mono (OFL), bundled with the pages.
+import '@fontsource/ibm-plex-sans/400.css';
+import '@fontsource/ibm-plex-sans/500.css';
+import '@fontsource/ibm-plex-sans/600.css';
+import '@fontsource/ibm-plex-sans/700.css';
+import '@fontsource/ibm-plex-mono/400.css';
+import '@fontsource/ibm-plex-mono/500.css';
 
 import './play.css';
 import { showFragment, type PlayPage } from './show.ts';
