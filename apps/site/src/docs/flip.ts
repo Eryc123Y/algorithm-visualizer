@@ -73,10 +73,16 @@ function flipbook(thumb: HTMLElement, view: Window, preload: Preload): void {
     mark(ruler, k);
   };
 
-  // Each hover is a run of its own; leaving ends it, loaded or not.
+  // The pointer and focus each hold the card; it flips while either does,
+  // in one loop at most. Each loop is a run of its own: stopping ends it,
+  // loaded or not, and a stale run's callbacks do nothing.
+  const holders = new Set<'pointer' | 'focus'>();
   let run = 0;
+  let running = false;
   let timer: number | undefined;
   const start = async () => {
+    if (running) return;
+    running = true;
     const mine = ++run;
     const dark = view.matchMedia('(prefers-color-scheme: dark)').matches;
     await Promise.all(
@@ -86,6 +92,7 @@ function flipbook(thumb: HTMLElement, view: Window, preload: Preload): void {
     thumb.classList.add('flipping');
     let k = 0;
     const next = () => {
+      if (mine !== run) return;
       show(k);
       k = (k + 1) % frames.length;
       timer = view.setTimeout(next, FLIP_INTERVAL);
@@ -94,17 +101,26 @@ function flipbook(thumb: HTMLElement, view: Window, preload: Preload): void {
   };
   const stop = () => {
     run++;
+    running = false;
     if (timer !== undefined) view.clearTimeout(timer);
     timer = undefined;
     thumb.classList.remove('flipping');
     img.setAttribute('src', still.src);
     source?.setAttribute('srcset', still.srcset);
   };
+  const hold = (by: 'pointer' | 'focus') => {
+    holders.add(by);
+    void start();
+  };
+  const release = (by: 'pointer' | 'focus') => {
+    holders.delete(by);
+    if (holders.size === 0) stop();
+  };
 
-  link.addEventListener('pointerenter', () => void start());
-  link.addEventListener('focusin', () => void start());
-  link.addEventListener('pointerleave', stop);
-  link.addEventListener('focusout', stop);
+  link.addEventListener('pointerenter', () => hold('pointer'));
+  link.addEventListener('focusin', () => hold('focus'));
+  link.addEventListener('pointerleave', () => release('pointer'));
+  link.addEventListener('focusout', () => release('focus'));
 }
 
 /** Makes every catalogue thumbnail with frames a flipbook. */

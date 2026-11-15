@@ -89,6 +89,29 @@ describe('setUpFlip', () => {
     expect(cells.map((c) => c.className)).toEqual(['done', 'now', '', '']);
   });
 
+  it('runs one loop for hover and focus together, and stops when both have gone', async () => {
+    document.body.innerHTML = card();
+    setUpFlip(document, viewWith(true), () => Promise.resolve());
+    const link = document.querySelector('a')!;
+    const img = document.querySelector('img')!;
+    link.dispatchEvent(new Event('pointerenter'));
+    await vi.advanceTimersByTimeAsync(0);
+    link.dispatchEvent(new Event('focusin'));
+    await vi.advanceTimersByTimeAsync(0);
+    // Still the first frame: focus did not start a second loop.
+    expect(img.getAttribute('src')).toBe('thumbs/dijkstra-f1-light.svg');
+    link.dispatchEvent(new Event('pointerleave'));
+    // Focus is still on the card: it keeps flipping.
+    expect(
+      document.querySelector('.thumb')!.classList.contains('flipping'),
+    ).toBe(true);
+    link.dispatchEvent(new Event('focusout'));
+    expect(img.getAttribute('src')).toBe('thumbs/dijkstra-light.svg');
+    // No loop survives to draw over the still.
+    await vi.advanceTimersByTimeAsync(700 * 4);
+    expect(img.getAttribute('src')).toBe('thumbs/dijkstra-light.svg');
+  });
+
   it('does not start if the pointer leaves before the frames load', async () => {
     document.body.innerHTML = card();
     let loaded: () => void = () => {};
