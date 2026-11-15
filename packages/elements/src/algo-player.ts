@@ -343,6 +343,8 @@ export class AlgoPlayer extends LitElement {
 
   #locale: Locale = 'en';
   #stopWatchingLang: (() => void) | undefined;
+  /** A load has started and not yet finished, so its locale may be stale. */
+  #loading = false;
 
   /**
    * A `lang` changed somewhere, or the player moved: follow it if it
@@ -352,8 +354,12 @@ export class AlgoPlayer extends LitElement {
     const locale = localeAround(this);
     if (locale === this.#locale) return;
     this.#locale = locale;
-    // Nothing loaded yet: the first load uses the new locale.
-    if (this.trace === null && this.errors === null) return;
+    // Nothing loaded yet. A load not started will use the new locale; one
+    // under way was asked in the old one, so it starts again.
+    if (this.trace === null && this.errors === null) {
+      if (this.#loading) void this.#load();
+      return;
+    }
     // A run is recorded in the locale; a document stays as written, but
     // the layout's own words follow.
     if (this.visualization === undefined && this.algorithm) void this.#load();
@@ -513,6 +519,7 @@ export class AlgoPlayer extends LitElement {
 
   async #load(): Promise<void> {
     const request = ++this.#request;
+    this.#loading = true;
     const pending = documentOf({
       visualization: this.visualization,
       algorithm: this.algorithm,
@@ -525,6 +532,7 @@ export class AlgoPlayer extends LitElement {
     // A document given directly loads at once, without a microtask.
     const content = pending instanceof Promise ? await pending : pending;
     if (request !== this.#request) return;
+    this.#loading = false;
     if (!content.ok) {
       this.#fail(content.error);
       return;

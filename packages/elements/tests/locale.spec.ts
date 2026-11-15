@@ -3,7 +3,7 @@
  * HTML does. Its chrome is in that locale, and a run of an algorithm is
  * recorded in it; a document shows its text as written.
  */
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import type { Trace } from '@algomotion/core';
 
@@ -41,7 +41,6 @@ const firstStep = (el: AlgoPlayer) =>
   (el as unknown as { trace: Trace }).trace.visualization.steps[0]!.meta
     ?.narration ?? '';
 const DIJKSTRA = '<algo-player algorithm="dijkstra"></algo-player>';
-
 describe('<algo-player> in a locale', () => {
   it('is English with no lang anywhere', async () => {
     const el = await mount(DIJKSTRA);
@@ -88,6 +87,30 @@ describe('<algo-player> in a locale', () => {
     await el.updateComplete;
     expect(el.locale).toBe('zh');
     expect(label(el, '.controls .primary')).toBe('播放');
+  });
+
+  it('records the run in a language that changes while it first loads', async () => {
+    // The input arrives only when the test says, so the change of lang
+    // lands while the first load waits for it.
+    let respond: () => void = () => {};
+    const fetched = new Promise<void>((resolve) => (respond = resolve));
+    const fetch = vi.spyOn(globalThis, 'fetch').mockImplementation(async () => {
+      await fetched;
+      return new Response('"A-B 4, B-C 1"');
+    });
+    document.body.innerHTML =
+      '<algo-player algorithm="dijkstra" src="input.json"></algo-player>';
+    const el = document.querySelector('algo-player')!;
+    await el.updateComplete;
+    document.documentElement.lang = 'zh';
+    await Promise.resolve();
+    const loaded = settled(el);
+    respond();
+    await loaded;
+    await el.updateComplete;
+    fetch.mockRestore();
+    expect(el.locale).toBe('zh');
+    expect(firstStep(el)).toMatch(CJK);
   });
 
   it('follows a new ancestor when it is moved', async () => {
