@@ -18,6 +18,8 @@ export interface HomeText {
     readonly getStarted: string;
     readonly browse: (count: number) => string;
     readonly fine: string;
+    /** The red label over the headline: the figure's number. */
+    readonly figure: string;
   };
   readonly playground: {
     readonly label: string;
@@ -36,6 +38,8 @@ export interface HomeText {
     readonly lede: string;
     readonly figure: string;
     readonly caption: string;
+    /** The ruler's status, with {n} and {length} filled in. */
+    readonly step: string;
   };
   readonly outputs: {
     readonly title: string;
@@ -108,11 +112,12 @@ const en: HomeText = {
   description:
     'Step-by-step pictures and animations of algorithms and data structures, from one algorithm name and your input, for web pages, Typst, LaTeX, slides and AI conversations.',
   hero: {
-    title: 'Every step of an algorithm, drawn.',
+    title: 'Every step, drawn.',
     lede: 'Name an algorithm and give it your input, in the notation you already write. algomotion runs it and draws each step: an animation for a web page, figures for Typst and LaTeX notes, overlays for slides, and a player inside AI conversations.',
     getStarted: 'Get started',
     browse: (n) => `Browse ${n} algorithms`,
     fine: 'The source is public. The player runs in the reader’s browser, and share links carry their run in the link itself.',
+    figure: 'Fig. 1',
   },
   playground: {
     label: 'Try an algorithm',
@@ -125,10 +130,11 @@ const en: HomeText = {
     openShare: 'Open in the share page',
   },
   plate: {
-    title: 'The same run, as figures for your notes',
-    lede: 'Every step has a name, so you can ask for a figure by what happens in it: <code>extract#2</code> is the second vertex taken from the queue. Each one is a vector figure, in the theme you pick.',
-    figure: 'Figure 1.',
-    caption: 'Dijkstra’s algorithm from A on the graph above.',
+    title: 'Every step, named and drawn',
+    lede: 'Scroll through the run above. Each step has a name you can cite, such as <code>improve#3</code>, and a sentence that says why. Any of them becomes a figure for your notes, in the theme you pick.',
+    figure: 'Fig. 2.',
+    caption: 'Dijkstra’s algorithm from A',
+    step: 'Step {n} of {length}',
   },
   outputs: {
     title: 'One input, wherever you write',
@@ -266,11 +272,12 @@ const zh: HomeText = {
   description:
     '给出算法名和你的输入，algomotion 就把算法和数据结构的每一步画出来：用在网页、Typst、LaTeX、幻灯片和 AI 对话里。',
   hero: {
-    title: '算法的每一步，都画出来。',
+    title: '每一步，都画出来。',
     lede: '说出算法名，用你平时习惯的记法给出输入。algomotion 运行后画出每一步：网页上是动画，Typst 和 LaTeX 笔记里是插图，幻灯片上是逐步显示的叠层，AI 对话里是播放器。',
     getStarted: '开始使用',
     browse: (n) => `浏览 ${n} 个算法`,
     fine: '源码公开。播放器在读者自己的浏览器里运行，分享链接把整个运行过程写在链接本身里。',
+    figure: '图 1',
   },
   playground: {
     label: '试一个算法',
@@ -283,10 +290,11 @@ const zh: HomeText = {
     openShare: '在分享页中打开',
   },
   plate: {
-    title: '同一次运行，变成笔记里的插图',
-    lede: '每一步都有名字，所以可以按步骤里发生了什么来指定插图：<code>extract#2</code> 是第二个从队列中取出的顶点。每一幅都是矢量图，主题由你选。',
-    figure: '图 1',
-    caption: '在上面的图上从 A 出发运行 Dijkstra 算法。',
+    title: '每一步，都有名字，都画出来',
+    lede: '顺着上面这次运行往下滚动。每一步都有一个可以引用的名字，比如 <code>improve#3</code>，以及一句说明原因的话。其中任何一步都能变成笔记里的插图，主题由你选。',
+    figure: '图 2.',
+    caption: 'Dijkstra 算法，从 A 出发',
+    step: '第 {n} 步，共 {length} 步',
   },
   outputs: {
     title: '一份输入，写到哪里都行',

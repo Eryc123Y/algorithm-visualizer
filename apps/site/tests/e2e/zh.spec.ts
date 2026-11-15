@@ -42,9 +42,13 @@ for (const path of PAGES)
     await expect(
       page.locator('link[rel="alternate"][hreflang="en"]'),
     ).toHaveCount(1);
-    // Images in hidden tab panels load lazily, when their tab opens.
+    // Images in hidden tab panels load lazily, when their tab opens; the
+    // story's pinned sheet is hidden on a phone, where each step shows its
+    // own figure instead.
     for (const img of await page
-      .locator('main img:not([role="tabpanel"][hidden] img)')
+      .locator(
+        'main img:not([role="tabpanel"][hidden] img):not(.story-figure img)',
+      )
       .all()) {
       await img.scrollIntoViewIfNeeded();
       await expect

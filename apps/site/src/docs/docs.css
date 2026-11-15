@@ -108,15 +108,18 @@ picture img {
 /* ── Home: hero ─────────────────────────────────────────────────────── */
 
 .home .hero {
+  padding-block-end: clamp(2.5rem, 6vw, 4.5rem);
+}
+
+.hero-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 2.5rem;
   align-items: center;
-  padding-block-end: clamp(2.5rem, 6vw, 4.5rem);
 }
 
 @media (min-width: 64rem) {
-  .home .hero {
+  .hero-grid {
     grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
     gap: 3.5rem;
     /* The playground changes height with its run: keep the text still. */
@@ -130,9 +133,9 @@ picture img {
 
 .hero h1 {
   margin-top: 0;
-  font-size: clamp(2.5rem, 1.5rem + 4.4vw, 4.5rem);
-  line-height: 1.02;
-  letter-spacing: -0.02em;
+  font-size: var(--step-5);
+  line-height: 0.92;
+  letter-spacing: -0.045em;
 }
 
 .actions {
@@ -270,7 +273,7 @@ picture img {
 
 .pg-where mark {
   padding: 0 0.125em;
-  border-radius: 0.125rem;
+  border-radius: 0;
   background: color-mix(in oklab, var(--mark) 30%, transparent);
   color: inherit;
   text-decoration: underline wavy var(--alert);
@@ -343,89 +346,6 @@ picture img {
   .pg-error {
     display: none;
   }
-}
-
-/* ── Home: the plate ────────────────────────────────────────────────── */
-
-.plate {
-  border-block: 1px solid var(--rule);
-  background: var(--surface);
-}
-
-.plate-inner {
-  inline-size: min(72rem, 100% - 2 * var(--gutter));
-  margin-inline: auto;
-  padding-block: clamp(2.5rem, 6vw, 4.5rem);
-}
-
-.plate-head {
-  max-inline-size: var(--measure);
-}
-
-.plate-head h2 {
-  margin-top: 0;
-}
-
-.plate-head p {
-  color: var(--muted);
-}
-
-.plate-figure {
-  margin: 2rem 0 0;
-}
-
-.subfigures {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 1.5rem 1.25rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-@media (min-width: 34rem) {
-  .subfigures {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 60rem) {
-  .subfigures {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-.subfigures li {
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-  gap: 0.375rem;
-  min-width: 0;
-}
-
-.sub {
-  font-family: var(--serif);
-  font-size: var(--step-0);
-}
-
-.sub-step {
-  justify-self: start;
-  color: var(--muted);
-}
-
-.subfigures picture {
-  align-self: center;
-}
-
-.plate-figure figcaption {
-  max-inline-size: 52rem;
-  margin-top: 1.75rem;
-  font-family: var(--serif);
-  font-size: 1.0625rem;
-  line-height: 1.55;
-}
-
-.plate-figure figcaption b {
-  font-weight: 600;
 }
 
 /* ── Home: outputs, as tabs ─────────────────────────────────────────── */
@@ -800,7 +720,7 @@ picture img {
   font-weight: 500;
   padding: 0.125rem 0.625rem;
   border: 1px solid var(--rule);
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--surface);
   color: var(--ink);
   cursor: pointer;
@@ -822,7 +742,7 @@ picture img {
 .steps li {
   padding: 0.125rem 0.5rem;
   border: 1px solid var(--rule);
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--surface);
 }
 
@@ -1397,7 +1317,7 @@ main.project > .project-body {
   margin-right: 0.25rem;
   padding: 0 0.375rem;
   border: 1px solid var(--rule);
-  border-radius: 0.25rem;
+  border-radius: 0;
   color: var(--muted);
   font-size: var(--step--1);
   text-align: center;
@@ -1715,7 +1635,7 @@ main.project > .project-body {
 .scene-notes img,
 .scene-pages img {
   border: 1px solid var(--rule);
-  border-radius: 0.25rem;
+  border-radius: 0;
 }
 
 .scene-chat img {
@@ -1794,7 +1714,7 @@ main.project > .project-body {
   display: block;
   padding: 0.75rem;
   border: 1px solid color-mix(in oklab, var(--sheet-paper) 82%, var(--ink));
-  border-radius: 0.25rem;
+  border-radius: 0;
   background: var(--sheet-paper);
 }
 
@@ -1857,4 +1777,312 @@ main.project > .project-body {
  */
 .hero h1:lang(zh) {
   font-size: clamp(2rem, 1.3rem + 2.6vw, 3.25rem);
+}
+
+/* ── The drafting sheet (redesign, after the design canvas) ──────────
+ *
+ * The rules above keep their layout; these give every component the same
+ * flat drafting finish: white sheets framed in ink, square corners, labels
+ * and figure numbers in red mono, the primary action in red.
+ */
+
+:root {
+  --figure-paper: light-dark(var(--surface), #121214);
+}
+
+/* The player's own chrome: square, framed, with the red as its accent. */
+algo-player {
+  --algo-radius: 0;
+  --algo-control-radius: 0;
+  --algo-panel-radius: 0;
+  --algo-accent: var(--mark);
+}
+
+.pg-stage algo-player,
+main > algo-player {
+  border: 1px solid var(--frame);
+  background: var(--surface);
+}
+
+/* Sheets: every framed figure is a white sheet with an ink hairline. */
+.output-figure,
+.guide-figure,
+.thumb,
+.theme-thumbs img,
+.themes img,
+.sheet {
+  border: 1px solid var(--frame);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* Figure numbers and step names: the drawing's annotations. */
+.sub {
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--mark);
+}
+
+.player-caption code,
+.pg-caption code {
+  font-family: var(--mono);
+}
+
+/* The primary action is red; the others are framed in ink. */
+.actions .button:not(.quiet),
+.button.primary {
+  background: var(--mark);
+  border-color: var(--mark);
+  color: var(--mark-ink);
+}
+
+.actions .button:not(.quiet):hover,
+.button.primary:hover {
+  background: color-mix(in oklab, var(--mark) 88%, var(--ink));
+}
+
+.button.quiet {
+  border-color: var(--frame);
+  background: var(--surface);
+}
+
+/* Controls: square fields framed in ink. */
+.pg-field select,
+.pg-field textarea,
+.pg-reset,
+.filter input,
+.copy {
+  border-radius: 0;
+  border-color: var(--frame);
+}
+
+/* Code: a sunken sheet with an ink hairline on its left, like a callout. */
+.snippet pre,
+pre {
+  border-radius: 0;
+}
+
+.snippet pre {
+  border-left: 2px solid var(--frame);
+}
+
+/* Section headings: large and tight, as in the hero. */
+.section-head h2,
+.audiences h2 {
+  font-size: var(--step-4);
+}
+
+/* Lists of cards: ruled in ink rather than in grey. */
+.audiences .who > div,
+.topics li,
+.cards li {
+  border-top-color: var(--frame);
+}
+
+/* ── The hero: its figure label and the install line ────────────────── */
+
+/* The figure's number, in red mono, over the headline. */
+.fig-label {
+  margin: 0 0 1.25rem;
+  font-family: var(--mono);
+  font-size: 0.875rem;
+  color: var(--mark);
+}
+
+.fig-title:empty {
+  display: none;
+}
+
+.install {
+  margin: 0 0 1.25rem;
+}
+
+.install code {
+  display: inline-block;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid var(--frame);
+  background: var(--surface);
+  font-size: 0.875rem;
+}
+
+/* ── The story: the run's steps beside a pinned sheet ─────────────── */
+
+.story {
+  border-block: 1px solid var(--frame);
+  background: color-mix(in oklab, var(--paper) 70%, transparent);
+}
+
+.story-inner {
+  inline-size: min(80rem, 100% - 2 * var(--gutter));
+  margin-inline: auto;
+  padding-block: clamp(3rem, 7vw, 6rem);
+}
+
+.story-head {
+  max-inline-size: 46rem;
+  margin-block-end: clamp(2rem, 5vw, 3.5rem);
+}
+
+.story-head h2 {
+  margin: 0 0 1rem;
+  font-size: var(--step-4);
+}
+
+.story-head p {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: var(--step-1);
+  line-height: 1.5;
+}
+
+.story-steps {
+  display: grid;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.story-step {
+  padding: 1rem 1.25rem 1.25rem;
+  border-inline-start: 2px solid var(--rule);
+  transition:
+    border-color 160ms linear,
+    background-color 160ms linear;
+}
+
+.story-step.now {
+  border-inline-start-color: var(--mark);
+  background: var(--surface);
+}
+
+.story-label {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin: 0 0 0.375rem;
+}
+
+.story-label code {
+  padding: 0;
+  background: none;
+  font-weight: 500;
+}
+
+.story-text {
+  margin: 0;
+  font-size: 1.0625rem;
+  color: var(--ink-2);
+}
+
+.story-step.now .story-text {
+  color: var(--ink);
+}
+
+.story-inline {
+  margin-block-start: 0.875rem;
+}
+
+.story-inline picture,
+.story-inline .sheet {
+  border: 1px solid var(--frame);
+  background: var(--figure-paper);
+  padding: 0.5rem;
+}
+
+/* The pinned sheet shows only once the story is live, on wide screens. */
+.story-figure {
+  display: none;
+}
+
+@media (min-width: 64rem) {
+  .story.live .story-body {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: 3.5rem;
+    align-items: start;
+  }
+
+  .story.live .story-inline {
+    display: none;
+  }
+
+  .story.live .story-step {
+    min-block-size: 26vh;
+  }
+
+  .story.live .story-figure {
+    display: block;
+    position: sticky;
+    top: max(1.5rem, 50vh - 18rem);
+  }
+}
+
+.story-sheet {
+  display: grid;
+  padding: 1.25rem;
+  border: 1px solid var(--frame);
+  background: var(--figure-paper);
+}
+
+.story-frame {
+  grid-area: 1 / 1;
+  opacity: 0;
+  transition: opacity 220ms ease-out;
+}
+
+.story-frame.now {
+  opacity: 1;
+}
+
+.story-frame picture,
+.story-frame img {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .story-frame,
+  .story-step,
+  .ruler > span {
+    transition: none;
+  }
+}
+
+/* The step ruler: one cell per step, flat, framed in ink. */
+.ruler {
+  display: flex;
+  margin-block-start: 0.75rem;
+  border: 1px solid var(--frame);
+  background: var(--surface);
+}
+
+.ruler > span {
+  flex: 1 1 0;
+  min-inline-size: 0;
+  block-size: 0.75rem;
+  border-inline-end: 1px solid var(--rule);
+  transition: background-color 120ms linear;
+}
+
+.ruler > span:last-child {
+  border-inline-end: 0;
+}
+
+.ruler > span.done {
+  background: var(--ink);
+  border-inline-end-color: var(--paper);
+}
+
+.ruler > span.now {
+  background: var(--mark);
+}
+
+.ruler-status {
+  margin: 0.625rem 0 0;
+  font-family: var(--mono);
+  font-size: 0.875rem;
+  color: var(--ink);
 }

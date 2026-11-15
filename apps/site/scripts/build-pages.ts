@@ -74,15 +74,6 @@ const DEMO = 'dijkstra';
 const THEME_STEP = 'improve#3';
 /** The home page's input: small enough to read at a glance. */
 const HOME_INPUT = 'A-B 4, B-C 1, A-C 7, C-D 2';
-/** The plate's subfigures, (a) to (f). */
-const PLATE = [
-  'start',
-  'extract#1',
-  'improve#2',
-  'improve#3',
-  'improve#4',
-  'done',
-];
 
 function write(path: string, html: string): void {
   const file = join(DIST, path);
@@ -103,7 +94,7 @@ function documentOf(algorithm: string, input: unknown): unknown {
 /** One frame of `document` in `theme`. */
 function figureOf(
   document: unknown,
-  step: string,
+  step: string | number,
   theme: ThemeName,
   layout?: FigureLayout,
 ): Figure {
@@ -117,13 +108,20 @@ function figureOf(
   return series.value.figures[0]!;
 }
 
+/** Every frame of `document` after the first, as the light theme draws it. */
+function allFigures(document: unknown): readonly Figure[] {
+  const series = exportFigures(document, { theme: 'light' });
+  if (!series.ok) throw new Error(JSON.stringify(series.error));
+  return series.value.figures.filter((f) => f.frame > 0);
+}
+
 /**
  * Draws a step in the light and the dark theme, or in one fixed theme,
  * into `stem-light.svg` and `stem-dark.svg`.
  */
 function drawArt(
   document: unknown,
-  step: string,
+  step: string | number,
   stem: string,
   alt: string,
   theme?: ThemeName,
@@ -253,12 +251,14 @@ write(
   withPolicy(themesPage(figures, assets, 'zh'), 'zh/themes/'),
 );
 
-// The home page: the hero's run, its plate, and a figure per output.
+// The home page: the hero's run, its story, and a figure per output.
 const home = documentOf(DEMO, HOME_INPUT);
 const art: HomeArt = {
-  plate: PLATE.map((step) => ({
-    step,
-    ...drawArt(home, step, `art/plate-${step.replace('#', '-')}`, ''),
+  // Every step of the run, frames 1 to the last, for the story.
+  story: allFigures(home).map((f) => ({
+    step: f.selector,
+    narration: f.narration ?? '',
+    ...drawArt(home, f.frame, `art/story-${f.frame}`, f.narration ?? ''),
   })),
   outputs: {
     web: drawArt(

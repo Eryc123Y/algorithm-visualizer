@@ -232,6 +232,9 @@ The owner's brief (2026-11-14): the site still looks bare and says too little. M
 - [x] **5.7 The site in Chinese.** `/zh/` holds the home page, the guide and the other pages in Simplified Chinese, with a language switch and `hreflang`. Module pages stay in English until 5.8 (#152).
 - [ ] **5.8 Chinese in the product** _ADR_: the player's chrome and the recipes' narration in Chinese. It needs a decision on where a document keeps several languages.
 - [x] **5.9 A logo** _owner_: the owner picked candidate 1, frames stacked like a flipbook with the front one playing; it is in `docs/brand/`, the site's bar and its favicon (#153).
+- [ ] **5.10 The drafting redesign.** The owner asked for the site to look like a portal, not a documentation site, and picked a direction on the design canvas: a drafting sheet (grid paper, ink-blue frames, red annotations, IBM Plex) laid out flat and large. In two parts:
+  - part 1 (#157): the design system on every page, and the home page's story, where the run's steps scroll by beside a pinned sheet that draws the step being read;
+  - part 2: the gallery playing a few steps on hover, transitions between pages, and a pass over the guide, module and project pages.
 
 ## After 1.0
 
