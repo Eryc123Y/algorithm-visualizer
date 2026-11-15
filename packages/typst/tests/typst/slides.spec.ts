@@ -104,7 +104,7 @@ const slides = (
   region = '(width: 800pt, height: 400pt)',
 ): Part[] =>
   evaluate(
-    `${standIn(region)} parts(algomotion-slides(only, ${args}))`,
+    `${standIn(region)} parts(algomotion-slides(only, ${args}, lang: "en"))`,
   ) as Part[];
 
 describe('algomotion-slides with a stand-in only', () => {

@@ -12,6 +12,7 @@ import {
   err,
   ok,
   type Diagnostic,
+  type Locale,
   type Result,
   type VisualizationInput,
 } from '@algomotion/spec';
@@ -25,8 +26,14 @@ export interface CatalogEntry {
   readonly topic: Topic;
   readonly summary: string;
   readonly input: z.ZodType;
-  /** Builds the document; it is checked before it is returned. */
-  run(input: unknown): Result<VisualizationInput, readonly Diagnostic[]>;
+  /**
+   * Builds the document, written in `locale` (ADR 0045); it is checked
+   * before it is returned.
+   */
+  run(
+    input: unknown,
+    locale?: Locale,
+  ): Result<VisualizationInput, readonly Diagnostic[]>;
 }
 
 function fromModule(algorithm: Algorithm): CatalogEntry {
@@ -37,8 +44,8 @@ function fromModule(algorithm: Algorithm): CatalogEntry {
     topic,
     summary,
     input,
-    run(given) {
-      const run = runModule(algorithm, given);
+    run(given, locale = 'en') {
+      const run = runModule(algorithm, given, { locale });
       return run.ok ? ok(run.value.document) : run;
     },
   };
@@ -70,6 +77,7 @@ export function listRecipes() {
 export function runRecipe(
   id: string,
   input: unknown,
+  locale: Locale = 'en',
 ): Result<VisualizationInput, readonly Diagnostic[]> {
   const entry = findRecipe(id);
   if (entry === undefined)
@@ -81,5 +89,5 @@ export function runRecipe(
         hint: `Ids: ${recipeCatalog.map((r) => r.id).join(', ')}.`,
       },
     ]);
-  return entry.run(input);
+  return entry.run(input, locale);
 }

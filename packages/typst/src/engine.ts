@@ -18,6 +18,7 @@ import { runAlgorithm } from '@algomotion/recipes';
 import {
   err,
   formatPath,
+  localeOf,
   type Diagnostic,
   type Result,
 } from '@algomotion/spec';
@@ -49,6 +50,11 @@ const requestSchema = z
     theme: z.string().optional(),
     /** `wide` (default) or `narrow`: where side structures go (ADR 0029). */
     layout: z.string().optional(),
+    /**
+     * Typst's `text.lang`, or the `lang` given: a run and the layout's own
+     * words are in Chinese for `zh`, and English for any other (ADR 0045).
+     */
+    lang: z.string().optional(),
   })
   .superRefine((request, ctx) => {
     const issue = (message: string, path: PropertyKey[] = []) =>
@@ -92,8 +98,9 @@ function prepare(
   request: Request,
 ): Result<PreparedFigures, readonly Diagnostic[]> {
   let document = request.document;
+  const locale = localeOf(request.lang);
   if (request.algorithm !== undefined) {
-    const run = runAlgorithm(request.algorithm, request.input);
+    const run = runAlgorithm(request.algorithm, request.input, { locale });
     if (!run.ok) return run;
     document = run.value.document;
   }
@@ -101,6 +108,7 @@ function prepare(
   return prepareFigures(document, {
     theme: (request.theme ?? 'light') as ThemeName,
     layout: (request.layout ?? 'wide') as NonNullable<SeriesOptions['layout']>,
+    locale,
   });
 }
 
@@ -119,6 +127,7 @@ export function createEngine(cacheSize = CACHE_SIZE): Engine {
       document: request.document,
       theme: request.theme ?? 'light',
       layout: request.layout ?? 'wide',
+      locale: localeOf(request.lang),
     });
     const hit = cache.get(key);
     if (hit !== undefined) {

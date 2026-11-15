@@ -2,7 +2,12 @@
  * One frame of a document as a standalone SVG image.
  */
 import { layoutTrace, type FigureLayout } from '@algomotion/core';
-import { ok, type Diagnostic, type Result } from '@algomotion/spec';
+import {
+  ok,
+  type Diagnostic,
+  type Locale,
+  type Result,
+} from '@algomotion/spec';
 import { renderSvg, themes, type ThemeName } from '@algomotion/svg';
 
 import { loadDocument, resolveFrame, type FrameSelector } from './document.ts';
@@ -16,6 +21,8 @@ export interface RenderOptions {
   readonly theme?: ThemeName;
   /** Where side structures go (ADR 0029); default `'wide'`, as in the player. */
   readonly layout?: FigureLayout;
+  /** The language of the figure's own words (ADR 0045); default `'en'`. */
+  readonly locale?: Locale;
 }
 
 export interface RenderResult {
@@ -28,7 +35,12 @@ export interface RenderResult {
 
 export function render(
   input: unknown,
-  { frame = -1, theme = 'light', layout = 'wide' }: RenderOptions = {},
+  {
+    frame = -1,
+    theme = 'light',
+    layout = 'wide',
+    locale = 'en',
+  }: RenderOptions = {},
 ): Result<RenderResult, readonly Diagnostic[]> {
   const loaded = loadDocument(input);
   if (!loaded.ok) return loaded;
@@ -40,6 +52,7 @@ export function render(
   const scene = layoutTrace(trace, {
     fonts: themes[theme].fontMetrics,
     layout,
+    locale,
   }).sceneAt(index.value);
   return ok({
     frame: index.value,

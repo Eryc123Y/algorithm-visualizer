@@ -438,3 +438,38 @@ describe('the package', () => {
     expect(calls(dir)).toHaveLength(2);
   });
 });
+
+describe('the language of figures (ADR 0045)', () => {
+  it('draws a figure’s own words in Chinese with lang=zh, in a document that sets Chinese', () => {
+    const dir = workspace();
+    const file = 'chinese.tex';
+    writeFileSync(
+      join(dir, file),
+      [
+        '\\documentclass{ctexart}',
+        '\\usepackage{algomotion}',
+        '\\begin{document}',
+        '\\algomotion[step=1, lang=zh]{dijkstra}{A-B 4, B-C 1}',
+        '',
+        '\\algomotion[step=1]{dijkstra}{A-B 4, B-C 1}',
+        '\\end{document}',
+        '',
+      ].join('\n'),
+    );
+    expect(errors(tex(dir, file, 'unrestricted', '', 'xelatex'))).toEqual([]);
+    // One figure in each language: the language is part of the cache key.
+    const figures = cached(dir).map((f) =>
+      readFileSync(join(dir, '_algomotion', f), 'utf8'),
+    );
+    expect(figures).toHaveLength(2);
+    expect(figures.filter((f) => f.includes('最小'))).toHaveLength(1);
+    expect(pdfText(join(dir, 'chinese.pdf'))).toContain('最小');
+  });
+
+  it('refuses a language it does not have', () => {
+    const dir = workspace();
+    const file = document(dir, 'french', '\\algomotion[lang=fr]{dijkstra}{}');
+    const text = tex(dir, file, 'unrestricted');
+    expect(errors(text).join('\n')).toMatch(/lang/);
+  });
+});

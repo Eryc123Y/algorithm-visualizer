@@ -3,7 +3,14 @@
  * its input, so that a model shows a recipe by name without copying its
  * document.
  */
-import { err, ok, type Diagnostic, type Result } from '@algomotion/spec';
+import {
+  err,
+  LOCALES,
+  ok,
+  type Diagnostic,
+  type Locale,
+  type Result,
+} from '@algomotion/spec';
 import { z } from 'zod';
 
 import { runRecipe } from './recipes.ts';
@@ -33,12 +40,20 @@ export const sourceArgs = {
       'A recipe id from algomotion_list_recipes, such as "dijkstra", in place of a document: the tool runs it on `input`.',
     ),
   input: RecipeInput,
+  locale: z
+    .enum(LOCALES)
+    .optional()
+    .describe(
+      'The language to write a recipe’s run in and to draw the figure’s own words such as "(empty)": "en" (default) or "zh" (Simplified Chinese). Pass "zh" when the user writes Chinese. A document’s own text stays as written.',
+    ),
 };
 
 export interface SourceArgs {
   readonly document?: unknown;
   readonly recipe?: string | undefined;
   readonly input?: unknown;
+  /** The language of a recipe's run and of the figure's words (ADR 0045). */
+  readonly locale?: Locale | undefined;
 }
 
 /** The document the arguments name: given, or a recipe's run. */
@@ -46,13 +61,14 @@ export function sourceOf({
   document,
   recipe,
   input,
+  locale,
 }: SourceArgs): Result<unknown, readonly Diagnostic[]> {
   if (recipe !== undefined) {
     if (document !== undefined)
       return err([
         argumentError('$.document', 'Give a document or a recipe, not both'),
       ]);
-    return runRecipe(recipe, input);
+    return runRecipe(recipe, input, locale);
   }
   if (input !== undefined)
     return err([

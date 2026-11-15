@@ -104,6 +104,10 @@
 % Where structures placed on the side go (ADR 0029): wide or narrow, or
 % empty for the document's default.
 \str_new:N \l__algomotion_layout_str
+% The language of an algorithm's run and of the figure's own words
+% (ADR 0045): en or zh. Chinese needs a document that sets Chinese, such
+% as one with ctex.
+\str_new:N \l__algomotion_lang_str
 \str_new:N \g__algomotion_default_layout_str
 \str_gset:Nn \g__algomotion_default_layout_str { narrow }
 \tl_new:N \l__algomotion_algorithm_tl
@@ -167,6 +171,10 @@
           { \str_clear:N \l__algomotion_layout_str }
           { \str_set:NV \l__algomotion_layout_str \l_keys_choice_tl }
       } ,
+    lang .choices:nn =
+      { en, zh }
+      { \str_set:NV \l__algomotion_lang_str \l_keys_choice_tl } ,
+    lang .initial:n = en ,
     algorithm .tl_set:N = \l__algomotion_algorithm_tl ,
     width .dim_set:N = \l__algomotion_width_dim ,
     width .initial:n = 0pt ,
@@ -740,7 +748,7 @@
                 algomotion~tikz~\int_use:N \c__algomotion_format_int \c_space_tl
                 \c__algomotion_version_str ; #2 ;
                 \__algomotion_selection: ; \l__algomotion_theme_str ;
-                \__algomotion_layout:
+                \__algomotion_layout: ; \l__algomotion_lang_str
               }
           }
       }
@@ -771,6 +779,7 @@
         \__algomotion_step_option:
         \c_space_tl --theme= \l__algomotion_theme_str
         \c_space_tl --layout= \__algomotion_layout:
+        \c_space_tl --lang= \l__algomotion_lang_str
         \c_space_tl --format=tikz
         \c_space_tl --out=" \l__algomotion_cache_str "
         \c_space_tl --name= \l__algomotion_hash_str

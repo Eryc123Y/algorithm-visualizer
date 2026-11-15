@@ -131,10 +131,10 @@ describe('figures in Typst', () => {
     writeFileSync(join(root, 'input.json'), JSON.stringify(input));
     const [run, doc, last, alt] = evaluate(
       `(
-        str(algomotion("bst.delete", json("/input.json"), step: 2, theme: "dark").source),
-        str(algomotion(json("/doc.json"), step: "delete-3/no-left").source),
-        str(algomotion("bst.delete", json("/input.json")).source),
-        algomotion("bst.delete", json("/input.json"), step: 1).alt,
+        str(algomotion("bst.delete", json("/input.json"), step: 2, theme: "dark", lang: "en").source),
+        str(algomotion(json("/doc.json"), step: "delete-3/no-left", lang: "en").source),
+        str(algomotion("bst.delete", json("/input.json"), lang: "en").source),
+        algomotion("bst.delete", json("/input.json"), step: 1, lang: "en").alt,
       )`,
     ) as string[];
     expect(run).toBe(exported(document, [2], 'dark')[0]);
@@ -167,11 +167,11 @@ describe('figures in Typst', () => {
     });
     const [notation, field, alone, ops, example] = evaluate(
       `(
-        str(algomotion("dijkstra", "A-B 4, B-C 1, A-C 7, C-D 2", step: "improve#3").source),
-        str(algomotion("dijkstra", (graph: "A-B 4, B-C 1, A-C 7, C-D 2", source: "A"), step: "improve#3").source),
-        str(algomotion("insertion-sort", (5, 2, 4, 6, 1, 3), step: 4).source),
-        str(algomotion("bst", (from: "8 3 10 1 6", ops: "insert 4, delete 3")).source),
-        str(algomotion("dijkstra", step: 2).source),
+        str(algomotion("dijkstra", "A-B 4, B-C 1, A-C 7, C-D 2", step: "improve#3", lang: "en").source),
+        str(algomotion("dijkstra", (graph: "A-B 4, B-C 1, A-C 7, C-D 2", source: "A"), step: "improve#3", lang: "en").source),
+        str(algomotion("insertion-sort", (5, 2, 4, 6, 1, 3), step: 4, lang: "en").source),
+        str(algomotion("bst", (from: "8 3 10 1 6", ops: "insert 4, delete 3"), lang: "en").source),
+        str(algomotion("dijkstra", step: 2, lang: "en").source),
       )`,
     ) as string[];
     expect(notation).toBe(exported(dijkstra, ['improve#3'], 'light')[0]);
@@ -227,8 +227,8 @@ describe('layout (ADR 0029)', () => {
     writeFileSync(join(root, 'sided.json'), JSON.stringify(sided));
     const [one, wide, series, figures] = evaluate(
       `(
-        str(algomotion(json("/sided.json")).source),
-        str(algomotion(json("/sided.json"), layout: "wide").source),
+        str(algomotion(json("/sided.json"), lang: "en").source),
+        str(algomotion(json("/sided.json"), layout: "wide", lang: "en").source),
         algomotion-series(json("/sided.json")).map(i => str(i.source)),
         algomotion-figures(json("/sided.json"), layout: "wide").figures.map(f => f.svg),
       )`,
@@ -355,5 +355,64 @@ describe('the plugin in wasmi', () => {
       );
     expect(depth(500)).toBe('500');
     expect(depth(5000)).toBe('RangeError: Maximum call stack size exceeded');
+  });
+});
+
+describe('the language of figures (ADR 0045)', () => {
+  const CJK = /[\u{4e00}-\u{9fff}]/u;
+
+  /** The alt texts of every image in a document with `body`. */
+  function alts(body: string): string[] {
+    const doc = join(root, 'lang.typ');
+    writeFileSync(
+      doc,
+      `#import "${spec}": *\n#show image: it => [#metadata(it.alt) <alt> #it]\n${body}\n`,
+    );
+    const result = typst([
+      'eval',
+      '--root',
+      root,
+      '--in',
+      doc,
+      'query(<alt>).map(m => m.value)',
+    ]);
+    if (result.status !== 0) throw new Error(result.stderr);
+    return JSON.parse(result.stdout) as string[];
+  }
+
+  const call = 'algomotion("dijkstra", "A-B 4, B-C 1", step: 1)';
+
+  it('follows the document’s text.lang by default', () => {
+    const [zh] = alts(`#set text(lang: "zh")\n#${call}`);
+    expect(zh).toMatch(CJK);
+    const [en] = alts(`#${call}`);
+    expect(en).not.toMatch(CJK);
+    // Any language other than Chinese is English.
+    const [de] = alts(`#set text(lang: "de")\n#${call}`);
+    expect(de).toBe(en);
+  });
+
+  it('takes a language over the document’s', () => {
+    const [en] = alts(
+      `#set text(lang: "zh")\n#algomotion("dijkstra", "A-B 4, B-C 1", step: 1, lang: "en")`,
+    );
+    expect(en).not.toMatch(CJK);
+  });
+
+  it('is English for data unless named, which has no context to read', () => {
+    const [named, unnamed] = evaluate(
+      `(
+        algomotion-figures("dijkstra", "A-B 4, B-C 1", steps: 1, lang: "zh").figures.first().narration,
+        algomotion-figures("dijkstra", "A-B 4, B-C 1", steps: 1).figures.first().narration,
+      )`,
+    ) as string[];
+    expect(named).toMatch(CJK);
+    expect(unnamed).not.toMatch(CJK);
+  });
+
+  it('stops for a language of the wrong type', () => {
+    expect(failure('algomotion("dijkstra", lang: 1)')).toContain(
+      '`lang` takes a language such as "zh"',
+    );
   });
 });

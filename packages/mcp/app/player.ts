@@ -21,6 +21,8 @@ interface Shown {
     readonly sections?: readonly { readonly id: string; title: string }[];
   };
   readonly frame: number;
+  /** The language the tool was asked for (ADR 0045). */
+  readonly locale?: string;
 }
 
 /** ', step "go" in section "Insert 5"', or nothing for unnamed steps. */
@@ -85,7 +87,11 @@ app.ontoolresult = (result) => {
   player.hidden = false;
   // Seek once the new document has loaded: setting frame to the value it
   // already has would not register, and the load would reset it to 0.
-  const { frame } = shown;
+  const { frame, locale } = shown;
+  // The chrome speaks the language the run was asked in; otherwise the
+  // page's own, English.
+  if (locale === 'zh') player.setAttribute('lang', 'zh-Hans');
+  else player.removeAttribute('lang');
   player.addEventListener('algo-load', () => player.seek(frame), {
     once: true,
   });
