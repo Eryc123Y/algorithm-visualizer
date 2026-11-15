@@ -142,6 +142,7 @@ export const tools: readonly ToolDefinition[] = [
         ...(frame === undefined ? {} : { frame }),
         ...(theme === undefined ? {} : { theme }),
         ...(layout === undefined ? {} : { layout }),
+        ...(source.locale === undefined ? {} : { locale: source.locale }),
       });
       return result.ok ? { text: result.value.svg } : failure(result.error);
     },
@@ -164,11 +165,15 @@ export const tools: readonly ToolDefinition[] = [
       id: z.string().describe('Recipe id, e.g. "bst.delete" or "dijkstra".'),
       // Any JSON: the recipe's own schema checks it, at paths under $.input.
       input: RecipeInput,
+      locale: sourceArgs.locale,
     }),
-    run({ id, input }) {
-      const doc = runRecipe(id, input);
+    run({ id, input, locale }) {
+      const doc = runRecipe(id, input, locale);
       return doc.ok
-        ? { text: JSON.stringify(doc.value), share: recipeShare(id, input) }
+        ? {
+            text: JSON.stringify(doc.value),
+            share: recipeShare(id, input, undefined, locale),
+          }
         : failure(doc.error);
     },
   }),

@@ -36,9 +36,12 @@ import { basename, dirname, extname, join } from 'node:path';
 import type { FigureLayout } from '@algomotion/core';
 import { readInput, runAlgorithm } from '@algomotion/recipes';
 import {
-  formatErrors,
-  ok,
   type Diagnostic,
+  formatErrors,
+  isLocale,
+  type Locale,
+  LOCALES,
+  ok,
   type Result,
 } from '@algomotion/spec';
 import {
@@ -65,16 +68,17 @@ const USAGE = `Usage:
   algomotion validate <file>                Check a document
   algomotion inspect <file> [frame …]       State at frames (default: the last)
   algomotion render <file> [--frame f] [--theme t]
-                    [--layout wide|narrow] [--out file.svg]
+                    [--layout wide|narrow] [--lang en|zh] [--out file.svg]
   algomotion export <file> [--step s …] [--theme t]
-                    [--layout wide|narrow] [--format svg|tikz] [--one-file]
+                    [--layout wide|narrow] [--lang en|zh]
+                    [--format svg|tikz] [--one-file]
                     [--out dir]
                     [--name pattern] [--error-file file]
                                             Write frames as SVG or TikZ figures
   algomotion export <id> --input <input|file> [the same options]
                                             Run an algorithm, then export
   algomotion recipes                        List ready-made visualizations
-  algomotion run <id> [input] [--out file.json]
+  algomotion run <id> [input] [--lang en|zh] [--out file.json]
                                             Run one, e.g. run dijkstra
                                             'A-B 4, B-C 1, A-C 7'
 
@@ -97,7 +101,9 @@ default) or below them (narrow, for a column of notes). --input-hex takes the
 input as hexadecimal UTF-8, for programs that cannot quote JSON for a shell,
 and --error-file also writes any error to a file, which a successful export
 removes. --theme picks a built-in theme: ${themeNames.join(', ')}; light is
-the default.`;
+the default. --lang zh writes an algorithm's run in Simplified Chinese and
+draws the figure's own words, such as "(empty)", in Chinese; English is the
+default, and a document's own text stays as written.`;
 
 class UsageError extends Error {}
 
@@ -115,6 +121,8 @@ interface Options {
   frame?: string;
   theme?: string;
   layout?: string;
+  /** run, render and export: the language (ADR 0045). */
+  lang?: string;
   out?: string;
   /** Export only: selectors, each possibly a comma-separated list. */
   step?: string[];
@@ -163,6 +171,7 @@ function parse(argv: readonly string[]) {
     else if (flag === '--name') values.name = take();
     else if (flag === '--theme') values.theme = take();
     else if (flag === '--layout') values.layout = take();
+    else if (flag === '--lang') values.lang = take();
     else if (flag === '--out' || flag === '-o') values.out = take();
     else if (arg === '--one-file') values.oneFile = true;
     else if (arg === '--help' || arg === '-h') values.help = true;
@@ -186,6 +195,8 @@ function run(argv: readonly string[]): {
       throw new UsageError(`${flag} only applies to export`);
   if (values.layout !== undefined && command !== 'render')
     throw new UsageError('--layout only applies to export and render');
+  if (values.lang !== undefined && command !== 'render' && command !== 'run')
+    throw new UsageError('--lang only applies to run, render and export');
   return { result: dispatch(command, rest, values), outFile: values.out };
 }
 
@@ -204,6 +215,17 @@ function layoutOf(name: string | undefined): FigureLayout {
       `Unknown layout "${layout}"; use ${LAYOUTS.join(', ')}`,
     );
   return layout as FigureLayout;
+}
+
+/**
+ * The locale `--lang` names, English by default (ADR 0045): `en` or `zh`,
+ * with or without a script or region, such as `zh-CN`.
+ */
+function localeOfFlag(tag: string | undefined): Locale {
+  if (tag === undefined) return 'en';
+  const primary = tag.split(/[-_]/, 1)[0]!.toLowerCase();
+  if (isLocale(primary)) return primary;
+  throw new UsageError(`Unknown language "${tag}"; use ${LOCALES.join(', ')}`);
 }
 
 /**
@@ -253,7 +275,9 @@ function exportSource(
     );
   const value = readInput(inputText(values));
   if (!value.ok) return value;
-  const run = runAlgorithm(source, value.value);
+  const run = runAlgorithm(source, value.value, {
+    locale: localeOfFlag(values.lang),
+  });
   return run.ok ? ok(run.value.document) : run;
 }
 
@@ -274,6 +298,7 @@ function exportSeries(
     steps: readonly string[];
     theme: ThemeName;
     layout: FigureLayout;
+    locale: Locale;
   },
   format: FigureFormat,
 ): Result<
@@ -314,6 +339,7 @@ function exportCommand(rest: readonly string[], values: Options): ToolResult {
       `Unknown theme "${theme}"; use ${themeNames.join(', ')}`,
     );
   const layout = layoutOf(values.layout);
+  const locale = localeOfFlag(values.lang);
   const format = values.format ?? 'svg';
   if (!isFormat(format))
     throw new UsageError(`Unknown format "${format}"; use svg or tikz`);
@@ -336,7 +362,11 @@ function exportCommand(rest: readonly string[], values: Options): ToolResult {
   const steps = (values.step ?? []).flatMap((s) =>
     s.split(',').map((part) => part.trim()),
   );
-  const series = exportSeries(document.value, { steps, theme, layout }, format);
+  const series = exportSeries(
+    document.value,
+    { steps, theme, layout, locale },
+    format,
+  );
   if (!series.ok) return failure(series.error);
   const name =
     values.input !== undefined || values.inputHex !== undefined
@@ -389,8 +419,11 @@ function dispatch(
     frame?: string | undefined;
     theme?: string | undefined;
     layout?: string | undefined;
+    lang?: string | undefined;
   },
 ): ToolResult {
+  const locale =
+    values.lang === undefined ? {} : { locale: localeOfFlag(values.lang) };
   const file = rest[0];
   const needFile = () => {
     if (file === undefined) throw new UsageError(`${command} needs a file`);
@@ -420,6 +453,7 @@ function dispatch(
         ...(values.layout === undefined
           ? {}
           : { layout: layoutOf(values.layout) }),
+        ...locale,
       });
     case 'recipes':
       return callTool('algomotion_list_recipes', {});
@@ -428,7 +462,11 @@ function dispatch(
       if (id === undefined) throw new UsageError(`${command} needs an id`);
       const input = readInput(text ?? '');
       if (!input.ok) return failure(input.error);
-      return callTool('algomotion_run_recipe', { id, input: input.value });
+      return callTool('algomotion_run_recipe', {
+        id,
+        input: input.value,
+        ...locale,
+      });
     }
     default:
       throw new UsageError(`Unknown command "${command}"`);

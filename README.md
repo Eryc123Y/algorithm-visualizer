@@ -221,6 +221,8 @@ algomotion export bst.delete --input '"from": "8 3 10 1 6", "key": 3' \
 
 A figure draws the structures an algorithm keeps besides its main one, such as Dijkstra's priority queue or a call stack, in a side panel ([ADR 0029](docs/adr/0029-auxiliary-structures.md)). `--layout wide`, the default, puts the side panel right of the main structure, for slides and web pages; `--layout narrow` puts it below, for a column of notes. The Typst and LaTeX packages draw narrow in notes and wide on slides by default, and take `layout` too.
 
+`--lang zh` writes an algorithm's run in Simplified Chinese and draws the figure's own words, such as "(empty)" and "top", in Chinese ([ADR 0045](docs/adr/0045-chinese-in-the-product.md)). The Typst package follows the document's `text.lang`, the LaTeX package takes `lang=zh`, and the MCP tools take `locale`. A document's own text stays as written.
+
 `--format tikz` writes the same figures as TikZ in `.tex` files, with text left to the fonts of the LaTeX document that includes them ([ADR 0027](docs/adr/0027-latex-package.md)). The command also builds as a standalone 3 MB executable that needs no Node.js; see [the CLI's README](packages/mcp/README.md#without-nodejs).
 
 In Typst, [the algomotion package](packages/typst/package/README.md) draws the same figures from inside a document, with the engine running in a WebAssembly plugin, so students need nothing but Typst ([ADR 0026](docs/adr/0026-typst-package.md)):

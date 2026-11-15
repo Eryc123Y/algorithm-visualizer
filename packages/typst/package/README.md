@@ -26,8 +26,8 @@ The graph is written as an edge list, and Dijkstra's algorithm starts at its fir
 ## One step: `algomotion`
 
 ```typ
-#algomotion(source, input, step: -1, theme: "light", layout: auto, strict: false,
-  width: auto, height: auto, fit: "contain", alt: auto)
+#algomotion(source, input, step: -1, theme: "light", layout: auto, lang: auto,
+  strict: false, width: auto, height: auto, fit: "contain", alt: auto)
 ```
 
 - **`source`** is an algorithm id followed by its input, or a document alone. Without an input, the algorithm runs on its first example.
@@ -40,9 +40,10 @@ The graph is written as an edge list, and Dijkstra's algorithm starts at its fir
 
 - **`theme`** is a built-in theme: `"light"` (the default), `"dark"`, `"print"`, `"textbook"`, `"textbook-dark"`, `"blocks"`, `"blocks-dark"`, `"answer-sheet"` or `"turbo-c"`.
 - **`layout`** says where the structures an algorithm keeps besides its main one go, such as Dijkstra's priority queue or a call stack: `"narrow"`, the default here, puts them below the main structure, for a column of notes; `"wide"` puts them beside it. `algomotion-slides` draws wide by default.
+- **`lang`** is the language of an algorithm's narration and of the figure's own words, such as "(empty)": `"zh"` for Simplified Chinese, `"en"` for English. `auto`, the default, follows the document's `text.lang`, so `#set text(lang: "zh")` is enough. Any language other than Chinese is English, and a document's own text stays as written. `algomotion-series`, `algomotion-figures` and `algomotion-slides` cannot read `text.lang` themselves, so their `auto` is English: pass `lang: "zh"`, or write `context algomotion-series(.., lang: text.lang)`.
 - **`width`, `height`, `fit` and `alt`** are passed to `image`. `alt` defaults to the narration of the step.
 
-`algomotion` returns an image, so it goes into `figure`, `grid`, `box` and the rest like any image. At its natural size, one pixel of the figure is 0.75 pt.
+`algomotion` returns an image, so it goes into `figure`, `grid`, `box` and the rest like any image. With `lang: auto` the image is drawn in `context`, where it reads the document's language; to take its fields, such as `.alt`, give `lang` a value. At its natural size, one pixel of the figure is 0.75 pt.
 
 To find the step names, ask for a step that does not exist. The error lists the names the document has (see [Errors](#errors)).
 
@@ -72,7 +73,7 @@ Every algorithm of the algomotion registry is available, with the input its sche
 ## Several steps: `algomotion-series`
 
 ```typ
-#algomotion-series(source, input, steps: auto, theme: "light", layout: auto,
+#algomotion-series(source, input, steps: auto, theme: "light", layout: auto, lang: auto,
   strict: false, width: auto, height: auto, fit: "contain")
 ```
 
@@ -94,7 +95,8 @@ All figures of a document share one canvas, the largest of its frames. They ther
 
 ```typ
 #algomotion-slides(only, source, input, steps: auto, start: 1, theme: "light",
-  layout: auto, strict: false, width: auto, height: auto, fit: "contain")
+  layout: auto, lang: auto, strict: false, width: auto, height: auto,
+  fit: "contain")
 ```
 
 It steps through a series in a slide deck, one frame per subslide, with your slide framework's own `only`. All frames share one box, sized by the first, so nothing moves from subslide to subslide. With [touying](https://typst.app/universe/package/touying):
@@ -177,7 +179,7 @@ Arguments of the wrong type, such as a number for `theme` or a misspelt argument
 
 ## The engine's data: `algomotion-figures`
 
-`algomotion-figures(source, input, steps: auto, theme: "light", layout: auto)` returns the engine's answer as a dictionary, for captions and custom layouts:
+`algomotion-figures(source, input, steps: auto, theme: "light", layout: auto, lang: auto)` returns the engine's answer as a dictionary, for captions and custom layouts:
 
 ```typ
 #let series = algomotion-figures("bst.delete", (from: (8, 3, 10, 1, 6), key: 3), steps: (0, -1))
