@@ -344,11 +344,16 @@ export class AlgoPlayer extends LitElement {
   #locale: Locale = 'en';
   #stopWatchingLang: (() => void) | undefined;
 
-  /** A `lang` changed somewhere: follow it if it changes the locale. */
+  /**
+   * A `lang` changed somewhere, or the player moved: follow it if it
+   * changes the locale.
+   */
   #onLang = (): void => {
     const locale = localeAround(this);
     if (locale === this.#locale) return;
     this.#locale = locale;
+    // Nothing loaded yet: the first load uses the new locale.
+    if (this.trace === null && this.errors === null) return;
     // A run is recorded in the locale; a document stays as written, but
     // the layout's own words follow.
     if (this.visualization === undefined && this.algorithm) void this.#load();
@@ -365,7 +370,9 @@ export class AlgoPlayer extends LitElement {
 
   override connectedCallback(): void {
     super.connectedCallback();
-    this.#locale = localeAround(this);
+    // Connected for the first time, or moved: the language around it may
+    // have changed while it was away.
+    this.#onLang();
     this.#stopWatchingLang = onLangChange(this.#onLang);
     linkFonts(
       AlgoPlayer.fontsUrl === undefined

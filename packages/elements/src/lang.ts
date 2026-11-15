@@ -1,13 +1,28 @@
 /**
  * The language a player inherits, as HTML inherits `lang`: the element's
  * own, or its closest ancestor's (ADR 0045). One observer for the page
- * tells every player when a `lang` changes anywhere.
+ * tells every player when a `lang` changes anywhere in the document; a
+ * change inside a shadow root reaches its players when they reconnect.
  */
 import { localeOf, type Locale } from '@algomotion/spec';
 
+/**
+ * The `lang` around `el`: its own or its closest ancestor's, crossing
+ * shadow roots to their hosts, as a component's player inherits the
+ * page's language.
+ */
+export function langAround(el: Element): string | undefined {
+  for (let at: Element | null = el; at !== null;) {
+    const found = at.closest('[lang]');
+    if (found !== null) return found.getAttribute('lang') ?? undefined;
+    const root = at.getRootNode();
+    at = root instanceof ShadowRoot ? root.host : null;
+  }
+  return undefined;
+}
+
 /** The locale `el` is in, from the closest `lang` around it. */
-export const localeAround = (el: Element): Locale =>
-  localeOf(el.closest('[lang]')?.getAttribute('lang'));
+export const localeAround = (el: Element): Locale => localeOf(langAround(el));
 
 const listeners = new Set<() => void>();
 let observer: MutationObserver | undefined;

@@ -90,6 +90,34 @@ describe('<algo-player> in a locale', () => {
     expect(label(el, '.controls .primary')).toBe('播放');
   });
 
+  it('follows a new ancestor when it is moved', async () => {
+    document.body.innerHTML = `<div lang="en" id="a"><algo-player algorithm="dijkstra"></algo-player></div><div lang="zh" id="b"></div>`;
+    const el = document.querySelector('algo-player')!;
+    await settled(el);
+    await el.updateComplete;
+    expect(el.locale).toBe('en');
+    const reloaded = settled(el);
+    document.querySelector('#b')!.append(el);
+    await reloaded;
+    await el.updateComplete;
+    expect(el.locale).toBe('zh');
+    expect(firstStep(el)).toMatch(CJK);
+    expect(label(el, '.controls .primary')).toBe('播放');
+  });
+
+  it('reads the lang of the host when it is inside a shadow root', async () => {
+    document.body.innerHTML = '<div lang="zh-Hans" id="host"></div>';
+    const root = document
+      .querySelector('#host')!
+      .attachShadow({ mode: 'open' });
+    root.innerHTML = '<algo-player algorithm="dijkstra"></algo-player>';
+    const el = root.querySelector('algo-player')!;
+    await settled(el);
+    await el.updateComplete;
+    expect(el.locale).toBe('zh');
+    expect(firstStep(el)).toMatch(CJK);
+  });
+
   it('shows a document’s own text as written, in Chinese chrome', async () => {
     document.documentElement.lang = 'zh';
     const doc = {
