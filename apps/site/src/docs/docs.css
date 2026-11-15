@@ -869,6 +869,7 @@ picture img {
 
 /* A fixed frame: any figure fits it, so nothing moves as images load. */
 .thumb {
+  position: relative;
   display: block;
   aspect-ratio: 16 / 10;
   padding: 0.5rem;
@@ -1790,20 +1791,6 @@ main.project > .project-body {
   --figure-paper: light-dark(var(--surface), #121214);
 }
 
-/* The player's own chrome: square, framed, with the red as its accent. */
-algo-player {
-  --algo-radius: 0;
-  --algo-control-radius: 0;
-  --algo-panel-radius: 0;
-  --algo-accent: var(--mark);
-}
-
-.pg-stage algo-player,
-main > algo-player {
-  border: 1px solid var(--frame);
-  background: var(--surface);
-}
-
 /* Sheets: every framed figure is a white sheet with an ink hairline. */
 .output-figure,
 .guide-figure,
@@ -2085,4 +2072,46 @@ pre {
   font-family: var(--mono);
   font-size: 0.875rem;
   color: var(--ink);
+}
+
+/* ── The catalogue's flipbooks (flip.ts) ─────────────────────────────── */
+
+/* While a thumbnail flips, a ruler along its lower edge marks the frame,
+   as the home page's story does; at rest it is hidden. */
+.thumb-ruler {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  border-block-start: 1px solid var(--frame);
+  background: var(--surface);
+  opacity: 0;
+  transition: opacity 120ms linear;
+}
+
+.thumb-ruler span {
+  block-size: 0.375rem;
+  border-inline-end: 1px solid var(--rule);
+}
+
+.thumb-ruler span:last-child {
+  border-inline-end: 0;
+}
+
+.thumb-ruler .done {
+  background: var(--ink);
+}
+
+.thumb-ruler .now {
+  background: var(--mark);
+}
+
+.thumb.flipping {
+  border-color: var(--frame);
+}
+
+.thumb.flipping .thumb-ruler {
+  opacity: 1;
 }

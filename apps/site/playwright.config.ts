@@ -15,6 +15,11 @@ export default defineConfig({
   use: {
     baseURL: `http://localhost:${PORT}`,
     trace: 'on-first-retry',
+    // Pages opt in to view transitions between them (base.css). Chromium
+    // reports a transition cut short by the next navigation as a page
+    // error, which every test fails on, so the tests read without motion;
+    // those about motion turn it back on.
+    reducedMotion: 'reduce',
     ...(executablePath ? { launchOptions: { executablePath } } : {}),
   },
   projects: [

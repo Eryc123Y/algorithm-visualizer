@@ -73,3 +73,71 @@ test('the filter hides whole cards, and the topics left say so', async ({
   await expect(shown.locator('.card-title')).toHaveText(/^Red.black tree$/);
   await expect(page.locator('#catalog .topic:visible')).toHaveCount(1);
 });
+
+test('hovering a card flips its thumbnail through its run, and leaving puts it back', async ({
+  page,
+}, info) => {
+  test.skip(info.project.name === 'phone', 'a phone has no hover');
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto('/algorithms/');
+  const card = page.locator('#catalog .card', { hasText: 'Heapsort' }).first();
+  const thumb = card.locator('.thumb');
+  const img = thumb.locator('img');
+  const still = await img.getAttribute('src');
+  // Every frame it names is there, beside the still.
+  const frames = (await thumb.getAttribute('data-frames'))!.split(',');
+  expect(frames.length).toBeGreaterThanOrEqual(2);
+  for (const f of frames) {
+    const url = `/algorithms/thumbs/heapsort-f${f}-light.svg`;
+    expect((await page.request.get(url)).status()).toBe(200);
+  }
+
+  await card.locator('a').first().hover();
+  await expect(thumb).toHaveClass(/flipping/);
+  await expect(img).toHaveAttribute('src', /heapsort-f\d+-light\.svg$/);
+  await expect(thumb.locator('.thumb-ruler .now')).toHaveCount(1);
+  await page.mouse.move(0, 0);
+  await expect(thumb).not.toHaveClass(/flipping/);
+  await expect(img).toHaveAttribute('src', still!);
+});
+
+test('for a reader who asks for less motion, thumbnails stay still', async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/algorithms/');
+  const card = page.locator('#catalog .card', { hasText: 'Heapsort' }).first();
+  const img = card.locator('.thumb img');
+  const still = await img.getAttribute('src');
+  await card.locator('a').first().hover();
+  await page.waitForTimeout(1500);
+  await expect(img).toHaveAttribute('src', still!);
+  await expect(card.locator('.thumb-ruler')).toHaveCount(0);
+});
+
+test('pages opt in to transitions between them, unless the reader asks for less motion', async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto('/algorithms/');
+  const opted = await page.evaluate(() =>
+    [...document.styleSheets]
+      .flatMap((sheet) => [...sheet.cssRules])
+      .filter((rule): rule is CSSMediaRule => rule instanceof CSSMediaRule)
+      .some(
+        (rule) =>
+          rule.conditionText.includes(
+            'prefers-reduced-motion: no-preference',
+          ) &&
+          [...rule.cssRules].some((inner) =>
+            inner.cssText.startsWith('@view-transition'),
+          ),
+      ),
+  );
+  expect(opted).toBe(true);
+  // The page's title carries over as one piece.
+  await expect(page.locator('main h1')).toHaveCSS(
+    'view-transition-name',
+    'page-title',
+  );
+});

@@ -224,6 +224,27 @@ export const thumbnailFrame = (frames: number): number =>
   frames <= 1 ? 0 : Math.max(1, Math.floor((frames - 1) / 2));
 
 /**
+ * The frames a thumbnail flips through on hover, of a run of `frames`: up
+ * to four, spread evenly from the first step to the answer, so a glance
+ * shows the run start, work and finish. None for a run of two frames or
+ * fewer, which has nothing to show in motion.
+ */
+export function flipFrames(frames: number): number[] {
+  if (frames <= 2) return [];
+  const last = frames - 1;
+  const count = Math.min(4, last);
+  const picked = Array.from({ length: count }, (_, k) =>
+    Math.round(1 + (k * (last - 1)) / (count - 1)),
+  );
+  return [...new Set(picked)];
+}
+
+/** A catalogue thumbnail, with the frames it flips through on hover. */
+export interface Thumbnail extends Art {
+  readonly flip?: readonly number[];
+}
+
+/**
  * How many thumbnails load with the page rather than lazily: two rows on
  * a desktop, the first screen; lazy ones start only after layout.
  */
@@ -239,7 +260,7 @@ export const thumbnailStem = (id: string): string => `thumbs/${id}`;
 export function algorithmsPage(
   groups: readonly TopicGroup[],
   assets: Assets,
-  thumbnails: Readonly<Record<string, Art>> = {},
+  thumbnails: Readonly<Record<string, Thumbnail>> = {},
   locale: Locale = 'en',
 ): string {
   const t = PAGES[locale].algorithms;
@@ -254,7 +275,12 @@ export function algorithmsPage(
     const art = thumbnails[e.id];
     if (art === undefined) return '';
     const loading = shown++ < EAGER_THUMBNAILS ? 'eager' : 'lazy';
-    return `<span class="thumb">${picture({ ...art, alt: '' }, own, loading)}</span>`;
+    // The frames it flips through on hover (flip.ts), beside its drawing.
+    const flip =
+      art.flip === undefined || art.flip.length === 0
+        ? ''
+        : ` data-flip="${attribute(own + thumbnailStem(e.id))}" data-frames="${art.flip.join(',')}"`;
+    return `<span class="thumb"${flip}>${picture({ ...art, alt: '' }, own, loading)}</span>`;
   };
   // A structure is found by its operations' names too.
   const item = (e: Entry, operations: readonly Entry[] = [], inner = '') =>

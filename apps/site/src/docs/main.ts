@@ -24,6 +24,7 @@ import {
   markLoadingThumbnails,
   setUpTabs,
 } from './enhance.ts';
+import { setUpFlip, setUpTitleMorph } from './flip.ts';
 import { nameFigure, setUpStory } from './story.ts';
 import { setUpPlayground } from './playground-ui.ts';
 
@@ -42,5 +43,7 @@ setUpPlayground(document, {
 });
 setUpStory(document, window);
 nameFigure(document);
+setUpFlip(document, window);
+setUpTitleMorph(document, window);
 const filter = document.querySelector<HTMLInputElement>('#filter');
 filter?.addEventListener('input', () => filterCatalog(document, filter.value));
