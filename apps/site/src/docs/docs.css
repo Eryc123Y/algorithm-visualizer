@@ -348,89 +348,6 @@ picture img {
   }
 }
 
-/* ── Home: the plate ────────────────────────────────────────────────── */
-
-.plate {
-  border-block: 1px solid var(--rule);
-  background: var(--surface);
-}
-
-.plate-inner {
-  inline-size: min(72rem, 100% - 2 * var(--gutter));
-  margin-inline: auto;
-  padding-block: clamp(2.5rem, 6vw, 4.5rem);
-}
-
-.plate-head {
-  max-inline-size: var(--measure);
-}
-
-.plate-head h2 {
-  margin-top: 0;
-}
-
-.plate-head p {
-  color: var(--muted);
-}
-
-.plate-figure {
-  margin: 2rem 0 0;
-}
-
-.subfigures {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 1.5rem 1.25rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-@media (min-width: 34rem) {
-  .subfigures {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 60rem) {
-  .subfigures {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-.subfigures li {
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-  gap: 0.375rem;
-  min-width: 0;
-}
-
-.sub {
-  font-family: var(--serif);
-  font-size: var(--step-0);
-}
-
-.sub-step {
-  justify-self: start;
-  color: var(--muted);
-}
-
-.subfigures picture {
-  align-self: center;
-}
-
-.plate-figure figcaption {
-  max-inline-size: 52rem;
-  margin-top: 1.75rem;
-  font-family: var(--serif);
-  font-size: 1.0625rem;
-  line-height: 1.55;
-}
-
-.plate-figure figcaption b {
-  font-weight: 600;
-}
-
 /* ── Home: outputs, as tabs ─────────────────────────────────────────── */
 
 .outputs {
@@ -1893,16 +1810,10 @@ main > algo-player {
 .thumb,
 .theme-thumbs img,
 .themes img,
-.subfigures picture,
 .sheet {
   border: 1px solid var(--frame);
   border-radius: 0;
   box-shadow: none;
-}
-
-.subfigures picture {
-  padding: 0.75rem;
-  background: var(--figure-paper);
 }
 
 /* Figure numbers and step names: the drawing's annotations. */
@@ -1913,20 +1824,9 @@ main > algo-player {
   color: var(--mark);
 }
 
-.sub-step,
 .player-caption code,
 .pg-caption code {
   font-family: var(--mono);
-}
-
-.plate-figure figcaption {
-  font-family: var(--sans);
-  font-size: 1rem;
-  color: var(--ink-2);
-}
-
-.plate-figure figcaption b {
-  color: var(--ink);
 }
 
 /* The primary action is red; the others are framed in ink. */
@@ -1969,8 +1869,7 @@ pre {
 
 /* Section headings: large and tight, as in the hero. */
 .section-head h2,
-.audiences h2,
-.plate-head h2 {
+.audiences h2 {
   font-size: var(--step-4);
 }
 
@@ -1981,7 +1880,7 @@ pre {
   border-top-color: var(--frame);
 }
 
-/* ── The hero, driven by scroll ──────────────────────────────────────── */
+/* ── The hero: its figure label and the install line ────────────────── */
 
 /* The figure's number, in red mono, over the headline. */
 .fig-label {

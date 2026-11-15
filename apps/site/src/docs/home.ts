@@ -1,6 +1,6 @@
 /**
  * The home page: what algomotion does, shown before it is told. A live
- * player, the same run as a plate of figures, the run written for each
+ * player, the same run told step by step, the run written for each
  * output, the themes, and the way into the catalogue.
  */
 import type { TopicGroup } from './catalog.ts';
@@ -29,7 +29,7 @@ export interface Art {
   readonly theme?: string;
 }
 
-/** One subfigure of the plate. */
+/** One step of the home page's story. */
 export interface StoryFrame extends Art {
   /** The step's most specific selector: `improve#3`. */
   readonly step: string;
@@ -337,19 +337,17 @@ export function homePage(
     locale,
     alternate: '',
     body: `<section class="hero" aria-labelledby="hero-title">
-  <div class="hero-pin">
-    <div class="hero-grid">
-      <div class="hero-text">
-        <p class="fig-label"><span>${text(t.hero.figure)}</span> <span class="fig-title"></span></p>
-        <h1 id="hero-title">${text(t.hero.title)}</h1>
-        <p class="lede">${text(t.hero.lede)}</p>
-        <p class="actions"><a class="button" href="guide/">${text(t.hero.getStarted)}</a> <a class="button quiet" href="algorithms/">${text(t.hero.browse(count))}</a></p>
-        <p class="install"><code>npm i @algomotion/elements@alpha</code></p>
-        <p class="fine">${text(t.hero.fine)}</p>
-      </div>
-      <div class="hero-player">
-        ${player}
-      </div>
+  <div class="hero-grid">
+    <div class="hero-text">
+      <p class="fig-label"><span>${text(t.hero.figure)}</span> <span class="fig-title"></span></p>
+      <h1 id="hero-title">${text(t.hero.title)}</h1>
+      <p class="lede">${text(t.hero.lede)}</p>
+      <p class="actions"><a class="button" href="guide/">${text(t.hero.getStarted)}</a> <a class="button quiet" href="algorithms/">${text(t.hero.browse(count))}</a></p>
+      <p class="install"><code>npm i @algomotion/elements@alpha</code></p>
+      <p class="fine">${text(t.hero.fine)}</p>
+    </div>
+    <div class="hero-player">
+      ${player}
     </div>
   </div>
 </section>
