@@ -48,8 +48,10 @@ import {
   stepsOf,
   notFoundPage,
   themesPage,
+  flipFrames,
   thumbnailFrame,
   thumbnailStem,
+  type Thumbnail,
 } from '../src/docs/pages.ts';
 import { playgroundGroups, playgroundMarkup } from '../src/docs/playground.ts';
 import { shortInput } from '../src/docs/short-input.ts';
@@ -192,34 +194,43 @@ for (const entry of entries) {
   write(`${entry.path}index.html`, withPolicy(html, entry.path));
 }
 // The catalogue: a thumbnail of each algorithm and structure, from its
-// first example, at the frame `thumbnailFrame` picks, in light and dark.
-const thumbnails: Record<string, Art> = {};
+// first example, at the frame `thumbnailFrame` picks, in light and dark,
+// and the few frames it flips through on hover (`flipFrames`).
+const thumbnails: Record<string, Thumbnail> = {};
 for (const entry of entries) {
   if (entry.structure !== undefined) continue;
   const algorithm = algorithms.find((a) => a.id === entry.id)!;
   const doc = documentOf(entry.id, shortInput(entry.id, algorithm.examples[0]));
-  const [light, dark] = (['light', 'dark'] as const).map((theme) => {
+  const stem = thumbnailStem(entry.id);
+  let flip: readonly number[] = [];
+  const [light] = (['light', 'dark'] as const).map((theme) => {
     const prepared = prepareFigures(doc, { theme });
     if (!prepared.ok)
       throw new Error(
         `${entry.id} in ${theme}: ${JSON.stringify(prepared.error)}`,
       );
-    const figure = prepared.value.figure(thumbnailFrame(prepared.value.frames));
-    if (!figure.ok)
-      throw new Error(
-        `${entry.id} in ${theme}: ${JSON.stringify(figure.error)}`,
-      );
-    return figure.value;
+    const draw = (frame: number) => {
+      const figure = prepared.value.figure(frame);
+      if (!figure.ok)
+        throw new Error(
+          `${entry.id} in ${theme}: ${JSON.stringify(figure.error)}`,
+        );
+      return figure.value;
+    };
+    const still = draw(thumbnailFrame(prepared.value.frames));
+    write(`algorithms/${stem}-${theme}.svg`, still.svg);
+    flip = flipFrames(prepared.value.frames);
+    for (const frame of flip)
+      write(`algorithms/${stem}-f${frame}-${theme}.svg`, draw(frame).svg);
+    return still;
   });
-  const stem = thumbnailStem(entry.id);
-  write(`algorithms/${stem}-light.svg`, light!.svg);
-  write(`algorithms/${stem}-dark.svg`, dark!.svg);
   thumbnails[entry.id] = {
     light: `${stem}-light.svg`,
     dark: `${stem}-dark.svg`,
     width: light!.width,
     height: light!.height,
     alt: '',
+    flip,
   };
 }
 write(

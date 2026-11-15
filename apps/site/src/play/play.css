@@ -15,15 +15,16 @@
 .note {
   max-width: 40rem;
   padding: 1.25rem 1.5rem;
-  border: 1px solid var(--rule);
+  border: 1px solid var(--frame);
   border-radius: var(--radius);
   background: var(--surface);
 }
 
 .note h1 {
   margin: 0 0 0.5rem;
-  font-size: 1.25rem;
-  font-weight: 600;
+  font-size: var(--step-2);
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 #problem h1 {

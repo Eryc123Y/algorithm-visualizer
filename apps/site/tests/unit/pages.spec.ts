@@ -17,6 +17,7 @@ import {
   stepsOf,
   themesPage,
   EAGER_THUMBNAILS,
+  flipFrames,
   thumbnailFrame,
   thumbnailStem,
 } from '../../src/docs/pages.ts';
@@ -201,6 +202,52 @@ describe('the catalogue’s thumbnails', () => {
       expect(frame).toBeGreaterThan(0);
       expect(frame).toBeLessThan(frames - 1);
     }
+  });
+
+  it('flip on hover through a few frames spread over the run, ending on its answer', () => {
+    expect(flipFrames(0)).toEqual([]);
+    expect(flipFrames(2)).toEqual([]);
+    expect(flipFrames(3)).toEqual([1, 2]);
+    expect(flipFrames(15)).toEqual([1, 5, 10, 14]);
+    for (let frames = 3; frames < 200; frames++) {
+      const flip = flipFrames(frames);
+      expect(flip.length).toBeGreaterThanOrEqual(2);
+      expect(flip.length).toBeLessThanOrEqual(4);
+      expect(flip[0]).toBe(1);
+      expect(flip.at(-1)).toBe(frames - 1);
+      // Strictly increasing: no frame twice.
+      flip.slice(1).forEach((f, k) => expect(f).toBeGreaterThan(flip[k]!));
+    }
+  });
+
+  it('tell the page which frames a thumbnail flips through, and where they are', () => {
+    const dijkstra = groups
+      .flatMap((g) => g.algorithms)
+      .find((e) => e.id === 'dijkstra')!;
+    const art = {
+      light: 'thumbs/dijkstra-light.svg',
+      dark: 'thumbs/dijkstra-dark.svg',
+      width: 320,
+      height: 200,
+      alt: '',
+      flip: [1, 6, 10, 14],
+    };
+    document.body.innerHTML = algorithmsPage(groups, noAssets, {
+      dijkstra: art,
+    });
+    const thumb = document.querySelector('.thumb[data-flip]')!;
+    expect(thumb.getAttribute('data-flip')).toBe(thumbnailStem(dijkstra.id));
+    expect(thumb.getAttribute('data-frames')).toBe('1,6,10,14');
+    // The Chinese page reaches the English page's drawings.
+    document.body.innerHTML = algorithmsPage(
+      groups,
+      noAssets,
+      { dijkstra: art },
+      'zh',
+    );
+    expect(
+      document.querySelector('.thumb[data-flip]')!.getAttribute('data-flip'),
+    ).toBe(`../../algorithms/${thumbnailStem(dijkstra.id)}`);
   });
 
   it('give every algorithm and structure a card with a sized, lazy thumbnail', () => {
