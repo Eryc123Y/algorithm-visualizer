@@ -10,6 +10,7 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import { main } from '../src/cli.ts';
+import { sourceShare } from '../src/share.ts';
 import { showSource } from '../src/show.ts';
 import { callTool } from '../src/tools.ts';
 
@@ -90,6 +91,23 @@ describe('the tools in a locale', () => {
     });
     expect(result.isError).toBe(true);
     expect(result.text).toContain('locale');
+  });
+});
+
+describe('share links in a locale', () => {
+  it('carry the language asked for, for a document as for a recipe', () => {
+    const document = {
+      version: '1.0',
+      structures: { s: { kind: 'stack', initial: [] } },
+      steps: [],
+    };
+    expect(sourceShare({ document, locale: 'zh' })).toMatchObject({
+      lang: 'zh',
+    });
+    expect(sourceShare({ recipe: 'dijkstra', locale: 'zh' })).toMatchObject({
+      lang: 'zh',
+    });
+    expect(sourceShare({ document })).not.toHaveProperty('lang');
   });
 });
 

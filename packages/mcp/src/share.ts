@@ -63,6 +63,9 @@ export function sourceShare(
   return {
     document: document.value,
     ...(frame === undefined ? {} : { frame }),
+    // The language asked for holds for a document too: the share page then
+    // shows its chrome and the layout's words in it (ADR 0045).
+    ...(source.locale === undefined ? {} : { lang: source.locale }),
   };
 }
 
