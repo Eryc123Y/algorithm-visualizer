@@ -52,7 +52,7 @@ Run from the repository root.
 | `npm run test:standalone`                     | Build the standalone `algomotion` and compare it with the Node CLI              |
 | `npm run test:latex`                          | Compile the LaTeX package's examples and cases (needs TeX Live)                 |
 | `npm run test:worker`                         | Build the Worker and test it in workerd, locally                                |
-| `npm run check`                               | Typecheck, lint, format check and unit tests (what CI runs first)               |
+| `npm run check`                               | Typecheck, lint, format check and unit tests (what CI runs, in parallel jobs)   |
 | `npm run generate:schema -w @algomotion/spec` | Regenerate `packages/spec/schema/visualization.schema.json`                     |
 | `npm run gallery -- out.html [file.json …]`   | Render every frame of fixtures or documents to one page, for review             |
 | `npm run generate:fonts`                      | Regenerate the fonts' metrics, outlines and web fonts (ADR 0030)                |
@@ -122,7 +122,7 @@ Every algorithm, and every operation of a data structure, is a module of the reg
 
 ## Git workflow
 
-- `main` holds stable code. Work on a feature branch and merge only when CI is green.
+- `main` holds stable code. Work on a feature branch and merge only when CI is green. CI runs the static checks, the unit tests in two shards and each app's end-to-end tests as parallel jobs; coverage is the Coverage workflow's, run by hand or weekly.
 - Commit messages follow `type(scope): description`, for example `feat(spec): add tree actions`. Types: `feat`, `fix`, `docs`, `test`, `refactor`, `chore`.
 - Record architectural changes as a new ADR in `docs/adr/`.
 
