@@ -11,7 +11,14 @@ import { describe, expect, it } from 'vitest';
 import type { Trace, TreeState } from '@algomotion/core';
 
 import { ordinal } from '../src/structures/red-black/order-statistic-tree.ts';
-import { fuzz, replay, runError, runOk, stateOf } from './helpers.ts';
+import {
+  checkOperations,
+  fuzz,
+  replay,
+  runError,
+  runOk,
+  stateOf,
+} from './helpers.ts';
 import {
   drawnShape,
   RefTree,
@@ -42,6 +49,10 @@ function sizeProblems(tree: TreeState): string[] {
 }
 
 /** The tree at the end of every operation of a run, and at the end. */
+/** The tree as drawn at `frame`, for comparing runs (ADR 0018). */
+const view = (trace: Trace, frame: number) =>
+  drawnShape(stateOf(trace, 'T', 'tree', frame));
+
 function ends(trace: Trace): TreeState[] {
   const sections = trace.visualization.sections ?? [];
   return [
@@ -186,6 +197,7 @@ describe('order-statistic-tree', () => {
         (from, ops) => {
           const ref = new RefTree<number>((a, b) => a < b);
           for (const key of from) ref.insert(key);
+          const start = ref.shape();
           // A select asks for a rank the tree has at that point: i modulo
           // its size; an empty tree has none, and that call is dropped.
           const calls: typeof ops = [];
@@ -218,6 +230,7 @@ describe('order-statistic-tree', () => {
             expect(sizeProblems(tree)).toEqual([]);
             expect(redBlackProblems(tree, less)).toEqual([]);
           }
+          checkOperations('order-statistic-tree', from, calls, view, start);
         },
       ),
       fuzz,

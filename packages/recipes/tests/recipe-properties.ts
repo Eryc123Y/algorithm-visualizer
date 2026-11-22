@@ -87,6 +87,24 @@ function checkRender(trace: Trace): void {
 }
 
 /**
+ * Every step has a name and points at a line of code in every language
+ * the document shows (ADR 0017, 0020), whichever branch the input takes;
+ * the registry's tests check this for the examples.
+ */
+function checkSteps(trace: Trace): void {
+  const { steps, sources = [] } = trace.visualization;
+  expect(sources.length).toBeGreaterThan(0);
+  steps.forEach((step, k) => {
+    const where = `step ${k + 1}`;
+    expect(step.meta?.id, where).toBeDefined();
+    const at = step.meta?.at;
+    expect(at, where).toBeDefined();
+    for (const { language, anchors } of sources)
+      expect(anchors[at!], `${where} in ${language}`).toBeDefined();
+  });
+}
+
+/**
  * Frames are the same whether replayed from a checkpoint every step, every
  * 7 steps or every 32 (the default): reducers do not share or mutate state.
  */
@@ -147,8 +165,11 @@ export function recipe<T>(
   };
   describe(name, () => {
     it(
-      'gives a document that loads, and replays the same at any checkpoint interval',
-      property(checkReplay),
+      'gives a document that loads, points every step at a line of code in every language, and replays the same at any checkpoint interval',
+      property((trace) => {
+        checkSteps(trace);
+        checkReplay(trace);
+      }),
       TIMEOUT,
     );
     it('ends with the right answer', property(semantics), TIMEOUT);

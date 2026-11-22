@@ -11,7 +11,14 @@ import { describe, expect, it } from 'vitest';
 import type { Trace, TreeState } from '@algomotion/core';
 
 import { parseIntervals } from '../src/structures/red-black/interval-tree.ts';
-import { fuzz, replay, runError, runOk, stateOf } from './helpers.ts';
+import {
+  checkOperations,
+  fuzz,
+  replay,
+  runError,
+  runOk,
+  stateOf,
+} from './helpers.ts';
 import {
   drawnShape,
   RefTree,
@@ -61,6 +68,10 @@ function maxProblems(tree: TreeState): string[] {
   for (const root of tree.data.roots) max(root);
   return problems;
 }
+
+/** The tree as drawn at `frame`, for comparing runs (ADR 0018). */
+const view = (trace: Trace, frame: number) =>
+  drawnShape(stateOf(trace, 'T', 'tree', frame));
 
 function ends(trace: Trace): TreeState[] {
   const sections = trace.visualization.sections ?? [];
@@ -199,6 +210,7 @@ describe('interval-tree', () => {
         fc.array(call, { minLength: 1, maxLength: 8 }),
         (from, ops) => {
           const ref = reference(from);
+          const start = ref.shape(value);
           const expected = ops.map(({ op, interval: i }) => {
             if (op === 'insert') ref.insert(i);
             else if (op === 'delete') ref.delete(i);
@@ -215,6 +227,7 @@ describe('interval-tree', () => {
             expect(maxProblems(tree)).toEqual([]);
             expect(redBlackProblems(tree, less)).toEqual([]);
           }
+          checkOperations('interval-tree', from, ops, view, start);
         },
       ),
       fuzz,

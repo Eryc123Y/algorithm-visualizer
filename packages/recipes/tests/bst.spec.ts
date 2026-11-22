@@ -5,6 +5,7 @@ import type { TreeState } from '@algomotion/core';
 import type { VisualizationInput } from '@algomotion/spec';
 
 import { fuzz, replay, runError, runOk, stateOf } from './helpers.ts';
+import { recipe } from './recipe-properties.ts';
 
 type BstCall =
   | { readonly op: 'search'; readonly key: number }
@@ -330,3 +331,31 @@ describe('bst', () => {
     });
   });
 });
+
+// The properties every recipe has: replay, layout, clean SVG and the run
+// in Chinese (recipe-properties.ts), on random operations from distinct
+// keys, deleting with the successor or the predecessor.
+const key = fc.integer({ min: 0, max: 20 });
+recipe(
+  'bst',
+  fc.record({
+    keys: fc.uniqueArray(key, { maxLength: 16 }),
+    calls: fc.array(
+      fc.oneof(
+        key.map((k): BstCall => ({ op: 'search', key: k })),
+        key.map((k): BstCall => ({ op: 'insert', key: k })),
+        key.map((k): BstCall => ({ op: 'delete', key: k })),
+        key.map((k): BstCall => ({
+          op: 'delete',
+          key: k,
+          replaceWith: 'predecessor',
+        })),
+      ),
+      { minLength: 1, maxLength: 6 },
+    ),
+  }),
+  ({ keys, calls }, locale) =>
+    runOk('bst', { from: keys, ops: calls }, locale).document,
+  (trace, { keys, calls }) =>
+    expect(shapeAt(trace.visualization)).toEqual(reference(keys, calls).shape),
+);
