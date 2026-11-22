@@ -136,20 +136,34 @@ const BEAMER_SLIDES = String.raw`\documentclass{beamer}
 \end{frame}
 \end{document}`;
 
-const SHOW_CALL = `algomotion_show {
-  "recipe": "dijkstra",
-  "input": "A-B 4, B-C 1, A-C 7, C-D 2"
-}`;
+/** A call of MCP tool `tool` with `args`, and the locale outside English. */
+const mcpCall =
+  (tool: string, args: Readonly<Record<string, unknown>>) =>
+  (locale: Locale): string =>
+    `${tool} ${JSON.stringify(
+      { ...args, ...(locale === 'en' ? {} : { locale }) },
+      null,
+      2,
+    ).replace(/\[\n\s*("[^"]*")\n\s*\]/g, '[$1]')}`;
 
-const INSPECT_CALL = `algomotion_inspect {
-  "recipe": "dijkstra",
-  "input": "A-B 4, B-C 1, A-C 7, C-D 2",
-  "frames": ["improve#3"]
-}`;
+const SHOW_CALL = mcpCall('algomotion_show', {
+  recipe: WHY_RUN.algorithm,
+  input: WHY_RUN.input,
+});
 
-/** The code of a walk-through's step, the same in every locale. */
+const INSPECT_CALL = mcpCall('algomotion_inspect', {
+  recipe: WHY_RUN.algorithm,
+  input: WHY_RUN.input,
+  frames: ['improve#3'],
+});
+
+/**
+ * The code of a walk-through's step, the same in every locale but for the
+ * MCP calls, which ask for the page's language as a model does when the
+ * user writes it (ADR 0045), so the reply quoted is what the call returns.
+ */
 interface WalkCode {
-  readonly code?: string;
+  readonly code?: string | ((locale: Locale) => string);
   /** The code's file name, used as its label in every locale. */
   readonly file?: string;
   readonly reply?: boolean;
@@ -210,7 +224,9 @@ export function walkthroughs(locale: Locale, root: string): Walkthrough[] {
         const label = s.file ?? step.label;
         return {
           html: step.html(root),
-          ...(s.code === undefined ? {} : { code: s.code }),
+          ...(s.code === undefined
+            ? {}
+            : { code: typeof s.code === 'string' ? s.code : s.code(locale) }),
           ...(label === undefined ? {} : { label }),
           ...(s.reply === true ? { reply: true } : {}),
           ...(s.scene === undefined

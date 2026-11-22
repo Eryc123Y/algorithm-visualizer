@@ -49,10 +49,11 @@ export async function runPlayground(
     const t = clientText(lang).playground;
     return { ok: false, error: { message: t.empty, hint: t.emptyHint } };
   }
-  const ran = runAlgorithm(algorithm, read.value);
-  if (!ran.ok) return { ok: false, error: inputError(input, ran.error[0]!) };
-  // The snippets ask every output for the page's language (ADR 0045).
+  // The run, its snippets and its share link are in the page's language
+  // (ADR 0045).
   const locale = localeOf(lang);
+  const ran = runAlgorithm(algorithm, read.value, { locale });
+  if (!ran.ok) return { ok: false, error: inputError(input, ran.error[0]!) };
   const snippets = await snippetsFor(
     algorithm,
     read.value,

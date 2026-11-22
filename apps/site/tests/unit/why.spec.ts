@@ -13,6 +13,7 @@ import { HOME } from '../../src/docs/text/home.ts';
 import {
   COMPARISON,
   WALKTHROUGHS,
+  walkthroughs,
   WHY_FIGURES,
   whyPage,
   type WhyFacts,
@@ -90,6 +91,19 @@ describe('the figures and walk-throughs', () => {
         if (figures.ok && r.frames !== undefined)
           expect(figures.value.figures).toHaveLength(r.frames);
       }
+  });
+
+  it('asks the assistant for the page’s language, so the reply quoted is the call’s', () => {
+    const callsIn = (locale: 'en' | 'zh') =>
+      walkthroughs(locale, '../')
+        .find((w) => w.id === 'assistant')!
+        .steps.map((s) => s.code ?? '')
+        .filter((code) => code.startsWith('algomotion_'));
+    expect(callsIn('en')).toEqual([
+      'algomotion_show {\n  "recipe": "dijkstra",\n  "input": "A-B 4, B-C 1, A-C 7, C-D 2"\n}',
+      'algomotion_inspect {\n  "recipe": "dijkstra",\n  "input": "A-B 4, B-C 1, A-C 7, C-D 2",\n  "frames": ["improve#3"]\n}',
+    ]);
+    for (const call of callsIn('zh')) expect(call).toContain('"locale": "zh"');
   });
 });
 

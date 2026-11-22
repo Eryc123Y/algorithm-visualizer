@@ -281,6 +281,12 @@ describe('the algorithms page', () => {
     );
     const search = link.closest('.card')!.getAttribute('data-search')!;
     expect(search).toContain('dijkstra’s algorithm');
+    // A structure is found by its operations' English names too.
+    const bst = document
+      .querySelector('#catalog .card a[href="../../zh/bst/"]')!
+      .closest('.card')!
+      .getAttribute('data-search')!;
+    expect(bst).toContain('binary search tree: delete');
     expect(search).toContain(link.textContent.toLowerCase());
     expect(
       document.querySelectorAll('.card .ops a[href="../../zh/bst/delete/"]'),

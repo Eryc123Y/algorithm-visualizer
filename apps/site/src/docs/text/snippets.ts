@@ -31,7 +31,7 @@ const zh: SnippetNotes = {
   typst: (step) =>
     `画最后一帧；加上 step: "${step}" 就画那一步。文档里写了 #set text(lang: "zh") 时，lang 可以省略。`,
   latex: (step) =>
-    `第一次编译时加 -shell-escape；[step=${step}] 指定画哪一步。`,
+    `文档要能排中文，比如加载 ctex 宏包；第一次编译时加 -shell-escape；[step=${step}] 指定画哪一步。`,
   cli: (step) =>
     `把每一帧画成 SVG，写进 figures/；加上 --step ${step} 就只写那一步。`,
   mcp: (step) =>

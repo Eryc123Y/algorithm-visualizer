@@ -172,6 +172,11 @@ test('the playground, tabs and copy buttons speak Chinese', async ({
   );
   await page.locator('.pg-reset').click();
   await expect(page.locator('#pg-error')).toBeEmpty();
+  // A run the reader asks for is told in Chinese too.
+  await page.locator('#pg-input').fill('A-B 3, B-C 1');
+  const player = page.locator('main algo-player').first();
+  await player.getByRole('button', { name: '下一步' }).click();
+  await expect(player.getByText(/每个顶点的距离都是 ∞/u)).toBeVisible();
   await expect(page.locator('.pg-caption')).toContainText('，输入为 ');
   // The share link leads to the share page at the site's root.
   await expect(page.locator('.pg-share')).toHaveAttribute(
