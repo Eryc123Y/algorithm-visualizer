@@ -17,7 +17,7 @@ npm run build:standalone -w @algomotion/mcp && npm run test:standalone
 npm run test:worker
 ```
 
-- Run the property tests deep, a few files at a time: `FUZZ_RUNS=5000 npx vitest run <files>`. `packages/recipes/tests/properties.spec.ts` alone takes more than an hour.
+- Run every test deep with `FUZZ_RUNS=5000 npx vitest run`, about an hour on a 10-core machine.
 - Remeasure the bundles with `npm run sizes`, and commit `docs/sizes.md` if they moved.
 - Look at the figures with `npm run gallery`, in both languages.
 

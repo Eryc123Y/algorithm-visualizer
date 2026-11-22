@@ -2,7 +2,7 @@
  * The graph modules against independent references: shortest distances
  * by repeated relaxation, a minimum spanning forest by a plain greedy
  * pass, and the order constraints of a topological sort.
- * `properties.spec.ts` runs them on random graphs.
+ * `properties/` runs them on random graphs.
  */
 import { describe, expect, it } from 'vitest';
 

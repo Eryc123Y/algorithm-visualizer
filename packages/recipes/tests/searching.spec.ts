@@ -1,6 +1,6 @@
 /**
  * `binary-search` against an independent reference, Array.prototype
- * methods, and the halving bound. `properties.spec.ts` runs it on random
+ * methods, and the halving bound. `properties/` runs it on random
  * inputs.
  */
 import { describe, expect, it } from 'vitest';

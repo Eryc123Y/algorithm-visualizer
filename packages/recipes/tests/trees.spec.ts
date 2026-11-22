@@ -3,7 +3,7 @@
  * tree, walks of a level order, prefix sets for tries, and label
  * propagation for disjoint sets. Structures also meet the checks of ADR
  * 0018: frame 0 is the starting state, `after` rebuilds it, and chained
- * runs end where one run ends. `properties.spec.ts` runs them on random
+ * runs end where one run ends. `properties/` runs them on random
  * inputs.
  */
 import fc from 'fast-check';

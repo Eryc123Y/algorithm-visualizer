@@ -1,7 +1,9 @@
 /**
  * The committed plugin, run by Node's WebAssembly as Typst runs it, with the
  * engine bytecode built from this checkout (ADR 0026). Its SVG must be the
- * SVG of `exportFigures`, byte for byte.
+ * SVG of `exportFigures`, byte for byte: for every registry example in
+ * every theme in `plugin-themes-*.spec.ts`, and here for steps, documents,
+ * the cache and errors.
  */
 import fc from 'fast-check';
 import { beforeAll, describe, expect, it } from 'vitest';
@@ -9,9 +11,9 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import { algorithms, runAlgorithm } from '@algomotion/recipes';
 import { exportFigures, themes, type ThemeName } from '@algomotion/svg';
 
-import type { Response } from '../src/engine.ts';
 import { buildEngine } from '../scripts/engine.ts';
 import { instantiatePlugin, type PluginInstance } from '../scripts/host.ts';
+import { exportedSvg, render, svgOf } from './plugin-host.ts';
 
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
@@ -26,33 +28,6 @@ async function loaded(): Promise<PluginInstance> {
   const instance = await instantiatePlugin(plugin);
   instance.call('load', bytecode);
   return instance;
-}
-
-function render(instance: PluginInstance, request: unknown): Response {
-  const output = instance.call(
-    'render',
-    encoder.encode(JSON.stringify(request)),
-  );
-  return JSON.parse(decoder.decode(output)) as Response;
-}
-
-/** The SVG of each figure `algomotion export` draws for a run. */
-function exportedSvg(
-  id: string,
-  input: unknown,
-  steps: readonly (string | number)[],
-  theme: ThemeName,
-): string[] {
-  const run = runAlgorithm(id, input);
-  if (!run.ok) throw new Error(JSON.stringify(run.error));
-  const series = exportFigures(run.value.document, { steps, theme });
-  if (!series.ok) throw new Error(JSON.stringify(series.error));
-  return series.value.figures.map((f) => f.svg);
-}
-
-function svgOf(response: Response): string[] {
-  if (!response.ok) throw new Error(JSON.stringify(response.diagnostics));
-  return response.figures.map((f) => f.svg);
 }
 
 beforeAll(async () => {
@@ -76,16 +51,6 @@ describe('the plugin', () => {
         .map((e) => e.name)
         .toSorted(),
     ).toEqual(['compile', 'load', 'memory', 'render']);
-  });
-
-  it('draws every registry example in every theme as exportFigures does', () => {
-    for (const algorithm of algorithms)
-      for (const input of algorithm.examples)
-        for (const theme of themeNames)
-          expect(
-            svgOf(render(engine, { algorithm: algorithm.id, input, theme })),
-            `${algorithm.id} in ${theme}`,
-          ).toEqual(exportedSvg(algorithm.id, input, [], theme));
   });
 
   it('draws one step', () => {

@@ -1,7 +1,7 @@
 /**
  * `reverse-linked-list` and `balanced-brackets` against independent
  * references: walking the links from the head, and erasing matched pairs
- * until none is left. `properties.spec.ts` runs them on random inputs.
+ * until none is left. `properties/` runs them on random inputs.
  */
 import { describe, expect, it } from 'vitest';
 
