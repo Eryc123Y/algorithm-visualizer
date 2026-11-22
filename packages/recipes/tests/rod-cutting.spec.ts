@@ -105,6 +105,6 @@ const prices = fc.oneof(
 recipe(
   'rod-cutting',
   prices,
-  (p) => runOk('rod-cutting', { prices: p }).document,
+  (p, locale) => runOk('rod-cutting', { prices: p }, locale).document,
   (trace, p) => check(trace.visualization, p),
 );

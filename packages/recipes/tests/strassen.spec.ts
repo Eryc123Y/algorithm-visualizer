@@ -211,6 +211,6 @@ describe('strassen', () => {
 recipe(
   'strassen',
   pair,
-  (input) => runOk('strassen', input).document,
+  (input, locale) => runOk('strassen', input, locale).document,
   (trace, { a, b }) => check(trace, a, b),
 );

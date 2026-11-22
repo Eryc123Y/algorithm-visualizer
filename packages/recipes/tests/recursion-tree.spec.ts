@@ -188,6 +188,6 @@ const inputs = fc
 recipe(
   'recursion-tree',
   inputs,
-  (input) => runOk('recursion-tree', input).document,
+  (input, locale) => runOk('recursion-tree', input, locale).document,
   (trace, { recurrence, n }) => check(trace, recurrence, n),
 );

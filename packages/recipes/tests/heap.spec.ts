@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import type { VisualizationInput } from '@algomotion/spec';
 
 import { fuzz, replay, runError, runOk, stateOf } from './helpers.ts';
+import { recipe } from './recipe-properties.ts';
 
 type Order = 'min' | 'max';
 
@@ -80,6 +81,36 @@ const isHeap = (h: readonly unknown[], order: Order) =>
   h.every(
     (v, i) => i === 0 || !first(order)(v as number, h[(i - 1) >> 1] as number),
   );
+
+/**
+ * Calls built from random picks, each valid for the heap's size at its
+ * point: a pop or a key change only when the heap has values, and a key
+ * change only in the allowed direction.
+ */
+function callsFor(
+  order: Order,
+  start: readonly number[],
+  picks: readonly (readonly [number, number, number])[],
+): HeapCall[] {
+  let size = start.length;
+  const calls: HeapCall[] = [];
+  for (const [kind, v, at] of picks) {
+    if (kind === 1 && size > 0) {
+      calls.push({ op: 'pop' });
+      size -= 1;
+    } else if (kind === 2 && size > 0) {
+      const index = at % size;
+      const now = reference(start, calls, order).end[index]!;
+      const op = order === 'min' ? 'decrease-key' : 'increase-key';
+      const target = order === 'min' ? Math.min(v, now) : Math.max(v, now);
+      calls.push({ op, index, value: target });
+    } else {
+      calls.push({ op: 'push', value: v });
+      size += 1;
+    }
+  }
+  return calls;
+}
 
 const values = [5, 3, 8, 1, 9, 2];
 const narrations = (doc: VisualizationInput) =>
@@ -198,25 +229,7 @@ describe('min-heap and max-heap', () => {
           maxLength: 6,
         }),
         (order, start, picks) => {
-          // Build calls that are valid for the heap size at each point.
-          let size = start.length;
-          const calls: HeapCall[] = [];
-          for (const [kind, v, at] of picks) {
-            if (kind === 1 && size > 0) {
-              calls.push({ op: 'pop' });
-              size -= 1;
-            } else if (kind === 2 && size > 0) {
-              const index = at % size;
-              const now = reference(start, calls, order).end[index]!;
-              const op = order === 'min' ? 'decrease-key' : 'increase-key';
-              const target =
-                order === 'min' ? Math.min(v, now) : Math.max(v, now);
-              calls.push({ op, index, value: target });
-            } else {
-              calls.push({ op: 'push', value: v });
-              size += 1;
-            }
-          }
+          const calls = callsFor(order, start, picks);
           const id = `${order}-heap`;
           const run = runOk(id, { from: start, ops: calls });
           const ref = reference(start, calls, order);
@@ -286,3 +299,30 @@ describe('min-heap and max-heap', () => {
     expect(last.results).toEqual([null]);
   });
 });
+
+// The properties every recipe has: replay, layout, clean SVG and the run
+// in Chinese (recipe-properties.ts), on random operations.
+for (const order of ['min', 'max'] as const) {
+  const value = fc.integer({ min: 0, max: 30 });
+  recipe(
+    `${order}-heap`,
+    fc
+      .tuple(
+        fc.array(value, { maxLength: 12 }),
+        fc.array(fc.tuple(fc.nat(2), value, fc.nat()), {
+          minLength: 1,
+          maxLength: 6,
+        }),
+      )
+      .map(([start, picks]) => ({
+        start,
+        calls: callsFor(order, start, picks),
+      })),
+    ({ start, calls }, locale) =>
+      runOk(`${order}-heap`, { from: start, ops: calls }, locale).document,
+    (trace, { start, calls }) =>
+      expect(valuesAt(trace.visualization)).toEqual(
+        reference(start, calls, order).end,
+      ),
+  );
+}

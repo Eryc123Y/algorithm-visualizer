@@ -13,7 +13,14 @@ import type { Trace, TreeState } from '@algomotion/core';
 
 import { parseForest } from '../src/structures/fibonacci-heap/notation.ts';
 import { RefFibHeap } from './fibonacci-reference.ts';
-import { fuzz, replay, runError, runOk, stateOf } from './helpers.ts';
+import {
+  checkOperations,
+  fuzz,
+  replay,
+  runError,
+  runOk,
+  stateOf,
+} from './helpers.ts';
 
 const SAMPLE = '23 7 3(18*(39*) 52 38(41)) 17(30) 24(26*(35) 46)';
 
@@ -264,6 +271,13 @@ describe('fibonacci-heap', () => {
           for (const { start } of (trace.visualization.sections ?? []).slice(1))
             expect(heapProblems(heapAt(trace, start))).toEqual([]);
           expect(heapProblems(heapAt(trace))).toEqual([]);
+          checkOperations(
+            'fibonacci-heap',
+            parseForest(from),
+            ops,
+            (tr, frame) => drawn(heapAt(tr, frame)),
+            from,
+          );
         },
       ),
       fuzz,

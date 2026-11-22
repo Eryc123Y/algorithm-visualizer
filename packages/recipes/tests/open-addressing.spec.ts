@@ -227,8 +227,8 @@ for (const id of Object.keys(SEQUENCES) as Id[])
   recipe(
     id,
     runs(id),
-    ({ size, keys, calls }) =>
-      runOk(id, { from: { size, keys }, ops: calls }).document,
+    ({ size, keys, calls }, locale) =>
+      runOk(id, { from: { size, keys }, ops: calls }, locale).document,
     (trace, { size, keys, calls }) => {
       expect(stateOf(trace, 't', 'array').data.map((e) => e.value)).toEqual(
         reference(id, size, keys, calls).end,

@@ -1,8 +1,9 @@
 /**
- * The four properties every recipe must have, shared by the property
+ * The five properties every recipe must have, shared by the property
  * tests: random inputs give a document that loads and replays the same at
  * any checkpoint interval, ends with the right answer, lays out every
- * frame inside one fixed-size scene, and renders to clean SVG.
+ * frame inside one fixed-size scene, renders to clean SVG, and runs the
+ * same in Chinese, told in Chinese (ADR 0045).
  */
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
@@ -13,7 +14,11 @@ import {
   type Scene,
   type Trace,
 } from '@algomotion/core';
-import { formatErrors, type VisualizationInput } from '@algomotion/spec';
+import {
+  formatErrors,
+  type Locale,
+  type VisualizationInput,
+} from '@algomotion/spec';
 import { renderSvg } from '@algomotion/svg';
 
 export const runs = Number(process.env['FUZZ_RUNS'] ?? 40);
@@ -49,9 +54,9 @@ export function load(doc: VisualizationInput): Trace {
  * Every frame's scene is well formed and as large as frame 0's, in both
  * layouts (ADR 0029).
  */
-function checkLayout(trace: Trace): void {
+function checkLayout(trace: Trace, locale: Locale = 'en'): void {
   for (const figure of ['wide', 'narrow'] as const) {
-    const layout = layoutTrace(trace, { layout: figure });
+    const layout = layoutTrace(trace, { layout: figure, locale });
     const first = layout.sceneAt(0);
     for (let i = 0; i <= trace.length; i++) {
       const scene = i === 0 ? first : layout.sceneAt(i);
@@ -82,6 +87,24 @@ function checkRender(trace: Trace): void {
 }
 
 /**
+ * Every step has a name and points at a line of code in every language
+ * the document shows (ADR 0017, 0020), whichever branch the input takes;
+ * the registry's tests check this for the examples.
+ */
+function checkSteps(trace: Trace): void {
+  const { steps, sources = [] } = trace.visualization;
+  expect(sources.length).toBeGreaterThan(0);
+  steps.forEach((step, k) => {
+    const where = `step ${k + 1}`;
+    expect(step.meta?.id, where).toBeDefined();
+    const at = step.meta?.at;
+    expect(at, where).toBeDefined();
+    for (const { language, anchors } of sources)
+      expect(anchors[at!], `${where} in ${language}`).toBeDefined();
+  });
+}
+
+/**
  * Frames are the same whether replayed from a checkpoint every step, every
  * 7 steps or every 32 (the default): reducers do not share or mutate state.
  */
@@ -101,33 +124,64 @@ function checkReplay(trace: Trace): void {
       expect(other.frame(i).state, `frame ${i}`).toEqual(trace.frame(i).state);
 }
 
-/** The four properties every recipe must have. */
+const CJK = /[\u{4e00}-\u{9fff}]/u;
+
+/**
+ * The run in Chinese has the same steps, with the same names, as the run
+ * in English; every step is told in Chinese, whichever branch the input
+ * takes; and every frame still fits one fixed-size scene. The examples'
+ * runs are checked word by word in `zh-coverage.spec.ts`; this reaches
+ * the branches no example takes.
+ */
+function checkChinese(english: Trace, chinese: Trace): void {
+  const ids = (trace: Trace) =>
+    trace.visualization.steps.map((step) => step.meta?.id);
+  expect(ids(chinese)).toEqual(ids(english));
+  chinese.visualization.steps.forEach((step, k) => {
+    expect(step.meta?.narration, `step ${k + 1}`).toMatch(CJK);
+  });
+  // The layout's own words, such as 栈顶 and （空）, in Chinese too.
+  checkLayout(chinese, 'zh');
+}
+
+/**
+ * The five properties every recipe must have. `build` runs the recipe on
+ * an input, in a locale.
+ */
 export function recipe<T>(
   name: string,
   arb: fc.Arbitrary<T>,
-  build: (input: T) => VisualizationInput,
+  build: (input: T, locale: Locale) => VisualizationInput,
   semantics: (trace: Trace, input: T) => void,
 ): void {
   const property = (check: (trace: Trace, input: T) => void) => () => {
     fc.assert(
       fc.property(arb, (input) => {
-        check(load(build(input)), input);
+        check(load(build(input, 'en')), input);
       }),
       { numRuns: runs },
     );
   };
   describe(name, () => {
     it(
-      'gives a document that loads, and replays the same at any checkpoint interval',
-      property(checkReplay),
+      'gives a document that loads, points every step at a line of code in every language, and replays the same at any checkpoint interval',
+      property((trace) => {
+        checkSteps(trace);
+        checkReplay(trace);
+      }),
       TIMEOUT,
     );
     it('ends with the right answer', property(semantics), TIMEOUT);
     it(
       'lays out every frame inside one fixed-size scene',
-      property(checkLayout),
+      property((trace) => checkLayout(trace)),
       TIMEOUT,
     );
     it('renders the last frame to clean SVG', property(checkRender), TIMEOUT);
+    it(
+      'runs the same in Chinese, told in Chinese, inside one fixed-size scene',
+      property((trace, input) => checkChinese(trace, load(build(input, 'zh')))),
+      TIMEOUT,
+    );
   });
 }
