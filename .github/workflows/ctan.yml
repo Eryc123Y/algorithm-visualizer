@@ -68,7 +68,8 @@ jobs:
           mkdir -p "$RUNNER_TEMP/pkgcheck"
           cd "$RUNNER_TEMP/pkgcheck"
           curl -fsSL --retry 3 -o pkgcheck "$base"
-          sum="$(curl -fsSL --retry 3 "$base.sha256" | sed -n 's/.*= *\([0-9a-f]\{64\}\).*/\1/p')"
+          # The checksum files come in GNU and BSD formats; take the hash.
+          sum="$(curl -fsSL --retry 3 "$base.sha256" | grep -oE '[0-9a-f]{64}' | head -1)"
           echo "$sum  pkgcheck" | sha256sum -c -
           chmod +x pkgcheck
           echo "PKGCHECK=$PWD/pkgcheck" >> "$GITHUB_ENV"
