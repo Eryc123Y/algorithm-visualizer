@@ -71,7 +71,7 @@ ${code(
 \end{frame}`,
   '分节、范围和暂停',
 )}
-<p>图组之后的新内容用 <code>\\onslide&lt;+-&gt;</code>；用 <code>\\pause</code> 会把最后一帧重复一遍。在非 fragile 的 Beamer 帧里，<code>#</code> 要转义成 <code>\\#</code>。</p>
+<p>图组之后的新内容用 <code>\\onslide&lt;+-&gt;</code>；用 <code>\\pause</code> 会把最后一帧重复一遍。在非 fragile 的 Beamer 帧里，<code>#</code> 要转义成 <code>\\#</code>。<code>lang=zh</code> 用中文讲解运行过程，文档要能排中文，比如用了 <code>ctex</code>。</p>
 <p>Beamer 里的图占满行宽，高度最多占正文高度的四分之三。<code>height=0.6\\textheight</code> 能给文字留出空间。<code>width</code> 改变宽度上限，<code>scale=1</code> 用原始尺寸。放在分栏里时，图占满所在的那一栏。Beamer 下默认 <code>layout=wide</code>。</p>
 <p>用 <code>\\documentclass[handout]{beamer}</code>、在透明胶片模式或 <code>beamerarticle</code> 笔记里，图组只显示最后一帧。在 Beamer 之外也显示最后一帧，并给出警告。只含一帧的图组，在每个叠层上都是一张普通的图。</p>
 
@@ -119,7 +119,7 @@ ${code(
 ]`,
   'polylux 叠层',
 )}
-<p>两个框架支持同样的选项：<code>steps</code>、<code>start</code>、<code>theme</code>、<code>layout</code>、<code>strict</code>、<code>width</code>、<code>height</code> 和 <code>fit</code>。默认布局是 wide。图组在保持比例的前提下，占满所在区域的宽度和四分之三的高度。<code>width</code> 和 <code>height</code> 只覆盖各自方向的尺寸。把两个图组放进 <code>grid</code>，每个图组就有各自的区域。</p>
+<p>两个框架支持同样的选项：<code>steps</code>、<code>start</code>、<code>theme</code>、<code>layout</code>、<code>strict</code>、<code>width</code>、<code>height</code>、<code>fit</code> 和 <code>lang</code>。幻灯片函数读不到 <code>text.lang</code>，所以要用中文讲解运行过程，得写 <code>lang: "zh"</code>。默认布局是 wide。图组在保持比例的前提下，占满所在区域的宽度和四分之三的高度。<code>width</code> 和 <code>height</code> 只覆盖各自方向的尺寸。把两个图组放进 <code>grid</code>，每个图组就有各自的区域。</p>
 ${note('<p>单个步骤也能占满一张幻灯片：用 <code>algomotion-slides</code> 并写 <code>steps: "insert"</code>。普通的 <code>algomotion</code> 图保持原始尺寸。上课前预览实际的演示文稿和讲义；要打印就选适合打印的主题。</p>')}
 `,
 };

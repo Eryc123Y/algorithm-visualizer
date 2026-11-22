@@ -31,7 +31,7 @@ You name an algorithm and give it an input, written the way you would write it o
 | --------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | <img src="apps/site/public/scenes/notes.svg" alt="A page of Typst notes with an algomotion figure" width="260"> | <img src="apps/site/public/scenes/beamer-1.svg" alt="A Beamer slide stepping through Dijkstra's algorithm" width="260"> | <img src="apps/site/public/scenes/chat-light.webp" alt="The player inside an AI conversation" width="260"> |
 
-The same run becomes any of these, drawn by one engine in nine themes. A model can also write a visualization of its own through the MCP server, check it step by step, and show it in the conversation.
+The same run becomes any of these, drawn by one engine in nine themes, and told in English or Simplified Chinese. A model can also write a visualization of its own through the MCP server, check it step by step, and show it in the conversation.
 
 ## Status: 1.0 alpha
 

@@ -91,6 +91,7 @@ ${scene('terminal', '命令的一次实际会话：一次导出、一次运行�
 <tr><td><code>--step</code></td><td>所有帧</td><td>选择器；可以重复这个选项，也可以用逗号分隔多个选择器。</td></tr>
 <tr><td><code>--theme</code></td><td><code>light</code></td><td>任一内置的固定主题，见<a href="${root}themes/">主题</a>。</td></tr>
 <tr><td><code>--layout</code></td><td><code>wide</code></td><td><code>wide</code> 或 <code>narrow</code>。</td></tr>
+<tr><td><code>--lang</code></td><td><code>en</code></td><td><code>en</code> 或 <code>zh</code>：算法运行过程的语言，以及图中自带的词（如“栈顶”）的语言。文档本身的文字按原样显示。</td></tr>
 <tr><td><code>--format</code></td><td><code>svg</code></td><td><code>svg</code> 或 <code>tikz</code>。</td></tr>
 <tr><td><code>--one-file</code></td><td>关闭</td><td>仅限 TikZ：把各帧合并成一个用于幻灯片的图组。</td></tr>
 <tr><td><code>--out</code>, <code>-o</code></td><td>当前目录</td><td>输出目录，不存在时自动创建。</td></tr>

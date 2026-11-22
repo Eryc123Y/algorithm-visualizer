@@ -50,7 +50,7 @@ ${code(`{"recipe":"dijkstra","input":"A-B 4, B-C 1, A-C 7","frame":"improve#3"}`
 <tr><td><code>algomotion_run_recipe</code></td><td>Runs an id on input and returns the JSON document.</td><td><code>{"id":"insertion-sort","input":"5 2 4"}</code></td></tr>
 <tr><td><code>algomotion_show</code></td><td>Shows a document or recipe in an MCP Apps player.</td><td><code>{"recipe":"insertion-sort","input":"5 2 4"}</code></td></tr>
 </tbody></table></div>
-<p><code>inspect</code>, <code>render</code> and <code>show</code> accept either <code>document</code> or <code>recipe</code> with optional <code>input</code>, never both. <code>validate</code> takes documents only. <code>inspect</code> accepts sections and ranges, with at most 20 frames. <code>render</code> and <code>show</code> take one frame. Use <code>run_recipe</code>'s <code>id</code> key when asking for a document.</p>
+<p><code>inspect</code>, <code>render</code> and <code>show</code> accept either <code>document</code> or <code>recipe</code> with optional <code>input</code>, never both. <code>validate</code> takes documents only. <code>inspect</code> accepts sections and ranges, with at most 20 frames. <code>render</code> and <code>show</code> take one frame. Use <code>run_recipe</code>'s <code>id</code> key when asking for a document. <code>run_recipe</code>, <code>inspect</code>, <code>render</code> and <code>show</code> take an optional <code>locale</code>, <code>"en"</code> or <code>"zh"</code>, for the language of a recipe's run; the server asks models to pass <code>"zh"</code> when the user writes Chinese.</p>
 <p>A complete <code>algomotion_validate</code> call checks a custom document like this:</p>
 ${code(
   `{"document":{"version":"1.0","structures":{"s":{"kind":"stack","initial":[1]}},
