@@ -13,6 +13,7 @@ import { z } from 'zod';
 
 import { defineAlgorithm } from '../../algorithm.ts';
 import { listField } from '../../notation/schema.ts';
+import { labelFor } from '../../trace.ts';
 
 /** The longest rod, so that the table stays readable. */
 export const MAX_ROD = 12;
@@ -91,6 +92,7 @@ export const rodCutting = defineAlgorithm({
     const s = [0];
     const table = trace.add('rod', {
       kind: 'table',
+      ...labelFor(trace, 'rod', { en: 'rod', zh: '钢条' }),
       initial: [
         ['', ...prices],
         [0, ...prices.map(() => null)],

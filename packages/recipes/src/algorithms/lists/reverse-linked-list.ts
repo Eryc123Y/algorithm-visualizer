@@ -6,6 +6,7 @@ import { z } from 'zod';
 
 import { defineAlgorithm } from '../../algorithm.ts';
 import { listField } from '../../notation/schema.ts';
+import { labelFor } from '../../trace.ts';
 
 /** Most nodes the list takes, so it fits on one row. */
 export const MAX_LIST = 12;
@@ -57,6 +58,7 @@ export const reverseLinkedList = defineAlgorithm({
   run({ values }, trace) {
     const list = trace.add('list', {
       kind: 'linkedList',
+      ...labelFor(trace, 'list', { en: 'list', zh: '链表' }),
       initial: [...values],
     });
     const n = values.length;

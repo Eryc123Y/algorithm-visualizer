@@ -150,7 +150,7 @@ export const johnson = defineAlgorithm({
     }
     trace.step('potential', {
       en: `Bellman–Ford from ${s} gives each vertex its distance from ${s}, its potential h: ${g.nodes.map((v) => `h(${v}) = ${num(h.get(v)!)}`).join(', ')}.`,
-      zh: `从 ${s} 运行 Bellman–Ford，得到每个顶点到 ${s} 的距离，即它的势 h：${g.nodes.map((v) => `h(${v}) = ${num(h.get(v)!)}`).join(', ')}。`,
+      zh: `从 ${s} 运行 Bellman–Ford，得到从 ${s} 到每个顶点的距离，即顶点的势 h：${g.nodes.map((v) => `h(${v}) = ${num(h.get(v)!)}`).join('，')}。`,
     });
     for (const v of g.nodes)
       graph.annotate({ node: v, text: `h=${num(h.get(v)!)}` });

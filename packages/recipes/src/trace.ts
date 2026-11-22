@@ -51,6 +51,21 @@ export interface Trace {
   section(id: string, title: Text): void;
 }
 
+/**
+ * The label that heads structure `id` with `text` in the trace's locale,
+ * or none where that is `id` itself: a figure heads a structure without a
+ * label with its id, so the English documents stay as they were while a
+ * Chinese figure gets a Chinese heading (ADR 0045).
+ */
+export function labelFor(
+  trace: Pick<Trace, 'say'>,
+  id: string,
+  text: Text,
+): { readonly label?: string } {
+  const said = trace.say(text);
+  return said === id ? {} : { label: said };
+}
+
 /** A handle whose methods record nothing. */
 export function silentHandle<K extends StructureKindName>(kind: K): Handle<K> {
   const handle: Record<string, () => unknown> = {};

@@ -10,6 +10,7 @@ import { z } from 'zod';
 
 import { defineAlgorithm } from '../../algorithm.ts';
 import { declareGraph, Graph, graphOf, shown } from './graph.ts';
+import { labelFor } from '../../trace.ts';
 
 export const floydWarshall = defineAlgorithm({
   id: 'floyd-warshall',
@@ -75,6 +76,7 @@ export const floydWarshall = defineAlgorithm({
     const table = trace.add('dist', {
       kind: 'table',
       place: 'side',
+      ...labelFor(trace, 'dist', { en: 'dist', zh: '距离' }),
       initial: d.map((row) => row.map((x) => (x === Infinity ? '∞' : x))),
       rowLabels: [...g.nodes],
       columnLabels: [...g.nodes],

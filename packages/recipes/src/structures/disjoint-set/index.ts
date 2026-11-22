@@ -356,6 +356,7 @@ export const disjointSet = defineStructure<DisjointSetState, From, 'tree'>({
     zh: '在不相交集合森林中合并集合、查找元素所在的集合，使用按秩合并和路径压缩。',
   },
   name: 'sets',
+  heading: { en: 'sets', zh: '集合' },
   kind: 'tree',
   from: From.describe(
     'The starting forest: { size, unions }, or { parent, rank } as after gives it.',

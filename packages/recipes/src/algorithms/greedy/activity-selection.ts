@@ -12,6 +12,7 @@
 import { z } from 'zod';
 
 import { defineAlgorithm } from '../../algorithm.ts';
+import { labelFor } from '../../trace.ts';
 
 /** The most activities, so that the table fits a page. */
 export const MAX_ACTIVITIES = 12;
@@ -93,6 +94,7 @@ export const activitySelection = defineAlgorithm({
     const names = sorted.map((_, k) => `a${k + 1}`);
     const table = trace.add('activities', {
       kind: 'table',
+      ...labelFor(trace, 'activities', { en: 'activities', zh: '活动' }),
       initial: [sorted.map((a) => a.s), sorted.map((a) => a.f)],
       rowLabels: ['s', 'f'],
       columnLabels: names,

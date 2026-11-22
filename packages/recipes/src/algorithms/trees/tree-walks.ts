@@ -11,6 +11,7 @@ import type { Text } from '../../text.ts';
 import { defineAlgorithm, type Algorithm } from '../../algorithm.ts';
 import { callStack } from '../../call-stack.ts';
 import { listField } from '../../notation/schema.ts';
+import { labelFor } from '../../trace.ts';
 
 /** Most entries of a level order, so the tree fits on one screen. */
 export const MAX_LEVEL_ORDER = 31;
@@ -124,9 +125,14 @@ function treeWalk(order: Order): Algorithm<TreeInput> {
       const { values, children } = shape(levelOrder);
       const tree = outer.add('tree', {
         kind: 'tree',
+        ...labelFor(outer, 'tree', { en: 'tree', zh: '树' }),
         levelOrder: [...levelOrder],
       });
-      const out = outer.add('out', { kind: 'array', initial: [] });
+      const out = outer.add('out', {
+        kind: 'array',
+        ...labelFor(outer, 'out', { en: 'out', zh: '输出' }),
+        initial: [],
+      });
       // A call on a node is on the stack from its enter step until the
       // next step after it returns (ADR 0029).
       const calls = callStack(outer);

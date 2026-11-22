@@ -28,6 +28,18 @@ function codeWords(a: Algorithm): Set<string> {
   return new Set(words.map((w) => w.toLowerCase()));
 }
 
+/**
+ * The headings a figure draws: a structure's label, or its id when it has
+ * none, so an id a reader sees must not be an English word either.
+ */
+function headings(document: { readonly structures: object }) {
+  return Object.entries(document.structures).map(([id, s]) => ({
+    path: `$.structures.${id}`,
+    key: 'heading',
+    text: (s as { readonly label?: string }).label ?? id,
+  }));
+}
+
 /** The text fields a reader sees, outside the code, with where they are. */
 function texts(
   node: unknown,
@@ -80,16 +92,17 @@ describe.each(translated.map((a) => [a.id, a] as const))(
       for (const example of algorithm.examples) {
         const run = runModule(algorithm, example, { locale: 'zh' });
         if (!run.ok) throw new Error(JSON.stringify(run.error));
-        const english = texts(run.value.document).flatMap(
-          ({ path, key, text }) => {
-            if (key === 'narration' || key === 'title')
-              return CJK.test(text) ? [] : [`${path}: ${text}`];
-            const words = (text.match(WORD) ?? []).filter(
-              (w) => !code.has(w.toLowerCase()),
-            );
-            return words.length === 0 ? [] : [`${path}: ${text}`];
-          },
-        );
+        const english = [
+          ...texts(run.value.document),
+          ...headings(run.value.document),
+        ].flatMap(({ path, key, text }) => {
+          if (key === 'narration' || key === 'title')
+            return CJK.test(text) ? [] : [`${path}: ${text}`];
+          const words = (text.match(WORD) ?? []).filter(
+            (w) => !code.has(w.toLowerCase()),
+          );
+          return words.length === 0 ? [] : [`${path}: ${text}`];
+        });
         expect(english).toEqual([]);
       }
     });

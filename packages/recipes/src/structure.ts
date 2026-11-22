@@ -31,7 +31,7 @@ import {
   type Snippet,
 } from './snippet.ts';
 import { textIn, type Text } from './text.ts';
-import { listingTrace, type Trace } from './trace.ts';
+import { labelFor, listingTrace, type Trace } from './trace.ts';
 import { printOperations } from './notation/operations.ts';
 import { operationsField } from './notation/schema.ts';
 
@@ -129,6 +129,8 @@ export interface StructureDef<S, From, K extends StructureKindName> {
   readonly summary: Text;
   /** Name of the structure in the document. */
   readonly name: string;
+  /** What a figure heads it with, where that is not `name` (ADR 0045). */
+  readonly heading?: Text;
   readonly kind: K;
   /** The starting states `from` may describe. */
   readonly from: z.ZodType<From>;
@@ -243,7 +245,12 @@ function runCalls<S, From, K extends StructureKindName>(
   const code = joinListings(resolved.map((r) => r.listing));
   // Section ids are selectors: English in every locale.
   const ids = sectionIds(resolved.map((r) => textIn(r.title, 'en')));
-  const on = trace.add(def.name, def.declare(state)) as Handle<K>;
+  const on = trace.add(def.name, {
+    ...def.declare(state),
+    ...(def.heading === undefined
+      ? {}
+      : labelFor(trace, def.name, def.heading)),
+  }) as Handle<K>;
   const sides: Sides = Object.fromEntries(
     Object.entries(def.auxiliary?.(from, calls) ?? {}).map(([name, decl]) => [
       name,
