@@ -58,6 +58,7 @@ ${scene('notes', 'A whole page, as Typst compiles it: the figure sits in the not
 <tr><td><code>step</code></td><td><code>-1</code></td><td>One frame: a number, step name or section-qualified step.</td></tr>
 <tr><td><code>theme</code></td><td><code>"light"</code></td><td>A fixed built-in theme.</td></tr>
 <tr><td><code>layout</code></td><td><code>auto</code></td><td><code>"narrow"</code> for notes by default; <code>"wide"</code> puts side structures beside the main one.</td></tr>
+<tr><td><code>lang</code></td><td><code>auto</code></td><td>The language of an algorithm's run and of the figure's own words: <code>"zh"</code> is Chinese, anything else English. <code>auto</code> follows the document's <code>text.lang</code>, so <code>#set text(lang: "zh")</code> is enough.</td></tr>
 <tr><td><code>strict</code></td><td><code>false</code></td><td>Stop compilation on a diagnostic instead of drawing an error box.</td></tr>
 <tr><td><code>width</code>, <code>height</code></td><td><code>auto</code></td><td>Passed to <code>image</code>. Natural size is 0.75 pt per pixel.</td></tr>
 <tr><td><code>fit</code></td><td><code>"contain"</code></td><td>Image fitting: <code>"contain"</code>, <code>"cover"</code> or <code>"stretch"</code>.</td></tr>

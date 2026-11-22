@@ -5,19 +5,31 @@
  * hand, so a new module appears without changes to the site.
  */
 import {
-  TOPIC_TITLES,
+  summaryOf,
+  titleOf,
+  topicTitle,
   TOPICS,
   type Algorithm,
   type Topic,
 } from '@algomotion/recipes';
+
+import type { Locale } from './locale.ts';
 
 /** One module's page. */
 export interface Entry {
   readonly id: string;
   readonly title: string;
   readonly summary: string;
+  /**
+   * The English title, on pages in another language, so a reader can
+   * find a module by either name.
+   */
+  readonly english?: string;
   readonly topic: Topic;
-  /** The page's folder, relative to the site's root, such as `bst/delete/`. */
+  /**
+   * The page's folder within its locale, such as `bst/delete/`: from the
+   * site's root in English, from `zh/` in Chinese.
+   */
   readonly path: string;
   /** For an operation, the structure it belongs to. */
   readonly structure?: string;
@@ -43,14 +55,21 @@ export const pathOf = (id: string): string => `${id.split('.').join('/')}/`;
 export const depthOf = (path: string): number =>
   path.split('/').filter((part) => part !== '').length;
 
-/** The pages of `modules`, by topic and then by structure. */
-export function catalog(modules: readonly Algorithm[]): TopicGroup[] {
+/**
+ * The pages of `modules`, by topic and then by structure, with their
+ * titles and summaries in `locale` (ADR 0045).
+ */
+export function catalog(
+  modules: readonly Algorithm[],
+  locale: Locale = 'en',
+): TopicGroup[] {
   const entryOf = (a: Algorithm): Entry => {
     const [structure, operation] = a.id.split('.');
     return {
       id: a.id,
-      title: a.title,
-      summary: a.summary,
+      title: titleOf(a, locale),
+      summary: summaryOf(a, locale),
+      ...(locale === 'en' ? {} : { english: a.title }),
       topic: a.topic,
       path: pathOf(a.id),
       ...(operation === undefined ? {} : { structure: structure! }),
@@ -68,7 +87,7 @@ export function catalog(modules: readonly Algorithm[]): TopicGroup[] {
     );
     return {
       topic,
-      title: TOPIC_TITLES[topic],
+      title: topicTitle(topic, locale),
       algorithms: own.filter((e) => !isStructure(e)),
       structures: own
         .filter(isStructure)

@@ -2,7 +2,13 @@
  * The documentation's catalogue (roadmap 3.4): every registry module gets
  * a page, grouped by topic, and a data structure's operations under it.
  */
-import { algorithms, TOPICS } from '@algomotion/recipes';
+import {
+  algorithms,
+  summaryOf,
+  titleOf,
+  topicTitle,
+  TOPICS,
+} from '@algomotion/recipes';
 import { describe, expect, it } from 'vitest';
 
 import { catalog, depthOf, pathOf } from '../../src/docs/catalog.ts';
@@ -57,8 +63,35 @@ describe('the catalogue', () => {
     expect(depthOf('bst/delete/')).toBe(2);
   });
 
-  it('keeps no page in the way of the share page or the themes', () => {
+  it('keeps no page in the way of the share page, the themes or the Chinese pages', () => {
     for (const e of entries)
-      expect(['play/', 'themes/', 'assets/']).not.toContain(e.path);
+      expect(['play/', 'themes/', 'assets/', 'zh/']).not.toContain(e.path);
+  });
+});
+
+describe('the catalogue in Chinese', () => {
+  const zh = catalog(algorithms, 'zh');
+  const zhEntries = zh.flatMap((g) => [
+    ...g.algorithms,
+    ...g.structures.flatMap((s) => [s.entry, ...s.operations]),
+  ]);
+
+  it('has the same pages, in the same order and folders', () => {
+    expect(zhEntries.map((e) => [e.id, e.path])).toEqual(
+      entries.map((e) => [e.id, e.path]),
+    );
+  });
+
+  it('names every module and topic in Chinese, and keeps its English title to search by', () => {
+    for (const e of zhEntries) {
+      const a = algorithms.find((m) => m.id === e.id)!;
+      expect(e.title, e.id).toBe(titleOf(a, 'zh'));
+      expect(e.summary, e.id).toBe(summaryOf(a, 'zh'));
+      expect(e.title, e.id).toMatch(/[\u4e00-\u9fff]/u);
+      expect(e.english, e.id).toBe(a.title);
+    }
+    for (const g of zh) expect(g.title).toBe(topicTitle(g.topic, 'zh'));
+    // The English catalogue has nothing else to search by.
+    for (const e of entries) expect(e.english).toBeUndefined();
   });
 });

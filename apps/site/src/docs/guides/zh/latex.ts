@@ -49,6 +49,7 @@ ${figure('tree', '引擎画出的同一棵树、同一个主题。在 LaTeX 中�
 <tr><td><code>start</code></td><td><code>+</code></td><td>图组的第一个叠层：递增计数，或一个明确的编号。</td></tr>
 <tr><td><code>theme</code></td><td><code>light</code></td><td>一个内置的固定主题。</td></tr>
 <tr><td><code>layout</code></td><td><code>auto</code></td><td>笔记中为 <code>narrow</code>，Beamer 中为 <code>wide</code>；两者都可以显式指定。</td></tr>
+<tr><td><code>lang</code></td><td><code>en</code></td><td><code>en</code> 或 <code>zh</code>：算法运行过程和图中自带的词的语言。中文的图要放在能排中文的文档里，比如用了 <code>ctex</code> 的文档。</td></tr>
 <tr><td><code>width</code>、<code>height</code></td><td>自然尺寸；Beamer 中填满</td><td>在给定尺寸内缩放，保持比例。</td></tr>
 <tr><td><code>scale</code></td><td>无</td><td>相对自然尺寸的缩放因子；不给值时恢复默认尺寸。</td></tr>
 <tr><td><code>value font</code></td><td>主题的字体族</td><td>单元格的值、节点、下标、边标签和指针所用的字体。</td></tr>

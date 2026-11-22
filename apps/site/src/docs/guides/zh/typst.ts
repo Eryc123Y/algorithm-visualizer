@@ -58,6 +58,7 @@ ${scene('notes', 'Typst 编译出的一整页：这幅图和笔记里的其他�
 <tr><td><code>step</code></td><td><code>-1</code></td><td>一帧：编号、步骤名，或带分节限定的步骤。</td></tr>
 <tr><td><code>theme</code></td><td><code>"light"</code></td><td>一个固定的内置主题。</td></tr>
 <tr><td><code>layout</code></td><td><code>auto</code></td><td>笔记中默认 <code>"narrow"</code>；<code>"wide"</code> 把辅助结构放在主结构旁边。</td></tr>
+<tr><td><code>lang</code></td><td><code>auto</code></td><td>算法运行过程和图中自带的词的语言：<code>"zh"</code> 是中文，其他都是英文。<code>auto</code> 跟随文档的 <code>text.lang</code>，所以写 <code>#set text(lang: "zh")</code> 就够了。</td></tr>
 <tr><td><code>strict</code></td><td><code>false</code></td><td>遇到诊断信息时中止编译，而不是画一个错误框。</td></tr>
 <tr><td><code>width</code>、<code>height</code></td><td><code>auto</code></td><td>传给 <code>image</code>。自然尺寸是每像素 0.75 pt。</td></tr>
 <tr><td><code>fit</code></td><td><code>"contain"</code></td><td>图片的适配方式：<code>"contain"</code>、<code>"cover"</code> 或 <code>"stretch"</code>。</td></tr>

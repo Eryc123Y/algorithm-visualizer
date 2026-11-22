@@ -311,11 +311,11 @@ const zh: HomeText = {
       },
       latex: {
         tab: 'LaTeX',
-        lede: '一条命令用 TikZ 画图，图里的文字用的是文档自己的字体。图会被缓存，之后编译不再需要 shell escape。',
+        lede: '一条命令用 TikZ 画图，图里的文字用的是文档自己的字体，所以中文的图要放在能排中文的文档里，比如加载了 ctex 的文档。图会被缓存，之后编译不再需要 shell escape。',
       },
       slides: {
         tab: '幻灯片',
-        lede: '在 Beamer 里，steps 选项把一幅图变成同一张图的多个叠层，每步一页。在 Typst 里，algomotion-slides 借助 polylux 或 Touying 的 only 做到同样的事。',
+        lede: '在 Beamer 里，steps 选项把一幅图变成同一张图的多个叠层，每步一页；中文的讲解要用能排中文的文档，比如加载 ctex。在 Typst 里，algomotion-slides 借助 polylux 或 Touying 的 only 做到同样的事。',
       },
       cli: {
         tab: '命令行',
