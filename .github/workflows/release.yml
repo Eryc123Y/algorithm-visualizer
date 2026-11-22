@@ -1,0 +1,91 @@
+name: Release files
+
+# Builds what a GitHub release carries (docs/releasing.md): the standalone
+# `algomotion` command for each platform, each run once before it is
+# packed, and the Typst, LaTeX and player archives. It publishes nothing;
+# the files are the run's artifacts, which the release then attaches. It
+# runs on a version tag, by hand, and on pull requests that change how the
+# files are built.
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/release.yml'
+      - 'scripts/release-assets.sh'
+      - 'packages/mcp/scripts/build-standalone.ts'
+      - 'packages/mcp/scripts/standalone.ts'
+      - 'packages/mcp/standalone/**'
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  standalone:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { runner: macos-14, name: macos-arm64 }
+          - { runner: macos-14, name: macos-x64, target: x86_64-apple-darwin }
+          - { runner: ubuntu-24.04, name: linux-x64 }
+          - { runner: ubuntu-24.04-arm, name: linux-arm64 }
+          - { runner: windows-2022, name: windows-x64 }
+    runs-on: ${{ matrix.runner }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Add the cross target
+        if: matrix.target
+        run: |
+          channel="$(sed -n 's/^channel = "\(.*\)"$/\1/p' packages/mcp/standalone/rust-toolchain.toml)"
+          rustup toolchain install "$channel" --profile minimal --target "${{ matrix.target }}"
+      - name: Build
+        run: npm run build:standalone -w @algomotion/mcp ${{ matrix.target && format('-- --target {0}', matrix.target) || '' }}
+      - name: Run it once and pack it
+        run: |
+          dir="packages/mcp/dist/standalone${{ matrix.target && format('/{0}', matrix.target) || '' }}"
+          exe="algomotion"; [ "${{ runner.os }}" = Windows ] && exe="algomotion.exe"
+          if [ -z "${{ matrix.target }}" ]; then
+            "$dir/$exe" run dijkstra 'A-B 4, B-C 1' --lang zh > run.json
+            grep -q '最' run.json
+          else
+            strip "$dir/$exe"
+            file "$dir/$exe" | tee /dev/stderr | grep -q x86_64
+          fi
+          pack="algomotion-${{ matrix.name }}"
+          mkdir -p "$pack" && cp "$dir/$exe" LICENSE "$pack/"
+          if [ "${{ runner.os }}" = Windows ]; then
+            7z a -tzip "$pack.zip" "$pack" > /dev/null
+          else
+            tar -czf "$pack.tar.gz" "$pack"
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: algomotion-${{ matrix.name }}
+          path: algomotion-${{ matrix.name }}.*
+
+  archives:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: scripts/release-assets.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: archives
+          path: release/

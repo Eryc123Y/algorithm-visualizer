@@ -10,7 +10,7 @@
     "player",
     "animation"
   ],
-  "license": "GPL-3.0-or-later",
+  "license": "GPL-3.0-or-later AND OFL-1.1",
   "homepage": "https://algomotion.turing2234.com",
   "repository": {
     "type": "git",
