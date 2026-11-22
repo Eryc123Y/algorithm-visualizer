@@ -67,4 +67,4 @@ Across the project:
 
 ## Decisions the owner still has to make
 
-- **Name:** the project name, before anything is published to npm, Typst Universe or CTAN.
+None before 1.0. The owner named the project algomotion ([ADR 0044](adr/0044-the-name-algomotion.md)) and chose its licence, GPL-3.0-or-later; publishing waits for the owner's accounts ([releasing](releasing.md)).
