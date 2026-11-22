@@ -11,7 +11,13 @@ import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
 
-import { NOTICES, packagesIn, unnoticed } from './third-party.ts';
+import {
+  htmlComment,
+  NOTICES,
+  noticesFor,
+  packagesIn,
+  unnoticed,
+} from './third-party.ts';
 
 const ROOT = fileURLToPath(new URL('../', import.meta.url));
 const notices = readFileSync(NOTICES, 'utf8');
@@ -55,6 +61,41 @@ describe('unnoticed', () => {
     expect(unnoticed(['zod', 'left-pad'], 'The `zod` package.')).toEqual([
       'left-pad',
     ]);
+  });
+});
+
+describe('noticesFor', () => {
+  const notices = [
+    '# Notices',
+    '### A',
+    'For `a`.',
+    'Copyright A',
+    '### B',
+    'The same covers `b` and `c`.',
+    'Copyright B',
+  ].join('\n');
+
+  it('keeps the sections that name the packages', () => {
+    const chosen = noticesFor(['c'], notices);
+    expect(chosen).toContain('Copyright B');
+    expect(chosen).not.toContain('Copyright A');
+  });
+
+  it('fails for a package no section names', () => {
+    expect(() => noticesFor(['d'], notices)).toThrow(/d, which/);
+  });
+
+  it('has a section for every npm package of the table', () => {
+    const real = readFileSync(NOTICES, 'utf8');
+    expect(() => noticesFor(rowsFrom('npm'), real)).not.toThrow();
+  });
+});
+
+describe('htmlComment', () => {
+  it('cannot be ended early by the text', () => {
+    const comment = htmlComment('a --> b --!> c');
+    expect(comment.match(/-->/g)).toHaveLength(1);
+    expect(comment).not.toContain('--!>');
   });
 });
 

@@ -18,6 +18,10 @@ trap 'rm -rf "$tmp"' EXIT
 for built in packages/typst/package/engine.bc packages/elements/dist/cdn/algomotion-player.js packages/elements/dist/cdn/THIRD-PARTY-NOTICES.md; do
   [ -f "$built" ] || { echo "Missing $built: run npm run build first." >&2; exit 1; }
 done
+cmp -s THIRD-PARTY-NOTICES.md packages/typst/package/THIRD-PARTY-NOTICES.md || {
+  echo "packages/typst/package/THIRD-PARTY-NOTICES.md differs from THIRD-PARTY-NOTICES.md: copy it." >&2
+  exit 1
+}
 rm -rf "$out"
 mkdir -p "$out"
 

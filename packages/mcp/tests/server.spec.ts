@@ -129,6 +129,18 @@ describe('algomotion_show, the MCP App', () => {
     expect(content!.text).toContain('<algo-player hidden>');
     // Hosts load nothing but this file.
     expect(content!.text).not.toMatch(/<script[^>]* src=|<link[^>]* href=/);
+    // So it carries the notices of the software it bundles.
+    const notices = /<!--\nThird-party notices:[\s\S]*-->\n$/.exec(
+      content!.text,
+    )?.[0];
+    expect(notices).toBeDefined();
+    for (const holder of [
+      'Copyright (c) 2025 Colin McDonnell',
+      'Copyright (c) 2017 Google LLC',
+      'Model Context Protocol a Series of LF Projects, LLC',
+    ])
+      expect(notices).toContain(holder);
+    expect(notices).not.toContain('QuickJS');
   });
 
   it('hands a valid document and frame to the page', async () => {

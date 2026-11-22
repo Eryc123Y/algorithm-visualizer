@@ -118,4 +118,4 @@ A command takes about 20 ms to start, and one Dijkstra figure 45 ms on an Apple 
 
 ## Licence
 
-GPL-3.0-or-later. The player page, `ui/player.html`, bundles Lit, Zod and the MCP Apps SDK, whose licences `ui/THIRD-PARTY-NOTICES.md` carries; the standalone command bundles QuickJS-ng and Zod, and its archives carry the same file.
+GPL-3.0-or-later. The player page, `ui/player.html`, bundles Lit, Zod and the MCP Apps SDK, and carries their licences in a comment at its end; `ui/THIRD-PARTY-NOTICES.md` has them too. The standalone command bundles QuickJS-ng and Zod, and its archives carry `THIRD-PARTY-NOTICES.md` and the fonts' `OFL.txt`.

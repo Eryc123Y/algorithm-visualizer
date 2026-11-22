@@ -14,6 +14,7 @@ on:
     paths:
       - '.github/workflows/typst-universe.yml'
       - 'scripts/typst-universe.sh'
+      - 'THIRD-PARTY-NOTICES.md'
       - 'packages/typst/**'
       - 'packages/spec/src/**'
       - 'packages/fonts/src/**'

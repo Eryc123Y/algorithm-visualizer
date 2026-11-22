@@ -70,7 +70,8 @@ jobs:
           "${run[@]}" run dijkstra 'A-B 4, B-C 1' --lang zh > run.json
           grep -q '最' run.json
           pack="algomotion-${{ matrix.name }}"
-          mkdir -p "$pack" && cp "$dir/$exe" LICENSE THIRD-PARTY-NOTICES.md "$pack/"
+          # The command draws text with the fonts' outlines, under the OFL.
+          mkdir -p "$pack" && cp "$dir/$exe" LICENSE THIRD-PARTY-NOTICES.md packages/fonts/OFL.txt "$pack/"
           if [ "${{ runner.os }}" = Windows ]; then
             7z a -tzip "$pack.zip" "$pack" > /dev/null
           else

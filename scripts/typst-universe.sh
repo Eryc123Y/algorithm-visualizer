@@ -50,6 +50,10 @@ if [ -e "$target" ] && [ "$replace" != true ]; then
   exit 1
 fi
 
+cmp -s THIRD-PARTY-NOTICES.md packages/typst/package/THIRD-PARTY-NOTICES.md || {
+  echo "packages/typst/package/THIRD-PARTY-NOTICES.md differs from THIRD-PARTY-NOTICES.md: copy it." >&2
+  exit 1
+}
 npm run build -w @algomotion/typst > /dev/null
 rm -rf "$target"
 mkdir -p "$target"

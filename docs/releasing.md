@@ -50,7 +50,7 @@ The tag starts the **Release files** workflow (`.github/workflows/release.yml`).
 - `algomotion-latex.zip`: the LaTeX package as CTAN takes it;
 - `algomotion-player-<version>.zip`: the player's files, to host.
 
-Every file that bundles other people's software carries `THIRD-PARTY-NOTICES.md`: the standalone archives, the Typst package, and the player's files and the MCP server's player page, whose builds write it next to them. A bundle that contains an npm package the notices do not name fails to build, and `scripts/third-party.spec.ts` checks the crates and the copyright lines.
+Every file that bundles other people's software carries `THIRD-PARTY-NOTICES.md`: the standalone archives (with the fonts' `OFL.txt`), the Typst package, and the player's files, whose build writes it next to them. The MCP server's player page, which hosts receive alone, carries the notices of what it bundles in a comment at its end. The Typst package's copy must equal the root file; the packing scripts stop if it does not. A bundle that contains an npm package the notices do not name fails to build, and `scripts/third-party.spec.ts` checks the crates and the copyright lines.
 
 The files are the run's artifacts. Download them from the run's page, or with `gh run download`. The same archives build locally with `npm run build && scripts/release-assets.sh`, into `release/`.
 

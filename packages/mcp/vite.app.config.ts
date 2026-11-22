@@ -7,7 +7,12 @@ import { fileURLToPath } from 'node:url';
 
 import { defineConfig, type Plugin } from 'vite';
 
-import { thirdPartyNotices } from '../../scripts/third-party.ts';
+import {
+  htmlComment,
+  noticesFor,
+  packagesIn,
+  thirdPartyNotices,
+} from '../../scripts/third-party.ts';
 
 /** Moves the built script chunks into the HTML file. */
 const inlineScripts = (): Plugin => ({
@@ -17,8 +22,10 @@ const inlineScripts = (): Plugin => ({
     for (const html of Object.values(bundle)) {
       if (html.type !== 'asset' || !html.fileName.endsWith('.html')) continue;
       let text = String(html.source);
+      const modules: string[] = [];
       for (const [name, chunk] of Object.entries(bundle)) {
         if (chunk.type !== 'chunk') continue;
+        modules.push(...chunk.moduleIds);
         const tag = new RegExp(
           `<script type="module" crossorigin src="[^"]*${chunk.fileName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"></script>`,
         );
@@ -32,7 +39,9 @@ const inlineScripts = (): Plugin => ({
       }
       if (/<script[^>]* src=/.test(text))
         throw new Error('A script was left out of the player page');
-      html.source = text;
+      // Hosts receive this file alone, so it carries the notices of the
+      // software it bundles.
+      html.source = `${text.trimEnd()}\n${htmlComment(noticesFor(packagesIn(modules)))}\n`;
     }
   },
 });
@@ -55,7 +64,7 @@ export default defineConfig({
       ),
     },
   },
-  // THIRD-PARTY-NOTICES.md goes next to the page, for what it bundles.
+  // THIRD-PARTY-NOTICES.md goes next to the page too, in the npm package.
   plugins: [thirdPartyNotices({ emit: true }), inlineScripts()],
   build: {
     outDir: fileURLToPath(new URL('ui', import.meta.url)),

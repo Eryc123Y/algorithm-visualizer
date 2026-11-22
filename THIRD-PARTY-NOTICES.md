@@ -1,12 +1,12 @@
 # Third-party notices
 
-algomotion is free software under the GNU General Public License, version 3 or later (`LICENSE`). Some of the files it distributes also contain other people's software, which keeps its own licence. This file says which, and carries the notices those licences ask to be kept with every copy. It goes with each file that contains them: the Typst package, the standalone `algomotion` command, the player's files and the MCP server's player page.
+algomotion is free software under the GNU General Public License, version 3 or later (`LICENSE`). Some of the files it distributes also contain other people's software, which keeps its own licence. This file says which, and carries the notices those licences ask to be kept with every copy. It goes with each file that contains them: the Typst package, the standalone `algomotion` command and the player's files carry it, and the MCP server's player page carries the notices of what it bundles in a comment at its end.
 
 ## What goes where
 
 | Component                                                                                      | Where it comes from        | Licence                                         | In                                                                                  |
 | ---------------------------------------------------------------------------------------------- | -------------------------- | ----------------------------------------------- | ----------------------------------------------------------------------------------- |
-| QuickJS-ng                                                                                     | vendored in `rquickjs-sys` | MIT                                             | the Typst plugin (`plugin.wasm`), the standalone command                            |
+| QuickJS-ng                                                                                     | vendored in `rquickjs-sys` | MIT, and Unicode-3.0 for its Unicode tables     | the Typst plugin (`plugin.wasm`), the standalone command                            |
 | `rquickjs`, `rquickjs-core`, `rquickjs-sys`                                                    | crates.io                  | MIT                                             | the Typst plugin, the standalone command                                            |
 | `hashbrown`, `allocator-api2`, `equivalent`                                                    | crates.io                  | MIT OR Apache-2.0, used under MIT               | the Typst plugin, the standalone command                                            |
 | `foldhash`                                                                                     | crates.io                  | Zlib                                            | the Typst plugin, the standalone command                                            |
@@ -19,7 +19,7 @@ algomotion is free software under the GNU General Public License, version 3 or l
 
 - **The player** is `algomotion-player.js` and `algomotion-recipes.js`: in `@algomotion/elements` (`dist/cdn/`), on the CDN and in the GitHub release's player archive.
 - **The player page** is `ui/player.html` in `@algomotion/mcp`, which the MCP server sends to the client.
-- **Fonts.** The themes' fonts are under the SIL Open Font License 1.1. Their notices are in `OFL.txt`, which goes with every output that carries them: `@algomotion/fonts`, the player's `fonts/`, and the Typst package, whose engine draws text with their outlines.
+- **Fonts.** The themes' fonts are under the SIL Open Font License 1.1. Their notices are in `OFL.txt`, which goes with every output that carries them: `@algomotion/fonts`, the player's `fonts/`, and the Typst package and the standalone command, which draw text with their outlines.
 - **Used only to build**, and not part of any file the project distributes: the crates `cc`, `find-msvc-tools`, `shlex`, `proc-macro2`, `quote`, `syn`, `unicode-ident`, `venial`, `serde_core`, `serde_derive` and `relative-path`.
 - **Without a notice to keep**: `wasm-minimal-protocol`, a macro whose glue code is in the Typst plugin, is in the public domain (The Unlicense).
 
@@ -52,6 +52,65 @@ THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
+```
+
+The QuickJS-ng sources that `rquickjs-sys` compiles (`quickjs.c`, `libregexp.c`, `libunicode.c`, `dtoa.c` and their headers) carry these copyright lines under the same licence:
+
+```text
+Copyright (c) 2016-2017 Fabrice Bellard
+Copyright (c) 2017 Fabrice Bellard
+Copyright (c) 2017-2018 Fabrice Bellard
+Copyright (c) 2017-2026 Fabrice Bellard
+Copyright (c) 2024 Fabrice Bellard
+Copyright (c) 2017-2018 Charlie Gordon
+Copyright (c) 2017-2024 Charlie Gordon
+Copyright (c) 2017-2025 Charlie Gordon
+Copyright (c) 2018 Charlie Gordon
+Copyright (c) 2023-2026 Ben Noordhuis
+Copyright (c) 2023-2026 Saúl Ibarra Corretgé
+Copyright (c) 2023 Marcin Kolny
+```
+
+Its Unicode tables (`libunicode-table.h`) come from the Unicode Character Database:
+
+```text
+COPYRIGHT AND PERMISSION NOTICE
+
+Copyright © 1991-2026 Unicode, Inc.
+
+NOTICE TO USER: Carefully read the following legal agreement. BY
+DOWNLOADING, INSTALLING, COPYING OR OTHERWISE USING DATA FILES, AND/OR
+SOFTWARE, YOU UNEQUIVOCALLY ACCEPT, AND AGREE TO BE BOUND BY, ALL OF THE
+TERMS AND CONDITIONS OF THIS AGREEMENT. IF YOU DO NOT AGREE, DO NOT
+DOWNLOAD, INSTALL, COPY, DISTRIBUTE OR USE THE DATA FILES OR SOFTWARE.
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of data files and any associated documentation (the "Data Files") or
+software and any associated documentation (the "Software") to deal in the
+Data Files or Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, and/or sell
+copies of the Data Files or Software, and to permit persons to whom the
+Data Files or Software are furnished to do so, provided that either (a)
+this copyright and permission notice appear with all copies of the Data
+Files or Software, or (b) this copyright and permission notice appear in
+associated Documentation.
+
+THE DATA FILES AND SOFTWARE ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY
+KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT OF
+THIRD PARTY RIGHTS.
+
+IN NO EVENT SHALL THE COPYRIGHT HOLDER OR HOLDERS INCLUDED IN THIS NOTICE
+BE LIABLE FOR ANY CLAIM, OR ANY SPECIAL INDIRECT OR CONSEQUENTIAL DAMAGES,
+OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
+WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
+ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THE DATA
+FILES OR SOFTWARE.
+
+Except as contained in this notice, the name of a copyright holder shall
+not be used in advertising or otherwise to promote the sale, use or other
+dealings in these Data Files or Software without prior written
+authorization of the copyright holder.
 ```
 
 ### rquickjs, rquickjs-core and rquickjs-sys
@@ -504,6 +563,8 @@ DEALINGS IN THE SOFTWARE.
 
 ### Zod
 
+For `zod`.
+
 ```text
 MIT License
 
@@ -787,6 +848,8 @@ the full license text.
 ```
 
 ### pkce-challenge
+
+For `pkce-challenge`.
 
 ```text
 MIT License

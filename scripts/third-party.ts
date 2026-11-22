@@ -40,6 +40,34 @@ export function unnoticed(
   return names.filter((name) => !notices.includes(`\`${name}\``));
 }
 
+/**
+ * The notices of some npm packages: the sections of THIRD-PARTY-NOTICES.md
+ * that name them, under its title, for a file that carries only those.
+ */
+export function noticesFor(
+  packages: readonly string[],
+  notices: string = readFileSync(NOTICES, 'utf8'),
+): string {
+  const sections = notices.split(/^(?=### )/m).slice(1);
+  const named = (name: string) => `\`${name}\``;
+  const missing = packages.filter(
+    (name) => !sections.some((section) => section.includes(named(name))),
+  );
+  if (missing.length > 0) throw new Error(unnoticedError(missing));
+  const chosen = sections.filter((section) =>
+    packages.some((name) => section.includes(named(name))),
+  );
+  return [
+    'Third-party notices: this file contains the software below, under its own licence.',
+    '',
+    ...chosen.map((section) => section.trim() + '\n'),
+  ].join('\n');
+}
+
+/** Text as an HTML comment, which ends only where the comment does. */
+export const htmlComment = (text: string): string =>
+  `<!--\n${text.replaceAll('-->', '-- >').replaceAll('--!>', '--! >')}\n-->`;
+
 /** The error for a bundle with packages the notices leave out. */
 export function unnoticedError(missing: readonly string[]): string {
   return (
