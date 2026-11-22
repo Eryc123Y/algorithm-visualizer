@@ -62,7 +62,7 @@ ${code(
 <tr><td><code>hide-controls</code></td><td>不设置</td><td>隐藏播放控件。</td></tr>
 <tr><td><code>hide-code</code></td><td>不设置</td><td>隐藏源代码。</td></tr>
 <tr><td><code>language</code></td><td>有伪代码时为伪代码</td><td>首选的源代码语言，如 <code>python</code>。</td></tr>
-<tr><td><code>lang</code></td><td>页面的语言</td><td>播放器控件和算法运行过程所用的语言：任何 <code>zh</code> 标签都是中文，其他都是英文。和所有 <code>lang</code> 一样会继承，所以写 <code>&lt;html lang="zh-Hans"&gt;</code> 就够了。文档自带的文字按原样显示。各模块的讲解正在翻译中（路线图 5.8）。</td></tr>
+<tr><td><code>lang</code></td><td>页面的语言</td><td>播放器控件和算法运行过程所用的语言：任何 <code>zh</code> 标签都是中文，其他都是英文。和所有 <code>lang</code> 一样会继承，所以写 <code>&lt;html lang="zh-Hans"&gt;</code> 就够了。文档自带的文字按原样显示。</td></tr>
 <tr><td><code>mode</code></td><td><code>interactive</code></td><td><code>display</code> 只显示动画。</td></tr>
 <tr><td><code>once</code></td><td>不设置</td><td>在展示模式下只播放一遍，不循环。</td></tr>
 <tr><td><code>motion</code></td><td>由模式决定</td><td><code>arc</code> 或 <code>linear</code>；交互模式默认 arc，展示模式默认 linear。</td></tr>
