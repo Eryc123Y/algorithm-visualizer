@@ -51,17 +51,22 @@ jobs:
           rustup toolchain install "$channel" --profile minimal --target "${{ matrix.target }}"
       - name: Build
         run: npm run build:standalone -w @algomotion/mcp ${{ matrix.target && format('-- --target {0}', matrix.target) || '' }}
+      - name: Rosetta, to run the Intel build on Apple silicon
+        if: matrix.target == 'x86_64-apple-darwin'
+        run: /usr/sbin/softwareupdate --install-rosetta --agree-to-license || arch -x86_64 /usr/bin/true
       - name: Run it once and pack it
         run: |
           dir="packages/mcp/dist/standalone${{ matrix.target && format('/{0}', matrix.target) || '' }}"
           exe="algomotion"; [ "${{ runner.os }}" = Windows ] && exe="algomotion.exe"
-          if [ -z "${{ matrix.target }}" ]; then
-            "$dir/$exe" run dijkstra 'A-B 4, B-C 1' --lang zh > run.json
-            grep -q '最' run.json
-          else
+          # The cross build runs under Rosetta; every build runs once.
+          run=("$dir/$exe")
+          if [ -n "${{ matrix.target }}" ]; then
             strip "$dir/$exe"
             file "$dir/$exe" | tee /dev/stderr | grep -q x86_64
+            run=(arch -x86_64 "$dir/$exe")
           fi
+          "${run[@]}" run dijkstra 'A-B 4, B-C 1' --lang zh > run.json
+          grep -q '最' run.json
           pack="algomotion-${{ matrix.name }}"
           mkdir -p "$pack" && cp "$dir/$exe" LICENSE "$pack/"
           if [ "${{ runner.os }}" = Windows ]; then

@@ -35,11 +35,28 @@ describe('the README’s list of modules', () => {
   });
 
   it('names each structure’s operations', () => {
-    for (const [, id, ops] of list.matchAll(/`([a-z-]+)` \(([a-z, -]+)\)/g)) {
+    const structures = families.filter((id) =>
+      algorithms.some((a) => a.id.startsWith(`${id}.`)),
+    );
+    expect(structures.length).toBeGreaterThan(10);
+    for (const id of structures) {
       const own = algorithms
         .filter((a) => a.id.startsWith(`${id}.`))
-        .map((a) => a.id.slice(id!.length + 1));
-      expect(ops!.split(', ').sort(), id).toEqual(own.sort());
+        .map((a) => a.id.slice(id.length + 1))
+        .sort();
+      // `stack` (push, pop), or a line of several that share their
+      // operations: "…, each with insert and search".
+      const ownList = new RegExp(`\`${id}\` \\(([a-z, -]+)\\)`).exec(list);
+      const line = list.split('\n').find((l) => l.includes(`\`${id}\``)) ?? '';
+      const shared =
+        /each with ([a-z -]+(?:, [a-z -]+)*) and ([a-z -]+)\./.exec(line);
+      const listed =
+        ownList !== null
+          ? ownList[1]!.split(', ')
+          : shared !== null
+            ? [...shared[1]!.split(', '), shared[2]!]
+            : [];
+      expect(listed.sort(), id).toEqual(own);
     }
   });
 });
