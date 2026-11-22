@@ -127,15 +127,28 @@ const DELETE = listing('delete', {
 /** Records LIST-SEARCH for `key`; returns the node's place, or -1. */
 function search(s: ListState, key: number, trace: Trace, on: On): number {
   if (s.keys.length === 0) {
-    trace.step('start', `The list is empty: x = L.head is no node at all.`, {
-      vars: { k: key },
+    trace.step(
+      'start',
+      {
+        en: `The list is empty: x = L.head is no node at all.`,
+        zh: `链表为空：x = L.head 不指向任何节点。`,
+      },
+      {
+        vars: { k: key },
+      },
+    );
+    trace.step('result', {
+      en: `x has run off the end: ${key} is not in the list.`,
+      zh: `x 已走出链表末尾：${key} 不在链表中。`,
     });
-    trace.step('result', `x has run off the end: ${key} is not in the list.`);
     return -1;
   }
   trace.step(
     'start',
-    `x = L.head, which holds ${s.keys[0]}${s.keys[0] === key ? `, the key ${key}` : ''}.`,
+    {
+      en: `x = L.head, which holds ${s.keys[0]}${s.keys[0] === key ? `, the key ${key}` : ''}.`,
+      zh: `x = L.head，它存放 ${s.keys[0]}${s.keys[0] === key ? `，正是关键字 ${key}` : ''}。`,
+    },
     { vars: { k: key } },
   );
   on.pointer({ name: 'head', index: 0 })
@@ -148,8 +161,14 @@ function search(s: ListState, key: number, trace: Trace, on: On): number {
     trace.step(
       'next',
       last
-        ? `${s.keys[at - 1]} ≠ ${key}: x = x.next, past the end of the list.`
-        : `${s.keys[at - 1]} ≠ ${key}: x = x.next, which holds ${s.keys[at]}.`,
+        ? {
+            en: `${s.keys[at - 1]} ≠ ${key}: x = x.next, past the end of the list.`,
+            zh: `${s.keys[at - 1]} ≠ ${key}：x = x.next，走出了链表末尾。`,
+          }
+        : {
+            en: `${s.keys[at - 1]} ≠ ${key}: x = x.next, which holds ${s.keys[at]}.`,
+            zh: `${s.keys[at - 1]} ≠ ${key}：x = x.next，它存放 ${s.keys[at]}。`,
+          },
       { vars: { k: key } },
     );
     on.pointer({ name: 'x', index: last ? null : at });
@@ -159,8 +178,11 @@ function search(s: ListState, key: number, trace: Trace, on: On): number {
   trace.step(
     'result',
     found
-      ? `x holds ${key}: found.`
-      : `x has run off the end: ${key} is not in the list.`,
+      ? { en: `x holds ${key}: found.`, zh: `x 存放 ${key}：找到了。` }
+      : {
+          en: `x has run off the end: ${key} is not in the list.`,
+          zh: `x 已走出链表末尾：${key} 不在链表中。`,
+        },
   );
   if (found) on.highlight({ indices: [at] });
   return found ? at : -1;
@@ -195,8 +217,14 @@ function prepend(
   trace.step(
     'link',
     head === undefined
-      ? `A new node x holds ${key}: the list is empty, so x has no next node and no previous one.`
-      : `A new node x holds ${key}: x.next = L.head, the node of ${head}, and x has no previous node.`,
+      ? {
+          en: `A new node x holds ${key}: the list is empty, so x has no next node and no previous one.`,
+          zh: `新节点 x 存放 ${key}：链表为空，所以 x 既没有后继，也没有前驱。`,
+        }
+      : {
+          en: `A new node x holds ${key}: x.next = L.head, the node of ${head}, and x has no previous node.`,
+          zh: `新节点 x 存放 ${key}：x.next = L.head，即 ${head} 的节点，x 没有前驱。`,
+        },
     { vars: { k: key } },
   );
   const next = place(s, key, 0, on);
@@ -204,13 +232,16 @@ function prepend(
   if (head !== undefined) on.pointer({ name: 'head', index: 1 });
   if (head !== undefined) {
     on.link({ from: 0, to: 1 });
-    trace.step(
-      'back',
-      `The old head, ${head}, points back to x: L.head.prev = x.`,
-    );
+    trace.step('back', {
+      en: `The old head, ${head}, points back to x: L.head.prev = x.`,
+      zh: `原来的表头 ${head} 反向指向 x：L.head.prev = x。`,
+    });
     on.link({ from: 1, to: 0, field: 'prev' }).highlight({ indices: [1] });
   }
-  trace.step('head', `L.head = x: ${key} is the first key.`);
+  trace.step('head', {
+    en: `L.head = x: ${key} is the first key.`,
+    zh: `L.head = x：${key} 成为第一个关键字。`,
+  });
   on.pointer({ name: 'head', index: 0 }).highlight({ indices: [0] });
   return { state: next, result: null };
 }
@@ -233,8 +264,14 @@ function insert(
   trace.step(
     'link',
     succ === undefined
-      ? `A new node x holds ${key}: y, the node of ${after}, is last, so x has no next node, and x.prev = y.`
-      : `A new node x holds ${key}: x.next = y.next, the node of ${succ}, and x.prev = y, the node of ${after}.`,
+      ? {
+          en: `A new node x holds ${key}: y, the node of ${after}, is last, so x has no next node, and x.prev = y.`,
+          zh: `新节点 x 存放 ${key}：${after} 的节点 y 在最后，所以 x 没有后继，x.prev = y。`,
+        }
+      : {
+          en: `A new node x holds ${key}: x.next = y.next, the node of ${succ}, and x.prev = y, the node of ${after}.`,
+          zh: `新节点 x 存放 ${key}：x.next = y.next，即 ${succ} 的节点；x.prev = y，即 ${after} 的节点。`,
+        },
     { vars: { k: key } },
   );
   const next = place(s, key, at, on);
@@ -244,12 +281,18 @@ function insert(
   on.link({ from: at, to: succ === undefined ? null : at + 1 });
   on.link({ from: at, to: y, field: 'prev' });
   if (succ !== undefined) {
-    trace.step('back', `${succ} points back to x: y.next.prev = x.`);
+    trace.step('back', {
+      en: `${succ} points back to x: y.next.prev = x.`,
+      zh: `${succ} 反向指向 x：y.next.prev = x。`,
+    });
     on.link({ from: at + 1, to: at, field: 'prev' }).highlight({
       indices: [at + 1],
     });
   }
-  trace.step('after', `y.next = x: ${key} follows ${after}.`);
+  trace.step('after', {
+    en: `y.next = x: ${key} follows ${after}.`,
+    zh: `y.next = x：${key} 跟在 ${after} 后面。`,
+  });
   on.link({ from: y, to: at }).highlight({ indices: [y, at] });
   return { state: next, result: null };
 }
@@ -267,8 +310,14 @@ function remove(
   trace.step(
     prev === undefined ? 'behead' : 'unlink',
     prev === undefined
-      ? `x is the head: L.head = x.next, ${succ === undefined ? 'so the list becomes empty' : `the node of ${succ}`}.`
-      : `x.prev.next = x.next: ${succ === undefined ? `${prev} is now last` : `${prev} now points to ${succ}`}.`,
+      ? {
+          en: `x is the head: L.head = x.next, ${succ === undefined ? 'so the list becomes empty' : `the node of ${succ}`}.`,
+          zh: `x 是表头：L.head = x.next，${succ === undefined ? '链表变为空' : `即 ${succ} 的节点`}。`,
+        }
+      : {
+          en: `x.prev.next = x.next: ${succ === undefined ? `${prev} is now last` : `${prev} now points to ${succ}`}.`,
+          zh: `x.prev.next = x.next：${succ === undefined ? `${prev} 现在是最后一个` : `${prev} 现在指向 ${succ}`}。`,
+        },
     { vars: { k: key } },
   );
   if (prev === undefined)
@@ -278,10 +327,10 @@ function remove(
       { indices: [at - 1] },
     );
   if (succ !== undefined) {
-    trace.step(
-      'back',
-      `x.next.prev = x.prev: ${prev === undefined ? `${succ} is now first` : `${succ} now points back to ${prev}`}.`,
-    );
+    trace.step('back', {
+      en: `x.next.prev = x.prev: ${prev === undefined ? `${succ} is now first` : `${succ} now points back to ${prev}`}.`,
+      zh: `x.next.prev = x.prev：${prev === undefined ? `${succ} 现在是第一个` : `${succ} 现在反向指向 ${prev}`}。`,
+    });
     on.link({
       from: at + 1,
       to: prev === undefined ? null : at - 1,
@@ -308,10 +357,12 @@ const sample: ListFrom = { keys: [9, 16, 4, 1] };
 /** A doubly linked list, as in CLRS. */
 export const linkedList = defineStructure<ListState, ListFrom, 'linkedList'>({
   id: 'linked-list',
-  title: 'Doubly linked list',
+  title: { en: 'Doubly linked list', zh: '双向链表' },
   topic: 'lists',
-  summary:
-    'Searches, prepends, inserts after a key and deletes keys in a doubly linked list, setting each next and prev pointer as the code does.',
+  summary: {
+    en: 'Searches, prepends, inserts after a key and deletes keys in a doubly linked list, setting each next and prev pointer as the code does.',
+    zh: '在双向链表中查找、在表头插入、在某个关键字之后插入以及删除关键字，像代码那样设置每个 next 和 prev 指针。',
+  },
   name: 'L',
   kind: 'linkedList',
   from: z
@@ -355,16 +406,18 @@ export const linkedList = defineStructure<ListState, ListFrom, 'linkedList'>({
   operations: [
     op({
       name: 'search',
-      title: 'search',
-      summary:
-        'Walks the list from the head until it finds the key or reaches NIL.',
+      title: { en: 'search', zh: '查找' },
+      summary: {
+        en: 'Walks the list from the head until it finds the key or reaches NIL.',
+        zh: '从表头开始沿链表走，直到找到这个关键字或者到达 NIL。',
+      },
       args: { key: Key.describe('The key to look for.') },
       examples: [
         { from: sample, key: 4 },
         { from: sample, key: 7 },
       ],
       code: SEARCH,
-      titleOf: ({ key }) => `search ${key}`,
+      titleOf: ({ key }) => ({ en: `search ${key}`, zh: `查找 ${key}` }),
       apply: (s, { key }, trace, on) => {
         const at = search(s, key, trace, on);
         return { state: s, result: at >= 0 };
@@ -372,40 +425,53 @@ export const linkedList = defineStructure<ListState, ListFrom, 'linkedList'>({
     }),
     op({
       name: 'prepend',
-      title: 'prepend',
-      summary: 'Links a new node with the key in front of the head.',
+      title: { en: 'prepend', zh: '插到表头' },
+      summary: {
+        en: 'Links a new node with the key in front of the head.',
+        zh: '把存放这个关键字的新节点链接到表头前面。',
+      },
       args: { key: Key.describe('The key to prepend.') },
       examples: [{ from: sample, key: 25 }],
       code: PREPEND,
-      titleOf: ({ key }) => `prepend ${key}`,
+      titleOf: ({ key }) => ({
+        en: `prepend ${key}`,
+        zh: `把 ${key} 插到表头`,
+      }),
       apply: (s, { key }, trace, on) => prepend(s, key, trace, on),
     }),
     op({
       name: 'insert',
-      title: 'insert after',
-      summary:
-        'Finds the node of the key `after`, then links a new node with the key in after it.',
+      title: { en: 'insert after', zh: '插到某个关键字之后' },
+      summary: {
+        en: 'Finds the node of the key `after`, then links a new node with the key in after it.',
+        zh: '找到关键字 `after` 的节点，再把存放这个关键字的新节点链接到它后面。',
+      },
       args: {
         key: Key.describe('The key to insert.'),
         after: Key.describe('The key of the node to insert after.'),
       },
       examples: [{ from: sample, key: 36, after: 16 }],
       code: INSERT,
-      titleOf: ({ key, after }) => `insert ${key} after ${after}`,
+      titleOf: ({ key, after }) => ({
+        en: `insert ${key} after ${after}`,
+        zh: `在 ${after} 之后插入 ${key}`,
+      }),
       apply: (s, { key, after }, trace, on) => insert(s, key, after, trace, on),
     }),
     op({
       name: 'delete',
-      title: 'delete',
-      summary:
-        'Finds the node of the key, then unlinks it by pointing its neighbours at each other.',
+      title: { en: 'delete', zh: '删除' },
+      summary: {
+        en: 'Finds the node of the key, then unlinks it by pointing its neighbours at each other.',
+        zh: '找到这个关键字的节点，再让它的两个邻居互相指向，把它从链表中摘下。',
+      },
       args: { key: Key.describe('The key to delete.') },
       examples: [
         { from: sample, key: 4 },
         { from: sample, key: 9 },
       ],
       code: DELETE,
-      titleOf: ({ key }) => `delete ${key}`,
+      titleOf: ({ key }) => ({ en: `delete ${key}`, zh: `删除 ${key}` }),
       apply: (s, { key }, trace, on) => remove(s, key, trace, on),
     }),
   ],

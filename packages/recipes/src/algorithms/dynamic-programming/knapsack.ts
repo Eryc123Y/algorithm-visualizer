@@ -23,10 +23,12 @@ export interface KnapsackItem {
 
 export const knapsack = defineAlgorithm({
   id: 'knapsack',
-  title: '0/1 knapsack',
+  title: { en: '0/1 knapsack', zh: '0-1 背包' },
   topic: 'dynamic-programming',
-  summary:
-    'Fills a table of the best value of the first items within every capacity, each item taken whole or not at all, then traces back the items taken.',
+  summary: {
+    en: 'Fills a table of the best value of the first items within every capacity, each item taken whole or not at all, then traces back the items taken.',
+    zh: '填一张表：在每种容量下，前几件物品能得到的最大价值，每件物品要么整件拿，要么不拿；再回溯出拿了哪些物品。',
+  },
   input: z.strictObject({
     items: z
       .array(
@@ -106,7 +108,7 @@ export const knapsack = defineAlgorithm({
       kind: 'table',
       initial: K.map((row, i) => row.map((v) => (i === 0 ? v : null))),
       rowLabels: [
-        'none',
+        trace.say({ en: 'none', zh: '无' }),
         ...items.map(({ weight, value }) => `w${weight} v${value}`),
       ],
     });
@@ -118,7 +120,10 @@ export const knapsack = defineAlgorithm({
           K[i]![c] = skip;
           trace.step(
             'skip',
-            `Capacity ${c}: item ${i}, of weight ${w}, does not fit; keep ${skip}.`,
+            {
+              en: `Capacity ${c}: item ${i}, of weight ${w}, does not fit; keep ${skip}.`,
+              zh: `容量 ${c}：物品 ${i} 的重量是 ${w}，放不下；保持 ${skip}。`,
+            },
             { vars: { i, c } },
           );
           table.depend({ cell: [i, c], on: [[i - 1, c]] });
@@ -127,7 +132,10 @@ export const knapsack = defineAlgorithm({
           K[i]![c] = Math.max(skip, take);
           trace.step(
             'take',
-            `Capacity ${c}: item ${i} fits; the better of leaving it, ${skip}, and taking it, ${K[i - 1]![c - w]} + ${v} = ${take}, is ${K[i]![c]}.`,
+            {
+              en: `Capacity ${c}: item ${i} fits; the better of leaving it, ${skip}, and taking it, ${K[i - 1]![c - w]} + ${v} = ${take}, is ${K[i]![c]}.`,
+              zh: `容量 ${c}：物品 ${i} 放得下；不拿它是 ${skip}，拿它是 ${K[i - 1]![c - w]} + ${v} = ${take}，较大的是 ${K[i]![c]}。`,
+            },
             { vars: { i, c } },
           );
           table.depend({
@@ -141,10 +149,10 @@ export const knapsack = defineAlgorithm({
         table.set({ cell: [i, c], value: K[i]![c]! });
       }
     });
-    trace.step(
-      'done',
-      `The table is complete: the best value within capacity ${capacity} is ${K[n]![capacity]}.`,
-    );
+    trace.step('done', {
+      en: `The table is complete: the best value within capacity ${capacity} is ${K[n]![capacity]}.`,
+      zh: `表已填完：容量 ${capacity} 内的最大价值是 ${K[n]![capacity]}。`,
+    });
     const chosen: Cell[] = [];
     let c = capacity;
     for (let i = n; i > 0; i--)
@@ -156,8 +164,14 @@ export const knapsack = defineAlgorithm({
     trace.step(
       'trace',
       taken.length === 0
-        ? 'Walk back from the last row: no row differs from the one above, so no item is taken.'
-        : `Walk back from the last row: where a row differs from the one above, its item is taken, so ${taken.length === 1 ? 'item' : 'items'} ${taken.join(', ')}.`,
+        ? {
+            en: 'Walk back from the last row: no row differs from the one above, so no item is taken.',
+            zh: '从最后一行往回走：没有哪一行与上一行不同，所以没有拿任何物品。',
+          }
+        : {
+            en: `Walk back from the last row: where a row differs from the one above, its item is taken, so ${taken.length === 1 ? 'item' : 'items'} ${taken.join(', ')}.`,
+            zh: `从最后一行往回走：哪一行与上一行不同，就拿了那一行的物品，所以拿了物品 ${taken.join(', ')}。`,
+          },
     );
     if (chosen.length > 0) table.settle({ cells: chosen });
   },

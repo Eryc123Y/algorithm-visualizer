@@ -100,7 +100,10 @@ function push(
     );
   trace.step(
     'push',
-    `top becomes ${top}: store ${key} in S[${top}], the new top.`,
+    {
+      en: `top becomes ${top}: store ${key} in S[${top}], the new top.`,
+      zh: `top 变为 ${top}：把 ${key} 存入 S[${top}]，即新的栈顶。`,
+    },
     { vars: { x: key, top } },
   );
   on.set({ index: top, value: key })
@@ -117,8 +120,14 @@ function pop(s: StackState, trace: Trace, on: On): Applied<StackState> {
   trace.step(
     'pop',
     top === 0
-      ? `Pop ${key}, the only key: top becomes −1, and the stack is empty.`
-      : `Pop ${key} from S[${top}]: top becomes ${top - 1}, at ${s.keys[top - 1]}.`,
+      ? {
+          en: `Pop ${key}, the only key: top becomes −1, and the stack is empty.`,
+          zh: `弹出唯一的关键字 ${key}：top 变为 −1，栈空了。`,
+        }
+      : {
+          en: `Pop ${key} from S[${top}]: top becomes ${top - 1}, at ${s.keys[top - 1]}.`,
+          zh: `从 S[${top}] 弹出 ${key}：top 变为 ${top - 1}，指向 ${s.keys[top - 1]}。`,
+        },
     { vars: { top: top - 1 } },
   );
   on.highlight({ indices: [top] })
@@ -133,10 +142,12 @@ const sample: ArrayFrom = { size: 6, keys: [15, 6, 2, 9] };
 /** A stack kept in an array, as in CLRS. */
 export const stack = defineStructure<StackState, ArrayFrom, 'array'>({
   id: 'stack',
-  title: 'Stack',
+  title: { en: 'Stack', zh: '栈' },
   topic: 'lists',
-  summary:
-    'Pushes keys onto and pops them off a stack kept in an array, last in, first out, with top at the most recent key.',
+  summary: {
+    en: 'Pushes keys onto and pops them off a stack kept in an array, last in, first out, with top at the most recent key.',
+    zh: '在用数组存放的栈中压入和弹出关键字，后进先出，top 指向最近放入的关键字。',
+  },
   name: 'S',
   kind: 'array',
   from: arrayFrom('from the bottom to the top, e.g. [15, 6, 2, 9]'),
@@ -173,22 +184,28 @@ export const stack = defineStructure<StackState, ArrayFrom, 'array'>({
   operations: [
     op({
       name: 'push',
-      title: 'push',
-      summary: 'Puts a key on top of the stack, in the cell above the top.',
+      title: { en: 'push', zh: '压入' },
+      summary: {
+        en: 'Puts a key on top of the stack, in the cell above the top.',
+        zh: '把一个关键字放到栈顶，即原栈顶上面的那一格。',
+      },
       args: { key: Key.describe('The key to push.') },
       examples: [{ from: sample, key: 17 }],
       code: PUSH,
-      titleOf: ({ key }) => `push ${key}`,
+      titleOf: ({ key }) => ({ en: `push ${key}`, zh: `压入 ${key}` }),
       apply: (s, { key }, trace, on) => push(s, key, trace, on),
     }),
     op({
       name: 'pop',
-      title: 'pop',
-      summary: 'Takes the top key off the stack and returns it.',
+      title: { en: 'pop', zh: '弹出' },
+      summary: {
+        en: 'Takes the top key off the stack and returns it.',
+        zh: '取下栈顶的关键字并返回它。',
+      },
       args: {},
       examples: [{ from: sample }],
       code: POP,
-      titleOf: () => 'pop',
+      titleOf: () => ({ en: 'pop', zh: '弹出' }),
       apply: (s, _, trace, on) => pop(s, trace, on),
     }),
   ],

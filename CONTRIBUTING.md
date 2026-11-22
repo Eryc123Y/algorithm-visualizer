@@ -97,15 +97,15 @@ Themes are data (ADR 0009, 0030); the painters and the player need no code of th
 Every algorithm, and every operation of a data structure, is a module of the registry in `@algomotion/recipes` (ADR 0019, ADR 0022). MCP, the command line and the playground read the registry, so a module needs no other changes.
 
 1. **Module:** add `packages/recipes/src/algorithms/<topic>/<id>.ts` and export the module made by `defineAlgorithm`:
-   - a kebab-case `id`, a `title`, a `topic`, a one-sentence `summary`;
+   - a kebab-case `id`, a `title`, a `topic`, a one-sentence `summary`, the title and summary in English and Simplified Chinese (`{ en, zh }`, ADR 0045);
    - a Zod `input` schema, and `examples`, the first being the default in menus and the input of a run without one. Lists, graphs and operations take their notations through `listField`, `Graph` and `defineStructure` (ADR 0032). If the input has only one field a run needs, name it `main`, so the input may be that field alone;
    - its `code` in pseudocode (CLRS conventions, indices from 0, our own words) and in Python, with `// @name` and `# @name` markers on the lines steps point at;
-   - `run(input, trace)`, which declares structures with `trace.add` and starts every step with `trace.step(anchor, narration)`. Narrations name values, not the syntax of either language. Throw a `RangeError` for an input the module cannot show.
+   - `run(input, trace)`, which declares structures with `trace.add` and starts every step with `trace.step(anchor, narration)`. Every narration, section title and label is written in both languages side by side, `{ en: …, zh: … }` over the same values; Chinese follows the terms of the Chinese edition of CLRS. Narrations name values, not the syntax of either language. Throw a `RangeError` for an input the module cannot show.
 
    A data structure goes in `packages/recipes/src/structures/<name>/`, with `defineStructure`: a model, `start`, `describe`, `declare` and one entry per operation (ADR 0018).
 
 2. **Registry:** add the module to `algorithms` in `packages/recipes/src/registry.ts`, next to its topic.
-3. **Tests:** `tests/registry.spec.ts` checks every module (examples, anchors, narrations, step names, determinism). Add the module's own test against an independent reference implementation, and property tests in `tests/properties.spec.ts`.
+3. **Tests:** `tests/registry.spec.ts` checks every module (examples, anchors, narrations, step names, determinism), and `tests/zh-coverage.spec.ts` and `tests/zh-sources.spec.ts` check its Chinese. Add the module's own test against an independent reference implementation, and property tests in `tests/properties.spec.ts`.
 4. **Look at it:** open it in the playground, in both languages.
 
 ## Tests

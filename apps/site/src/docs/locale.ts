@@ -1,8 +1,10 @@
 /**
  * The site's languages (roadmap 5.7). English pages sit at the root;
  * each has a Simplified Chinese counterpart under `zh/` at the same path,
- * except the module pages and the share page, which stay English until
- * 5.8 puts Chinese in the product. Layout code is shared: a page takes
+ * the module pages too since 5.8 put Chinese in the product. The share
+ * page is the one exception: a single page for every link, in the
+ * language the link or the reader's browser asks for. Layout code is
+ * shared: a page takes
  * its locale and a table of strings typed once for both languages, so a
  * string missing in one of them does not compile.
  */

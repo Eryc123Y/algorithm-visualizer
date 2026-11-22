@@ -8,10 +8,12 @@ import { SAMPLE, SortInput } from './input.ts';
 
 export const bubbleSort = defineAlgorithm({
   id: 'bubble-sort',
-  title: 'Bubble sort',
+  title: { en: 'Bubble sort', zh: '冒泡排序' },
   topic: 'sorting',
-  summary:
-    'Swaps neighbours that are out of order, from the end towards the front, so each pass bubbles the smallest remaining value into place.',
+  summary: {
+    en: 'Swaps neighbours that are out of order, from the end towards the front, so each pass bubbles the smallest remaining value into place.',
+    zh: '从末尾往前交换顺序颠倒的相邻值，每一趟把剩下的值中最小的一个冒泡到位。',
+  },
   input: SortInput,
   main: 'values',
   examples: [SAMPLE],
@@ -38,21 +40,34 @@ export const bubbleSort = defineAlgorithm({
     const arr = trace.add('a', { kind: 'array', initial: [...values] });
     for (let i = 0; i < n - 1; i++) {
       for (let j = n - 1; j > i; j--) {
-        trace.step('compare', `Compare ${a[j - 1]} and ${a[j]}.`, {
-          vars: { i, j },
-        });
+        trace.step(
+          'compare',
+          {
+            en: `Compare ${a[j - 1]} and ${a[j]}.`,
+            zh: `比较 ${a[j - 1]} 和 ${a[j]}。`,
+          },
+          {
+            vars: { i, j },
+          },
+        );
         arr.pointer({ name: 'j', index: j }).compare({ i: j - 1, j });
         if (a[j]! < a[j - 1]!) {
-          trace.step('swap', `${a[j]} < ${a[j - 1]}: swap them.`);
+          trace.step('swap', {
+            en: `${a[j]} < ${a[j - 1]}: swap them.`,
+            zh: `${a[j]} < ${a[j - 1]}：交换它们。`,
+          });
           arr.swap({ i: j - 1, j });
           [a[j - 1], a[j]] = [a[j]!, a[j - 1]!];
         }
       }
       // At the inner loop's last test, which ends the pass.
-      trace.step('in-place', `${a[i]} is in its final position, ${i}.`);
+      trace.step('in-place', {
+        en: `${a[i]} is in its final position, ${i}.`,
+        zh: `${a[i]} 已在最终位置 ${i}。`,
+      });
       arr.pointer({ name: 'j', index: null }).settle({ index: i });
     }
-    trace.step('sorted', 'The array is sorted.');
+    trace.step('sorted', { en: 'The array is sorted.', zh: '数组已排好序。' });
     arr.settle({ index: n - 1 });
   },
 });

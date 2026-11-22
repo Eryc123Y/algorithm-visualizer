@@ -27,7 +27,7 @@
 
 同一次运行可以变成上面任何一种形式，都由同一个引擎绘制，有九种主题可选。模型也可以通过 MCP 服务器自己编写可视化，逐步校验，再在对话里展示出来。
 
-目前解说和播放器界面只有英文，中文已列入路线图。
+讲解和播放器界面有英文和简体中文两种：网页上的播放器跟随页面的 `lang`，Typst 包跟随文档的 `text.lang`，LaTeX 包用 `lang=zh`，命令行用 `--lang zh`，MCP 工具用 `locale`。
 
 ## 现状：1.0 alpha
 
@@ -53,13 +53,16 @@ import '@algomotion/elements/define';
 <algo-player
   algorithm="dijkstra"
   input="A-B 4, B-C 1, A-C 7, C-D 2"
+  lang="zh"
 ></algo-player>
 ```
+
+页面本身是 `<html lang="zh-Hans">` 时，`lang` 可以省略：播放器会继承它。
 
 在命令行里导出插图：
 
 ```sh
-npx -p @algomotion/mcp@alpha algomotion export dijkstra --input 'A-B 4, B-C 1, A-C 7, C-D 2' --step improve#3 --out figures
+npx -p @algomotion/mcp@alpha algomotion export dijkstra --input 'A-B 4, B-C 1, A-C 7, C-D 2' --step improve#3 --lang zh --out figures
 ```
 
 在 Claude Code 里接入：
@@ -72,6 +75,7 @@ claude mcp add --transport http algomotion https://algomotion-mcp.turing2234.com
 
 ```typ
 #import "@local/algomotion:0.1.0": algomotion
+#set text(lang: "zh")
 #algomotion("dijkstra", "A-B 4, B-C 1, A-C 7, C-D 2", step: "improve#3")
 ```
 
@@ -79,8 +83,10 @@ claude mcp add --transport http algomotion https://algomotion-mcp.turing2234.com
 
 ```latex
 \usepackage{algomotion}
-\algomotion[step=improve\#3]{dijkstra}{A-B 4, B-C 1, A-C 7, C-D 2}
+\algomotion[step=improve\#3, lang=zh]{dijkstra}{A-B 4, B-C 1, A-C 7, C-D 2}
 ```
+
+中文的图要放在能排中文的文档里，比如用了 `ctex` 的文档。
 
 更多内容见[英文 README](README.md) 和[中文网站](https://algomotion.turing2234.com/zh/)。
 

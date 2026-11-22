@@ -25,10 +25,12 @@ const MAX_DIMMED = 90;
 
 export const approxVertexCover = defineAlgorithm({
   id: 'approx-vertex-cover',
-  title: 'Approximate vertex cover',
+  title: { en: 'Approximate vertex cover', zh: '近似顶点覆盖' },
   topic: 'graphs',
-  summary:
-    'Finds a vertex cover at most twice the size of the smallest by taking any edge left, putting both its ends in the cover, and removing every edge they touch.',
+  summary: {
+    en: 'Finds a vertex cover at most twice the size of the smallest by taking any edge left, putting both its ends in the cover, and removing every edge they touch.',
+    zh: '求一个大小不超过最小顶点覆盖两倍的顶点覆盖：任取一条剩下的边，把它的两个端点放进覆盖，再删去与它们相连的所有边。',
+  },
   input: z.strictObject({
     graph: Graph.describe('A graph; its edges are taken as undirected.'),
   }),
@@ -76,10 +78,10 @@ export const approxVertexCover = defineAlgorithm({
     const g: GraphInput = { ...graphOf(input.graph), directed: false };
     const ids = edgeIds(g);
     const graph = trace.add('g', declareGraph(g, false));
-    trace.step(
-      'start',
-      `Start with an empty cover and all ${g.edges.length} edge${g.edges.length === 1 ? '' : 's'} still to cover.`,
-    );
+    trace.step('start', {
+      en: `Start with an empty cover and all ${g.edges.length} edge${g.edges.length === 1 ? '' : 's'} still to cover.`,
+      zh: `从空的覆盖开始，${g.edges.length} 条边都还需要覆盖。`,
+    });
     const left = new Set(g.edges.keys());
     const cover: string[] = [];
     const taken: number[] = [];
@@ -94,8 +96,14 @@ export const approxVertexCover = defineAlgorithm({
       trace.step(
         'take',
         u === v
-          ? `Take the loop at ${u}, the first edge left: put ${u} in the cover.`
-          : `Take ${u}–${v}, the first edge left: put both ${u} and ${v} in the cover.`,
+          ? {
+              en: `Take the loop at ${u}, the first edge left: put ${u} in the cover.`,
+              zh: `取剩下的第一条边，${u} 上的自环：把 ${u} 放进覆盖。`,
+            }
+          : {
+              en: `Take ${u}–${v}, the first edge left: put both ${u} and ${v} in the cover.`,
+              zh: `取剩下的第一条边 ${u}–${v}：把 ${u} 和 ${v} 都放进覆盖。`,
+            },
       );
       graph.markEdge({ edge: ids[k]!, mark: 'selected' });
       for (const x of fresh) graph.group({ node: x, group: 0 });
@@ -108,17 +116,23 @@ export const approxVertexCover = defineAlgorithm({
       trace.step(
         'remove',
         others.length === 0
-          ? `No other edge touches ${u === v ? u : `${u} or ${v}`}: ${left.size === 0 ? 'none is left' : `${left.size} still to cover`}.`
-          : `Remove the ${others.length} other edge${others.length === 1 ? '' : 's'} touching ${u === v ? u : `${u} or ${v}`}, now covered: ${left.size === 0 ? 'none is left' : `${left.size} still to cover`}.`,
+          ? {
+              en: `No other edge touches ${u === v ? u : `${u} or ${v}`}: ${left.size === 0 ? 'none is left' : `${left.size} still to cover`}.`,
+              zh: `没有别的边与 ${u === v ? u : `${u} 或 ${v}`} 相连：${left.size === 0 ? '已经没有剩下的边' : `还有 ${left.size} 条需要覆盖`}。`,
+            }
+          : {
+              en: `Remove the ${others.length} other edge${others.length === 1 ? '' : 's'} touching ${u === v ? u : `${u} or ${v}`}, now covered: ${left.size === 0 ? 'none is left' : `${left.size} still to cover`}.`,
+              zh: `删去与 ${u === v ? u : `${u} 或 ${v}`} 相连的另外 ${others.length} 条边，它们已被覆盖：${left.size === 0 ? '已经没有剩下的边' : `还有 ${left.size} 条需要覆盖`}。`,
+            },
       );
       // A step holds at most 100 actions: a star's edges are dimmed over
       // several.
       for (let i = 0; i < others.length; i += MAX_DIMMED) {
         if (i > 0)
-          trace.step(
-            'remove',
-            `More of the ${others.length} edges touching ${u === v ? u : `${u} or ${v}`}.`,
-          );
+          trace.step('remove', {
+            en: `More of the ${others.length} edges touching ${u === v ? u : `${u} or ${v}`}.`,
+            zh: `与 ${u === v ? u : `${u} 或 ${v}`} 相连的 ${others.length} 条边中的其余边。`,
+          });
         for (const j of others.slice(i, i + MAX_DIMMED))
           graph.markEdge({ edge: ids[j]!, mark: 'rejected' });
       }
@@ -126,8 +140,14 @@ export const approxVertexCover = defineAlgorithm({
     trace.step(
       'done',
       cover.length === 0
-        ? 'The graph has no edges, so the empty cover covers them all.'
-        : `No edge is left: ${cover.length === 1 ? `the vertex ${cover[0]} covers` : `the ${cover.length} vertices ${cover.join(', ')} cover`} every edge. ${taken.length === 1 ? 'Every cover holds' : `The ${taken.length} edges taken share no vertex, and every cover holds`} an end of ${taken.length === 1 ? 'the edge taken' : 'each'}, so the smallest cover has at least ${taken.length} vertex${taken.length === 1 ? '' : 'es'}: this one is at most twice that.`,
+        ? {
+            en: 'The graph has no edges, so the empty cover covers them all.',
+            zh: '这个图没有边，所以空覆盖就覆盖了所有边。',
+          }
+        : {
+            en: `No edge is left: ${cover.length === 1 ? `the vertex ${cover[0]} covers` : `the ${cover.length} vertices ${cover.join(', ')} cover`} every edge. ${taken.length === 1 ? 'Every cover holds' : `The ${taken.length} edges taken share no vertex, and every cover holds`} an end of ${taken.length === 1 ? 'the edge taken' : 'each'}, so the smallest cover has at least ${taken.length} vertex${taken.length === 1 ? '' : 'es'}: this one is at most twice that.`,
+            zh: `没有剩下的边了：${cover.length === 1 ? `顶点 ${cover[0]}` : `${cover.length} 个顶点 ${cover.join(', ')}`} 覆盖了每条边。${taken.length === 1 ? '任何覆盖都包含所取那条边的一个端点' : `所取的 ${taken.length} 条边没有公共顶点，任何覆盖都包含每条边的一个端点`}，所以最小覆盖至少有 ${taken.length} 个顶点：这个覆盖不超过它的两倍。`,
+          },
     );
     return { results: [cover.length] };
   },

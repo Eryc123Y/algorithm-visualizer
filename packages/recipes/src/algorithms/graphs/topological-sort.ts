@@ -42,10 +42,12 @@ export function checkAcyclic(g: GraphInput): void {
 
 export const topologicalSort = defineAlgorithm({
   id: 'topological-sort',
-  title: 'Topological sort',
+  title: { en: 'Topological sort', zh: '拓扑排序' },
   topic: 'graphs',
-  summary:
-    'Orders the vertices of a directed acyclic graph so that every edge points forward, by listing them in reverse order of finishing a depth-first search.',
+  summary: {
+    en: 'Orders the vertices of a directed acyclic graph so that every edge points forward, by listing them in reverse order of finishing a depth-first search.',
+    zh: '对有向无环图的顶点排序，使每条边都指向前方：按深度优先搜索完成时间的逆序列出顶点。',
+  },
   input: z.strictObject({
     graph: Graph.describe('A graph whose edges are taken as directed.'),
   }),
@@ -103,7 +105,7 @@ export const topologicalSort = defineAlgorithm({
     const seen = new Set<string>();
     const visit = (u: string): void => {
       seen.add(u);
-      trace.step('discover', `Visit ${u}.`);
+      trace.step('discover', { en: `Visit ${u}.`, zh: `访问 ${u}。` });
       calls.push(`call-${u}`, `visit ${u}`);
       graph.visit({ node: u }).pointer({ name: 'u', node: u });
       for (const { to: v, edge } of adj.get(u)!) {
@@ -111,8 +113,14 @@ export const topologicalSort = defineAlgorithm({
         trace.step(
           'edge',
           fresh
-            ? `${u} → ${v}: ${v} is not visited yet, so visit it first.`
-            : `${u} → ${v}: ${v} is in the list already, after where ${u} will go.`,
+            ? {
+                en: `${u} → ${v}: ${v} is not visited yet, so visit it first.`,
+                zh: `${u} → ${v}：${v} 还没有访问过，先访问它。`,
+              }
+            : {
+                en: `${u} → ${v}: ${v} is in the list already, after where ${u} will go.`,
+                zh: `${u} → ${v}：${v} 已经在列表中，位于 ${u} 将要放的位置之后。`,
+              },
         );
         graph.pointer({ name: 'u', node: u }).highlight({ edges: [edge] });
         if (fresh) {
@@ -120,23 +128,26 @@ export const topologicalSort = defineAlgorithm({
           visit(v);
         }
       }
-      trace.step(
-        'finish',
-        `Everything after ${u} is listed: put ${u} at the front of the list.`,
-      );
+      trace.step('finish', {
+        en: `Everything after ${u} is listed: put ${u} at the front of the list.`,
+        zh: `${u} 之后的顶点都已列出：把 ${u} 放到列表最前面。`,
+      });
       graph.pointer({ name: 'u', node: u }).settle({ node: u });
       order.insert({ index: 0, element: { id: `o-${u}`, value: u } });
       calls.pop();
     };
     for (const u of g.nodes) {
       if (seen.has(u)) continue;
-      trace.step('root', `${u} is not visited yet: start a search there.`);
+      trace.step('root', {
+        en: `${u} is not visited yet: start a search there.`,
+        zh: `${u} 还没有访问过：从它开始一次搜索。`,
+      });
       visit(u);
     }
-    trace.step(
-      'done',
-      'Every vertex is in the list, and every edge points forward in it: a topological order.',
-    );
+    trace.step('done', {
+      en: 'Every vertex is in the list, and every edge points forward in it: a topological order.',
+      zh: '所有顶点都在列表中，每条边都指向前方：这就是一个拓扑序。',
+    });
     graph.pointer({ name: 'u', node: null });
   },
 });

@@ -31,7 +31,7 @@ You name an algorithm and give it an input, written the way you would write it o
 | --------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | <img src="apps/site/public/scenes/notes.svg" alt="A page of Typst notes with an algomotion figure" width="260"> | <img src="apps/site/public/scenes/beamer-1.svg" alt="A Beamer slide stepping through Dijkstra's algorithm" width="260"> | <img src="apps/site/public/scenes/chat-light.webp" alt="The player inside an AI conversation" width="260"> |
 
-The same run becomes any of these, drawn by one engine in nine themes. A model can also write a visualization of its own through the MCP server, check it step by step, and show it in the conversation.
+The same run becomes any of these, drawn by one engine in nine themes, and told in English or Simplified Chinese. A model can also write a visualization of its own through the MCP server, check it step by step, and show it in the conversation.
 
 ## Status: 1.0 alpha
 
@@ -289,7 +289,7 @@ The registry is a second file of the bundle, `algomotion-recipes.js`, which the 
 </algo-player>
 ```
 
-Attributes: `algorithm`, `input`, `src`, `frame`, `theme` (a built-in theme, `auto` for light or dark by the reader's colour scheme, or a day and a night theme such as `"textbook textbook-dark"`), `layout` (`wide`, the default, or `narrow`, which puts side structures below the main one for a narrow column), `speed` (ms per step), `autoplay`, `loop`, `hide-controls`, `hide-code`, `language`, and `lang`, inherited like any `lang`: in Chinese (any `zh` tag) the player's controls and an algorithm's run are in Chinese ([ADR 0045](docs/adr/0045-chinese-in-the-product.md); the modules' narration is being translated). Style the chrome with CSS custom properties such as `--algo-accent`, or its corners with `--algo-radius` (the player), `--algo-control-radius` (buttons and menus) and `--algo-panel-radius` (the code panel), or pass a full scene theme as the `customTheme` property.
+Attributes: `algorithm`, `input`, `src`, `frame`, `theme` (a built-in theme, `auto` for light or dark by the reader's colour scheme, or a day and a night theme such as `"textbook textbook-dark"`), `layout` (`wide`, the default, or `narrow`, which puts side structures below the main one for a narrow column), `speed` (ms per step), `autoplay`, `loop`, `hide-controls`, `hide-code`, `language`, and `lang`, inherited like any `lang`: in Chinese (any `zh` tag) the player's controls and an algorithm's run are in Chinese ([ADR 0045](docs/adr/0045-chinese-in-the-product.md)). Style the chrome with CSS custom properties such as `--algo-accent`, or its corners with `--algo-radius` (the player), `--algo-control-radius` (buttons and menus) and `--algo-panel-radius` (the code panel), or pass a full scene theme as the `customTheme` property.
 
 Each theme draws in its own fonts. The player links `fonts/fonts.css`, next to its script, the first time a player shows, and the browser downloads only the font files a page draws. A bundler that puts the fonts elsewhere says where with `AlgoPlayer.fontsUrl = '/assets/fonts.css'`, and `AlgoPlayer.fontsUrl = null` turns loading off: text then falls back to similar fonts installed on the reader's system.
 

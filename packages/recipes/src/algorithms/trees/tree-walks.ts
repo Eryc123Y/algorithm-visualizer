@@ -7,6 +7,7 @@
  */
 import { z } from 'zod';
 
+import type { Text } from '../../text.ts';
 import { defineAlgorithm, type Algorithm } from '../../algorithm.ts';
 import { callStack } from '../../call-stack.ts';
 import { listField } from '../../notation/schema.ts';
@@ -83,17 +84,33 @@ function code(order: Order) {
   };
 }
 
-const DESCRIPTION: Readonly<Record<Order, string>> = {
-  inorder:
-    'Walks a binary tree visiting each node between its left and right subtrees, which lists a search tree in sorted order.',
-  preorder:
-    'Walks a binary tree visiting each node before its subtrees, left then right.',
-  postorder:
-    'Walks a binary tree visiting each node after its subtrees, left then right.',
+const DESCRIPTION: Readonly<Record<Order, Text>> = {
+  inorder: {
+    en: 'Walks a binary tree visiting each node between its left and right subtrees, which lists a search tree in sorted order.',
+    zh: '遍历二叉树，在左右子树之间访问每个节点，这样会按从小到大的顺序列出二叉搜索树的关键字。',
+  },
+  preorder: {
+    en: 'Walks a binary tree visiting each node before its subtrees, left then right.',
+    zh: '遍历二叉树，先访问每个节点，再依次遍历它的左子树和右子树。',
+  },
+  postorder: {
+    en: 'Walks a binary tree visiting each node after its subtrees, left then right.',
+    zh: '遍历二叉树，先依次遍历每个节点的左子树和右子树，再访问它。',
+  },
+};
+
+/** Each order's name in Chinese. */
+const ORDER_ZH: Readonly<Record<Order, string>> = {
+  inorder: '中序',
+  preorder: '先序',
+  postorder: '后序',
 };
 
 function treeWalk(order: Order): Algorithm<TreeInput> {
-  const title = `${order[0]!.toUpperCase()}${order.slice(1)} tree walk`;
+  const title = {
+    en: `${order[0]!.toUpperCase()}${order.slice(1)} tree walk`,
+    zh: `${ORDER_ZH[order]}遍历`,
+  };
   return defineAlgorithm({
     id: `${order}-tree-walk`,
     title,
@@ -105,11 +122,22 @@ function treeWalk(order: Order): Algorithm<TreeInput> {
     code: code(order),
     run({ levelOrder }, outer) {
       const { values, children } = shape(levelOrder);
-      const tree = outer.add('tree', {
-        kind: 'tree',
-        levelOrder: [...levelOrder],
-      });
-      const out = outer.add('out', { kind: 'array', initial: [] });
+      const tree = outer.add(
+        'tree',
+        {
+          kind: 'tree',
+          levelOrder: [...levelOrder],
+        },
+        { heading: { en: 'tree', zh: '树' } },
+      );
+      const out = outer.add(
+        'out',
+        {
+          kind: 'array',
+          initial: [],
+        },
+        { heading: { en: 'out', zh: '输出' } },
+      );
       // A call on a node is on the stack from its enter step until the
       // next step after it returns (ADR 0029).
       const calls = callStack(outer);
@@ -118,7 +146,10 @@ function treeWalk(order: Order): Algorithm<TreeInput> {
       const walk = (n: number | null): void => {
         if (n === null) return;
         const id = `e${n}`;
-        trace.step('enter', `Enter ${values[n]}.`);
+        trace.step('enter', {
+          en: `Enter ${values[n]}.`,
+          zh: `进入 ${values[n]}。`,
+        });
         calls.push(`call-${id}`, `walk ${values[n]}`);
         tree.pointer({ name: 'x', node: id });
         for (const part of BODY[order]) {
@@ -126,10 +157,10 @@ function treeWalk(order: Order): Algorithm<TreeInput> {
             walk(children[n]![part === 'left' ? 0 : 1]);
             continue;
           }
-          trace.step(
-            'visit',
-            `Visit ${values[n]}: it is number ${written + 1} of the ${order} order.`,
-          );
+          trace.step('visit', {
+            en: `Visit ${values[n]}: it is number ${written + 1} of the ${order} order.`,
+            zh: `访问 ${values[n]}：它是${ORDER_ZH[order]}序列中的第 ${written + 1} 个。`,
+          });
           tree.pointer({ name: 'x', node: id }).visit({ node: id });
           out.insert({
             index: written++,

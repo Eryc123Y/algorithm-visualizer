@@ -5,6 +5,8 @@
  * on `H2`, the second heap of a union, under it. A marked node has the
  * note `marked`; during CONSOLIDATE each root shows its degree.
  */
+import type { Locale } from '@algomotion/spec';
+
 import type { Handle } from '../../recorder.ts';
 import { MAX_SIZE } from '../../structure.ts';
 import type { Steps } from '../red-black/engine.ts';
@@ -32,6 +34,8 @@ export interface FibState {
 
 export interface FibRun {
   readonly step: Steps;
+  /** The run's locale, for the words its notes say (ADR 0045). */
+  readonly locale: Locale;
   readonly on: Handle<'tree'>;
   readonly A?: Handle<'array'>;
   readonly H2?: Handle<'tree'>;
@@ -44,22 +48,38 @@ const list = (items: readonly string[]) =>
   items.length < 2
     ? items.join('')
     : `${items.slice(0, -1).join(', ')} and ${items.at(-1)!}`;
+/** The same in Chinese (ADR 0045). */
+const listZh = (items: readonly string[]) =>
+  items.length < 2
+    ? items.join('')
+    : `${items.slice(0, -1).join('、')} 和 ${items.at(-1)!}`;
 
-const mark = (on: Handle<'tree'>, id: string, marked: boolean) =>
-  on.annotate({ node: id, field: 'mark', text: marked ? 'marked' : null });
+const MARKED: Readonly<Record<Locale, string>> = { en: 'marked', zh: '已标记' };
+
+const mark = (
+  on: Handle<'tree'>,
+  id: string,
+  marked: boolean,
+  locale: Locale,
+) =>
+  on.annotate({
+    node: id,
+    field: 'mark',
+    text: marked ? MARKED[locale] : null,
+  });
 
 /** The marks and `min` of a heap, which a declaration cannot show. */
-export function showHeap(on: Handle<'tree'>, h: FibHeap): void {
-  for (const [id, n] of h.nodes) if (n.mark) mark(on, id, true);
+export function showHeap(on: Handle<'tree'>, h: FibHeap, locale: Locale): void {
+  for (const [id, n] of h.nodes) if (n.mark) mark(on, id, true, locale);
   if (h.min !== null) on.pointer({ name: 'min', node: h.min });
 }
 
 /** Adds a heap's trees to a drawn forest, roots at the end, in preorder. */
-function draw(on: Handle<'tree'>, h: FibHeap): void {
+function draw(on: Handle<'tree'>, h: FibHeap, locale: Locale): void {
   const add = (id: string, parent: string | null) => {
     const n = nodeOf(h, id);
     on.addNode({ node: { id, value: valueOf(n.key) }, parent });
-    if (n.mark) mark(on, id, true);
+    if (n.mark) mark(on, id, true, locale);
     for (const c of n.children) add(c, id);
   };
   for (const r of h.roots) add(r, null);
@@ -85,19 +105,19 @@ export function insert(s: FibState, k: number, run: FibRun): FibState {
   const fresh = { key: k, children: [], parent: null, mark: false };
   const nodes = new Map(h.nodes).set(id, fresh);
   if (h.min === null) {
-    step(
-      'first',
-      `The heap is empty: ${keyText(k)} becomes its only root, and its minimum.`,
-    );
+    step('first', {
+      en: `The heap is empty: ${keyText(k)} becomes its only root, and its minimum.`,
+      zh: `堆是空的：${keyText(k)} 成为它唯一的根，也是最小值。`,
+    });
     on.addNode({ node: { id, value: valueOf(k) }, parent: null });
     on.pointer({ name: 'min', node: id });
     return { ...s, heap: { roots: [id], nodes, min: id, next: h.next + 1 } };
   }
   const at = h.roots.indexOf(h.min);
-  step(
-    'insert',
-    `Put ${keyText(k)} in the root list as a tree of its own, just left of the minimum ${key(h, h.min)}.`,
-  );
+  step('insert', {
+    en: `Put ${keyText(k)} in the root list as a tree of its own, just left of the minimum ${key(h, h.min)}.`,
+    zh: `把 ${keyText(k)} 作为一棵单独的树放进根链表，紧靠最小值 ${key(h, h.min)} 的左边。`,
+  });
   on.addNode({ node: { id, value: valueOf(k) }, parent: null, slot: at });
   const heap = {
     ...h,
@@ -106,10 +126,10 @@ export function insert(s: FibState, k: number, run: FibRun): FibState {
     next: h.next + 1,
   };
   if (k < nodeOf(h, h.min).key) {
-    step(
-      'new-min',
-      `${keyText(k)} < ${key(h, h.min)}: ${keyText(k)} is the new minimum.`,
-    );
+    step('new-min', {
+      en: `${keyText(k)} < ${key(h, h.min)}: ${keyText(k)} is the new minimum.`,
+      zh: `${keyText(k)} < ${key(h, h.min)}：${keyText(k)} 是新的最小值。`,
+    });
     on.pointer({ name: 'min', node: id });
     return { ...s, heap: { ...heap, min: id } };
   }
@@ -143,20 +163,29 @@ export function union(
   step(
     'second',
     other.min === null
-      ? 'The second heap H2 is empty.'
-      : `The second heap H2 holds ${other.nodes.size} key${other.nodes.size === 1 ? '' : 's'}, its minimum ${key(other, other.min)}.`,
+      ? { en: 'The second heap H2 is empty.', zh: '第二个堆 H2 是空的。' }
+      : {
+          en: `The second heap H2 holds ${other.nodes.size} key${other.nodes.size === 1 ? '' : 's'}, its minimum ${key(other, other.min)}.`,
+          zh: `第二个堆 H2 有 ${other.nodes.size} 个关键字，最小值是 ${key(other, other.min)}。`,
+        },
   );
   // The first union's heap is declared; a later one fills H2 again.
-  if (s.unions > 0) draw(H2, other);
-  showHeap(H2, other);
+  if (s.unions > 0) draw(H2, other, run.locale);
+  showHeap(H2, other, run.locale);
   step(
     'join',
     other.roots.length === 0
-      ? 'Join H2’s root list to H’s: there is nothing to join.'
-      : `Join H2’s root list to H’s: its trees, rooted at ${list(other.roots.map((r) => key(other, r)))}, follow H’s roots.`,
+      ? {
+          en: 'Join H2’s root list to H’s: there is nothing to join.',
+          zh: '把 H2 的根链表接到 H 的根链表上：没有什么可接的。',
+        }
+      : {
+          en: `Join H2’s root list to H’s: its trees, rooted at ${list(other.roots.map((r) => key(other, r)))}, follow H’s roots.`,
+          zh: `把 H2 的根链表接到 H 的根链表上：它以 ${listZh(other.roots.map((r) => key(other, r)))} 为根的树接在 H 的根后面。`,
+        },
   );
   for (const r of other.roots) H2.removeNode({ node: r });
-  draw(on, other);
+  draw(on, other, run.locale);
   const nodes = new Map([...h.nodes, ...other.nodes]);
   let heap: FibHeap = { ...h, roots: [...h.roots, ...other.roots], nodes };
   if (
@@ -166,8 +195,14 @@ export function union(
     step(
       'new-min',
       h.min === null
-        ? `H was empty, so H2’s minimum ${key(other, other.min)} is the minimum.`
-        : `H2’s minimum ${key(other, other.min)} < ${key(h, h.min)}: it is the new minimum.`,
+        ? {
+            en: `H was empty, so H2’s minimum ${key(other, other.min)} is the minimum.`,
+            zh: `H 原来是空的，所以 H2 的最小值 ${key(other, other.min)} 就是最小值。`,
+          }
+        : {
+            en: `H2’s minimum ${key(other, other.min)} < ${key(h, h.min)}: it is the new minimum.`,
+            zh: `H2 的最小值 ${key(other, other.min)} < ${key(h, h.min)}：它是新的最小值。`,
+          },
     );
     on.pointer({ name: 'min', node: other.min });
     heap = { ...heap, min: other.min };
@@ -192,10 +227,10 @@ export function extractMin(
   const zk = key(h, z);
   const children = nodeOf(h, z).children;
   if (children.length > 0) {
-    step(
-      'children',
-      `Move ${zk}’s children ${list(children.map((c) => key(h, c)))} to the root list, where ${zk} is.`,
-    );
+    step('children', {
+      en: `Move ${zk}’s children ${list(children.map((c) => key(h, c)))} to the root list, where ${zk} is.`,
+      zh: `把 ${zk} 的孩子 ${listZh(children.map((c) => key(h, c)))} 移到 ${zk} 所在的根链表中。`,
+    });
     const at = h.roots.indexOf(z);
     let roots = h.roots;
     children.forEach((c, k) => {
@@ -209,10 +244,10 @@ export function extractMin(
   const nodes = new Map(h.nodes);
   nodes.delete(z);
   if (left.length === 0) {
-    step(
-      'empty',
-      `${zk} was the only node: take it out, and the heap is empty.`,
-    );
+    step('empty', {
+      en: `${zk} was the only node: take it out, and the heap is empty.`,
+      zh: `${zk} 是唯一的节点：把它取出，堆空了。`,
+    });
     on.removeNode({ node: z });
     return {
       state: { ...s, heap: { ...h, roots: [], nodes, min: null } },
@@ -220,10 +255,10 @@ export function extractMin(
     };
   }
   const next = rightOf(h.roots, z);
-  step(
-    'remove',
-    `Take ${zk} out of the root list; for now min points at its right neighbour ${key(h, next)}.`,
-  );
+  step('remove', {
+    en: `Take ${zk} out of the root list; for now min points at its right neighbour ${key(h, next)}.`,
+    zh: `把 ${zk} 从根链表中取出；min 暂时指向它右边的邻居 ${key(h, next)}。`,
+  });
   on.removeNode({ node: z }).pointer({ name: 'min', node: next });
   h = { ...h, roots: left, nodes, min: next };
   // D(n) counts z too: CLRS decrements H.n after CONSOLIDATE.
@@ -252,10 +287,10 @@ function consolidate(
   if (A === undefined) throw new Error('CONSOLIDATE needs the array A');
   let h = start;
   const D = maxDegree(n);
-  step(
-    'array',
-    `Consolidate: start an array A with an empty entry for each degree up to D(${n}) = ${D}, and go through the roots.`,
-  );
+  step('array', {
+    en: `Consolidate: start an array A with an empty entry for each degree up to D(${n}) = ${D}, and go through the roots.`,
+    zh: `整合：建一个数组 A，从度数 0 到 D(${n}) = ${D} 各有一个空位，再逐个处理每个根。`,
+  });
   const slots: (string | null)[] = [];
   let cells = D + 1;
   for (let d = 0; d <= D; d++) A.set({ index: d, value: '' });
@@ -266,19 +301,23 @@ function consolidate(
   for (const w of round) {
     let x = w;
     let d = degree(h, x);
-    step('root', `Next root: ${key(h, x)}, of degree ${d}.`);
+    step('root', {
+      en: `Next root: ${key(h, x)}, of degree ${d}.`,
+      zh: `下一个根：${key(h, x)}，度数为 ${d}。`,
+    });
     on.pointer({ name: 'x', node: x }).highlight({ nodes: [x] });
     while ((slots[d] ?? null) !== null) {
       let y = slots[d]!;
       const same = `A[${d}] holds ${key(h, y)}, which also has degree ${d}`;
+      const sameZh = `A[${d}] 存放着 ${key(h, y)}，它的度数也是 ${d}`;
       if (nodeOf(h, x).key > nodeOf(h, y).key) [x, y] = [y, x];
-      step(
-        'link',
-        `${same}: ${key(h, y)} > ${key(h, x)}, so ${key(h, y)} becomes a child of ${key(h, x)}${nodeOf(h, y).mark ? ' and loses its mark' : ''}, and ${key(h, x)} has degree ${d + 1}.`,
-      );
+      step('link', {
+        en: `${same}: ${key(h, y)} > ${key(h, x)}, so ${key(h, y)} becomes a child of ${key(h, x)}${nodeOf(h, y).mark ? ' and loses its mark' : ''}, and ${key(h, x)} has degree ${d + 1}.`,
+        zh: `${sameZh}：${key(h, y)} > ${key(h, x)}，所以 ${key(h, y)} 成为 ${key(h, x)} 的孩子${nodeOf(h, y).mark ? '并失去标记' : ''}，${key(h, x)} 的度数变为 ${d + 1}。`,
+      });
       on.setChild({ parent: x, child: y });
       showDegree(on, y, null);
-      if (nodeOf(h, y).mark) mark(on, y, false);
+      if (nodeOf(h, y).mark) mark(on, y, false, run.locale);
       showDegree(on, x, d + 1);
       on.pointer({ name: 'x', node: x });
       A.set({ index: d, value: '' });
@@ -292,7 +331,10 @@ function consolidate(
       slots[d] = null;
       d += 1;
     }
-    step('store', `A[${d}] = ${key(h, x)}.`);
+    step('store', {
+      en: `A[${d}] = ${key(h, x)}.`,
+      zh: `把 ${key(h, x)} 存入 A[${d}]。`,
+    });
     A.set({ index: d, value: nodeOf(h, x).key }).highlight({ indices: [d] });
     slots[d] = x;
     cells = Math.max(cells, d + 1);
@@ -302,10 +344,10 @@ function consolidate(
   const order = slots.filter((r): r is string => r !== null && r !== undefined);
   h = { ...h, roots: order };
   const min = minimumRoot(h)!;
-  step(
-    'rebuild',
-    `Rebuild the root list from A, in order: ${list(order.map((r) => key(h, r)))}. The least of them, ${key(h, min)}, is the minimum.`,
-  );
+  step('rebuild', {
+    en: `Rebuild the root list from A, in order: ${list(order.map((r) => key(h, r)))}. The least of them, ${key(h, min)}, is the minimum.`,
+    zh: `按顺序用 A 重建根链表：${listZh(order.map((r) => key(h, r)))}。其中最小的 ${key(h, min)} 就是最小值。`,
+  });
   order.forEach((r, k) => {
     on.detach({ node: r, slot: k });
     showDegree(on, r, null);
@@ -319,7 +361,8 @@ function cut(h: FibHeap, x: string, on: Handle<'tree'>): FibHeap {
   const p = nodeOf(h, x).parent!;
   const at = h.roots.indexOf(h.min!);
   on.detach({ node: x, slot: at });
-  if (nodeOf(h, x).mark) mark(on, x, false);
+  // Clearing a mark says no word, so any locale does.
+  if (nodeOf(h, x).mark) mark(on, x, false, 'en');
   return {
     ...h,
     roots: insertAt(h.roots, at, x),
@@ -359,45 +402,54 @@ export function decreaseKey(
   step(
     'decrease',
     p === null
-      ? `Decrease ${keyText(k)} to ${keyText(to)}. It is a root, so no order breaks.`
+      ? {
+          en: `Decrease ${keyText(k)} to ${keyText(to)}. It is a root, so no order breaks.`,
+          zh: `把 ${keyText(k)} 减小为 ${keyText(to)}。它是根，所以堆序没有被破坏。`,
+        }
       : order
-        ? `Decrease ${keyText(k)} to ${keyText(to)}. Its parent ${key(h, p)} is still smaller, so nothing moves.`
-        : `Decrease ${keyText(k)} to ${keyText(to)}, below its parent ${key(h, p)}: the heap order breaks there.`,
+        ? {
+            en: `Decrease ${keyText(k)} to ${keyText(to)}. Its parent ${key(h, p)} is still smaller, so nothing moves.`,
+            zh: `把 ${keyText(k)} 减小为 ${keyText(to)}。它的父节点 ${key(h, p)} 仍然更小，所以什么都不动。`,
+          }
+        : {
+            en: `Decrease ${keyText(k)} to ${keyText(to)}, below its parent ${key(h, p)}: the heap order breaks there.`,
+            zh: `把 ${keyText(k)} 减小为 ${keyText(to)}，比它的父节点 ${key(h, p)} 还小：堆序在这里被破坏了。`,
+          },
   );
   on.setValue({ node: x, value: valueOf(to) }).pointer({ name: 'x', node: x });
   on.highlight({ nodes: [x] });
   if (p !== null && !order) {
-    step(
-      'cut',
-      `Cut ${keyText(to)} off ${key(h, p)}: it joins the root list just left of the minimum, unmarked.`,
-    );
+    step('cut', {
+      en: `Cut ${keyText(to)} off ${key(h, p)}: it joins the root list just left of the minimum, unmarked.`,
+      zh: `把 ${keyText(to)} 从 ${key(h, p)} 上切下：它进入根链表，紧靠最小值左边，不带标记。`,
+    });
     h = cut(h, x, on);
     for (let y = p; nodeOf(h, y).parent !== null;) {
       const z = nodeOf(h, y).parent!;
       if (!nodeOf(h, y).mark) {
-        step(
-          'mark',
-          `${key(h, y)} has now lost a child, its first since it became a child: mark it, and stop.`,
-        );
-        mark(on, y, true);
+        step('mark', {
+          en: `${key(h, y)} has now lost a child, its first since it became a child: mark it, and stop.`,
+          zh: `${key(h, y)} 现在失去了一个孩子，这是它成为孩子以来的第一次：标记它，然后停止。`,
+        });
+        mark(on, y, true, run.locale);
         on.highlight({ nodes: [y] });
         h = withNode(h, y, { mark: true });
         break;
       }
-      step(
-        'cascade',
-        `${key(h, y)} is marked, so this is its second lost child: cut it too, and go on with its parent ${key(h, z)}.`,
-      );
+      step('cascade', {
+        en: `${key(h, y)} is marked, so this is its second lost child: cut it too, and go on with its parent ${key(h, z)}.`,
+        zh: `${key(h, y)} 已被标记，所以这是它失去的第二个孩子：把它也切下，再继续处理它的父节点 ${key(h, z)}。`,
+      });
       on.highlight({ nodes: [y] });
       h = cut(h, y, on);
       y = z;
     }
   }
   if (to < nodeOf(h, h.min!).key) {
-    step(
-      'new-min',
-      `${keyText(to)} < ${key(h, h.min!)}: ${keyText(to)} is the new minimum.`,
-    );
+    step('new-min', {
+      en: `${keyText(to)} < ${key(h, h.min!)}: ${keyText(to)} is the new minimum.`,
+      zh: `${keyText(to)} < ${key(h, h.min!)}：${keyText(to)} 是新的最小值。`,
+    });
     on.pointer({ name: 'min', node: x });
     h = { ...h, min: x };
   }

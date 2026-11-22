@@ -94,10 +94,12 @@ const PARTITION_CODE = {
 
 export const randomizedSelect = defineAlgorithm({
   id: 'randomized-select',
-  title: 'Randomized select',
+  title: { en: 'Randomized select', zh: '随机化选择' },
   topic: 'searching',
-  summary:
-    'Finds the i-th smallest value by partitioning around a random pivot and searching only the side that holds it, in expected linear time.',
+  summary: {
+    en: 'Finds the i-th smallest value by partitioning around a random pivot and searching only the side that holds it, in expected linear time.',
+    zh: '找出第 i 小的值：围绕随机主元划分，只在包含它的那一边继续找，期望时间是线性的。',
+  },
   input: selectInput(MAX_VALUES).extend({ seed: seedField }),
   main: 'values',
   examples: [
@@ -143,11 +145,17 @@ ${PARTITION_CODE.python}`,
 
     let [p, r, i] = [0, n - 1, target];
     for (;;) {
-      const call = `${ordinal(i)} smallest of a[${p}..${r}]`;
+      const call = trace.say({
+        en: `${ordinal(i)} smallest of a[${p}..${r}]`,
+        zh: `a[${p}..${r}] 中第 ${i} 小`,
+      });
       if (p === r) {
         trace.step(
           'single',
-          `a[${p}] = ${a[p]} is the only value left: it is the answer, the ${ordinal(target)} smallest.`,
+          {
+            en: `a[${p}] = ${a[p]} is the only value left: it is the answer, the ${ordinal(target)} smallest.`,
+            zh: `a[${p}] = ${a[p]} 是剩下的唯一一个值：它就是答案，第 ${target} 小的值。`,
+          },
           { vars: { p, r, i } },
         );
         calls.push(`call-${p}-${r}`, call);
@@ -159,7 +167,10 @@ ${PARTITION_CODE.python}`,
       if (i === k) {
         trace.step(
           'found',
-          `The pivot ${a[q]} is the ${ordinal(k)} smallest of a[${p}..${r}], the one wanted: it is the answer, the ${ordinal(target)} smallest.`,
+          {
+            en: `The pivot ${a[q]} is the ${ordinal(k)} smallest of a[${p}..${r}], the one wanted: it is the answer, the ${ordinal(target)} smallest.`,
+            zh: `主元 ${a[q]} 是 a[${p}..${r}] 中第 ${k} 小的，正是要找的：它就是答案，第 ${target} 小的值。`,
+          },
           { vars: { p, r, i, k, q } },
         );
         arr.pointer({ name: 'answer', index: q });
@@ -169,8 +180,14 @@ ${PARTITION_CODE.python}`,
       trace.step(
         'rank',
         left
-          ? `The pivot ${a[q]} is the ${ordinal(k)} smallest of a[${p}..${r}], but the ${ordinal(i)} is wanted: it lies to the left, in a[${p}..${q - 1}].`
-          : `The pivot ${a[q]} is the ${ordinal(k)} smallest of a[${p}..${r}], but the ${ordinal(i)} is wanted: it is the ${ordinal(i - k)} smallest of a[${q + 1}..${r}], to the right.`,
+          ? {
+              en: `The pivot ${a[q]} is the ${ordinal(k)} smallest of a[${p}..${r}], but the ${ordinal(i)} is wanted: it lies to the left, in a[${p}..${q - 1}].`,
+              zh: `主元 ${a[q]} 是 a[${p}..${r}] 中第 ${k} 小的，但要找的是第 ${i} 小：它在左边的 a[${p}..${q - 1}] 中。`,
+            }
+          : {
+              en: `The pivot ${a[q]} is the ${ordinal(k)} smallest of a[${p}..${r}], but the ${ordinal(i)} is wanted: it is the ${ordinal(i - k)} smallest of a[${q + 1}..${r}], to the right.`,
+              zh: `主元 ${a[q]} 是 a[${p}..${r}] 中第 ${k} 小的，但要找的是第 ${i} 小：它是右边 a[${q + 1}..${r}] 中第 ${i - k} 小的。`,
+            },
         { vars: { p, r, i, k, q } },
       );
       const [lo, hi] = left ? [p, q - 1] : [q + 1, r];

@@ -31,6 +31,7 @@ ${figure('linked', 'The link opens at <code>insert</code>, after putting 2 befor
 <tr><td><code>doc</code></td><td>Document JSON as UTF-8, raw DEFLATE, then unpadded base64url. No <code>alg</code> or <code>in</code> with it.</td><td>Use the codec below.</td></tr>
 <tr><td><code>frame</code></td><td>Opening frame number or selector. Default <code>0</code>.</td><td><code>frame=improve%233</code></td></tr>
 <tr><td><code>theme</code></td><td>A player theme, <code>auto</code> or a day/night pair.</td><td><code>theme=textbook%20textbook-dark</code></td></tr>
+<tr><td><code>lang</code></td><td>The language of the player and of an algorithm's run, <code>en</code> or <code>zh</code>. Without it, the share page follows the reader's browser.</td><td><code>lang=zh</code></td></tr>
 </tbody></table></div>
 <p>Values use percent-encoding: <code>#</code> inside a selector becomes <code>%23</code>, and spaces become <code>%20</code>. Do not use form encoding's <code>+</code> for spaces. Unknown keys are ignored. Duplicate known keys, malformed encoding and unsupported versions are errors.</p>
 

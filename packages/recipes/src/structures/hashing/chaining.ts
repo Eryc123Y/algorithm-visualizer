@@ -56,12 +56,22 @@ function insert(
       `The table is full: it holds at most ${MAX_CHAINED} keys`,
     );
   const b = mod(key, s.size);
-  trace.step('hash', `${key} mod ${s.size} = ${b}: it goes into bucket ${b}.`, {
-    vars: { k: key, b },
-  });
+  trace.step(
+    'hash',
+    {
+      en: `${key} mod ${s.size} = ${b}: it goes into bucket ${b}.`,
+      zh: `${key} mod ${s.size} = ${b}：它放进桶 ${b}。`,
+    },
+    {
+      vars: { k: key, b },
+    },
+  );
   on.highlight({ bucket: b });
   const entry = { id: `k${s.keys.length}`, value: key };
-  trace.step('insert', `Put ${key} at the head of bucket ${b}'s chain.`);
+  trace.step('insert', {
+    en: `Put ${key} at the head of bucket ${b}'s chain.`,
+    zh: `把 ${key} 放到桶 ${b} 的链表头部。`,
+  });
   on.insert({ bucket: b, index: 0, element: entry });
   const chains = s.chains.map((chain, k) =>
     k === b ? [entry, ...chain] : chain,
@@ -97,7 +107,10 @@ function search(
   const b = mod(key, s.size);
   trace.step(
     'hash',
-    `Look for ${key}: ${key} mod ${s.size} = ${b}, so search bucket ${b}.`,
+    {
+      en: `Look for ${key}: ${key} mod ${s.size} = ${b}, so search bucket ${b}.`,
+      zh: `查找 ${key}：${key} mod ${s.size} = ${b}，所以在桶 ${b} 中查找。`,
+    },
     { vars: { k: key, b } },
   );
   on.highlight({ bucket: b });
@@ -105,20 +118,29 @@ function search(
     trace.step(
       'compare',
       value === key
-        ? `${value} = ${key}: this is the key.`
-        : `${value} ≠ ${key}: go on along the chain.`,
+        ? {
+            en: `${value} = ${key}: this is the key.`,
+            zh: `${value} = ${key}：就是这个关键字。`,
+          }
+        : {
+            en: `${value} ≠ ${key}: go on along the chain.`,
+            zh: `${value} ≠ ${key}：沿链表继续找。`,
+          },
     );
     on.highlight({ bucket: b, indices: [index] });
     if (value === key) {
-      trace.step('found', `Found ${key} in bucket ${b}.`);
+      trace.step('found', {
+        en: `Found ${key} in bucket ${b}.`,
+        zh: `在桶 ${b} 中找到 ${key}。`,
+      });
       on.settle({ bucket: b, index });
       return { state: s, result: true };
     }
   }
-  trace.step(
-    'missing',
-    `The chain of bucket ${b} has no ${key}: it is not in the table.`,
-  );
+  trace.step('missing', {
+    en: `The chain of bucket ${b} has no ${key}: it is not in the table.`,
+    zh: `桶 ${b} 的链表中没有 ${key}：它不在表中。`,
+  });
   return { state: s, result: false };
 }
 
@@ -129,10 +151,12 @@ const sample: TableFrom = { size: 7, keys: [15, 11, 27, 8, 22] };
 export const hashChaining = defineStructure<ChainState, TableFrom, 'hashTable'>(
   {
     id: 'hash-chaining',
-    title: 'Hash table with chaining',
+    title: { en: 'Hash table with chaining', zh: '链接法散列表' },
     topic: 'hashing',
-    summary:
-      'Inserts and searches integer keys one after another in a hash table that chains the keys of each bucket, with h(k) = k mod m.',
+    summary: {
+      en: 'Inserts and searches integer keys one after another in a hash table that chains the keys of each bucket, with h(k) = k mod m.',
+      zh: '在散列表中依次插入和查找整数关键字，每个桶中的关键字用链表链接起来，h(k) = k mod m。',
+    },
     name: 't',
     kind: 'hashTable',
     from: tableFrom(MAX_CHAINED, '[15, 11, 27, 8]'),
@@ -168,27 +192,31 @@ export const hashChaining = defineStructure<ChainState, TableFrom, 'hashTable'>(
     operations: [
       op({
         name: 'insert',
-        title: 'insert',
-        summary:
-          'Inserts a key at the head of the chain of its bucket, k mod m.',
+        title: { en: 'insert', zh: '插入' },
+        summary: {
+          en: 'Inserts a key at the head of the chain of its bucket, k mod m.',
+          zh: '把关键字插入它所在的桶 k mod m 的链表头部。',
+        },
         args: { key: Key.describe('The integer key to insert.') },
         examples: [{ from: sample, key: 29 }],
         code: INSERT,
-        titleOf: ({ key }) => `insert ${key}`,
+        titleOf: ({ key }) => ({ en: `insert ${key}`, zh: `插入 ${key}` }),
         apply: (s, { key }, trace, on) => insert(s, key, trace, on),
       }),
       op({
         name: 'search',
-        title: 'search',
-        summary:
-          'Looks for a key along the chain of its bucket, k mod m, from the head.',
+        title: { en: 'search', zh: '查找' },
+        summary: {
+          en: 'Looks for a key along the chain of its bucket, k mod m, from the head.',
+          zh: '从头开始，沿关键字所在的桶 k mod m 的链表查找它。',
+        },
         args: { key: Key.describe('The integer key to look for.') },
         examples: [
           { from: sample, key: 15 },
           { from: sample, key: 4 },
         ],
         code: SEARCH,
-        titleOf: ({ key }) => `search ${key}`,
+        titleOf: ({ key }) => ({ en: `search ${key}`, zh: `查找 ${key}` }),
         apply: (s, { key }, trace, on) => search(s, key, trace, on),
       }),
     ],

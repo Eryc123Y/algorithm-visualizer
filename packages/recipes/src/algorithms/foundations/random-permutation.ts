@@ -16,10 +16,12 @@ import { MAX_VALUES } from '../sorting/input.ts';
 
 export const randomPermutation = defineAlgorithm({
   id: 'random-permutation',
-  title: 'Random permutation',
+  title: { en: 'Random permutation', zh: '随机排列' },
   topic: 'foundations',
-  summary:
-    'Shuffles an array in place: each position in turn swaps with a value drawn uniformly from the positions not yet fixed.',
+  summary: {
+    en: 'Shuffles an array in place: each position in turn swaps with a value drawn uniformly from the positions not yet fixed.',
+    zh: '原地打乱一个数组：依次让每个位置与从尚未固定的位置中均匀随机选出的值交换。',
+  },
   input: z.strictObject({
     values: listField(
       z
@@ -62,7 +64,10 @@ export const randomPermutation = defineAlgorithm({
     const arr = trace.add('a', { kind: 'array', initial: [...values] });
     const draws = trace.add('draws', {
       kind: 'array',
-      label: 'RANDOM(i, n − 1) for each i',
+      label: trace.say({
+        en: 'RANDOM(i, n − 1) for each i',
+        zh: '每个 i 的 RANDOM(i, n − 1)',
+      }),
       place: 'side',
       initial: values.map(() => ''),
     });
@@ -71,8 +76,14 @@ export const randomPermutation = defineAlgorithm({
       trace.step(
         'draw',
         i === n - 1
-          ? `RANDOM(${i}, ${i}) can only return ${j}: a[${i}] = ${a[i]} is the last one left.`
-          : `RANDOM(${i}, ${n - 1}) draws j = ${j}, one of ${n - i} positions with equal chance.`,
+          ? {
+              en: `RANDOM(${i}, ${i}) can only return ${j}: a[${i}] = ${a[i]} is the last one left.`,
+              zh: `RANDOM(${i}, ${i}) 只能返回 ${j}：a[${i}] = ${a[i]} 是剩下的最后一个。`,
+            }
+          : {
+              en: `RANDOM(${i}, ${n - 1}) draws j = ${j}, one of ${n - i} positions with equal chance.`,
+              zh: `RANDOM(${i}, ${n - 1}) 抽到 j = ${j}，${n - i} 个位置的机会均等。`,
+            },
         { vars: { i, j, n } },
       );
       arr.pointer({ name: 'i', index: i }).pointer({ name: 'j', index: j });
@@ -81,8 +92,14 @@ export const randomPermutation = defineAlgorithm({
       trace.step(
         'swap',
         i === j
-          ? `j = i: ${a[i]} stays at position ${i}, which is now fixed.`
-          : `Swap a[${i}] = ${a[i]} with a[${j}] = ${a[j]}: position ${i} is now fixed.`,
+          ? {
+              en: `j = i: ${a[i]} stays at position ${i}, which is now fixed.`,
+              zh: `j = i：${a[i]} 留在位置 ${i}，这个位置现在固定了。`,
+            }
+          : {
+              en: `Swap a[${i}] = ${a[i]} with a[${j}] = ${a[j]}: position ${i} is now fixed.`,
+              zh: `交换 a[${i}] = ${a[i]} 和 a[${j}] = ${a[j]}：位置 ${i} 现在固定了。`,
+            },
         { vars: { i, j } },
       );
       if (i !== j) {
@@ -91,10 +108,10 @@ export const randomPermutation = defineAlgorithm({
       }
       arr.settle({ index: i });
     }
-    trace.step(
-      'done',
-      `a is now [${a.join(', ')}]: one of the ${n}! orders of the values, each equally likely.`,
-    );
+    trace.step('done', {
+      en: `a is now [${a.join(', ')}]: one of the ${n}! orders of the values, each equally likely.`,
+      zh: `a 现在是 [${a.join(', ')}]：这些值的 ${n}! 种顺序之一，每种的可能性都相同。`,
+    });
     arr.pointer({ name: 'i', index: null }).pointer({ name: 'j', index: null });
   },
 });

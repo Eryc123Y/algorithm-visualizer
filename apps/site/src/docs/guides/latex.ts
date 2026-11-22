@@ -49,6 +49,7 @@ ${figure('tree', 'The same tree and theme drawn by the engine. LaTeX sets the fi
 <tr><td><code>start</code></td><td><code>+</code></td><td>First overlay of a series: incremental count or an explicit number.</td></tr>
 <tr><td><code>theme</code></td><td><code>light</code></td><td>A built-in fixed theme.</td></tr>
 <tr><td><code>layout</code></td><td><code>auto</code></td><td><code>narrow</code> in notes, <code>wide</code> in Beamer; either can be set explicitly.</td></tr>
+<tr><td><code>lang</code></td><td><code>en</code></td><td><code>en</code> or <code>zh</code>: the language of an algorithm's run and of the figure's own words. A figure in Chinese needs a document that sets Chinese, such as one with <code>ctex</code>.</td></tr>
 <tr><td><code>width</code>, <code>height</code></td><td>natural; filled in Beamer</td><td>Fit inside the given dimensions while keeping shape.</td></tr>
 <tr><td><code>scale</code></td><td>none</td><td>Factor on natural size; without a value, reset sizing to the default.</td></tr>
 <tr><td><code>value font</code></td><td>theme's family</td><td>Font for cell values, nodes, indices, edge labels and pointers.</td></tr>

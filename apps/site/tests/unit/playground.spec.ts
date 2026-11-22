@@ -233,6 +233,23 @@ describe('the menu', () => {
 });
 
 describe('a run in the browser', () => {
+  it('runs in the page’s language, as its snippets and share link do', async () => {
+    const result = await runPlayground(
+      'dijkstra',
+      'Dijkstra 算法',
+      'A-B 4, B-C 1',
+      { lang: 'zh-Hans', depth: 1 },
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const doc = result.document as {
+      steps: { meta?: { narration?: string } }[];
+    };
+    expect(doc.steps[0]!.meta!.narration).toMatch(/[\u4e00-\u9fff]/u);
+    expect(result.link).toMatch(/&lang=zh$/);
+    expect(result.slides).toContain('lang=zh');
+  });
+
   it('writes the same snippets as the build', async () => {
     const result = await runPlayground(
       'dijkstra',

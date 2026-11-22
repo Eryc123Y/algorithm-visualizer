@@ -21,10 +21,12 @@ import {
 
 export const bellmanFord = defineAlgorithm({
   id: 'bellman-ford',
-  title: 'Bellman–Ford',
+  title: { en: 'Bellman–Ford', zh: 'Bellman–Ford 算法' },
   topic: 'graphs',
-  summary:
-    'Finds shortest paths from a source even with negative weights, relaxing every edge |V| − 1 times, and reports a negative cycle.',
+  summary: {
+    en: 'Finds shortest paths from a source even with negative weights, relaxing every edge |V| − 1 times, and reports a negative cycle.',
+    zh: '求从一个源点出发的最短路径，允许边权为负：把每条边松弛 |V| − 1 次，并报告负权环。',
+  },
   input: z.strictObject({
     graph: Graph.describe('A graph whose edges are taken as directed.'),
     source: z
@@ -91,7 +93,10 @@ export const bellmanFord = defineAlgorithm({
     const via = new Map<string, string>();
     const better = (u: string, v: string, w: number) =>
       d.get(u)! + w < d.get(v)!;
-    trace.step('start', `Every distance is ∞, except ${s}'s, which is 0.`);
+    trace.step('start', {
+      en: `Every distance is ∞, except ${s}'s, which is 0.`,
+      zh: `除 ${s} 的距离为 0 外，每个顶点的距离都是 ∞。`,
+    });
     for (const v of g.nodes)
       graph.annotate({ node: v, text: shown(d.get(v)!) });
     for (let i = 1; i < g.nodes.length; i++) {
@@ -106,8 +111,14 @@ export const bellmanFord = defineAlgorithm({
       trace.step(
         'round',
         improves
-          ? `Round ${i} of ${g.nodes.length - 1}: relax every edge in turn.`
-          : `Round ${i} of ${g.nodes.length - 1}: no edge improves a distance.`,
+          ? {
+              en: `Round ${i} of ${g.nodes.length - 1}: relax every edge in turn.`,
+              zh: `第 ${i} 轮，共 ${g.nodes.length - 1} 轮：依次松弛每条边。`,
+            }
+          : {
+              en: `Round ${i} of ${g.nodes.length - 1}: no edge improves a distance.`,
+              zh: `第 ${i} 轮，共 ${g.nodes.length - 1} 轮：没有边能改进距离。`,
+            },
         { vars: { i } },
       );
       for (const [k, [u, v, w = 1]] of g.edges.entries()) {
@@ -117,7 +128,10 @@ export const bellmanFord = defineAlgorithm({
         d.set(v, du + w);
         trace.step(
           'improve',
-          `${du} ${plus(w)} = ${du + w} improves ${v} to ${du + w}, through ${u}.`,
+          {
+            en: `${du} ${plus(w)} = ${du + w} improves ${v} to ${du + w}, through ${u}.`,
+            zh: `${du} ${plus(w)} = ${du + w}：${v} 经由 ${u} 改进为 ${du + w}。`,
+          },
           { vars: { i } },
         );
         graph
@@ -129,22 +143,25 @@ export const bellmanFord = defineAlgorithm({
         graph.markEdge({ edge, mark: 'selected' });
       }
     }
-    trace.step(
-      'check',
-      'Check every edge once more for one that still improves.',
-    );
+    trace.step('check', {
+      en: 'Check every edge once more for one that still improves.',
+      zh: '再检查一遍每条边，看是否还有能改进距离的。',
+    });
     for (const [k, [u, v, w = 1]] of g.edges.entries())
       if (better(u, v, w)) {
-        trace.step(
-          'cycle',
-          `${u} → ${v} still improves ${v}: a negative-weight cycle is reachable from ${s}.`,
-        );
+        trace.step('cycle', {
+          en: `${u} → ${v} still improves ${v}: a negative-weight cycle is reachable from ${s}.`,
+          zh: `${u} → ${v} 仍能改进 ${v}：从 ${s} 可以到达一个负权环。`,
+        });
         graph
           .highlight({ edges: [ids[k]!] })
           .markEdge({ edge: ids[k]!, mark: 'rejected' });
         return;
       }
-    trace.step('done', 'No edge improves any more: the distances are final.');
+    trace.step('done', {
+      en: 'No edge improves any more: the distances are final.',
+      zh: '没有边还能改进距离：所有距离都已确定。',
+    });
     for (const v of g.nodes)
       if (d.get(v) !== Infinity) graph.settle({ node: v });
   },

@@ -22,10 +22,12 @@ export const MAX_DIMENSION = 1000;
 
 export const matrixChain = defineAlgorithm({
   id: 'matrix-chain',
-  title: 'Matrix-chain multiplication',
+  title: { en: 'Matrix-chain multiplication', zh: '矩阵链乘法' },
   topic: 'dynamic-programming',
-  summary:
-    'Finds the order of multiplying a chain of matrices with the fewest scalar multiplications, filling a table of the best cost of every subchain, then reads the parenthesization back.',
+  summary: {
+    en: 'Finds the order of multiplying a chain of matrices with the fewest scalar multiplications, filling a table of the best cost of every subchain, then reads the parenthesization back.',
+    zh: '求矩阵链相乘时标量乘法次数最少的顺序：填一张表记录每条子链的最小代价，再读出加括号的方式。',
+  },
   input: z.strictObject({
     dims: listField(
       z
@@ -102,14 +104,20 @@ export const matrixChain = defineAlgorithm({
     const s: number[][] = labels.map(() => labels.map(() => 0));
     const M = trace.add('m', {
       kind: 'table',
-      label: 'm[i, j]: fewest multiplications for Ai to Aj',
+      label: trace.say({
+        en: 'm[i, j]: fewest multiplications for Ai to Aj',
+        zh: 'm[i, j]：Aᵢ 到 Aⱼ 的最少乘法次数',
+      }),
       initial: labels.map((_, i) => labels.map((_, j) => (i === j ? 0 : null))),
       rowLabels: labels,
       columnLabels: labels,
     });
     const S = trace.add('s', {
       kind: 'table',
-      label: 's[i, j]: where the best split falls',
+      label: trace.say({
+        en: 's[i, j]: where the best split falls',
+        zh: 's[i, j]：最优分割点',
+      }),
       place: 'side',
       rows: n,
       columns: n,
@@ -129,7 +137,10 @@ export const matrixChain = defineAlgorithm({
           const better = q < best;
           trace.step(
             'try',
-            `A${i}⋯A${j}, split after A${k}: m[${i}, ${k}] + m[${k + 1}, ${j}] + ${p[i - 1]}·${p[k]}·${p[j]} = ${m[i - 1]![k - 1]} + ${m[k]![j - 1]} + ${product} = ${q}${best === Infinity ? ', the first split tried' : better ? `, better than ${best}` : `, no better than ${best}`}.`,
+            {
+              en: `A${i}⋯A${j}, split after A${k}: m[${i}, ${k}] + m[${k + 1}, ${j}] + ${p[i - 1]}·${p[k]}·${p[j]} = ${m[i - 1]![k - 1]} + ${m[k]![j - 1]} + ${product} = ${q}${best === Infinity ? ', the first split tried' : better ? `, better than ${best}` : `, no better than ${best}`}.`,
+              zh: `A${i}⋯A${j} 在 A${k} 之后分割：m[${i}, ${k}] + m[${k + 1}, ${j}] + ${p[i - 1]}·${p[k]}·${p[j]} = ${m[i - 1]![k - 1]} + ${m[k]![j - 1]} + ${product} = ${q}${best === Infinity ? '，这是试的第一个分割' : better ? `，比 ${best} 好` : `，不比 ${best} 好`}。`,
+            },
             { vars: { i, j, k, q } },
           );
           M.depend({ cell: cell(i, j), on: [cell(i, k), cell(k + 1, j)] });
@@ -143,8 +154,14 @@ export const matrixChain = defineAlgorithm({
         trace.step(
           'best',
           j === i + 1
-            ? `m[${i}, ${j}] = ${best}: A${i}A${j} has only the one split, after A${i}, so s[${i}, ${j}] = ${k}.`
-            : `m[${i}, ${j}] = ${best}: A${i}⋯A${j} is cheapest split after A${k}, so s[${i}, ${j}] = ${k}.`,
+            ? {
+                en: `m[${i}, ${j}] = ${best}: A${i}A${j} has only the one split, after A${i}, so s[${i}, ${j}] = ${k}.`,
+                zh: `m[${i}, ${j}] = ${best}：A${i}A${j} 只有一种分割，在 A${i} 之后，所以 s[${i}, ${j}] = ${k}。`,
+              }
+            : {
+                en: `m[${i}, ${j}] = ${best}: A${i}⋯A${j} is cheapest split after A${k}, so s[${i}, ${j}] = ${k}.`,
+                zh: `m[${i}, ${j}] = ${best}：A${i}⋯A${j} 在 A${k} 之后分割代价最小，所以 s[${i}, ${j}] = ${k}。`,
+              },
           { vars: { i, j, k } },
         );
         M.set({ cell: cell(i, j), value: best }).highlight({
@@ -165,7 +182,10 @@ export const matrixChain = defineAlgorithm({
       const whole = i === 1 && j === n;
       trace.step(
         'split',
-        `s[${i}, ${j}] = ${k}: ${whole ? 'the whole chain' : `A${i}⋯A${j}`} splits into ${parens(i, k)} and ${parens(k + 1, j)}.${whole ? ` Best order: ${parens(1, n)}, ${m[0]![n - 1]} multiplications.` : ''}`,
+        {
+          en: `s[${i}, ${j}] = ${k}: ${whole ? 'the whole chain' : `A${i}⋯A${j}`} splits into ${parens(i, k)} and ${parens(k + 1, j)}.${whole ? ` Best order: ${parens(1, n)}, ${m[0]![n - 1]} multiplications.` : ''}`,
+          zh: `s[${i}, ${j}] = ${k}：${whole ? '整条链' : `A${i}⋯A${j}`}分成 ${parens(i, k)} 和 ${parens(k + 1, j)}。${whole ? `最优顺序：${parens(1, n)}，共 ${m[0]![n - 1]} 次乘法。` : ''}`,
+        },
         { vars: { i, j, k } },
       );
       S.settle({ cells: [cell(i, j)] });

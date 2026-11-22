@@ -12,10 +12,12 @@ import { TwoStrings } from './strings.ts';
 
 export const editDistance = defineAlgorithm({
   id: 'edit-distance',
-  title: 'Edit distance',
+  title: { en: 'Edit distance', zh: '编辑距离' },
   topic: 'dynamic-programming',
-  summary:
-    'Fills a table of the fewest replacements, insertions and deletions that turn every prefix of one string into every prefix of another.',
+  summary: {
+    en: 'Fills a table of the fewest replacements, insertions and deletions that turn every prefix of one string into every prefix of another.',
+    zh: '填一张表：把一个字符串的每个前缀变成另一个字符串的每个前缀，最少需要多少次替换、插入和删除。',
+  },
   input: TwoStrings,
   examples: [{ first: 'kitten', second: 'sitting' }],
   code: {
@@ -99,7 +101,10 @@ export const editDistance = defineAlgorithm({
         D[i]![j] = Math.min(del, ins, diag);
         trace.step(
           'fill',
-          `${a[i - 1]} and ${b[j - 1]}: the least of delete ${del}, insert ${ins} and ${cost === 0 ? 'copy' : 'replace'} ${diag} is ${D[i]![j]}.`,
+          {
+            en: `${a[i - 1]} and ${b[j - 1]}: the least of delete ${del}, insert ${ins} and ${cost === 0 ? 'copy' : 'replace'} ${diag} is ${D[i]![j]}.`,
+            zh: `${a[i - 1]} 和 ${b[j - 1]}：删除 ${del}、插入 ${ins} 和${cost === 0 ? '复制' : '替换'} ${diag} 中最小的是 ${D[i]![j]}。`,
+          },
           { vars: { i, j, cost } },
         );
         table.depend({
@@ -113,10 +118,10 @@ export const editDistance = defineAlgorithm({
         table.set({ cell: [i, j], value: D[i]![j]! });
       }
     const d = D[m]![n]!;
-    trace.step(
-      'done',
-      `The table is complete: ${d} ${d === 1 ? 'edit turns' : 'edits turn'} "${first}" into "${second}".`,
-    );
+    trace.step('done', {
+      en: `The table is complete: ${d} ${d === 1 ? 'edit turns' : 'edits turn'} "${first}" into "${second}".`,
+      zh: `表已填完：${d} 次编辑把“${first}”变成“${second}”。`,
+    });
     // Trace back one cheapest way, preferring the diagonal.
     const path: Cell[] = [[m, n]];
     let [i, j] = [m, n];
@@ -128,10 +133,10 @@ export const editDistance = defineAlgorithm({
       else j--;
       path.push([i, j]);
     }
-    trace.step(
-      'trace',
-      'Walk back from the corner to the start, each time to a neighbour the cell came from: the settled cells show one cheapest way.',
-    );
+    trace.step('trace', {
+      en: 'Walk back from the corner to the start, each time to a neighbour the cell came from: the settled cells show one cheapest way.',
+      zh: '从右下角往回走到起点，每次走到这个格子由之得来的邻格：标出的格子给出了一种代价最小的做法。',
+    });
     table.settle({ cells: path });
   },
 });

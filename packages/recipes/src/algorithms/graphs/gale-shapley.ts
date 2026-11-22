@@ -170,10 +170,12 @@ const ORDINALS = [
 
 export const galeShapley = defineAlgorithm({
   id: 'gale-shapley',
-  title: 'Gale–Shapley stable matching',
+  title: { en: 'Gale–Shapley stable matching', zh: 'Gale–Shapley 稳定匹配' },
   topic: 'graphs',
-  summary:
-    'Matches n proposers with n receivers so that no two would both rather be with each other: each free proposer proposes down its list, and each receiver keeps the best proposal it has had.',
+  summary: {
+    en: 'Matches n proposers with n receivers so that no two would both rather be with each other: each free proposer proposes down its list, and each receiver keeps the best proposal it has had.',
+    zh: '把 n 个求婚者和 n 个接受者配对，使得没有两个人都更愿意和对方在一起：每个单身的求婚者按自己的列表依次求婚，每个接受者留下目前收到的最好的求婚。',
+  },
   input: z
     .strictObject({
       proposers: Preferences.describe(
@@ -255,17 +257,20 @@ export const galeShapley = defineAlgorithm({
       trace.add(label, {
         kind: 'table',
         place: 'side',
-        label: `${label}, ${label === 'P' ? 'proposers' : 'receivers'}’ lists`,
+        label: trace.say({
+          en: `${label}, ${label === 'P' ? 'proposers' : 'receivers'}’ lists`,
+          zh: `${label}：${label === 'P' ? '求婚者' : '接受者'}的列表`,
+        }),
         initial: lists.map(([, list]) => [...list]),
         rowLabels: lists.map(([who]) => who),
         columnLabels: columns,
       });
     const P = table('P', proposers);
     const R = table('R', receivers);
-    trace.step(
-      'start',
-      'Everyone starts free. Each proposer will propose down its list in P, and each receiver keeps the best proposal it has had, by its list in R.',
-    );
+    trace.step('start', {
+      en: 'Everyone starts free. Each proposer will propose down its list in P, and each receiver keeps the best proposal it has had, by its list in R.',
+      zh: '开始时每个人都单身。每个求婚者按 P 中自己的列表依次求婚，每个接受者按 R 中自己的列表留下目前收到的最好的求婚。',
+    });
     for (const [p] of proposers) graph.group({ node: p, group: 0 });
     for (const [r] of receivers) graph.group({ node: r, group: 1 });
 
@@ -283,10 +288,10 @@ export const galeShapley = defineAlgorithm({
       const r = prefers.get(p)![k]!;
       asked.set(p, k + 1);
       proposals++;
-      trace.step(
-        'propose',
-        `${p} is free and proposes to ${r}, the ${ORDINALS[k]} on its list.`,
-      );
+      trace.step('propose', {
+        en: `${p} is free and proposes to ${r}, the ${ORDINALS[k]} on its list.`,
+        zh: `${p} 单身，向 ${r} 求婚，${r} 在 ${p} 的列表中排第 ${k + 1}。`,
+      });
       for (const id of dropped) graph.removeEdge({ edge: id });
       dropped = [];
       graph
@@ -301,10 +306,10 @@ export const galeShapley = defineAlgorithm({
       const list = ranks.get(r)!;
       const rRow = row(r, receivers);
       if (q === undefined) {
-        trace.step(
-          'accept',
-          `${r} is free, so it accepts ${p}: they are engaged.`,
-        );
+        trace.step('accept', {
+          en: `${r} is free, so it accepts ${p}: they are engaged.`,
+          zh: `${r} 单身，所以接受 ${p}：他们订婚了。`,
+        });
         partner.set(r, p);
         engaged.add(p);
         graph.markEdge({ edge: edge(p, r), mark: 'selected' });
@@ -313,10 +318,10 @@ export const galeShapley = defineAlgorithm({
       }
       const [mine, theirs] = [list.indexOf(p), list.indexOf(q)];
       if (mine < theirs) {
-        trace.step(
-          'trade',
-          `${r} ranks ${p} ${ORDINALS[mine]} and its partner ${q} ${ORDINALS[theirs]}: it leaves ${q}, who is free again, for ${p}.`,
-        );
+        trace.step('trade', {
+          en: `${r} ranks ${p} ${ORDINALS[mine]} and its partner ${q} ${ORDINALS[theirs]}: it leaves ${q}, who is free again, for ${p}.`,
+          zh: `${r} 把 ${p} 排在第 ${mine + 1}，把现在的伴侣 ${q} 排在第 ${theirs + 1}：它离开 ${q}，选择 ${p}，${q} 恢复单身。`,
+        });
         partner.set(r, p);
         engaged.add(p);
         engaged.delete(q);
@@ -325,10 +330,10 @@ export const galeShapley = defineAlgorithm({
           .markEdge({ edge: edge(p, r), mark: 'selected' });
         dropped = [edge(q, r)];
       } else {
-        trace.step(
-          'reject',
-          `${r} ranks its partner ${q} ${ORDINALS[theirs]} and ${p} ${ORDINALS[mine]}: it rejects ${p}, who stays free.`,
-        );
+        trace.step('reject', {
+          en: `${r} ranks its partner ${q} ${ORDINALS[theirs]} and ${p} ${ORDINALS[mine]}: it rejects ${p}, who stays free.`,
+          zh: `${r} 把现在的伴侣 ${q} 排在第 ${theirs + 1}，把 ${p} 排在第 ${mine + 1}：它拒绝 ${p}，${p} 仍然单身。`,
+        });
         graph.markEdge({ edge: edge(p, r), mark: 'rejected' });
         dropped = [edge(p, r)];
       }
@@ -339,10 +344,10 @@ export const galeShapley = defineAlgorithm({
         ],
       });
     }
-    trace.step(
-      'done',
-      `No proposer is free: the ${n === 1 ? 'engaged pair forms' : `${n} engaged pairs form`} a stable matching, the best one for every proposer, after ${proposals} proposal${proposals === 1 ? '' : 's'}.`,
-    );
+    trace.step('done', {
+      en: `No proposer is free: the ${n === 1 ? 'engaged pair forms' : `${n} engaged pairs form`} a stable matching, the best one for every proposer, after ${proposals} proposal${proposals === 1 ? '' : 's'}.`,
+      zh: `没有单身的求婚者了：${n === 1 ? '这一对' : `这 ${n} 对`}订婚者构成一个稳定匹配，对每个求婚者都是最好的，共求婚 ${proposals} 次。`,
+    });
     for (const id of dropped) graph.removeEdge({ edge: id });
     graph.pointer({ name: 'p', node: null });
     return { results: [proposals] };

@@ -52,6 +52,7 @@ const family: Family<Interval> = {
   keys,
   aug: {
     field: 'max',
+    fieldZh: 'max 值',
     of: ([, high], left, right) =>
       Math.max(high, left ?? -Infinity, right ?? -Infinity),
     down: (max, [, high]) => Math.max(max, high),
@@ -72,32 +73,35 @@ function search(t: State, i: Interval, run: Run<Interval>): Applied<State> {
     const node = nodeOf(t, x);
     const at = show(node.key);
     if (overlaps(i, node.key)) {
-      step('found', `${at} overlaps ${it}: found.`);
+      step('found', {
+        en: `${at} overlaps ${it}: found.`,
+        zh: `${at} 与 ${it} 重叠：找到了。`,
+      });
       on.pointer({ name: 'x', node: x }).settle({ node: x });
       return { state: t, result: true };
     }
     const leftMax = fieldOf(t, node.left);
     if (leftMax !== null && leftMax >= i[0]) {
-      step(
-        'left',
-        `${at} does not overlap ${it}. The left subtree reaches up to ${leftMax}, at least ${it}'s low end ${i[0]}, so if any interval overlaps ${it}, one on the left does: go left.`,
-      );
+      step('left', {
+        en: `${at} does not overlap ${it}. The left subtree reaches up to ${leftMax}, at least ${it}'s low end ${i[0]}, so if any interval overlaps ${it}, one on the left does: go left.`,
+        zh: `${at} 与 ${it} 不重叠。左子树最高到 ${leftMax}，不低于 ${it} 的低端点 ${i[0]}，所以如果有区间与 ${it} 重叠，左边就一定有：往左走。`,
+      });
       side = 'left';
     } else {
-      step(
-        'right',
-        `${at} does not overlap ${it}, and ${leftMax === null ? 'there is nothing on the left' : `the left subtree reaches only up to ${leftMax}, below ${it}'s low end ${i[0]}`}: go right.`,
-      );
+      step('right', {
+        en: `${at} does not overlap ${it}, and ${leftMax === null ? 'there is nothing on the left' : `the left subtree reaches only up to ${leftMax}, below ${it}'s low end ${i[0]}`}: go right.`,
+        zh: `${at} 与 ${it} 不重叠，${leftMax === null ? '而且左边什么都没有' : `而且左子树最高只到 ${leftMax}，低于 ${it} 的低端点 ${i[0]}`}：往右走。`,
+      });
       side = 'right';
     }
     on.pointer({ name: 'x', node: x }).highlight({ nodes: [x] });
     parent = x;
     x = node[side];
   }
-  step(
-    'none',
-    `Reached an empty leaf: no interval in the tree overlaps ${it}.`,
-  );
+  step('none', {
+    en: `Reached an empty leaf: no interval in the tree overlaps ${it}.`,
+    zh: `到达空叶子：树中没有区间与 ${it} 重叠。`,
+  });
   on.pointer({
     name: 'x',
     node: parent === null ? null : { parent, slot: side === 'left' ? 0 : 1 },
@@ -188,10 +192,12 @@ const op = operationsOf<State, From<Interval>, 'tree'>();
 /** Overlap search in a red–black tree of intervals that keeps maxima. */
 export const intervalTree = defineStructure<State, From<Interval>, 'tree'>({
   id: 'interval-tree',
-  title: 'Interval tree',
+  title: { en: 'Interval tree', zh: '区间树' },
   topic: 'trees',
-  summary:
-    'A red–black tree of intervals by low endpoint whose nodes keep the greatest high endpoint below them, so that an overlapping interval is found on one path.',
+  summary: {
+    en: 'A red–black tree of intervals by low endpoint whose nodes keep the greatest high endpoint below them, so that an overlapping interval is found on one path.',
+    zh: '按低端点组织区间的红黑树，每个节点记录它下面最大的高端点，这样沿一条路径就能找到重叠的区间。',
+  },
   name: 'T',
   kind: 'tree',
   from: fromSchema(
@@ -217,16 +223,21 @@ export const intervalTree = defineStructure<State, From<Interval>, 'tree'>({
   operations: [
     op({
       name: 'search',
-      title: 'search',
-      summary:
-        'Finds an interval that overlaps the given one, or none: it goes left whenever the left subtree reaches the low end, since an overlap is then on the left if anywhere.',
+      title: { en: 'search', zh: '查找' },
+      summary: {
+        en: 'Finds an interval that overlaps the given one, or none: it goes left whenever the left subtree reaches the low end, since an overlap is then on the left if anywhere.',
+        zh: '找出一个与给定区间重叠的区间，或者确定没有：只要左子树能达到低端点就往左走，因为这时若有重叠，左边一定有。',
+      },
       args: { interval: IntervalSchema.describe('The interval to overlap.') },
       examples: [
         { from: SAMPLE, interval: [22, 25] },
         { from: SAMPLE, interval: [11, 14] },
       ],
       code: INTERVAL_SEARCH,
-      titleOf: ({ interval }) => `search ${show(interval)}`,
+      titleOf: ({ interval }) => ({
+        en: `search ${show(interval)}`,
+        zh: `查找 ${show(interval)}`,
+      }),
       apply: (s, { interval }, trace, on) =>
         search(
           s,
@@ -236,13 +247,18 @@ export const intervalTree = defineStructure<State, From<Interval>, 'tree'>({
     }),
     op({
       name: 'insert',
-      title: 'insert',
-      summary:
-        'Inserts an interval as in a red–black tree, raising the max of every node on the way down to its high end where it is higher.',
+      title: { en: 'insert', zh: '插入' },
+      summary: {
+        en: 'Inserts an interval as in a red–black tree, raising the max of every node on the way down to its high end where it is higher.',
+        zh: '像在红黑树中一样插入区间，向下走时，若它的高端点更高，就把路上节点的 max 提高到它。',
+      },
       args: { interval: IntervalSchema.describe('The interval to insert.') },
       examples: [{ from: SAMPLE, interval: [12, 13] }],
       code: INTERVAL_INSERT,
-      titleOf: ({ interval }) => `insert ${show(interval)}`,
+      titleOf: ({ interval }) => ({
+        en: `insert ${show(interval)}`,
+        zh: `插入 ${show(interval)}`,
+      }),
       apply: (s, { interval }, trace, on) => ({
         state: insert(
           s,
@@ -254,13 +270,18 @@ export const intervalTree = defineStructure<State, From<Interval>, 'tree'>({
     }),
     op({
       name: 'delete',
-      title: 'delete',
-      summary:
-        'Deletes an interval as in a red–black tree, then recomputes the maxima from where the removed node’s place was filled up to the root.',
+      title: { en: 'delete', zh: '删除' },
+      summary: {
+        en: 'Deletes an interval as in a red–black tree, then recomputes the maxima from where the removed node’s place was filled up to the root.',
+        zh: '像在红黑树中一样删除区间，再从被删节点的位置被填补的地方往上走到根，重新计算 max 值。',
+      },
       args: { interval: IntervalSchema.describe('The interval to delete.') },
       examples: [{ from: SAMPLE, interval: [16, 21] }],
       code: INTERVAL_DELETE,
-      titleOf: ({ interval }) => `delete ${show(interval)}`,
+      titleOf: ({ interval }) => ({
+        en: `delete ${show(interval)}`,
+        zh: `删除 ${show(interval)}`,
+      }),
       apply: (s, { interval }, trace, on) => ({
         state: remove(
           s,

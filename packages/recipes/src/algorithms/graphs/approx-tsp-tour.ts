@@ -32,10 +32,12 @@ const show = (x: number) => String(Math.round(x * 100) / 100);
 
 export const approxTspTour = defineAlgorithm({
   id: 'approx-tsp-tour',
-  title: 'Approximate TSP tour',
+  title: { en: 'Approximate TSP tour', zh: '近似旅行商回路' },
   topic: 'graphs',
-  summary:
-    'Finds a travelling-salesman tour of points in the plane at most twice the shortest: grow a minimum spanning tree, and visit the points in the order a preorder walk of it reaches them.',
+  summary: {
+    en: 'Finds a travelling-salesman tour of points in the plane at most twice the shortest: grow a minimum spanning tree, and visit the points in the order a preorder walk of it reaches them.',
+    zh: '为平面上的点求一条长度不超过最短回路两倍的旅行商回路：先生长一棵最小生成树，再按先序遍历到达各点的顺序访问它们。',
+  },
   input: z.strictObject({ points: pointsField(2, MAX_TSP_POINTS) }),
   main: 'points',
   examples: [
@@ -101,10 +103,10 @@ export const approxTspTour = defineAlgorithm({
       edges: [],
     });
     const r = ps[0]!;
-    trace.step(
-      'start',
-      `Take ${r.id} as the root, and grow a minimum spanning tree from it by Prim's algorithm, the cost of joining two points being the distance between them.`,
-    );
+    trace.step('start', {
+      en: `Take ${r.id} as the root, and grow a minimum spanning tree from it by Prim's algorithm, the cost of joining two points being the distance between them.`,
+      zh: `以 ${r.id} 为根，用 Prim 算法从它生长一棵最小生成树，连接两点的代价是它们之间的距离。`,
+    });
     graph.pointer({ name: 'r', node: r.id });
 
     // Prim: the closest point to the tree joins it, a step each.
@@ -125,10 +127,10 @@ export const approxTspTour = defineAlgorithm({
       weight += Math.sqrt(best[v]!);
       const id = `${ps[u]!.id}-${ps[v]!.id}`;
       treeEdges.push(id);
-      trace.step(
-        'grow',
-        `${ps[v]!.id} is the closest point to the tree, ${show(Math.sqrt(best[v]!))} from ${ps[u]!.id}: add the edge ${ps[u]!.id}–${ps[v]!.id}.`,
-      );
+      trace.step('grow', {
+        en: `${ps[v]!.id} is the closest point to the tree, ${show(Math.sqrt(best[v]!))} from ${ps[u]!.id}: add the edge ${ps[u]!.id}–${ps[v]!.id}.`,
+        zh: `${ps[v]!.id} 是离树最近的点，与 ${ps[u]!.id} 相距 ${show(Math.sqrt(best[v]!))}：加入边 ${ps[u]!.id}–${ps[v]!.id}。`,
+      });
       graph
         .addEdge({
           edge: {
@@ -158,8 +160,14 @@ export const approxTspTour = defineAlgorithm({
       trace.step(
         'walk',
         k === 0
-          ? `Walk the tree in preorder from ${r.id}: it is first, number 1.`
-          : `The walk first reaches ${ps[v]!.id} next: number ${k + 1}.`,
+          ? {
+              en: `Walk the tree in preorder from ${r.id}: it is first, number 1.`,
+              zh: `从 ${r.id} 开始按先序遍历这棵树：它排第一，编号 1。`,
+            }
+          : {
+              en: `The walk first reaches ${ps[v]!.id} next: number ${k + 1}.`,
+              zh: `遍历接下来首次到达 ${ps[v]!.id}：编号 ${k + 1}。`,
+            },
       );
       graph
         .annotate({ node: ps[v]!.id, text: String(k + 1) })
@@ -170,10 +178,10 @@ export const approxTspTour = defineAlgorithm({
     const length = stops
       .slice(1)
       .reduce((s, v, k) => s + dist(ps[stops[k]!]!, ps[v]!), 0);
-    trace.step(
-      'tour',
-      `Visit the points in that order, ${stops.map((v) => ps[v]!.id).join(' → ')}: the tour has length ${show(length)}.`,
-    );
+    trace.step('tour', {
+      en: `Visit the points in that order, ${stops.map((v) => ps[v]!.id).join(' → ')}: the tour has length ${show(length)}.`,
+      zh: `按这个顺序访问各点，${stops.map((v) => ps[v]!.id).join(' → ')}：回路长度为 ${show(length)}。`,
+    });
     for (const id of treeEdges) graph.markEdge({ edge: id, mark: 'rejected' });
     if (n === 2) graph.markEdge({ edge: treeEdges[0]!, mark: 'selected' });
     else
@@ -184,10 +192,10 @@ export const approxTspTour = defineAlgorithm({
           .addEdge({ edge: { id, from: a.id, to: b.id } })
           .markEdge({ edge: id, mark: 'selected' });
       });
-    trace.step(
-      'done',
-      `The tree weighs ${show(weight)}, no more than the shortest tour, which less one edge is a spanning tree. Walking the tree fully costs twice its weight, and skipping repeated points costs no more, so this tour, ${show(length)}, is at most twice the shortest.`,
-    );
+    trace.step('done', {
+      en: `The tree weighs ${show(weight)}, no more than the shortest tour, which less one edge is a spanning tree. Walking the tree fully costs twice its weight, and skipping repeated points costs no more, so this tour, ${show(length)}, is at most twice the shortest.`,
+      zh: `这棵树的权重是 ${show(weight)}，不超过最短回路的长度，因为最短回路去掉一条边就是一棵生成树。完整地走遍这棵树的代价是它权重的两倍，跳过重复的点不会更长，所以这条回路的长度 ${show(length)} 不超过最短回路的两倍。`,
+    });
     graph.pointer({ name: 'r', node: null });
     return { results: [Math.round(length * 1000) / 1000] };
   },

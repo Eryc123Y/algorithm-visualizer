@@ -22,10 +22,12 @@ function checkSorted(values: readonly number[]): void {
 
 export const binarySearch = defineAlgorithm({
   id: 'binary-search',
-  title: 'Binary search',
+  title: { en: 'Binary search', zh: '二分查找' },
   topic: 'searching',
-  summary:
-    'Finds a value in a sorted array by looking at the middle of the range left and halving it.',
+  summary: {
+    en: 'Finds a value in a sorted array by looking at the middle of the range left and halving it.',
+    zh: '在有序数组中查找一个值：每次看剩下范围的中间，把范围减半。',
+  },
   input: z.strictObject({
     values: listField(
       z
@@ -74,39 +76,77 @@ export const binarySearch = defineAlgorithm({
     const arr = trace.add('a', { kind: 'array', initial: [...values] });
     let lo = 0;
     let hi = values.length - 1;
-    trace.step('start', `Search the whole array for ${target}.`, {
-      vars: { lo, hi },
-    });
+    trace.step(
+      'start',
+      {
+        en: `Search the whole array for ${target}.`,
+        zh: `在整个数组中查找 ${target}。`,
+      },
+      {
+        vars: { lo, hi },
+      },
+    );
     arr.pointer({ name: 'lo', index: lo }).pointer({ name: 'hi', index: hi });
     while (lo <= hi) {
       const mid = (lo + hi) >> 1;
       const v = values[mid]!;
-      trace.step('mid', `Look in the middle: a[${mid}] = ${v}.`, {
-        vars: { lo, hi, mid },
-      });
+      trace.step(
+        'mid',
+        {
+          en: `Look in the middle: a[${mid}] = ${v}.`,
+          zh: `看中间：a[${mid}] = ${v}。`,
+        },
+        {
+          vars: { lo, hi, mid },
+        },
+      );
       arr.pointer({ name: 'mid', index: mid }).highlight({ indices: [mid] });
       if (v === target) {
-        trace.step('found', `Found ${target} at position ${mid}.`, {
-          vars: { mid },
-        });
+        trace.step(
+          'found',
+          {
+            en: `Found ${target} at position ${mid}.`,
+            zh: `在位置 ${mid} 找到 ${target}。`,
+          },
+          {
+            vars: { mid },
+          },
+        );
         arr.settle({ index: mid });
         return;
       }
       if (v < target) {
         lo = mid + 1;
-        trace.step('right', `${v} < ${target}: search right of ${mid}.`, {
-          vars: { lo, hi },
-        });
+        trace.step(
+          'right',
+          {
+            en: `${v} < ${target}: search right of ${mid}.`,
+            zh: `${v} < ${target}：在 ${mid} 右边查找。`,
+          },
+          {
+            vars: { lo, hi },
+          },
+        );
         arr.pointer({ name: 'lo', index: lo });
       } else {
         hi = mid - 1;
-        trace.step('left', `${v} > ${target}: search left of ${mid}.`, {
-          vars: { lo, hi },
-        });
+        trace.step(
+          'left',
+          {
+            en: `${v} > ${target}: search left of ${mid}.`,
+            zh: `${v} > ${target}：在 ${mid} 左边查找。`,
+          },
+          {
+            vars: { lo, hi },
+          },
+        );
         arr.pointer({ name: 'hi', index: hi >= 0 ? hi : null });
       }
       arr.pointer({ name: 'mid', index: null });
     }
-    trace.step('missing', `lo > hi: ${target} is not in the array.`);
+    trace.step('missing', {
+      en: `lo > hi: ${target} is not in the array.`,
+      zh: `lo > hi：${target} 不在数组中。`,
+    });
   },
 });
