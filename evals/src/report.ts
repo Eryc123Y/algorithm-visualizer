@@ -175,7 +175,8 @@ export function writeReport(run: string): RunSummary {
   return summary;
 }
 
-// Run as a script (import.meta.main needs Node 22.18; we support 22.12).
+// Run as a script. The check avoids import.meta.main, which not every
+// Node.js the engines field allows has.
 if (resolve(process.argv[1] ?? '') === fileURLToPath(import.meta.url))
   for (const run of process.argv.slice(2)) {
     const { totals } = writeReport(run);

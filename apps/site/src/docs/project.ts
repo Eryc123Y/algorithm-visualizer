@@ -404,7 +404,7 @@ function contributingZh(markdown: string, assets: Assets): string {
 <p>每类问题都有一个简短的表单，问的是复现问题所需的信息。表单是英文的，用中文填写也可以。提交前先搜一下<a href="${REPOSITORY}/issues">已有的 issue</a>；附上你看到的图或分享链接，比文字描述更有用。</p>
 <ul class="forms">${forms}</ul>
 <h2 id="setup">准备仓库</h2>
-<p>需要 Node.js 22.12 或更高版本（见 <code>.nvmrc</code>）和 npm，其余都是开发依赖。只有跑 E2E 测试时才需要安装 Chromium。</p>
+<p>需要 Node.js 22.18 或更高版本（见 <code>.nvmrc</code>，它能直接运行 TypeScript 脚本和测试）和 npm，其余都是开发依赖。只有跑 E2E 测试时才需要安装 Chromium。</p>
 ${setup === undefined || setup.type !== 'code' ? '' : `<pre tabindex="0"><code>${text(setup.code)}</code></pre>`}
 <h2 id="algorithm">添加一个算法</h2>
 <p>每个算法，以及数据结构的每个操作，都是 <code>@algomotion/recipes</code> 注册表里的一个模块。MCP、命令行和 playground 都读这个注册表，所以加一个模块不需要改别处。</p>
