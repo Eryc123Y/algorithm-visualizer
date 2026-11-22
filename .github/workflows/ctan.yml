@@ -19,6 +19,8 @@ on:
       - 'packages/latex/package.json'
       - '.nvmrc'
       - 'packages/latex/scripts/**'
+      # The engine that draws the manual: its sources, and the manifests
+      # whose exports resolve them.
       - 'packages/spec/src/**'
       - 'packages/fonts/src/**'
       - 'packages/core/src/**'
@@ -26,6 +28,7 @@ on:
       - 'packages/tikz/src/**'
       - 'packages/recipes/src/**'
       - 'packages/mcp/src/**'
+      - 'packages/*/package.json'
       - 'package-lock.json'
 
 concurrency:
@@ -62,15 +65,17 @@ jobs:
             luaotfload
             lualibs
             lua-uni-algos
+      # pkgcheck 4.1.3 (2026-11-13). CTAN's mirrors serve the latest build
+      # under a fixed name, so the hash is pinned here: when it changes,
+      # review the new release and update both.
       - name: pkgcheck
+        env:
+          PKGCHECK_SHA256: 9050558c31a882ceceb3ff39e3e7c7abbd2bcf3783fa274d8463daec984de827
         run: |
-          base=https://mirrors.ctan.org/support/pkgcheck/bin/pkgcheck-x86_64-unknown-linux-musl
           mkdir -p "$RUNNER_TEMP/pkgcheck"
           cd "$RUNNER_TEMP/pkgcheck"
-          curl -fsSL --retry 3 -o pkgcheck "$base"
-          # The checksum files come in GNU and BSD formats; take the hash.
-          sum="$(curl -fsSL --retry 3 "$base.sha256" | grep -oE '[0-9a-f]{64}' | head -1)"
-          echo "$sum  pkgcheck" | sha256sum -c -
+          curl -fsSL --retry 3 -o pkgcheck https://mirrors.ctan.org/support/pkgcheck/bin/pkgcheck-x86_64-unknown-linux-musl
+          echo "$PKGCHECK_SHA256  pkgcheck" | sha256sum -c -
           chmod +x pkgcheck
           echo "PKGCHECK=$PWD/pkgcheck" >> "$GITHUB_ENV"
       - run: scripts/ctan.sh

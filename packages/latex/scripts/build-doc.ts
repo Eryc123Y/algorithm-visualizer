@@ -1,9 +1,10 @@
 /**
  * Builds the package's manual, dist/algomotion-doc.pdf, from
  * package/algomotion-doc.tex, with the algomotion command of this checkout
- * run from its sources, as `algomotion` on the PATH: `npm run build:doc -w @algomotion/latex`. Needs
- * latexmk and LuaLaTeX. CTAN takes the PDF with its source
- * (scripts/release-assets.sh).
+ * run from its sources, as `algomotion` on the PATH:
+ * `npm run build:doc -w @algomotion/latex`. Needs latexmk, LuaLaTeX and a
+ * POSIX shell, as scripts/ctan.sh does; on Windows, run it in WSL. CTAN
+ * takes the PDF with its source (scripts/ctan.sh).
  */
 import { spawnSync } from 'node:child_process';
 import {
