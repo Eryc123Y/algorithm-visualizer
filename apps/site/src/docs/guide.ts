@@ -36,9 +36,9 @@ export interface GuideContext {
    */
   readonly root: string;
   /**
-   * The way back to the site's root: links to the share page (`play/`)
-   * and to module pages (`dijkstra/`), which exist in English only, start
-   * here. In English it is the same as `root`.
+   * The way back to the site's root: links to the share page (`play/`),
+   * which is one page for both languages, start here. In English it is the
+   * same as `root`.
    */
   readonly site: string;
   /** A figure declared in the page's `figures`, with its caption. */

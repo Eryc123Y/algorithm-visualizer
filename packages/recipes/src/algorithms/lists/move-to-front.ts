@@ -25,10 +25,12 @@ const keyOf = (k: number | string) => String(k);
 
 export const moveToFront = defineAlgorithm({
   id: 'move-to-front',
-  title: 'Move-to-front',
+  title: { en: 'Move-to-front', zh: '移至前端' },
   topic: 'lists',
-  summary:
-    'Serves requests from a linked list, moving each requested key to the front: the search costs its position r, and moving it there by swaps would take r − 1 more.',
+  summary: {
+    en: 'Serves requests from a linked list, moving each requested key to the front: the search costs its position r, and moving it there by swaps would take r − 1 more.',
+    zh: '处理对链表的一串请求，每次把请求的关键字移到最前面：查找的代价是它的位置 r，用交换把它移到最前面还要 r − 1。',
+  },
   input: z
     .strictObject({
       list: listField(
@@ -109,24 +111,29 @@ export const moveToFront = defineAlgorithm({
     const table = trace.add('cost', {
       kind: 'table',
       place: 'side',
-      label: 'cost',
+      label: trace.say({ en: 'cost', zh: '代价' }),
       rows: requests.length + 1,
       columns: 4,
       initial: [
         ...requests.map((k) => [k, null, null, null]),
-        ['total', null, null, null],
+        [trace.say({ en: 'total', zh: '合计' }), null, null, null],
       ],
-      columnLabels: ['request', 'search', 'move', 'cost'],
+      columnLabels: [
+        trace.say({ en: 'request', zh: '请求' }),
+        trace.say({ en: 'search', zh: '查找' }),
+        trace.say({ en: 'move', zh: '移动' }),
+        trace.say({ en: 'cost', zh: '代价' }),
+      ],
     });
     // The keys in list order, as the drawing has them.
     let order = list.map(keyOf);
     const totals = { search: 0, move: 0 };
     requests.forEach((key, row) => {
       const k = keyOf(key);
-      trace.step(
-        'request',
-        `Request ${row + 1} of ${requests.length}: find ${k}, starting at the head, ${order[0]}.`,
-      );
+      trace.step('request', {
+        en: `Request ${row + 1} of ${requests.length}: find ${k}, starting at the head, ${order[0]}.`,
+        zh: `第 ${row + 1} 个请求，共 ${requests.length} 个：从表头 ${order[0]} 开始查找 ${k}。`,
+      });
       if (row === 0) L.pointer({ name: 'head', index: 0 });
       L.pointer({ name: 'x', index: 0 });
       table.highlight({ cells: [[row, 0]] });
@@ -135,16 +142,22 @@ export const moveToFront = defineAlgorithm({
         trace.step(
           'compare',
           p < at
-            ? `${order[p]} is not ${k}: go on to the next node.`
-            : `${order[p]} is ${k}: found at position ${p + 1}.`,
+            ? {
+                en: `${order[p]} is not ${k}: go on to the next node.`,
+                zh: `${order[p]} 不是 ${k}：继续看下一个节点。`,
+              }
+            : {
+                en: `${order[p]} is ${k}: found at position ${p + 1}.`,
+                zh: `${order[p]} 就是 ${k}：在位置 ${p + 1} 找到。`,
+              },
         );
         L.pointer({ name: 'x', index: p }).highlight({ indices: [p] });
       }
       const r = at + 1;
-      trace.step(
-        'found',
-        `The search read ${r} node${r === 1 ? '' : 's'}, so it costs ${r}; moving ${k} to the front by swaps of neighbours takes ${r - 1}, so the request costs ${2 * r - 1}.`,
-      );
+      trace.step('found', {
+        en: `The search read ${r} node${r === 1 ? '' : 's'}, so it costs ${r}; moving ${k} to the front by swaps of neighbours takes ${r - 1}, so the request costs ${2 * r - 1}.`,
+        zh: `查找读了 ${r} 个节点，代价是 ${r}；通过交换相邻节点把 ${k} 移到最前面要 ${r - 1}，所以这个请求的代价是 ${2 * r - 1}。`,
+      });
       table.set({ cell: [row, 1], value: r });
       table.set({ cell: [row, 2], value: r - 1 });
       table.set({ cell: [row, 3], value: 2 * r - 1 });
@@ -158,16 +171,19 @@ export const moveToFront = defineAlgorithm({
       totals.search += r;
       totals.move += r - 1;
       if (r === 1) {
-        trace.step('front', `${k} is already the head: nothing moves.`);
+        trace.step('front', {
+          en: `${k} is already the head: nothing moves.`,
+          zh: `${k} 已经是表头：不需要移动。`,
+        });
         L.highlight({ indices: [0] });
         return;
       }
       const before = order[at - 1]!;
       const after = order[at + 1];
-      trace.step(
-        'move',
-        `Move ${k} to the front: ${before} now links to ${after ?? 'nothing'}, ${k} links to the old head, ${order[0]}, and ${k} becomes the head.`,
-      );
+      trace.step('move', {
+        en: `Move ${k} to the front: ${before} now links to ${after ?? 'nothing'}, ${k} links to the old head, ${order[0]}, and ${k} becomes the head.`,
+        zh: `把 ${k} 移到最前面：${before} 现在链接到${after === undefined ? '空' : ` ${after}`}，${k} 链接到原来的表头 ${order[0]}，${k} 成为表头。`,
+      });
       // After the move, the predecessor is at position `at`, the
       // successor (if any) at `at + 1`, and the old head at 1.
       L.move({ from: at, to: 0 })
@@ -179,10 +195,10 @@ export const moveToFront = defineAlgorithm({
       order = [k, ...order.filter((o) => o !== k)];
     });
     const total = totals.search + totals.move;
-    trace.step(
-      'done',
-      `All ${requests.length} requests served: the searches cost ${totals.search} and the moves ${totals.move}, ${total} in all.`,
-    );
+    trace.step('done', {
+      en: `All ${requests.length} requests served: the searches cost ${totals.search} and the moves ${totals.move}, ${total} in all.`,
+      zh: `${requests.length} 个请求都已处理：查找的代价是 ${totals.search}，移动的代价是 ${totals.move}，总共 ${total}。`,
+    });
     L.pointer({ name: 'x', index: null });
     const last = requests.length;
     table.set({ cell: [last, 1], value: totals.search });

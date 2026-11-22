@@ -23,6 +23,7 @@ import {
 } from '../../src/docs/pages.ts';
 
 const groups = catalog(algorithms);
+const zhGroups = catalog(algorithms, 'zh');
 const assets = {
   scripts: ['assets/docs.js'],
   styles: ['assets/docs.css'],
@@ -177,7 +178,125 @@ describe('a module’s page', () => {
   });
 });
 
+describe('a module’s page in Chinese', () => {
+  const zh = (id: string): Entry =>
+    zhGroups
+      .flatMap((g) => [
+        ...g.algorithms,
+        ...g.structures.flatMap((s) => [s.entry, ...s.operations]),
+      ])
+      .find((e) => e.id === id)!;
+  const zhPage = async (id: string) =>
+    entryPage(await detailsOf(zh(id), zhGroups, undefined, 'zh'), assets, 'zh');
+
+  it('sits under zh/, in Chinese, and runs the player in the page’s language', async () => {
+    const html = await zhPage('dijkstra');
+    const title = zh('dijkstra').title;
+    expect(html).toContain('<html lang="zh-Hans">');
+    expect(html).toContain(`<h1>${text(title)}</h1>`);
+    expect(html).toContain(`<title>${text(title)} · algomotion</title>`);
+    // Two folders deep: the assets and the share page are at the root.
+    expect(html).toContain('src="../../assets/docs.js"');
+    expect(html).toContain('href="../../play/#v=1&amp;alg=dijkstra');
+    expect(html).toContain('&amp;lang=zh');
+    // The crumbs and the bar stay in Chinese pages.
+    expect(html).toContain('<a href="../../zh/">algomotion</a>');
+    expect(html).toContain('href="../../zh/algorithms/#topic-graphs"');
+    // The player inherits the page's lang; it needs no attribute of its own.
+    expect(html).toMatch(/<algo-player algorithm="dijkstra" input="[^"]+">/);
+    expect(html).toContain('<code>extract#2</code>');
+    for (const heading of ['步骤', '用法'])
+      expect(html).toContain(`<h2>${heading}</h2>`);
+    expect(html).not.toContain('Every step has a name');
+    expect(html).not.toContain('Open this run in the share page');
+  });
+
+  it('has the English page as its counterpart, both ways', async () => {
+    const html = await zhPage('bst.delete');
+    expect(html).toContain(
+      'hreflang="en" href="https://algomotion.turing2234.com/bst/delete/"',
+    );
+    expect(html).toMatch(
+      /class="lang-switch"><a href="\.\.\/\.\.\/\.\.\/bst\/delete\/"/,
+    );
+    const en = entryPage(await detailsOf(entry('bst.delete'), groups), assets);
+    expect(en).toContain(
+      'hreflang="zh-Hans" href="https://algomotion.turing2234.com/zh/bst/delete/"',
+    );
+    expect(en).toMatch(
+      /class="lang-switch"><a href="\.\.\/\.\.\/zh\/bst\/delete\/"/,
+    );
+  });
+
+  it('names a structure’s operations in Chinese, and leads to their Chinese pages', async () => {
+    const bst = await zhPage('bst');
+    expect(bst).toContain('<h2>操作</h2>');
+    expect(bst).toContain('<a href="../../zh/bst/delete/">删除</a>');
+    const del = await zhPage('bst.delete');
+    expect(del).toContain('<a href="../../../zh/bst/">二叉搜索树</a>');
+  });
+
+  it('labels the other examples in Chinese, and opens them in Chinese', async () => {
+    const details = await detailsOf(
+      zh('bst.delete'),
+      zhGroups,
+      undefined,
+      'zh',
+    );
+    expect(details.examples.length).toBeGreaterThan(0);
+    details.examples.forEach((e, k) => {
+      expect(e.label).toBe(`示例 ${k + 2}`);
+      expect(e.link).toMatch(
+        /^\.\.\/\.\.\/\.\.\/play\/#v=1&alg=bst\.delete&in=.*&lang=zh$/,
+      );
+    });
+  });
+
+  it('builds for every module of the registry', async () => {
+    for (const g of zhGroups)
+      for (const e of [
+        ...g.algorithms,
+        ...g.structures.flatMap((s) => [s.entry, ...s.operations]),
+      ]) {
+        const html = entryPage(
+          await detailsOf(e, zhGroups, undefined, 'zh'),
+          assets,
+          'zh',
+        );
+        expect(html, e.id).toContain(`algorithm="${e.id}"`);
+        expect(html, e.id).toContain('<html lang="zh-Hans">');
+      }
+  });
+});
+
 describe('the algorithms page', () => {
+  it('leads the Chinese catalogue to the Chinese module pages, searchable in both languages', () => {
+    document.body.innerHTML = algorithmsPage(zhGroups, noAssets, {}, 'zh');
+    const link = document.querySelector<HTMLAnchorElement>(
+      '#catalog .card a[href="../../zh/dijkstra/"]',
+    )!;
+    expect(link.textContent).toBe(
+      zhGroups.flatMap((g) => g.algorithms).find((e) => e.id === 'dijkstra')!
+        .title,
+    );
+    const search = link.closest('.card')!.getAttribute('data-search')!;
+    expect(search).toContain('dijkstra’s algorithm');
+    // A structure is found by its operations' English names too.
+    const bst = document
+      .querySelector('#catalog .card a[href="../../zh/bst/"]')!
+      .closest('.card')!
+      .getAttribute('data-search')!;
+    expect(bst).toContain('binary search tree: delete');
+    expect(search).toContain(link.textContent.toLowerCase());
+    expect(
+      document.querySelectorAll('.card .ops a[href="../../zh/bst/delete/"]'),
+    ).toHaveLength(1);
+    expect(document.querySelector('.note-en')).toBeNull();
+    expect(
+      document.querySelector('#filter')!.getAttribute('placeholder'),
+    ).toMatch(/[一-鿿]/u);
+  });
+
   it('lists every module under its topic, and operations under their structure', () => {
     const html = algorithmsPage(groups, assets);
     for (const a of algorithms)
@@ -238,16 +357,19 @@ describe('the catalogue’s thumbnails', () => {
     const thumb = document.querySelector('.thumb[data-flip]')!;
     expect(thumb.getAttribute('data-flip')).toBe(thumbnailStem(dijkstra.id));
     expect(thumb.getAttribute('data-frames')).toBe('1,6,10,14');
-    // The Chinese page reaches the English page's drawings.
+    // The Chinese page has drawings of its own, of runs in Chinese.
     document.body.innerHTML = algorithmsPage(
-      groups,
+      zhGroups,
       noAssets,
       { dijkstra: art },
       'zh',
     );
     expect(
       document.querySelector('.thumb[data-flip]')!.getAttribute('data-flip'),
-    ).toBe(`../../algorithms/${thumbnailStem(dijkstra.id)}`);
+    ).toBe(thumbnailStem(dijkstra.id));
+    expect(document.querySelector('.thumb img')!.getAttribute('src')).toBe(
+      art.light,
+    );
   });
 
   it('give every algorithm and structure a card with a sized, lazy thumbnail', () => {
@@ -323,6 +445,23 @@ describe('the themes page', () => {
       '&amp;theme=textbook',
     ])
       expect(html).toContain(how);
+  });
+});
+
+describe('the themes page in Chinese', () => {
+  it('shows figures of its own, beside it', () => {
+    const html = themesPage(
+      themeNames.map((name) => ({
+        name,
+        file: `${name}.svg`,
+        width: 400,
+        height: 200,
+      })),
+      assets,
+      'zh',
+    );
+    expect(html).toContain('<html lang="zh-Hans">');
+    for (const name of themeNames) expect(html).toContain(`src="${name}.svg"`);
   });
 });
 

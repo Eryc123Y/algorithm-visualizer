@@ -8,16 +8,27 @@ import { probingCode } from './probing-code.ts';
 
 export const linearProbing = openAddressing({
   id: 'linear-probing',
-  title: 'Hash table with linear probing',
-  summary:
-    'Inserts and searches integer keys one after another in a hash table that probes the slots (k + i) mod m for i = 0, 1, and so on.',
-  sequence: '(k + i) mod m for i = 0, 1, and so on',
+  title: { en: 'Hash table with linear probing', zh: '线性探查散列表' },
+  summary: {
+    en: 'Inserts and searches integer keys one after another in a hash table that probes the slots (k + i) mod m for i = 0, 1, and so on.',
+    zh: '在散列表中依次插入和查找整数关键字，对 i = 0, 1, …，依次探查槽 (k + i) mod m。',
+  },
+  sequence: {
+    en: '(k + i) mod m for i = 0, 1, and so on',
+    zh: '(k + i) mod m（i = 0, 1, …）',
+  },
   scheme: {
     slot: (key, i, size) => mod(mod(key, size) + i, size),
     narrate: (key, i, q, size, holds) =>
       i === 0
-        ? `${key} mod ${size} = ${q}: probe slot ${q}; ${holds}.`
-        : `Probe the next slot, ${q}; ${holds}.`,
+        ? {
+            en: `${key} mod ${size} = ${q}: probe slot ${q}; ${holds}.`,
+            zh: `${key} mod ${size} = ${q}：探查槽 ${q}；${holds}。`,
+          }
+        : {
+            en: `Probe the next slot, ${q}; ${holds}.`,
+            zh: `探查下一个槽 ${q}；${holds}。`,
+          },
   },
   code: probingCode({
     pseudocode: 'q = (k + i) mod m',

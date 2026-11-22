@@ -8,6 +8,7 @@ import { readShareFragment } from '@algomotion/spec';
 import { describe, expect, it } from 'vitest';
 
 import { shortInput } from '../../src/docs/short-input.ts';
+import { CHROME } from '../../src/docs/text/chrome.ts';
 import {
   inputText,
   latexText,
@@ -115,6 +116,49 @@ describe('snippetsFor', () => {
     expect(byId(snippets, 'link')).toBe(
       '../play/#v=1&alg=dijkstra&in=A-B%204%2C%20B-C%201',
     );
+  });
+
+  it('asks every output for Chinese on a Chinese page, and says so in Chinese', async () => {
+    const snippets = await snippetsFor(
+      'dijkstra',
+      'A-B 4, B-C 1',
+      2,
+      'improve#2',
+      'zh',
+    );
+    expect(snippets.map((s) => s.label)).toEqual(
+      snippets.map((s) => CHROME.zh.snippets[s.id]),
+    );
+    for (const s of snippets) expect(s.note, s.id).toMatch(/[\u4e00-\u9fff]/u);
+    expect(snippets.find((s) => s.id === 'cli')!.note).toContain(
+      '--step improve#2',
+    );
+    expect(byId(snippets, 'web')).toBe(
+      '<script type="module" src="algomotion-player.js"></script>\n<algo-player algorithm="dijkstra" input="A-B 4, B-C 1" lang="zh"></algo-player>',
+    );
+    expect(byId(snippets, 'typst')).toBe(
+      '#import "@preview/algomotion:0.1.0": algomotion\n#algomotion("dijkstra", "A-B 4, B-C 1", lang: "zh")',
+    );
+    expect(byId(snippets, 'latex')).toBe(
+      '\\usepackage{algomotion}\n\\algomotion[lang=zh]{dijkstra}{A-B 4, B-C 1}',
+    );
+    expect(byId(snippets, 'cli')).toBe(
+      "algomotion export dijkstra --input 'A-B 4, B-C 1' --lang zh --out figures",
+    );
+    expect(
+      JSON.parse(byId(snippets, 'mcp').replace(/^algomotion_show /, '')),
+    ).toEqual({ recipe: 'dijkstra', input: 'A-B 4, B-C 1', locale: 'zh' });
+    expect(byId(snippets, 'link')).toBe(
+      '../../play/#v=1&alg=dijkstra&in=A-B%204%2C%20B-C%201&lang=zh',
+    );
+  });
+
+  it('gives a structured input to the player as inline JSON in Chinese too', async () => {
+    const web = byId(
+      await snippetsFor('bst.delete', { from: '8 3', key: 3 }, 3, '-1', 'zh'),
+      'web',
+    );
+    expect(web).toContain('<algo-player algorithm="bst.delete" lang="zh">');
   });
 
   it('gives a structured input to the player as inline JSON, safely', async () => {

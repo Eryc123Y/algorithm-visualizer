@@ -9,10 +9,12 @@ import { range, SAMPLE, SortInput } from './input.ts';
 
 export const insertionSort = defineAlgorithm({
   id: 'insertion-sort',
-  title: 'Insertion sort',
+  title: { en: 'Insertion sort', zh: '插入排序' },
   topic: 'sorting',
-  summary:
-    'Grows a sorted prefix by lifting out the next value, shifting larger ones right, and dropping it into the gap.',
+  summary: {
+    en: 'Grows a sorted prefix by lifting out the next value, shifting larger ones right, and dropping it into the gap.',
+    zh: '逐步扩大已排序的前缀：取出下一个值，把比它大的值右移，再把它放进空位。',
+  },
   input: SortInput,
   main: 'values',
   examples: [SAMPLE],
@@ -51,7 +53,10 @@ export const insertionSort = defineAlgorithm({
       const key = a[i]!;
       trace.step(
         'key',
-        `a[0..${i - 1}] is sorted. Lift out the key ${key} from position ${i}.`,
+        {
+          en: `a[0..${i - 1}] is sorted. Lift out the key ${key} from position ${i}.`,
+          zh: `a[0..${i - 1}] 已排好序。从位置 ${i} 取出关键字 ${key}。`,
+        },
         { vars: { i, key } },
       );
       arr.pointer({ name: 'i', index: i }).highlight({ indices: [i] });
@@ -62,17 +67,23 @@ export const insertionSort = defineAlgorithm({
         trace.step(
           'compare',
           larger
-            ? `${a[j]} > ${key}: ${a[j]} moves right.`
-            : `${a[j]} ≤ ${key}: the key goes after it.`,
+            ? {
+                en: `${a[j]} > ${key}: ${a[j]} moves right.`,
+                zh: `${a[j]} > ${key}：${a[j]} 右移。`,
+              }
+            : {
+                en: `${a[j]} ≤ ${key}: the key goes after it.`,
+                zh: `${a[j]} ≤ ${key}：关键字放在它后面。`,
+              },
           { vars: { i, j, key } },
         );
         arr.pointer({ name: 'j', index: j }).highlight({ indices: [j] });
         cell.highlight({ indices: [0] });
         if (!larger) break;
-        trace.step(
-          'shift',
-          `Copy ${a[j]} one place right, to position ${j + 1}.`,
-        );
+        trace.step('shift', {
+          en: `Copy ${a[j]} one place right, to position ${j + 1}.`,
+          zh: `把 ${a[j]} 右移一位，到位置 ${j + 1}。`,
+        });
         arr.set({ index: j + 1, value: a[j]! });
         a[j + 1] = a[j]!;
       }
@@ -80,7 +91,10 @@ export const insertionSort = defineAlgorithm({
       if (j < 0) {
         trace.step(
           'compare',
-          'No value is left before the gap: the key goes to the front.',
+          {
+            en: 'No value is left before the gap: the key goes to the front.',
+            zh: '空位前面已没有值：关键字放到最前面。',
+          },
           {
             vars: { i, j, key },
           },
@@ -88,12 +102,15 @@ export const insertionSort = defineAlgorithm({
         arr.pointer({ name: 'j', index: null });
         cell.highlight({ indices: [0] });
       }
-      trace.step('insert', `Put the key ${key} at position ${j + 1}.`);
+      trace.step('insert', {
+        en: `Put the key ${key} at position ${j + 1}.`,
+        zh: `把关键字 ${key} 放到位置 ${j + 1}。`,
+      });
       arr.pointer({ name: 'j', index: null }).set({ index: j + 1, value: key });
       cell.set({ index: 0, value: '' });
       a[j + 1] = key;
     }
-    trace.step('sorted', 'The array is sorted.');
+    trace.step('sorted', { en: 'The array is sorted.', zh: '数组已排好序。' });
     arr.pointer({ name: 'i', index: null });
     for (const k of range(0, n - 1)) arr.settle({ index: k });
   },

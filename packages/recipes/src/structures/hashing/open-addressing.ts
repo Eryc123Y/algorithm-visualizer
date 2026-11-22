@@ -17,6 +17,7 @@ import {
   operationsOf,
   type Applied,
 } from '../../structure.ts';
+import { textIn, type Localized, type Text } from '../../text.ts';
 import { silentHandle, silentTrace, type Trace } from '../../trace.ts';
 import { Key, MAX_SLOTS, tableFrom, type TableFrom } from './hash.ts';
 
@@ -31,21 +32,21 @@ export interface ProbingState {
 type On = Handle<'array'>;
 
 /** What a probe of slot q finds, for narrations. */
-const holds = (s: ProbingState, q: number) =>
-  s.slots[q] === null ? 'it is empty' : `it holds ${s.slots[q]}`;
+const holds = (s: ProbingState, q: number): Localized =>
+  s.slots[q] === null
+    ? { en: 'it is empty', zh: '它是空的' }
+    : { en: `it holds ${s.slots[q]}`, zh: `它存放着 ${s.slots[q]}` };
 
 /** How a table finds the slots of a key's probe sequence. */
 export interface Scheme {
   /** h(k, i) for a table of `size` slots. */
   slot(key: number, i: number, size: number): number;
-  /** The narration of the i-th probe, at slot q; `holds` says what is there. */
-  narrate(
-    key: number,
-    i: number,
-    q: number,
-    size: number,
-    holds: string,
-  ): string;
+  /**
+   * The narration of the i-th probe, at slot q; `holds` says what is
+   * there, in the run's language. A plain string is English in every run;
+   * `{ en, zh }` gives each language its own (ADR 0045).
+   */
+  narrate(key: number, i: number, q: number, size: number, holds: string): Text;
   /** Why a table of `size` slots cannot be used, if it cannot. */
   unfit?(size: number): string | undefined;
 }
@@ -60,9 +61,13 @@ function probe(
   trace: Trace,
   on: On,
 ): void {
-  trace.step('probe', scheme.narrate(key, i, q, s.size, holds(s, q)), {
-    vars: { k: key, i, q },
-  });
+  trace.step(
+    'probe',
+    scheme.narrate(key, i, q, s.size, trace.say(holds(s, q))),
+    {
+      vars: { k: key, i, q },
+    },
+  );
   on.pointer({ name: 'q', index: q }).highlight({ indices: [q] });
 }
 
@@ -81,7 +86,10 @@ function insert(
     const q = scheme.slot(key, i, s.size);
     probe(scheme, s, key, i, q, trace, on);
     if (s.slots[q] !== null) continue;
-    trace.step('store', `Store ${key} in slot ${q}.`);
+    trace.step('store', {
+      en: `Store ${key} in slot ${q}.`,
+      zh: `把 ${key} 存入槽 ${q}。`,
+    });
     on.set({ index: q, value: key });
     const slots = s.slots.map((x, k) => (k === q ? key : x));
     return { state: { ...s, slots, keys: [...s.keys, key] }, result: null };
@@ -101,22 +109,25 @@ function search(
     const q = scheme.slot(key, i, s.size);
     probe(scheme, s, key, i, q, trace, on);
     if (s.slots[q] === key) {
-      trace.step('found', `Found ${key} in slot ${q}.`);
+      trace.step('found', {
+        en: `Found ${key} in slot ${q}.`,
+        zh: `在槽 ${q} 找到 ${key}。`,
+      });
       on.highlight({ indices: [q] });
       return { state: s, result: true };
     }
     if (s.slots[q] === null) {
-      trace.step(
-        'missing',
-        `Slot ${q} is empty, so ${key} is not in the table.`,
-      );
+      trace.step('missing', {
+        en: `Slot ${q} is empty, so ${key} is not in the table.`,
+        zh: `槽 ${q} 是空的，所以 ${key} 不在表中。`,
+      });
       return { state: s, result: false };
     }
   }
-  trace.step(
-    'exhausted',
-    `All ${s.size} slots were probed: ${key} is not in the table.`,
-  );
+  trace.step('exhausted', {
+    en: `All ${s.size} slots were probed: ${key} is not in the table.`,
+    zh: `${s.size} 个槽都探查过了：${key} 不在表中。`,
+  });
   on.pointer({ name: 'q', index: null });
   return { state: s, result: false };
 }
@@ -126,12 +137,12 @@ const op = operationsOf<ProbingState, TableFrom, 'array'>();
 /** What an open-addressing table needs besides its probe sequence. */
 export interface OpenAddressing {
   readonly id: string;
-  readonly title: string;
-  readonly summary: string;
+  readonly title: Text;
+  readonly summary: Text;
   readonly scheme: Scheme;
   readonly code: { readonly insert: Listing; readonly search: Listing };
   /** What the operations' summaries say the probe sequence is. */
-  readonly sequence: string;
+  readonly sequence: Text;
   /** The table of the operations' examples. */
   readonly sample: TableFrom;
   /** The module's run, from an empty table of the sample's size. */
@@ -193,26 +204,31 @@ export function openAddressing(table: OpenAddressing) {
     operations: [
       op({
         name: 'insert',
-        title: 'insert',
-        summary: `Inserts a key into the first empty slot of its probe sequence, ${table.sequence}.`,
+        title: { en: 'insert', zh: '插入' },
+        summary: {
+          en: `Inserts a key into the first empty slot of its probe sequence, ${textIn(table.sequence, 'en')}.`,
+          zh: `把关键字插入它的探查序列 ${textIn(table.sequence, 'zh')} 中第一个空槽。`,
+        },
         args: { key: Key.describe('The integer key to insert.') },
         examples: [{ from: sample, key: table.examples.insert }],
         code: table.code.insert,
-        titleOf: ({ key }) => `insert ${key}`,
+        titleOf: ({ key }) => ({ en: `insert ${key}`, zh: `插入 ${key}` }),
         apply: (s, { key }, trace, on) => insert(scheme, s, key, trace, on),
       }),
       op({
         name: 'search',
-        title: 'search',
-        summary:
-          'Looks for a key along its probe sequence, stopping at the key, at an empty slot, or after m probes.',
+        title: { en: 'search', zh: '查找' },
+        summary: {
+          en: 'Looks for a key along its probe sequence, stopping at the key, at an empty slot, or after m probes.',
+          zh: '沿探查序列查找一个关键字，找到它、遇到空槽或者探查 m 次之后停止。',
+        },
         args: { key: Key.describe('The integer key to look for.') },
         examples: [
           { from: sample, key: table.examples.found },
           { from: sample, key: table.examples.missing },
         ],
         code: table.code.search,
-        titleOf: ({ key }) => `search ${key}`,
+        titleOf: ({ key }) => ({ en: `search ${key}`, zh: `查找 ${key}` }),
         apply: (s, { key }, trace, on) => search(scheme, s, key, trace, on),
       }),
     ],

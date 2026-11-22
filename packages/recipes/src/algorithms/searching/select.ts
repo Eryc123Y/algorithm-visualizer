@@ -23,10 +23,12 @@ const GROUP = 5;
 
 export const select = defineAlgorithm({
   id: 'select',
-  title: 'Select (median of medians)',
+  title: { en: 'Select (median of medians)', zh: '选择（中位数的中位数）' },
   topic: 'searching',
-  summary:
-    'Finds the i-th smallest value in worst-case linear time: partitions around the median of the medians of groups of five, and searches only the side that holds it.',
+  summary: {
+    en: 'Finds the i-th smallest value in worst-case linear time: partitions around the median of the medians of groups of five, and searches only the side that holds it.',
+    zh: '在最坏情况线性时间内找出第 i 小的值：以每五个一组的中位数的中位数为主元划分，只在包含它的那一边继续找。',
+  },
   input: selectInput(MAX_SELECT_VALUES),
   main: 'values',
   examples: [
@@ -105,7 +107,10 @@ export const select = defineAlgorithm({
       n > GROUP
         ? outer.add('m', {
             kind: 'array',
-            label: 'm: the medians of the groups',
+            label: outer.say({
+              en: 'm: the medians of the groups',
+              zh: 'm：各组的中位数',
+            }),
             place: 'side',
             initial: Array.from({ length: groups }, () => ''),
           })
@@ -118,13 +123,19 @@ export const select = defineAlgorithm({
 
     let [p, r, i] = [0, n - 1, target];
     for (;;) {
-      const call = `${ordinal(i)} smallest of a[${p}..${r}]`;
+      const call = trace.say({
+        en: `${ordinal(i)} smallest of a[${p}..${r}]`,
+        zh: `a[${p}..${r}] 中第 ${i} 小`,
+      });
       const size = r - p + 1;
       if (size <= GROUP) {
         const answer = [...a.slice(p, r + 1)].sort((x, y) => x - y)[i - 1]!;
         trace.step(
           'small',
-          `a[${p}..${r}] has ${size === 1 ? 'one value' : `${size} values`}: sort ${size === 1 ? 'it' : 'them'} and take the ${ordinal(i)}, ${answer}. It is the answer, the ${ordinal(target)} smallest.`,
+          {
+            en: `a[${p}..${r}] has ${size === 1 ? 'one value' : `${size} values`}: sort ${size === 1 ? 'it' : 'them'} and take the ${ordinal(i)}, ${answer}. It is the answer, the ${ordinal(target)} smallest.`,
+            zh: `a[${p}..${r}] 只有 ${size} 个值：排序后取第 ${i} 个，${answer}。它就是答案，第 ${target} 小的值。`,
+          },
           { vars: { p, r, i } },
         );
         calls.push(`call-${p}-${r}`, call);
@@ -142,7 +153,10 @@ export const select = defineAlgorithm({
         const group = a.slice(s, e + 1).sort((x, y) => x - y);
         trace.step(
           'group',
-          `Sort the group a[${s}..${e}]: [${group.join(', ')}]. Its median is ${group[mid - s]}.`,
+          {
+            en: `Sort the group a[${s}..${e}]: [${group.join(', ')}]. Its median is ${group[mid - s]}.`,
+            zh: `排序这一组 a[${s}..${e}]：[${group.join(', ')}]。它的中位数是 ${group[mid - s]}。`,
+          },
           { vars: { p, r } },
         );
         sortRange(s, e);
@@ -163,7 +177,10 @@ export const select = defineAlgorithm({
       const pick = m.find((g) => g.value === x)!;
       trace.step(
         'medians',
-        `The medians, sorted, are [${sorted.map((x) => x.value).join(', ')}]: their median, ${pick.value}, is the pivot x.`,
+        {
+          en: `The medians, sorted, are [${sorted.map((x) => x.value).join(', ')}]: their median, ${pick.value}, is the pivot x.`,
+          zh: `排好序的中位数是 [${sorted.map((x) => x.value).join(', ')}]：它们的中位数 ${pick.value} 就是主元 x。`,
+        },
         { vars: { p, r } },
       );
       arr.pointer({ name: 'median', index: null });
@@ -173,8 +190,14 @@ export const select = defineAlgorithm({
       trace.step(
         'move',
         pick.at === r
-          ? `x = ${pick.value} is already last, in a[${r}].`
-          : `Swap x = ${pick.value} from a[${pick.at}] into a[${r}], so that PARTITION takes it as the pivot.`,
+          ? {
+              en: `x = ${pick.value} is already last, in a[${r}].`,
+              zh: `x = ${pick.value} 已经在最后，在 a[${r}]。`,
+            }
+          : {
+              en: `Swap x = ${pick.value} from a[${pick.at}] into a[${r}], so that PARTITION takes it as the pivot.`,
+              zh: `把 x = ${pick.value} 从 a[${pick.at}] 交换到 a[${r}]，让 PARTITION 以它为主元。`,
+            },
         { vars: { p, r } },
       );
       if (pick.at !== r) {
@@ -187,7 +210,10 @@ export const select = defineAlgorithm({
       if (i === k) {
         trace.step(
           'found',
-          `The pivot ${a[q]} is the ${ordinal(k)} smallest of a[${p}..${r}], the one wanted: it is the answer, the ${ordinal(target)} smallest.`,
+          {
+            en: `The pivot ${a[q]} is the ${ordinal(k)} smallest of a[${p}..${r}], the one wanted: it is the answer, the ${ordinal(target)} smallest.`,
+            zh: `主元 ${a[q]} 是 a[${p}..${r}] 中第 ${k} 小的，正是要找的：它就是答案，第 ${target} 小的值。`,
+          },
           { vars: { p, r, i, k, q } },
         );
         arr.pointer({ name: 'answer', index: q });
@@ -197,8 +223,14 @@ export const select = defineAlgorithm({
       trace.step(
         'rank',
         left
-          ? `The pivot ${a[q]} is the ${ordinal(k)} smallest of a[${p}..${r}], but the ${ordinal(i)} is wanted: it lies to the left, in a[${p}..${q - 1}].`
-          : `The pivot ${a[q]} is the ${ordinal(k)} smallest of a[${p}..${r}], but the ${ordinal(i)} is wanted: it is the ${ordinal(i - k)} smallest of a[${q + 1}..${r}], to the right.`,
+          ? {
+              en: `The pivot ${a[q]} is the ${ordinal(k)} smallest of a[${p}..${r}], but the ${ordinal(i)} is wanted: it lies to the left, in a[${p}..${q - 1}].`,
+              zh: `主元 ${a[q]} 是 a[${p}..${r}] 中第 ${k} 小的，但要找的是第 ${i} 小：它在左边的 a[${p}..${q - 1}] 中。`,
+            }
+          : {
+              en: `The pivot ${a[q]} is the ${ordinal(k)} smallest of a[${p}..${r}], but the ${ordinal(i)} is wanted: it is the ${ordinal(i - k)} smallest of a[${q + 1}..${r}], to the right.`,
+              zh: `主元 ${a[q]} 是 a[${p}..${r}] 中第 ${k} 小的，但要找的是第 ${i} 小：它是右边 a[${q + 1}..${r}] 中第 ${i - k} 小的。`,
+            },
         { vars: { p, r, i, k, q } },
       );
       const [lo, hi] = left ? [p, q - 1] : [q + 1, r];

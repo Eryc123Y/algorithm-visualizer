@@ -28,6 +28,20 @@ function codeWords(a: Algorithm): Set<string> {
   return new Set(words.map((w) => w.toLowerCase()));
 }
 
+/**
+ * The headings a figure draws, as the layout does: a structure's label, or
+ * its id when it has none, except that a lone structure without a label
+ * has no heading. An id a reader sees must not be an English word either.
+ */
+function headings(document: { readonly structures: object }) {
+  const structures = Object.entries(document.structures);
+  return structures.flatMap(([id, s]) => {
+    const { label } = s as { readonly label?: string };
+    if (label === undefined && structures.length === 1) return [];
+    return [{ path: `$.structures.${id}`, key: 'heading', text: label ?? id }];
+  });
+}
+
 /** The text fields a reader sees, outside the code, with where they are. */
 function texts(
   node: unknown,
@@ -44,6 +58,15 @@ function texts(
         ['narration', 'title', 'label', 'text'].includes(key)
       )
         out.push({ path: `${path}.${key}`, key, text: value });
+      // A table's row and column labels are labels too.
+      else if (
+        Array.isArray(value) &&
+        ['rowLabels', 'columnLabels'].includes(key)
+      )
+        value.forEach((text, k) => {
+          if (typeof text === 'string')
+            out.push({ path: `${path}.${key}[${k}]`, key: 'label', text });
+        });
       else texts(value, `${path}.${key}`, out);
     }
   return out;
@@ -71,16 +94,17 @@ describe.each(translated.map((a) => [a.id, a] as const))(
       for (const example of algorithm.examples) {
         const run = runModule(algorithm, example, { locale: 'zh' });
         if (!run.ok) throw new Error(JSON.stringify(run.error));
-        const english = texts(run.value.document).flatMap(
-          ({ path, key, text }) => {
-            if (key === 'narration' || key === 'title')
-              return CJK.test(text) ? [] : [`${path}: ${text}`];
-            const words = (text.match(WORD) ?? []).filter(
-              (w) => !code.has(w.toLowerCase()),
-            );
-            return words.length === 0 ? [] : [`${path}: ${text}`];
-          },
-        );
+        const english = [
+          ...texts(run.value.document),
+          ...headings(run.value.document),
+        ].flatMap(({ path, key, text }) => {
+          if (key === 'narration' || key === 'title')
+            return CJK.test(text) ? [] : [`${path}: ${text}`];
+          const words = (text.match(WORD) ?? []).filter(
+            (w) => !code.has(w.toLowerCase()),
+          );
+          return words.length === 0 ? [] : [`${path}: ${text}`];
+        });
         expect(english).toEqual([]);
       }
     });

@@ -50,7 +50,7 @@ ${code(`{"recipe":"dijkstra","input":"A-B 4, B-C 1, A-C 7","frame":"improve#3"}`
 <tr><td><code>algomotion_run_recipe</code></td><td>用给定输入按 id 运行算法，返回 JSON 文档。</td><td><code>{"id":"insertion-sort","input":"5 2 4"}</code></td></tr>
 <tr><td><code>algomotion_show</code></td><td>在 MCP Apps 播放器中展示文档或 recipe。</td><td><code>{"recipe":"insertion-sort","input":"5 2 4"}</code></td></tr>
 </tbody></table></div>
-<p><code>inspect</code>、<code>render</code> 和 <code>show</code> 接受 <code>document</code>，或 <code>recipe</code> 加可选的 <code>input</code>，二者不能同时给。<code>validate</code> 只接受文档。<code>inspect</code> 接受分节和范围，最多 20 帧。<code>render</code> 和 <code>show</code> 只取一帧。请求文档时，<code>run_recipe</code> 用的键是 <code>id</code>。</p>
+<p><code>inspect</code>、<code>render</code> 和 <code>show</code> 接受 <code>document</code>，或 <code>recipe</code> 加可选的 <code>input</code>，二者不能同时给。<code>validate</code> 只接受文档。<code>inspect</code> 接受分节和范围，最多 20 帧。<code>render</code> 和 <code>show</code> 只取一帧。请求文档时，<code>run_recipe</code> 用的键是 <code>id</code>。<code>run_recipe</code>、<code>inspect</code>、<code>render</code> 和 <code>show</code> 还接受可选的 <code>locale</code>（<code>"en"</code> 或 <code>"zh"</code>），决定算法运行过程的语言；服务器会提示模型在用户写中文时传 <code>"zh"</code>。</p>
 <p>一次完整的 <code>algomotion_validate</code> 调用这样检查自定义文档：</p>
 ${code(
   `{"document":{"version":"1.0","structures":{"s":{"kind":"stack","initial":[1]}},

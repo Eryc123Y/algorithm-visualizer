@@ -124,10 +124,12 @@ const format = (n: number) => String(n);
 
 export const huffman = defineAlgorithm({
   id: 'huffman',
-  title: 'Huffman codes',
+  title: { en: 'Huffman codes', zh: '赫夫曼编码' },
   topic: 'greedy',
-  summary:
-    'Builds an optimal prefix code by joining the two least frequent trees until one is left, then reads each codeword along its path.',
+  summary: {
+    en: 'Builds an optimal prefix code by joining the two least frequent trees until one is left, then reads each codeword along its path.',
+    zh: '构造最优前缀码：反复合并频率最小的两棵树，直到只剩一棵，再沿路径读出每个码字。',
+  },
   input: Input,
   main: 'frequencies',
   examples: [
@@ -212,12 +214,15 @@ export const huffman = defineAlgorithm({
     const codes = trace.add('codes', {
       kind: 'table',
       place: 'side',
-      label: 'codewords',
+      label: trace.say({ en: 'codewords', zh: '码字' }),
       rows: n,
       columns: 2,
       initial: frequencies.map(([, freq]) => [freq, null]),
       rowLabels: frequencies.map(([char]) => char),
-      columnLabels: ['freq', 'code'],
+      columnLabels: [
+        trace.say({ en: 'freq', zh: '频率' }),
+        trace.say({ en: 'code', zh: '编码' }),
+      ],
     });
     const name = (q: Queued) =>
       nodes.get(q.id)!.char === undefined
@@ -225,18 +230,18 @@ export const huffman = defineAlgorithm({
         : `${nodes.get(q.id)!.char}:${format(q.freq)}`;
     for (let k = 0; queue.length > 1; k++) {
       const [x, y] = [queue[0]!, queue[1]!];
-      trace.step(
-        'extract',
-        `Take the two least trees out of Q: ${name(x)} and ${name(y)}.`,
-      );
+      trace.step('extract', {
+        en: `Take the two least trees out of Q: ${name(x)} and ${name(y)}.`,
+        zh: `从 Q 中取出频率最小的两棵树：${name(x)} 和 ${name(y)}。`,
+      });
       Q.highlight({ nodes: [x.id, y.id] });
       const rest = queue.slice(2);
       const z: Queued = { id: `z${k}`, freq: x.freq + y.freq, age: n + k };
       const at = rest.filter((q) => before(q, z) < 0).length;
-      trace.step(
-        'merge',
-        `Join them under a new node of frequency ${format(x.freq)} + ${format(y.freq)} = ${format(z.freq)}, 0 to the left and 1 to the right, and put it back into Q${rest.length === 0 ? ', where it is the only tree' : at === rest.length ? ' last' : at === 0 ? ' first' : ` after ${name(rest[at - 1]!)}`}.`,
-      );
+      trace.step('merge', {
+        en: `Join them under a new node of frequency ${format(x.freq)} + ${format(y.freq)} = ${format(z.freq)}, 0 to the left and 1 to the right, and put it back into Q${rest.length === 0 ? ', where it is the only tree' : at === rest.length ? ' last' : at === 0 ? ' first' : ` after ${name(rest[at - 1]!)}`}.`,
+        zh: `把它们挂到一个频率为 ${format(x.freq)} + ${format(y.freq)} = ${format(z.freq)} 的新节点下，左边是 0，右边是 1，再把它放回 Q${rest.length === 0 ? '，它是 Q 中唯一的树' : at === rest.length ? ' 的最后' : at === 0 ? ' 的最前面' : `，放在 ${name(rest[at - 1]!)} 之后`}。`,
+      });
       // x and y are still the first two roots until they become children.
       Q.addNode({
         node: { id: z.id, value: z.freq },
@@ -252,10 +257,10 @@ export const huffman = defineAlgorithm({
       queue = [...rest.slice(0, at), z, ...rest.slice(at)];
     }
     const root = queue[0]!;
-    trace.step(
-      'done',
-      `Q holds one tree: the code tree, of total frequency ${format(root.freq)}. Each codeword is the path from the root down to its character.`,
-    );
+    trace.step('done', {
+      en: `Q holds one tree: the code tree, of total frequency ${format(root.freq)}. Each codeword is the path from the root down to its character.`,
+      zh: `Q 中只剩一棵树：编码树，总频率为 ${format(root.freq)}。每个码字就是从根到它的字符的路径。`,
+    });
     Q.settle({ node: root.id });
     // Codewords along each path, in input order.
     const paths = new Map<string, [string, string[]]>();
@@ -270,13 +275,11 @@ export const huffman = defineAlgorithm({
     let shown: string[] = [];
     frequencies.forEach(([char], k) => {
       const [code, path] = paths.get(`c${k}`)!;
-      trace.step(
-        'code',
-        `${char}: ${code
-          .split('')
-          .map((b) => (b === '0' ? 'left' : 'right'))
-          .join(', ')} gives the codeword ${code}.`,
-      );
+      const turns = code.split('');
+      trace.step('code', {
+        en: `${char}: ${turns.map((b) => (b === '0' ? 'left' : 'right')).join(', ')} gives the codeword ${code}.`,
+        zh: `${char}：${turns.map((b) => (b === '0' ? '左' : '右')).join('、')}，得到码字 ${code}。`,
+      });
       for (const id of shown) Q.markEdge({ node: id, mark: null });
       for (const id of path) Q.markEdge({ node: id, mark: 'selected' });
       Q.highlight({ nodes: [`c${k}`] });

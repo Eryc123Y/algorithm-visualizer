@@ -31,10 +31,12 @@ interface Step {
 
 export const edmondsKarp = defineAlgorithm({
   id: 'edmonds-karp',
-  title: 'Edmonds–Karp maximum flow',
+  title: { en: 'Edmonds–Karp maximum flow', zh: 'Edmonds–Karp 最大流' },
   topic: 'graphs',
-  summary:
-    'Finds a maximum flow from a source to a sink by augmenting along shortest paths in the residual network, found by breadth-first search, until none is left; the vertices still reachable then form a minimum cut.',
+  summary: {
+    en: 'Finds a maximum flow from a source to a sink by augmenting along shortest paths in the residual network, found by breadth-first search, until none is left; the vertices still reachable then form a minimum cut.',
+    zh: '求从源点到汇点的最大流：反复用广度优先搜索在残存网络中找最短路径并沿它增广，直到找不到为止；这时仍能到达的顶点构成一个最小割。',
+  },
   input: z.strictObject({
     graph: Graph.describe(
       'A graph whose edges are taken as directed, with whole-number capacities as weights (1 by default).',
@@ -132,10 +134,10 @@ export const edmondsKarp = defineAlgorithm({
         weight: label(k),
       })),
     });
-    trace.step(
-      'start',
-      `Start with no flow: every edge carries 0 of its capacity. Send flow from ${s} to ${t}.`,
-    );
+    trace.step('start', {
+      en: `Start with no flow: every edge carries 0 of its capacity. Send flow from ${s} to ${t}.`,
+      zh: `从零流开始：每条边的流量都是 0。从 ${s} 向 ${t} 输送流。`,
+    });
     // Pointers name the source and sink, unless their names already do.
     const ends = () => {
       if (s !== 's') graph.pointer({ name: 's', node: s });
@@ -169,10 +171,10 @@ export const edmondsKarp = defineAlgorithm({
           }
       }
       if (!seen.has(t)) {
-        trace.step(
-          'done',
-          `No path is left from ${s} to ${t} in the residual network: the flow, ${total}, is maximum. The vertices still reachable from ${s} form a minimum cut: the edges leaving them are full, and those coming into them carry nothing.`,
-        );
+        trace.step('done', {
+          en: `No path is left from ${s} to ${t} in the residual network: the flow, ${total}, is maximum. The vertices still reachable from ${s} form a minimum cut: the edges leaving them are full, and those coming into them carry nothing.`,
+          zh: `残存网络中已没有从 ${s} 到 ${t} 的路径：流的值 ${total} 就是最大流。从 ${s} 仍能到达的顶点构成一个最小割：离开它们的边都已满载，进入它们的边流量为 0。`,
+        });
         graph.resetMarks();
         ends();
         for (const v of seen) graph.group({ node: v, group: 0 });
@@ -186,10 +188,10 @@ export const edmondsKarp = defineAlgorithm({
           .slice(0, room)
           .forEach((edge) => graph.markEdge({ edge, mark: 'selected' }));
         for (let i = room; i < leaving.length; i += MAX_ACTIONS) {
-          trace.step(
-            'done',
-            `More of the ${leaving.length} edges leaving the cut, all full.`,
-          );
+          trace.step('done', {
+            en: `More of the ${leaving.length} edges leaving the cut, all full.`,
+            zh: `离开这个割的 ${leaving.length} 条边中的其余边，都已满载。`,
+          });
           for (const edge of leaving.slice(i, i + MAX_ACTIONS))
             graph.markEdge({ edge, mark: 'selected' });
         }
@@ -204,10 +206,10 @@ export const edmondsKarp = defineAlgorithm({
       const c = Math.min(...path.map((m) => m.room));
       const route = [s, ...path.map((m) => m.to)].join(' → ');
       const backward = path.filter((m) => !m.forward).length;
-      trace.step(
-        'path',
-        `Breadth-first search finds a shortest path in the residual network, ${route}, of ${path.length} edge${path.length === 1 ? '' : 's'}${backward === 0 ? '' : `, ${backward} of them against the flow`}. Its least residual capacity is ${c}.`,
-      );
+      trace.step('path', {
+        en: `Breadth-first search finds a shortest path in the residual network, ${route}, of ${path.length} edge${path.length === 1 ? '' : 's'}${backward === 0 ? '' : `, ${backward} of them against the flow`}. Its least residual capacity is ${c}.`,
+        zh: `广度优先搜索在残存网络中找到一条最短路径 ${route}，共 ${path.length} 条边${backward === 0 ? '' : `，其中 ${backward} 条与流的方向相反`}。它的最小残存容量是 ${c}。`,
+      });
       graph.resetMarks();
       ends();
       // Forward edges are marked; edges the path goes back along are
@@ -220,10 +222,10 @@ export const edmondsKarp = defineAlgorithm({
         if (m.forward) graph.markEdge({ edge: ids[m.k]!, mark: 'selected' });
       for (const m of path) flow[m.k] = flow[m.k]! + (m.forward ? c : -c);
       total += c;
-      trace.step(
-        'augment',
-        `Send ${c} more along it${backward === 0 ? '' : ', cancelling flow on the edges it goes back along'}: the flow is now ${total}.`,
-      );
+      trace.step('augment', {
+        en: `Send ${c} more along it${backward === 0 ? '' : ', cancelling flow on the edges it goes back along'}: the flow is now ${total}.`,
+        zh: `沿它再输送 ${c}${backward === 0 ? '' : '，并抵消它反向经过的边上的流'}：现在流的值是 ${total}。`,
+      });
       for (const m of path)
         graph.setWeight({ edge: ids[m.k]!, weight: label(m.k) });
     }

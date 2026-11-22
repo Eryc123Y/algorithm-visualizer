@@ -106,10 +106,12 @@ const Subsets = z
 
 export const greedySetCover = defineAlgorithm({
   id: 'greedy-set-cover',
-  title: 'Greedy set cover',
+  title: { en: 'Greedy set cover', zh: '贪心集合覆盖' },
   topic: 'greedy',
-  summary:
-    'Covers a set with few of a family of its subsets by always choosing the subset that covers the most elements not yet covered, within a factor H(d) of the fewest.',
+  summary: {
+    en: 'Covers a set with few of a family of its subsets by always choosing the subset that covers the most elements not yet covered, within a factor H(d) of the fewest.',
+    zh: '用一族子集中尽量少的几个覆盖一个集合：每次选覆盖最多尚未覆盖元素的子集，所用子集数不超过最少数目的 H(d) 倍。',
+  },
   input: z.strictObject({ subsets: Subsets }),
   main: 'subsets',
   examples: [
@@ -161,12 +163,12 @@ export const greedySetCover = defineAlgorithm({
         '',
       ]),
       rowLabels: sets.map(([name]) => name),
-      columnLabels: [...elements, 'new'],
+      columnLabels: [...elements, trace.say({ en: 'new', zh: '新增' })],
     });
-    trace.step(
-      'start',
-      `U, the elements still to cover, is all of X: ${count} element${count === 1 ? '' : 's'}. No subset is chosen yet.`,
-    );
+    trace.step('start', {
+      en: `U, the elements still to cover, is all of X: ${count} element${count === 1 ? '' : 's'}. No subset is chosen yet.`,
+      zh: `U 是还需要覆盖的元素，开始时是整个 X：共 ${count} 个元素。还没有选任何子集。`,
+    });
 
     const left = new Set(elements);
     const chosen: string[] = [];
@@ -179,10 +181,10 @@ export const greedySetCover = defineAlgorithm({
       const tied = gains.filter(
         (g, k) => g === gains[best] && k !== best,
       ).length;
-      trace.step(
-        'pick',
-        `${name} covers the most elements still in U, ${gains[best]}${tied === 0 ? '' : `, tied with ${tied} other${tied === 1 ? '' : 's'} given after it`}: choose it.`,
-      );
+      trace.step('pick', {
+        en: `${name} covers the most elements still in U, ${gains[best]}${tied === 0 ? '' : `, tied with ${tied} other${tied === 1 ? '' : 's'} given after it`}: choose it.`,
+        zh: `${name} 覆盖 U 中剩余元素最多，共 ${gains[best]} 个${tied === 0 ? '' : `，与排在它后面的 ${tied} 个子集并列`}：选它。`,
+      });
       gains.forEach((g, k) =>
         table.set({
           cell: [k, count],
@@ -198,10 +200,10 @@ export const greedySetCover = defineAlgorithm({
       });
       for (const x of fresh) left.delete(x);
       chosen.push(name);
-      trace.step(
-        'cover',
-        `Remove ${fresh.join(', ')} from U: ${left.size === 0 ? 'nothing is left' : `${left.size} element${left.size === 1 ? '' : 's'} left`}.`,
-      );
+      trace.step('cover', {
+        en: `Remove ${fresh.join(', ')} from U: ${left.size === 0 ? 'nothing is left' : `${left.size} element${left.size === 1 ? '' : 's'} left`}.`,
+        zh: `从 U 中删去 ${fresh.join(', ')}：${left.size === 0 ? '什么都不剩了' : `还剩 ${left.size} 个元素`}。`,
+      });
       // Each element is settled once, in the row of the subset that
       // covered it.
       table.set({ cell: [best, count], value: '✓' }).settle({
@@ -215,10 +217,10 @@ export const greedySetCover = defineAlgorithm({
       (a, b) => a + b,
       0,
     );
-    trace.step(
-      'done',
-      `U is empty: ${chosen.length === 1 ? `the chosen subset, ${chosen[0]}, covers` : `the ${chosen.length} chosen subsets, ${chosen.join(', ')}, cover`} X. The largest subset has ${d} element${d === 1 ? '' : 's'}, so this cover is at most H(${d}) ≈ ${h.toFixed(2)} times the smallest.`,
-    );
+    trace.step('done', {
+      en: `U is empty: ${chosen.length === 1 ? `the chosen subset, ${chosen[0]}, covers` : `the ${chosen.length} chosen subsets, ${chosen.join(', ')}, cover`} X. The largest subset has ${d} element${d === 1 ? '' : 's'}, so this cover is at most H(${d}) ≈ ${h.toFixed(2)} times the smallest.`,
+      zh: `U 空了：${chosen.length === 1 ? `选中的子集 ${chosen[0]}` : `选中的 ${chosen.length} 个子集 ${chosen.join(', ')}`} 覆盖了 X。最大的子集有 ${d} 个元素，所以这个覆盖不超过最小覆盖的 H(${d}) ≈ ${h.toFixed(2)} 倍。`,
+    });
     return { results: [chosen.length] };
   },
 });

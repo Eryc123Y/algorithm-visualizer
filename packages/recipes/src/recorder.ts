@@ -67,9 +67,21 @@ export interface RecorderOptions {
   readonly sources?: readonly AnchoredSource[];
 }
 
+/** How a structure is declared, besides its declaration. */
+export interface AddOptions {
+  /**
+   * The name a figure draws where it would draw the structure's id, in the
+   * document's language (ADR 0045). It becomes the label beside other
+   * structures; a figure draws a lone structure without a label under no
+   * heading, so there it adds nothing, and so does a label.
+   */
+  readonly heading?: string;
+}
+
 export class Recorder {
   readonly #options: RecorderOptions;
   readonly #structures: Record<string, StructureDeclInput> = {};
+  readonly #headings = new Map<string, string>();
   readonly #steps: Step[] = [];
   readonly #sections: Section[] = [];
 
@@ -81,11 +93,14 @@ export class Recorder {
   add<const D extends StructureDeclInput>(
     name: string,
     decl: D,
+    { heading }: AddOptions = {},
   ): Handle<D['kind']> {
     if (Object.hasOwn(this.#structures, name))
       throw new Error(`Structure "${name}" is already declared`);
     if (this.#steps.length > 0)
       throw new Error('Declare every structure before the first step');
+    if (heading !== undefined && heading !== name && decl.label === undefined)
+      this.#headings.set(name, heading);
     // defineProperty, not assignment: a name such as "__proto__" must
     // become a key, not change the object's prototype.
     Object.defineProperty(this.#structures, name, {
@@ -177,6 +192,19 @@ export class Recorder {
     return doc;
   }
 
+  /** The structures, each headed by its heading beside the others. */
+  #headed(): Record<string, StructureDeclInput> {
+    const entries = Object.entries(this.#structures);
+    if (entries.length < 2 || this.#headings.size === 0)
+      return { ...this.#structures };
+    return Object.fromEntries(
+      entries.map(([name, decl]) => {
+        const label = this.#headings.get(name);
+        return [name, label === undefined ? decl : { ...decl, label }];
+      }),
+    );
+  }
+
   #document(): VisualizationInput {
     this.#checkLastSection();
     const { title, source, sources } = this.#options;
@@ -184,7 +212,7 @@ export class Recorder {
       ...(title === undefined ? {} : { title }),
       ...(source === undefined ? {} : { source }),
       ...(sources === undefined ? {} : { sources: [...sources] }),
-      structures: { ...this.#structures },
+      structures: this.#headed(),
       steps: [...this.#steps],
       ...(this.#sections.length === 0 ? {} : { sections: [...this.#sections] }),
     };

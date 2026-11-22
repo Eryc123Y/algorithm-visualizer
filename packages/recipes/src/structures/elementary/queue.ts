@@ -90,7 +90,10 @@ function enqueue(
   const next = (tail + 1) % s.size;
   trace.step(
     'enqueue',
-    `Store ${key} at the tail, Q[${tail}]; tail moves to ${next}${next === 0 ? ', wrapping around' : ''}.`,
+    {
+      en: `Store ${key} at the tail, Q[${tail}]; tail moves to ${next}${next === 0 ? ', wrapping around' : ''}.`,
+      zh: `把 ${key} 存到队尾 Q[${tail}]；tail 移到 ${next}${next === 0 ? '，绕回开头' : ''}。`,
+    },
     { vars: { x: key, tail: next } },
   );
   on.set({ index: tail, value: key })
@@ -108,8 +111,14 @@ function dequeue(s: QueueState, trace: Trace, on: On): Applied<QueueState> {
   trace.step(
     'dequeue',
     s.keys.length === 1
-      ? `Take ${key} from the head, Q[${s.head}]; head moves to ${next}, where tail is: the queue is empty.`
-      : `Take ${key} from the head, Q[${s.head}]; head moves to ${next}${next === 0 ? ', wrapping around' : ''}.`,
+      ? {
+          en: `Take ${key} from the head, Q[${s.head}]; head moves to ${next}, where tail is: the queue is empty.`,
+          zh: `从队头 Q[${s.head}] 取出 ${key}；head 移到 ${next}，与 tail 重合：队列空了。`,
+        }
+      : {
+          en: `Take ${key} from the head, Q[${s.head}]; head moves to ${next}${next === 0 ? ', wrapping around' : ''}.`,
+          zh: `从队头 Q[${s.head}] 取出 ${key}；head 移到 ${next}${next === 0 ? '，绕回开头' : ''}。`,
+        },
     { vars: { x: key, head: next } },
   );
   on.highlight({ indices: [s.head] })
@@ -153,10 +162,12 @@ const From = z
 /** A queue kept in an array that wraps around, as in CLRS. */
 export const queue = defineStructure<QueueState, QueueFrom, 'array'>({
   id: 'queue',
-  title: 'Queue',
+  title: { en: 'Queue', zh: '队列' },
   topic: 'lists',
-  summary:
-    'Enqueues keys at the tail and dequeues them from the head of a queue kept in an array that wraps around, first in, first out.',
+  summary: {
+    en: 'Enqueues keys at the tail and dequeues them from the head of a queue kept in an array that wraps around, first in, first out.',
+    zh: '在用循环数组存放的队列中，从队尾入队、从队头出队，先进先出。',
+  },
   name: 'Q',
   kind: 'array',
   from: From,
@@ -198,24 +209,28 @@ export const queue = defineStructure<QueueState, QueueFrom, 'array'>({
   operations: [
     op({
       name: 'enqueue',
-      title: 'enqueue',
-      summary:
-        'Stores a key at the tail of the queue, and moves the tail one cell on, wrapping around.',
+      title: { en: 'enqueue', zh: '入队' },
+      summary: {
+        en: 'Stores a key at the tail of the queue, and moves the tail one cell on, wrapping around.',
+        zh: '把一个关键字存到队尾，tail 向后移一格，到末尾时绕回开头。',
+      },
       args: { key: Key.describe('The key to enqueue.') },
       examples: [{ from: sample, key: 17 }],
       code: ENQUEUE,
-      titleOf: ({ key }) => `enqueue ${key}`,
+      titleOf: ({ key }) => ({ en: `enqueue ${key}`, zh: `入队 ${key}` }),
       apply: (s, { key }, trace, on) => enqueue(s, key, trace, on),
     }),
     op({
       name: 'dequeue',
-      title: 'dequeue',
-      summary:
-        'Takes the key at the head of the queue, and moves the head one cell on, wrapping around.',
+      title: { en: 'dequeue', zh: '出队' },
+      summary: {
+        en: 'Takes the key at the head of the queue, and moves the head one cell on, wrapping around.',
+        zh: '取出队头的关键字，head 向后移一格，到末尾时绕回开头。',
+      },
       args: {},
       examples: [{ from: sample }],
       code: DEQUEUE,
-      titleOf: () => 'dequeue',
+      titleOf: () => ({ en: 'dequeue', zh: '出队' }),
       apply: (s, _, trace, on) => dequeue(s, trace, on),
     }),
   ],

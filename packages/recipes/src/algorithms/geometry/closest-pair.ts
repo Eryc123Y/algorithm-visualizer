@@ -8,6 +8,7 @@
 import { z } from 'zod';
 
 import { defineAlgorithm } from '../../algorithm.ts';
+import type { Localized } from '../../text.ts';
 import type { Handle } from '../../recorder.ts';
 import type { Trace } from '../../trace.ts';
 import { dist2, planeOf, pointsField, show, type Pt } from './common.ts';
@@ -28,10 +29,12 @@ interface Best {
 
 export const closestPair = defineAlgorithm({
   id: 'closest-pair',
-  title: 'Closest pair of points',
+  title: { en: 'Closest pair of points', zh: '最近点对' },
   topic: 'geometry',
-  summary:
-    'Finds the two nearest points by divide and conquer: split at a vertical line, solve both halves, then check the strip around the line, where each point has only a few neighbours to compare.',
+  summary: {
+    en: 'Finds the two nearest points by divide and conquer: split at a vertical line, solve both halves, then check the strip around the line, where each point has only a few neighbours to compare.',
+    zh: '用分治法找出距离最近的两个点：用一条竖线分开点集，分别求解两半，再检查竖线附近的带状区域，那里每个点只需要和少数几个邻居比较。',
+  },
   input: z.strictObject({ points: pointsField(2, MAX_PAIR_POINTS) }),
   main: 'points',
   examples: [
@@ -79,28 +82,31 @@ export const closestPair = defineAlgorithm({
     `,
   },
   run({ points }, trace) {
-    const P = trace.add('P', planeOf(points));
+    const P = trace.add(
+      'P',
+      planeOf(points, [], trace.say({ en: 'points', zh: '点' })),
+    );
     const X = [...points].sort(byX);
     const Y = [...points].sort(byY);
     trace.add('X', {
       kind: 'array',
       place: 'side',
-      label: 'sorted by x',
+      label: trace.say({ en: 'sorted by x', zh: '按 x 排序' }),
       initial: X.map((p) => p.id),
     });
     trace.add('Y', {
       kind: 'array',
       place: 'side',
-      label: 'sorted by y',
+      label: trace.say({ en: 'sorted by y', zh: '按 y 排序' }),
       initial: Y.map((p) => p.id),
     });
     const ctx: Ctx = { trace, P, best: undefined, found: 0 };
     solve(ctx, X, Y, undefined);
     const { a, b, d } = ctx.best!;
-    trace.step(
-      'done',
-      `The closest pair is ${show(a)} and ${show(b)}, ${fmt(d)} apart.`,
-    );
+    trace.step('done', {
+      en: `The closest pair is ${show(a)} and ${show(b)}, ${fmt(d)} apart.`,
+      zh: `最近点对是 ${show(a)} 和 ${show(b)}，相距 ${fmt(d)}。`,
+    });
     P.line({ name: 'l', x: null });
     return { results: [d] };
   },
@@ -119,7 +125,13 @@ interface Ctx {
  * Compares two points in a step, keeping them as the closest pair so far
  * if they are closer; returns their distance.
  */
-function consider(ctx: Ctx, a: Pt, b: Pt, step: string, why: string): number {
+function consider(
+  ctx: Ctx,
+  a: Pt,
+  b: Pt,
+  step: string,
+  why: Localized,
+): number {
   const { trace, P, best } = ctx;
   const d = Math.sqrt(dist2(a, b));
   const closer = best === undefined || d < best.d;
@@ -129,7 +141,16 @@ function consider(ctx: Ctx, a: Pt, b: Pt, step: string, why: string): number {
       : closer
         ? `, closer than ${fmt(best.d)}: the closest pair so far.`
         : `, not closer than ${fmt(best.d)}.`;
-  trace.step(step, `${why} ${a.id} and ${b.id} are ${fmt(d)} apart${verdict}`);
+  const verdictZh =
+    best === undefined
+      ? '：目前最近的一对。'
+      : closer
+        ? `，比 ${fmt(best.d)} 近：目前最近的一对。`
+        : `，不比 ${fmt(best.d)} 近。`;
+  trace.step(step, {
+    en: `${why.en} ${a.id} and ${b.id} are ${fmt(d)} apart${verdict}`,
+    zh: `${why.zh}${a.id} 和 ${b.id} 相距 ${fmt(d)}${verdictZh}`,
+  });
   P.compare({ points: [a.id, b.id] });
   if (!closer) return d;
   if (best !== undefined) P.removeSegment({ id: `best-${ctx.found}` });
@@ -159,13 +180,10 @@ function solve(
       for (let j = i + 1; j < X.length; j++)
         least = Math.min(
           least,
-          consider(
-            ctx,
-            X[i]!,
-            X[j]!,
-            'brute',
-            `${X.length} points: compare every pair.`,
-          ),
+          consider(ctx, X[i]!, X[j]!, 'brute', {
+            en: `${X.length} points: compare every pair.`,
+            zh: `${X.length} 个点：比较每一对。`,
+          }),
         );
     return least;
   }
@@ -173,10 +191,10 @@ function solve(
   const l = X[half - 1]!.x;
   const XL = X.slice(0, half);
   const left = new Set(XL);
-  trace.step(
-    'divide',
-    `${X.length} points: split them at the line x = ${l}, the first ${half} in x order (${XL.map((p) => p.id).join(' ')}) on the left and ${X.length - half} on the right.`,
-  );
+  trace.step('divide', {
+    en: `${X.length} points: split them at the line x = ${l}, the first ${half} in x order (${XL.map((p) => p.id).join(' ')}) on the left and ${X.length - half} on the right.`,
+    zh: `${X.length} 个点：用直线 x = ${l} 分开它们，按 x 排序的前 ${half} 个（${XL.map((p) => p.id).join(' ')}）在左边，其余 ${X.length - half} 个在右边。`,
+  });
   P.line({ name: 'l', x: l }).highlight({ points: XL.map((p) => p.id) });
   const dl = solve(
     ctx,
@@ -193,10 +211,10 @@ function solve(
   // δ of the two halves; a closer pair would have to cross the line.
   let delta = Math.min(dl, dr);
   const strip = Y.filter((p) => Math.abs(p.x - l) < delta);
-  trace.step(
-    'strip',
-    `Back at the ${X.length} points split at x = ${l}, with δ = ${fmt(delta)}, the least distance within either half: a closer pair would have to lie within δ of the line, where ${strip.length === 0 ? 'there is no point' : `the points are ${strip.map((p) => p.id).join(' ')}`}.`,
-  );
+  trace.step('strip', {
+    en: `Back at the ${X.length} points split at x = ${l}, with δ = ${fmt(delta)}, the least distance within either half: a closer pair would have to lie within δ of the line, where ${strip.length === 0 ? 'there is no point' : `the points are ${strip.map((p) => p.id).join(' ')}`}.`,
+    zh: `回到在 x = ${l} 处分开的 ${X.length} 个点，δ = ${fmt(delta)} 是两半内部的最小距离：更近的一对只能在距直线 δ 以内，${strip.length === 0 ? '那里没有点' : `那里的点是 ${strip.map((p) => p.id).join(' ')}`}。`,
+  });
   P.line({ name: 'l', x: l })
     .line({ name: 'l − δ', x: l - delta })
     .line({ name: 'l + δ', x: l + delta });
@@ -206,7 +224,10 @@ function solve(
       if (q.y - p.y >= delta) break;
       delta = Math.min(
         delta,
-        consider(ctx, p, q, 'compare', 'In the strip, in y order:'),
+        consider(ctx, p, q, 'compare', {
+          en: 'In the strip, in y order:',
+          zh: '在带状区域中，按 y 的顺序：',
+        }),
       );
     }
   });

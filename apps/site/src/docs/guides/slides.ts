@@ -71,7 +71,7 @@ ${code(
 \end{frame}`,
   'Sections, ranges and a pause',
 )}
-<p>After a series use <code>\\onslide&lt;+-&gt;</code> for new content; <code>\\pause</code> would repeat the final frame. Escape <code>#</code> as <code>\\#</code> in non-fragile Beamer frames.</p>
+<p>After a series use <code>\\onslide&lt;+-&gt;</code> for new content; <code>\\pause</code> would repeat the final frame. Escape <code>#</code> as <code>\\#</code> in non-fragile Beamer frames. <code>lang=zh</code> tells the run in Chinese, in a document that sets Chinese, such as one with <code>ctex</code>.</p>
 <p>A Beamer figure fills the line width and up to three quarters of the text height. <code>height=0.6\\textheight</code> leaves room for text. <code>width</code> changes the width cap, and <code>scale=1</code> uses natural size. In a column, it fills that column. <code>layout=wide</code> is the Beamer default.</p>
 <p>With <code>\\documentclass[handout]{beamer}</code>, in transparencies or in <code>beamerarticle</code> notes, a series shows its last frame. Outside Beamer it also shows the last frame, with a warning. A series containing one frame is an ordinary figure on every overlay.</p>
 
@@ -119,7 +119,7 @@ ${code(
 ]`,
   'polylux overlays',
 )}
-<p>The same options work in both frameworks: <code>steps</code>, <code>start</code>, <code>theme</code>, <code>layout</code>, <code>strict</code>, <code>width</code>, <code>height</code> and <code>fit</code>. The default layout is wide. The series fills the region's width and three quarters of its height while keeping shape. Width and height override their own side only. Put two series in a <code>grid</code> to give each its own region.</p>
+<p>The same options work in both frameworks: <code>steps</code>, <code>start</code>, <code>theme</code>, <code>layout</code>, <code>strict</code>, <code>width</code>, <code>height</code>, <code>fit</code> and <code>lang</code>. The slide functions cannot read <code>text.lang</code>, so a run in Chinese needs <code>lang: "zh"</code>. The default layout is wide. The series fills the region's width and three quarters of its height while keeping shape. Width and height override their own side only. Put two series in a <code>grid</code> to give each its own region.</p>
 ${note('<p>A single step can fill a slide too: use <code>algomotion-slides</code> with <code>steps: "insert"</code>. Ordinary <code>algomotion</code> images keep their natural size. Preview the actual deck and its handout before teaching; choose a print theme for paper.</p>')}
 `,
 };

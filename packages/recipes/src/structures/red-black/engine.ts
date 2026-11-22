@@ -12,6 +12,7 @@
 import type { Handle } from '../../recorder.ts';
 import type { Listing } from '../../snippet.ts';
 import { MAX_SIZE } from '../../structure.ts';
+import type { Localized, Text } from '../../text.ts';
 import type { Trace } from '../../trace.ts';
 import {
   attach,
@@ -41,7 +42,10 @@ export interface Family<K> {
 }
 
 /** Records a step named `name` at its marker. */
-export type Steps = (name: string, narration: string) => void;
+export type Steps = (name: string, narration: Text) => void;
+
+/** The sides in Chinese (ADR 0045). */
+const SIDE_ZH = { left: '左', right: '右' } as const;
 
 /**
  * The steps of one listing. A step is at the marker of its name, or, when
@@ -123,10 +127,20 @@ function turn<K>(
   return next;
 }
 
-const fieldChange = <K>(aug: Augment<K>, before: number, after: number) =>
+const fieldChange = <K>(
+  aug: Augment<K>,
+  before: number,
+  after: number,
+): Localized =>
   before === after
-    ? ` Its ${aug.field} stays ${after}.`
-    : ` Its ${aug.field} goes from ${before} to ${after}.`;
+    ? {
+        en: ` Its ${aug.field} stays ${after}.`,
+        zh: `它的${aug.fieldZh}保持 ${after}。`,
+      }
+    : {
+        en: ` Its ${aug.field} goes from ${before} to ${after}.`,
+        zh: `它的${aug.fieldZh}从 ${before} 变为 ${after}。`,
+      };
 
 /**
  * Inserts `key`: walks down, hangs a red leaf, and restores the red–black
@@ -141,10 +155,10 @@ export function insert<K>(t: RbTree<K>, key: K, run: Run<K>): RbTree<K> {
     throw new RangeError(`The tree is full: it holds at most ${MAX_SIZE} keys`);
   // An augmented tree checks first, so that it changes no field in vain.
   if (aug !== undefined && present !== null) {
-    step(
-      'present',
-      `${k} is already in the tree, so nothing changes, and no ${aug.field} either.`,
-    );
+    step('present', {
+      en: `${k} is already in the tree, so nothing changes, and no ${aug.field} either.`,
+      zh: `${k} 已经在树中，所以什么都不变，${aug.fieldZh}也都不变。`,
+    });
     on.pointer({ name: 'x', node: present }).highlight({ nodes: [present] });
     return t;
   }
@@ -155,15 +169,25 @@ export function insert<K>(t: RbTree<K>, key: K, run: Run<K>): RbTree<K> {
     const n = nodeOf(tree, x);
     const c = keys.compare(key, n.key);
     if (c === 0) {
-      step('present', `${k} is already in the tree: nothing changes.`);
+      step('present', {
+        en: `${k} is already in the tree: nothing changes.`,
+        zh: `${k} 已经在树中：什么都不变。`,
+      });
       on.pointer({ name: 'x', node: x }).highlight({ nodes: [x] });
       return t;
     }
     side = c < 0 ? 'left' : 'right';
-    let narration = `${k} ${c < 0 ? '<' : '>'} ${keys.text(n.key)}: go ${side}.`;
+    let narration: Localized = {
+      en: `${k} ${c < 0 ? '<' : '>'} ${keys.text(n.key)}: go ${side}.`,
+      zh: `${k} ${c < 0 ? '<' : '>'} ${keys.text(n.key)}：往${SIDE_ZH[side]}走。`,
+    };
     if (aug !== undefined) {
       const field = aug.down(n.aug, key);
-      narration += fieldChange(aug, n.aug, field);
+      const change = fieldChange(aug, n.aug, field);
+      narration = {
+        en: narration.en + change.en,
+        zh: narration.zh + change.zh,
+      };
       tree = withNode(tree, x, { aug: field });
     }
     step('go', narration);
@@ -189,8 +213,14 @@ export function insert<K>(t: RbTree<K>, key: K, run: Run<K>): RbTree<K> {
   step(
     'new',
     parent === null
-      ? `The tree is empty: ${k} becomes the root, red for now.`
-      : `Hang ${k} as the ${side} child of ${name(run, tree, parent)}, coloured red, so no path gains a black node.`,
+      ? {
+          en: `The tree is empty: ${k} becomes the root, red for now.`,
+          zh: `树是空的：${k} 成为根，暂时是红色。`,
+        }
+      : {
+          en: `Hang ${k} as the ${side} child of ${name(run, tree, parent)}, coloured red, so no path gains a black node.`,
+          zh: `把 ${k} 挂为 ${name(run, tree, parent)} 的${SIDE_ZH[side]}孩子，涂成红色，这样没有哪条路径多出黑节点。`,
+        },
   );
   on.addNode({
     node: { id: z, value: keys.value(key), color: 'red' },
@@ -206,6 +236,8 @@ function insertFixup<K>(t: RbTree<K>, z0: string, run: Run<K>): RbTree<K> {
   const { on, step } = run;
   const say = (id: string | null) =>
     id === null ? 'an empty leaf' : name(run, tree, id);
+  const sayZh = (id: string | null) =>
+    id === null ? '一片空叶子' : name(run, tree, id);
   let tree = t;
   let z = z0;
   for (;;) {
@@ -216,10 +248,10 @@ function insertFixup<K>(t: RbTree<K>, z0: string, run: Run<K>): RbTree<K> {
     const side = sideOf(tree, p)!;
     const uncle = nodeOf(tree, g)[other(side)];
     if (colorOf(tree, uncle) === 'red') {
-      step(
-        'case-1',
-        `${say(z)} and its parent ${say(p)} are both red, and so is the uncle ${say(uncle)}: make ${say(p)} and ${say(uncle)} black and the grandparent ${say(g)} red, then look again from ${say(g)}.`,
-      );
+      step('case-1', {
+        en: `${say(z)} and its parent ${say(p)} are both red, and so is the uncle ${say(uncle)}: make ${say(p)} and ${say(uncle)} black and the grandparent ${say(g)} red, then look again from ${say(g)}.`,
+        zh: `${sayZh(z)} 和它的父节点 ${sayZh(p)} 都是红色，叔节点 ${sayZh(uncle)} 也是红色：把 ${sayZh(p)} 和 ${sayZh(uncle)} 涂黑，把祖父节点 ${sayZh(g)} 涂红，再从 ${sayZh(g)} 开始检查。`,
+      });
       tree = paint(run, tree, [
         [p, 'black'],
         [uncle!, 'black'],
@@ -230,20 +262,20 @@ function insertFixup<K>(t: RbTree<K>, z0: string, run: Run<K>): RbTree<K> {
       continue;
     }
     if (z === nodeOf(tree, p)[other(side)]) {
-      step(
-        'case-2',
-        `${say(z)} and its parent ${say(p)} are both red and the uncle, ${say(uncle)}, is black, with ${say(z)} on the inside: rotate ${say(p)} ${side}, so that ${say(p)} becomes the lower of the two.`,
-      );
+      step('case-2', {
+        en: `${say(z)} and its parent ${say(p)} are both red and the uncle, ${say(uncle)}, is black, with ${say(z)} on the inside: rotate ${say(p)} ${side}, so that ${say(p)} becomes the lower of the two.`,
+        zh: `${sayZh(z)} 和它的父节点 ${sayZh(p)} 都是红色，叔节点 ${sayZh(uncle)} 是黑色，且 ${sayZh(z)} 在内侧：把 ${sayZh(p)} 向${SIDE_ZH[side]}旋转，使 ${sayZh(p)} 成为两者中较低的一个。`,
+      });
       tree = turn(run, tree, p, side);
       on.pointer({ name: 'z', node: p });
       z = p;
     }
     const zp = nodeOf(tree, z).parent!;
     const zg = nodeOf(tree, zp).parent!;
-    step(
-      'case-3',
-      `${say(z)} and its parent ${say(zp)} are both red, both ${side} children, and the uncle is black: make ${say(zp)} black and ${say(zg)} red, and rotate ${say(zg)} ${other(side)}.`,
-    );
+    step('case-3', {
+      en: `${say(z)} and its parent ${say(zp)} are both red, both ${side} children, and the uncle is black: make ${say(zp)} black and ${say(zg)} red, and rotate ${say(zg)} ${other(side)}.`,
+      zh: `${sayZh(z)} 和它的父节点 ${sayZh(zp)} 都是红色，都是${SIDE_ZH[side]}孩子，叔节点是黑色：把 ${sayZh(zp)} 涂黑、${sayZh(zg)} 涂红，再把 ${sayZh(zg)} 向${SIDE_ZH[other(side)]}旋转。`,
+    });
     tree = paint(run, tree, [
       [zp, 'black'],
       [zg, 'red'],
@@ -252,14 +284,17 @@ function insertFixup<K>(t: RbTree<K>, z0: string, run: Run<K>): RbTree<K> {
   }
   const root = tree.root!;
   if (colorOf(tree, root) === 'red') {
-    step('root', `The root ${say(root)} is red: colour it black.`);
+    step('root', {
+      en: `The root ${say(root)} is red: colour it black.`,
+      zh: `根 ${sayZh(root)} 是红色：把它涂黑。`,
+    });
     tree = paint(run, tree, [[root, 'black']]);
   } else
     // A root z is red, so this is z's black parent ending the loop.
-    step(
-      'fixed',
-      `${say(z)}'s parent is black, so no red node has a red child: the tree is a red–black tree again.`,
-    );
+    step('fixed', {
+      en: `${say(z)}'s parent is black, so no red node has a red child: the tree is a red–black tree again.`,
+      zh: `${sayZh(z)} 的父节点是黑色，所以没有红节点有红孩子：这棵树又是红黑树了。`,
+    });
   return tree;
 }
 
@@ -296,17 +331,23 @@ export function remove<K>(t: RbTree<K>, key: K, run: Run<K>): RbTree<K> {
     const n = nodeOf(t, z);
     const c = keys.compare(key, n.key);
     if (c === 0) {
-      step('find', `Found ${k}.`);
+      step('find', { en: `Found ${k}.`, zh: `找到 ${k}。` });
       on.pointer({ name: 'x', node: z }).highlight({ nodes: [z] });
       break;
     }
     const side: Side = c < 0 ? 'left' : 'right';
-    step('find', `${k} ${c < 0 ? '<' : '>'} ${keys.text(n.key)}: go ${side}.`);
+    step('find', {
+      en: `${k} ${c < 0 ? '<' : '>'} ${keys.text(n.key)}: go ${side}.`,
+      zh: `${k} ${c < 0 ? '<' : '>'} ${keys.text(n.key)}：往${SIDE_ZH[side]}走。`,
+    });
     on.pointer({ name: 'x', node: z }).highlight({ nodes: [z] });
     z = n[side];
   }
   if (z === null) {
-    step('missing', `${k} is not in the tree: nothing to delete.`);
+    step('missing', {
+      en: `${k} is not in the tree: nothing to delete.`,
+      zh: `${k} 不在树中：没有要删除的。`,
+    });
     on.pointer({ name: 'x', node: null });
     return t;
   }
@@ -323,10 +364,10 @@ export function remove<K>(t: RbTree<K>, key: K, run: Run<K>): RbTree<K> {
   };
   let tree = updateFields(moved.tree, moved.at, next);
   if (moved.lost === 'red') {
-    next.step(
-      'done',
-      `The node that left its place was red, so every path still has as many black nodes: nothing to fix.`,
-    );
+    next.step('done', {
+      en: `The node that left its place was red, so every path still has as many black nodes: nothing to fix.`,
+      zh: `离开原位置的节点是红色的，所以每条路径上的黑节点数都没有变：不需要修复。`,
+    });
     return tree;
   }
   tree = deleteFixup(tree, moved.at, next);
@@ -353,8 +394,14 @@ function unhook<K>(t: RbTree<K>, z: string, run: Run<K>): Unhooked<K> {
     step(
       zn.left === null ? 'no-left' : 'no-right',
       child === null
-        ? `${k} has no children: an empty leaf takes its place.`
-        : `${k} has no ${other(side)} child: its ${side} child ${name(run, t, child)} takes its place.`,
+        ? {
+            en: `${k} has no children: an empty leaf takes its place.`,
+            zh: `${k} 没有孩子：由一片空叶子取代它的位置。`,
+          }
+        : {
+            en: `${k} has no ${other(side)} child: its ${side} child ${name(run, t, child)} takes its place.`,
+            zh: `${k} 没有${SIDE_ZH[other(side)]}孩子：它的${SIDE_ZH[side]}孩子 ${name(run, t, child)} 取代它的位置。`,
+          },
     );
     hookInto(on, zn.parent, zSide, child);
     on.removeNode({ node: z });
@@ -366,17 +413,23 @@ function unhook<K>(t: RbTree<K>, z: string, run: Run<K>): Unhooked<K> {
   const y = minimum(t, zn.right);
   const yn = nodeOf(t, y);
   const yk = name(run, t, y);
-  step(
-    'successor',
-    `${k} has two children, so its successor ${yk}, the least key to its right, will take its place; ${yk} has no left child.`,
-  );
+  step('successor', {
+    en: `${k} has two children, so its successor ${yk}, the least key to its right, will take its place; ${yk} has no left child.`,
+    zh: `${k} 有两个孩子，所以由它的后继 ${yk}（它右边最小的关键字）取代它的位置；${yk} 没有左孩子。`,
+  });
   on.pointer({ name: 'x', node: null }).pointer({ name: 'y', node: y });
   on.highlight({ nodes: [y] });
   step(
     'move-up',
     yn.parent === z
-      ? `${yk} takes ${k}'s place, keeping its right subtree and taking ${k}'s left one and its colour.`
-      : `${yn.right === null ? 'An empty leaf' : `${yk}'s right child ${name(run, t, yn.right)}`} takes ${yk}'s place; then ${yk} takes ${k}'s place, its two subtrees and its colour.`,
+      ? {
+          en: `${yk} takes ${k}'s place, keeping its right subtree and taking ${k}'s left one and its colour.`,
+          zh: `${yk} 取代 ${k} 的位置，保留自己的右子树，接过 ${k} 的左子树和颜色。`,
+        }
+      : {
+          en: `${yn.right === null ? 'An empty leaf' : `${yk}'s right child ${name(run, t, yn.right)}`} takes ${yk}'s place; then ${yk} takes ${k}'s place, its two subtrees and its colour.`,
+          zh: `${yn.right === null ? '一片空叶子' : `${yk} 的右孩子 ${name(run, t, yn.right)}`}取代 ${yk} 的位置；然后 ${yk} 取代 ${k} 的位置，接过它的两棵子树和颜色。`,
+        },
   );
   let tree = t;
   let at: At;
@@ -438,10 +491,13 @@ function updateFields<K>(t: RbTree<K>, at: At, run: Run<K>): RbTree<K> {
     tree = recompute(tree, id, aug);
     path.push(id);
   }
-  run.step(
-    'update',
-    `Walk up from ${name(run, tree, start)} to the root, recomputing each ${aug.field} on the way: ${path.map((id) => `${name(run, tree, id)} ${aug.note(nodeOf(tree, id).aug)}`).join(', ')}.`,
-  );
+  const fields = path
+    .map((id) => `${name(run, tree, id)} ${aug.note(nodeOf(tree, id).aug)}`)
+    .join(', ');
+  run.step('update', {
+    en: `Walk up from ${name(run, tree, start)} to the root, recomputing each ${aug.field} on the way: ${fields}.`,
+    zh: `从 ${name(run, tree, start)} 往上走到根，沿途重新计算每个节点的${aug.fieldZh}：${fields}。`,
+  });
   run.on.highlight({ nodes: path });
   for (const id of path) showField(run, tree, id);
   return tree;
@@ -458,13 +514,15 @@ function deleteFixup<K>(t: RbTree<K>, start: At, run: Run<K>): RbTree<K> {
     const far = other(side);
     const xs =
       at.x === null ? `The empty leaf ${side} of ${say(p)}` : say(at.x);
+    const xsZh =
+      at.x === null ? `${say(p)} ${SIDE_ZH[side]}边的空叶子` : say(at.x);
     // A doubly black x has a sibling: its other subtree has black height 2.
     let w = nodeOf(tree, p)[far]!;
     if (colorOf(tree, w) === 'red') {
-      step(
-        'case-1',
-        `${xs} carries an extra black, and its sibling ${say(w)} is red: make ${say(w)} black and ${say(p)} red, and rotate ${say(p)} ${side}, so that the sibling is black.`,
-      );
+      step('case-1', {
+        en: `${xs} carries an extra black, and its sibling ${say(w)} is red: make ${say(w)} black and ${say(p)} red, and rotate ${say(p)} ${side}, so that the sibling is black.`,
+        zh: `${xsZh}带着一层额外的黑色，它的兄弟 ${say(w)} 是红色：把 ${say(w)} 涂黑、${say(p)} 涂红，再把 ${say(p)} 向${SIDE_ZH[side]}旋转，使兄弟变成黑色。`,
+      });
       on.pointer({ name: 'w', node: w });
       tree = paint(run, tree, [
         [w, 'black'],
@@ -477,10 +535,10 @@ function deleteFixup<K>(t: RbTree<K>, start: At, run: Run<K>): RbTree<K> {
     const near = nodeOf(tree, w)[side];
     const away = nodeOf(tree, w)[far];
     if (colorOf(tree, near) === 'black' && colorOf(tree, away) === 'black') {
-      step(
-        'case-2',
-        `${xs} carries an extra black, and its sibling ${say(w)} and both its children are black: make ${say(w)} red and pass the extra black up to ${say(p)}.`,
-      );
+      step('case-2', {
+        en: `${xs} carries an extra black, and its sibling ${say(w)} and both its children are black: make ${say(w)} red and pass the extra black up to ${say(p)}.`,
+        zh: `${xsZh}带着一层额外的黑色，它的兄弟 ${say(w)} 和兄弟的两个孩子都是黑色：把 ${say(w)} 涂红，把额外的黑色向上传给 ${say(p)}。`,
+      });
       on.pointer({ name: 'w', node: w });
       tree = paint(run, tree, [[w, 'red']]);
       at = {
@@ -492,10 +550,10 @@ function deleteFixup<K>(t: RbTree<K>, start: At, run: Run<K>): RbTree<K> {
       continue;
     }
     if (colorOf(tree, away) === 'black') {
-      step(
-        'case-3',
-        `The sibling ${say(w)} is black, its ${side} child ${say(near!)} red and its ${far} child black: swap the colours of ${say(w)} and ${say(near!)}, and rotate ${say(w)} ${far}.`,
-      );
+      step('case-3', {
+        en: `The sibling ${say(w)} is black, its ${side} child ${say(near!)} red and its ${far} child black: swap the colours of ${say(w)} and ${say(near!)}, and rotate ${say(w)} ${far}.`,
+        zh: `兄弟 ${say(w)} 是黑色，它的${SIDE_ZH[side]}孩子 ${say(near!)} 是红色，${SIDE_ZH[far]}孩子是黑色：交换 ${say(w)} 和 ${say(near!)} 的颜色，再把 ${say(w)} 向${SIDE_ZH[far]}旋转。`,
+      });
       on.pointer({ name: 'w', node: w });
       tree = paint(run, tree, [
         [near!, 'black'],
@@ -505,10 +563,10 @@ function deleteFixup<K>(t: RbTree<K>, start: At, run: Run<K>): RbTree<K> {
       w = nodeOf(tree, p)[far]!;
     }
     const red = nodeOf(tree, w)[far]!;
-    step(
-      'case-4',
-      `The sibling ${say(w)} is black and its ${far} child ${say(red)} is red: give ${say(w)} the colour of ${say(p)}, make ${say(p)} and ${say(red)} black, and rotate ${say(p)} ${side}. The extra black is gone.`,
-    );
+    step('case-4', {
+      en: `The sibling ${say(w)} is black and its ${far} child ${say(red)} is red: give ${say(w)} the colour of ${say(p)}, make ${say(p)} and ${say(red)} black, and rotate ${say(p)} ${side}. The extra black is gone.`,
+      zh: `兄弟 ${say(w)} 是黑色，它的${SIDE_ZH[far]}孩子 ${say(red)} 是红色：让 ${say(w)} 取 ${say(p)} 的颜色，把 ${say(p)} 和 ${say(red)} 涂黑，再把 ${say(p)} 向${SIDE_ZH[side]}旋转。额外的黑色消失了。`,
+    });
     on.pointer({ name: 'w', node: w });
     tree = paint(run, tree, [
       [w, colorOf(tree, p)],
@@ -520,10 +578,10 @@ function deleteFixup<K>(t: RbTree<K>, start: At, run: Run<K>): RbTree<K> {
     return turn(run, tree, p, side);
   }
   if (at.x !== null && colorOf(tree, at.x) === 'red') {
-    step(
-      'x-black',
-      `${say(at.x)} is red: colour it black, which puts back the black that left.`,
-    );
+    step('x-black', {
+      en: `${say(at.x)} is red: colour it black, which puts back the black that left.`,
+      zh: `${say(at.x)} 是红色：把它涂黑，补回离开的那层黑色。`,
+    });
     tree = paint(run, tree, [[at.x, 'black']]);
     on.pointer({ name: 'w', node: null });
   }

@@ -62,7 +62,7 @@ ${code(
 <tr><td><code>hide-controls</code></td><td>absent</td><td>Hide the playback controls.</td></tr>
 <tr><td><code>hide-code</code></td><td>absent</td><td>Hide the source listing.</td></tr>
 <tr><td><code>language</code></td><td>pseudocode, if present</td><td>Preferred source language, such as <code>python</code>.</td></tr>
-<tr><td><code>lang</code></td><td>the page’s</td><td>Language of the player’s controls and of an algorithm’s run: Chinese for any <code>zh</code> tag, English otherwise. Inherited like any <code>lang</code>, so <code>&lt;html lang="zh-Hans"&gt;</code> is enough. A document’s own text shows as written. The narration of the modules is being translated (roadmap 5.8).</td></tr>
+<tr><td><code>lang</code></td><td>the page’s</td><td>Language of the player’s controls and of an algorithm’s run: Chinese for any <code>zh</code> tag, English otherwise. Inherited like any <code>lang</code>, so <code>&lt;html lang="zh-Hans"&gt;</code> is enough. A document’s own text shows as written.</td></tr>
 <tr><td><code>mode</code></td><td><code>interactive</code></td><td><code>display</code> shows an animation alone.</td></tr>
 <tr><td><code>once</code></td><td>absent</td><td>In display mode, play once instead of looping.</td></tr>
 <tr><td><code>motion</code></td><td>mode's choice</td><td><code>arc</code> or <code>linear</code>; interactive defaults to arc, display to linear.</td></tr>
@@ -129,15 +129,15 @@ ${code(
 )}
 <p>Other properties are <code>--algo-bg</code>, <code>--algo-fg</code>, <code>--algo-muted</code>, <code>--algo-border</code>, <code>--algo-surface</code>, <code>--algo-error</code>, <code>--algo-line-bg</code>, <code>--algo-line-edge</code>, <code>--algo-font</code> and <code>--algo-mono</code>. Syntax colours use <code>--algo-code-keyword</code>, <code>--algo-code-string</code>, <code>--algo-code-number</code>, <code>--algo-code-comment</code>, <code>--algo-code-function</code> and <code>--algo-code-builtin</code>. These style the controls and code; the scene uses its theme.</p>
 
-<h2 id="bundlers">Workspace imports and bundlers</h2>
-<p>Until npm publication, use the repository's workspace packages and build them locally. A bundler can import the class without registering the element, set the font URL, then define it:</p>
+<h2 id="bundlers">Bundlers</h2>
+<p>With <code>@algomotion/elements</code> installed from npm, a bundler can import the class without registering the element, set the font URL, then define it:</p>
 ${code(
   `import { AlgoPlayer } from '@algomotion/elements';
 AlgoPlayer.fontsUrl = '/assets/fonts/fonts.css';
 customElements.define('algo-player', AlgoPlayer);`,
   'Register with a bundler',
 )}
-<p>Copy <code>packages/elements/dist/fonts/</code> to that assets folder, keeping the stylesheet's relative font URLs. Set <code>fontsUrl</code> before the first player connects. <code>AlgoPlayer.fontsUrl = null</code> disables font loading and uses system fallbacks. For registration alone, import <code>@algomotion/elements/define</code>.</p>
+<p>Copy <code>node_modules/@algomotion/elements/dist/fonts/</code> to that assets folder, keeping the stylesheet's relative font URLs. Set <code>fontsUrl</code> before the first player connects. <code>AlgoPlayer.fontsUrl = null</code> disables font loading and uses system fallbacks. For registration alone, import <code>@algomotion/elements/define</code>.</p>
 ${note('<p>The two standalone JavaScript files belong to the same build. A bundler handles its own chunks; do not copy only its entry file and omit the chunks it imports.</p>')}
 `,
 };

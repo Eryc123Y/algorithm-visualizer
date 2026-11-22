@@ -64,10 +64,12 @@ export const DAG_EXAMPLE: z.output<typeof Graph> = {
 
 export const dagShortestPaths = defineAlgorithm({
   id: 'dag-shortest-paths',
-  title: 'Shortest paths in a DAG',
+  title: { en: 'Shortest paths in a DAG', zh: '有向无环图中的最短路径' },
   topic: 'graphs',
-  summary:
-    'Finds shortest paths from a source in a directed acyclic graph, even with negative weights, by relaxing the edges out of each vertex once, in topological order.',
+  summary: {
+    en: 'Finds shortest paths from a source in a directed acyclic graph, even with negative weights, by relaxing the edges out of each vertex once, in topological order.',
+    zh: '在有向无环图中求从一个源点出发的最短路径，允许边权为负：按拓扑序，把每个顶点发出的边各松弛一次。',
+  },
   input: z.strictObject({
     graph: Graph.describe(
       'A graph whose edges are taken as directed, with no cycle.',
@@ -119,50 +121,53 @@ export const dagShortestPaths = defineAlgorithm({
     const list = trace.add('order', {
       kind: 'array',
       place: 'side',
-      label: 'topological order',
+      label: trace.say({ en: 'topological order', zh: '拓扑序' }),
       initial: order.map((v) => ({ id: `o-${v}`, value: v })),
     });
     const adj = adjacency(g);
     const d = new Map(g.nodes.map((v) => [v, v === s ? 0 : Infinity]));
     const via = new Map<string, string>();
-    trace.step(
-      'sort',
-      `Sort the vertices topologically, by a depth-first search: ${order.join(', ')}. Every edge goes forward in this order.`,
-    );
-    trace.step('start', `Every distance is ∞, except ${s}'s, which is 0.`);
+    trace.step('sort', {
+      en: `Sort the vertices topologically, by a depth-first search: ${order.join(', ')}. Every edge goes forward in this order.`,
+      zh: `用深度优先搜索对顶点做拓扑排序：${order.join(', ')}。在这个顺序中，每条边都指向前方。`,
+    });
+    trace.step('start', {
+      en: `Every distance is ∞, except ${s}'s, which is 0.`,
+      zh: `除 ${s} 的距离为 0 外，每个顶点的距离都是 ∞。`,
+    });
     for (const v of g.nodes) graph.annotate({ node: v, text: num(d.get(v)!) });
     order.forEach((u, k) => {
       const du = d.get(u)!;
       if (du === Infinity) {
-        trace.step(
-          'vertex',
-          `${u} is next, but no path from ${s} reaches it: its edges improve nothing.`,
-        );
+        trace.step('vertex', {
+          en: `${u} is next, but no path from ${s} reaches it: its edges improve nothing.`,
+          zh: `下一个是 ${u}，但从 ${s} 没有路径到达它：它的边改进不了任何距离。`,
+        });
         list.highlight({ indices: [k] });
         graph.pointer({ name: 'u', node: u });
         return;
       }
-      trace.step(
-        'vertex',
-        `${u} is next: every edge into it has been relaxed, so its distance ${num(du)} is final. Relax the edges out of it.`,
-      );
+      trace.step('vertex', {
+        en: `${u} is next: every edge into it has been relaxed, so its distance ${num(du)} is final. Relax the edges out of it.`,
+        zh: `下一个是 ${u}：进入它的边都已松弛，所以它的距离 ${num(du)} 已经确定。松弛它发出的边。`,
+      });
       list.highlight({ indices: [k] });
       graph.pointer({ name: 'u', node: u }).settle({ node: u });
       for (const { to: v, weight: w, edge } of adj.get(u)!) {
         const before = d.get(v)!;
         if (du + w >= before) {
-          trace.step(
-            'relax',
-            `${num(du)} ${plus(w)} = ${num(du + w)} is not less than ${num(before)}: ${v} keeps its distance.`,
-          );
+          trace.step('relax', {
+            en: `${num(du)} ${plus(w)} = ${num(du + w)} is not less than ${num(before)}: ${v} keeps its distance.`,
+            zh: `${num(du)} ${plus(w)} = ${num(du + w)} 不小于 ${num(before)}：${v} 保持原来的距离。`,
+          });
           graph.highlight({ nodes: [v], edges: [edge] });
           continue;
         }
         d.set(v, du + w);
-        trace.step(
-          'improve',
-          `${num(du)} ${plus(w)} = ${num(du + w)} is less than ${num(before)}: ${v} improves to ${num(du + w)}, through ${u}.`,
-        );
+        trace.step('improve', {
+          en: `${num(du)} ${plus(w)} = ${num(du + w)} is less than ${num(before)}: ${v} improves to ${num(du + w)}, through ${u}.`,
+          zh: `${num(du)} ${plus(w)} = ${num(du + w)} 小于 ${num(before)}：${v} 经由 ${u} 改进为 ${num(du + w)}。`,
+        });
         graph
           .highlight({ nodes: [v], edges: [edge] })
           .annotate({ node: v, text: num(du + w) });
@@ -172,10 +177,10 @@ export const dagShortestPaths = defineAlgorithm({
         graph.markEdge({ edge, mark: 'selected' });
       }
     });
-    trace.step(
-      'done',
-      'Every vertex has had its turn: the distances are final, and the marked edges form a shortest-path tree.',
-    );
+    trace.step('done', {
+      en: 'Every vertex has had its turn: the distances are final, and the marked edges form a shortest-path tree.',
+      zh: '每个顶点都已处理：所有距离都已确定，标出的边构成一棵最短路径树。',
+    });
     graph.pointer({ name: 'u', node: null });
   },
 });

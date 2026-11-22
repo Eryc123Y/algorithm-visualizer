@@ -4,7 +4,18 @@ All notable changes to algomotion, newest first. The format follows [Keep a Chan
 
 ## Unreleased
 
-Nothing yet.
+### Added
+
+- Chinese in the product ([ADR 0045](docs/adr/0045-chinese-in-the-product.md), #159): a document is in one language, recipes write every text in both side by side, and every output takes a locale.
+  - The player's controls, the layout's own words and an algorithm's run follow the page's `lang`, and share links carry a `lang` (#160).
+  - The command line's `--lang`, MCP's `locale`, Typst's `lang` (following `text.lang` by default), LaTeX's `lang` key, and TikZ through the figure options (#161).
+  - Every module's title, summary, narration, sections and labels in Simplified Chinese, with a test that reads the sources so no narration stays in one language (#162).
+  - The site's module pages and catalogue in Chinese under `/zh/`: every figure on a Chinese page is drawn from a run in Chinese, the catalogue can be searched by the English names too, and each page's snippets ask their output for Chinese (#163).
+
+### Changed
+
+- The site's drafting redesign: grid paper, ink-blue frames, red annotations and IBM Plex on every page, and a home page whose run scrolls by beside a pinned sheet (#157); catalogue thumbnails that flip through their run on hover, page transitions, and the share page in the same finish (#158).
+- Releases are packed from clean builds, without build leftovers (#154), and the site's copy was reviewed in both languages, with install steps for the alpha (#155).
 
 ## 1.0.0-alpha.1 (2026-11-14)
 

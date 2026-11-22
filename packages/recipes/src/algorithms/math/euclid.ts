@@ -50,10 +50,12 @@ export function calls(a: number, b: number): [number, number][] {
 
 export const euclid = defineAlgorithm({
   id: 'euclid',
-  title: 'Euclid’s algorithm',
+  title: { en: 'Euclid’s algorithm', zh: '欧几里得算法' },
   topic: 'math',
-  summary:
-    'Finds the greatest common divisor of two whole numbers by replacing (a, b) with (b, a mod b) until b is 0.',
+  summary: {
+    en: 'Finds the greatest common divisor of two whole numbers by replacing (a, b) with (b, a mod b) until b is 0.',
+    zh: '求两个整数的最大公约数：反复把 (a, b) 换成 (b, a mod b)，直到 b 为 0。',
+  },
   input: Input,
   examples: [{ a: 30, b: 21 }],
   code: {
@@ -74,7 +76,7 @@ export const euclid = defineAlgorithm({
     const rows = calls(input.a, input.b);
     const table = trace.add('calls', {
       kind: 'table',
-      label: 'Calls',
+      label: trace.say({ en: 'Calls', zh: '调用' }),
       initial: rows.map(() => ['', '', '']),
       columnLabels: ['a', 'b', 'a mod b'],
     });
@@ -82,7 +84,10 @@ export const euclid = defineAlgorithm({
       if (b === 0) {
         trace.step(
           'base',
-          `EUCLID(${a}, 0): b is 0, so the answer is a: gcd(${input.a}, ${input.b}) = ${a}.`,
+          {
+            en: `EUCLID(${a}, 0): b is 0, so the answer is a: gcd(${input.a}, ${input.b}) = ${a}.`,
+            zh: `EUCLID(${a}, 0)：b 为 0，所以答案是 a：gcd(${input.a}, ${input.b}) = ${a}。`,
+          },
           { vars: { a, b } },
         );
         table.set({ cell: [k, 0], value: a }).set({ cell: [k, 1], value: 0 });
@@ -91,7 +96,10 @@ export const euclid = defineAlgorithm({
       }
       trace.step(
         'call',
-        `EUCLID(${a}, ${b}): b is not 0, so call EUCLID(${b}, ${a} mod ${b}) = EUCLID(${b}, ${a % b}), which has the same gcd.`,
+        {
+          en: `EUCLID(${a}, ${b}): b is not 0, so call EUCLID(${b}, ${a} mod ${b}) = EUCLID(${b}, ${a % b}), which has the same gcd.`,
+          zh: `EUCLID(${a}, ${b})：b 不为 0，所以调用 EUCLID(${b}, ${a} mod ${b}) = EUCLID(${b}, ${a % b})，它的最大公约数相同。`,
+        },
         { vars: { a, b } },
       );
       table
@@ -105,10 +113,12 @@ export const euclid = defineAlgorithm({
 
 export const extendedEuclid = defineAlgorithm({
   id: 'extended-euclid',
-  title: 'Extended Euclid',
+  title: { en: 'Extended Euclid', zh: '扩展欧几里得算法' },
   topic: 'math',
-  summary:
-    'Finds d = gcd(a, b) and integers x and y with d = ax + by, working back up from the last call of Euclid’s algorithm.',
+  summary: {
+    en: 'Finds d = gcd(a, b) and integers x and y with d = ax + by, working back up from the last call of Euclid’s algorithm.',
+    zh: '求 d = gcd(a, b) 以及满足 d = ax + by 的整数 x 和 y：从欧几里得算法的最后一次调用往回推。',
+  },
   input: Input,
   examples: [{ a: 99, b: 78 }],
   code: {
@@ -132,7 +142,7 @@ export const extendedEuclid = defineAlgorithm({
     const rows = calls(input.a, input.b);
     const table = trace.add('calls', {
       kind: 'table',
-      label: 'Calls',
+      label: trace.say({ en: 'Calls', zh: '调用' }),
       initial: rows.map(() => ['', '', '', '', '', '']),
       columnLabels: ['a', 'b', '⌊a/b⌋', 'd', 'x', 'y'],
     });
@@ -140,7 +150,10 @@ export const extendedEuclid = defineAlgorithm({
       if (b === 0) return;
       trace.step(
         'call',
-        `EXTENDED-EUCLID(${a}, ${b}): b is not 0, so call EXTENDED-EUCLID(${b}, ${a} mod ${b}) = EXTENDED-EUCLID(${b}, ${a % b}), keeping ⌊${a}/${b}⌋ = ${Math.floor(a / b)} for the way back.`,
+        {
+          en: `EXTENDED-EUCLID(${a}, ${b}): b is not 0, so call EXTENDED-EUCLID(${b}, ${a} mod ${b}) = EXTENDED-EUCLID(${b}, ${a % b}), keeping ⌊${a}/${b}⌋ = ${Math.floor(a / b)} for the way back.`,
+          zh: `EXTENDED-EUCLID(${a}, ${b})：b 不为 0，所以调用 EXTENDED-EUCLID(${b}, ${a} mod ${b}) = EXTENDED-EUCLID(${b}, ${a % b})，并记下 ⌊${a}/${b}⌋ = ${Math.floor(a / b)} 供返回时使用。`,
+        },
         { vars: { a, b } },
       );
       table
@@ -152,7 +165,10 @@ export const extendedEuclid = defineAlgorithm({
     const d = rows[last]![0];
     trace.step(
       'base',
-      `EXTENDED-EUCLID(${d}, 0): b is 0, so return (d, x, y) = (${d}, 1, 0), since ${d} = ${d} · 1 + 0 · 0.`,
+      {
+        en: `EXTENDED-EUCLID(${d}, 0): b is 0, so return (d, x, y) = (${d}, 1, 0), since ${d} = ${d} · 1 + 0 · 0.`,
+        zh: `EXTENDED-EUCLID(${d}, 0)：b 为 0，所以返回 (d, x, y) = (${d}, 1, 0)，因为 ${d} = ${d} · 1 + 0 · 0。`,
+      },
       { vars: { a: d, b: 0 } },
     );
     table
@@ -169,7 +185,10 @@ export const extendedEuclid = defineAlgorithm({
       [x, y] = [yp, xp - q * yp];
       trace.step(
         'return',
-        `Back in EXTENDED-EUCLID(${a}, ${b}): the call below gave x' = ${minus(xp)} and y' = ${minus(yp)}, so x = y' = ${minus(x)} and y = x' − ${q} · y' = ${minus(y)}: ${d} = ${a} · ${paren(x)} + ${b} · ${paren(y)}.`,
+        {
+          en: `Back in EXTENDED-EUCLID(${a}, ${b}): the call below gave x' = ${minus(xp)} and y' = ${minus(yp)}, so x = y' = ${minus(x)} and y = x' − ${q} · y' = ${minus(y)}: ${d} = ${a} · ${paren(x)} + ${b} · ${paren(y)}.`,
+          zh: `回到 EXTENDED-EUCLID(${a}, ${b})：下一层调用给出 x' = ${minus(xp)}，y' = ${minus(yp)}，所以 x = y' = ${minus(x)}，y = x' − ${q} · y' = ${minus(y)}：${d} = ${a} · ${paren(x)} + ${b} · ${paren(y)}。`,
+        },
         { vars: { a, b } },
       );
       table

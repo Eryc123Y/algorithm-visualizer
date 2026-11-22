@@ -11,10 +11,12 @@ import { range, SAMPLE, SortInput } from './input.ts';
 
 export const mergeSort = defineAlgorithm({
   id: 'merge-sort',
-  title: 'Merge sort',
+  title: { en: 'Merge sort', zh: '归并排序' },
   topic: 'sorting',
-  summary:
-    'Splits the array in halves down to single values, then merges sorted halves through a buffer.',
+  summary: {
+    en: 'Splits the array in halves down to single values, then merges sorted halves through a buffer.',
+    zh: '把数组对半拆分，直到只剩单个值，再借助缓冲区把排好序的两半归并起来。',
+  },
   input: SortInput,
   main: 'values',
   examples: [SAMPLE],
@@ -80,7 +82,10 @@ export const mergeSort = defineAlgorithm({
     const merge = (p: number, q: number, r: number): void => {
       trace.step(
         'copy',
-        `Merge the sorted halves a[${p}..${q}] and a[${q + 1}..${r}]: first copy them into aux.`,
+        {
+          en: `Merge the sorted halves a[${p}..${q}] and a[${q + 1}..${r}]: first copy them into aux.`,
+          zh: `归并已排好序的两半 a[${p}..${q}] 和 a[${q + 1}..${r}]：先把它们复制到 aux。`,
+        },
         { vars: { p, q, r } },
       );
       arr.highlight({ indices: range(p, r) });
@@ -97,10 +102,19 @@ export const mergeSort = defineAlgorithm({
         trace.step(
           takeLeft ? 'take-left' : 'take-right',
           j > r
-            ? `The right half is used up: take ${left}.`
+            ? {
+                en: `The right half is used up: take ${left}.`,
+                zh: `右半已经取完：取 ${left}。`,
+              }
             : i > q
-              ? `The left half is used up: take ${right}.`
-              : `${left} ${takeLeft ? '≤' : '>'} ${right}: take ${takeLeft ? left : right}.`,
+              ? {
+                  en: `The left half is used up: take ${right}.`,
+                  zh: `左半已经取完：取 ${right}。`,
+                }
+              : {
+                  en: `${left} ${takeLeft ? '≤' : '>'} ${right}: take ${takeLeft ? left : right}.`,
+                  zh: `${left} ${takeLeft ? '≤' : '>'} ${right}：取 ${takeLeft ? left : right}。`,
+                },
           { vars: { i, j, k } },
         );
         buf
@@ -115,8 +129,14 @@ export const mergeSort = defineAlgorithm({
       trace.step(
         'merged',
         whole
-          ? `a[${p}..${r}] is merged: the array is sorted.`
-          : `a[${p}..${r}] is merged and sorted.`,
+          ? {
+              en: `a[${p}..${r}] is merged: the array is sorted.`,
+              zh: `a[${p}..${r}] 归并完成：数组已排好序。`,
+            }
+          : {
+              en: `a[${p}..${r}] is merged and sorted.`,
+              zh: `a[${p}..${r}] 已归并，排好了序。`,
+            },
       );
       calls.pop();
       buf
@@ -134,7 +154,10 @@ export const mergeSort = defineAlgorithm({
       if (p >= r) {
         // A single value is sorted; say so only when it is the whole array.
         if (n === 1) {
-          trace.step('single', 'One value is already sorted.');
+          trace.step('single', {
+            en: 'One value is already sorted.',
+            zh: '单个值本身就是有序的。',
+          });
           arr.settle({ index: 0 });
         }
         return;
@@ -142,7 +165,10 @@ export const mergeSort = defineAlgorithm({
       const q = Math.floor((p + r) / 2);
       trace.step(
         'split',
-        `Split a[${p}..${r}] into a[${p}..${q}] and a[${q + 1}..${r}], and sort each.`,
+        {
+          en: `Split a[${p}..${r}] into a[${p}..${q}] and a[${q + 1}..${r}], and sort each.`,
+          zh: `把 a[${p}..${r}] 拆成 a[${p}..${q}] 和 a[${q + 1}..${r}]，分别排序。`,
+        },
         { vars: { p, q, r } },
       );
       calls.push(`call-${p}-${r}`, `sort a[${p}..${r}]`);

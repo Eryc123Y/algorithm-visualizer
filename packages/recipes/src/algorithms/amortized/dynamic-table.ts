@@ -21,10 +21,12 @@ export const MAX_INSERTS = 16;
 
 export const dynamicTable = defineAlgorithm({
   id: 'dynamic-table',
-  title: 'Dynamic table',
+  title: { en: 'Dynamic table', zh: '动态表' },
   topic: 'amortized',
-  summary:
-    'Inserts items into a table that doubles its size when full, copying its items, and keeps each insertion’s cost, the total and the potential 2·num − size.',
+  summary: {
+    en: 'Inserts items into a table that doubles its size when full, copying its items, and keeps each insertion’s cost, the total and the potential 2·num − size.',
+    zh: '向一张满了就扩大一倍的表中插入元素（扩大时复制已有的元素），记下每次插入的代价、总代价和势 2·num − size。',
+  },
   input: z.strictObject({
     items: listField(
       z
@@ -75,12 +77,21 @@ export const dynamicTable = defineAlgorithm({
     const T = trace.add('T', { kind: 'array', initial: [] });
     const ledger = trace.add('cost', {
       kind: 'table',
-      label: 'each insertion: num, size, cost, total, Φ',
+      label: trace.say({
+        en: 'each insertion: num, size, cost, total, Φ',
+        zh: '每次插入：num、size、代价、总计、Φ',
+      }),
       place: 'side',
       rows: n,
       columns: 5,
       rowLabels: items.map((_, t) => t + 1),
-      columnLabels: ['num', 'size', 'cost', 'total', 'Φ'],
+      columnLabels: [
+        'num',
+        'size',
+        trace.say({ en: 'cost', zh: '代价' }),
+        trace.say({ en: 'total', zh: '总计' }),
+        'Φ',
+      ],
     });
     let size = 0;
     let total = 0;
@@ -96,16 +107,26 @@ export const dynamicTable = defineAlgorithm({
     items.forEach((x, num) => {
       let cost = 1;
       if (size === 0) {
-        trace.step('first', 'The table is empty: allocate it with 1 slot.', {
-          vars: { num, size: 1 },
-        });
+        trace.step(
+          'first',
+          {
+            en: 'The table is empty: allocate it with 1 slot.',
+            zh: '表是空的：为它分配 1 个槽。',
+          },
+          {
+            vars: { num, size: 1 },
+          },
+        );
         grow(1);
       }
       if (num === size) {
         cost += num;
         trace.step(
           'expand',
-          `${size === 1 ? 'The 1 slot is' : `All ${size} slots are`} full: allocate ${2 * size} slots and copy the ${num === 1 ? 'item' : `${num} items`} into them. Copying costs ${num}, plus 1 to insert the new item.`,
+          {
+            en: `${size === 1 ? 'The 1 slot is' : `All ${size} slots are`} full: allocate ${2 * size} slots and copy the ${num === 1 ? 'item' : `${num} items`} into them. Copying costs ${num}, plus 1 to insert the new item.`,
+            zh: `${size === 1 ? '这 1 个槽' : `${size} 个槽都`}满了：分配 ${2 * size} 个槽，把 ${num} 个元素复制进去。复制的代价是 ${num}，再加上插入新元素的 1。`,
+          },
           { vars: { num, size: 2 * size } },
         );
         T.highlight({ indices: Array.from({ length: num }, (_, k) => k) });
@@ -115,7 +136,10 @@ export const dynamicTable = defineAlgorithm({
       const phi = 2 * (num + 1) - size;
       trace.step(
         'insert',
-        `Insert ${x} into slot ${num}. This insertion cost ${cost}; ${num === 0 ? 'it is the only one so far' : `the ${num + 1} insertions have cost ${total} in all`}, and Φ = 2·${num + 1} − ${size} = ${phi}.`,
+        {
+          en: `Insert ${x} into slot ${num}. This insertion cost ${cost}; ${num === 0 ? 'it is the only one so far' : `the ${num + 1} insertions have cost ${total} in all`}, and Φ = 2·${num + 1} − ${size} = ${phi}.`,
+          zh: `把 ${x} 插入槽 ${num}。这次插入的代价是 ${cost}；${num === 0 ? '这是到目前为止唯一的一次' : `这 ${num + 1} 次插入的总代价是 ${total}`}，Φ = 2·${num + 1} − ${size} = ${phi}。`,
+        },
         // num as the line reads it, before T.num grows.
         { vars: { num, size } },
       );

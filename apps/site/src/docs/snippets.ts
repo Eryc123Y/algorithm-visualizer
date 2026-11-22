@@ -6,6 +6,10 @@
 import { readInput, writeInput } from '@algomotion/recipes';
 import { shareFragment } from '@algomotion/spec';
 
+import type { Locale } from './locale.ts';
+import { CHROME } from './text/chrome.ts';
+import { SNIPPET_NOTES } from './text/snippets.ts';
+
 export interface Snippet {
   readonly id: 'web' | 'typst' | 'latex' | 'cli' | 'mcp' | 'link';
   /** Where the snippet goes, as a heading. */
@@ -119,73 +123,62 @@ const scriptJson = (value: unknown): string =>
 
 /**
  * A Beamer frame that shows module `id`, titled `title`, on the input
- * `text`, one overlay per step.
+ * `text`, one overlay per step, in `locale`.
  */
-export const slidesCode = (title: string, id: string, text: string): string =>
+export const slidesCode = (
+  title: string,
+  id: string,
+  text: string,
+  locale: Locale = 'en',
+): string =>
   `\\begin{frame}{${latexText(title)}}
   \\centering
-  \\algomotion[steps]{${id}}{${latexText(text)}}
+  \\algomotion[steps${locale === 'en' ? '' : `, lang=${locale}`}]{${id}}{${latexText(text)}}
 \\end{frame}`;
 
 /**
  * The snippets of module `id` run on `input`, for a page `depth` folders
  * below the site's root, whose share page is `play/`; `step` is a step of
- * the run that the notes use as their example.
+ * the run that the notes use as their example. Outside English, each
+ * snippet asks its output for `locale` (ADR 0045), and its heading and
+ * note are in that language.
  */
 export async function snippetsFor(
   id: string,
   input: unknown,
   depth: number,
   step = '-1',
+  locale: Locale = 'en',
 ): Promise<Snippet[]> {
   const text = inputText(input);
+  const lang = locale === 'en' ? undefined : locale;
   // A notation, or other text the player reads as it is, goes in the
   // attribute; an object goes in inline JSON, as people write it.
   const asText = typeof input === 'string' && readInput(input).ok;
+  const langAttribute = lang === undefined ? '' : ` lang="${lang}"`;
   const player = asText
-    ? `<algo-player algorithm="${attribute(id)}" input="${attribute(text)}"></algo-player>`
-    : `<algo-player algorithm="${attribute(id)}">\n  <script type="application/json">\n${scriptJson(input).replace(/^/gm, '    ')}\n  </script>\n</algo-player>`;
+    ? `<algo-player algorithm="${attribute(id)}" input="${attribute(text)}"${langAttribute}></algo-player>`
+    : `<algo-player algorithm="${attribute(id)}"${langAttribute}>\n  <script type="application/json">\n${scriptJson(input).replace(/^/gm, '    ')}\n  </script>\n</algo-player>`;
+  const written = writeInput(input);
   const fragment = await shareFragment({
     algorithm: id,
-    ...(writeInput(input) === undefined ? {} : { input: writeInput(input)! }),
+    ...(written === undefined ? {} : { input: written }),
+    ...(lang === undefined ? {} : { lang }),
   });
   const root = '../'.repeat(depth);
-  return [
-    {
-      id: 'web',
-      label: 'On a web page',
-      code: `<script type="module" src="algomotion-player.js"></script>\n${player}`,
-      note: 'The player is one script, the standalone bundle, in the @algomotion/elements package on npm (tag alpha) or from a CDN such as jsDelivr.',
-    },
-    {
-      id: 'typst',
-      label: 'In Typst',
-      code: `#import "@preview/algomotion:0.1.0": algomotion\n#algomotion(${typstString(id)}, ${typstValue(input)})`,
-      note: `Draws the last frame; step: "${step}" draws that step instead.`,
-    },
-    {
-      id: 'latex',
-      label: 'In LaTeX',
-      code: `\\usepackage{algomotion}\n\\algomotion{${id}}{${latexText(text)}}`,
-      note: `Compile with -shell-escape the first time; [step=${step}] picks the step drawn.`,
-    },
-    {
-      id: 'cli',
-      label: 'On the command line',
-      code: `algomotion export ${id} --input ${shellQuote(text)} --out figures`,
-      note: `Writes an SVG of every frame into figures/; --step ${step} writes only that step.`,
-    },
-    {
-      id: 'mcp',
-      label: 'To a model, through MCP',
-      code: `algomotion_show ${JSON.stringify({ recipe: id, input }, null, 2)}`,
-      note: `The call a model makes to show this run in the conversation; "frame": "${step}" opens it on that step.`,
-    },
-    {
-      id: 'link',
-      label: 'As a share link',
-      code: fragment.ok ? `${root}play/#${fragment.value}` : `${root}play/`,
-      note: 'Opens this run in the share page; the run travels in the link after the #.',
-    },
-  ];
+  const codes: Readonly<Record<Snippet['id'], string>> = {
+    web: `<script type="module" src="algomotion-player.js"></script>\n${player}`,
+    typst: `#import "@preview/algomotion:0.1.0": algomotion\n#algomotion(${typstString(id)}, ${typstValue(input)}${lang === undefined ? '' : `, lang: ${typstString(lang)}`})`,
+    latex: `\\usepackage{algomotion}\n\\algomotion${lang === undefined ? '' : `[lang=${lang}]`}{${id}}{${latexText(text)}}`,
+    cli: `algomotion export ${id} --input ${shellQuote(text)}${lang === undefined ? '' : ` --lang ${lang}`} --out figures`,
+    mcp: `algomotion_show ${JSON.stringify({ recipe: id, input, ...(lang === undefined ? {} : { locale: lang }) }, null, 2)}`,
+    link: fragment.ok ? `${root}play/#${fragment.value}` : `${root}play/`,
+  };
+  const ids = ['web', 'typst', 'latex', 'cli', 'mcp', 'link'] as const;
+  return ids.map((snippet) => ({
+    id: snippet,
+    label: CHROME[locale].snippets[snippet],
+    code: codes[snippet],
+    note: SNIPPET_NOTES[locale][snippet](step),
+  }));
 }

@@ -7,10 +7,12 @@ import { SAMPLE, SortInput } from './input.ts';
 
 export const selectionSort = defineAlgorithm({
   id: 'selection-sort',
-  title: 'Selection sort',
+  title: { en: 'Selection sort', zh: '选择排序' },
   topic: 'sorting',
-  summary:
-    'Finds the smallest value of the unsorted part and swaps it to the front of that part, one position at a time.',
+  summary: {
+    en: 'Finds the smallest value of the unsorted part and swaps it to the front of that part, one position at a time.',
+    zh: '找出未排序部分中最小的值，把它交换到这一部分的最前面，每次确定一个位置。',
+  },
   input: SortInput,
   main: 'values',
   examples: [SAMPLE],
@@ -41,30 +43,49 @@ export const selectionSort = defineAlgorithm({
     const arr = trace.add('a', { kind: 'array', initial: [...values] });
     for (let i = 0; i < n - 1; i++) {
       let smallest = i;
-      trace.step('start', `Find the smallest value in a[${i}..${n - 1}].`, {
-        vars: { i },
-      });
+      trace.step(
+        'start',
+        {
+          en: `Find the smallest value in a[${i}..${n - 1}].`,
+          zh: `找出 a[${i}..${n - 1}] 中最小的值。`,
+        },
+        {
+          vars: { i },
+        },
+      );
       arr
         .pointer({ name: 'i', index: i })
         .pointer({ name: 'smallest', index: i });
       for (let j = i + 1; j < n; j++) {
         trace.step(
           'compare',
-          `Compare ${a[j]} with the smallest so far, ${a[smallest]}.`,
+          {
+            en: `Compare ${a[j]} with the smallest so far, ${a[smallest]}.`,
+            zh: `比较 ${a[j]} 和目前最小的 ${a[smallest]}。`,
+          },
           { vars: { i, j, smallest } },
         );
         arr.pointer({ name: 'j', index: j }).compare({ i: j, j: smallest });
         if (a[j]! < a[smallest]!) {
           smallest = j;
-          trace.step('smaller', `${a[j]} is smaller: the smallest so far.`);
+          trace.step('smaller', {
+            en: `${a[j]} is smaller: the smallest so far.`,
+            zh: `${a[j]} 更小：它是目前最小的。`,
+          });
           arr.pointer({ name: 'smallest', index: j });
         }
       }
       trace.step(
         'swap',
         smallest === i
-          ? `${a[i]} is the smallest: it stays at position ${i}.`
-          : `Swap the smallest, ${a[smallest]}, into position ${i}.`,
+          ? {
+              en: `${a[i]} is the smallest: it stays at position ${i}.`,
+              zh: `${a[i]} 就是最小的：它留在位置 ${i}。`,
+            }
+          : {
+              en: `Swap the smallest, ${a[smallest]}, into position ${i}.`,
+              zh: `把最小的 ${a[smallest]} 交换到位置 ${i}。`,
+            },
       );
       arr.pointer({ name: 'j', index: null });
       if (smallest !== i) {
@@ -73,7 +94,7 @@ export const selectionSort = defineAlgorithm({
       }
       arr.settle({ index: i });
     }
-    trace.step('sorted', 'The array is sorted.');
+    trace.step('sorted', { en: 'The array is sorted.', zh: '数组已排好序。' });
     arr
       .pointer({ name: 'i', index: null })
       .pointer({ name: 'smallest', index: null })

@@ -12,10 +12,12 @@ import { adjacency, CLOTHES, declareGraph, Graph, graphOf } from './graph.ts';
 
 export const dfs = defineAlgorithm({
   id: 'dfs',
-  title: 'Depth-first search',
+  title: { en: 'Depth-first search', zh: '深度优先搜索' },
   topic: 'graphs',
-  summary:
-    'Explores a graph as deep as it can before backing up, from every vertex not yet reached, recording discovery and finishing times.',
+  summary: {
+    en: 'Explores a graph as deep as it can before backing up, from every vertex not yet reached, recording discovery and finishing times.',
+    zh: '从每个还没到达的顶点出发，尽可能深入地探索图再回退，记录每个顶点的发现时间和完成时间。',
+  },
   input: z.strictObject({ graph: Graph }),
   main: 'graph',
   examples: [{ graph: CLOTHES }],
@@ -68,7 +70,7 @@ export const dfs = defineAlgorithm({
     const graph = trace.add('g', declareGraph(g, false));
     const calls = trace.add('calls', {
       kind: 'stack',
-      label: 'call stack',
+      label: trace.say({ en: 'call stack', zh: '调用栈' }),
       place: 'side',
       initial: [],
     });
@@ -78,9 +80,16 @@ export const dfs = defineAlgorithm({
     let time = 0;
     const visit = (u: string): void => {
       d.set(u, ++time);
-      trace.step('discover', `Discover ${u} at time ${time}.`, {
-        vars: { time },
-      });
+      trace.step(
+        'discover',
+        {
+          en: `Discover ${u} at time ${time}.`,
+          zh: `在时刻 ${time} 发现 ${u}。`,
+        },
+        {
+          vars: { time },
+        },
+      );
       calls.push({ element: { id: `call-${u}`, value: `visit ${u}` } });
       graph
         .visit({ node: u })
@@ -91,16 +100,22 @@ export const dfs = defineAlgorithm({
           trace.step(
             'seen',
             finished.has(v)
-              ? `${v} is finished already: skip it.`
-              : `${v} is on the current path: skip it.`,
+              ? {
+                  en: `${v} is finished already: skip it.`,
+                  zh: `${v} 已经完成：跳过。`,
+                }
+              : {
+                  en: `${v} is on the current path: skip it.`,
+                  zh: `${v} 在当前路径上：跳过。`,
+                },
           );
           graph.pointer({ name: 'u', node: u }).highlight({ edges: [edge] });
           continue;
         }
-        trace.step(
-          'tree-edge',
-          `${v} is new: ${u}–${v} is a tree edge, so go deeper.`,
-        );
+        trace.step('tree-edge', {
+          en: `${v} is new: ${u}–${v} is a tree edge, so go deeper.`,
+          zh: `${v} 是新顶点：${u}–${v} 是树边，继续深入。`,
+        });
         graph
           .pointer({ name: 'u', node: u })
           .highlight({ edges: [edge] })
@@ -108,9 +123,17 @@ export const dfs = defineAlgorithm({
         visit(v);
       }
       finished.add(u);
-      trace.step('finish', `${u} is finished at time ${++time}.`, {
-        vars: { time },
-      });
+      time += 1;
+      trace.step(
+        'finish',
+        {
+          en: `${u} is finished at time ${time}.`,
+          zh: `${u} 在时刻 ${time} 完成。`,
+        },
+        {
+          vars: { time },
+        },
+      );
       graph
         .pointer({ name: 'u', node: u })
         .settle({ node: u })
@@ -122,8 +145,14 @@ export const dfs = defineAlgorithm({
       trace.step(
         'root',
         time === 0
-          ? `Start a depth-first tree at ${u}.`
-          : `${u} is not reached yet: start a new depth-first tree there.`,
+          ? {
+              en: `Start a depth-first tree at ${u}.`,
+              zh: `从 ${u} 开始一棵深度优先树。`,
+            }
+          : {
+              en: `${u} is not reached yet: start a new depth-first tree there.`,
+              zh: `${u} 还没有到达：从它开始一棵新的深度优先树。`,
+            },
       );
       visit(u);
     }

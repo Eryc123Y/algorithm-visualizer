@@ -30,10 +30,19 @@ export function partitioner(
     trace.step(
       'random',
       k === r
-        ? `RANDOM(${p}, ${r}) draws ${k}: the pivot is ${a[r]}, already last.`
+        ? {
+            en: `RANDOM(${p}, ${r}) draws ${k}: the pivot is ${a[r]}, already last.`,
+            zh: `RANDOM(${p}, ${r}) 抽到 ${k}：主元是 ${a[r]}，已经在最后。`,
+          }
         : a[k] === a[r]
-          ? `RANDOM(${p}, ${r}) draws ${k}: a[${k}] equals a[${r}], so the pivot is ${a[r]} either way.`
-          : `RANDOM(${p}, ${r}) draws ${k}: swap ${a[k]} into a[${r}], to be the pivot.`,
+          ? {
+              en: `RANDOM(${p}, ${r}) draws ${k}: a[${k}] equals a[${r}], so the pivot is ${a[r]} either way.`,
+              zh: `RANDOM(${p}, ${r}) 抽到 ${k}：a[${k}] 等于 a[${r}]，所以主元总是 ${a[r]}。`,
+            }
+          : {
+              en: `RANDOM(${p}, ${r}) draws ${k}: swap ${a[k]} into a[${r}], to be the pivot.`,
+              zh: `RANDOM(${p}, ${r}) 抽到 ${k}：把 ${a[k]} 交换到 a[${r}]，作为主元。`,
+            },
       { vars: { p, r, k } },
     );
     calls.push(`call-${p}-${r}`, call);
@@ -49,7 +58,10 @@ export function partitioner(
     const x = a[r]!;
     trace.step(
       'pivot',
-      `Partition a[${p}..${r}] around the pivot ${x}, ${random === undefined ? 'its' : 'now its'} last value.`,
+      {
+        en: `Partition a[${p}..${r}] around the pivot ${x}, ${random === undefined ? 'its' : 'now its'} last value.`,
+        zh: `以主元 ${x} 划分 a[${p}..${r}]，它${random === undefined ? '是' : '现在是'}最后一个值。`,
+      },
       { vars: { p, r, x } },
     );
     if (random === undefined && push) calls.push(`call-${p}-${r}`, call);
@@ -60,8 +72,14 @@ export function partitioner(
       trace.step(
         'compare',
         small
-          ? `${a[j]} ≤ ${x}: it belongs on the left.`
-          : `${a[j]} > ${x}: it stays on the right.`,
+          ? {
+              en: `${a[j]} ≤ ${x}: it belongs on the left.`,
+              zh: `${a[j]} ≤ ${x}：它属于左边。`,
+            }
+          : {
+              en: `${a[j]} > ${x}: it stays on the right.`,
+              zh: `${a[j]} > ${x}：它留在右边。`,
+            },
         { vars: { i, j, x } },
       );
       arr.pointer({ name: 'j', index: j }).compare({ i: j, j: r });
@@ -70,8 +88,14 @@ export function partitioner(
       trace.step(
         'swap',
         i === j
-          ? `The left part grows to a[${p}..${i}]; ${a[j]} is already there.`
-          : `The left part grows to a[${p}..${i}]: swap ${a[i]} and ${a[j]}.`,
+          ? {
+              en: `The left part grows to a[${p}..${i}]; ${a[j]} is already there.`,
+              zh: `左边部分扩大为 a[${p}..${i}]；${a[j]} 已经在里面。`,
+            }
+          : {
+              en: `The left part grows to a[${p}..${i}]: swap ${a[i]} and ${a[j]}.`,
+              zh: `左边部分扩大为 a[${p}..${i}]：交换 ${a[i]} 和 ${a[j]}。`,
+            },
         { vars: { i, j, x } },
       );
       arr.pointer({ name: 'i', index: i });
@@ -83,7 +107,10 @@ export function partitioner(
     const q = i + 1;
     trace.step(
       'place',
-      `Put the pivot ${x} between the parts, at position ${q}: it is in place.`,
+      {
+        en: `Put the pivot ${x} between the parts, at position ${q}: it is in place.`,
+        zh: `把主元 ${x} 放在两部分之间，位置 ${q}：它已就位。`,
+      },
       { vars: { q } },
     );
     arr
