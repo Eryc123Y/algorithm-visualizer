@@ -97,6 +97,29 @@
   layout
 }
 
+// The language of a run and of the layout's own words (ADR 0045): a name
+// such as "zh" or "en", or `auto` for the document's `text.lang`, which
+// only content can read, inside `context`. The engine reads any Chinese
+// language as Chinese and every other as English.
+#let _lang(name, lang) = {
+  if lang == auto { return text.lang }
+  if type(lang) != str {
+    panic(name + ": `lang` takes a language such as \"zh\", not " + repr(type(lang)))
+  }
+  lang
+}
+
+// Content in a language: drawn in `context` when `lang` is `auto`, so it
+// reads the document's `text.lang` where it is placed.
+#let _in-lang(name, lang, draw) = if lang == auto {
+  context draw(text.lang)
+} else { draw(_lang(name, lang)) }
+
+// The language where no context can read `text.lang`, as in data, or in
+// slides, whose frameworks' `only` does not work inside `context`: `auto`
+// is English; pass `lang: text.lang` inside `context` instead.
+#let _data-lang(name, lang) = if lang == auto { "en" } else { _lang(name, lang) }
+
 // What the engine reported, as a box in place of the figure, or as a
 // compile error when `strict` is true. The box holds the diagnostics as
 // metadata labelled <algomotion-error>, so `query(<algomotion-error>)` lists them.
@@ -228,6 +251,11 @@
 ///   such as a queue or a call stack, go: "narrow" (the default here) puts
 ///   them below the main ones, for a column of notes; "wide" puts them
 ///   beside, for slides.
+/// - lang (auto, str): The language of an algorithm's narration and of the
+///   figure's own words, such as "(empty)": "zh" for Simplified Chinese,
+///   "en" for English. `auto`, the default, follows the document's
+///   `text.lang`, so `#set text(lang: "zh")` is enough; any language other
+///   than Chinese is English. A document's own text stays as written.
 /// - strict (bool): Stop compilation on an error, instead of showing it in
 ///   place of the figure.
 /// - width, height, fit, alt: As for `image`; `alt` defaults to the step's
@@ -239,23 +267,29 @@
   step: -1,
   theme: "light",
   layout: auto,
+  lang: auto,
   strict: false,
   width: auto,
   height: auto,
   fit: "contain",
   alt: auto,
 ) = {
-  let request = _source("algomotion", source, args)
-  let response = _render(request + (
+  // Arguments are checked here, outside any context, so a wrong one
+  // stops compilation wherever the figure is placed.
+  let request = _source("algomotion", source, args) + (
     step: _selector("algomotion", "step", step),
     theme: _theme("algomotion", theme),
     layout: _layout("algomotion", layout, "narrow"),
-  ))
-  if response.ok {
-    _image(response.figures.first(), width, height, fit, alt)
-  } else {
-    _failure("algomotion", response.diagnostics, strict)
+  )
+  let draw(language) = {
+    let response = _render(request + (lang: language))
+    if response.ok {
+      _image(response.figures.first(), width, height, fit, alt)
+    } else {
+      _failure("algomotion", response.diagnostics, strict)
+    }
   }
+  _in-lang("algomotion", lang, draw)
 }
 
 /// Figures of several steps, as an array of images. All figures of a
@@ -264,6 +298,9 @@
 /// - steps (auto, int, str, array): `auto` for every frame, or the
 ///   selectors of `algomotion`'s `step`; a section such as "insert-5" or a
 ///   range such as "2..5" names several frames.
+/// - lang (auto, str): As for `algomotion`, but an array of images has no
+///   context to read `text.lang` from, so `auto` is English here; write
+///   `context algomotion-series(.., lang: text.lang)` to follow the document.
 /// - theme, layout, strict, width, height, fit: As for `algomotion`.
 /// -> array
 #let algomotion-series(
@@ -272,6 +309,7 @@
   steps: auto,
   theme: "light",
   layout: auto,
+  lang: auto,
   strict: false,
   width: auto,
   height: auto,
@@ -282,6 +320,7 @@
     steps: _selectors("algomotion-series", steps),
     theme: _theme("algomotion-series", theme),
     layout: _layout("algomotion-series", layout, "narrow"),
+    lang: _data-lang("algomotion-series", lang),
   ))
   if response.ok {
     response.figures.map(f => _image(f, width, height, fit, auto))
@@ -294,7 +333,8 @@
 /// figures: ((frame:, selector:, width:, height:, narration:, svg:), ..))`,
 /// or `(ok: false, diagnostics: ((code:, path:, message:, hint:), ..))`.
 /// For captions, custom layouts and slides. `layout` is "narrow" by
-/// default, as for `algomotion`.
+/// default, as for `algomotion`; `lang` is English by default, as for
+/// `algomotion-series`.
 /// -> dictionary
 #let algomotion-figures(
   source,
@@ -302,12 +342,14 @@
   steps: auto,
   theme: "light",
   layout: auto,
+  lang: auto,
 ) = {
   let request = _source("algomotion-figures", source, args)
   _render(request + (
     steps: _selectors("algomotion-figures", steps),
     theme: _theme("algomotion-figures", theme),
     layout: _layout("algomotion-figures", layout, "narrow"),
+    lang: _data-lang("algomotion-figures", lang),
   ))
 }
 
@@ -332,6 +374,9 @@
 /// - fit (str): "contain", the default, keeps the figure's shape and makes
 ///   it as large as fits in the box; "cover" and "stretch" make it the box,
 ///   as `image` does.
+/// - lang (auto, str): As for `algomotion-series`: slide frameworks' `only`
+///   does not work inside `context`, so `auto` is English here; pass
+///   `lang: "zh"` for a deck in Chinese.
 /// - theme, strict: As for `algomotion`.
 /// -> content
 #let algomotion-slides(
@@ -342,6 +387,7 @@
   start: 1,
   theme: "light",
   layout: auto,
+  lang: auto,
   strict: false,
   width: auto,
   height: auto,
@@ -362,33 +408,37 @@
   _slide-side("width", width)
   _slide-side("height", height)
   let request = _source("algomotion-slides", source, args)
-  let response = _render(request + (
-    steps: _selectors("algomotion-slides", steps),
-    theme: _theme("algomotion-slides", theme),
-    layout: _layout("algomotion-slides", layout, "wide"),
-  ))
-  if not response.ok {
-    return _failure("algomotion-slides", response.diagnostics, strict)
-  }
-  let figures = response.figures
-  if figures.len() == 1 {
-    return _slide-image(figures.first(), width, height, fit, auto)
-  }
-  // Each frame sizes itself with `layout` inside `only`, where touying
-  // still finds `only`; a layout placed in the box sees the same region as
-  // the hidden copy, so every frame gets the same size.
-  let last = figures.len() - 1
-  box({
-    hide(_slide-image(figures.first(), width, height, fit, none))
-    for (k, figure) in figures.enumerate() {
-      let subslides = if k == last { str(start + k) + "-" } else { start + k }
-      place(top + left, only(subslides, _slide-image(
-        figure,
-        width,
-        height,
-        fit,
-        auto,
-      )))
+  let draw(language) = {
+    let response = _render(request + (
+      steps: _selectors("algomotion-slides", steps),
+      theme: _theme("algomotion-slides", theme),
+      layout: _layout("algomotion-slides", layout, "wide"),
+      lang: language,
+    ))
+    if not response.ok {
+      return _failure("algomotion-slides", response.diagnostics, strict)
     }
-  })
+    let figures = response.figures
+    if figures.len() == 1 {
+      return _slide-image(figures.first(), width, height, fit, auto)
+    }
+    // Each frame sizes itself with `layout` inside `only`, where touying
+    // still finds `only`; a layout placed in the box sees the same region as
+    // the hidden copy, so every frame gets the same size.
+    let last = figures.len() - 1
+    box({
+      hide(_slide-image(figures.first(), width, height, fit, none))
+      for (k, figure) in figures.enumerate() {
+        let subslides = if k == last { str(start + k) + "-" } else { start + k }
+        place(top + left, only(subslides, _slide-image(
+          figure,
+          width,
+          height,
+          fit,
+          auto,
+        )))
+      }
+    })
+  }
+  draw(_data-lang("algomotion-slides", lang))
 }

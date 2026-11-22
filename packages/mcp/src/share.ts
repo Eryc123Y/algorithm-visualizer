@@ -5,7 +5,12 @@
  * `ALGOMOTION_SHARE_URL` or the `shareUrl` option.
  */
 import { writeInput } from '@algomotion/recipes';
-import { checkShareBase, shareLink, type ShareContent } from '@algomotion/spec';
+import {
+  checkShareBase,
+  shareLink,
+  type Locale,
+  type ShareContent,
+} from '@algomotion/spec';
 
 import { readDocument, type FrameSelector } from './document.ts';
 import type { SourceArgs } from './source.ts';
@@ -34,12 +39,15 @@ export function recipeShare(
   algorithm: string,
   input: unknown,
   frame?: FrameSelector,
+  lang?: Locale,
 ): ShareContent {
   const text = writeInput(input);
   return {
     algorithm,
     ...(text === undefined ? {} : { input: text }),
     ...(frame === undefined ? {} : { frame }),
+    // A run asked for in a language opens in it (ADR 0045).
+    ...(lang === undefined ? {} : { lang }),
   };
 }
 
@@ -49,12 +57,15 @@ export function sourceShare(
   frame?: FrameSelector,
 ): ShareContent | undefined {
   if (source.recipe !== undefined)
-    return recipeShare(source.recipe, source.input, frame);
+    return recipeShare(source.recipe, source.input, frame, source.locale);
   const document = readDocument(source.document);
   if (!document.ok) return undefined;
   return {
     document: document.value,
     ...(frame === undefined ? {} : { frame }),
+    // The language asked for holds for a document too: the share page then
+    // shows its chrome and the layout's words in it (ADR 0045).
+    ...(source.locale === undefined ? {} : { lang: source.locale }),
   };
 }
 

@@ -14,6 +14,8 @@ An MCP server that lets models write, check and render algomotion visualizations
 | `algomotion_run_recipe`   | Builds a recipe's document from its `id` and `input`                                              |
 | `algomotion_show`         | Shows a valid document to the user as an interactive player, in clients that display MCP Apps     |
 
+`algomotion_run_recipe`, `algomotion_show`, `algomotion_render` and `algomotion_inspect` take an optional `locale`, `"en"` (the default) or `"zh"`: a recipe's run is then narrated in Simplified Chinese, and the player and figures draw their own words in Chinese ([ADR 0045](../../docs/adr/0045-chinese-in-the-product.md)). The server's instructions tell models to pass `"zh"` when the user writes Chinese. On the command line, `--lang zh` does the same for `run`, `render` and `export`.
+
 Tools that take frames accept a frame number (negative counts from the end) or a selector: a step name such as `relax#2`, a step in a section such as `insert-5/relax`, a section such as `insert-5`, or a range `a..b` ([ADR 0020](../../docs/adr/0020-step-names-and-sections.md)). `algomotion_render` and `algomotion_show` take one frame; `algomotion_inspect` reports each frame's step name, section and selector.
 
 ## Recipes

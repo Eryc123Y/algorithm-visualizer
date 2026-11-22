@@ -262,3 +262,40 @@ describe('the package', () => {
     expect(read('../package/OFL.txt')).toBe(read('../../fonts/OFL.txt'));
   });
 });
+
+describe('the engine in a language (ADR 0045)', () => {
+  const CJK = /[\u{4e00}-\u{9fff}]/u;
+  const narrationOf = (response: Response) =>
+    response.ok ? (response.figures[0]?.narration ?? '') : '';
+
+  it('runs an algorithm in the language Typst names, English otherwise', () => {
+    const engine = createEngine();
+    const request = { algorithm: 'dijkstra', input: 'A-B 4, B-C 1', step: 1 };
+    expect(narrationOf(engine.render({ ...request, lang: 'zh' }))).toMatch(CJK);
+    // Typst's text.lang is any language; those we lack are English.
+    for (const lang of [undefined, 'en', 'de'])
+      expect(
+        narrationOf(
+          engine.render(lang === undefined ? request : { ...request, lang }),
+        ),
+      ).not.toMatch(CJK);
+  });
+
+  it('keeps each language’s figures apart in its cache', () => {
+    const engine = createEngine();
+    const request = { algorithm: 'dijkstra', input: 'A-B 4, B-C 1', step: 1 };
+    engine.render({ ...request, lang: 'zh' });
+    expect(narrationOf(engine.render(request))).not.toMatch(CJK);
+    expect(engine.cached).toBe(2);
+  });
+
+  it('draws the layout’s own words in the language', () => {
+    const response = createEngine().render({
+      algorithm: 'dijkstra',
+      input: 'A-B 4, B-C 1',
+      step: 0,
+      lang: 'zh',
+    });
+    expect(response.ok && response.figures[0]!.svg).toContain('（空）');
+  });
+});
