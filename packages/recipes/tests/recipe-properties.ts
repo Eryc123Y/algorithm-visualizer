@@ -54,9 +54,9 @@ export function load(doc: VisualizationInput): Trace {
  * Every frame's scene is well formed and as large as frame 0's, in both
  * layouts (ADR 0029).
  */
-function checkLayout(trace: Trace): void {
+function checkLayout(trace: Trace, locale: Locale = 'en'): void {
   for (const figure of ['wide', 'narrow'] as const) {
-    const layout = layoutTrace(trace, { layout: figure });
+    const layout = layoutTrace(trace, { layout: figure, locale });
     const first = layout.sceneAt(0);
     for (let i = 0; i <= trace.length; i++) {
       const scene = i === 0 ? first : layout.sceneAt(i);
@@ -138,11 +138,10 @@ function checkChinese(english: Trace, chinese: Trace): void {
     trace.visualization.steps.map((step) => step.meta?.id);
   expect(ids(chinese)).toEqual(ids(english));
   chinese.visualization.steps.forEach((step, k) => {
-    const narration = step.meta?.narration;
-    if (narration !== undefined)
-      expect(narration, `step ${k + 1}`).toMatch(CJK);
+    expect(step.meta?.narration, `step ${k + 1}`).toMatch(CJK);
   });
-  checkLayout(chinese);
+  // The layout's own words, such as 栈顶 and （空）, in Chinese too.
+  checkLayout(chinese, 'zh');
 }
 
 /**
@@ -175,7 +174,7 @@ export function recipe<T>(
     it('ends with the right answer', property(semantics), TIMEOUT);
     it(
       'lays out every frame inside one fixed-size scene',
-      property(checkLayout),
+      property((trace) => checkLayout(trace)),
       TIMEOUT,
     );
     it('renders the last frame to clean SVG', property(checkRender), TIMEOUT);
