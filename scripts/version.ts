@@ -16,6 +16,7 @@ import { parseArgs } from 'node:util';
 
 import {
   currentVersions,
+  isVersion,
   rewrite,
   trackedFiles,
   type Product,
@@ -23,7 +24,6 @@ import {
 } from './versions.ts';
 
 const ROOT = fileURLToPath(new URL('../', import.meta.url));
-const SEMVER = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.]+)?$/;
 
 const { values } = parseArgs({
   options: {
@@ -39,8 +39,8 @@ if (Object.keys(next).length === 0) {
   process.stderr.write('Give at least one of --npm, --typst and --latex.\n');
   process.exit(2);
 }
-for (const [product, version] of Object.entries(next))
-  if (!SEMVER.test(version) || (product !== 'npm' && version.includes('-'))) {
+for (const [product, version] of Object.entries(next) as [Product, string][])
+  if (!isVersion(product, version)) {
     // Typst Universe and CTAN take plain versions only.
     process.stderr.write(`Not a version for ${product}: ${version}\n`);
     process.exit(2);

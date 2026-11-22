@@ -10,6 +10,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   currentVersions,
+  isVersion,
   rewrite,
   trackedFiles,
   versionsIn,
@@ -42,6 +43,9 @@ describe('the versions the repository writes', () => {
     expect(files('npm')).toContain('packages/elements/package.json');
     expect(files('typst')).toContain('packages/typst/package/typst.toml');
     expect(files('typst')).toContain('apps/site/src/docs/snippets.ts');
+    // The folder a manual install puts the package in, in the guide.
+    expect(files('typst')).toContain('apps/site/src/docs/guides/typst.ts');
+    expect(files('typst')).toContain('packages/typst/package/README.md');
     expect(files('latex')).toContain('packages/latex/package/algomotion.sty');
   });
 });
@@ -86,8 +90,42 @@ describe('rewrite', () => {
     );
   });
 
+  it('moves the Typst package’s folder, written with or without local/', () => {
+    const text =
+      'Link it as `algomotion/0.1.0`, under local/algomotion/0.1.0, and import @local/algomotion:0.1.0.';
+    expect(rewrite('README.md', text, { typst: '1.0.0' }, '2026-12-01')).toBe(
+      'Link it as `algomotion/1.0.0`, under local/algomotion/1.0.0, and import @local/algomotion:1.0.0.',
+    );
+  });
+
   it('leaves a document’s protocol version alone', () => {
     const doc = '{ "version": "1.0", "structures": {} }';
     expect(rewrite('x.json', doc, { npm: '2.0.0' }, '2026-12-01')).toBe(doc);
+  });
+});
+
+describe('isVersion', () => {
+  it('takes what npm, Typst Universe and CTAN take', () => {
+    for (const v of ['1.0.0', '1.0.0-alpha.2', '2.10.3-rc.1', '0.1.0'])
+      expect(isVersion('npm', v), v).toBe(true);
+    for (const v of ['1.0.0', '0.2.0'])
+      expect(isVersion('typst', v), v).toBe(true);
+    expect(isVersion('latex', '1.0.0')).toBe(true);
+  });
+
+  it('refuses what they would not', () => {
+    for (const v of [
+      '1.0',
+      '01.0.0',
+      '1.0.0-alpha..2',
+      '1.0.0-',
+      '1.0.0-01',
+      '1.0.0+build',
+      'v1.0.0',
+    ])
+      expect(isVersion('npm', v), v).toBe(false);
+    // Typst Universe and CTAN take plain versions only.
+    expect(isVersion('typst', '1.0.0-alpha.1')).toBe(false);
+    expect(isVersion('latex', '1.0.0-rc.1')).toBe(false);
   });
 });

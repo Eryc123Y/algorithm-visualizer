@@ -50,10 +50,8 @@ export const PLACES: readonly Place[] = [
     files: /typst\.toml$/,
   },
   { product: 'typst', pattern: new RegExp(`algomotion:${VERSION}`, 'g') },
-  {
-    product: 'typst',
-    pattern: new RegExp(String.raw`local/algomotion/${VERSION}`, 'g'),
-  },
+  // The package's folder, under local/ or as the guides name it alone.
+  { product: 'typst', pattern: new RegExp(`algomotion/${VERSION}`, 'g') },
   { product: 'typst', pattern: new RegExp(`algomotion-typst-${VERSION}`, 'g') },
   // The LaTeX package: its header, its cache key and its archive.
   {
@@ -72,6 +70,22 @@ export const PLACES: readonly Place[] = [
   },
   { product: 'latex', pattern: new RegExp(`algomotion-latex-${VERSION}`, 'g') },
 ];
+
+/** A version number without leading zeros, as SemVer has it. */
+const NUMBER = String.raw`(?:0|[1-9]\d*)`;
+/** One identifier of a prerelease: a number, or letters and digits. */
+const IDENTIFIER = String.raw`(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*)`;
+const SEMVER = new RegExp(
+  `^${NUMBER}\\.${NUMBER}\\.${NUMBER}(?:-${IDENTIFIER}(?:\\.${IDENTIFIER})*)?$`,
+);
+
+/**
+ * Whether `version` can be published for `product`: a SemVer version
+ * without build metadata for npm, and a plain one, without a prerelease,
+ * for Typst Universe and CTAN.
+ */
+export const isVersion = (product: Product, version: string): boolean =>
+  SEMVER.test(version) && (product === 'npm' || !version.includes('-'));
 
 /**
  * Files that record history rather than say the current version (the
