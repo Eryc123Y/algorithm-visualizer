@@ -363,15 +363,15 @@ describe('linked-list', () => {
 recipe(
   'stack',
   stackRuns,
-  ({ size, keys, calls }) =>
-    runOk('stack', { from: { size, keys }, ops: calls }).document,
+  ({ size, keys, calls }, locale) =>
+    runOk('stack', { from: { size, keys }, ops: calls }, locale).document,
   (trace, input) => checkStack(trace, undefined, input),
 );
 recipe(
   'queue',
   queueRuns,
-  ({ size, head, keys, calls }) =>
-    runOk('queue', { from: { size, head, keys }, ops: calls }).document,
+  ({ size, head, keys, calls }, locale) =>
+    runOk('queue', { from: { size, head, keys }, ops: calls }, locale).document,
   (trace, { size, head, keys, calls }) =>
     expect(cells(trace, 'Q')).toEqual(
       queueReference(size, head, keys, calls).cells,
@@ -380,8 +380,8 @@ recipe(
 recipe(
   'linked-list',
   listRuns,
-  ({ keys, calls }) =>
-    runOk('linked-list', { from: { keys }, ops: calls }).document,
+  ({ keys, calls }, locale) =>
+    runOk('linked-list', { from: { keys }, ops: calls }, locale).document,
   (trace, { keys, calls }) =>
     expect(linked(trace)).toEqual(listReference(keys, calls).keys),
 );

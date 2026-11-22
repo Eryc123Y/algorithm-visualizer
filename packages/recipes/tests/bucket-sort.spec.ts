@@ -122,6 +122,6 @@ const inputs = fc.oneof(
 recipe(
   'bucket-sort',
   inputs,
-  (values) => runOk('bucket-sort', { values }).document,
+  (values, locale) => runOk('bucket-sort', { values }, locale).document,
   (trace, values) => check(trace.visualization, values),
 );

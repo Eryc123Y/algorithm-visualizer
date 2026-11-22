@@ -11,7 +11,7 @@ import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 
 import type { GraphState, Trace, TreeState } from '@algomotion/core';
-import type { VisualizationInput } from '@algomotion/spec';
+import type { Locale, VisualizationInput } from '@algomotion/spec';
 
 import {
   runAlgorithm,
@@ -115,8 +115,8 @@ function parents(tree: TreeState): Map<string, string> {
 // Sorting
 
 /** The document of a sorting module's run. */
-const sorted = (id: string) => (values: readonly number[]) =>
-  runOk(id, { values }).document;
+const sorted = (id: string) => (values: readonly number[], locale: Locale) =>
+  runOk(id, { values }, locale).document;
 
 function checkSorted(trace: Trace, input: readonly number[], name = 'a'): void {
   const a = stateOf(trace, name, 'array');
@@ -215,7 +215,7 @@ const searchInput = fc
 recipe(
   'binary-search',
   searchInput,
-  (input) => runOk('binary-search', input).document,
+  (input, locale) => runOk('binary-search', input, locale).document,
   (trace, { values, target }) => {
     const a = stateOf(trace, 'a', 'array');
     const settled = a.marks.settled;
@@ -259,7 +259,7 @@ describe('binary-search input checks', () => {
 recipe(
   'reverse-linked-list',
   numberArrays(12).filter((a) => a.length > 0),
-  (values) => runOk('reverse-linked-list', { values }).document,
+  (values, locale) => runOk('reverse-linked-list', { values }, locale).document,
   (trace, values) => {
     const list = stateOf(trace, 'list', 'linkedList');
     const byId = new Map(list.data.map((n) => [n.id, n]));
@@ -288,7 +288,7 @@ recipe(
       list,
       requests: picks.map((p) => list[p % list.length]!),
     })),
-  (input) => runOk('move-to-front', input).document,
+  (input, locale) => runOk('move-to-front', input, locale).document,
   (trace, { list, requests }) => {
     // Each request ends at the front, so the last requests, most recent
     // first, lead the list, and the keys never requested keep their order.
@@ -311,7 +311,7 @@ function isBalanced(text: string): boolean {
 recipe(
   'balanced-brackets',
   strings('()[]{}a ', 32).filter((t) => t.length >= 1 && t.length <= 32),
-  (text) => runOk('balanced-brackets', { text }).document,
+  (text, locale) => runOk('balanced-brackets', { text }, locale).document,
   (trace, text) => {
     const last = trace.visualization.steps.at(-1)?.meta?.narration ?? '';
     const balanced = isBalanced(text);
@@ -345,7 +345,7 @@ const avlRuns = fc
 recipe(
   'avl',
   avlRuns,
-  (input) => runOk('avl', input).document,
+  (input, locale) => runOk('avl', input, locale).document,
   (trace, { from, ops }) => {
     const tree = stateOf(trace, 'avl', 'tree');
     const all = [...from, ...ops.map((o) => o.key)];
@@ -380,7 +380,7 @@ const redBlackRuns = fc
 recipe(
   'red-black-tree',
   redBlackRuns,
-  (input) => runOk('red-black-tree', input).document,
+  (input, locale) => runOk('red-black-tree', input, locale).document,
   (trace, { from, ops }) => {
     const ref = new RefTree<number>((a, b) => a < b);
     for (const key of from) ref.insert(key);
@@ -436,7 +436,7 @@ recipe(
         o.op === 'delete' && o.key === from[0] ? { ...o, key: o.key + 101 } : o,
       ),
     })),
-  (input) => runOk('order-statistic-tree', input).document,
+  (input, locale) => runOk('order-statistic-tree', input, locale).document,
   (trace, { from, ops }) => {
     const keys = new Set(from);
     for (const o of ops)
@@ -464,7 +464,7 @@ recipe(
       ),
     )
     .map(([from, ops]) => ({ from, ops })),
-  (input) => runOk('interval-tree', input).document,
+  (input, locale) => runOk('interval-tree', input, locale).document,
   (trace, { from, ops }) => {
     const keys = new Map(from.map((i) => [i.join(), i]));
     for (const { op, interval } of ops)
@@ -492,7 +492,7 @@ recipe(
       { minLength: 1, maxLength: 8 },
     ),
   }),
-  (input) => runOk('b-tree', input).document,
+  (input, locale) => runOk('b-tree', input, locale).document,
   (trace, { from, ops }) => {
     const keys = new Set(from.keys);
     for (const { op, key } of ops)
@@ -549,7 +549,7 @@ recipe(
         ops: ops.length > 0 ? ops : [{ op: 'insert', key: 100 }],
       };
     }),
-  (input) => runOk('fibonacci-heap', input).document,
+  (input, locale) => runOk('fibonacci-heap', input, locale).document,
   (trace, { from, ops }) => {
     const keys = new Set(from);
     for (const o of ops)
@@ -578,7 +578,7 @@ recipe(
     .map(([chars, freqs]) => ({
       frequencies: chars.map((c, k): [string, number] => [c, freqs[k]!]),
     })),
-  (input) => runOk('huffman', input).document,
+  (input, locale) => runOk('huffman', input, locale).document,
   (trace, { frequencies }) => {
     const codes = stateOf(trace, 'codes', 'table').data.map((row) => row[1]);
     expect(codes.every((c) => typeof c === 'string' && c.length > 0)).toBe(
@@ -648,7 +648,8 @@ for (const order of ['preorder', 'inorder', 'postorder'] as const)
   recipe(
     `${order}-tree-walk`,
     levelOrders,
-    (levelOrder) => runOk(`${order}-tree-walk`, { levelOrder }).document,
+    (levelOrder, locale) =>
+      runOk(`${order}-tree-walk`, { levelOrder }, locale).document,
     (trace, levelOrder) => {
       const expected = traverse(levelOrder, order);
       expect(valuesOf(trace, 'out')).toEqual(expected);
@@ -695,7 +696,7 @@ const trieRuns = fc
 recipe(
   'trie',
   trieRuns,
-  (input) => runOk('trie', input).document,
+  (input, locale) => runOk('trie', input, locale).document,
   (trace, { from, ops }) => {
     const words = new Set(from);
     for (const { op, word } of ops) if (op === 'insert') words.add(word);
@@ -756,7 +757,7 @@ const disjointRuns = fc.integer({ min: 1, max: 16 }).chain((size) =>
 recipe(
   'disjoint-set',
   disjointRuns,
-  (input) => runOk('disjoint-set', input).document,
+  (input, locale) => runOk('disjoint-set', input, locale).document,
   (trace, { from: { size, unions }, ops }) => {
     const forest = stateOf(trace, 'sets', 'tree');
     const parent = parents(forest);
@@ -840,7 +841,7 @@ const hashRuns = (maxKeys: (size: number) => number) =>
 recipe(
   'hash-chaining',
   hashRuns(() => 24),
-  (input) => runOk('hash-chaining', input).document,
+  (input, locale) => runOk('hash-chaining', input, locale).document,
   (trace, { from: { size, keys }, ops }) => {
     const chains: number[][] = Array.from({ length: size }, () => []);
     for (const k of keys) chains[mod(k, size)]!.unshift(k);
@@ -854,7 +855,7 @@ recipe(
 recipe(
   'linear-probing',
   hashRuns((size) => size),
-  (input) => runOk('linear-probing', input).document,
+  (input, locale) => runOk('linear-probing', input, locale).document,
   (trace, { from: { size, keys }, ops }) => {
     const slots = Array<number | string>(size).fill('');
     const insert = (key: number) => {
@@ -944,7 +945,7 @@ const stringPairs = fc
 recipe(
   'lcs',
   stringPairs,
-  ([first, second]) => runOk('lcs', { first, second }).document,
+  ([first, second], locale) => runOk('lcs', { first, second }, locale).document,
   (trace, [first, second]) => {
     const [a, b] = [[...first], [...second]];
     const table = stateOf(trace, 'c', 'table');
@@ -966,7 +967,8 @@ recipe(
 recipe(
   'edit-distance',
   stringPairs,
-  ([first, second]) => runOk('edit-distance', { first, second }).document,
+  ([first, second], locale) =>
+    runOk('edit-distance', { first, second }, locale).document,
   (trace, [first, second]) => {
     const [a, b] = [[...first], [...second]];
     const table = stateOf(trace, 'D', 'table');
@@ -1020,7 +1022,8 @@ function bestValue(items: readonly KnapsackItem[], capacity: number): number {
 recipe(
   'knapsack',
   knapsackInput,
-  ([items, capacity]) => runOk('knapsack', { items, capacity }).document,
+  ([items, capacity], locale) =>
+    runOk('knapsack', { items, capacity }, locale).document,
   (trace, [items, capacity]) => {
     const table = stateOf(trace, 'K', 'table');
     const best = bestValue(items, capacity);
@@ -1267,7 +1270,7 @@ const steps = (trace: Trace, id: string) =>
 recipe(
   'bfs',
   withStart(graphs(nonNegative, { minNodes: 1 })),
-  ([graph, source]) => runOk('bfs', { graph, source }).document,
+  ([graph, source], locale) => runOk('bfs', { graph, source }, locale).document,
   (trace, [g, start]) => {
     const state = stateOf(trace, 'g', 'graph');
     const hops = shortest(
@@ -1293,7 +1296,7 @@ recipe(
 recipe(
   'dfs',
   graphs(nonNegative, { minNodes: 1 }),
-  (graph) => runOk('dfs', { graph }).document,
+  (graph, locale) => runOk('dfs', { graph }, locale).document,
   (trace, g) => {
     const state = stateOf(trace, 'g', 'graph');
     const times = Object.entries(state.marks.notes).map(([v, t]) => {
@@ -1329,7 +1332,8 @@ recipe(
 recipe(
   'dijkstra',
   withStart(graphs(nonNegative, { minNodes: 1 })),
-  ([graph, source]) => runOk('dijkstra', { graph, source }).document,
+  ([graph, source], locale) =>
+    runOk('dijkstra', { graph, source }, locale).document,
   (trace, [g, start]) => {
     const state = stateOf(trace, 'g', 'graph');
     const { d } = shortest(g, start);
@@ -1385,7 +1389,8 @@ describe('dijkstra input checks', () => {
 recipe(
   'bellman-ford',
   withStart(graphs(anyWeight, { minNodes: 1 })),
-  ([graph, source]) => runOk('bellman-ford', { graph, source }).document,
+  ([graph, source], locale) =>
+    runOk('bellman-ford', { graph, source }, locale).document,
   (trace, [g, start]) => {
     const state = stateOf(trace, 'g', 'graph');
     const { d, negativeCycle } = shortest(g, start, true);
@@ -1423,7 +1428,7 @@ const componentCount = (g: GraphInput) =>
 recipe(
   'prim',
   withStart(graphs(anyWeight, { minNodes: 1 })),
-  ([graph, root]) => runOk('prim', { graph, root }).document,
+  ([graph, root], locale) => runOk('prim', { graph, root }, locale).document,
   (trace, g) => {
     const graph = g[0];
     const state = stateOf(trace, 'g', 'graph');
@@ -1439,7 +1444,7 @@ recipe(
 recipe(
   'kruskal',
   graphs(anyWeight, { minNodes: 1 }),
-  (graph) => runOk('kruskal', { graph }).document,
+  (graph, locale) => runOk('kruskal', { graph }, locale).document,
   (trace, g) => {
     const state = stateOf(trace, 'g', 'graph');
     const tree = selected(state);
@@ -1464,7 +1469,7 @@ recipe(
 recipe(
   'topological-sort',
   graphs(nonNegative, { minNodes: 1, dag: true }),
-  (graph) => runOk('topological-sort', { graph }).document,
+  (graph, locale) => runOk('topological-sort', { graph }, locale).document,
   (trace, g) => {
     const order = valuesOf(trace, 'order').map(String);
     expect([...order].sort()).toEqual([...g.nodes].sort());
@@ -1478,7 +1483,8 @@ recipe(
 recipe(
   'dag-shortest-paths',
   withStart(graphs(anyWeight, { minNodes: 1, dag: true })),
-  ([graph, source]) => runOk('dag-shortest-paths', { graph, source }).document,
+  ([graph, source], locale) =>
+    runOk('dag-shortest-paths', { graph, source }, locale).document,
   (trace, [g, s]) => {
     // Each reachable vertex has its turn once, and its distance is
     // annotated; the source's is 0.
@@ -1490,7 +1496,8 @@ recipe(
 recipe(
   'strongly-connected-components',
   graphs(nonNegative, { minNodes: 1 }),
-  (graph) => runOk('strongly-connected-components', { graph }).document,
+  (graph, locale) =>
+    runOk('strongly-connected-components', { graph }, locale).document,
   (trace, g) => {
     // Every vertex is in exactly one listed component.
     const listed = valuesOf(trace, 'components').map(String);
@@ -1529,7 +1536,7 @@ recipe(
       });
       return { directed: true, nodes, edges };
     }),
-  (graph) => runOk('johnson', { graph }).document,
+  (graph, locale) => runOk('johnson', { graph }, locale).document,
   (trace, g) => {
     // Either a negative cycle is reported, or every row of D is filled
     // with 0 on its diagonal.
@@ -1546,7 +1553,7 @@ recipe(
 recipe(
   'transitive-closure',
   graphs(nonNegative, { minNodes: 1 }),
-  (graph) => runOk('transitive-closure', { graph }).document,
+  (graph, locale) => runOk('transitive-closure', { graph }, locale).document,
   (trace, g) => {
     // The diagonal is 1, and every edge's entry is 1.
     const t = stateOf(trace, 't', 'table').data;
@@ -1562,7 +1569,7 @@ recipe(
     fc.option(fc.integer({ min: 0, max: 20 }), { nil: undefined, freq: 4 }),
     { minNodes: 2 },
   ),
-  (graph) => runOk('edmonds-karp', { graph }).document,
+  (graph, locale) => runOk('edmonds-karp', { graph }, locale).document,
   (trace) => {
     // Every edge ends with a flow within its capacity.
     for (const e of stateOf(trace, 'g', 'graph').data.edges) {
@@ -1598,7 +1605,7 @@ recipe(
       );
       return { nodes, edges };
     }),
-  (graph) => runOk('bipartite-matching', { graph }).document,
+  (graph, locale) => runOk('bipartite-matching', { graph }, locale).document,
   (trace) => {
     // The marked edges share no vertex.
     const g = stateOf(trace, 'g', 'graph');
@@ -1635,7 +1642,7 @@ recipe(
       );
       return { nodes, edges };
     }),
-  (graph) => runOk('hopcroft-karp', { graph }).document,
+  (graph, locale) => runOk('hopcroft-karp', { graph }, locale).document,
   (trace) => {
     // The marked edges share no vertex, and no note is left at the end.
     const g = stateOf(trace, 'g', 'graph');
@@ -1663,7 +1670,7 @@ recipe(
         .map((ls) => rs.map((r, k): [string, string[]] => [r, ls[k]!])),
     });
   }),
-  (input) => runOk('gale-shapley', input).document,
+  (input, locale) => runOk('gale-shapley', input, locale).document,
   (trace, input) => {
     // Everyone ends engaged, once, and only engagements are drawn.
     const g = stateOf(trace, 'g', 'graph');
@@ -1686,7 +1693,7 @@ recipe(
       { minLength: n, maxLength: n },
     ),
   ),
-  (weights) => runOk('hungarian', { weights }).document,
+  (weights, locale) => runOk('hungarian', { weights }, locale).document,
   (trace, weights) => {
     // A perfect matching, weighing as much as the labels add up to.
     const g = stateOf(trace, 'g', 'graph');
@@ -1742,7 +1749,7 @@ describe('topological-sort input checks', () => {
 recipe(
   'floyd-warshall',
   graphs(anyWeight, { minNodes: 1 }),
-  (graph) => runOk('floyd-warshall', { graph }).document,
+  (graph, locale) => runOk('floyd-warshall', { graph }, locale).document,
   (trace, g) => {
     const table = stateOf(trace, 'dist', 'table');
     const n = g.nodes.length;
@@ -1969,7 +1976,7 @@ for (const id of [
   recipe(
     id,
     matchInput,
-    (input) => runOk(id, input).document,
+    (input, locale) => runOk(id, input, locale).document,
     (trace, { text, pattern }) => {
       const want: number[] = [];
       for (let s = 0; s + pattern.length <= text.length; s++)
@@ -2001,7 +2008,7 @@ for (const id of ['graham-scan', 'jarvis-march'])
   recipe(
     id,
     gridPoints(3, 24),
-    (points) => runOk(id, { points }).document,
+    (points, locale) => runOk(id, { points }, locale).document,
     (trace) => {
       const P = stateOf(trace, 'P', 'plane');
       // As many hull edges chosen as hull vertices settled.
@@ -2012,7 +2019,7 @@ for (const id of ['graham-scan', 'jarvis-march'])
 recipe(
   'closest-pair',
   gridPoints(2, 16),
-  (points) => runOk('closest-pair', { points }).document,
+  (points, locale) => runOk('closest-pair', { points }, locale).document,
   (trace) => {
     const P = stateOf(trace, 'P', 'plane');
     expect(P.marks.selected).toHaveLength(1);
@@ -2040,7 +2047,8 @@ recipe(
       selector: ([a, b]) => [a.join(), b.join()].sort().join(' '),
     },
   ),
-  (segments) => runOk('any-segments-intersect', { segments }).document,
+  (segments, locale) =>
+    runOk('any-segments-intersect', { segments }, locale).document,
   (trace) => {
     const P = stateOf(trace, 'P', 'plane');
     // Either two segments are chosen, as the pair found, or none.
@@ -2060,7 +2068,7 @@ recipe(
       { minLength: n, maxLength: n },
     ),
   ),
-  (a) => runOk('lup-decomposition', { a }).document,
+  (a, locale) => runOk('lup-decomposition', { a }, locale).document,
   (trace, a) => {
     // π stays a permutation of the rows.
     const pi = stateOf(trace, 'pi', 'table').data[0]!.map(Number);
@@ -2079,7 +2087,7 @@ recipe(
       maxLength: n,
     }),
   ),
-  (coefficients) => runOk('fft', { coefficients }).document,
+  (coefficients, locale) => runOk('fft', { coefficients }, locale).document,
   (trace, coefficients) => {
     // y_0 is the sum of the coefficients, a real number.
     const y0 = stateOf(trace, 'T', 'table').data[0]![1];
@@ -2097,7 +2105,7 @@ const euclidPairs = fc
 recipe(
   'euclid',
   euclidPairs,
-  (input) => runOk('euclid', input).document,
+  (input, locale) => runOk('euclid', input, locale).document,
   (trace, { a, b }) => {
     // The last call's a divides both operands.
     const rows = stateOf(trace, 'calls', 'table').data;
@@ -2110,7 +2118,7 @@ recipe(
 recipe(
   'extended-euclid',
   euclidPairs,
-  (input) => runOk('extended-euclid', input).document,
+  (input, locale) => runOk('extended-euclid', input, locale).document,
   (trace, { a, b }) => {
     // The first row holds d, x and y with d = ax + by.
     const [, , , d, x, y] = stateOf(trace, 'calls', 'table').data[0]!.map(
@@ -2128,7 +2136,7 @@ recipe(
     b: fc.integer({ min: 0, max: 2 ** 31 - 1 }),
     n: fc.integer({ min: 1, max: 1_000_000_000 }),
   }),
-  (input) => runOk('modular-exponentiation', input).document,
+  (input, locale) => runOk('modular-exponentiation', input, locale).document,
   (trace, { b, n }) => {
     // The last column has read all of b, and every d is below n.
     const [, c, d] = stateOf(trace, 'bits', 'table').data;
@@ -2145,7 +2153,7 @@ recipe(
     minLength: 1,
     maxLength: 16,
   }),
-  (text) => runOk('suffix-array', { text }).document,
+  (text, locale) => runOk('suffix-array', { text }, locale).document,
   (trace, text) => {
     // The suffix column is in increasing order.
     const suffixes = stateOf(trace, 'S', 'table').data.map((r) => String(r[1]));
@@ -2158,7 +2166,7 @@ recipe(
 recipe(
   'approx-vertex-cover',
   graphs(nonNegative, { minNodes: 1 }),
-  (graph) => runOk('approx-vertex-cover', { graph }).document,
+  (graph, locale) => runOk('approx-vertex-cover', { graph }, locale).document,
   (trace, g) => {
     // Every edge has an end in the cover, group 0.
     const groups = stateOf(trace, 'g', 'graph').marks.groups;
@@ -2174,7 +2182,7 @@ recipe(
     fc.tuple(fc.integer({ min: -9, max: 9 }), fc.integer({ min: -9, max: 9 })),
     { minLength: 2, maxLength: 10, selector: ([x, y]) => `${x} ${y}` },
   ),
-  (points) => runOk('approx-tsp-tour', { points }).document,
+  (points, locale) => runOk('approx-tsp-tour', { points }, locale).document,
   (trace, points) => {
     // Every point is numbered once, 1 to n.
     const notes = Object.values(stateOf(trace, 'g', 'graph').marks.notes).map(
@@ -2195,7 +2203,7 @@ recipe(
       maxLength: 6,
     })
     .map((ms) => ms.map((m, k): [string, string[]] => [`S${k}`, m])),
-  (subsets) => runOk('greedy-set-cover', { subsets }).document,
+  (subsets, locale) => runOk('greedy-set-cover', { subsets }, locale).document,
   (trace, subsets) => {
     // The ticked subsets cover every element.
     const rows = stateOf(trace, 'F', 'table').data;

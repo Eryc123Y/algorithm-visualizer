@@ -1,8 +1,9 @@
 /**
- * The four properties every recipe must have, shared by the property
+ * The five properties every recipe must have, shared by the property
  * tests: random inputs give a document that loads and replays the same at
  * any checkpoint interval, ends with the right answer, lays out every
- * frame inside one fixed-size scene, and renders to clean SVG.
+ * frame inside one fixed-size scene, renders to clean SVG, and runs the
+ * same in Chinese, told in Chinese (ADR 0045).
  */
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
@@ -13,7 +14,11 @@ import {
   type Scene,
   type Trace,
 } from '@algomotion/core';
-import { formatErrors, type VisualizationInput } from '@algomotion/spec';
+import {
+  formatErrors,
+  type Locale,
+  type VisualizationInput,
+} from '@algomotion/spec';
 import { renderSvg } from '@algomotion/svg';
 
 export const runs = Number(process.env['FUZZ_RUNS'] ?? 40);
@@ -101,17 +106,41 @@ function checkReplay(trace: Trace): void {
       expect(other.frame(i).state, `frame ${i}`).toEqual(trace.frame(i).state);
 }
 
-/** The four properties every recipe must have. */
+const CJK = /[\u{4e00}-\u{9fff}]/u;
+
+/**
+ * The run in Chinese has the same steps, with the same names, as the run
+ * in English; every step is told in Chinese, whichever branch the input
+ * takes; and every frame still fits one fixed-size scene. The examples'
+ * runs are checked word by word in `zh-coverage.spec.ts`; this reaches
+ * the branches no example takes.
+ */
+function checkChinese(english: Trace, chinese: Trace): void {
+  const ids = (trace: Trace) =>
+    trace.visualization.steps.map((step) => step.meta?.id);
+  expect(ids(chinese)).toEqual(ids(english));
+  chinese.visualization.steps.forEach((step, k) => {
+    const narration = step.meta?.narration;
+    if (narration !== undefined)
+      expect(narration, `step ${k + 1}`).toMatch(CJK);
+  });
+  checkLayout(chinese);
+}
+
+/**
+ * The five properties every recipe must have. `build` runs the recipe on
+ * an input, in a locale.
+ */
 export function recipe<T>(
   name: string,
   arb: fc.Arbitrary<T>,
-  build: (input: T) => VisualizationInput,
+  build: (input: T, locale: Locale) => VisualizationInput,
   semantics: (trace: Trace, input: T) => void,
 ): void {
   const property = (check: (trace: Trace, input: T) => void) => () => {
     fc.assert(
       fc.property(arb, (input) => {
-        check(load(build(input)), input);
+        check(load(build(input, 'en')), input);
       }),
       { numRuns: runs },
     );
@@ -129,5 +158,10 @@ export function recipe<T>(
       TIMEOUT,
     );
     it('renders the last frame to clean SVG', property(checkRender), TIMEOUT);
+    it(
+      'runs the same in Chinese, told in Chinese, inside one fixed-size scene',
+      property((trace, input) => checkChinese(trace, load(build(input, 'zh')))),
+      TIMEOUT,
+    );
   });
 }

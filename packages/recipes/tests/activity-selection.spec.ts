@@ -109,6 +109,7 @@ const inputs = fc.oneof(
 recipe(
   'activity-selection',
   inputs,
-  (a) => runOk('activity-selection', { activities: a }).document,
+  (a, locale) =>
+    runOk('activity-selection', { activities: a }, locale).document,
   (trace, a) => check(trace.visualization, a),
 );

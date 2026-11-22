@@ -4,7 +4,7 @@ import type {
   StructureKindName,
   VisualizationInput,
 } from '@algomotion/spec';
-import { formatErrors } from '@algomotion/spec';
+import { formatErrors, type Locale } from '@algomotion/spec';
 
 import { runAlgorithm, type AlgorithmRun } from '../src/index.ts';
 
@@ -45,8 +45,12 @@ export const fuzz = {
 };
 
 /** Runs a registry module, failing the test with its errors if it fails. */
-export function runOk(id: string, input: unknown): AlgorithmRun {
-  const result = runAlgorithm(id, input);
+export function runOk(
+  id: string,
+  input: unknown,
+  locale: Locale = 'en',
+): AlgorithmRun {
+  const result = runAlgorithm(id, input, { locale });
   if (!result.ok) throw new Error(formatErrors(result.error));
   return result.value;
 }

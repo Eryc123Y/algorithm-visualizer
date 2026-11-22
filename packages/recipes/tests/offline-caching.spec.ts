@@ -159,6 +159,7 @@ const inputs = fc.record({
 recipe(
   'offline-caching',
   inputs,
-  ({ requests, k }) => runOk('offline-caching', { requests, k }).document,
+  ({ requests, k }, locale) =>
+    runOk('offline-caching', { requests, k }, locale).document,
   (trace, { requests, k }) => check(trace.visualization, requests, k),
 );

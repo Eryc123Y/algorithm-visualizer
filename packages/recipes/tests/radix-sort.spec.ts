@@ -123,6 +123,6 @@ const inputs = fc.oneof(
 recipe(
   'radix-sort',
   inputs,
-  (values) => runOk('radix-sort', { values }).document,
+  (values, locale) => runOk('radix-sort', { values }, locale).document,
   (trace, values) => check(trace.visualization, values),
 );

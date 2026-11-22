@@ -119,6 +119,6 @@ const dims = fc.oneof(
 recipe(
   'matrix-chain',
   dims,
-  (p) => runOk('matrix-chain', { dims: p }).document,
+  (p, locale) => runOk('matrix-chain', { dims: p }, locale).document,
   (trace, p) => check(trace.visualization, p),
 );

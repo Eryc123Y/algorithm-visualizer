@@ -8,7 +8,7 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 
-import type { VisualizationInput } from '@algomotion/spec';
+import type { Locale, VisualizationInput } from '@algomotion/spec';
 
 import { ordinal } from '../src/algorithms/searching/randomized-select.ts';
 import { seededRandom } from '../src/random.ts';
@@ -68,8 +68,12 @@ function check(
   expect(stateOf(trace, 'calls', 'stack').data).toEqual([]);
 }
 
-const run = (values: readonly number[], i: number, seed: number) =>
-  runOk('randomized-select', { values, i, seed }).document;
+const run = (
+  values: readonly number[],
+  i: number,
+  seed: number,
+  locale?: Locale,
+) => runOk('randomized-select', { values, i, seed }, locale).document;
 
 describe('randomized-select', () => {
   it('finds the 3rd smallest of the example, turning right then left', () => {
@@ -140,6 +144,6 @@ const inputs = fc
 recipe(
   'randomized-select',
   inputs,
-  ({ values, i, seed }) => run(values, i, seed),
+  ({ values, i, seed }, locale) => run(values, i, seed, locale),
   (trace, { values, i, seed }) => check(trace.visualization, values, i, seed),
 );
