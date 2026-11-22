@@ -26,6 +26,7 @@ All notable changes to algomotion, newest first. The format follows [Keep a Chan
 - The Worker's custom domain moves to its `production` environment, so the Deploy to Cloudflare button deploys a copy anywhere (#165). `@algomotion/elements` names the fonts' licence beside the GPL (#165).
 - The shared property suite (`recipe-properties.ts`) also runs each recipe's random inputs in Chinese, and checks that every step points at a line in every language; the BST and the heaps join the shared suite, and four more structures get ADR 0018's checks (#166).
 - The Typst package's manifest describes it in the imperative, as Typst Universe asks, and names the fonts' licence beside the GPL (`GPL-3.0-or-later AND OFL-1.1`); its README links the examples at the release's tag and moves the install from a checkout to a section of its own (#172).
+- Development needs Node.js 22.22.2 or later in the 22 line, 24.15 in the 24 line, or 26: the scripts and tests run TypeScript without a flag, which needs 22.18, and the locked dev dependencies ask for the rest. The stated minimum was 22.12, on which the scripts did not run (#175).
 - Faster tests: the recipes' property tests are split by topic and the Typst plugin's themes shared out, so they run in parallel; the unit tests take about a minute instead of almost three, and the deep runs before a release about an hour instead of over three (#169). CI runs as parallel jobs, about 6.5 minutes instead of 13.5, and coverage moves to a workflow of its own, by hand or weekly (#170).
 
 ## 1.0.0-alpha.1 (2026-11-14)
