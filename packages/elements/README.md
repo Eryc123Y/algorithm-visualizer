@@ -8,6 +8,8 @@
 npm install @algomotion/elements@alpha
 ```
 
+The `lang` attribute, and with it everything in Chinese, came after `1.0.0-alpha.1`, so it needs a later version, or this repository's sources.
+
 Register the element once:
 
 ```js

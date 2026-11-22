@@ -8,6 +8,8 @@ The algorithm registry of algomotion: 132 modules, one for each algorithm and ea
 npm install @algomotion/recipes@alpha
 ```
 
+The `locale` option, and with it everything in Chinese, came after `1.0.0-alpha.1`, so it needs a later version, or this repository's sources.
+
 ## Run an algorithm
 
 `runAlgorithm(id, input, options)` checks the input, records the run and replays the document through the engine. It returns `{ ok: true, value }`, where `value` has the `document`, the operations' `results` and, for a data structure, its final state as `after`; or `{ ok: false, error }` with diagnostics.
@@ -59,7 +61,7 @@ a.swap({ i: 0, j: 1 });
 const doc = r.build();
 ```
 
-Every handle has one method per action of its structure's kind, typed from the protocol. `r.step({ id: 'swap', narration: '…' })` names a step, and `r.section(id, title)` starts a section. `build()` checks the document against the protocol and throws a `RangeError` if it cannot be shown.
+Every handle has one method per action of its structure's kind, typed from the protocol. `r.step({ id: 'swap', narration: '…' })` names a step, and `r.section(id, title)` starts a section. `build()` checks the document's format against the protocol and throws a `RangeError` if it is malformed. It does not replay the actions: `loadTrace` from `@algomotion/core` does, and reports an action that does not fit the state it meets, such as a swap past the end of the array, as the player would.
 
 ## Related packages
 

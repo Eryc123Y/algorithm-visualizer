@@ -10,6 +10,8 @@ The output is not standalone TikZ. It calls macros of the LaTeX package, and a d
 npm install @algomotion/tikz@alpha
 ```
 
+The `locale` option, and with it everything in Chinese, came after `1.0.0-alpha.1`, so it needs a later version, or this repository's sources.
+
 ## Write a figure
 
 `exportTikzFigures(document, options)` returns `{ ok: true, value }`, where `value.figures` holds one figure per frame with its `frame`, `selector`, `width`, `height`, `narration` and `tikz`; or `{ ok: false, error }` with diagnostics.

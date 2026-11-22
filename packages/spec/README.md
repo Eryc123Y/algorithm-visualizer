@@ -10,6 +10,8 @@ A document declares structures, such as an array or a graph, and a timeline of s
 npm install @algomotion/spec@alpha
 ```
 
+`LOCALES` and `localeOf`, and with them everything in Chinese, came after `1.0.0-alpha.1`, so they need a later version, or this repository's sources.
+
 ## Validate a document
 
 `parseVisualization` takes any value, such as JSON written by a person or a model, and returns `{ ok: true, value }` with the document in canonical form, or `{ ok: false, error }` with a list of diagnostics. It does not throw.

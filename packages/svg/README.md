@@ -10,6 +10,8 @@ Text is drawn as glyph outlines of the bundled fonts, so a figure looks the same
 npm install @algomotion/svg@alpha
 ```
 
+The `locale` option, and with it everything in Chinese, came after `1.0.0-alpha.1`, so it needs a later version, or this repository's sources.
+
 ## Export figures
 
 `exportFigures(document, options)` returns `{ ok: true, value }`, where `value.figures` holds one figure per frame with its `frame`, `selector`, `width`, `height`, `narration` and `svg`; or `{ ok: false, error }` with diagnostics.

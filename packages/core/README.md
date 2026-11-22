@@ -8,6 +8,8 @@ The algomotion engine: the structure kinds and their reducers, the timeline that
 npm install @algomotion/core@alpha
 ```
 
+The layout's `locale` option, and with it everything in Chinese, came after `1.0.0-alpha.1`, so it needs a later version, or this repository's sources.
+
 ## Replay a document
 
 `loadTrace` parses a document with [`@algomotion/spec`](https://www.npmjs.com/package/@algomotion/spec), then replays every step and checks each action against the state it meets. It returns `{ ok: true, value }` with a trace, or `{ ok: false, error }` with diagnostics. Frame 0 is the initial state, and frame `n` the state after step `n`.
