@@ -9,6 +9,8 @@ import { fileURLToPath } from 'node:url';
 
 import { build, type Rollup } from 'vite';
 
+import { thirdPartyNotices } from '../../../scripts/third-party.ts';
+
 import { embeddedGuide } from './embed.ts';
 
 /** Directories and files of the standalone build. */
@@ -47,7 +49,7 @@ export async function bundleStandalone(): Promise<string> {
       ],
     },
     define: { 'process.env.NODE_ENV': JSON.stringify('production') },
-    plugins: [embeddedGuide()],
+    plugins: [embeddedGuide(), thirdPartyNotices()],
     build: {
       write: false,
       minify: true,

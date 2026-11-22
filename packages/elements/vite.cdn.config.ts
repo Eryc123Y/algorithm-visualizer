@@ -14,6 +14,8 @@ import { cpSync } from 'node:fs';
 
 import { defineConfig, type Plugin } from 'vite';
 
+import { thirdPartyNotices } from '../../scripts/third-party.ts';
+
 const copyFonts = (): Plugin => ({
   name: 'algomotion:copy-fonts',
   closeBundle() {
@@ -32,7 +34,8 @@ export default defineConfig({
       'default',
     ],
   },
-  plugins: [copyFonts()],
+  // THIRD-PARTY-NOTICES.md goes next to the files, for Lit and Zod.
+  plugins: [copyFonts(), thirdPartyNotices({ emit: true })],
   build: {
     outDir: 'dist/cdn',
     emptyOutDir: true,

@@ -50,10 +50,14 @@ if [ -e "$target" ] && [ "$replace" != true ]; then
   exit 1
 fi
 
+cmp -s THIRD-PARTY-NOTICES.md packages/typst/package/THIRD-PARTY-NOTICES.md || {
+  echo "packages/typst/package/THIRD-PARTY-NOTICES.md differs from THIRD-PARTY-NOTICES.md: copy it." >&2
+  exit 1
+}
 npm run build -w @algomotion/typst > /dev/null
 rm -rf "$target"
 mkdir -p "$target"
-for file in typst.toml lib.typ engine.bc plugin.wasm README.md LICENSE OFL.txt; do
+for file in typst.toml lib.typ engine.bc plugin.wasm README.md LICENSE OFL.txt THIRD-PARTY-NOTICES.md; do
   cp "packages/typst/package/$file" "$target/"
 done
 echo "Laid out $target"

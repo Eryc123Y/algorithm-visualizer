@@ -97,4 +97,4 @@ claude mcp add --transport http algomotion https://algomotion-mcp.turing2234.com
 
 ## 许可证
 
-algomotion 是自由软件，采用 GNU 通用公共许可证第 3 版或更高版本（[LICENSE](LICENSE)）。它画出的图和生成的文档归你所有。随附的字体保留各自的许可证，即 SIL 开放字体许可证 1.1。
+algomotion 是自由软件，采用 GNU 通用公共许可证第 3 版或更高版本（[LICENSE](LICENSE)）。它画出的图和生成的文档归你所有。随附的字体保留各自的许可证，即 SIL 开放字体许可证 1.1。Typst 包、独立命令、播放器文件和 MCP 服务器的播放器页面里还包含别人的软件，如 QuickJS-ng、Zod 和 Lit，各自沿用原来的许可证；[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) 列出了它们并附上需要保留的声明，随这些文件一起分发。

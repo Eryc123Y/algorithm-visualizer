@@ -8,6 +8,8 @@ import { fileURLToPath } from 'node:url';
 
 import { build, type Rollup } from 'vite';
 
+import { thirdPartyNotices } from '../../../scripts/third-party.ts';
+
 import { instantiatePlugin } from './host.ts';
 
 /** Files of the workspace. */
@@ -28,6 +30,7 @@ export async function bundleEngine(): Promise<string> {
       conditions: ['@algomotion/source', 'module', 'import', 'default'],
     },
     define: { 'process.env.NODE_ENV': JSON.stringify('production') },
+    plugins: [thirdPartyNotices()],
     build: {
       write: false,
       minify: true,

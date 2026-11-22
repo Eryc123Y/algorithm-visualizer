@@ -368,4 +368,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Licence
 
-algomotion is free software under the GNU General Public License, version 3 or later ([LICENSE](LICENSE)). The figures and documents it makes are yours. The bundled fonts keep their own licence, the SIL Open Font License 1.1.
+algomotion is free software under the GNU General Public License, version 3 or later ([LICENSE](LICENSE)). The figures and documents it makes are yours. The bundled fonts keep their own licence, the SIL Open Font License 1.1. The Typst package, the standalone command, the player's files and the MCP server's player page also contain other people's software, such as QuickJS-ng, Zod and Lit, under their own licences; [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) names them and carries their notices, and goes with each of those files.
