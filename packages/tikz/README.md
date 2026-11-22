@@ -7,10 +7,8 @@ The output is not standalone TikZ. It calls macros of the LaTeX package, and a d
 ## Install
 
 ```sh
-npm install @algomotion/tikz@alpha
+npm install @algomotion/tikz
 ```
-
-The `locale` option, and with it everything in Chinese, came after `1.0.0-alpha.1`, so it needs a later version, or this repository's sources.
 
 ## Write a figure
 

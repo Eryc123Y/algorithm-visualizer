@@ -1,6 +1,6 @@
 // The inputs of the README's table, one figure each: short notations,
 // and the structured forms they stand for.
-#import "@local/algomotion:0.1.0": algomotion
+#import "@local/algomotion:1.0.0": algomotion
 
 #set page(width: 16cm, height: auto, margin: 1cm)
 

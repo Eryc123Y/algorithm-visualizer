@@ -1,6 +1,6 @@
 // Slides that step through a run with polylux: one frame per subslide.
 #import "@preview/polylux:0.4.0": *
-#import "@local/algomotion:0.1.0": algomotion-slides
+#import "@local/algomotion:1.0.0": algomotion-slides
 
 #set page(paper: "presentation-16-9", margin: 1.5cm)
 #set text(size: 20pt)

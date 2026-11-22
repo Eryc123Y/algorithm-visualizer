@@ -5,10 +5,8 @@
 ## Install
 
 ```sh
-npm install @algomotion/elements@alpha
+npm install @algomotion/elements
 ```
-
-The `lang` attribute, and with it everything in Chinese, came after `1.0.0-alpha.1`, so it needs a later version, or this repository's sources.
 
 Register the element once:
 
@@ -35,13 +33,13 @@ Without a bundler, load the standalone bundle, which includes Lit and every algo
 ```html
 <script
   type="module"
-  src="https://cdn.jsdelivr.net/npm/@algomotion/elements@alpha/dist/cdn/algomotion-player.js"
+  src="https://cdn.jsdelivr.net/npm/@algomotion/elements@1/dist/cdn/algomotion-player.js"
 ></script>
 
 <algo-player algorithm="insertion-sort" input="5 2 4 6 1 3"></algo-player>
 ```
 
-Put an exact version in place of `alpha`, such as `1.0.0-alpha.1`, to pin it. To host the bundle yourself, copy `dist/cdn/` from the package and keep its files together under their names: `algomotion-player.js`, `algomotion-recipes.js` (the registry, loaded the first time a player has `algorithm`) and the `fonts/` folder.
+`@1` follows the latest 1.x release; put an exact version, such as `1.0.0`, to pin it. To host the bundle yourself, copy `dist/cdn/` from the package and keep its files together under their names: `algomotion-player.js`, `algomotion-recipes.js` (the registry, loaded the first time a player has `algorithm`) and the `fonts/` folder.
 
 ## Attributes
 

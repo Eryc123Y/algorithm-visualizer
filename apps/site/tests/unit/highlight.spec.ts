@@ -69,12 +69,12 @@ describe('tokens', () => {
 
   it('mark Typst functions, keys and strings', () => {
     const tokens = tokenize(
-      '#import "@preview/algomotion:0.1.0": algomotion\n#algomotion("bst", (from: "8 3", key: 5))',
+      '#import "@local/algomotion:1.0.0": algomotion\n#algomotion("bst", (from: "8 3", key: 5))',
       'typst',
     );
     expect(of(tokens, 'name')).toEqual(['#import', '#algomotion']);
     expect(of(tokens, 'string')).toEqual([
-      '"@preview/algomotion:0.1.0"',
+      '"@local/algomotion:1.0.0"',
       '"bst"',
       '"8 3"',
     ]);

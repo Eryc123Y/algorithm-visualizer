@@ -55,6 +55,6 @@ ${code('claude mcp add --transport http algomotion https://algomotion-mcp.turing
   <dd>一次运行的 JSON 记录，包含数据结构和步骤。算法会替你生成文档；目录里没有的内容，你或者模型也可以手写一份。见<a href="${root}guide/documents/">文档格式</a>。</dd>
 </dl>
 
-${note(`<p>algomotion 目前是 1.0 alpha。npm 上的包都以 <code>alpha</code> 标签发布，<a href="https://github.com/Eryc123Y/algorithm-visualizer/releases/tag/v1.0.0-alpha.1">GitHub Release</a> 里有 Typst 包、LaTeX 包和独立命令。Typst Universe 和 CTAN 要等 1.0 再上，所以 Typst 和 LaTeX 两篇指南会说明如何在本地安装。1.0 之前，名称和选项仍可能调整。</p>`)}
+${note(`<p>algomotion 1.0 已发布到 npm，<a href="https://github.com/Eryc123Y/algorithm-visualizer/releases/tag/v1.0.0">GitHub Release</a> 里有 Typst 包、LaTeX 包，以及 macOS、Linux 和 Windows 的独立命令。LaTeX 包会发布到 CTAN；Typst 包还没有发布到 Typst Universe，所以 Typst 指南会说明如何在本地安装。</p>`)}
 `,
 };

@@ -1,6 +1,6 @@
 {
   "name": "@algomotion/fonts",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0",
   "description": "Metrics and glyph outlines of the fonts algomotion bundles, and text measurement. No DOM or Node.js APIs.",
   "keywords": [
     "algorithms",
@@ -42,7 +42,6 @@
     "build": "tsc --build tsconfig.lib.json"
   },
   "publishConfig": {
-    "access": "public",
-    "tag": "alpha"
+    "access": "public"
   }
 }

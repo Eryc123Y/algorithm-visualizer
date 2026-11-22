@@ -1,8 +1,12 @@
 # Changelog
 
-All notable changes to algomotion, newest first. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packages will follow [Semantic Versioning](https://semver.org/) once they are published. Numbers such as (#14) are the pull requests on GitHub; the [roadmap](docs/roadmap.md) says what each phase set out to do.
+All notable changes to algomotion, newest first. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packages follow [Semantic Versioning](https://semver.org/). Numbers such as (#14) are the pull requests on GitHub; the [roadmap](docs/roadmap.md) says what each phase set out to do.
 
 ## Unreleased
+
+## 1.0.0 (2026-11-23)
+
+The first stable release. The eight npm packages are published as `1.0.0` under the `latest` tag, and the GitHub release carries the standalone `algomotion` command for macOS (arm64 and x64), Linux (x64 and arm64) and Windows (x64), the Typst and LaTeX packages and the player's files. The LaTeX package goes to CTAN; Typst Universe follows later. Everything since `1.0.0-alpha.1` is in it, Chinese above all (#176).
 
 ### Added
 

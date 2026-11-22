@@ -1,5 +1,5 @@
 // A figure of one step: an algorithm, its input and a step name.
-#import "@local/algomotion:0.1.0": algomotion
+#import "@local/algomotion:1.0.0": algomotion
 
 #set page(width: 16cm, height: auto, margin: 1cm)
 

@@ -17,11 +17,11 @@ export const zh: Guide = {
   ],
   body: ({ root, code, figure, note }) => `
 <h2 id="bundle">安装并加载播放器</h2>
-<p>这些包已作为 1.0 alpha 发布到 npm，使用 <code>alpha</code> 标签。用打包工具时，安装元素包并注册一次：</p>
-${code(`npm install @algomotion/elements@alpha`, '安装播放器')}
+<p>这些包已发布到 npm。用打包工具时，安装元素包并注册一次：</p>
+${code(`npm install @algomotion/elements`, '安装播放器')}
 ${code(`import '@algomotion/elements/define';`, '注册元素')}
 <p>不用打包工具时，可以从提供 npm 包的 CDN（比如 jsDelivr）加载独立脚本包：</p>
-${code(`<script type="module" src="https://cdn.jsdelivr.net/npm/@algomotion/elements@1.0.0-alpha.1/dist/cdn/algomotion-player.js"></script>`, '从 CDN 加载播放器')}
+${code(`<script type="module" src="https://cdn.jsdelivr.net/npm/@algomotion/elements@1.0.0/dist/cdn/algomotion-player.js"></script>`, '从 CDN 加载播放器')}
 <p>想自己托管的话，把包里的 <code>dist/cdn/</code> 复制到你的网站；也可以在仓库检出目录里运行 <code>npm run build -w @algomotion/elements</code>，再复制 <code>packages/elements/dist/cdn/</code>。<code>algomotion-player.js</code> 和 <code>algomotion-recipes.js</code> 要放在一起，名字不要改，旁边放上 <code>fonts/</code> 文件夹。第二个脚本只在播放器运行算法时才加载。请通过 HTTP 提供这些文件，不要直接从磁盘打开 HTML。</p>
 ${code(
   `<script type="module" src="/assets/algomotion-player.js"></script>

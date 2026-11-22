@@ -1,6 +1,6 @@
 {
   "name": "@algomotion/svg",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0",
   "description": "Renders algomotion scenes to standalone SVG strings, without a DOM.",
   "keywords": [
     "algorithms",
@@ -36,12 +36,11 @@
     "build": "tsc --build tsconfig.lib.json"
   },
   "dependencies": {
-    "@algomotion/core": "1.0.0-alpha.1",
-    "@algomotion/fonts": "1.0.0-alpha.1",
-    "@algomotion/spec": "1.0.0-alpha.1"
+    "@algomotion/core": "1.0.0",
+    "@algomotion/fonts": "1.0.0",
+    "@algomotion/spec": "1.0.0"
   },
   "publishConfig": {
-    "access": "public",
-    "tag": "alpha"
+    "access": "public"
   }
 }

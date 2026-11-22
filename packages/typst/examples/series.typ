@@ -1,5 +1,5 @@
 // Several steps of one run on one scale, with their selectors as captions.
-#import "@local/algomotion:0.1.0": algomotion-figures, algomotion-series
+#import "@local/algomotion:1.0.0": algomotion-figures, algomotion-series
 
 #set page(width: 18cm, height: auto, margin: 1cm)
 

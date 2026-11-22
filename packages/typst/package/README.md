@@ -5,7 +5,7 @@ Step-by-step figures of algorithms and data structures in your Typst notes and s
 The algomotion engine runs inside the package as a WebAssembly plugin, so nothing else needs to be installed. A figure is exactly the SVG that `algomotion export` writes, with its text drawn as outlines of the bundled fonts, so it looks the same everywhere.
 
 ```typ
-#import "@preview/algomotion:0.1.0": algomotion
+#import "@preview/algomotion:1.0.0": algomotion
 
 #figure(
   algomotion("dijkstra", "A-B 4, B-C 1, A-C 7, C-D 2", step: "improve#3"),
@@ -62,7 +62,7 @@ Every algorithm of the algomotion registry is available, with the input its sche
 - **Operations** are written as exercises write them, each with its arguments in order: `"insert 4, delete 3"`.
 - An input that needs only one thing may be that thing alone, as the table's first and graph rows show. The structured forms work too, such as `(graph: (nodes: ("A", "B"), edges: (("A", "B", 4),)), source: "A")`.
 
-`algomotion recipes` (the command line) lists every id with the JSON Schema of its input, and [`examples/inputs.typ`](https://github.com/Eryc123Y/algorithm-visualizer/blob/v1.0.0-alpha.1/packages/typst/examples/inputs.typ) draws each row of this table. An input that does not fit is reported with the path of the wrong field, such as `$.input.key`, and a notation with the token and its position, such as `INVALID_NOTATION at $.input: Expected a weight or "," after "B-C", not "x" (character 12)`.
+`algomotion recipes` (the command line) lists every id with the JSON Schema of its input, and [`examples/inputs.typ`](https://github.com/Eryc123Y/algorithm-visualizer/blob/v1.0.0/packages/typst/examples/inputs.typ) draws each row of this table. An input that does not fit is reported with the path of the wrong field, such as `$.input.key`, and a notation with the token and its position, such as `INVALID_NOTATION at $.input: Expected a weight or "," after "B-C", not "x" (character 12)`.
 
 ## Several steps: `algomotion-series`
 
@@ -76,7 +76,7 @@ It returns an array of images, one per frame, each with its step's narration as 
 All figures of a document share one canvas, the largest of its frames. They therefore line up at one scale when you place them at their natural size or all at one width:
 
 ```typ
-#import "@preview/algomotion:0.1.0": algomotion-series
+#import "@preview/algomotion:1.0.0": algomotion-series
 
 #grid(
   columns: 3,
@@ -98,7 +98,7 @@ It steps through a series in a slide deck, one frame per subslide, with your sli
 ```typ
 #import "@preview/touying:0.8.0": *
 #import themes.simple: *
-#import "@preview/algomotion:0.1.0": algomotion-slides
+#import "@preview/algomotion:1.0.0": algomotion-slides
 
 #show: simple-theme.with(aspect-ratio: "16-9")
 
@@ -117,7 +117,7 @@ With [polylux](https://typst.app/universe/package/polylux), the same call goes i
 - A series of one frame is the image alone, on every subslide. An error shows in a box, as for `algomotion`.
 - In touying's handout mode, which keeps the last subslide of each slide, a series shows its last frame.
 
-[`examples/slides-polylux.typ`](https://github.com/Eryc123Y/algorithm-visualizer/blob/v1.0.0-alpha.1/packages/typst/examples/slides-polylux.typ) and [`examples/slides-touying.typ`](https://github.com/Eryc123Y/algorithm-visualizer/blob/v1.0.0-alpha.1/packages/typst/examples/slides-touying.typ) step through a whole run, a range from the second subslide, and a section.
+[`examples/slides-polylux.typ`](https://github.com/Eryc123Y/algorithm-visualizer/blob/v1.0.0/packages/typst/examples/slides-polylux.typ) and [`examples/slides-touying.typ`](https://github.com/Eryc123Y/algorithm-visualizer/blob/v1.0.0/packages/typst/examples/slides-touying.typ) step through a whole run, a range from the second subslide, and a section.
 
 ## Documents
 
@@ -210,10 +210,10 @@ There is no time limit. For very long documents, `algomotion export` writes the 
 To use the package from a checkout of the [algomotion repository](https://github.com/Eryc123Y/algorithm-visualizer), such as a change that is not on Typst Universe yet:
 
 1. In the repository, run `npm install`, then `npm run build -w @algomotion/typst` to build `engine.bc`.
-2. Link `packages/typst/package` as `algomotion/0.1.0` in your local package directory: `~/Library/Application Support/typst/packages/local` on macOS, `~/.local/share/typst/packages/local` on Linux, `%APPDATA%\typst\packages\local` on Windows.
-3. Import `@local/algomotion:0.1.0` instead of `@preview/algomotion:0.1.0`.
+2. Link `packages/typst/package` as `algomotion/1.0.0` in your local package directory: `~/Library/Application Support/typst/packages/local` on macOS, `~/.local/share/typst/packages/local` on Linux, `%APPDATA%\typst\packages\local` on Windows.
+3. Import `@local/algomotion:1.0.0` instead of `@preview/algomotion:1.0.0`.
 
-The repository's [`examples/`](https://github.com/Eryc123Y/algorithm-visualizer/tree/v1.0.0-alpha.1/packages/typst/examples) folder has every example of this README as a file, importing the package this way.
+The repository's [`examples/`](https://github.com/Eryc123Y/algorithm-visualizer/tree/v1.0.0/packages/typst/examples) folder has every example of this README as a file, importing the package this way.
 
 ## Licence
 

@@ -17,7 +17,7 @@
 
 <p align="center">
   <a href="https://github.com/Eryc123Y/algorithm-visualizer/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/Eryc123Y/algorithm-visualizer/actions/workflows/ci.yml/badge.svg"></a>
-  <a href="https://www.npmjs.com/package/@algomotion/elements"><img alt="npm (alpha)" src="https://img.shields.io/npm/v/@algomotion/elements/alpha?label=npm%20alpha"></a>
+  <a href="https://www.npmjs.com/package/@algomotion/elements"><img alt="npm" src="https://img.shields.io/npm/v/@algomotion/elements?label=npm"></a>
   <a href="LICENSE"><img alt="Licence: GPL-3.0-or-later" src="https://img.shields.io/badge/licence-GPL--3.0--or--later-blue"></a>
 </p>
 
@@ -33,13 +33,14 @@ You name an algorithm and give it an input, written the way you would write it o
 
 The same run becomes any of these, drawn by one engine in nine themes, and told in English or Simplified Chinese. A model can also write a visualization of its own through the MCP server, check it step by step, and show it in the conversation.
 
-## Status: 1.0 alpha
+## Status: 1.0
 
-The protocol is frozen at 1.0, and eleven structure kinds and 132 algorithms and data structure operations work end to end. `1.0.0-alpha.1` is the first public release, for trying out and feedback: names and options may still change before 1.0.
+`1.0.0` is the first stable release. The protocol is frozen at 1.0, and eleven structure kinds and 132 algorithms and data structure operations work end to end, in English and Simplified Chinese.
 
-- **npm:** every package is published as `1.0.0-alpha.1`, under the `alpha` tag. It is the only version so far, so a plain `npm install` gets it too; ask for `@alpha` to keep getting alphas once 1.0 is out.
-- **Typst Universe and CTAN:** not yet. Both review packages by hand and keep every version, so they wait for 1.0. Until then, install the Typst and LaTeX packages locally from the [GitHub release](https://github.com/Eryc123Y/algorithm-visualizer/releases) or from this repository, as the [Typst guide](https://algomotion.turing2234.com/guide/typst/) and the [LaTeX guide](https://algomotion.turing2234.com/guide/latex/) show.
-- **Chinese:** runs in Simplified Chinese are on `main` and on the site; they come with the next release, as `1.0.0-alpha.1` draws in English only. Until then, build from this repository.
+- **npm:** every package is published as `1.0.0`.
+- **GitHub release:** [v1.0.0](https://github.com/Eryc123Y/algorithm-visualizer/releases/tag/v1.0.0) carries the standalone `algomotion` command for macOS, Linux and Windows, the Typst and LaTeX packages, and the player's files.
+- **CTAN:** the LaTeX package goes to CTAN as `algomotion`, and TeX Live and MiKTeX take it from there. Until CTAN has it, install it from the GitHub release, as the [LaTeX guide](https://algomotion.turing2234.com/guide/latex/) shows.
+- **Typst Universe:** not yet. Until then, install the Typst package locally from the GitHub release, as the [Typst guide](https://algomotion.turing2234.com/guide/typst/) shows.
 - **AI assistants:** the hosted MCP server at `https://algomotion-mcp.turing2234.com/mcp` works today.
 
 ## Quick start
@@ -47,7 +48,7 @@ The protocol is frozen at 1.0, and eleven structure kinds and 132 algorithms and
 On a web page, with the player from npm:
 
 ```sh
-npm install @algomotion/elements@alpha
+npm install @algomotion/elements
 ```
 
 ```js
@@ -64,7 +65,7 @@ import '@algomotion/elements/define';
 On the command line:
 
 ```sh
-npx -p @algomotion/mcp@alpha algomotion export dijkstra --input 'A-B 4, B-C 1, A-C 7, C-D 2' --step improve#3 --out figures
+npx -p @algomotion/mcp algomotion export dijkstra --input 'A-B 4, B-C 1, A-C 7, C-D 2' --step improve#3 --out figures
 ```
 
 In Claude Code:
@@ -76,7 +77,7 @@ claude mcp add --transport http algomotion https://algomotion-mcp.turing2234.com
 In Typst, after installing the package locally (see the [Typst guide](https://algomotion.turing2234.com/guide/typst/)):
 
 ```typ
-#import "@local/algomotion:0.1.0": algomotion
+#import "@local/algomotion:1.0.0": algomotion
 #algomotion("dijkstra", "A-B 4, B-C 1, A-C 7, C-D 2", step: "improve#3")
 ```
 
@@ -229,13 +230,13 @@ A figure draws the structures an algorithm keeps besides its main one, such as D
 In Typst, [the algomotion package](packages/typst/package/README.md) draws the same figures from inside a document, with the engine running in a WebAssembly plugin, so students need nothing but Typst ([ADR 0026](docs/adr/0026-typst-package.md)):
 
 ```typ
-#import "@preview/algomotion:0.1.0": algomotion, algomotion-series
+#import "@local/algomotion:1.0.0": algomotion, algomotion-series
 
 #algomotion("dijkstra", "A-B 4, B-C 1, A-C 7, C-D 2", step: "relax#3")
 #grid(columns: 3, ..algomotion-series("bst.delete", (from: "8 3 10 1 6", key: 3)))
 ```
 
-The package is not on Typst Universe yet; its README says how to use it as a local package until it is.
+The package is not on Typst Universe yet, so it is imported as `@local` after a local install, which [the Typst guide](https://algomotion.turing2234.com/guide/typst/) describes; once it is there, the import becomes `@preview/algomotion`.
 
 In LaTeX, [the algomotion package](packages/latex/package/README.md) draws them with TikZ, so their text is set in the document's own fonts ([ADR 0027](docs/adr/0027-latex-package.md)). It runs the `algomotion` command through shell escape, as `minted` does, and caches every figure, so later runs need no shell escape:
 

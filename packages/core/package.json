@@ -1,6 +1,6 @@
 {
   "name": "@algomotion/core",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0",
   "description": "Structure kinds, reducers and the timeline engine for algomotion traces.",
   "keywords": [
     "algorithms",
@@ -36,11 +36,10 @@
     "build": "tsc --build tsconfig.lib.json"
   },
   "dependencies": {
-    "@algomotion/fonts": "1.0.0-alpha.1",
-    "@algomotion/spec": "1.0.0-alpha.1"
+    "@algomotion/fonts": "1.0.0",
+    "@algomotion/spec": "1.0.0"
   },
   "publishConfig": {
-    "access": "public",
-    "tag": "alpha"
+    "access": "public"
   }
 }

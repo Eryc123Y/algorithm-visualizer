@@ -1,6 +1,6 @@
 // 一页带 algomotion 插图的学生笔记，由 `npm run scenes -w @algomotion/site`
 // 编译成网站中文页面上的实景。
-#import "@local/algomotion:0.1.0": algomotion
+#import "@local/algomotion:1.0.0": algomotion
 
 #set page(width: 15cm, height: auto, margin: (x: 1.5cm, y: 1.25cm))
 #set text(size: 10.5pt, lang: "zh", font: ("Libertinus Serif", "Noto Serif CJK SC"))

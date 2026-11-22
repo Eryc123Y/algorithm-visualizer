@@ -5,10 +5,8 @@ The algomotion engine: the structure kinds and their reducers, the timeline that
 ## Install
 
 ```sh
-npm install @algomotion/core@alpha
+npm install @algomotion/core
 ```
-
-The layout's `locale` option, and with it everything in Chinese, came after `1.0.0-alpha.1`, so it needs a later version, or this repository's sources.
 
 ## Replay a document
 

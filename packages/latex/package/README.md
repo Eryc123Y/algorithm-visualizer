@@ -18,8 +18,6 @@ latexmk -pdf -shell-escape notes.tex     # or -pdflua, -pdfxe
 
 The package runs the `algomotion` command through shell escape, as `minted` runs Pygments. It keeps every figure in `_algomotion/`, so a figure that did not change is never made again, and cached figures need no shell escape at all.
 
-> **Not on CTAN yet.** Until it is published, install [the development version](#the-development-version).
-
 `algomotion-doc.pdf` is the manual, with every figure drawn by the package. It comes with the package on CTAN; its source, `algomotion-doc.tex`, compiles like any document that uses the package, and in the repository `npm run build:doc -w @algomotion/latex` builds it.
 
 ## Requirements
@@ -103,11 +101,11 @@ In a Beamer frame, `steps` turns a figure into overlays: one slide per frame of 
 - **A series** has the canvas of its largest frame, and `width`, `height` and `scale` apply to the whole of it. A series that names one frame is an ordinary figure, on every slide.
 - **By hand.** The command writes a series into one file of the cache. `algomotion export … --format tikz --one-file` writes such a file outside LaTeX, and `\algomotioninput` draws it as a series.
 
-[`examples/slides.tex`](https://github.com/Eryc123Y/algorithm-visualizer/blob/v1.0.0-alpha.1/packages/latex/examples/slides.tex) steps through a whole run, a range after a pause, and a section.
+[`examples/slides.tex`](https://github.com/Eryc123Y/algorithm-visualizer/blob/v1.0.0/packages/latex/examples/slides.tex) steps through a whole run, a range after a pause, and a section.
 
 ## The input
 
-The input of `\algomotion` is a notation, or JSON ([ADR 0032](https://github.com/Eryc123Y/algorithm-visualizer/blob/v1.0.0-alpha.1/docs/adr/0032-algorithm-and-input.md)):
+The input of `\algomotion` is a notation, or JSON ([ADR 0032](https://github.com/Eryc123Y/algorithm-visualizer/blob/v1.0.0/docs/adr/0032-algorithm-and-input.md)):
 
 ```latex
 \algomotion{insertion-sort}{5 2 4 6 1 3}                     % a list
@@ -184,7 +182,7 @@ To use the package from a checkout of the [algomotion repository](https://github
 1. **The command.** In the repository, run `npm install`, then `npm run build:standalone -w @algomotion/mcp`. This needs rustup and a C compiler, and writes `packages/mcp/dist/standalone/algomotion`, a 3 MB program that needs no Node.js. Put it on your `PATH`, or name it with the package option `command=`. The Node.js CLI works too: `command={node /path/to/algomotion.js}`.
 2. **The package.** Put `packages/latex/package/algomotion.sty` next to your document, or in your local `texmf` tree under `tex/latex/algomotion/`.
 
-The repository's [`examples/`](https://github.com/Eryc123Y/algorithm-visualizer/tree/v1.0.0-alpha.1/packages/latex/examples) folder has notes and slides to start from.
+The repository's [`examples/`](https://github.com/Eryc123Y/algorithm-visualizer/tree/v1.0.0/packages/latex/examples) folder has notes and slides to start from.
 
 ## Licence and contact
 

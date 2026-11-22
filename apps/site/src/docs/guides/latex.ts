@@ -18,14 +18,14 @@ export const latex: Guide = {
   ],
   body: ({ root, code, figure, note }) => `
 <h2 id="install">Requirements and installation</h2>
-<p>Use LaTeX 2024-06-01 or later and TikZ. pdfLaTeX, LuaLaTeX and XeLaTeX are supported. The package is not on CTAN yet; it will be at 1.0. Take <code>algomotion.sty</code> from <code>algomotion-latex.zip</code> in the <a href="https://github.com/Eryc123Y/algorithm-visualizer/releases/tag/v1.0.0-alpha.1">GitHub release</a>, or from <code>packages/latex/package/</code> in the repository, and put it next to your document or in your local <code>texmf/tex/latex/algomotion/</code> tree.</p>
-<p>The package runs the <code>algomotion</code> command. With Node.js, install it from npm: <code>npm install -g @algomotion/mcp@alpha</code>. Without Node.js, use the standalone executable: the release has one for macOS on Apple silicon, and the repository builds one for your machine, with rustup and a C compiler:</p>
+<p>Use LaTeX 2024-06-01 or later and TikZ. pdfLaTeX, LuaLaTeX and XeLaTeX are supported. The package goes to CTAN as <code>algomotion</code>, so TeX Live and MiKTeX install it like any other; until your distribution has it, take <code>algomotion.sty</code> from <code>algomotion-latex.zip</code> in the <a href="https://github.com/Eryc123Y/algorithm-visualizer/releases/tag/v1.0.0">GitHub release</a>, or from <code>packages/latex/package/</code> in the repository, and put it next to your document or in your local <code>texmf/tex/latex/algomotion/</code> tree.</p>
+<p>The package runs the <code>algomotion</code> command. With Node.js, install it from npm: <code>npm install -g @algomotion/mcp</code>. Without Node.js, use the standalone executable: the <a href="https://github.com/Eryc123Y/algorithm-visualizer/releases/tag/v1.0.0">release</a> has one for macOS (Apple silicon and Intel), Linux (x64 and arm64) and Windows (x64). The repository also builds one for your machine, with rustup and a C compiler:</p>
 ${code(
   `npm ci
 npm run build:standalone -w @algomotion/mcp`,
   'Build the command for LaTeX',
 )}
-<p>Put <code>packages/mcp/dist/standalone/algomotion</code> on your <code>PATH</code>, or pass its absolute path with <code>command=</code>. The <a href="${root}guide/cli/">Node.js command</a> also works, with <code>command={node /absolute/path/packages/mcp/dist/algomotion.js}</code>. For figures in Chinese, take both the package and the command from the repository: the <code>lang</code> key came after 1.0.0-alpha.1, whose package and command draw in English only, and it comes with the next release.</p>
+<p>Put <code>packages/mcp/dist/standalone/algomotion</code> on your <code>PATH</code>, or pass its absolute path with <code>command=</code>. The <a href="${root}guide/cli/">Node.js command</a> also works, with <code>command={node /absolute/path/packages/mcp/dist/algomotion.js}</code>.</p>
 
 <h2 id="figure">One figure</h2>
 ${code(

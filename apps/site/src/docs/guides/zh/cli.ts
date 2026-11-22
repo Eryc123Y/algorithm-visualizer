@@ -17,10 +17,10 @@ export const zh: Guide = {
   ],
   body: ({ root, code, figure, note, scene }) => `
 <h2 id="install">安装</h2>
-<p>这个命令已作为 1.0 alpha 发布到 npm，在 <code>@algomotion/mcp</code> 包里。可以不安装直接运行，也可以全局安装：</p>
+<p>这个命令已发布到 npm，在 <code>@algomotion/mcp</code> 包里。可以不安装直接运行，也可以全局安装：</p>
 ${code(
-  `npx -p @algomotion/mcp@alpha algomotion --help
-npm install -g @algomotion/mcp@alpha`,
+  `npx -p @algomotion/mcp algomotion --help
+npm install -g @algomotion/mcp`,
   '运行或安装命令',
 )}
 <p>也可以从仓库检出目录构建：安装工作区依赖，再构建 MCP 包：</p>

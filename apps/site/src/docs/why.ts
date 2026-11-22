@@ -113,7 +113,7 @@ export interface Walkthrough {
   }[];
 }
 
-const TYPST_NOTES_EN = `#import "@local/algomotion:0.1.0": algomotion
+const TYPST_NOTES_EN = `#import "@local/algomotion:1.0.0": algomotion
 
 = Shortest paths
 
@@ -126,7 +126,7 @@ from 7 to 5:
   caption: [Step \`improve#3\`: C improves to 5, through B.],
 )`;
 
-const TYPST_NOTES_ZH = `#import "@local/algomotion:0.1.0": algomotion
+const TYPST_NOTES_ZH = `#import "@local/algomotion:1.0.0": algomotion
 #set text(lang: "zh")
 
 = 最短路径

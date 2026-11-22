@@ -36,10 +36,10 @@ export const version = field('version');
  */
 export type Namespace = 'local' | 'preview';
 
-/** The package as documents import it, such as `@local/algomotion:0.1.0`. */
+/** The package as documents import it, such as `@local/algomotion:1.0.0`. */
 export const specIn = (namespace: Namespace) =>
   `@${namespace}/${name}:${version}`;
-/** The package as the examples import it, `@local/algomotion:0.1.0`. */
+/** The package as the examples import it, `@local/algomotion:1.0.0`. */
 export const spec = specIn('local');
 
 /** The slide frameworks the examples and tests use (ADR 0028). */

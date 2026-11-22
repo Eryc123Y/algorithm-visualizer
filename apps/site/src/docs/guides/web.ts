@@ -17,11 +17,11 @@ export const web: Guide = {
   ],
   body: ({ root, code, figure, note }) => `
 <h2 id="bundle">Install and load the player</h2>
-<p>The packages are on npm as a 1.0 alpha, under the <code>alpha</code> tag. With a bundler, install the element and register it once:</p>
-${code(`npm install @algomotion/elements@alpha`, 'Install the player')}
+<p>The packages are on npm. With a bundler, install the element and register it once:</p>
+${code(`npm install @algomotion/elements`, 'Install the player')}
 ${code(`import '@algomotion/elements/define';`, 'Register the element')}
 <p>Without a bundler, load the standalone bundle from a CDN that serves npm packages, such as jsDelivr:</p>
-${code(`<script type="module" src="https://cdn.jsdelivr.net/npm/@algomotion/elements@1.0.0-alpha.1/dist/cdn/algomotion-player.js"></script>`, 'Load the player from a CDN')}
+${code(`<script type="module" src="https://cdn.jsdelivr.net/npm/@algomotion/elements@1.0.0/dist/cdn/algomotion-player.js"></script>`, 'Load the player from a CDN')}
 <p>To host it yourself, copy <code>dist/cdn/</code> from the package, or from <code>packages/elements/dist/cdn/</code> after <code>npm run build -w @algomotion/elements</code> in a checkout of the repository, to your site. Keep <code>algomotion-player.js</code> and <code>algomotion-recipes.js</code> together under those names, with the <code>fonts/</code> folder beside them. The second script loads only when a player runs an algorithm. Serve the files over HTTP rather than opening the HTML from disk.</p>
 ${code(
   `<script type="module" src="/assets/algomotion-player.js"></script>

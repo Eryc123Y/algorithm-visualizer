@@ -7,10 +7,8 @@ Text is drawn as glyph outlines of the bundled fonts, so a figure looks the same
 ## Install
 
 ```sh
-npm install @algomotion/svg@alpha
+npm install @algomotion/svg
 ```
-
-The `locale` option, and with it everything in Chinese, came after `1.0.0-alpha.1`, so it needs a later version, or this repository's sources.
 
 ## Export figures
 

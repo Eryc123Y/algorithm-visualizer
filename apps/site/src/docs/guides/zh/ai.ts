@@ -72,9 +72,9 @@ Validate the document and inspect frames 0 and -1 before showing it.`,
 <p>托管服务器可以从 <code>algomotion_show</code> 和 <code>algomotion_run_recipe</code> 返回<a href="${root}guide/share-links/">分享链接</a>。recipe 链接带 id 和输入；自定义文档的链接带压缩后的文档。链接超过 16,384 个字符时，不生成链接，并在文本中说明原因。</p>
 
 <h2 id="local">通过 stdio 在本地运行</h2>
-<p>这个服务器已作为 1.0 alpha 发布到 npm。在 Claude Code 里注册它，npx 会在第一次使用时下载：</p>
+<p>这个服务器已发布到 npm。在 Claude Code 里注册它，npx 会在第一次使用时下载：</p>
 ${code(
-  `claude mcp add algomotion -- npx -y -p @algomotion/mcp@alpha algomotion-mcp`,
+  `claude mcp add algomotion -- npx -y -p @algomotion/mcp algomotion-mcp`,
   '注册本地 stdio 服务器',
 )}
 <p>想用自己构建的版本时，在仓库检出目录里构建，再填上服务器的路径（把绝对路径换成你检出仓库的位置）：</p>

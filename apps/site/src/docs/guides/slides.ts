@@ -90,7 +90,7 @@ ${code(
 ${code(
   `#import "@preview/touying:0.8.0": *
 #import themes.simple: *
-#import "@local/algomotion:0.1.0": algomotion-slides
+#import "@local/algomotion:1.0.0": algomotion-slides
 #show: simple-theme.with(aspect-ratio: "16-9")
 
 == Insertion sort
@@ -107,7 +107,7 @@ ${code(`#show: simple-theme.with(aspect-ratio: "16-9", config-common(handout: tr
 <h2 id="polylux">Typst with polylux</h2>
 ${code(
   `#import "@preview/polylux:0.4.0": *
-#import "@local/algomotion:0.1.0": algomotion-slides
+#import "@local/algomotion:1.0.0": algomotion-slides
 #set page(paper: "presentation-16-9", margin: 1.5cm)
 #set text(size: 20pt)
 
