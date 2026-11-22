@@ -113,7 +113,7 @@ export interface Walkthrough {
   }[];
 }
 
-const TYPST_NOTES = `#import "@local/algomotion:0.1.0": algomotion
+const TYPST_NOTES_EN = `#import "@local/algomotion:0.1.0": algomotion
 
 = Shortest paths
 
@@ -126,7 +126,24 @@ from 7 to 5:
   caption: [Step \`improve#3\`: C improves to 5, through B.],
 )`;
 
-const BEAMER_SLIDES = String.raw`\documentclass{beamer}
+const TYPST_NOTES_ZH = `#import "@local/algomotion:0.1.0": algomotion
+#set text(lang: "zh")
+
+= 最短路径
+
+Dijkstra 算法每轮从队列中取出距离最小的顶点，
+再松弛从它出发的边。经由 B，C 从 7 降到 5：
+
+#figure(
+  algomotion("dijkstra", "A-B 4, B-C 1, A-C 7, C-D 2", step: "improve#3"),
+  caption: [第 \`improve#3\` 步：C 经由 B 从 7 改进为 5。],
+)`;
+
+/** The notes of the walk-through, as a student writes them in `locale`. */
+const TYPST_NOTES = (locale: Locale): string =>
+  locale === 'en' ? TYPST_NOTES_EN : TYPST_NOTES_ZH;
+
+const BEAMER_SLIDES_EN = String.raw`\documentclass{beamer}
 \usepackage{algomotion}
 
 \begin{document}
@@ -145,6 +162,23 @@ const mcpCall =
       null,
       2,
     ).replace(/\[\n\s*("[^"]*")\n\s*\]/g, '[$1]')}`;
+
+const BEAMER_SLIDES_ZH = String.raw`\documentclass{ctexbeamer}
+\usepackage{algomotion}
+
+\begin{document}
+\begin{frame}{Dijkstra 算法}
+  \centering
+  \algomotion[steps=extract\#2..improve\#3, lang=zh]{dijkstra}{A-B 4, B-C 1, A-C 7, C-D 2}
+\end{frame}
+\end{document}`;
+
+/**
+ * The slides of the walk-through in `locale`, the very file the scene
+ * compiles; Chinese slides set Chinese with ctex.
+ */
+export const BEAMER_SLIDES = (locale: Locale): string =>
+  locale === 'en' ? BEAMER_SLIDES_EN : BEAMER_SLIDES_ZH;
 
 const SHOW_CALL = mcpCall('algomotion_show', {
   recipe: WHY_RUN.algorithm,
@@ -190,7 +224,11 @@ const WALKS: readonly {
     steps: [
       {},
       { code: BEAMER_SLIDES, file: 'slides.tex' },
-      { code: 'latexmk -pdf -shell-escape slides.tex', scene: 'beamer' },
+      {
+        code: (locale) =>
+          `latexmk ${locale === 'en' ? '-pdf' : '-xelatex'} -shell-escape slides.tex`,
+        scene: 'beamer',
+      },
     ],
     runs: [{ ...WHY_RUN, steps: ['extract#2..improve#3'], frames: 3 }],
   },

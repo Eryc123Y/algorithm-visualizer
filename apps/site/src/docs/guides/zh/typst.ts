@@ -51,7 +51,7 @@ ${code(
   '笔记中的一幅图',
 )}
 ${figure('insert', '<code>algomotion</code> 在 <code>insert#2</code> 画出的图。')}
-${scene('notes', 'Typst 编译出的一整页：这幅图和笔记里的其他图一样带着图注；版面只有一栏，队列排到了图的下方。由 <code>npm run scenes</code> 从 <code>apps/site/scenes/notes.typ</code> 生成。')}
+${scene('notes', 'Typst 编译出的一整页：这幅图和笔记里的其他图一样带着图注；版面只有一栏，队列排到了图的下方。由 <code>npm run scenes</code> 从 <code>apps/site/scenes/notes-zh.typ</code> 生成。')}
 <p><code>algomotion(source, input, ...)</code> 返回一张图片，可以放进 <code>figure</code>、<code>grid</code> 或 <code>box</code>。第一个参数是算法 id，后面跟它的输入；也可以只传一份文档。不给输入的算法运行它的第一个示例。<a href="${root}guide/inputs/">输入记法</a>可以直接写成字符串；结构化输入用 Typst 的数组和字典。</p>
 <div class="scroll" role="region" aria-label="Typst 选项" tabindex="0"><table class="params">
 <thead><tr><th>选项</th><th>默认值</th><th>用途</th></tr></thead><tbody>

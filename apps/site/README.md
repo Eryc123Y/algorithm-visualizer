@@ -34,18 +34,19 @@ Every page sends the same Content Security Policy, in a `<meta>` and in `_header
 
 ## Real scenes
 
-The home page, the guides and `/why/` show the outputs as they really look (roadmap 5.3): a page of Typst notes, the overlays of a Beamer frame, a terminal session and the player in a conversation. They are files in `public/scenes/`, committed, with `scenes.json` naming each file, its size and its alternative text. `scripts/scenes.ts` makes them all again from the real tools:
+The home page, the guides and `/why/` show the outputs as they really look (roadmap 5.3): a page of Typst notes, the overlays of a Beamer frame, a terminal session and the player in a conversation. They are files in `public/scenes/`, committed, with `scenes.json` naming each file, its size and its alternative text. Each comes twice: in English, and for the pages under `zh/` in Chinese, from runs asked for in Chinese, with `-zh` in its name and under `zh` in the manifest. `scripts/scenes.ts` makes them all again from the real tools:
 
 ```sh
 npm run scenes -w @algomotion/site
 ```
 
 - `notes.svg`: `scenes/notes.typ` compiled by `typst compile --format svg` with the repository's Typst package, whose engine it builds first, so the page uses the same engine as the other scenes.
-- `beamer-1.svg` to `beamer-3.svg`: `scenes/slides.tex`, the very file the Beamer walk-through on `/why/` shows, compiled by `latexmk -pdf -shell-escape` with the LaTeX package and the `algomotion` command from source, then one SVG per page with `pdftocairo -svg`.
-- `terminal-light.svg` and `terminal-dark.svg`: the commands in `SESSION` run in a fresh folder with the command from source; their output, as printed, is drawn by `src/docs/terminal.ts`, which wraps long lines as a terminal does.
+  `notes-zh.svg` is `scenes/notes-zh.typ`, Chinese notes that set `text.lang`.
+- `beamer-1.svg` to `beamer-3.svg`: `scenes/slides.tex`, the very file the Beamer walk-through on `/why/` shows, compiled by `latexmk -pdf -shell-escape` with the LaTeX package and the `algomotion` command from source, then one SVG per page with `pdftocairo -svg`. `beamer-zh-1.svg` to `beamer-zh-3.svg` are `scenes/slides-zh.tex`, a `ctexbeamer` frame with `lang=zh`, compiled with `latexmk -xelatex`.
+- `terminal-light.svg` and `terminal-dark.svg`: the commands of `session` run in a fresh folder with the command from source; their output, as printed, is drawn by `src/docs/terminal.ts`, which wraps long lines as a terminal does.
 - `chat-light.webp` and `chat-dark.webp`: the MCP server's player page after a real `algomotion_show` call, in the minimal MCP Apps host of the playground's E2E tests (`apps/playground/tests/e2e/mcp-host.ts`), photographed by Playwright at twice the size and compressed with `cwebp`. The conversation around it is plain and carries no product's look.
 
-It needs Typst 0.15, TeX Live with `latexmk`, Poppler's `pdftocairo` and `pdfinfo`, `cwebp` and Playwright's Chromium. Run it after changing the engine's drawing, the packages or the player, and commit what changes. The unit tests check that the files match the manifest and stay under 800 KB together, and that `scenes/slides.tex` is the walk-through's file.
+It needs Typst 0.15 with Noto Serif CJK SC, TeX Live with `latexmk`, XeLaTeX and `ctex`, Poppler's `pdftocairo` and `pdfinfo`, `cwebp` and Playwright's Chromium. Run it after changing the engine's drawing, the packages or the player, and commit what changes. The unit tests check that the files match the manifest and stay under 800 KB together in each language, and that `scenes/slides.tex` and `scenes/slides-zh.tex` are the walk-throughs' files.
 
 ## Deploying to Cloudflare
 
