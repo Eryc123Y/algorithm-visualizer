@@ -12,7 +12,6 @@
 # program PKGCHECK names; --no-check packs without it.
 set -euo pipefail
 root="$(cd "$(dirname "$0")/.." && pwd)"
-cd "$root"
 check=true
 for arg in "$@"; do
   case "$arg" in
@@ -23,11 +22,21 @@ for arg in "$@"; do
       ;;
   esac
 done
+# PKGCHECK may be relative to where the script is run from, so it is made
+# absolute before the script moves to the repository.
 pkgcheck="${PKGCHECK:-pkgcheck}"
-if [ "$check" = true ] && ! command -v "$pkgcheck" > /dev/null; then
-  echo "pkgcheck is missing: get it from https://ctan.org/pkg/pkgcheck, or pass --no-check." >&2
-  exit 1
+if [ "$check" = true ]; then
+  found="$(command -v "$pkgcheck" || true)"
+  [ -n "$found" ] || {
+    echo "pkgcheck is missing: get it from https://ctan.org/pkg/pkgcheck, or pass --no-check." >&2
+    exit 1
+  }
+  case "$found" in
+    /*) pkgcheck="$found" ;;
+    *) pkgcheck="$PWD/$found" ;;
+  esac
 fi
+cd "$root"
 
 npm run build:doc -w @algomotion/latex > /dev/null
 out="$root/release"

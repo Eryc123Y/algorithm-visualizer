@@ -16,6 +16,8 @@ on:
       - '.github/workflows/ctan.yml'
       - 'scripts/ctan.sh'
       - 'packages/latex/package/**'
+      - 'packages/latex/package.json'
+      - '.nvmrc'
       - 'packages/latex/scripts/**'
       - 'packages/spec/src/**'
       - 'packages/fonts/src/**'

@@ -19,6 +19,7 @@
   basicstyle=\ttfamily\small,
   columns=fullflexible,
   keepspaces,
+  breaklines,
   frame=leftline,
   framerule=1.5pt,
   rulecolor=\color{black!25},
@@ -97,7 +98,7 @@ shell escape at all.
   \item \textbf{The package.} \texttt{algomotion.sty} comes with
     \TeX\ distributions that include it from CTAN; otherwise put it next to
     your document, or in your local \texttt{texmf} tree under
-    \texttt{tex/latex/algomotion/}.
+    \nolinkurl{tex/latex/algomotion/}.
   \item \textbf{Requirements.} \LaTeX\ 2024-06-01 or later, as in \TeX\ Live
     2024, and TikZ. pdf\LaTeX, Lua\LaTeX\ and Xe\LaTeX\ work alike;
     \texttt{latex} with \texttt{dvips} works too, but PostScript has no
@@ -245,14 +246,16 @@ frame of a series, all in one picture, so nothing moves from slide to slide.
 \begin{lstlisting}
 \begin{frame}{Dijkstra's algorithm, step by step}
   \centering
-  \algomotionfile[algorithm=dijkstra, steps]{graph.json}   % every frame
+  % every frame
+  \algomotion[steps]{dijkstra}{s-a 4, s-b 1, b-a 2, a-c 1, b-c 5, c-t 3}
 \end{frame}
 
 \begin{frame}{Settling $a$}
   The queue hands out $a$, at distance $3$. \pause
 
   \centering
-  \algomotionfile[algorithm=dijkstra, steps=extract\#3..improve\#5]{graph.json}
+  \algomotion[steps=extract\#3..improve\#5]{dijkstra}{s-a 4, s-b 1, b-a 2,
+    a-c 1, b-c 5, c-t 3}
 \end{frame}
 \end{lstlisting}
 
@@ -364,9 +367,13 @@ characters that shells read inside quotes.
 \section{Licence and support}
 
 The package is free software under the GNU General Public License, version 3
-or later. The figures it draws are yours. Report problems and ask questions
-at \url{https://github.com/Eryc123Y/algorithm-visualizer/issues}; the
-documentation of the whole project is at
-\url{https://algomotion.turing2234.com}.
+or later. The figures it draws are yours.
+
+\begin{itemize}
+  \item Report problems and ask questions at\\
+    \url{https://github.com/Eryc123Y/algorithm-visualizer/issues}.
+  \item The documentation of the whole project, with every algorithm and its
+    figures, is at \url{https://algomotion.turing2234.com}.
+\end{itemize}
 
 \end{document}
