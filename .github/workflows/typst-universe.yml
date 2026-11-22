@@ -1,0 +1,55 @@
+name: Typst Universe
+
+# Checks the Typst package as Typst Universe takes it (docs/releasing.md):
+# the README's examples compile with the oldest Typst the manifest allows,
+# importing `@preview/algomotion`, and Typst's own linter passes on the
+# package laid out as a submission adds it. It publishes nothing. It runs on
+# a version tag, by hand, and on pull requests that change the package: its
+# files, the engine that engine.bc is built from, or the dependencies.
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/typst-universe.yml'
+      - 'scripts/typst-universe.sh'
+      - 'packages/typst/**'
+      - 'packages/spec/src/**'
+      - 'packages/fonts/src/**'
+      - 'packages/core/src/**'
+      - 'packages/svg/src/**'
+      - 'packages/recipes/src/**'
+      - 'package-lock.json'
+
+concurrency:
+  group: typst-universe-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: The oldest Typst the manifest allows
+        id: manifest
+        run: echo "compiler=$(sed -n 's/^compiler = "\(.*\)"$/\1/p' packages/typst/package/typst.toml)" >> "$GITHUB_OUTPUT"
+      - uses: typst-community/setup-typst@v5
+        with:
+          typst-version: ${{ steps.manifest.outputs.compiler }}
+      - name: The README's examples
+        working-directory: packages/typst
+        run: npx vitest run --config vitest.typst.config.ts tests/typst/readme.spec.ts
+      # A pull request checks the package's files; the manifest's URLs, which
+      # are the live site and repository, are checked on a tag and by hand.
+      - name: typst-package-check
+        run: scripts/typst-universe.sh ${{ github.event_name == 'pull_request' && '--offline' || '' }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: typst-universe
+          path: release/universe/

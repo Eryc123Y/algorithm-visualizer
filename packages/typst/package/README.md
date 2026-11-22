@@ -15,13 +15,7 @@ The algomotion engine runs inside the package as a WebAssembly plugin, so nothin
 
 The graph is written as an edge list, and Dijkstra's algorithm starts at its first node; see [Algorithms and inputs](#algorithms-and-inputs).
 
-> **Not on Typst Universe yet.** Until it is published, use it as a local package:
->
-> 1. In the algomotion repository, run `npm install`, then `npm run build -w @algomotion/typst` to build `engine.bc`.
-> 2. Link `packages/typst/package` as `algomotion/0.1.0` in your local package directory: `~/Library/Application Support/typst/packages/local` on macOS, `~/.local/share/typst/packages/local` on Linux, `%APPDATA%\typst\packages\local` on Windows.
-> 3. Import `@local/algomotion:0.1.0` instead of `@preview/algomotion:0.1.0`.
->
-> The `examples/` folder next to this package has every example of this README as a file.
+> **Not on Typst Universe yet.** Until it is published, install [the development version](#the-development-version).
 
 ## One step: `algomotion`
 
@@ -68,7 +62,7 @@ Every algorithm of the algomotion registry is available, with the input its sche
 - **Operations** are written as exercises write them, each with its arguments in order: `"insert 4, delete 3"`.
 - An input that needs only one thing may be that thing alone, as the table's first and graph rows show. The structured forms work too, such as `(graph: (nodes: ("A", "B"), edges: (("A", "B", 4),)), source: "A")`.
 
-`algomotion recipes` (the command line) lists every id with the JSON Schema of its input, and `examples/inputs.typ` draws each row of this table. An input that does not fit is reported with the path of the wrong field, such as `$.input.key`, and a notation with the token and its position, such as `INVALID_NOTATION at $.input: Expected a weight or "," after "B-C", not "x" (character 12)`.
+`algomotion recipes` (the command line) lists every id with the JSON Schema of its input, and [`examples/inputs.typ`](https://github.com/Eryc123Y/algorithm-visualizer/blob/v1.0.0-alpha.1/packages/typst/examples/inputs.typ) draws each row of this table. An input that does not fit is reported with the path of the wrong field, such as `$.input.key`, and a notation with the token and its position, such as `INVALID_NOTATION at $.input: Expected a weight or "," after "B-C", not "x" (character 12)`.
 
 ## Several steps: `algomotion-series`
 
@@ -123,7 +117,7 @@ With [polylux](https://typst.app/universe/package/polylux), the same call goes i
 - A series of one frame is the image alone, on every subslide. An error shows in a box, as for `algomotion`.
 - In touying's handout mode, which keeps the last subslide of each slide, a series shows its last frame.
 
-`examples/slides-polylux.typ` and `examples/slides-touying.typ` step through a whole run, a range from the second subslide, and a section.
+[`examples/slides-polylux.typ`](https://github.com/Eryc123Y/algorithm-visualizer/blob/v1.0.0-alpha.1/packages/typst/examples/slides-polylux.typ) and [`examples/slides-touying.typ`](https://github.com/Eryc123Y/algorithm-visualizer/blob/v1.0.0-alpha.1/packages/typst/examples/slides-touying.typ) step through a whole run, a range from the second subslide, and a section.
 
 ## Documents
 
@@ -211,6 +205,16 @@ There is no time limit. For very long documents, `algomotion export` writes the 
 - Text is drawn as outlines for Latin and Greek letters, digits and common symbols. Other text, such as Chinese characters or emoji, stays text, drawn by your document's fonts. Typst shows colour emoji in SVG images as missing glyphs.
 - Recursion in the engine stops at a few hundred levels, with an error in place of the figure. This is far deeper than any algorithm of the registry goes, but a hand-written document with very deep nesting could reach it.
 
+## The development version
+
+To use the package from a checkout of the [algomotion repository](https://github.com/Eryc123Y/algorithm-visualizer), such as a change that is not on Typst Universe yet:
+
+1. In the repository, run `npm install`, then `npm run build -w @algomotion/typst` to build `engine.bc`.
+2. Link `packages/typst/package` as `algomotion/0.1.0` in your local package directory: `~/Library/Application Support/typst/packages/local` on macOS, `~/.local/share/typst/packages/local` on Linux, `%APPDATA%\typst\packages\local` on Windows.
+3. Import `@local/algomotion:0.1.0` instead of `@preview/algomotion:0.1.0`.
+
+The repository's [`examples/`](https://github.com/Eryc123Y/algorithm-visualizer/tree/v1.0.0-alpha.1/packages/typst/examples) folder has every example of this README as a file, importing the package this way.
+
 ## Licence
 
-The package is free software under the GNU General Public License, version 3 or later (`LICENSE`). The figures it draws are yours. The bundled fonts, whose outlines draw the figures' text (JetBrains Mono, Inter, STIX Two Text, Lexend, Noto Sans, Noto Sans Mono and DotGothic16), are under the SIL Open Font License 1.1 (`OFL.txt`).
+The package is free software under the GNU General Public License, version 3 or later (`LICENSE`). The figures it draws are yours. The package ships no font files: `engine.bc` carries the outlines of the bundled fonts (JetBrains Mono, Inter, STIX Two Text, Lexend, Noto Sans, Noto Sans Mono and DotGothic16), which draw the figures' text, and those outlines are under the SIL Open Font License 1.1 (`OFL.txt`).

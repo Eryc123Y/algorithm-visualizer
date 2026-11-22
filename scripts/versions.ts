@@ -43,6 +43,12 @@ export const PLACES: readonly Place[] = [
     pattern: new RegExp(`@algomotion/elements@${VERSION}`, 'g'),
   },
   { product: 'npm', pattern: new RegExp(`releases/tag/v${VERSION}`, 'g') },
+  // Files of the repository at the release's tag, which the Typst package's
+  // README links to, as Typst Universe asks.
+  {
+    product: 'npm',
+    pattern: new RegExp(`algorithm-visualizer/(?:blob|tree)/v${VERSION}/`, 'g'),
+  },
   // The Typst package: its manifest, its imports and its local folder.
   {
     product: 'typst',

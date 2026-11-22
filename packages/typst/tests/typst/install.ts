@@ -26,8 +26,21 @@ export const examples = here('../../examples');
 const manifest = readFileSync(join(packageDir, 'typst.toml'), 'utf8');
 const field = (name: string) =>
   new RegExp(`^${name}\\s*=\\s*"([^"]+)"`, 'm').exec(manifest)![1]!;
-/** The package as documents import it, `@local/algomotion:0.1.0`. */
-export const spec = `@local/${field('name')}:${field('version')}`;
+const name = field('name');
+/** The version of the package, `0.1.0`. */
+export const version = field('version');
+
+/**
+ * Where the tests install the package: `local`, for a checkout, or
+ * `preview`, as Typst Universe serves it.
+ */
+export type Namespace = 'local' | 'preview';
+
+/** The package as documents import it, such as `@local/algomotion:0.1.0`. */
+export const specIn = (namespace: Namespace) =>
+  `@${namespace}/${name}:${version}`;
+/** The package as the examples import it, `@local/algomotion:0.1.0`. */
+export const spec = specIn('local');
 
 /** The slide frameworks the examples and tests use (ADR 0028). */
 export const FRAMEWORKS = ['@preview/polylux:0.4.0', '@preview/touying:0.8.0'];
@@ -43,12 +56,18 @@ export interface Installed {
   remove(): void;
 }
 
-/** Installs the package, with a freshly built engine, in a new directory. */
-export async function installPackage(): Promise<Installed> {
+/**
+ * Installs the package, with a freshly built engine, in a new directory.
+ * Typst looks in that directory for every namespace before its cache, so a
+ * package installed as `preview` is the one `@preview/algomotion` imports.
+ */
+export async function installPackage(
+  namespace: Namespace = 'local',
+): Promise<Installed> {
   const tmp = mkdtempSync(join(tmpdir(), 'algomotion-typst-'));
   const packages = join(tmp, 'packages');
   const root = join(tmp, 'root');
-  const installed = join(packages, 'local', field('name'), field('version'));
+  const installed = join(packages, namespace, name, version);
   mkdirSync(installed, { recursive: true });
   mkdirSync(root);
   for (const file of ['typst.toml', 'lib.typ', 'plugin.wasm', 'OFL.txt'])
@@ -75,15 +94,18 @@ export async function installPackage(): Promise<Installed> {
 }
 
 /**
- * Why the slide frameworks cannot be used, or undefined when they can.
- * Typst downloads them from Typst Universe the first time, so this runs
- * while the tests are collected, before any of them is chosen.
+ * Why packages from Typst Universe, the slide frameworks by default, cannot
+ * be used, or undefined when they can. Typst downloads them the first
+ * time, so this runs while the tests are collected, before any of them is
+ * chosen.
  */
-export function frameworksMissing(): string | undefined {
+export function frameworksMissing(
+  frameworks: readonly string[] = FRAMEWORKS,
+): string | undefined {
   const dir = mkdtempSync(join(tmpdir(), 'algomotion-frameworks-'));
   try {
     const probe = join(dir, 'probe.typ');
-    writeFileSync(probe, FRAMEWORKS.map((f) => `#import "${f}"\n`).join(''));
+    writeFileSync(probe, frameworks.map((f) => `#import "${f}"\n`).join(''));
     const result = spawnSync(
       'typst',
       ['compile', probe, join(dir, 'probe.pdf')],
@@ -93,7 +115,7 @@ export function frameworksMissing(): string | undefined {
       return `The typst command is missing: ${result.error.message}`;
     return result.status === 0
       ? undefined
-      : `Typst could not load ${FRAMEWORKS.join(' and ')}, so the slide tests are skipped: ${result.stderr.trim()}`;
+      : `Typst could not load ${frameworks.join(' and ')}, so the tests that need them are skipped: ${result.stderr.trim()}`;
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

@@ -6,10 +6,10 @@ compiler = "0.15.0"
 authors = ["Eryc123Y <https://github.com/Eryc123Y>"]
 repository = "https://github.com/Eryc123Y/algorithm-visualizer"
 homepage = "https://algomotion.turing2234.com"
-description = "Step-by-step figures of algorithms and data structures, from an algorithm and its input or from a document."
+description = "Draw step-by-step figures of algorithms and data structures."
 keywords = ["algorithm", "data structure", "visualization", "CLRS", "graph", "tree", "sorting", "figure"]
 categories = ["visualization"]
 disciplines = ["computer-science", "education"]
-license = "GPL-3.0-or-later"
-# OFL.txt covers the outlines of the bundled fonts, which the engine draws
-# text with.
+# The code is under the GPL (LICENSE). The outlines of the bundled fonts,
+# which the engine draws text with, are under the OFL (OFL.txt).
+license = "GPL-3.0-or-later AND OFL-1.1"
