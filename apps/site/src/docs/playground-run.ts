@@ -6,6 +6,7 @@
  * registry loads with the player's, in one shared file.
  */
 import { readInput, runAlgorithm } from '@algomotion/recipes';
+import { localeOf } from '@algomotion/spec';
 
 import { inputError, type InputError } from './playground-state.ts';
 import { clientText } from './text/client.ts';
@@ -50,12 +51,20 @@ export async function runPlayground(
   }
   const ran = runAlgorithm(algorithm, read.value);
   if (!ran.ok) return { ok: false, error: inputError(input, ran.error[0]!) };
-  const snippets = await snippetsFor(algorithm, read.value, depth);
+  // The snippets ask every output for the page's language (ADR 0045).
+  const locale = localeOf(lang);
+  const snippets = await snippetsFor(
+    algorithm,
+    read.value,
+    depth,
+    '-1',
+    locale,
+  );
   return {
     ok: true,
     document: ran.value.document,
     snippets,
-    slides: slidesCode(title, algorithm, inputText(read.value)),
+    slides: slidesCode(title, algorithm, inputText(read.value), locale),
     link: snippets.find((s) => s.id === 'link')!.code,
   };
 }

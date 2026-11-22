@@ -1,40 +1,36 @@
 /**
  * Writes the site's pages into `dist/`, after Vite has built the scripts:
  * the home page with its figures, the guide, the catalogue, a page per
- * registry module, the themes and the missing page. Every figure is drawn
- * here by the engine, so the site always shows what the packages draw.
- * Each page gets the site's Content Security Policy, as the share page
- * does.
+ * registry module, the themes and the missing page, in English at the
+ * root and in Chinese under `zh/`. Every figure is drawn here by the
+ * engine (`draw.ts`), from a run in its page's language, so the site
+ * always shows what the packages draw. Each page gets the site's Content
+ * Security Policy, as the share page does.
  *
  *     node --conditions=@algomotion/source scripts/build-pages.ts
  */
 import { execFileSync } from 'node:child_process';
-import {
-  existsSync,
-  mkdirSync,
-  readdirSync,
-  readFileSync,
-  writeFileSync,
-} from 'node:fs';
-import { dirname, join } from 'node:path';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { algorithms, runAlgorithm } from '@algomotion/recipes';
-import {
-  exportFigures,
-  prepareFigures,
-  themeNames,
-  type Figure,
-  type ThemeName,
-} from '@algomotion/svg';
+import { algorithms } from '@algomotion/recipes';
+import { themeNames } from '@algomotion/svg';
 
 import { assetsOf, type Manifest } from '../src/docs/assets.ts';
-import { catalog, type Entry } from '../src/docs/catalog.ts';
-import { figureFiles, guidePage } from '../src/docs/guide.ts';
+import { catalog, type Entry, type TopicGroup } from '../src/docs/catalog.ts';
+import { figureFiles, guidePage, type Guide } from '../src/docs/guide.ts';
 import { GUIDES } from '../src/docs/guides/index.ts';
 import { GUIDES_ZH } from '../src/docs/guides/zh/index.ts';
 import { homePage, type Art, type HomeArt } from '../src/docs/home.ts';
 import { attribute, type BuildInfo } from '../src/docs/html.ts';
+import {
+  depthOf,
+  LOCALES,
+  missingCounterparts,
+  PREFIX,
+  type Locale,
+} from '../src/docs/locale.ts';
 import {
   changelogPage,
   contributingPage,
@@ -45,30 +41,28 @@ import {
   countOf,
   detailsOf,
   entryPage,
-  stepsOf,
   notFoundPage,
+  stepsOf,
   themesPage,
-  flipFrames,
-  thumbnailFrame,
-  thumbnailStem,
-  type Thumbnail,
 } from '../src/docs/pages.ts';
 import { playgroundGroups, playgroundMarkup } from '../src/docs/playground.ts';
+import { parseScenes } from '../src/docs/scenes.ts';
 import { shortInput } from '../src/docs/short-input.ts';
 import { inputText, slidesCode, snippetsFor } from '../src/docs/snippets.ts';
-import {
-  WHY_FIGURES,
-  WHY_RUN,
-  whyPage,
-  type FigureLayout,
-} from '../src/docs/why.ts';
-import { missingCounterparts, PREFIX } from '../src/docs/locale.ts';
-import { parseScenes } from '../src/docs/scenes.ts';
-import { CHROME } from '../src/docs/text/chrome.ts';
 import { HOME } from '../src/docs/text/home.ts';
+import { WHY } from '../src/docs/text/why.ts';
+import { WHY_FIGURES, WHY_RUN, whyPage } from '../src/docs/why.ts';
 import { withPolicy } from '../src/headers.ts';
+import {
+  allFigures,
+  DIST,
+  runOf,
+  drawArt,
+  drawThumbnails,
+  figureOf,
+  write,
+} from './draw.ts';
 
-const DIST = fileURLToPath(new URL('../dist/', import.meta.url));
 const REPO = fileURLToPath(new URL('../../../', import.meta.url));
 const ENTRY = 'src/docs/main.ts';
 /** The run the home page and the themes show. */
@@ -76,74 +70,6 @@ const DEMO = 'dijkstra';
 const THEME_STEP = 'improve#3';
 /** The home page's input: small enough to read at a glance. */
 const HOME_INPUT = 'A-B 4, B-C 1, A-C 7, C-D 2';
-
-function write(path: string, html: string): void {
-  const file = join(DIST, path);
-  mkdirSync(dirname(file), { recursive: true });
-  writeFileSync(file, html);
-}
-
-/** The document of `algorithm` run on `input`, or a build error. */
-function documentOf(algorithm: string, input: unknown): unknown {
-  const result = runAlgorithm(algorithm, input);
-  if (!result.ok)
-    throw new Error(
-      `${algorithm} on ${JSON.stringify(input)}: ${JSON.stringify(result.error)}`,
-    );
-  return result.value.document;
-}
-
-/** One frame of `document` in `theme`. */
-function figureOf(
-  document: unknown,
-  step: string | number,
-  theme: ThemeName,
-  layout?: FigureLayout,
-): Figure {
-  const series = exportFigures(document, {
-    theme,
-    steps: [step],
-    ...(layout === undefined ? {} : { layout }),
-  });
-  if (!series.ok)
-    throw new Error(`${step} in ${theme}: ${JSON.stringify(series.error)}`);
-  return series.value.figures[0]!;
-}
-
-/** Every frame of `document` after the first, as the light theme draws it. */
-function allFigures(document: unknown): readonly Figure[] {
-  const series = exportFigures(document, { theme: 'light' });
-  if (!series.ok) throw new Error(JSON.stringify(series.error));
-  return series.value.figures.filter((f) => f.frame > 0);
-}
-
-/**
- * Draws a step in the light and the dark theme, or in one fixed theme,
- * into `stem-light.svg` and `stem-dark.svg`.
- */
-function drawArt(
-  document: unknown,
-  step: string | number,
-  stem: string,
-  alt: string,
-  theme?: ThemeName,
-  layout?: FigureLayout,
-): Art {
-  const light = figureOf(document, step, theme ?? 'light', layout);
-  const dark =
-    theme === undefined ? figureOf(document, step, 'dark', layout) : light;
-  write(`${stem}-light.svg`, light.svg);
-  write(`${stem}-dark.svg`, dark.svg);
-  return {
-    light: `${stem}-light.svg`,
-    dark: `${stem}-dark.svg`,
-    width: light.width,
-    height: light.height,
-    alt: alt || light.narration || 'The initial state.',
-    // One fixed theme: shown on that theme's paper in both schemes.
-    ...(theme === undefined ? {} : { theme }),
-  };
-}
 
 /** A file of the repository, by its path from the root. */
 const repoFile = (path: string): string =>
@@ -183,287 +109,216 @@ const manifest = JSON.parse(
   readFileSync(join(DIST, '.vite/manifest.json'), 'utf8'),
 ) as Manifest;
 const assets = { ...assetsOf(manifest, ENTRY), build: buildInfo() };
-const groups = catalog(algorithms);
-const entries: Entry[] = groups.flatMap((g) => [
-  ...g.algorithms,
-  ...g.structures.flatMap((s) => [s.entry, ...s.operations]),
-]);
+/** The catalogue in each locale: the same pages, named in its language. */
+const groupsIn: Readonly<Record<Locale, readonly TopicGroup[]>> = {
+  en: catalog(algorithms),
+  zh: catalog(algorithms, 'zh'),
+};
+const entriesOf = (of: readonly TopicGroup[]): Entry[] =>
+  of.flatMap((g) => [
+    ...g.algorithms,
+    ...g.structures.flatMap((s) => [s.entry, ...s.operations]),
+  ]);
+const entries = entriesOf(groupsIn.en);
+/** A module's first example, as short as it runs the same, as text. */
+const exampleText = (id: string): string =>
+  inputText(shortInput(id, algorithms.find((a) => a.id === id)!.examples[0]));
 
-for (const entry of entries) {
-  const html = entryPage(await detailsOf(entry, groups), assets);
-  write(`${entry.path}index.html`, withPolicy(html, entry.path));
+/** Writes a page at `path` within `locale`, with the site's policy. */
+function writePage(locale: Locale, path: string, html: string): void {
+  const at = `${PREFIX[locale]}${path}`;
+  write(
+    `${at}${path.endsWith('.html') ? '' : 'index.html'}`,
+    withPolicy(html, at || '/'),
+  );
 }
-// The catalogue: a thumbnail of each algorithm and structure, from its
-// first example, at the frame `thumbnailFrame` picks, in light and dark,
-// and the few frames it flips through on hover (`flipFrames`).
-const thumbnails: Record<string, Thumbnail> = {};
-for (const entry of entries) {
-  if (entry.structure !== undefined) continue;
-  const algorithm = algorithms.find((a) => a.id === entry.id)!;
-  const doc = documentOf(entry.id, shortInput(entry.id, algorithm.examples[0]));
-  const stem = thumbnailStem(entry.id);
-  let flip: readonly number[] = [];
-  const [light] = (['light', 'dark'] as const).map((theme) => {
-    const prepared = prepareFigures(doc, { theme });
-    if (!prepared.ok)
-      throw new Error(
-        `${entry.id} in ${theme}: ${JSON.stringify(prepared.error)}`,
-      );
-    const draw = (frame: number) => {
-      const figure = prepared.value.figure(frame);
-      if (!figure.ok)
-        throw new Error(
-          `${entry.id} in ${theme}: ${JSON.stringify(figure.error)}`,
-        );
-      return figure.value;
-    };
-    const still = draw(thumbnailFrame(prepared.value.frames));
-    write(`algorithms/${stem}-${theme}.svg`, still.svg);
-    flip = flipFrames(prepared.value.frames);
-    for (const frame of flip)
-      write(`algorithms/${stem}-f${frame}-${theme}.svg`, draw(frame).svg);
-    return still;
-  });
-  thumbnails[entry.id] = {
-    light: `${stem}-light.svg`,
-    dark: `${stem}-dark.svg`,
-    width: light!.width,
-    height: light!.height,
-    alt: '',
-    flip,
+
+/** The home page's figures, from the hero's run in `locale`. */
+function homeArt(locale: Locale): HomeArt {
+  const home = runOf(DEMO, HOME_INPUT, locale);
+  const t = HOME[locale];
+  const dir = `${PREFIX[locale]}art/`;
+  const output = (
+    id: keyof HomeArt['outputs'],
+    step: string,
+    theme?: (typeof themeNames)[number],
+  ) => drawArt(home, step, `${dir}out-${id}`, t.outputs.alts[id], theme);
+  return {
+    // Every step of the run, frames 1 to the last, for the story.
+    story: allFigures(home).map((f) => ({
+      step: f.selector,
+      narration: f.narration ?? '',
+      ...drawArt(home, f.frame, `${dir}story-${f.frame}`, f.narration ?? ''),
+    })),
+    outputs: {
+      web: output('web', 'improve#3', 'blocks'),
+      typst: output('typst', 'improve#3', 'textbook'),
+      latex: output('latex', 'improve#3', 'print'),
+      cli: output('cli', 'extract#3'),
+      mcp: output('mcp', 'improve#3'),
+      link: output('link', 'done'),
+    },
+    slides: ['improve#2', 'extract#2', 'improve#3'].map((step, k) =>
+      drawArt(home, step, `${dir}slide-${k + 1}`, '', 'dark'),
+    ),
+    scenes,
+    themes: themeNames.map((name) => ({
+      name,
+      art: drawArt(
+        home,
+        'improve#3',
+        `${dir}theme-${name}`,
+        t.themes.alt(name),
+        name,
+      ),
+    })),
   };
 }
-write(
-  'algorithms/index.html',
-  withPolicy(algorithmsPage(groups, assets, thumbnails), 'algorithms/'),
-);
-write(
-  'zh/algorithms/index.html',
-  withPolicy(
-    algorithmsPage(groups, assets, thumbnails, 'zh'),
-    'zh/algorithms/',
-  ),
-);
 
-// The themes page: the registry example at one step, in every theme.
-const example = documentOf(
-  DEMO,
-  shortInput(DEMO, algorithms.find((a) => a.id === DEMO)!.examples[0]),
-);
-const figures = themeNames.map((name) => {
-  const figure = figureOf(example, THEME_STEP, name);
-  const file = `${DEMO}-${name}.svg`;
-  write(`themes/${file}`, figure.svg);
-  return { name, file, width: figure.width, height: figure.height };
-});
-write('themes/index.html', withPolicy(themesPage(figures, assets), 'themes/'));
-write(
-  'zh/themes/index.html',
-  withPolicy(themesPage(figures, assets, 'zh'), 'zh/themes/'),
-);
-
-// The home page: the hero's run, its story, and a figure per output.
-const home = documentOf(DEMO, HOME_INPUT);
-const art: HomeArt = {
-  // Every step of the run, frames 1 to the last, for the story.
-  story: allFigures(home).map((f) => ({
-    step: f.selector,
-    narration: f.narration ?? '',
-    ...drawArt(home, f.frame, `art/story-${f.frame}`, f.narration ?? ''),
-  })),
-  outputs: {
-    web: drawArt(
-      home,
-      'improve#3',
-      'art/out-web',
-      'The player at C’s improvement to 5, in the blocks theme.',
-      'blocks',
-    ),
-    typst: drawArt(
-      home,
-      'improve#3',
-      'art/out-typst',
-      'C improves to 5, through B, in the textbook theme.',
-      'textbook',
-    ),
-    latex: drawArt(
-      home,
-      'improve#3',
-      'art/out-latex',
-      'C improves to 5, through B, in the print theme.',
-      'print',
-    ),
-    cli: drawArt(home, 'extract#3', 'art/out-cli', 'C is final, at 5.'),
-    mcp: drawArt(home, 'improve#3', 'art/out-mcp', 'C improves to 5.'),
-    link: drawArt(home, 'done', 'art/out-link', 'Every distance is final.'),
-  },
-  slides: ['improve#2', 'extract#2', 'improve#3'].map((step, k) =>
-    drawArt(home, step, `art/slide-${k + 1}`, '', 'dark'),
-  ),
-  scenes,
-  themes: themeNames.map((name) => ({
-    name,
-    art: drawArt(
-      home,
-      'improve#3',
-      `art/theme-${name}`,
-      `Dijkstra’s algorithm in the ${name} theme.`,
-      name,
-    ),
-  })),
-};
-const demo = await detailsOf(
-  entries.find((e) => e.id === DEMO)!,
-  groups,
-  0,
-);
-const homeSnippets = await snippetsFor(DEMO, HOME_INPUT, 0, 'improve#3');
-const playground = playgroundMarkup(
-  playgroundGroups(groups, (id) =>
-    inputText(shortInput(id, algorithms.find((a) => a.id === id)!.examples[0])),
-  ),
-  { algorithm: DEMO, input: HOME_INPUT, title: demo.entry.title },
-  `<algo-player algorithm="${DEMO}" input="${attribute(HOME_INPUT)}" theme="auto"></algo-player>`,
-  homeSnippets.find((s) => s.id === 'link')!.code,
-);
-write(
-  'index.html',
-  withPolicy(
-    homePage(
-      groups,
-      { ...demo, snippets: homeSnippets },
-      art,
-      playground,
-      slidesCode(demo.entry.title, DEMO, HOME_INPUT),
-      countOf(groups),
-      assets,
-    ),
-    '/',
-  ),
-);
-
-// The home page in Chinese: the same art and run, its own words. The
-// share link and the playground's snippets are one folder further from
-// the site's root.
-const zhText = HOME.zh;
-const zhArt: HomeArt = {
-  ...art,
-  outputs: Object.fromEntries(
-    Object.entries(art.outputs).map(([id, a]) => [
-      id,
-      {
-        ...a,
-        alt: zhText.outputs.alts[id as keyof typeof zhText.outputs.alts],
-      },
-    ]),
-  ),
-  themes: art.themes.map((t) => ({
-    ...t,
-    art: { ...t.art, alt: zhText.themes.alt(t.name) },
-  })),
-};
-const zhSnippets = (await snippetsFor(DEMO, HOME_INPUT, 1, 'improve#3')).map(
-  (sn) => ({ ...sn, label: CHROME.zh.snippets[sn.id] }),
-);
-const zhPlayground = playgroundMarkup(
-  playgroundGroups(
-    groups,
-    (id) =>
-      inputText(
-        shortInput(id, algorithms.find((a) => a.id === id)!.examples[0]),
-      ),
-    'zh',
-  ),
-  { algorithm: DEMO, input: HOME_INPUT, title: demo.entry.title },
-  `<algo-player algorithm="${DEMO}" input="${attribute(HOME_INPUT)}" theme="auto"></algo-player>`,
-  zhSnippets.find((sn) => sn.id === 'link')!.code,
-  'zh',
-);
-write(
-  'zh/index.html',
-  withPolicy(
-    homePage(
-      groups,
-      { ...demo, snippets: zhSnippets },
-      zhArt,
-      zhPlayground,
-      slidesCode(demo.entry.title, DEMO, HOME_INPUT),
-      countOf(groups),
-      assets,
-      'zh',
-    ),
-    'zh/',
-  ),
-);
-
-// The guide, each page's figures drawn from its own runs.
-for (const guide of GUIDES) {
-  const drawn: Record<string, Art> = {};
-  for (const f of guide.figures ?? []) {
-    const { light } = figureFiles(guide.slug, f.key);
-    drawn[f.key] = drawArt(
-      documentOf(f.algorithm, f.input),
-      f.step,
-      light.replace(/-light\.svg$/, ''),
-      f.alt,
-      f.theme,
-    );
-  }
-  const path = `guide/${guide.slug === '' ? '' : `${guide.slug}/`}`;
-  write(
-    `${path}index.html`,
-    withPolicy(
-      guidePage(guide, GUIDES, drawn, assets, scenes, { translated: true }),
-      path,
-    ),
-  );
-  // The Chinese page shows the same figures, with its own alternative text.
-  const zh = GUIDES_ZH.find((g) => g.slug === guide.slug);
-  if (zh === undefined) continue;
-  const zhDrawn = Object.fromEntries(
-    (zh.figures ?? []).map((f) => [f.key, { ...drawn[f.key]!, alt: f.alt }]),
-  );
-  write(
-    `zh/${path}index.html`,
-    withPolicy(
-      guidePage(zh, GUIDES_ZH, zhDrawn, assets, scenes, {
-        locale: 'zh',
-        translated: true,
-      }),
-      `zh/${path}`,
-    ),
+/** The figures of a guide page, from its own runs in `locale`. */
+function guideArt(guide: Guide, locale: Locale): Record<string, Art> {
+  return Object.fromEntries(
+    (guide.figures ?? []).map((f) => {
+      const { light } = figureFiles(guide.slug, f.key);
+      return [
+        f.key,
+        drawArt(
+          runOf(f.algorithm, f.input, locale),
+          f.step,
+          PREFIX[locale] + light.replace(/-light\.svg$/, ''),
+          f.alt,
+          f.theme,
+        ),
+      ];
+    }),
   );
 }
 
-write('404.html', withPolicy(notFoundPage(assets), '404.html'));
-// Cloudflare serves the nearest 404.html, so addresses under zh/ get this.
-write('zh/404.html', withPolicy(notFoundPage(assets, 'zh'), 'zh/404.html'));
-
-// Why algomotion: its figures, and the facts it states, from real runs.
-const whyArt: Record<string, Art> = {};
-for (const f of WHY_FIGURES)
-  whyArt[f.key] = drawArt(
-    documentOf(f.algorithm, f.input),
-    f.step,
-    `why/${f.key}`,
-    f.alt,
-    f.theme,
-    f.layout,
-  );
-const whyDocument = documentOf(WHY_RUN.algorithm, WHY_RUN.input);
-const whyFacts = {
-  steps: stepsOf(whyDocument),
-  checked: figureOf(whyDocument, 'improve#3', 'light').narration ?? '',
-  modules: algorithms.length,
+const GUIDES_IN: Readonly<Record<Locale, readonly Guide[]>> = {
+  en: GUIDES,
+  zh: GUIDES_ZH,
 };
-for (const locale of ['en', 'zh'] as const)
-  write(
-    `${PREFIX[locale]}why/index.html`,
-    withPolicy(
-      whyPage(whyArt, whyFacts, assets, scenes, locale),
-      `${PREFIX[locale]}why/`,
+
+for (const locale of LOCALES) {
+  const groups = groupsIn[locale];
+  // A page per module.
+  for (const entry of entriesOf(groups))
+    writePage(
+      locale,
+      entry.path,
+      entryPage(
+        await detailsOf(entry, groups, undefined, locale),
+        assets,
+        locale,
+      ),
+    );
+
+  // The catalogue, with a thumbnail of each algorithm and structure.
+  writePage(
+    locale,
+    'algorithms/',
+    algorithmsPage(
+      groups,
+      assets,
+      drawThumbnails(entriesOf(groups), locale),
+      locale,
     ),
   );
+
+  // The themes page: the registry example at one step, in every theme.
+  const example = runOf(
+    DEMO,
+    shortInput(DEMO, algorithms.find((a) => a.id === DEMO)!.examples[0]),
+    locale,
+  );
+  const figures = themeNames.map((name) => {
+    const figure = figureOf(example, THEME_STEP, name);
+    const file = `${DEMO}-${name}.svg`;
+    write(`${PREFIX[locale]}themes/${file}`, figure.svg);
+    return { name, file, width: figure.width, height: figure.height };
+  });
+  writePage(locale, 'themes/', themesPage(figures, assets, locale));
+
+  // The home page: the hero's run, its story, and a figure per output.
+  // In Chinese the share link and the playground's snippets are one
+  // folder further from the site's root.
+  const depth = depthOf(PREFIX[locale]);
+  const demo = await detailsOf(
+    entriesOf(groups).find((e) => e.id === DEMO)!,
+    groups,
+    depth,
+    locale,
+  );
+  const snippets = await snippetsFor(
+    DEMO,
+    HOME_INPUT,
+    depth,
+    'improve#3',
+    locale,
+  );
+  const playground = playgroundMarkup(
+    playgroundGroups(groups, exampleText, locale),
+    { algorithm: DEMO, input: HOME_INPUT, title: demo.entry.title },
+    `<algo-player algorithm="${DEMO}" input="${attribute(HOME_INPUT)}" theme="auto"></algo-player>`,
+    snippets.find((s) => s.id === 'link')!.code,
+    locale,
+  );
+  writePage(
+    locale,
+    '',
+    homePage(
+      groups,
+      { ...demo, snippets },
+      homeArt(locale),
+      playground,
+      slidesCode(demo.entry.title, DEMO, HOME_INPUT, locale),
+      countOf(groups),
+      assets,
+      locale,
+    ),
+  );
+
+  // The guide, each page's figures drawn from its own runs.
+  for (const guide of GUIDES_IN[locale])
+    writePage(
+      locale,
+      `guide/${guide.slug === '' ? '' : `${guide.slug}/`}`,
+      guidePage(
+        guide,
+        GUIDES_IN[locale],
+        guideArt(guide, locale),
+        assets,
+        scenes,
+        { locale, translated: true },
+      ),
+    );
+
+  // Cloudflare serves the nearest 404.html, so addresses under zh/ get
+  // the Chinese one.
+  writePage(locale, '404.html', notFoundPage(assets, locale));
+
+  // Why algomotion: its figures, and the facts it states, from real runs.
+  const whyArt = Object.fromEntries(
+    WHY_FIGURES.map((f) => [
+      f.key,
+      drawArt(
+        runOf(f.algorithm, f.input, locale),
+        f.step,
+        `${PREFIX[locale]}why/${f.key}`,
+        WHY[locale].alt[f.key],
+        f.theme,
+        f.layout,
+      ),
+    ]),
+  );
+  const whyRun = runOf(WHY_RUN.algorithm, WHY_RUN.input, locale);
+  const whyFacts = {
+    steps: stepsOf(whyRun.document),
+    checked: figureOf(whyRun, 'improve#3', 'light').narration ?? '',
+    modules: algorithms.length,
+  };
+  writePage(locale, 'why/', whyPage(whyArt, whyFacts, assets, scenes, locale));
+}
 
 // The project pages, from the repository's own files.
 const PROJECT = [
@@ -472,18 +327,13 @@ const PROJECT = [
   ['contributing/', contributingPage, 'CONTRIBUTING.md'],
 ] as const;
 for (const [path, render, file] of PROJECT)
-  for (const locale of ['en', 'zh'] as const)
-    write(
-      `${PREFIX[locale]}${path}index.html`,
-      withPolicy(
-        render(repoFile(file), assets, locale),
-        `${PREFIX[locale]}${path}`,
-      ),
-    );
+  for (const locale of LOCALES)
+    writePage(locale, path, render(repoFile(file), assets, locale));
 
-// Every English page but the module pages and the share page has a
-// Chinese counterpart, or the build fails: the two cannot drift apart.
-const englishOnly = new Set([...entries.map((e) => e.path), 'play/']);
+// Every English page but the share page has a Chinese counterpart, or the
+// build fails: the two cannot drift apart. The share page is one page for
+// every link, in the language the link or the reader's browser asks for.
+const englishOnly = new Set(['play/']);
 const pagesUnder = (dir: string): string[] =>
   readdirSync(join(DIST, dir), { withFileTypes: true }).flatMap((d) =>
     d.isDirectory()
@@ -505,5 +355,5 @@ if (missing.length > 0)
   );
 
 process.stdout.write(
-  `Wrote ${entries.length + 5 + GUIDES.length + PROJECT.length} English pages, ${5 + GUIDES_ZH.length + PROJECT.length} Chinese pages and ${figures.length} theme figures to dist/\n`,
+  `Wrote ${entries.length + 5 + GUIDES.length + PROJECT.length} English pages and ${entries.length + 5 + GUIDES_ZH.length + PROJECT.length} Chinese pages, with their figures, to dist/\n`,
 );

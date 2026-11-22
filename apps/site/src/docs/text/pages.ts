@@ -1,7 +1,7 @@
 /**
- * The words of the catalogue, the themes page and the missing page, in
- * each locale (roadmap 5.7). Module titles and summaries come from the
- * registry and stay English until 5.8.
+ * The words of the catalogue, the module pages, the themes page and the
+ * missing page, in each locale (roadmap 5.7). Module titles and summaries
+ * come from the registry, in both languages (ADR 0045).
  */
 import type { ThemeName } from '@algomotion/svg';
 
@@ -13,12 +13,33 @@ export interface PagesText {
     readonly heading: string;
     readonly description: (count: number) => string;
     readonly lede: (count: number) => string;
-    /** Said once, in Chinese only: the module names are English. */
-    readonly englishNote: string;
     readonly catalogue: string;
     readonly filter: string;
+    /** Examples of what to type in the filter. */
+    readonly placeholder: string;
     readonly topics: string;
     readonly operations: (structure: string) => string;
+  };
+  /** A module's page. */
+  readonly entry: {
+    readonly operations: string;
+    readonly operationsLede: string;
+    readonly steps: string;
+    /**
+     * HTML: steps have names, with `step` as the example, the `count`th
+     * step called `name` (the first when there is no `#`).
+     */
+    readonly stepsIntro: (
+      step: string,
+      name: string,
+      repeated: boolean,
+    ) => string;
+    readonly inThisExample: string;
+    readonly useIt: string;
+    readonly useItLede: string;
+    readonly moreExamples: string;
+    readonly example: (n: number) => string;
+    readonly openShare: string;
   };
   readonly themes: {
     readonly title: string;
@@ -53,11 +74,28 @@ const en: PagesText = {
       `All ${n} algorithms, data structures and operations algomotion draws, by topic.`,
     lede: (n) =>
       `${n} modules, each with its own page: a player, the names of its steps, and the same run written for a web page, Typst, LaTeX, the command line, an AI assistant and a share link. A data structure’s operations are listed under it.`,
-    englishNote: '',
     catalogue: 'Catalogue',
     filter: 'Filter',
+    placeholder: 'dijkstra, heap, sort…',
     topics: 'Topics',
     operations: (s) => `${s} operations`,
+  },
+  entry: {
+    operations: 'Operations',
+    operationsLede:
+      'Each operation starts from a structure you describe and animates only itself.',
+    steps: 'Steps',
+    stepsIntro: (step, name, repeated) =>
+      repeated
+        ? `Every step has a name, so notes can point at one: <code>${step}</code> is the second <code>${name}</code> step.`
+        : `Every step has a name, so notes can point at one, such as <code>${step}</code>.`,
+    inThisExample: 'In this example:',
+    useIt: 'Use it',
+    useItLede:
+      'The same run, in each output. The input is the example above; give your own the same way.',
+    moreExamples: 'More examples:',
+    example: (n) => `Example ${n}`,
+    openShare: 'Open this run in the share page',
   },
   themes: {
     title: 'Themes · algomotion',
@@ -109,12 +147,27 @@ const zh: PagesText = {
       `algomotion 能画的全部 ${n} 个算法、数据结构和操作，按领域排列。`,
     lede: (n) =>
       `共 ${n} 个模块，每个都有自己的页面：一个播放器、各步骤的名字，以及同一次运行写成网页、Typst、LaTeX、命令行、AI 助手和分享链接各自的代码。数据结构的操作列在它下面。`,
-    englishNote:
-      '模块的名称和简介目前还是英文，模块页面也只有英文版；产品本身的中文化在路线图 5.8。',
     catalogue: '目录',
     filter: '筛选',
+    placeholder: 'dijkstra、堆、排序…',
     topics: '领域',
     operations: (s) => `${s} 的操作`,
+  },
+  entry: {
+    operations: '操作',
+    operationsLede: '每个操作都从你描述的结构开始，只演示这个操作本身。',
+    steps: '步骤',
+    stepsIntro: (step, name, repeated) =>
+      repeated
+        ? `每一步都有名字，笔记可以直接引用某一步：<code>${step}</code> 是第二个 <code>${name}</code> 步骤。`
+        : `每一步都有名字，笔记可以直接引用某一步，比如 <code>${step}</code>。`,
+    inThisExample: '这个例子中有：',
+    useIt: '用法',
+    useItLede:
+      '同一次运行，写成每种输出的代码。输入就是上面的例子；换成你自己的输入，写法一样。',
+    moreExamples: '更多示例：',
+    example: (n) => `示例 ${n}`,
+    openShare: '在分享页面中打开这次运行',
   },
   themes: {
     title: '主题 · algomotion',
