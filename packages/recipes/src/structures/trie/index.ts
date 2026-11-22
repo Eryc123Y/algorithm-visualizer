@@ -266,6 +266,7 @@ export const trie = defineStructure<TrieState, From, 'tree'>({
     zh: '在字典树中依次插入和查找单词，每个单词都是一条从根出发的字符路径。',
   },
   name: 'trie',
+  heading: { en: 'trie', zh: '字典树' },
   kind: 'tree',
   from: listField(
     z

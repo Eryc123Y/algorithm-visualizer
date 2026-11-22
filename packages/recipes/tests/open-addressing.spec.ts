@@ -10,7 +10,13 @@ import { describe, expect, it } from 'vitest';
 
 import type { VisualizationInput } from '@algomotion/spec';
 
-import { findAlgorithm } from '../src/index.ts';
+import {
+  findAlgorithm,
+  linearProbing,
+  openAddressing,
+  runModule,
+} from '../src/index.ts';
+import { probingCode } from '../src/structures/hashing/probing-code.ts';
 import { fuzz, replay, runError, runOk, stateOf } from './helpers.ts';
 import { recipe } from './recipe-properties.ts';
 
@@ -229,3 +235,42 @@ for (const id of Object.keys(SEQUENCES) as Id[])
       );
     },
   );
+
+describe('a probing scheme of one’s own', () => {
+  // Written before ADR 0045: one language, as plain strings.
+  const custom = openAddressing({
+    id: 'custom-probing',
+    title: 'Hash table with a custom probe',
+    summary: 'Probes (k + 2i) mod m.',
+    sequence: '(k + 2i) mod m',
+    scheme: {
+      slot: (key, i, size) => (((key + 2 * i) % size) + size) % size,
+      narrate: (key, _i, q, _size, holds) => `Probe ${q} for ${key}; ${holds}.`,
+    },
+    code: probingCode({
+      pseudocode: 'q = (k + 2i) mod m',
+      python: 'q = (k + 2 * i) % m',
+    }),
+    sample: { size: 7, keys: [3] },
+    run: [{ op: 'insert', key: 10 }],
+    examples: { insert: 10, found: 3, missing: 4 },
+  });
+  const run = (locale: 'en' | 'zh') => {
+    const module = custom.modules.find((m) => m.id === 'custom-probing')!;
+    const result = runModule(module, undefined, { locale });
+    if (!result.ok) throw new Error(JSON.stringify(result.error));
+    return result.value.document.steps.map((s) => s.meta?.narration);
+  };
+
+  it('still narrates with plain strings, telling what a slot holds in the run’s language', () => {
+    expect(run('en')).toContain('Probe 3 for 10; it is empty.');
+    expect(run('zh')).toContain('Probe 3 for 10; 它是空的.');
+    expect(custom.modules[0]!.summary).toContain('(k + 2i) mod m');
+  });
+
+  it('is what the built-in tables are made of', () => {
+    expect(linearProbing.modules.map((m) => m.id)).toContain(
+      'linear-probing.insert',
+    );
+  });
+});

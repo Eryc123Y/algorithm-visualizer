@@ -153,7 +153,7 @@ export const stronglyConnectedComponents = defineAlgorithm({
     const found = trace.add('components', {
       kind: 'array',
       place: 'side',
-      label: 'components',
+      label: trace.say({ en: 'components', zh: '强连通分量' }),
       initial: [],
     });
     const adj = adjacency(g);

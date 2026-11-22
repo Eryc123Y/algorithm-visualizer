@@ -92,6 +92,7 @@ ${scene('terminal', 'A session with the command, as it ran: an export, a run, an
 <tr><td><code>--step</code></td><td>all frames</td><td>Selector; repeat the option or separate selectors with commas.</td></tr>
 <tr><td><code>--theme</code></td><td><code>light</code></td><td>Any built-in fixed theme; see <a href="${root}themes/">Themes</a>.</td></tr>
 <tr><td><code>--layout</code></td><td><code>wide</code></td><td><code>wide</code> or <code>narrow</code>.</td></tr>
+<tr><td><code>--lang</code></td><td><code>en</code></td><td><code>en</code> or <code>zh</code>: the language of an algorithm's run and of the figure's own words, such as “top”. A document's own text stays as written.</td></tr>
 <tr><td><code>--format</code></td><td><code>svg</code></td><td><code>svg</code> or <code>tikz</code>.</td></tr>
 <tr><td><code>--one-file</code></td><td>off</td><td>TikZ only: combine the frames for a slide series.</td></tr>
 <tr><td><code>--out</code>, <code>-o</code></td><td>current directory</td><td>Output directory, created if missing.</td></tr>

@@ -30,6 +30,7 @@ ${figure('linked', '链接在 <code>insert</code> 处打开，此时 2 已经移
 <tr><td><code>doc</code></td><td>文档 JSON，依次经过 UTF-8 编码、原始 DEFLATE 压缩和无填充的 base64url 编码。有它时不能再给 <code>alg</code> 或 <code>in</code>。</td><td>用下文的编解码函数。</td></tr>
 <tr><td><code>frame</code></td><td>打开时的帧号或选择器，默认 <code>0</code>。</td><td><code>frame=improve%233</code></td></tr>
 <tr><td><code>theme</code></td><td>播放器主题、<code>auto</code>，或一对日间/夜间主题。</td><td><code>theme=textbook%20textbook-dark</code></td></tr>
+<tr><td><code>lang</code></td><td>播放器和算法运行过程的语言，<code>en</code> 或 <code>zh</code>。不写时，分享页跟随读者浏览器的语言。</td><td><code>lang=zh</code></td></tr>
 </tbody></table></div>
 <p>值用百分号编码：选择器里的 <code>#</code> 写成 <code>%23</code>，空格写成 <code>%20</code>。不要用表单编码中表示空格的 <code>+</code>。未知的键会被忽略。已知的键重复、编码格式错误或版本不受支持，都会报错。</p>
 

@@ -263,12 +263,17 @@ test('the roadmap shows each phase’s progress and what waits for the owner', a
   await expect(bars.first()).toHaveAccessibleName(
     /Phase 0: foundations: \d+ of \d+ done/,
   );
-  await expect(page.locator('#owner-items')).toContainText('4.3 Publish');
-  await page
-    .locator('#next-items')
-    .getByRole('link', { name: 'Phase 5: a site worth visiting' })
-    .click();
-  await expect(page).toHaveURL(/#phase-5-a-site-worth-visiting$/);
+  // What waits for the owner leads to its phase; so does what is next,
+  // which is nothing once every other item is done.
+  const owner = page.locator('#owner-items');
+  await expect(owner).toContainText('4.3 Publish');
+  await owner.getByRole('link', { name: 'Phase 4: release 1.0' }).click();
+  await expect(page).toHaveURL(/#phase-4-release-1-0$/);
+  const next = page.locator('#next-items a');
+  if ((await next.count()) === 0)
+    await expect(page.locator('#next + p')).toHaveText(
+      'Nothing is waiting to be picked up.',
+    );
 });
 
 test('the footer names the version and the commit the site was built from', async ({

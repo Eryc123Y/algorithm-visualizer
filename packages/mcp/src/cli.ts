@@ -6,15 +6,15 @@
  *   algomotion validate <file>
  *   algomotion inspect <file> [frame …]
  *   algomotion render <file> [--frame f] [--theme t] [--layout narrow]
- *                  [--out frame.svg]
+ *                  [--lang en|zh] [--out frame.svg]
  *   algomotion export <file> [--step s …] [--theme t] [--layout l] [--format svg|tikz]
- *                  [--one-file] [--out dir] [--name pattern]
+ *                  [--lang en|zh] [--one-file] [--out dir] [--name pattern]
  *                  [--error-file file]
  *   algomotion export <id> --input <input|file> [the same options]
  *   algomotion export <id> --input-hex <hex> [the same options]
  *
  *   algomotion recipes
- *   algomotion run <id> [input] [--out doc.json]
+ *   algomotion run <id> [input] [--lang en|zh] [--out doc.json]
  *
  * An input is JSON, a JSON object without its braces, or a notation such
  * as "5 2 4 6 1 3" or "A-B 4, B-C 2" (ADR 0032).

@@ -89,16 +89,20 @@ export const rodCutting = defineAlgorithm({
     const p = [0, ...prices];
     const r = [0];
     const s = [0];
-    const table = trace.add('rod', {
-      kind: 'table',
-      initial: [
-        ['', ...prices],
-        [0, ...prices.map(() => null)],
-        ['', ...prices.map(() => null)],
-      ],
-      rowLabels: ['p', 'r', 's'],
-      columnLabels: Array.from({ length: n + 1 }, (_, j) => j),
-    });
+    const table = trace.add(
+      'rod',
+      {
+        kind: 'table',
+        initial: [
+          ['', ...prices],
+          [0, ...prices.map(() => null)],
+          ['', ...prices.map(() => null)],
+        ],
+        rowLabels: ['p', 'r', 's'],
+        columnLabels: Array.from({ length: n + 1 }, (_, j) => j),
+      },
+      { heading: { en: 'rod', zh: '钢条' } },
+    );
 
     for (let j = 1; j <= n; j++) {
       let q = -Infinity;

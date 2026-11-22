@@ -72,13 +72,17 @@ export const floydWarshall = defineAlgorithm({
       if (!g.directed) d[j]![i] = Math.min(d[j]![i]!, w);
     }
     const graph = trace.add('g', declareGraph(g, true));
-    const table = trace.add('dist', {
-      kind: 'table',
-      place: 'side',
-      initial: d.map((row) => row.map((x) => (x === Infinity ? '∞' : x))),
-      rowLabels: [...g.nodes],
-      columnLabels: [...g.nodes],
-    });
+    const table = trace.add(
+      'dist',
+      {
+        kind: 'table',
+        place: 'side',
+        initial: d.map((row) => row.map((x) => (x === Infinity ? '∞' : x))),
+        rowLabels: [...g.nodes],
+        columnLabels: [...g.nodes],
+      },
+      { heading: { en: 'dist', zh: '距离' } },
+    );
     trace.step('start', {
       en: 'Start from the edge weights: 0 on the diagonal, ∞ where there is no edge.',
       zh: '从边的权重开始：对角线上为 0，没有边的地方为 ∞。',

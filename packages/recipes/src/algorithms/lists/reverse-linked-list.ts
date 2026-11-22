@@ -55,10 +55,14 @@ export const reverseLinkedList = defineAlgorithm({
     `,
   },
   run({ values }, trace) {
-    const list = trace.add('list', {
-      kind: 'linkedList',
-      initial: [...values],
-    });
+    const list = trace.add(
+      'list',
+      {
+        kind: 'linkedList',
+        initial: [...values],
+      },
+      { heading: { en: 'list', zh: '链表' } },
+    );
     const n = values.length;
     trace.step('start', {
       en: 'Start at the head, with no node before it: prev is empty.',

@@ -115,7 +115,7 @@ export const offlineCaching = defineAlgorithm({
     });
     const M = trace.add('misses', {
       kind: 'array',
-      label: 'misses',
+      label: trace.say({ en: 'misses', zh: '未命中次数' }),
       place: 'side',
       initial: [0],
     });

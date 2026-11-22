@@ -34,12 +34,12 @@ export const doubleHashing = openAddressing({
     narrate: (key, i, q, size, holds) =>
       i === 0
         ? {
-            en: `h₁(${key}) = ${key} mod ${size} = ${q}, and the step is h₂(${key}) = 1 + (${key} mod ${size - 1}) = ${step(key, size)}: probe slot ${q}; ${holds.en}.`,
-            zh: `h₁(${key}) = ${key} mod ${size} = ${q}，步长 h₂(${key}) = 1 + (${key} mod ${size - 1}) = ${step(key, size)}：探查槽 ${q}；${holds.zh}。`,
+            en: `h₁(${key}) = ${key} mod ${size} = ${q}, and the step is h₂(${key}) = 1 + (${key} mod ${size - 1}) = ${step(key, size)}: probe slot ${q}; ${holds}.`,
+            zh: `h₁(${key}) = ${key} mod ${size} = ${q}，步长 h₂(${key}) = 1 + (${key} mod ${size - 1}) = ${step(key, size)}：探查槽 ${q}；${holds}。`,
           }
         : {
-            en: `Step ${step(key, size)} slots further: slot ${q}; ${holds.en}.`,
-            zh: `再前进 ${step(key, size)} 个槽：槽 ${q}；${holds.zh}。`,
+            en: `Step ${step(key, size)} slots further: slot ${q}; ${holds}.`,
+            zh: `再前进 ${step(key, size)} 个槽：槽 ${q}；${holds}。`,
           },
     unfit: (size) =>
       isPrime(size)

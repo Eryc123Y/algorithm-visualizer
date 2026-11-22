@@ -17,7 +17,7 @@ import {
   operationsOf,
   type Applied,
 } from '../../structure.ts';
-import type { Localized, Text } from '../../text.ts';
+import { textIn, type Localized, type Text } from '../../text.ts';
 import { silentHandle, silentTrace, type Trace } from '../../trace.ts';
 import { Key, MAX_SLOTS, tableFrom, type TableFrom } from './hash.ts';
 
@@ -41,14 +41,12 @@ const holds = (s: ProbingState, q: number): Localized =>
 export interface Scheme {
   /** h(k, i) for a table of `size` slots. */
   slot(key: number, i: number, size: number): number;
-  /** The narration of the i-th probe, at slot q; `holds` says what is there. */
-  narrate(
-    key: number,
-    i: number,
-    q: number,
-    size: number,
-    holds: Localized,
-  ): Text;
+  /**
+   * The narration of the i-th probe, at slot q; `holds` says what is
+   * there, in the run's language. A plain string is English in every run;
+   * `{ en, zh }` gives each language its own (ADR 0045).
+   */
+  narrate(key: number, i: number, q: number, size: number, holds: string): Text;
   /** Why a table of `size` slots cannot be used, if it cannot. */
   unfit?(size: number): string | undefined;
 }
@@ -63,9 +61,13 @@ function probe(
   trace: Trace,
   on: On,
 ): void {
-  trace.step('probe', scheme.narrate(key, i, q, s.size, holds(s, q)), {
-    vars: { k: key, i, q },
-  });
+  trace.step(
+    'probe',
+    scheme.narrate(key, i, q, s.size, trace.say(holds(s, q))),
+    {
+      vars: { k: key, i, q },
+    },
+  );
   on.pointer({ name: 'q', index: q }).highlight({ indices: [q] });
 }
 
@@ -140,7 +142,7 @@ export interface OpenAddressing {
   readonly scheme: Scheme;
   readonly code: { readonly insert: Listing; readonly search: Listing };
   /** What the operations' summaries say the probe sequence is. */
-  readonly sequence: Localized;
+  readonly sequence: Text;
   /** The table of the operations' examples. */
   readonly sample: TableFrom;
   /** The module's run, from an empty table of the sample's size. */
@@ -204,8 +206,8 @@ export function openAddressing(table: OpenAddressing) {
         name: 'insert',
         title: { en: 'insert', zh: '插入' },
         summary: {
-          en: `Inserts a key into the first empty slot of its probe sequence, ${table.sequence.en}.`,
-          zh: `把关键字插入它的探查序列 ${table.sequence.zh} 中第一个空槽。`,
+          en: `Inserts a key into the first empty slot of its probe sequence, ${textIn(table.sequence, 'en')}.`,
+          zh: `把关键字插入它的探查序列 ${textIn(table.sequence, 'zh')} 中第一个空槽。`,
         },
         args: { key: Key.describe('The integer key to insert.') },
         examples: [{ from: sample, key: table.examples.insert }],
