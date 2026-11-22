@@ -12,7 +12,7 @@ All notable changes to algomotion, newest first. The format follows [Keep a Chan
   - Every module's title, summary, narration, sections and labels in Simplified Chinese, with a test that reads the sources so no narration stays in one language (#162).
   - The site's module pages and catalogue in Chinese under `/zh/`: every figure on a Chinese page is drawn from a run in Chinese, the catalogue can be searched by the English names too, and each page's snippets ask their output for Chinese (#163).
   - The real scenes on the Chinese pages in Chinese: Typst notes that set `text.lang`, a `ctexbeamer` frame, a terminal session with `--lang zh` and a conversation that asks for Chinese (#164).
-- Release preparation (#165): `node scripts/version.ts` sets every version the repository writes, and a test keeps them in step; the Release files workflow builds the standalone `algomotion` command for macOS (arm64 and x64), Linux (x64 and arm64) and Windows (x64), runs each once, and packs the Typst, LaTeX and player archives; `docs/releasing.md` has the steps.
+- Release preparation (#165): `node scripts/version.ts` sets every version the repository writes, but for the lock file, which `npm install --package-lock-only` updates, and a test keeps them in step; the Release files workflow builds the standalone `algomotion` command for macOS (arm64 and x64), Linux (x64 and arm64) and Windows (x64), runs each once, and packs the Typst, LaTeX and player archives; `docs/releasing.md` has the steps.
 - A README for every published package (#167).
 
 ### Changed
@@ -21,7 +21,7 @@ All notable changes to algomotion, newest first. The format follows [Keep a Chan
 - Releases are packed from clean builds, without build leftovers (#154), and the site's copy was reviewed in both languages, with install steps for the alpha (#155).
 - The root package, whose version the site's footer shows, and the MCP server report the packages' version, `1.0.0-alpha.1`; they said `0.1.0` and `0.0.0` (#165).
 - The Worker's custom domain moves to its `production` environment, so the Deploy to Cloudflare button deploys a copy anywhere (#165). `@algomotion/elements` names the fonts' licence beside the GPL (#165).
-- The property tests run every recipe's random inputs in Chinese too, and check that every step points at a line in every language; the BST and the heaps join the shared suite, and four more structures get ADR 0018's checks (#166).
+- The shared property suite (`recipe-properties.ts`) also runs each recipe's random inputs in Chinese, and checks that every step points at a line in every language; the BST and the heaps join the shared suite, and four more structures get ADR 0018's checks (#166).
 
 ## 1.0.0-alpha.1 (2026-11-14)
 
