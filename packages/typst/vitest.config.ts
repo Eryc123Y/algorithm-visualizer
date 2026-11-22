@@ -11,8 +11,9 @@ const conditions = [
 
 // The generated requests run FUZZ_RUNS cases, 30 by default; a deeper run
 // before a release gets time in proportion. Drawing every registry example
-// through the plugin takes about 15 s; coverage instruments the engine the
-// plugin's bundle is built from, which makes it about twice as slow.
+// in two themes through the plugin, as each plugin-themes file does, takes
+// about 30 s; coverage instruments the engine the plugin's bundle is built
+// from, which makes it about twice as slow.
 const coverage = process.argv.some((arg) => arg.startsWith('--coverage'));
 const testTimeout =
   120_000 *
