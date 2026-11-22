@@ -4,6 +4,10 @@ name: CI
 # Pull requests run CI; merges to main do not run it again, as the pull request
 # already tested the merge result. Changes that only touch documentation skip
 # it, and a newer push cancels a running check.
+#
+# The checks run as parallel jobs: the static checks, the unit tests in two
+# shards, and each app's end-to-end tests. Coverage is measured by the
+# Coverage workflow, by hand or weekly, since no pull request reads it.
 on:
   pull_request:
     paths-ignore:
@@ -16,7 +20,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  check:
+  static:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -28,7 +32,36 @@ jobs:
       - run: npm run typecheck
       - run: npm run lint
       - run: npm run format:check
-      - run: npm run test:coverage
+
+  unit:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npx vitest run --shard=${{ matrix.shard }}/2
+
+  e2e:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [playground, site]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      # The packages' builds, which the playground's tests load from dist/.
       - run: npm run build
       - run: npx playwright install --with-deps chromium
-      - run: npm run test:e2e
+      - run: npm run test:e2e -w @algomotion/${{ matrix.app }}
