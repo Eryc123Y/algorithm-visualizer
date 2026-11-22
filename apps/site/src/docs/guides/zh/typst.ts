@@ -26,7 +26,7 @@ export const zh: Guide = {
   body: ({ root, code, figure, note, scene }) => `
 <h2 id="install">在本地安装</h2>
 <p>这个包还没有发布到 Typst Universe，1.0 时会发布。先安装 Typst 0.15 或更高版本。最快的办法是用 <a href="https://github.com/Eryc123Y/algorithm-visualizer/releases/tag/v1.0.0-alpha.1">GitHub Release</a>：把 <code>algomotion-typst-0.1.0.zip</code> 解压到本地 Typst 包目录（见下文），让它包含 <code>local/algomotion/0.1.0/</code>，然后导入 <code>@local/algomotion:0.1.0</code>。</p>
-<p>也可以从仓库构建引擎。仓库里已提交编译好的 WebAssembly 插件，正常使用不需要编译 Rust 代码。</p>
+<p>也可以从仓库构建引擎。仓库里已提交编译好的 WebAssembly 插件，正常使用不需要编译 Rust 代码。要用中文画运行过程，就按这种方法构建：<code>lang</code> 参数和跟随 <code>text.lang</code> 都是在 1.0.0-alpha.1 之后加入的，那个版本的包只能画英文，下一个版本才会带上它们。</p>
 ${code(
   `npm ci
 npm run build -w @algomotion/typst`,

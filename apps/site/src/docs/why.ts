@@ -163,7 +163,7 @@ const mcpCall =
       2,
     ).replace(/\[\n\s*("[^"]*")\n\s*\]/g, '[$1]')}`;
 
-const BEAMER_SLIDES_ZH = String.raw`\documentclass{ctexbeamer}
+const BEAMER_SLIDES_ZH = String.raw`\documentclass[fontset=fandol]{ctexbeamer}
 \usepackage{algomotion}
 
 \begin{document}
@@ -175,7 +175,8 @@ const BEAMER_SLIDES_ZH = String.raw`\documentclass{ctexbeamer}
 
 /**
  * The slides of the walk-through in `locale`, the very file the scene
- * compiles; Chinese slides set Chinese with ctex.
+ * compiles; Chinese slides set Chinese with ctex, in the Fandol fonts
+ * that come with TeX Live, so they compile on any system.
  */
 export const BEAMER_SLIDES = (locale: Locale): string =>
   locale === 'en' ? BEAMER_SLIDES_EN : BEAMER_SLIDES_ZH;

@@ -25,7 +25,7 @@ ${code(
 npm run build:standalone -w @algomotion/mcp`,
   '构建 LaTeX 所用的命令',
 )}
-<p>把 <code>packages/mcp/dist/standalone/algomotion</code> 加入 <code>PATH</code>，或者用 <code>command=</code> 传入它的绝对路径。<a href="${root}guide/cli/">Node.js 版命令</a>也可以用，写成 <code>command={node /absolute/path/packages/mcp/dist/algomotion.js}</code>。</p>
+<p>把 <code>packages/mcp/dist/standalone/algomotion</code> 加入 <code>PATH</code>，或者用 <code>command=</code> 传入它的绝对路径。<a href="${root}guide/cli/">Node.js 版命令</a>也可以用，写成 <code>command={node /absolute/path/packages/mcp/dist/algomotion.js}</code>。要画中文的图，宏包和命令都要从仓库获取：<code>lang</code> 键是在 1.0.0-alpha.1 之后加入的，那个版本的宏包和命令只能画英文，下一个版本才会带上它。</p>
 
 <h2 id="figure">画一幅图</h2>
 ${code(
