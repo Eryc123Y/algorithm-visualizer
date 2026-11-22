@@ -2,7 +2,7 @@
 
 ## Setup
 
-Requirements: Node.js >= 22.18 (see `.nvmrc`), which runs the TypeScript scripts and tests directly, and npm. Everything else is a dev dependency.
+Requirements: Node.js 22.22.2 or later in the 22 line, 24.15 or later in the 24 line, or 26 and later (see `.nvmrc`), and npm. Everything else is a dev dependency. The scripts and tests run TypeScript directly, which needs Node.js 22.18, and some locked dev dependencies need the newer releases.
 
 ```shell
 npm install
