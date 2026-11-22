@@ -31,34 +31,48 @@ const blocks = [...readme.matchAll(/^```typ\n([\s\S]*?)^```$/gm)].map(
 
 /**
  * A function's signature as the README writes it, in a code block or
- * inline: its name, then its parameters after the source and the input.
+ * inline: its name, its positional parameters, the source among them, then
+ * its named ones.
  */
 const SIGNATURE =
-  /#?(algomotion(?:-[a-z]+)?)\((?:only, )?source, input, ([^)]*)\)/g;
+  /#?(algomotion(?:-[a-z]+)?)\(((?:[a-z]+, )*source, [a-z]+, [a-z]+:[^)]*)\)/g;
 const isSignature = (block: string) =>
-  /^#algomotion[-a-z]*\((?:only, )?source, input,/.test(block);
+  /^#algomotion[-a-z]*\((?:[a-z]+, )*source, [a-z]+, [a-z]+:/.test(block);
 
-/** The named parameters of a parameter list, with their defaults. */
-function named(parameters: string): Record<string, string> {
-  return Object.fromEntries(
-    [...parameters.matchAll(/([a-z]+):\s*([^,\s]+)/g)].map((m) => [
-      m[1]!,
-      m[2]!,
-    ]),
-  );
+interface Signature {
+  /** The positional parameters; the README calls lib.typ's `..args` `input`. */
+  readonly positional: readonly string[];
+  /** The named parameters, with their defaults. */
+  readonly named: Readonly<Record<string, string>>;
 }
 
-/** The public functions of lib.typ with their named parameters. */
+/** The signature of a parameter list, as lib.typ or the README writes it. */
+function signatureOf(parameters: string): Signature {
+  const all = parameters
+    .split(',')
+    .map((p) => p.trim())
+    .filter((p) => p !== '');
+  return {
+    positional: all
+      .filter((p) => !p.includes(':'))
+      .map((p) => (p === '..args' ? 'input' : p)),
+    named: Object.fromEntries(
+      all.filter((p) => p.includes(':')).map((p) => p.split(/:\s*/)),
+    ) as Record<string, string>,
+  };
+}
+
+/** The public functions of lib.typ with their signatures. */
 const defined = Object.fromEntries(
   [...lib.matchAll(/^#let (algomotion[-a-z]*)\(\n([\s\S]*?)^\) =/gm)].map(
-    (m) => [m[1]!, named(m[2]!)],
+    (m) => [m[1]!, signatureOf(m[2]!)],
   ),
 );
 
 describe('the README’s signatures', () => {
   const documented = [...readme.matchAll(SIGNATURE)].map((m) => ({
     name: m[1]!,
-    parameters: named(m[2]!.replaceAll(/\s+/g, ' ')),
+    signature: signatureOf(m[2]!),
   }));
 
   it('cover every public function of lib.typ, once', () => {
@@ -69,8 +83,8 @@ describe('the README’s signatures', () => {
 
   it.for(documented.map((d) => [d.name, d] as const))(
     '%s has the parameters and defaults of lib.typ',
-    ([name, { parameters }]) => {
-      expect(parameters).toEqual(defined[name]);
+    ([name, { signature }]) => {
+      expect(signature).toEqual(defined[name]);
     },
   );
 });

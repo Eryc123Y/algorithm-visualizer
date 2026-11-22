@@ -42,12 +42,13 @@ jobs:
       - uses: typst-community/setup-typst@v5
         with:
           typst-version: ${{ steps.manifest.outputs.compiler }}
-      - run: npm run build -w @algomotion/typst
       - name: The README's examples
         working-directory: packages/typst
         run: npx vitest run --config vitest.typst.config.ts tests/typst/readme.spec.ts
+      # A pull request checks the package's files; the manifest's URLs, which
+      # are the live site and repository, are checked on a tag and by hand.
       - name: typst-package-check
-        run: scripts/typst-universe.sh
+        run: scripts/typst-universe.sh ${{ github.event_name == 'pull_request' && '--offline' || '' }}
       - uses: actions/upload-artifact@v4
         with:
           name: typst-universe

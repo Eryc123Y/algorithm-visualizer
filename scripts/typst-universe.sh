@@ -2,31 +2,55 @@
 # Lays the Typst package out as a pull request to Typst Universe adds it,
 # packages/preview/algomotion/<version>/ in a clone of typst/packages, and
 # checks it with Typst's own linter, typst-package-check
-# (docs/releasing.md). Build engine.bc first:
+# (docs/releasing.md). After `npm ci`:
 #
-#     npm run build -w @algomotion/typst && scripts/typst-universe.sh [dir]
+#     scripts/typst-universe.sh [dir] [--replace] [--offline]
 #
-# `dir` is the clone, or any directory to lay it out in, and defaults to
-# release/universe. The check runs typst-package-check from PATH, or its
-# Docker image. It fails on every diagnostic but the size warnings of
-# plugin.wasm and engine.bc, which the submission explains: they are the
-# engine (ADR 0026).
+# - `dir` is the clone, or any directory to lay the package out in; it
+#   defaults to release/universe, which is made afresh each time.
+# - It builds engine.bc from this checkout first, so the package is the
+#   checkout's. A version already in `dir` stays, unless --replace.
+# - --offline skips the checks that fetch the manifest's URLs.
+#
+# The check runs typst-package-check from PATH, or its Docker image. It
+# fails on every diagnostic but the size warnings of plugin.wasm and
+# engine.bc, which the submission explains: they are the engine (ADR 0026).
 set -euo pipefail
 root="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$root"
 CHECKER_IMAGE="ghcr.io/typst/package-check:0.7.0"
+
+clone=""
+replace=false
+offline=()
+for arg in "$@"; do
+  case "$arg" in
+    --replace) replace=true ;;
+    --offline) offline=(--offline) ;;
+    -*)
+      echo "Unknown option $arg" >&2
+      exit 1
+      ;;
+    *) clone="$arg" ;;
+  esac
+done
+if [ -z "$clone" ]; then
+  clone="$root/release/universe"
+  rm -rf "$clone"
+fi
+
 manifest=packages/typst/package/typst.toml
 name="$(sed -n 's/^name = "\(.*\)"$/\1/p' "$manifest")"
 version="$(sed -n 's/^version = "\(.*\)"$/\1/p' "$manifest")"
-clone="${1:-$root/release/universe}"
 mkdir -p "$clone"
 clone="$(cd "$clone" && pwd)"
 target="$clone/packages/preview/$name/$version"
-
-[ -f packages/typst/package/engine.bc ] || {
-  echo "Missing engine.bc: run npm run build -w @algomotion/typst first." >&2
+if [ -e "$target" ] && [ "$replace" != true ]; then
+  echo "$target exists; pass --replace to lay the package out again." >&2
   exit 1
-}
+fi
+
+npm run build -w @algomotion/typst > /dev/null
 rm -rf "$target"
 mkdir -p "$target"
 for file in typst.toml lib.typ engine.bc plugin.wasm README.md LICENSE OFL.txt; do
@@ -43,10 +67,10 @@ trap 'rm -f "$diagnostics"' EXIT
 # when it cannot check; the diagnostics are judged below.
 status=0
 if command -v typst-package-check > /dev/null; then
-  PACKAGES_DIR="$clone" typst-package-check check --json "$spec" > "$diagnostics" || status=$?
+  PACKAGES_DIR="$clone" typst-package-check check --json ${offline[@]+"${offline[@]}"} "$spec" > "$diagnostics" || status=$?
 elif command -v docker > /dev/null; then
   docker run --rm -v "$clone:/data:ro" -e PACKAGES_DIR=/data \
-    "$CHECKER_IMAGE" check --json "$spec" > "$diagnostics" || status=$?
+    "$CHECKER_IMAGE" check --json ${offline[@]+"${offline[@]}"} "$spec" > "$diagnostics" || status=$?
 else
   echo "Install typst-package-check or Docker to check the package." >&2
   exit 1
