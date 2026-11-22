@@ -23,7 +23,7 @@ import { sourceArgs } from './source.ts';
 import { FrameSelectorArg, tools } from './tools.ts';
 
 export const SERVER_NAME = 'algomotion';
-export const SERVER_VERSION = '0.0.0';
+export const SERVER_VERSION = '1.0.0-alpha.1';
 
 const readOnly = {
   readOnlyHint: true,
