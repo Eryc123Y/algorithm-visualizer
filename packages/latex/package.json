@@ -5,6 +5,7 @@
   "description": "The algomotion LaTeX package: figures drawn with TikZ in the document's fonts, made by the algomotion command (ADR 0027).",
   "type": "module",
   "scripts": {
+    "build:doc": "node --conditions=@algomotion/source scripts/build-doc.ts",
     "test:latex": "vitest run --config vitest.latex.config.ts"
   },
   "devDependencies": {
