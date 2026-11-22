@@ -4,7 +4,7 @@ The algomotion MCP server as a Cloudflare Worker: the same tools as `algomotion-
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/Eryc123Y/algorithm-visualizer/tree/main/apps/worker)
 
-The button works once the repository is public, and needs a Cloudflare account. The Worker builds from this monorepo, so the deploy must check out the whole repository, not only this folder; if it does not, deploy by hand as below.
+The button needs a Cloudflare account, and deploys the Worker to your `workers.dev` subdomain. The Worker builds from this monorepo, so the deploy must check out the whole repository, not only this folder; if it does not, deploy by hand as below. The project's own domain is only in the `production` environment of `wrangler.jsonc`, so a copy never tries to claim it.
 
 ## What it does
 
@@ -61,6 +61,8 @@ From the repository root, with a Cloudflare account:
    ```
 
    `wrangler deploy` runs the configured build, `npm run build`: it builds the player page, then bundles the Worker with the guide and the page into `dist/worker.js`: 2.1 MB, 0.6 MB compressed, within the free plan's 3 MB.
+
+   This project's own Worker deploys with `npx wrangler deploy --env production`, which adds its domain, `algomotion-mcp.turing2234.com`. Give a copy its own domain the same way, or in the Cloudflare dashboard.
 
 ## Developing
 

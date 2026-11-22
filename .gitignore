@@ -65,3 +65,4 @@ packages/mcp/standalone/target/
 # wrangler local state
 .wrangler/
 .dev.vars
+/release
