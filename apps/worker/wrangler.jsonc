@@ -1,15 +1,14 @@
 // The Worker's configuration. The name is part of the Worker's workers.dev
 // address; a copy deployed to another account may pick its own (README).
+// This top level deploys anywhere, to workers.dev, as the Deploy to
+// Cloudflare button does; this project's own deploy adds its domain with
+// `npx wrangler deploy --env production`.
 {
   "$schema": "../../node_modules/wrangler/config-schema.json",
   "name": "algomotion-mcp",
   "main": "dist/worker.js",
   "compatibility_date": "2026-10-01",
   "no_bundle": true,
-  // This project's address; a copy on another account removes or changes it.
-  "routes": [
-    { "pattern": "algomotion-mcp.turing2234.com", "custom_domain": true },
-  ],
   "build": {
     "command": "npm run build",
   },
@@ -30,4 +29,24 @@
     "ALGOMOTION_SHARE_URL": "https://algomotion.turing2234.com/play/",
   },
   "observability": { "enabled": false },
+  // This project's own deploy, on its domain. Bindings and vars are not
+  // inherited by an environment, so they are repeated here.
+  "env": {
+    "production": {
+      "name": "algomotion-mcp",
+      "routes": [
+        { "pattern": "algomotion-mcp.turing2234.com", "custom_domain": true },
+      ],
+      "ratelimits": [
+        {
+          "name": "RATE_LIMITER",
+          "namespace_id": "1001",
+          "simple": { "limit": 60, "period": 60 },
+        },
+      ],
+      "vars": {
+        "ALGOMOTION_SHARE_URL": "https://algomotion.turing2234.com/play/",
+      },
+    },
+  },
 }
