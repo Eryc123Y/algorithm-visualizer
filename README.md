@@ -230,13 +230,13 @@ A figure draws the structures an algorithm keeps besides its main one, such as D
 In Typst, [the algomotion package](packages/typst/package/README.md) draws the same figures from inside a document, with the engine running in a WebAssembly plugin, so students need nothing but Typst ([ADR 0026](docs/adr/0026-typst-package.md)):
 
 ```typ
-#import "@preview/algomotion:1.0.0": algomotion, algomotion-series
+#import "@local/algomotion:1.0.0": algomotion, algomotion-series
 
 #algomotion("dijkstra", "A-B 4, B-C 1, A-C 7, C-D 2", step: "relax#3")
 #grid(columns: 3, ..algomotion-series("bst.delete", (from: "8 3 10 1 6", key: 3)))
 ```
 
-The package is not on Typst Universe yet; its README says how to use it as a local package until it is.
+The package is not on Typst Universe yet, so it is imported as `@local` after a local install, which [the Typst guide](https://algomotion.turing2234.com/guide/typst/) describes; once it is there, the import becomes `@preview/algomotion`.
 
 In LaTeX, [the algomotion package](packages/latex/package/README.md) draws them with TikZ, so their text is set in the document's own fonts ([ADR 0027](docs/adr/0027-latex-package.md)). It runs the `algomotion` command through shell escape, as `minted` does, and caches every figure, so later runs need no shell escape:
 

@@ -14,7 +14,7 @@ const en: SnippetNotes = {
   web: () =>
     'The player is one script, the standalone bundle, in the @algomotion/elements package on npm or from a CDN such as jsDelivr.',
   typst: (step) =>
-    `Draws the last frame; step: "${step}" draws that step instead.`,
+    `Install the package locally first, as the Typst guide shows, until it is on Typst Universe. Draws the last frame; step: "${step}" draws that step instead.`,
   latex: (step) =>
     `Compile with -shell-escape the first time; [step=${step}] picks the step drawn.`,
   cli: (step) =>
@@ -29,7 +29,7 @@ const zh: SnippetNotes = {
   web: () =>
     '播放器只是一个脚本，即 npm 上 @algomotion/elements 包里的独立 bundle，也可以从 jsDelivr 等 CDN 加载。页面本身是中文时，lang="zh" 可以省略。',
   typst: (step) =>
-    `画最后一帧；加上 step: "${step}" 就画那一步。文档里写了 #set text(lang: "zh") 时，lang 可以省略。`,
+    `这个包发布到 Typst Universe 之前，先按 Typst 指南在本地安装。画最后一帧；加上 step: "${step}" 就画那一步。文档里写了 #set text(lang: "zh") 时，lang 可以省略。`,
   latex: (step) =>
     `文档要能排中文，比如加载 ctex 宏包；第一次编译时加 -shell-escape；[step=${step}] 指定画哪一步。`,
   cli: (step) =>

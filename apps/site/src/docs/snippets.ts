@@ -168,7 +168,7 @@ export async function snippetsFor(
   const root = '../'.repeat(depth);
   const codes: Readonly<Record<Snippet['id'], string>> = {
     web: `<script type="module" src="algomotion-player.js"></script>\n${player}`,
-    typst: `#import "@preview/algomotion:1.0.0": algomotion\n#algomotion(${typstString(id)}, ${typstValue(input)}${lang === undefined ? '' : `, lang: ${typstString(lang)}`})`,
+    typst: `#import "@local/algomotion:1.0.0": algomotion\n#algomotion(${typstString(id)}, ${typstValue(input)}${lang === undefined ? '' : `, lang: ${typstString(lang)}`})`,
     latex: `\\usepackage{algomotion}\n\\algomotion${lang === undefined ? '' : `[lang=${lang}]`}{${id}}{${latexText(text)}}`,
     cli: `algomotion export ${id} --input ${shellQuote(text)}${lang === undefined ? '' : ` --lang ${lang}`} --out figures`,
     mcp: `algomotion_show ${JSON.stringify({ recipe: id, input, ...(lang === undefined ? {} : { locale: lang }) }, null, 2)}`,
