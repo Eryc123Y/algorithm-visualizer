@@ -69,6 +69,13 @@ status=0
 if command -v typst-package-check > /dev/null; then
   PACKAGES_DIR="$clone" typst-package-check check --json ${offline[@]+"${offline[@]}"} "$spec" > "$diagnostics" || status=$?
 elif command -v docker > /dev/null; then
+  # The registry sometimes times out from CI, so the image is pulled first,
+  # with a few tries.
+  for try in 1 2 3; do
+    docker pull --quiet "$CHECKER_IMAGE" > /dev/null && break
+    [ "$try" = 3 ] && { echo "Could not pull $CHECKER_IMAGE." >&2; exit 1; }
+    sleep $((try * 10))
+  done
   docker run --rm -v "$clone:/data:ro" -e PACKAGES_DIR=/data \
     "$CHECKER_IMAGE" check --json ${offline[@]+"${offline[@]}"} "$spec" > "$diagnostics" || status=$?
 else
