@@ -22,6 +22,7 @@ All notable changes to algomotion, newest first. The format follows [Keep a Chan
 - The root package, whose version the site's footer shows, and the MCP server report the packages' version, `1.0.0-alpha.1`; they said `0.1.0` and `0.0.0` (#165).
 - The Worker's custom domain moves to its `production` environment, so the Deploy to Cloudflare button deploys a copy anywhere (#165). `@algomotion/elements` names the fonts' licence beside the GPL (#165).
 - The shared property suite (`recipe-properties.ts`) also runs each recipe's random inputs in Chinese, and checks that every step points at a line in every language; the BST and the heaps join the shared suite, and four more structures get ADR 0018's checks (#166).
+- Faster tests: the recipes' property tests are split by topic and the Typst plugin's themes shared out, so they run in parallel; the unit tests take about a minute instead of almost three, and the deep runs before a release about an hour instead of over three (#169). CI runs as parallel jobs, about 6.5 minutes instead of 13.5, and coverage moves to a workflow of its own, by hand or weekly (#170).
 
 ## 1.0.0-alpha.1 (2026-11-14)
 
