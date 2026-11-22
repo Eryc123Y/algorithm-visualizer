@@ -315,7 +315,11 @@ export function algorithmsPage(
         // by the English name they learnt.
         ...(locale === 'en' ? [] : [topicNames[e.topic]]),
         ...(e.english === undefined ? [] : [e.english]),
-        ...operations.flatMap((o) => [o.id, o.title]),
+        ...operations.flatMap((o) => [
+          o.id,
+          o.title,
+          ...(o.english === undefined ? [] : [o.english]),
+        ]),
       ]
         .join(' ')
         .toLowerCase(),
