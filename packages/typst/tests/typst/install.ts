@@ -26,8 +26,21 @@ export const examples = here('../../examples');
 const manifest = readFileSync(join(packageDir, 'typst.toml'), 'utf8');
 const field = (name: string) =>
   new RegExp(`^${name}\\s*=\\s*"([^"]+)"`, 'm').exec(manifest)![1]!;
-/** The package as documents import it, `@local/algomotion:0.1.0`. */
-export const spec = `@local/${field('name')}:${field('version')}`;
+const name = field('name');
+/** The version of the package, `0.1.0`. */
+export const version = field('version');
+
+/**
+ * Where the tests install the package: `local`, for a checkout, or
+ * `preview`, as Typst Universe serves it.
+ */
+export type Namespace = 'local' | 'preview';
+
+/** The package as documents import it, such as `@local/algomotion:0.1.0`. */
+export const specIn = (namespace: Namespace) =>
+  `@${namespace}/${name}:${version}`;
+/** The package as the examples import it, `@local/algomotion:0.1.0`. */
+export const spec = specIn('local');
 
 /** The slide frameworks the examples and tests use (ADR 0028). */
 export const FRAMEWORKS = ['@preview/polylux:0.4.0', '@preview/touying:0.8.0'];
@@ -43,12 +56,18 @@ export interface Installed {
   remove(): void;
 }
 
-/** Installs the package, with a freshly built engine, in a new directory. */
-export async function installPackage(): Promise<Installed> {
+/**
+ * Installs the package, with a freshly built engine, in a new directory.
+ * Typst looks in that directory for every namespace before its cache, so a
+ * package installed as `preview` is the one `@preview/algomotion` imports.
+ */
+export async function installPackage(
+  namespace: Namespace = 'local',
+): Promise<Installed> {
   const tmp = mkdtempSync(join(tmpdir(), 'algomotion-typst-'));
   const packages = join(tmp, 'packages');
   const root = join(tmp, 'root');
-  const installed = join(packages, 'local', field('name'), field('version'));
+  const installed = join(packages, namespace, name, version);
   mkdirSync(installed, { recursive: true });
   mkdirSync(root);
   for (const file of ['typst.toml', 'lib.typ', 'plugin.wasm', 'OFL.txt'])

@@ -14,6 +14,7 @@ All notable changes to algomotion, newest first. The format follows [Keep a Chan
   - The real scenes on the Chinese pages in Chinese: Typst notes that set `text.lang`, a `ctexbeamer` frame, a terminal session with `--lang zh` and a conversation that asks for Chinese (#164).
 - Release preparation (#165): `node scripts/version.ts` sets every version the repository writes, but for the lock file, which `npm install --package-lock-only` updates, and a test keeps them in step; the Release files workflow builds the standalone `algomotion` command for macOS (arm64 and x64), Linux (x64 and arm64) and Windows (x64), runs each once, and packs the Typst, LaTeX and player archives; `docs/releasing.md` has the steps.
 - A README for every published package (#167).
+- Ready for Typst Universe (#172): a test compiles every example of the Typst package's README with the package installed as `@preview/algomotion`, and checks its signatures against `lib.typ`; `scripts/typst-universe.sh` lays the package out as a submission adds it and runs Typst's linter, typst-package-check, on it; the Typst Universe workflow does both on pull requests that change the package and on a version tag, with the oldest Typst the manifest allows. `docs/releasing.md` has the submission's steps and notes.
 
 ### Changed
 
@@ -22,6 +23,7 @@ All notable changes to algomotion, newest first. The format follows [Keep a Chan
 - The root package, whose version the site's footer shows, and the MCP server report the packages' version, `1.0.0-alpha.1`; they said `0.1.0` and `0.0.0` (#165).
 - The Worker's custom domain moves to its `production` environment, so the Deploy to Cloudflare button deploys a copy anywhere (#165). `@algomotion/elements` names the fonts' licence beside the GPL (#165).
 - The shared property suite (`recipe-properties.ts`) also runs each recipe's random inputs in Chinese, and checks that every step points at a line in every language; the BST and the heaps join the shared suite, and four more structures get ADR 0018's checks (#166).
+- The Typst package's manifest describes it in the imperative, as Typst Universe asks, and names the fonts' licence beside the GPL (`GPL-3.0-or-later AND OFL-1.1`); its README links the examples at the release's tag and moves the install from a checkout to a section of its own (#172).
 - Faster tests: the recipes' property tests are split by topic and the Typst plugin's themes shared out, so they run in parallel; the unit tests take about a minute instead of almost three, and the deep runs before a release about an hour instead of over three (#169). CI runs as parallel jobs, about 6.5 minutes instead of 13.5, and coverage moves to a workflow of its own, by hand or weekly (#170).
 
 ## 1.0.0-alpha.1 (2026-11-14)

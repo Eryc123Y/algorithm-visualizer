@@ -57,6 +57,7 @@ describe('rewrite', () => {
       '"@algomotion/core": "1.0.0-alpha.1"',
       '#import "@local/algomotion:0.1.0": algomotion',
       'https://cdn.jsdelivr.net/npm/@algomotion/elements@1.0.0-alpha.1/dist/cdn/x.js',
+      'https://github.com/Eryc123Y/algorithm-visualizer/blob/v1.0.0-alpha.1/x.typ',
     ].join('\n');
     expect(
       rewrite(
@@ -71,6 +72,7 @@ describe('rewrite', () => {
         '"@algomotion/core": "1.0.0"',
         '#import "@local/algomotion:0.1.0": algomotion',
         'https://cdn.jsdelivr.net/npm/@algomotion/elements@1.0.0/dist/cdn/x.js',
+        'https://github.com/Eryc123Y/algorithm-visualizer/blob/v1.0.0/x.typ',
       ].join('\n'),
     );
   });

@@ -1,0 +1,49 @@
+name: Typst Universe
+
+# Checks the Typst package as Typst Universe takes it (docs/releasing.md):
+# the README's examples compile with the oldest Typst the manifest allows,
+# importing `@preview/algomotion`, and Typst's own linter passes on the
+# package laid out as a submission adds it. It publishes nothing. It runs on
+# a version tag, by hand, and on pull requests that change the package.
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/typst-universe.yml'
+      - 'scripts/typst-universe.sh'
+      - 'packages/typst/package/**'
+      - 'packages/typst/tests/typst/install.ts'
+      - 'packages/typst/tests/typst/readme.spec.ts'
+
+concurrency:
+  group: typst-universe-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: The oldest Typst the manifest allows
+        id: manifest
+        run: echo "compiler=$(sed -n 's/^compiler = "\(.*\)"$/\1/p' packages/typst/package/typst.toml)" >> "$GITHUB_OUTPUT"
+      - uses: typst-community/setup-typst@v5
+        with:
+          typst-version: ${{ steps.manifest.outputs.compiler }}
+      - run: npm run build -w @algomotion/typst
+      - name: The README's examples
+        working-directory: packages/typst
+        run: npx vitest run --config vitest.typst.config.ts tests/typst/readme.spec.ts
+      - name: typst-package-check
+        run: scripts/typst-universe.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: typst-universe
+          path: release/universe/

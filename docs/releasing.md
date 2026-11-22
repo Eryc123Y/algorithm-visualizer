@@ -35,6 +35,7 @@ Then, in the same pull request:
 - **Changelog.** Turn `## Unreleased` in `CHANGELOG.md` into `## 1.0.0 (date)`, with a sentence on the release.
 - **Words.** Update what the docs say about where to get each output: the status sections of `README.md` and `README.zh-CN.md`, and the guide's install notes in both languages (`apps/site/src/docs/guides/`, `start`, `web`, `typst` and `latex`).
   - Once the Typst package is on Universe, imports change from `@local/algomotion` to `@preview/algomotion`.
+  - Delete the "Not on Typst Universe yet" note at the top of `packages/typst/package/README.md`, which is the package's page on Typst Universe.
   - Once the LaTeX package is on CTAN, the install steps change too.
   - Remove the notes that Chinese came after `1.0.0-alpha.1` and comes with the next release, in both READMEs' status sections and in the Typst and LaTeX guides' install sections, in both languages.
 - **Roadmap.** Tick the release in `docs/roadmap.md`.
@@ -51,13 +52,18 @@ The tag starts the **Release files** workflow (`.github/workflows/release.yml`).
 
 The files are the run's artifacts. Download them from the run's page, or with `gh run download`. The same archives build locally with `npm run build && scripts/release-assets.sh`, into `release/`.
 
+The tag also starts the **Typst Universe** workflow (`.github/workflows/typst-universe.yml`), which pull requests that change the Typst package run too. It compiles the README's examples with the oldest Typst the manifest allows, importing `@preview/algomotion`. Then `scripts/typst-universe.sh` lays the package out as a submission adds it, `preview/algomotion/<version>/`, and checks it with Typst's linter, [typst-package-check](https://github.com/typst/package-check). Every diagnostic fails the check but the size warnings of `plugin.wasm` and `engine.bc`. The folder is the run's `typst-universe` artifact. Locally, `npm run build -w @algomotion/typst && scripts/typst-universe.sh` writes it to `release/universe/packages/` and checks it with `typst-package-check` from PATH, or with its Docker image.
+
 ## 4. Publish (owner)
 
 - **npm.** Run `scripts/publish.sh`. It builds from clean and publishes the eight libraries in dependency order. A prerelease goes under its own tag, such as `alpha`; a release goes under `latest`. npm asks to authenticate each package in the browser.
 - **GitHub.** Make a release from the tag with the files of step 3, and notes taken from the changelog. Mark it as a prerelease only for one.
-- **Typst Universe.** Fork [typst/packages](https://github.com/typst/packages). Copy the Typst archive's `local/algomotion/<version>/` to `packages/preview/algomotion/<version>/`, and open a pull request there.
-  - The package's README, licence and the fonts' OFL go with it.
-  - Typst's reviewers check the manifest, the README's examples and the files' sizes: `plugin.wasm` and `engine.bc` are about 2.5 MB together.
+- **Typst Universe.** Fork [typst/packages](https://github.com/typst/packages), with a [sparse checkout](https://github.com/typst/packages/blob/main/docs/tips.md#sparse-checkout-of-the-repository) of `packages/preview/algomotion`. Copy the `typst-universe` artifact's `preview/algomotion/<version>/` into the fork's `packages/preview/`, and open a pull request named `algomotion:<version>`, with the repository's template. For the first version, its notes can say:
+  - **Description.** Draw step-by-step figures of algorithms and data structures: name an algorithm of the registry and its input, or pass a document, pick a step, and get the SVG figure the player and `algomotion export` draw, in notes, series and slides (polylux and touying), in nine themes and in English or Chinese.
+  - **Name.** A neologism of "algorithm" and "motion"; it is also the name of the project, its npm packages and its LaTeX package.
+  - **Size.** Two files are large, and both are needed to draw: `plugin.wasm` (1.2 MB, about 420 kB compressed) is QuickJS-ng compiled to WebAssembly, the JavaScript interpreter the plugin runs, as in jogs and ctxjs; `engine.bc` (1.4 MB, about 570 kB compressed) is algomotion's engine as QuickJS bytecode. `docs/sizes.md` in the repository has the measures.
+  - **Fonts.** The package ships no font files. The engine draws the figures' text as outlines of the bundled fonts, so a figure looks the same everywhere; those outlines are under the OFL, hence `GPL-3.0-or-later AND OFL-1.1`, and the README's Licence section says which part each licence covers.
+  - **Checks.** `typst-package-check` reports only the size of `engine.bc`. The README's examples compile with Typst 0.15.0, the manifest's `compiler`.
 - **CTAN.** Upload the LaTeX archive at [ctan.org/upload](https://ctan.org/upload). Give the licence as GPL 3 or later, and the repository as the home page.
   - The package needs the `algomotion` command, from npm or the GitHub release.
   - Say so in the upload's notes, as for any package that runs a program through shell escape.
