@@ -102,7 +102,7 @@ describe('snippetsFor', () => {
       '<script type="module" src="algomotion-player.js"></script>\n<algo-player algorithm="dijkstra" input="A-B 4, B-C 1"></algo-player>',
     );
     expect(byId(snippets, 'typst')).toBe(
-      '#import "@preview/algomotion:0.1.0": algomotion\n#algomotion("dijkstra", "A-B 4, B-C 1")',
+      '#import "@preview/algomotion:1.0.0": algomotion\n#algomotion("dijkstra", "A-B 4, B-C 1")',
     );
     expect(byId(snippets, 'latex')).toBe(
       '\\usepackage{algomotion}\n\\algomotion{dijkstra}{A-B 4, B-C 1}',
@@ -137,7 +137,7 @@ describe('snippetsFor', () => {
       '<script type="module" src="algomotion-player.js"></script>\n<algo-player algorithm="dijkstra" input="A-B 4, B-C 1" lang="zh"></algo-player>',
     );
     expect(byId(snippets, 'typst')).toBe(
-      '#import "@preview/algomotion:0.1.0": algomotion\n#algomotion("dijkstra", "A-B 4, B-C 1", lang: "zh")',
+      '#import "@preview/algomotion:1.0.0": algomotion\n#algomotion("dijkstra", "A-B 4, B-C 1", lang: "zh")',
     );
     expect(byId(snippets, 'latex')).toBe(
       '\\usepackage{algomotion}\n\\algomotion[lang=zh]{dijkstra}{A-B 4, B-C 1}',

@@ -7,7 +7,7 @@ The faces are Inter, JetBrains Mono, STIX Two Text, Lexend, Noto Sans and Noto S
 ## Install
 
 ```sh
-npm install @algomotion/fonts@alpha
+npm install @algomotion/fonts
 ```
 
 Most code uses it through [`@algomotion/core`](https://www.npmjs.com/package/@algomotion/core) and [`@algomotion/svg`](https://www.npmjs.com/package/@algomotion/svg), which depend on it.

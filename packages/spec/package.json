@@ -1,6 +1,6 @@
 {
   "name": "@algomotion/spec",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0",
   "description": "Protocol schemas, types and validation for algomotion traces.",
   "keywords": [
     "algorithms",
@@ -42,7 +42,6 @@
     "zod": "^4.6.7"
   },
   "publishConfig": {
-    "access": "public",
-    "tag": "alpha"
+    "access": "public"
   }
 }

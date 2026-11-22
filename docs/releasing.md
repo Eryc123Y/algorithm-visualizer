@@ -37,7 +37,6 @@ Then, in the same pull request:
   - Once the Typst package is on Universe, imports change from `@local/algomotion` to `@preview/algomotion`.
   - Delete the "Not on Typst Universe yet" note at the top of `packages/typst/package/README.md`, which is the package's page on Typst Universe.
   - Once the LaTeX package is on CTAN, the install steps change too.
-  - Remove the notes that Chinese came after `1.0.0-alpha.1` and comes with the next release, in both READMEs' status sections and in the Typst and LaTeX guides' install sections, in both languages.
 - **Roadmap.** Tick the release in `docs/roadmap.md`.
 
 Merge it, then tag the merge commit: `git tag v1.0.0 && git push origin v1.0.0`.

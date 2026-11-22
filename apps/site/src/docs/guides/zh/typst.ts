@@ -25,24 +25,24 @@ export const zh: Guide = {
   ],
   body: ({ root, code, figure, note, scene }) => `
 <h2 id="install">在本地安装</h2>
-<p>这个包还没有发布到 Typst Universe，1.0 时会发布。先安装 Typst 0.15 或更高版本。最快的办法是用 <a href="https://github.com/Eryc123Y/algorithm-visualizer/releases/tag/v1.0.0-alpha.1">GitHub Release</a>：把 <code>algomotion-typst-0.1.0.zip</code> 解压到本地 Typst 包目录（见下文），让它包含 <code>local/algomotion/0.1.0/</code>，然后导入 <code>@local/algomotion:0.1.0</code>。</p>
-<p>也可以从仓库构建引擎。仓库里已提交编译好的 WebAssembly 插件，正常使用不需要编译 Rust 代码。要用中文画运行过程，就按这种方法构建：<code>lang</code> 参数和跟随 <code>text.lang</code> 都是在 1.0.0-alpha.1 之后加入的，那个版本的包只能画英文，下一个版本才会带上它们。</p>
+<p>这个包还没有发布到 Typst Universe。先安装 Typst 0.15 或更高版本。最快的办法是用 <a href="https://github.com/Eryc123Y/algorithm-visualizer/releases/tag/v1.0.0">GitHub Release</a>：把 <code>algomotion-typst-1.0.0.zip</code> 解压到本地 Typst 包目录（见下文），让它包含 <code>local/algomotion/1.0.0/</code>，然后导入 <code>@local/algomotion:1.0.0</code>。</p>
+<p>也可以从仓库构建引擎。仓库里已提交编译好的 WebAssembly 插件，正常使用不需要编译 Rust 代码。</p>
 ${code(
   `npm ci
 npm run build -w @algomotion/typst`,
   '构建 Typst 引擎',
 )}
-<p>把 <code>packages/typst/package/</code> 链接或复制到本地 Typst 包目录下的 <code>algomotion/0.1.0</code>。要保留整个文件夹，包括 <code>engine.bc</code>、<code>plugin.wasm</code> 和 <code>lib.typ</code>。在 macOS 上，从仓库根目录执行：</p>
+<p>把 <code>packages/typst/package/</code> 链接或复制到本地 Typst 包目录下的 <code>algomotion/1.0.0</code>。要保留整个文件夹，包括 <code>engine.bc</code>、<code>plugin.wasm</code> 和 <code>lib.typ</code>。在 macOS 上，从仓库根目录执行：</p>
 ${code(
   `mkdir -p "$HOME/Library/Application Support/typst/packages/local/algomotion"
-ln -s "$PWD/packages/typst/package" "$HOME/Library/Application Support/typst/packages/local/algomotion/0.1.0"`,
+ln -s "$PWD/packages/typst/package" "$HOME/Library/Application Support/typst/packages/local/algomotion/1.0.0"`,
   '在 macOS 上安装本地包',
 )}
-<p>Linux 上的本地目录是 <code>~/.local/share/typst/packages/local</code>；Windows 上是 <code>%APPDATA%\\typst\\packages\\local</code>。正式发布之前，导入时写 <code>@local/algomotion:0.1.0</code>。</p>
+<p>Linux 上的本地目录是 <code>~/.local/share/typst/packages/local</code>；Windows 上是 <code>%APPDATA%\\typst\\packages\\local</code>。正式发布之前，导入时写 <code>@local/algomotion:1.0.0</code>。</p>
 
 <h2 id="one">画一步</h2>
 ${code(
-  `#import "@local/algomotion:0.1.0": algomotion
+  `#import "@local/algomotion:1.0.0": algomotion
 
 #figure(
   algomotion("insertion-sort", "5 2 4 6 1 3", step: "insert#2", width: 100%),
@@ -69,7 +69,7 @@ ${scene('notes', 'Typst 编译出的一整页：这幅图和笔记里的其他�
 <h2 id="series">画多步</h2>
 <p><code>algomotion-series</code> 返回一个图片数组。<code>steps: auto</code> 选中所有帧；写一个选择器或一个数组，则选中特定的帧。结果按时间轴顺序排列，不会重复。同一份文档的所有帧共用一块画布，所以宽度相同时比例也一致。</p>
 ${code(
-  `#import "@local/algomotion:0.1.0": algomotion-series
+  `#import "@local/algomotion:1.0.0": algomotion-series
 
 #grid(columns: 3, gutter: 8pt,
   ..algomotion-series("insertion-sort", "5 2 4 6 1 3",
@@ -82,7 +82,7 @@ ${code(
 <h2 id="documents">读取文档</h2>
 <p>先用 <code>algomotion run insertion-sort '5 2 4' --out sort.json</code> 生成 <code>sort.json</code>，再把解析后的文档单独传进去：</p>
 ${code(
-  `#import "@local/algomotion:0.1.0": algomotion
+  `#import "@local/algomotion:1.0.0": algomotion
 #let run = json("sort.json")
 #algomotion(run, step: -1, width: 80%)`,
   '在 Typst 中读取 JSON',
@@ -92,7 +92,7 @@ ${code(
 <h2 id="themes">主题</h2>
 <p>可用 <code>"light"</code>、<code>"dark"</code>、<code>"print"</code>、<code>"textbook"</code>、<code>"textbook-dark"</code>、<code>"blocks"</code>、<code>"blocks-dark"</code>、<code>"answer-sheet"</code> 或 <code>"turbo-c"</code>。Typst 只接受固定主题，不接受播放器的 <code>auto</code> 或日夜主题对。</p>
 ${code(
-  `#import "@local/algomotion:0.1.0": algomotion
+  `#import "@local/algomotion:1.0.0": algomotion
 #let algomotion = algomotion.with(theme: "print")
 #algomotion("inorder-tree-walk", (8, 3, 10, 1, 6))`,
   '为后面的图设定主题',
@@ -102,7 +102,7 @@ ${figure('print', '<code>print</code> 主题下的中序树遍历。文字画成
 <h2 id="errors">文档中的错误</h2>
 <p>算法未知，或者输入、文档、选择器、主题无效时，会画出一个写有诊断信息的框，文档的其余部分照常编译。要中止编译，就用 <code>strict: true</code>。参数类型错误和未知的参数名总会中止编译。</p>
 ${code(
-  `#import "@local/algomotion:0.1.0": algomotion
+  `#import "@local/algomotion:1.0.0": algomotion
 #algomotion("insertion-sort", "5 x 4") // Shows INVALID_NOTATION.
 // Inspect all error metadata after compiling:
 // typst eval --in notes.typ 'query(<algomotion-error>).map(m => m.value)'`,
@@ -112,7 +112,7 @@ ${code(
 <h2 id="figures">直接使用引擎的结果</h2>
 <p><code>algomotion-figures</code> 返回一个字典，供自定义排版使用。它接受 <code>steps</code>、<code>theme</code> 和 <code>layout</code>。读取图之前先检查 <code>ok</code>。</p>
 ${code(
-  `#import "@local/algomotion:0.1.0": algomotion-figures
+  `#import "@local/algomotion:1.0.0": algomotion-figures
 #let run = algomotion-figures("insertion-sort", "5 2 4", steps: (0, -1))
 #if run.ok {
   grid(columns: 2, ..run.figures.map(f => figure(

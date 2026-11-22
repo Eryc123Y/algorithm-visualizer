@@ -18,14 +18,14 @@ export const zh: Guide = {
   ],
   body: ({ root, code, figure, note }) => `
 <h2 id="install">环境要求与安装</h2>
-<p>需要 LaTeX 2024-06-01 或更新版本，以及 TikZ。支持 pdfLaTeX、LuaLaTeX 和 XeLaTeX。这个包还没有发布到 CTAN，1.0 时会发布。从 <a href="https://github.com/Eryc123Y/algorithm-visualizer/releases/tag/v1.0.0-alpha.1">GitHub Release</a> 的 <code>algomotion-latex.zip</code> 或仓库的 <code>packages/latex/package/</code> 里取出 <code>algomotion.sty</code>，放到文档旁边，或者放进本地的 <code>texmf/tex/latex/algomotion/</code> 目录树。</p>
-<p>这个包要调用 <code>algomotion</code> 命令。装了 Node.js 的话，从 npm 安装：<code>npm install -g @algomotion/mcp@alpha</code>。没有 Node.js 的话，用独立可执行文件：Release 里有 Apple 芯片 macOS 版，其他平台可以在仓库里用 rustup 和 C 编译器构建：</p>
+<p>需要 LaTeX 2024-06-01 或更新版本，以及 TikZ。支持 pdfLaTeX、LuaLaTeX 和 XeLaTeX。这个包以 <code>algomotion</code> 的名字发布到 CTAN，TeX Live 和 MiKTeX 收录后可以像其他宏包一样安装；在你的发行版收录之前，可以从 <a href="https://github.com/Eryc123Y/algorithm-visualizer/releases/tag/v1.0.0">GitHub Release</a> 的 <code>algomotion-latex.zip</code> 或仓库的 <code>packages/latex/package/</code> 里取出 <code>algomotion.sty</code>，放到文档旁边，或者放进本地的 <code>texmf/tex/latex/algomotion/</code> 目录树。</p>
+<p>这个包要调用 <code>algomotion</code> 命令。装了 Node.js 的话，从 npm 安装：<code>npm install -g @algomotion/mcp</code>。没有 Node.js 的话，用独立可执行文件：<a href="https://github.com/Eryc123Y/algorithm-visualizer/releases/tag/v1.0.0">Release</a> 里有 macOS（Apple 芯片和 Intel）、Linux（x64 和 arm64）和 Windows（x64）版。也可以在仓库里用 rustup 和 C 编译器为自己的机器构建：</p>
 ${code(
   `npm ci
 npm run build:standalone -w @algomotion/mcp`,
   '构建 LaTeX 所用的命令',
 )}
-<p>把 <code>packages/mcp/dist/standalone/algomotion</code> 加入 <code>PATH</code>，或者用 <code>command=</code> 传入它的绝对路径。<a href="${root}guide/cli/">Node.js 版命令</a>也可以用，写成 <code>command={node /absolute/path/packages/mcp/dist/algomotion.js}</code>。要画中文的图，宏包和命令都要从仓库获取：<code>lang</code> 键是在 1.0.0-alpha.1 之后加入的，那个版本的宏包和命令只能画英文，下一个版本才会带上它。</p>
+<p>把 <code>packages/mcp/dist/standalone/algomotion</code> 加入 <code>PATH</code>，或者用 <code>command=</code> 传入它的绝对路径。<a href="${root}guide/cli/">Node.js 版命令</a>也可以用，写成 <code>command={node /absolute/path/packages/mcp/dist/algomotion.js}</code>。</p>
 
 <h2 id="figure">画一幅图</h2>
 ${code(

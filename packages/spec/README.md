@@ -7,10 +7,8 @@ A document declares structures, such as an array or a graph, and a timeline of s
 ## Install
 
 ```sh
-npm install @algomotion/spec@alpha
+npm install @algomotion/spec
 ```
-
-`LOCALES` and `localeOf`, and with them everything in Chinese, came after `1.0.0-alpha.1`, so they need a later version, or this repository's sources.
 
 ## Validate a document
 

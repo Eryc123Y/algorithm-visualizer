@@ -25,24 +25,24 @@ export const typst: Guide = {
   ],
   body: ({ root, code, figure, note, scene }) => `
 <h2 id="install">Install locally</h2>
-<p>The package is not on Typst Universe yet; it will be at 1.0. Install Typst 0.15 or later. The quickest way is the <a href="https://github.com/Eryc123Y/algorithm-visualizer/releases/tag/v1.0.0-alpha.1">GitHub release</a>: unzip <code>algomotion-typst-0.1.0.zip</code> into your local Typst packages directory (shown below), so that it holds <code>local/algomotion/0.1.0/</code>, and import <code>@local/algomotion:0.1.0</code>.</p>
-<p>To build it from the repository instead, build the engine. The committed WebAssembly plugin needs no Rust build for normal use. Build it this way for runs in Chinese: <code>lang</code>, and following <code>text.lang</code>, came after 1.0.0-alpha.1, whose package draws in English only, and they come with the next release.</p>
+<p>The package is not on Typst Universe yet. Install Typst 0.15 or later. The quickest way is the <a href="https://github.com/Eryc123Y/algorithm-visualizer/releases/tag/v1.0.0">GitHub release</a>: unzip <code>algomotion-typst-1.0.0.zip</code> into your local Typst packages directory (shown below), so that it holds <code>local/algomotion/1.0.0/</code>, and import <code>@local/algomotion:1.0.0</code>.</p>
+<p>To build it from the repository instead, build the engine. The committed WebAssembly plugin needs no Rust build for normal use.</p>
 ${code(
   `npm ci
 npm run build -w @algomotion/typst`,
   'Build the Typst engine',
 )}
-<p>Link or copy <code>packages/typst/package/</code> to <code>algomotion/0.1.0</code> under your local Typst packages directory. Keep the whole folder, including <code>engine.bc</code>, <code>plugin.wasm</code> and <code>lib.typ</code>. On macOS, from the repository root:</p>
+<p>Link or copy <code>packages/typst/package/</code> to <code>algomotion/1.0.0</code> under your local Typst packages directory. Keep the whole folder, including <code>engine.bc</code>, <code>plugin.wasm</code> and <code>lib.typ</code>. On macOS, from the repository root:</p>
 ${code(
   `mkdir -p "$HOME/Library/Application Support/typst/packages/local/algomotion"
-ln -s "$PWD/packages/typst/package" "$HOME/Library/Application Support/typst/packages/local/algomotion/0.1.0"`,
+ln -s "$PWD/packages/typst/package" "$HOME/Library/Application Support/typst/packages/local/algomotion/1.0.0"`,
   'Install a local package on macOS',
 )}
-<p>On Linux the local directory is <code>~/.local/share/typst/packages/local</code>; on Windows it is <code>%APPDATA%\\typst\\packages\\local</code>. Use <code>@local/algomotion:0.1.0</code> in imports until publication.</p>
+<p>On Linux the local directory is <code>~/.local/share/typst/packages/local</code>; on Windows it is <code>%APPDATA%\\typst\\packages\\local</code>. Use <code>@local/algomotion:1.0.0</code> in imports until publication.</p>
 
 <h2 id="one">One step</h2>
 ${code(
-  `#import "@local/algomotion:0.1.0": algomotion
+  `#import "@local/algomotion:1.0.0": algomotion
 
 #figure(
   algomotion("insertion-sort", "5 2 4 6 1 3", step: "insert#2", width: 100%),
@@ -69,7 +69,7 @@ ${scene('notes', 'A whole page, as Typst compiles it: the figure sits in the not
 <h2 id="series">Several steps</h2>
 <p><code>algomotion-series</code> returns an array of images. Its <code>steps: auto</code> selects every frame; a selector or an array selects particular frames. Results come in timeline order without repeats. All frames of a document share a canvas, so equal widths keep their scale.</p>
 ${code(
-  `#import "@local/algomotion:0.1.0": algomotion-series
+  `#import "@local/algomotion:1.0.0": algomotion-series
 
 #grid(columns: 3, gutter: 8pt,
   ..algomotion-series("insertion-sort", "5 2 4 6 1 3",
@@ -82,7 +82,7 @@ ${code(
 <h2 id="documents">Read a document</h2>
 <p>Make <code>sort.json</code> with <code>algomotion run insertion-sort '5 2 4' --out sort.json</code>, then pass the parsed document alone:</p>
 ${code(
-  `#import "@local/algomotion:0.1.0": algomotion
+  `#import "@local/algomotion:1.0.0": algomotion
 #let run = json("sort.json")
 #algomotion(run, step: -1, width: 80%)`,
   'Read JSON in Typst',
@@ -92,7 +92,7 @@ ${code(
 <h2 id="themes">Themes</h2>
 <p>Use <code>"light"</code>, <code>"dark"</code>, <code>"print"</code>, <code>"textbook"</code>, <code>"textbook-dark"</code>, <code>"blocks"</code>, <code>"blocks-dark"</code>, <code>"answer-sheet"</code> or <code>"turbo-c"</code>. Typst takes fixed themes, not the player's <code>auto</code> or day/night pairs.</p>
 ${code(
-  `#import "@local/algomotion:0.1.0": algomotion
+  `#import "@local/algomotion:1.0.0": algomotion
 #let algomotion = algomotion.with(theme: "print")
 #algomotion("inorder-tree-walk", (8, 3, 10, 1, 6))`,
   'Set a theme for later figures',
@@ -102,7 +102,7 @@ ${figure('print', 'An inorder tree walk in the <code>print</code> theme. Text is
 <h2 id="errors">Errors in the document</h2>
 <p>An unknown algorithm, invalid input, document, selector or theme draws a box containing the diagnostic. The rest of the document still compiles. Use <code>strict: true</code> to stop instead. Invalid argument types and unknown argument names always stop compilation.</p>
 ${code(
-  `#import "@local/algomotion:0.1.0": algomotion
+  `#import "@local/algomotion:1.0.0": algomotion
 #algomotion("insertion-sort", "5 x 4") // Shows INVALID_NOTATION.
 // Inspect all error metadata after compiling:
 // typst eval --in notes.typ 'query(<algomotion-error>).map(m => m.value)'`,
@@ -112,7 +112,7 @@ ${code(
 <h2 id="figures">Use the engine's answer</h2>
 <p><code>algomotion-figures</code> returns a dictionary for custom layouts. It takes <code>steps</code>, <code>theme</code> and <code>layout</code>. Check <code>ok</code> before reading the figures.</p>
 ${code(
-  `#import "@local/algomotion:0.1.0": algomotion-figures
+  `#import "@local/algomotion:1.0.0": algomotion-figures
 #let run = algomotion-figures("insertion-sort", "5 2 4", steps: (0, -1))
 #if run.ok {
   grid(columns: 2, ..run.figures.map(f => figure(

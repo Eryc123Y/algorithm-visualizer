@@ -5,10 +5,8 @@ The algorithm registry of algomotion: 132 modules, one for each algorithm and ea
 ## Install
 
 ```sh
-npm install @algomotion/recipes@alpha
+npm install @algomotion/recipes
 ```
-
-The `locale` option, and with it everything in Chinese, came after `1.0.0-alpha.1`, so it needs a later version, or this repository's sources.
 
 ## Run an algorithm
 

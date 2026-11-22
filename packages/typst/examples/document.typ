@@ -1,5 +1,5 @@
 // A document, here written by `algomotion run`, in three themes.
-#import "@local/algomotion:0.1.0": algomotion
+#import "@local/algomotion:1.0.0": algomotion
 
 #set page(width: 16cm, height: auto, margin: 1cm)
 

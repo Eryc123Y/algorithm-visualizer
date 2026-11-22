@@ -1,6 +1,6 @@
 {
   "name": "@algomotion/elements",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0",
   "description": "Web Components for algomotion: the <algo-player> interactive player.",
   "keywords": [
     "algorithms",
@@ -50,14 +50,13 @@
     "build": "tsc --build tsconfig.lib.json && vite build --config vite.cdn.config.ts"
   },
   "dependencies": {
-    "@algomotion/core": "1.0.0-alpha.1",
-    "@algomotion/recipes": "1.0.0-alpha.1",
-    "@algomotion/spec": "1.0.0-alpha.1",
-    "@algomotion/svg": "1.0.0-alpha.1",
+    "@algomotion/core": "1.0.0",
+    "@algomotion/recipes": "1.0.0",
+    "@algomotion/spec": "1.0.0",
+    "@algomotion/svg": "1.0.0",
     "lit": "^3.3.1"
   },
   "publishConfig": {
-    "access": "public",
-    "tag": "alpha"
+    "access": "public"
   }
 }

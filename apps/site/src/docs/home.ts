@@ -343,7 +343,7 @@ export function homePage(
       <h1 id="hero-title">${text(t.hero.title)}</h1>
       <p class="lede">${text(t.hero.lede)}</p>
       <p class="actions"><a class="button" href="guide/">${text(t.hero.getStarted)}</a> <a class="button quiet" href="algorithms/">${text(t.hero.browse(count))}</a></p>
-      <p class="install"><code>npm i @algomotion/elements@alpha</code></p>
+      <p class="install"><code>npm i @algomotion/elements</code></p>
       <p class="fine">${text(t.hero.fine)}</p>
     </div>
     <div class="hero-player">

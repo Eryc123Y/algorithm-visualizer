@@ -1,6 +1,6 @@
 [package]
 name = "algomotion"
-version = "0.1.0"
+version = "1.0.0"
 entrypoint = "lib.typ"
 compiler = "0.15.0"
 authors = ["Eryc123Y <https://github.com/Eryc123Y>"]

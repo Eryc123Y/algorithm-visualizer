@@ -29,13 +29,14 @@
 
 讲解和播放器界面有英文和简体中文两种：网页上的播放器跟随页面的 `lang`，Typst 包跟随文档的 `text.lang`，LaTeX 包用 `lang=zh`，命令行用 `--lang zh`，MCP 工具用 `locale`。
 
-## 现状：1.0 alpha
+## 现状：1.0
 
-协议已冻结在 1.0，十一种数据结构和 132 个算法及数据结构操作都已完整可用。`1.0.0-alpha.1` 是第一个公开版本，供试用和反馈：在 1.0 之前，名称和选项仍可能调整。
+`1.0.0` 是第一个正式版本。协议已冻结在 1.0，十一种数据结构和 132 个算法及数据结构操作都已完整可用，支持英文和简体中文。
 
-- **npm**：所有包都以 `1.0.0-alpha.1` 发布，带 `alpha` 标签。目前只有这一个版本，所以直接 `npm install` 也会装到它；想在 1.0 发布后继续用 alpha 版，就指定 `@alpha`。
-- **Typst Universe 和 CTAN**：暂未发布。这两个平台都由人工审核，并且会永久保留每个版本，所以等 1.0 再上。在那之前，可以从 [GitHub Release](https://github.com/Eryc123Y/algorithm-visualizer/releases) 或本仓库在本地安装 Typst 和 LaTeX 包，方法见 [Typst 指南](https://algomotion.turing2234.com/zh/guide/typst/)和 [LaTeX 指南](https://algomotion.turing2234.com/zh/guide/latex/)。
-- **中文**：中文的运行过程已在 `main` 分支和网站上可用，会随下一个版本发布；`1.0.0-alpha.1` 只能画英文。在那之前，请从本仓库构建。
+- **npm**：所有包都以 `1.0.0` 发布。
+- **GitHub Release**：[v1.0.0](https://github.com/Eryc123Y/algorithm-visualizer/releases/tag/v1.0.0) 里有 macOS、Linux 和 Windows 的独立 `algomotion` 命令，以及 Typst 包、LaTeX 包和播放器文件。
+- **CTAN**：LaTeX 包以 `algomotion` 的名字发布到 CTAN，TeX Live 和 MiKTeX 会从那里收录。在 CTAN 收录之前，可以从 GitHub Release 安装，方法见 [LaTeX 指南](https://algomotion.turing2234.com/zh/guide/latex/)。
+- **Typst Universe**：暂未发布。在那之前，可以从 GitHub Release 在本地安装 Typst 包，方法见 [Typst 指南](https://algomotion.turing2234.com/zh/guide/typst/)。
 - **AI 助手**：托管的 MCP 服务器 `https://algomotion-mcp.turing2234.com/mcp` 现在就能用。
 
 ## 快速上手
@@ -43,7 +44,7 @@
 在网页上使用（从 npm 安装播放器）：
 
 ```sh
-npm install @algomotion/elements@alpha
+npm install @algomotion/elements
 ```
 
 ```js
@@ -63,7 +64,7 @@ import '@algomotion/elements/define';
 在命令行里导出插图：
 
 ```sh
-npx -p @algomotion/mcp@alpha algomotion export dijkstra --input 'A-B 4, B-C 1, A-C 7, C-D 2' --step improve#3 --lang zh --out figures
+npx -p @algomotion/mcp algomotion export dijkstra --input 'A-B 4, B-C 1, A-C 7, C-D 2' --step improve#3 --lang zh --out figures
 ```
 
 在 Claude Code 里接入：
@@ -75,7 +76,7 @@ claude mcp add --transport http algomotion https://algomotion-mcp.turing2234.com
 在 Typst 里（先按 [Typst 指南](https://algomotion.turing2234.com/zh/guide/typst/)在本地安装）：
 
 ```typ
-#import "@local/algomotion:0.1.0": algomotion
+#import "@local/algomotion:1.0.0": algomotion
 #set text(lang: "zh")
 #algomotion("dijkstra", "A-B 4, B-C 1, A-C 7, C-D 2", step: "improve#3")
 ```

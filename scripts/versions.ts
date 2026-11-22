@@ -29,7 +29,7 @@ export const PLACES: readonly Place[] = [
     product: 'npm',
     pattern: new RegExp(String.raw`^  "version": "${VERSION}"`, 'gm'),
     files:
-      /^(package\.json|packages\/(spec|fonts|core|svg|tikz|recipes|elements|mcp)\/package\.json)$/,
+      /^(package\.json|packages\/(spec|fonts|core|svg|tikz|recipes|elements|mcp|typst|latex)\/package\.json)$/,
   },
   {
     product: 'npm',

@@ -55,6 +55,6 @@ ${code('claude mcp add --transport http algomotion https://algomotion-mcp.turing
   <dd>The JSON record of a run: the structures and the steps. Algorithms make them for you; you, or a model, can also write one by hand for anything the catalogue does not have. See <a href="${root}guide/documents/">Documents</a>.</dd>
 </dl>
 
-${note(`<p>algomotion is a 1.0 alpha. The npm packages are published under the <code>alpha</code> tag, and the <a href="https://github.com/Eryc123Y/algorithm-visualizer/releases/tag/v1.0.0-alpha.1">GitHub release</a> carries the Typst and LaTeX packages and the standalone command. Typst Universe and CTAN wait for 1.0, so the Typst and LaTeX guides show how to install those packages locally. Names and options may still change before 1.0.</p>`)}
+${note(`<p>algomotion 1.0 is on npm, and the <a href="https://github.com/Eryc123Y/algorithm-visualizer/releases/tag/v1.0.0">GitHub release</a> carries the Typst and LaTeX packages and the standalone command for macOS, Linux and Windows. The LaTeX package goes to CTAN; the Typst package is not on Typst Universe yet, so the Typst guide shows how to install it locally.</p>`)}
 `,
 };

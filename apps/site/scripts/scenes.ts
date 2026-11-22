@@ -118,7 +118,7 @@ const typstPackages = (() => {
   run('npm', ['run', 'build', '-w', '@algomotion/typst'], REPO);
   const packages = join(work, 'typst-packages');
   mkdirSync(join(packages, 'local/algomotion'), { recursive: true });
-  symlinkSync(pkg, join(packages, 'local/algomotion/0.1.0'));
+  symlinkSync(pkg, join(packages, 'local/algomotion/1.0.0'));
   return packages;
 })();
 
