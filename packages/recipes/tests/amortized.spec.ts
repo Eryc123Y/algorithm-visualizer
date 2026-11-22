@@ -117,12 +117,12 @@ const tables = fc.array(fc.integer({ min: -99, max: 99 }), {
 recipe(
   'binary-counter',
   counters,
-  ({ k, n }) => runOk('binary-counter', { k, n }).document,
+  ({ k, n }, locale) => runOk('binary-counter', { k, n }, locale).document,
   (trace, { k, n }) => checkCounter(trace.visualization, k, n),
 );
 recipe(
   'dynamic-table',
   tables,
-  (items) => runOk('dynamic-table', { items }).document,
+  (items, locale) => runOk('dynamic-table', { items }, locale).document,
   (trace, items) => checkTable(trace.visualization, items),
 );

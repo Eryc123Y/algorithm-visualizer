@@ -182,6 +182,6 @@ const inputs = fc.integer({ min: 1, max: 6 }).chain((n) =>
 recipe(
   'optimal-bst',
   inputs,
-  ({ p, q }) => runOk('optimal-bst', { p, q }).document,
+  ({ p, q }, locale) => runOk('optimal-bst', { p, q }, locale).document,
   (trace, { p, q }) => check(trace.visualization, p, q),
 );

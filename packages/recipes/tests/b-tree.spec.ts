@@ -11,7 +11,14 @@ import { describe, expect, it } from 'vitest';
 import type { BTreeState, Trace } from '@algomotion/core';
 
 import { RefBTree } from './b-tree-reference.ts';
-import { fuzz, replay, runError, runOk, stateOf } from './helpers.ts';
+import {
+  checkOperations,
+  fuzz,
+  replay,
+  runError,
+  runOk,
+  stateOf,
+} from './helpers.ts';
 
 const CLRS =
   '[P] ([C G M] ([A B] [D E F] [J K L] [N O]) [T X] ([Q R S] [U V] [Y Z]))';
@@ -204,6 +211,7 @@ describe('b-tree', () => {
         (t, keys, ops) => {
           const ref = new RefBTree(t);
           for (const k of keys) ref.insert(k);
+          const start = ref.print();
           // The reference tree after each operation.
           const snapshots: string[] = [];
           const expected = ops.map(({ op, key }) => {
@@ -230,6 +238,13 @@ describe('b-tree', () => {
           });
           expect(drawn(treeOf(trace))).toBe(ref.print());
           expect(bTreeProblems(treeOf(trace), t)).toEqual([]);
+          checkOperations(
+            'b-tree',
+            { t, keys },
+            ops,
+            (tr, frame) => drawn(treeOf(tr, frame)),
+            start,
+          );
         },
       ),
       fuzz,

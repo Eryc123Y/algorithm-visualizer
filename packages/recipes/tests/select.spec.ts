@@ -152,6 +152,6 @@ const inputs = fc
 recipe(
   'select',
   inputs,
-  ({ values, i }) => runOk('select', { values, i }).document,
+  ({ values, i }, locale) => runOk('select', { values, i }, locale).document,
   (trace, { values, i }) => check(trace.visualization, values, i),
 );

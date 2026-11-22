@@ -8,7 +8,7 @@ import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 
 import type { Trace } from '@algomotion/core';
-import type { VisualizationInput } from '@algomotion/spec';
+import type { Locale, VisualizationInput } from '@algomotion/spec';
 
 import { seededRandom } from '../src/random.ts';
 import { fuzz, replay, runOk, stateOf } from './helpers.ts';
@@ -69,8 +69,8 @@ function check(
   expect(stateOf(trace, 'calls', 'stack').data).toEqual([]);
 }
 
-const run = (values: readonly number[], seed: number) =>
-  runOk('randomized-quicksort', { values, seed }).document;
+const run = (values: readonly number[], seed: number, locale?: Locale) =>
+  runOk('randomized-quicksort', { values, seed }, locale).document;
 
 describe('randomized-quicksort', () => {
   it('sorts the examples, drawing each pivot before it partitions', () => {
@@ -124,6 +124,6 @@ const inputs = fc.record({
 recipe(
   'randomized-quicksort',
   inputs,
-  ({ values, seed }) => run(values, seed),
+  ({ values, seed }, locale) => run(values, seed, locale),
   (trace, { values, seed }) => check(trace.visualization, values, seed),
 );

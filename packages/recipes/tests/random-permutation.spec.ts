@@ -152,6 +152,6 @@ const inputs = fc.record({
 recipe(
   'random-permutation',
   inputs,
-  (input) => runOk('random-permutation', input).document,
+  (input, locale) => runOk('random-permutation', input, locale).document,
   (trace, { values }) => check(trace, values),
 );
