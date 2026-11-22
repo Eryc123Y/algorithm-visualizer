@@ -333,27 +333,42 @@ describe('bst', () => {
 });
 
 // The properties every recipe has: replay, layout, clean SVG and the run
-// in Chinese (recipe-properties.ts), on random operations from distinct
-// keys, deleting with the successor or the predecessor.
+// in Chinese (recipe-properties.ts), on random operations. Deleting with
+// the predecessor needs distinct keys in the left subtree, so those runs
+// only search and delete, from distinct keys; the others insert too.
 const key = fc.integer({ min: 0, max: 20 });
+const searchCall = key.map((k): BstCall => ({ op: 'search', key: k }));
+const deleteCall = key.map((k): BstCall => ({ op: 'delete', key: k }));
 recipe(
   'bst',
-  fc.record({
-    keys: fc.uniqueArray(key, { maxLength: 16 }),
-    calls: fc.array(
-      fc.oneof(
-        key.map((k): BstCall => ({ op: 'search', key: k })),
-        key.map((k): BstCall => ({ op: 'insert', key: k })),
-        key.map((k): BstCall => ({ op: 'delete', key: k })),
-        key.map((k): BstCall => ({
-          op: 'delete',
-          key: k,
-          replaceWith: 'predecessor',
-        })),
+  fc.oneof(
+    fc.record({
+      keys: fc.array(key, { maxLength: 16 }),
+      calls: fc.array(
+        fc.oneof(
+          searchCall,
+          deleteCall,
+          key.map((k): BstCall => ({ op: 'insert', key: k })),
+        ),
+        { minLength: 1, maxLength: 6 },
       ),
-      { minLength: 1, maxLength: 6 },
-    ),
-  }),
+    }),
+    fc.record({
+      keys: fc.uniqueArray(key, { maxLength: 16 }),
+      calls: fc.array(
+        fc.oneof(
+          searchCall,
+          deleteCall,
+          key.map((k): BstCall => ({
+            op: 'delete',
+            key: k,
+            replaceWith: 'predecessor',
+          })),
+        ),
+        { minLength: 1, maxLength: 6 },
+      ),
+    }),
+  ),
   ({ keys, calls }, locale) =>
     runOk('bst', { from: keys, ops: calls }, locale).document,
   (trace, { keys, calls }) =>
