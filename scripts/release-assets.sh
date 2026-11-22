@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Packs the files a GitHub release carries into release/, as 1.0.0-alpha.1
-# did: the Typst package in the layout of a local package directory, the
-# LaTeX package as CTAN takes it (one folder named after the package), and
-# the player's files to host. The standalone executables come from the
-# "Release files" workflow, one per platform. Build first:
+# did: the Typst package in the layout of a local package directory, and
+# the player's files to host. The LaTeX package as CTAN takes it comes from
+# scripts/ctan.sh, and the standalone executables from the "Release files"
+# workflow, one per platform. Build first:
 #
 #     npm run build && scripts/release-assets.sh
 set -euo pipefail
@@ -26,8 +26,11 @@ cmp -s THIRD-PARTY-NOTICES.md packages/elements/dist/cdn/THIRD-PARTY-NOTICES.md 
   echo "The player's THIRD-PARTY-NOTICES.md is older than the root file: run npm run build again." >&2
   exit 1
 }
-rm -rf "$out"
+# Only this script's archives are replaced: the LaTeX archive comes from
+# scripts/ctan.sh, which needs TeX, and the Typst Universe layout from
+# scripts/typst-universe.sh.
 mkdir -p "$out"
+rm -f "$out"/algomotion-typst-*.zip "$out"/algomotion-player-*.zip
 
 # The Typst package, unzipped into the Typst packages directory as
 # local/algomotion/<version>/.
@@ -37,12 +40,6 @@ for file in typst.toml lib.typ engine.bc plugin.wasm README.md LICENSE OFL.txt T
   cp "packages/typst/package/$file" "$typst/"
 done
 (cd "$tmp/typst" && zip -qr "$out/algomotion-typst-$typst_version.zip" local)
-
-# The LaTeX package: algomotion.sty with its README and licence.
-mkdir -p "$tmp/latex/algomotion"
-cp packages/latex/package/algomotion.sty packages/latex/package/README.md \
-  packages/latex/package/LICENSE "$tmp/latex/algomotion/"
-(cd "$tmp/latex" && zip -qr "$out/algomotion-latex.zip" algomotion)
 
 # The player as plain files: the bundle, the registry, their source maps,
 # the fonts and the third-party notices.

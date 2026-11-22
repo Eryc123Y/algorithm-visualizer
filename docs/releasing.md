@@ -44,11 +44,12 @@ Merge it, then tag the merge commit: `git tag v1.0.0 && git push origin v1.0.0`.
 
 ## 3. Files
 
-The tag starts the **Release files** workflow (`.github/workflows/release.yml`). It builds the standalone `algomotion` command for macOS (arm64 and x64), Linux (x64 and arm64) and Windows (x64), and runs each once. It also packs three archives with `scripts/release-assets.sh`:
+The tag starts the **Release files** workflow (`.github/workflows/release.yml`). It builds the standalone `algomotion` command for macOS (arm64 and x64), Linux (x64 and arm64) and Windows (x64), and runs each once. It also packs two archives with `scripts/release-assets.sh`:
 
 - `algomotion-typst-<version>.zip`: the Typst package, in the layout of a local package directory;
-- `algomotion-latex.zip`: the LaTeX package as CTAN takes it;
 - `algomotion-player-<version>.zip`: the player's files, to host.
+
+The tag also starts the **CTAN** workflow (`.github/workflows/ctan.yml`), which pull requests that change the LaTeX package or the engine run too. `scripts/ctan.sh` builds the manual, `algomotion-doc.pdf`, whose figures the package draws, and packs `algomotion-latex.zip`: one folder, `algomotion/`, with `algomotion.sty`, `README.md`, `LICENSE`, the manual and its source, as CTAN takes it. It then checks the folder with CTAN's [pkgcheck](https://ctan.org/pkg/pkgcheck), which reports nothing. The archive is the run's `ctan` artifact. Locally, after `npm ci`, `scripts/ctan.sh` needs latexmk, LuaLaTeX and pkgcheck (or `--no-check`).
 
 Every file that bundles other people's software carries `THIRD-PARTY-NOTICES.md`: the standalone archives (with the fonts' `OFL.txt`), the Typst package, and the player's files, whose build writes it next to them. The MCP server's player page, which hosts receive alone, carries the notices of what it bundles in a comment at its end. The Typst package's copy must equal the root file; the packing scripts stop if it does not. A bundle that contains an npm package the notices do not name fails to build, and `scripts/third-party.spec.ts` checks the crates and the copyright lines.
 
@@ -68,9 +69,13 @@ The tag also starts the **Typst Universe** workflow (`.github/workflows/typst-un
   - **Fonts.** The package ships no font files. The engine draws the figures' text as outlines of the bundled fonts, so a figure looks the same everywhere; those outlines are under the OFL, hence `GPL-3.0-or-later AND OFL-1.1`, and the README's Licence section says which part each licence covers.
   - **Checks.** `typst-package-check` reports only the size of `engine.bc`. The README's examples compile with Typst 0.15.0, the manifest's `compiler`.
   - **The homepage must answer servers.** Typst Universe's check fetches `homepage` and `repository` from a server, without a browser's headers. In November 2026 the site answered GitHub's runners with 403, which the checker reports as an error (`manifest/package/homepage/private`), while browsers and home connections got 200. That is Cloudflare's bot protection on the site's zone (owner). Before submitting, run the Typst Universe workflow by hand: it fetches both URLs from GitHub's servers.
-- **CTAN.** Upload the LaTeX archive at [ctan.org/upload](https://ctan.org/upload). Give the licence as GPL 3 or later, and the repository as the home page.
-  - The package needs the `algomotion` command, from npm or the GitHub release.
-  - Say so in the upload's notes, as for any package that runs a program through shell escape.
+- **CTAN.** Upload the `ctan` artifact's `algomotion-latex.zip` at [ctan.org/upload](https://ctan.org/upload). Delete the README's "Not on CTAN yet" note in the release commit first. The form can say:
+  - **Name** `algomotion`; **version** the one in `\ProvidesExplPackage` of `algomotion.sty`, with its date.
+  - **Summary.** Step-by-step figures of algorithms and data structures, drawn with TikZ.
+  - **Description.** Name an algorithm, give it your input and pick a step, and the package draws that step as a TikZ figure in the document's fonts; it also draws documents in the algomotion format. In Beamer, a figure steps through the run as overlays. About 130 algorithms and data structures, nine themes, English and Chinese.
+  - **Licence** GNU General Public License, version 3 or later. **Home page** <https://algomotion.turing2234.com>; **repository** <https://github.com/Eryc123Y/algorithm-visualizer>; **bug tracker** its issues.
+  - **Notes to the CTAN team.** The package runs an external program, `algomotion`, through shell escape, as minted runs Pygments; it comes from npm (`@algomotion/mcp`) or as a standalone executable from the GitHub releases. Figures are cached, so a document with its cache compiles without shell escape. The manual was built that way; its source needs the command and `-shell-escape` to build again.
+  - The uploader's name and email are the owner's.
 
 ## 5. Deploy
 

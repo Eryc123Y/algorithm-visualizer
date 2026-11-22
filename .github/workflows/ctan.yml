@@ -1,0 +1,77 @@
+name: CTAN
+
+# Packs the LaTeX package as CTAN takes it and checks it with CTAN's
+# pkgcheck (scripts/ctan.sh, docs/releasing.md): one folder with the .sty,
+# the README, the licence, and the manual, which the package draws, with
+# its source. It publishes nothing; the archive is the run's artifact,
+# which the GitHub release and the CTAN upload take. It runs on a version
+# tag, by hand, and on pull requests that change the package or the
+# engine that draws the manual's figures.
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/ctan.yml'
+      - 'scripts/ctan.sh'
+      - 'packages/latex/package/**'
+      - 'packages/latex/scripts/**'
+      - 'packages/spec/src/**'
+      - 'packages/fonts/src/**'
+      - 'packages/core/src/**'
+      - 'packages/svg/src/**'
+      - 'packages/tikz/src/**'
+      - 'packages/recipes/src/**'
+      - 'packages/mcp/src/**'
+      - 'package-lock.json'
+
+concurrency:
+  group: ctan-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pack:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      # What the manual reads, from a recorded build, on top of LaTeX.
+      - uses: TeX-Live/setup-texlive-action@v4
+        with:
+          packages: |
+            scheme-basic
+            latexmk
+            booktabs
+            listings
+            xcolor
+            pgf
+            etoolbox
+            epstopdf-pkg
+            hyperref
+            geometry
+            tools
+            url
+            lm
+            luaotfload
+            lualibs
+            lua-uni-algos
+      - name: pkgcheck
+        run: |
+          base=https://mirrors.ctan.org/support/pkgcheck/bin/pkgcheck-x86_64-unknown-linux-musl
+          mkdir -p "$RUNNER_TEMP/pkgcheck"
+          cd "$RUNNER_TEMP/pkgcheck"
+          curl -fsSL --retry 3 -o pkgcheck "$base"
+          sum="$(curl -fsSL --retry 3 "$base.sha256" | sed -n 's/.*= *\([0-9a-f]\{64\}\).*/\1/p')"
+          echo "$sum  pkgcheck" | sha256sum -c -
+          chmod +x pkgcheck
+          echo "PKGCHECK=$PWD/pkgcheck" >> "$GITHUB_ENV"
+      - run: scripts/ctan.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ctan
+          path: release/algomotion-latex.zip

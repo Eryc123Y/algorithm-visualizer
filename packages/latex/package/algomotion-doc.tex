@@ -1,0 +1,372 @@
+% The manual of the algomotion LaTeX package. Its figures are drawn by the
+% package itself, so it compiles like any document that uses it:
+%
+%   lualatex -shell-escape algomotion-doc.tex   (twice, for the contents)
+%
+% with the algomotion command on the PATH. In the algomotion repository,
+% `npm run build:doc -w @algomotion/latex` builds it with the command of
+% the checkout.
+\documentclass[11pt]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{algomotion}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  columns=fullflexible,
+  keepspaces,
+  frame=leftline,
+  framerule=1.5pt,
+  rulecolor=\color{black!25},
+  xleftmargin=1.5em,
+  aboveskip=0.8\baselineskip,
+  belowskip=0.8\baselineskip,
+}
+\newcommand\pkg[1]{\textsf{#1}}
+\newcommand\cs[1]{\texttt{\textbackslash#1}}
+\newcommand\key[1]{\texttt{#1}}
+\makeatletter
+\edef\algomotionversion{\csname ver@algomotion.sty\endcsname}
+\makeatother
+
+\title{The \pkg{algomotion} package\\[0.3em]
+  \large Step-by-step figures of algorithms and data structures}
+\author{Eryc123Y\\
+  \url{https://github.com/Eryc123Y/algorithm-visualizer}}
+\date{\algomotionversion}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+  Name an algorithm, give it your input and pick a step, such as the moment
+  Dijkstra's algorithm improves a distance on your graph, and \pkg{algomotion}
+  draws that step as a TikZ figure, in your document's fonts. It can also draw
+  a document that you wrote, or that an AI wrote for you, in the algomotion
+  format. In Beamer, a figure becomes overlays that step through the run.
+  Every figure in this manual is drawn by the package.
+\end{abstract}
+
+\tableofcontents
+
+\section{Introduction}
+
+\noindent This line draws figure~\ref{fig:dijkstra}:
+
+\begin{lstlisting}
+\algomotion[step=improve#3]{dijkstra}{A-B 4, B-C 1, A-C 7, C-D 2}
+\end{lstlisting}
+
+\begin{figure}[htbp]
+  \centering
+  \algomotion[step=improve\#3, layout=wide, width=0.75\linewidth]{dijkstra}{A-B 4, B-C 1, A-C 7, C-D 2}
+  \caption{Dijkstra's algorithm from $A$, the third time a distance improves:
+    the edge from $B$ lowers the distance of $C$ from $7$ to $5$. The
+    priority queue is drawn beside the graph.}
+  \label{fig:dijkstra}
+\end{figure}
+
+\noindent The graph is an edge list, and Dijkstra's algorithm starts at its
+first node, $A$. The figure itself uses \texttt{layout=wide}, which puts the
+priority queue beside the graph.
+
+The figures come from algomotion, a library and command line that run the
+algorithms of a registry, about 130 of them from sorting to graphs, dynamic
+programming and data structures, and record every step. The same figures are
+drawn by its web player, its Typst package and its SVG export, with the same
+shapes, colours and positions. Here they are drawn with TikZ, so their text
+is set in the document's fonts and they scale with the page.
+
+The package runs the \texttt{algomotion} command through shell escape, as
+\pkg{minted} runs Pygments. It keeps every figure in a cache directory, so a
+figure that did not change is never made again, and cached figures need no
+shell escape at all.
+
+\section{Installation}
+
+\begin{itemize}
+  \item \textbf{The command.} Install \texttt{algomotion} with npm,
+    \texttt{npm install -g @algomotion/mcp}, or take the standalone
+    executable for your platform from the project's GitHub releases, a
+    program of about 3\,MB that needs no Node.js. Put it on the
+    \texttt{PATH}, or name it with the package option \key{command}.
+  \item \textbf{The package.} \texttt{algomotion.sty} comes with
+    \TeX\ distributions that include it from CTAN; otherwise put it next to
+    your document, or in your local \texttt{texmf} tree under
+    \texttt{tex/latex/algomotion/}.
+  \item \textbf{Requirements.} \LaTeX\ 2024-06-01 or later, as in \TeX\ Live
+    2024, and TikZ. pdf\LaTeX, Lua\LaTeX\ and Xe\LaTeX\ work alike;
+    \texttt{latex} with \texttt{dvips} works too, but PostScript has no
+    transparency, so the shadows of the light and dark themes come out solid.
+  \item \textbf{Shell escape} is needed the first time a figure is made:
+\end{itemize}
+
+\begin{lstlisting}
+latexmk -pdf -shell-escape notes.tex     % or -pdflua, -pdfxe
+\end{lstlisting}
+
+\section{Commands}
+
+\begin{center}
+  \begin{tabularx}{\linewidth}{@{}lX@{}}
+    \toprule
+    Command & Draws \\
+    \midrule
+    \cs{algomotion}\texttt{[keys]\{id\}\{input\}} & a step of a registry
+      algorithm, run on the input (section~\ref{sec:input}) \\
+    \cs{algomotionfile}\texttt{[keys]\{doc.json\}} & a step of an algomotion
+      document in a JSON file \\
+    \cs{algomotionfile}\texttt{[algorithm=id, keys]\{in.json\}} & a step of
+      an algorithm whose input is in a file \\
+    \cs{algomotioninput}\texttt{[keys]\{figure.tex\}} & a figure or series
+      made by \texttt{algomotion export --format tikz}, without shell escape \\
+    \cs{algomotionset}\texttt{\{keys\}} & sets keys for the figures that
+      follow, in the current group \\
+    \bottomrule
+  \end{tabularx}
+\end{center}
+
+\noindent \texttt{algomotion recipes} lists the algorithm ids and the inputs
+they take, and \texttt{algomotion guide} explains documents.
+
+\section{Keys}
+
+\begin{center}
+  \small
+  \begin{tabularx}{\linewidth}{@{}llX@{}}
+    \toprule
+    Key & Default & Meaning \\
+    \midrule
+    \key{step} & \texttt{-1} & The frame to draw (section~\ref{sec:steps}). \\
+    \key{steps} & none & A series of frames, one per slide in Beamer
+      (section~\ref{sec:slides}). \\
+    \key{start} & \texttt{+} & The slide of a series' first frame. \\
+    \key{theme} & \texttt{light} & A built-in theme
+      (section~\ref{sec:themes}). \\
+    \key{layout} & \texttt{narrow} & Where structures beside the main one go,
+      such as a queue: below it (\texttt{narrow}) or beside it
+      (\texttt{wide}); Beamer's default is \texttt{wide}. \\
+    \key{lang} & \texttt{en} & The language of an algorithm's run and of the
+      figure's own words: \texttt{en} or \texttt{zh} (Simplified Chinese,
+      in a document that sets Chinese, such as one with \pkg{ctex}). \\
+    \key{width}, \key{height} & natural & The figure's size; with both, it
+      fits inside both and keeps its shape. \\
+    \key{scale} & none & A factor on the natural size. \\
+    \key{value font} & the theme's & The font of values in cells and nodes,
+      indices, edge labels and pointers. \\
+    \key{label font} & the theme's & The font of titles and labels such as
+      ``top''. \\
+    \key{algorithm} & none & With \cs{algomotionfile}: the file is this
+      algorithm's input, not a document. \\
+    \bottomrule
+  \end{tabularx}
+\end{center}
+
+An algorithm's figure also draws what it keeps besides its main structure,
+such as Dijkstra's priority queue or a call stack. \texttt{layout=narrow} puts
+those structures below the main one, which suits a column of notes;
+\texttt{layout=wide} puts them beside it, which suits a slide.
+
+At its natural size, a figure's values come out at 1.25 times the size of the
+text around it, and its labels at three quarters of it. A figure is never
+wider than the line, unless \key{width} or \key{height} says otherwise. Every
+figure of one run of an algorithm has the same canvas, so figures of
+different steps drawn at the same scale line up:
+
+\begin{lstlisting}
+\algomotion[step=swap#2, width=0.45\linewidth]{bubble-sort}{5 1 4 2 8}\hfill
+\algomotion[step=-1, width=0.45\linewidth]{bubble-sort}{5 1 4 2 8}
+\end{lstlisting}
+
+\begin{figure}[htbp]
+  \centering
+  \algomotion[step=swap\#2, width=0.45\linewidth]{bubble-sort}{5 1 4 2 8}\hfill
+  \algomotion[step=-1, width=0.45\linewidth]{bubble-sort}{5 1 4 2 8}
+  \caption{Bubble sort's second swap and its last frame, at one width and so
+    at one scale.}
+\end{figure}
+
+\noindent Package options, in \cs{usepackage}\texttt{[...]\{algomotion\}}:
+\key{command=algomotion}, the command to run, with a path or arguments if
+needed; and \key{cachedir=\_algomotion}, where the figures are kept.
+
+\section{Steps}\label{sec:steps}
+
+\key{step} takes a selector:
+\begin{itemize}
+  \item a frame number: \texttt{0} is the starting state, \texttt{-1} the
+    last frame;
+  \item a step name, counted from 1: \texttt{relax\#3} is the third step
+    named \texttt{relax};
+  \item a step inside a section: \texttt{insert-5/relax\#2}.
+\end{itemize}
+A selector that names several frames, such as a section or a range, is an
+error with \key{step}, since a figure is one frame; \key{steps} takes a
+series. If a step does not exist, the error lists the step names the run has.
+
+In ordinary text, write \texttt{step=relax\#3}. Inside a macro definition, a
+table or a Beamer frame without \texttt{[fragile]}, \TeX\ reads \texttt{\#}
+as a parameter, so write \texttt{step=relax\textbackslash\#3} there. That
+spelling works everywhere.
+
+\section{Themes}\label{sec:themes}
+
+Nine themes are built in: \texttt{light} (the default), \texttt{dark},
+\texttt{print}, \texttt{textbook}, \texttt{textbook-dark}, \texttt{blocks},
+\texttt{blocks-dark}, \texttt{answer-sheet} and \texttt{turbo-c}. Each one
+chooses the document's family for its values and labels, which the keys
+\key{value font} and \key{label font} change. The dark themes and Turbo~C
+paint their own background. Figure~\ref{fig:themes} draws the step of
+figure~\ref{fig:dijkstra} in six of them.
+
+\newcommand\themed[1]{%
+  \begin{minipage}[b]{0.31\linewidth}
+    \centering
+    \algomotion[step=improve\#3, theme=#1, layout=wide, width=\linewidth]{dijkstra}{A-B 4, B-C 1, A-C 7, C-D 2}\\[0.3em]
+    \texttt{#1}
+  \end{minipage}}
+\begin{figure}[htbp]
+  \centering
+  \themed{print}\hfill\themed{textbook}\hfill\themed{blocks}\\[1.2em]
+  \themed{answer-sheet}\hfill\themed{textbook-dark}\hfill\themed{turbo-c}
+  \caption{One step in six themes.}
+  \label{fig:themes}
+\end{figure}
+
+\section{Slides}\label{sec:slides}
+
+In a Beamer frame, \key{steps} turns a figure into overlays: one slide per
+frame of a series, all in one picture, so nothing moves from slide to slide.
+
+\begin{lstlisting}
+\begin{frame}{Dijkstra's algorithm, step by step}
+  \centering
+  \algomotionfile[algorithm=dijkstra, steps]{graph.json}   % every frame
+\end{frame}
+
+\begin{frame}{Settling $a$}
+  The queue hands out $a$, at distance $3$. \pause
+
+  \centering
+  \algomotionfile[algorithm=dijkstra, steps=extract\#3..improve\#5]{graph.json}
+\end{frame}
+\end{lstlisting}
+
+\begin{itemize}
+  \item \key{steps} takes the selectors of \key{step}, and series of them: a
+    range such as \texttt{relax\textbackslash\#2..-1}, a section such as
+    \texttt{insert-5}, or several in braces:
+    \texttt{steps=\{0, relax\textbackslash\#2, -1\}}. Without a value, it
+    means every frame. The frames come in timeline order, each once.
+  \item A series starts where Beamer's incremental count stands, as
+    \texttt{<+>} does, so it follows a \cs{pause}; \texttt{start=3} starts it
+    on slide 3 instead. Its last frame stays until the frame ends; continue
+    with \cs{onslide}\texttt{<+->} rather than \cs{pause}.
+  \item In the \texttt{beamer} class, a figure fills the frame: as large as
+    fits in the line's width and three quarters of the text height, keeping
+    its shape. \key{width} and \key{height} replace their side of that box,
+    and \key{scale} gives the natural size times \key{scale}.
+  \item In handouts, in transparencies, in \texttt{beamerarticle} notes and
+    outside Beamer, a series shows its last frame.
+\end{itemize}
+
+\section{The input}\label{sec:input}
+
+The input of \cs{algomotion} is a notation, or JSON:
+
+\begin{lstlisting}
+\algomotion{insertion-sort}{5 2 4 6 1 3}                     % a list
+\algomotion{dijkstra}{A-B 4, B-C 1, A-C 7, C-D 2}            % a graph
+\algomotion{topological-sort}{shirt->tie, tie->jacket, socks} % a directed graph
+\algomotion{inorder-tree-walk}{[4, 2, 6, 1, 3, null, 7]}     % a tree in level order
+\algomotion{bst}{"from": "8 3 10 1 6", "ops": "insert 4, delete 3"}
+\algomotion{dijkstra}{"graph": "A-B 4, B-C 1", "source": "C"}
+\algomotion{kruskal}{}                                        % the first example
+\end{lstlisting}
+
+\begin{itemize}
+  \item \textbf{Lists} are numbers separated by commas or spaces, optionally
+    in brackets; a level order writes \texttt{null} for a gap.
+  \item \textbf{Graphs} are edge lists: \texttt{-} joins an undirected edge
+    and \texttt{->} a directed one, a number after a space is the weight, and
+    a name alone is a node without edges.
+  \item \textbf{Operations} of a data structure are written as exercises
+    write them: \texttt{insert 4, delete 3}.
+  \item Anything that starts with \texttt{\{}, \texttt{[} or \texttt{"} is
+    JSON, and the outer braces of an object may be left out.
+  \item Write \texttt{\%} as \texttt{\textbackslash\%}; \texttt{\textbackslash\#},
+    \texttt{\textbackslash\{}, \texttt{\textbackslash\}}, \texttt{\textbackslash\&},
+    \texttt{\textbackslash\$} and \texttt{\textbackslash\_} also stand for
+    the characters. Line breaks and repeated spaces are fine.
+\end{itemize}
+
+\noindent Figure~\ref{fig:inputs} draws two of these inputs, and a dynamic
+programming table.
+
+\begin{figure}[htbp]
+  \centering
+  \begin{minipage}[c]{0.4\linewidth}
+    \centering
+    \algomotion[width=\linewidth]{bst}{"from": "8 3 10 1 6", "ops": "insert 4, delete 3"}
+  \end{minipage}\hfill
+  \begin{minipage}[c]{0.55\linewidth}
+    \centering
+    \algomotion[width=\linewidth]{lcs}{"first": "ABCB", "second": "BDCAB"}
+  \end{minipage}
+  \caption{Left, a binary search tree built from \texttt{8 3 10 1 6}, after
+    inserting $4$ and deleting $3$. Right, the table of the longest common
+    subsequence of \texttt{ABCB} and \texttt{BDCAB}.}
+  \label{fig:inputs}
+\end{figure}
+
+\section{The cache}
+
+Each figure is kept in \texttt{\_algomotion/} under the MD5 of everything
+that changes its drawing: the input or the file's contents, the algorithm,
+the step, the theme, the layout, the file format and the package version.
+
+\begin{itemize}
+  \item A figure found there is drawn without running anything, so later
+    runs of a document cost only TikZ's time.
+  \item Fonts and sizes are applied when the figure is drawn, so changing
+    them makes no new figure.
+  \item Share or commit \texttt{\_algomotion/} to compile the document where
+    the command is missing or shell escape is off, such as on arXiv or for a
+    co-author.
+  \item The package deletes nothing. Delete \texttt{\_algomotion/} to clean
+    up, and after updating the \texttt{algomotion} command.
+\end{itemize}
+
+\section{Errors}
+
+When a figure cannot be made, \LaTeX\ reports an error, and a framed box
+takes the figure's place with the whole message: an unknown algorithm or
+theme, an input that the algorithm rejects, an invalid document, or a step
+that names no frame. The package also says when shell escape is off and the
+figure is not in the cache yet; when restricted shell escape, the \TeX\ Live
+default, did not run \texttt{algomotion}, which is not in
+\texttt{shell\_escape\_commands}; and when the command made no figure,
+usually because it is not installed or not on the \texttt{PATH}.
+
+\section{Security}
+
+Shell escape lets a document run programs, so compile documents from others
+with care, as with \pkg{minted}. The package passes the shell only checked
+text: the command line holds the algorithm id, the step and the theme, each
+checked against the characters it may have; the input is passed as
+hexadecimal; and file names are quoted, and rejected if they contain
+characters that shells read inside quotes.
+
+\section{Licence and support}
+
+The package is free software under the GNU General Public License, version 3
+or later. The figures it draws are yours. Report problems and ask questions
+at \url{https://github.com/Eryc123Y/algorithm-visualizer/issues}; the
+documentation of the whole project is at
+\url{https://algomotion.turing2234.com}.
+
+\end{document}
