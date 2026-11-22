@@ -418,7 +418,7 @@ ${setup === undefined || setup.type !== 'code' ? '' : `<pre tabindex="0"><code>$
 </ul>
 数据结构放在 <code>packages/recipes/src/structures/&lt;name&gt;/</code>，用 <code>defineStructure</code> 定义。</li>
 <li><strong>注册：</strong>把模块加进 <code>packages/recipes/src/registry.ts</code> 的 <code>algorithms</code>，放在同领域的模块旁边。</li>
-<li><strong>测试：</strong><code>tests/registry.spec.ts</code> 会检查每个模块（示例、锚点、解说、步骤名、确定性）。再为它写一个对照独立参考实现的测试，并在 <code>tests/properties.spec.ts</code> 里加性质测试。</li>
+<li><strong>测试：</strong><code>tests/registry.spec.ts</code> 会检查每个模块（示例、锚点、解说、步骤名、确定性）。再为它写一个对照独立参考实现的测试，并在 <code>tests/properties/</code> 下对应主题的文件里加性质测试。</li>
 <li><strong>亲眼看看：</strong>在 playground 里打开它，两种语言都看一遍。</li>
 </ol>
 <h2 id="pull-requests">提交拉取请求</h2>

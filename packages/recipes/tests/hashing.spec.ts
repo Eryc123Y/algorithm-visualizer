@@ -2,7 +2,7 @@
  * The hash tables against independent references on plain arrays: chains
  * that grow at the head, and linear probing. They also meet the checks of
  * ADR 0018: frame 0 is the starting table, chained runs agree with one
- * run, and `after` rebuilds the same table. `properties.spec.ts` runs them
+ * run, and `after` rebuilds the same table. `properties/` runs them
  * on random inputs.
  */
 import fc from 'fast-check';

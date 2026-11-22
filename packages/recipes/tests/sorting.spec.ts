@@ -1,7 +1,7 @@
 /**
  * The sorting modules against independent references: the sorted order
  * from Array.prototype.sort, inversion counts, and the invariants of each
- * CLRS procedure. `properties.spec.ts` runs them on random inputs.
+ * CLRS procedure. `properties/` runs them on random inputs.
  */
 import { describe, expect, it } from 'vitest';
 

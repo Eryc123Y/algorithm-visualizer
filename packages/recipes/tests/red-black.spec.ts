@@ -3,7 +3,7 @@
  * implementation: every insertion and deletion ends in the same tree with
  * the same colours, every fixup case is reached and named, deletion points
  * `x` at NIL when an empty leaf moves up, and the structure meets the
- * checks of ADR 0018. `properties.spec.ts` runs it on random inputs too.
+ * checks of ADR 0018. `properties/` runs it on random inputs too.
  */
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';

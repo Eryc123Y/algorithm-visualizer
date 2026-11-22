@@ -1,7 +1,7 @@
 /**
  * The dynamic-programming modules against independent references:
  * recursive LCS length and Levenshtein distance, and every subset of the
- * knapsack items. `properties.spec.ts` runs them on random inputs.
+ * knapsack items. `properties/` runs them on random inputs.
  */
 import { describe, expect, it } from 'vitest';
 

@@ -7,6 +7,7 @@ import fc from 'fast-check';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import { algorithms, runAlgorithm } from '@algomotion/recipes';
+import { kindNames } from '@algomotion/spec';
 import { exportFigures, themes, type ThemeName } from '@algomotion/svg';
 
 import type { Response } from '../src/engine.ts';
@@ -50,6 +51,38 @@ function exportedSvg(
   return series.value.figures.map((f) => f.svg);
 }
 
+/**
+ * Registry examples that between them show every structure kind, picked
+ * greedily, the example with the most kinds not yet shown first.
+ */
+function examplesOfEveryKind(): { id: string; input: unknown }[] {
+  const all = algorithms.flatMap((a) =>
+    a.examples.map((input) => {
+      const run = runAlgorithm(a.id, input);
+      const kinds = run.ok
+        ? new Set<string>(
+            Object.values(run.value.document.structures).map((s) => s.kind),
+          )
+        : new Set<string>();
+      return { id: a.id, input, kinds };
+    }),
+  );
+  const left = new Set<string>(kindNames);
+  const picked: { id: string; input: unknown }[] = [];
+  const fresh = (kinds: ReadonlySet<string>) =>
+    [...kinds].filter((k) => left.has(k)).length;
+  while (left.size > 0) {
+    const best = all.reduce((b, e) =>
+      fresh(e.kinds) > fresh(b.kinds) ? e : b,
+    );
+    if (fresh(best.kinds) === 0)
+      throw new Error(`No example shows ${[...left].join(', ')}`);
+    picked.push({ id: best.id, input: best.input });
+    for (const k of best.kinds) left.delete(k);
+  }
+  return picked;
+}
+
 function svgOf(response: Response): string[] {
   if (!response.ok) throw new Error(JSON.stringify(response.diagnostics));
   return response.figures.map((f) => f.svg);
@@ -78,14 +111,26 @@ describe('the plugin', () => {
     ).toEqual(['compile', 'load', 'memory', 'render']);
   });
 
-  it('draws every registry example in every theme as exportFigures does', () => {
+  it('draws every registry example as exportFigures does', () => {
     for (const algorithm of algorithms)
       for (const input of algorithm.examples)
-        for (const theme of themeNames)
-          expect(
-            svgOf(render(engine, { algorithm: algorithm.id, input, theme })),
-            `${algorithm.id} in ${theme}`,
-          ).toEqual(exportedSvg(algorithm.id, input, [], theme));
+        expect(
+          svgOf(render(engine, { algorithm: algorithm.id, input })),
+          algorithm.id,
+        ).toEqual(exportedSvg(algorithm.id, input, [], 'light'));
+  });
+
+  it('draws every theme as exportFigures does, on examples of every kind', () => {
+    // A theme is data the same painter reads, so each one is drawn on a few
+    // examples that between them show every structure kind, rather than on
+    // every example: the engine in WebAssembly is checked above.
+    const examples = examplesOfEveryKind();
+    for (const { id, input } of examples)
+      for (const theme of themeNames)
+        expect(
+          svgOf(render(engine, { algorithm: id, input, theme })),
+          `${id} in ${theme}`,
+        ).toEqual(exportedSvg(id, input, [], theme));
   });
 
   it('draws one step', () => {
