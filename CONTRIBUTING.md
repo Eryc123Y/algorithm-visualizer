@@ -125,3 +125,7 @@ Every algorithm, and every operation of a data structure, is a module of the reg
 - `main` holds stable code. Work on a feature branch and merge only when CI is green.
 - Commit messages follow `type(scope): description`, for example `feat(spec): add tree actions`. Types: `feat`, `fix`, `docs`, `test`, `refactor`, `chore`.
 - Record architectural changes as a new ADR in `docs/adr/`.
+
+## Releasing
+
+[docs/releasing.md](docs/releasing.md) has the steps: the checks, `node scripts/version.ts` for the versions, the Release files workflow for the archives and executables, and where each part is published and deployed.
