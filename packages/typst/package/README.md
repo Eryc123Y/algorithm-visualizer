@@ -217,4 +217,4 @@ The repository's [`examples/`](https://github.com/Eryc123Y/algorithm-visualizer/
 
 ## Licence
 
-The package is free software under the GNU General Public License, version 3 or later (`LICENSE`). The figures it draws are yours. The package ships no font files: `engine.bc` carries the outlines of the bundled fonts (JetBrains Mono, Inter, STIX Two Text, Lexend, Noto Sans, Noto Sans Mono and DotGothic16), which draw the figures' text, and those outlines are under the SIL Open Font License 1.1 (`OFL.txt`).
+The package is free software under the GNU General Public License, version 3 or later (`LICENSE`). The figures it draws are yours. The package ships no font files: `engine.bc` carries the outlines of the bundled fonts (JetBrains Mono, Inter, STIX Two Text, Lexend, Noto Sans, Noto Sans Mono and DotGothic16), which draw the figures' text, and those outlines are under the SIL Open Font License 1.1 (`OFL.txt`). `plugin.wasm` contains QuickJS-ng and other software under permissive licences, and `engine.bc` contains Zod; `THIRD-PARTY-NOTICES.md` names them and carries their notices.

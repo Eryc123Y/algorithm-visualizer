@@ -53,7 +53,7 @@ fi
 npm run build -w @algomotion/typst > /dev/null
 rm -rf "$target"
 mkdir -p "$target"
-for file in typst.toml lib.typ engine.bc plugin.wasm README.md LICENSE OFL.txt; do
+for file in typst.toml lib.typ engine.bc plugin.wasm README.md LICENSE OFL.txt THIRD-PARTY-NOTICES.md; do
   cp "packages/typst/package/$file" "$target/"
 done
 echo "Laid out $target"

@@ -7,6 +7,8 @@ import { fileURLToPath } from 'node:url';
 
 import { defineConfig, type Plugin } from 'vite';
 
+import { thirdPartyNotices } from '../../scripts/third-party.ts';
+
 /** Moves the built script chunks into the HTML file. */
 const inlineScripts = (): Plugin => ({
   name: 'algomotion:inline-scripts',
@@ -53,7 +55,8 @@ export default defineConfig({
       ),
     },
   },
-  plugins: [inlineScripts()],
+  // THIRD-PARTY-NOTICES.md goes next to the page, for what it bundles.
+  plugins: [thirdPartyNotices({ emit: true }), inlineScripts()],
   build: {
     outDir: fileURLToPath(new URL('ui', import.meta.url)),
     emptyOutDir: true,

@@ -14,6 +14,8 @@ on:
     paths:
       - '.github/workflows/release.yml'
       - 'scripts/release-assets.sh'
+      - 'scripts/third-party.ts'
+      - 'THIRD-PARTY-NOTICES.md'
       - 'packages/mcp/scripts/build-standalone.ts'
       - 'packages/mcp/scripts/standalone.ts'
       - 'packages/mcp/standalone/**'
@@ -68,7 +70,7 @@ jobs:
           "${run[@]}" run dijkstra 'A-B 4, B-C 1' --lang zh > run.json
           grep -q '最' run.json
           pack="algomotion-${{ matrix.name }}"
-          mkdir -p "$pack" && cp "$dir/$exe" LICENSE "$pack/"
+          mkdir -p "$pack" && cp "$dir/$exe" LICENSE THIRD-PARTY-NOTICES.md "$pack/"
           if [ "${{ runner.os }}" = Windows ]; then
             7z a -tzip "$pack.zip" "$pack" > /dev/null
           else

@@ -9,6 +9,7 @@
     "customConditions": ["@algomotion/source"]
   },
   "include": [
+    "../../scripts/third-party.ts",
     "src",
     "tests",
     "scripts",

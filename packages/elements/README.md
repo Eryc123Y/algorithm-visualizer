@@ -79,4 +79,4 @@ Website and guide: <https://algomotion.turing2234.com>, <https://algomotion.turi
 
 ## Licence
 
-GPL-3.0-or-later. The web fonts in `dist/fonts/` and `dist/cdn/fonts/` keep their own licence, the SIL Open Font License 1.1, which `OFL.txt` beside them reproduces.
+GPL-3.0-or-later. The web fonts in `dist/fonts/` and `dist/cdn/fonts/` keep their own licence, the SIL Open Font License 1.1, which `OFL.txt` beside them reproduces. The files in `dist/cdn/` bundle Lit and Zod, whose licences `THIRD-PARTY-NOTICES.md` beside them carries.
