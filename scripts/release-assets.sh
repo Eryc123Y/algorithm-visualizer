@@ -22,6 +22,10 @@ cmp -s THIRD-PARTY-NOTICES.md packages/typst/package/THIRD-PARTY-NOTICES.md || {
   echo "packages/typst/package/THIRD-PARTY-NOTICES.md differs from THIRD-PARTY-NOTICES.md: copy it." >&2
   exit 1
 }
+cmp -s THIRD-PARTY-NOTICES.md packages/elements/dist/cdn/THIRD-PARTY-NOTICES.md || {
+  echo "The player's THIRD-PARTY-NOTICES.md is older than the root file: run npm run build again." >&2
+  exit 1
+}
 rm -rf "$out"
 mkdir -p "$out"
 

@@ -107,6 +107,24 @@ describe('THIRD-PARTY-NOTICES.md', () => {
     expect(unnoticed(lockedCrates(lock), notices)).toEqual([]);
   });
 
+  it('names the standard library’s crates that the Typst plugin contains', () => {
+    // The plugin is committed, and keeps the source paths of the toolchain's
+    // crates for its panic messages, such as /rust/deps/dlmalloc-0.2.14/.
+    const plugin = readFileSync(
+      join(ROOT, 'packages/typst/package/plugin.wasm'),
+      'latin1',
+    );
+    const crates = [
+      ...new Set(
+        [...plugin.matchAll(/\/rust\/deps\/([a-z0-9_-]+?)-\d+\.\d+\.\d+/g)].map(
+          (m) => m[1]!,
+        ),
+      ),
+    ];
+    expect(crates).toContain('dlmalloc');
+    expect(unnoticed(crates, notices)).toEqual([]);
+  });
+
   it('names npm packages, each with its licence’s copyright lines', () => {
     const npm = rowsFrom('npm');
     expect(npm).toContain('zod');

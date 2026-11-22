@@ -4,18 +4,18 @@ algomotion is free software under the GNU General Public License, version 3 or l
 
 ## What goes where
 
-| Component                                                                                      | Where it comes from        | Licence                                         | In                                                                                  |
-| ---------------------------------------------------------------------------------------------- | -------------------------- | ----------------------------------------------- | ----------------------------------------------------------------------------------- |
-| QuickJS-ng                                                                                     | vendored in `rquickjs-sys` | MIT, and Unicode-3.0 for its Unicode tables     | the Typst plugin (`plugin.wasm`), the standalone command                            |
-| `rquickjs`, `rquickjs-core`, `rquickjs-sys`                                                    | crates.io                  | MIT                                             | the Typst plugin, the standalone command                                            |
-| `hashbrown`, `allocator-api2`, `equivalent`                                                    | crates.io                  | MIT OR Apache-2.0, used under MIT               | the Typst plugin, the standalone command                                            |
-| `foldhash`                                                                                     | crates.io                  | Zlib                                            | the Typst plugin, the standalone command                                            |
-| The Rust standard library                                                                      | the Rust toolchain         | MIT OR Apache-2.0, used under MIT               | the Typst plugin, the standalone command                                            |
-| wasi-libc, with parts of musl and cloudlibc                                                    | vendored in `rquickjs-sys` | MIT (wasi-libc, musl), BSD-2-Clause (cloudlibc) | the Typst plugin                                                                    |
-| `zod`                                                                                          | npm                        | MIT                                             | the Typst engine (`engine.bc`), the standalone command, the player, the player page |
-| `lit`, `lit-html`, `lit-element`, `@lit/reactive-element`                                      | npm                        | BSD-3-Clause                                    | the player, the player page                                                         |
-| `@modelcontextprotocol/ext-apps`, `@modelcontextprotocol/client`, `@modelcontextprotocol/core` | npm                        | Apache-2.0, and MIT for older contributions     | the player page                                                                     |
-| `pkce-challenge`                                                                               | npm                        | MIT                                             | the player page                                                                     |
+| Component                                                                                                                                                                 | Where it comes from        | Licence                                                                          | In                                                                                  |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | -------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| QuickJS-ng                                                                                                                                                                | vendored in `rquickjs-sys` | MIT, and Unicode-3.0 for its Unicode tables                                      | the Typst plugin (`plugin.wasm`), the standalone command                            |
+| `rquickjs`, `rquickjs-core`, `rquickjs-sys`                                                                                                                               | crates.io                  | MIT                                                                              | the Typst plugin, the standalone command                                            |
+| `hashbrown`, `allocator-api2`, `equivalent`                                                                                                                               | crates.io                  | MIT OR Apache-2.0, used under MIT                                                | the Typst plugin, the standalone command                                            |
+| `foldhash`                                                                                                                                                                | crates.io                  | Zlib                                                                             | the Typst plugin, the standalone command                                            |
+| The Rust standard library, with `dlmalloc`, `rustc-demangle`, `cfg-if`, `addr2line`, `gimli`, `object`, `libc`, `memchr`, `compiler_builtins`, `adler2` and `miniz_oxide` | the Rust toolchain         | MIT OR Apache-2.0, used under MIT; `adler2` under 0BSD, `miniz_oxide` under Zlib | the Typst plugin, the standalone command                                            |
+| wasi-libc, with parts of musl and cloudlibc                                                                                                                               | vendored in `rquickjs-sys` | MIT (wasi-libc, musl), BSD-2-Clause (cloudlibc)                                  | the Typst plugin                                                                    |
+| `zod`                                                                                                                                                                     | npm                        | MIT                                                                              | the Typst engine (`engine.bc`), the standalone command, the player, the player page |
+| `lit`, `lit-html`, `lit-element`, `@lit/reactive-element`                                                                                                                 | npm                        | BSD-3-Clause                                                                     | the player, the player page                                                         |
+| `@modelcontextprotocol/ext-apps`, `@modelcontextprotocol/client`, `@modelcontextprotocol/core`                                                                            | npm                        | Apache-2.0, and MIT for older contributions                                      | the player page                                                                     |
+| `pkce-challenge`                                                                                                                                                          | npm                        | MIT                                                                              | the player page                                                                     |
 
 - **The player** is `algomotion-player.js` and `algomotion-recipes.js`: in `@algomotion/elements` (`dist/cdn/`), on the CDN and in the GitHub release's player archive.
 - **The player page** is `ui/player.html` in `@algomotion/mcp`, which the MCP server sends to the client.
@@ -560,6 +560,24 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 ```
+
+### The Rust standard library's dependencies
+
+The standard library links these crates into the Typst plugin and the standalone command; `dlmalloc`, its allocator, only into the plugin. Each is used under the MIT License, whose text is the standard library's above, with these copyright lines:
+
+```text
+`dlmalloc`: Copyright (c) 2014 Alex Crichton
+`rustc-demangle`: Copyright (c) 2014 Alex Crichton
+`cfg-if`: Copyright (c) 2014 Alex Crichton
+`addr2line`: Copyright (c) 2016-2018 The gimli Developers
+`gimli`: Copyright (c) 2015 The Rust Project Developers
+`object`: Copyright (c) 2015 The Gimli Developers
+`libc`: Copyright (c) The Rust Project Developers
+`memchr`: Copyright (c) 2015 Andrew Gallant
+`compiler_builtins`: the compiler-builtins and libm contributors
+```
+
+`adler2` is used under 0BSD and `miniz_oxide` under the Zlib License, which ask for no notice in a program.
 
 ### Zod
 
