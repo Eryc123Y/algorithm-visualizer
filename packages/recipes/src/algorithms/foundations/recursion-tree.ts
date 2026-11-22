@@ -77,10 +77,12 @@ const Input = z
 
 export const recursionTree = defineAlgorithm({
   id: 'recursion-tree',
-  title: 'Recursion tree',
+  title: { en: 'Recursion tree', zh: '递归树' },
   topic: 'foundations',
-  summary:
-    'Draws the recursion tree of T(n) = a T(n/b) + f(n) a level at a time, adds the cost of each level, and finds which term dominates.',
+  summary: {
+    en: 'Draws the recursion tree of T(n) = a T(n/b) + f(n) a level at a time, adds the cost of each level, and finds which term dominates.',
+    zh: '逐层画出 T(n) = a T(n/b) + f(n) 的递归树，加起每一层的代价，找出哪一部分占主导。',
+  },
   input: Input,
   main: 'recurrence',
   examples: [
@@ -125,12 +127,22 @@ export const recursionTree = defineAlgorithm({
     });
     const table = trace.add('levels', {
       kind: 'table',
-      label: 'cost of each level',
+      label: trace.say({ en: 'cost of each level', zh: '每一层的代价' }),
       place: 'side',
       rows: depth + 2,
       columns: 4,
-      rowLabels: [...levels.map((_, j) => `depth ${j}`), 'T(n)'],
-      columnLabels: ['nodes', 'size', 'each', 'level'],
+      rowLabels: [
+        ...levels.map((_, j) =>
+          trace.say({ en: `depth ${j}`, zh: `深度 ${j}` }),
+        ),
+        'T(n)',
+      ],
+      columnLabels: [
+        trace.say({ en: 'nodes', zh: '节点数' }),
+        trace.say({ en: 'size', zh: '大小' }),
+        trace.say({ en: 'each', zh: '每个' }),
+        trace.say({ en: 'level', zh: '本层' }),
+      ],
     });
     const fill = (j: number) => {
       const { nodes, size, each, total } = levels[j]!;
@@ -154,7 +166,10 @@ export const recursionTree = defineAlgorithm({
 
     trace.step(
       'cost',
-      `The root is the whole problem, of size n = ${n}. Dividing it and combining the answers costs f(${n}) = ${levels[0]!.each}.`,
+      {
+        en: `The root is the whole problem, of size n = ${n}. Dividing it and combining the answers costs f(${n}) = ${levels[0]!.each}.`,
+        zh: `根是整个问题，大小为 n = ${n}。分解它并合并答案的代价是 f(${n}) = ${levels[0]!.each}。`,
+      },
       { vars: { n } },
     );
     grow(0);
@@ -166,11 +181,21 @@ export const recursionTree = defineAlgorithm({
         parents === 1
           ? `The node at depth ${j - 1} splits into ${count(a, 'subproblem')} of size ${size}`
           : `Each of the ${parents} nodes at depth ${j - 1} splits into ${a} subproblems of size ${size}`;
+      const splitZh =
+        parents === 1
+          ? `深度 ${j - 1} 的节点分成 ${a} 个大小为 ${size} 的子问题`
+          : `深度 ${j - 1} 的 ${parents} 个节点各分成 ${a} 个大小为 ${size} 的子问题`;
       trace.step(
         j === depth ? 'leaf' : 'split',
         j === depth
-          ? `${split}. ${nodes === 1 ? 'It is a leaf, costing' : `These ${nodes} are leaves, each costing`} T(1) = 1: ${total} in all.`
-          : `${split}: ${count(nodes, 'node')} at depth ${j}, ${nodes === 1 ? 'costing' : 'each costing'} f(${size}) = ${each}, ${total} in all.`,
+          ? {
+              en: `${split}. ${nodes === 1 ? 'It is a leaf, costing' : `These ${nodes} are leaves, each costing`} T(1) = 1: ${total} in all.`,
+              zh: `${splitZh}。${nodes === 1 ? '它是叶子，代价为' : `这 ${nodes} 个都是叶子，每个代价为`} T(1) = 1：共 ${total}。`,
+            }
+          : {
+              en: `${split}: ${count(nodes, 'node')} at depth ${j}, ${nodes === 1 ? 'costing' : 'each costing'} f(${size}) = ${each}, ${total} in all.`,
+              zh: `${splitZh}：深度 ${j} 有 ${nodes} 个节点，${nodes === 1 ? '代价为' : '每个代价为'} f(${size}) = ${each}，共 ${total}。`,
+            },
         { vars: { n: size } },
       );
       grow(j);
@@ -180,7 +205,10 @@ export const recursionTree = defineAlgorithm({
     const sum = levels.reduce((s, l) => s + l.total, 0);
     trace.step(
       'total',
-      `T(${n}) = ${levels.map((l) => l.total).join(' + ')} = ${sum}. ${growth(recurrence)}`,
+      {
+        en: `T(${n}) = ${levels.map((l) => l.total).join(' + ')} = ${sum}. ${growth(recurrence)}`,
+        zh: `T(${n}) = ${levels.map((l) => l.total).join(' + ')} = ${sum}。${growthZh(recurrence)}`,
+      },
       { vars: { n } },
     );
     table.set({ cell: [depth + 1, 3], value: sum });
@@ -202,6 +230,19 @@ export function growth({ a, b, d }: Recurrence): string {
       ? `Every level costs the same, 1, over log${sub(b)} n + 1 levels: T(n) = Θ(lg n).`
       : `Every level costs the same, ${power(d)}, over log${sub(b)} n + 1 levels: T(n) = Θ(${power(d)} lg n).`;
   return `Each level costs ${ratio} times the one above, so the leaves dominate: T(n) = Θ(${leafPower(a, b)}).`;
+}
+
+/** The same in Chinese (ADR 0045). */
+export function growthZh({ a, b, d }: Recurrence): string {
+  const top = b ** d;
+  const ratio = fraction(a, top);
+  if (a < top)
+    return `每一层的代价是上一层的 ${ratio}，所以根的 f(n) 占主导：T(n) = Θ(${power(d)})。`;
+  if (a === top)
+    return d === 0
+      ? `每一层的代价都是 1，共 log${sub(b)} n + 1 层：T(n) = Θ(lg n)。`
+      : `每一层的代价都是 ${power(d)}，共 log${sub(b)} n + 1 层：T(n) = Θ(${power(d)} lg n)。`;
+  return `每一层的代价是上一层的 ${ratio} 倍，所以叶子占主导：T(n) = Θ(${leafPower(a, b)})。`;
 }
 
 /** n^(log_b a), as an integer power when it is one. */

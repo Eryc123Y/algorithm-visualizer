@@ -12,10 +12,12 @@ import { recordQuicksort } from './quicksort.ts';
 
 export const randomizedQuicksort = defineAlgorithm({
   id: 'randomized-quicksort',
-  title: 'Randomized quicksort',
+  title: { en: 'Randomized quicksort', zh: '随机化快速排序' },
   topic: 'sorting',
-  summary:
-    'Quicksort with a pivot drawn uniformly from each part, so that its expected time is O(n lg n) on every input.',
+  summary: {
+    en: 'Quicksort with a pivot drawn uniformly from each part, so that its expected time is O(n lg n) on every input.',
+    zh: '从每一部分中均匀随机地选主元的快速排序，对任何输入的期望运行时间都是 O(n lg n)。',
+  },
   input: SortInput.extend({ seed: seedField }),
   main: 'values',
   examples: [

@@ -23,10 +23,12 @@ const ROW = { p: 0, r: 1, s: 2 } as const;
 
 export const rodCutting = defineAlgorithm({
   id: 'rod-cutting',
-  title: 'Rod cutting',
+  title: { en: 'Rod cutting', zh: '钢条切割' },
   topic: 'dynamic-programming',
-  summary:
-    'Finds the best revenue from cutting a rod into pieces of priced lengths, bottom up, then cuts the rod by the best first pieces it recorded.',
+  summary: {
+    en: 'Finds the best revenue from cutting a rod into pieces of priced lengths, bottom up, then cuts the rod by the best first pieces it recorded.',
+    zh: '自底向上求出把钢条切成若干段（每种长度有价格）能得到的最大收益，再按记录的最优第一段切开钢条。',
+  },
   input: z.strictObject({
     prices: listField(
       z
@@ -87,16 +89,20 @@ export const rodCutting = defineAlgorithm({
     const p = [0, ...prices];
     const r = [0];
     const s = [0];
-    const table = trace.add('rod', {
-      kind: 'table',
-      initial: [
-        ['', ...prices],
-        [0, ...prices.map(() => null)],
-        ['', ...prices.map(() => null)],
-      ],
-      rowLabels: ['p', 'r', 's'],
-      columnLabels: Array.from({ length: n + 1 }, (_, j) => j),
-    });
+    const table = trace.add(
+      'rod',
+      {
+        kind: 'table',
+        initial: [
+          ['', ...prices],
+          [0, ...prices.map(() => null)],
+          ['', ...prices.map(() => null)],
+        ],
+        rowLabels: ['p', 'r', 's'],
+        columnLabels: Array.from({ length: n + 1 }, (_, j) => j),
+      },
+      { heading: { en: 'rod', zh: '钢条' } },
+    );
 
     for (let j = 1; j <= n; j++) {
       let q = -Infinity;
@@ -106,10 +112,19 @@ export const rodCutting = defineAlgorithm({
         trace.step(
           'try',
           q === -Infinity
-            ? `Length ${j}, first piece ${i}: p[${i}] + r[${j - i}] = ${p[i]} + ${r[j - i]} = ${value}, the best so far.`
+            ? {
+                en: `Length ${j}, first piece ${i}: p[${i}] + r[${j - i}] = ${p[i]} + ${r[j - i]} = ${value}, the best so far.`,
+                zh: `长度 ${j}，第一段长 ${i}：p[${i}] + r[${j - i}] = ${p[i]} + ${r[j - i]} = ${value}，目前最好。`,
+              }
             : better
-              ? `First piece ${i}: p[${i}] + r[${j - i}] = ${p[i]} + ${r[j - i]} = ${value}, better than ${q}.`
-              : `First piece ${i}: p[${i}] + r[${j - i}] = ${p[i]} + ${r[j - i]} = ${value}, no better than ${q}.`,
+              ? {
+                  en: `First piece ${i}: p[${i}] + r[${j - i}] = ${p[i]} + ${r[j - i]} = ${value}, better than ${q}.`,
+                  zh: `第一段长 ${i}：p[${i}] + r[${j - i}] = ${p[i]} + ${r[j - i]} = ${value}，比 ${q} 好。`,
+                }
+              : {
+                  en: `First piece ${i}: p[${i}] + r[${j - i}] = ${p[i]} + ${r[j - i]} = ${value}, no better than ${q}.`,
+                  zh: `第一段长 ${i}：p[${i}] + r[${j - i}] = ${p[i]} + ${r[j - i]} = ${value}，不比 ${q} 好。`,
+                },
           // q as the comparison reads it, before this piece can update it.
           { vars: q === -Infinity ? { j, i } : { j, i, q } },
         );
@@ -128,7 +143,10 @@ export const rodCutting = defineAlgorithm({
       r[j] = q;
       trace.step(
         'best',
-        `r[${j}] = ${q}: a rod of length ${j} sells best with a first piece of length s[${j}] = ${s[j]}.`,
+        {
+          en: `r[${j}] = ${q}: a rod of length ${j} sells best with a first piece of length s[${j}] = ${s[j]}.`,
+          zh: `r[${j}] = ${q}：长度为 ${j} 的钢条，第一段长 s[${j}] = ${s[j]} 时卖得最好。`,
+        },
         { vars: { j, q } },
       );
       table
@@ -150,8 +168,14 @@ export const rodCutting = defineAlgorithm({
       trace.step(
         'cut',
         rest === 0
-          ? `s[${left}] = ${piece}: the last piece${pieces.length === 1 ? ' is the whole rod' : ` has length ${piece}`}. Pieces ${pieces.join(' + ')} = ${n} sell for r[${n}] = ${r[n]}.`
-          : `s[${left}] = ${piece}: cut a piece of length ${piece}, worth ${p[piece]}, leaving ${rest}.`,
+          ? {
+              en: `s[${left}] = ${piece}: the last piece${pieces.length === 1 ? ' is the whole rod' : ` has length ${piece}`}. Pieces ${pieces.join(' + ')} = ${n} sell for r[${n}] = ${r[n]}.`,
+              zh: `s[${left}] = ${piece}：${pieces.length === 1 ? '最后一段就是整根钢条' : `最后一段长 ${piece}`}。各段 ${pieces.join(' + ')} = ${n} 共卖 r[${n}] = ${r[n]}。`,
+            }
+          : {
+              en: `s[${left}] = ${piece}: cut a piece of length ${piece}, worth ${p[piece]}, leaving ${rest}.`,
+              zh: `s[${left}] = ${piece}：切下长 ${piece} 的一段，价值 ${p[piece]}，还剩 ${rest}。`,
+            },
         { vars: { n: left } },
       );
       table.settle({

@@ -19,10 +19,12 @@ export const MAX_INCREMENTS = 16;
 
 export const binaryCounter = defineAlgorithm({
   id: 'binary-counter',
-  title: 'Binary counter',
+  title: { en: 'Binary counter', zh: '二进制计数器' },
   topic: 'amortized',
-  summary:
-    'Increments a k-bit binary counter n times from 0, flipping bits one at a time, and keeps each increment’s cost, the total and the potential, the number of 1s.',
+  summary: {
+    en: 'Increments a k-bit binary counter n times from 0, flipping bits one at a time, and keeps each increment’s cost, the total and the potential, the number of 1s.',
+    zh: '从 0 开始把一个 k 位二进制计数器加一 n 次，逐个翻转二进制位，记下每次加一的代价、总代价和势（即 1 的个数）。',
+  },
   input: z.strictObject({
     k: z
       .int()
@@ -68,12 +70,20 @@ export const binaryCounter = defineAlgorithm({
     });
     const ledger = trace.add('cost', {
       kind: 'table',
-      label: 'each increment: value, flips, total, Φ',
+      label: trace.say({
+        en: 'each increment: value, flips, total, Φ',
+        zh: '每次加一：值、翻转次数、总计、Φ',
+      }),
       place: 'side',
       rows: n,
       columns: 4,
       rowLabels: Array.from({ length: n }, (_, t) => t + 1),
-      columnLabels: ['value', 'cost', 'total', 'Φ'],
+      columnLabels: [
+        trace.say({ en: 'value', zh: '值' }),
+        trace.say({ en: 'cost', zh: '代价' }),
+        trace.say({ en: 'total', zh: '总计' }),
+        'Φ',
+      ],
     });
     let total = 0;
     let value = 0;
@@ -97,8 +107,14 @@ export const binaryCounter = defineAlgorithm({
         trace.step(
           'reset',
           wraps
-            ? `Increment ${t}: A[${i}] is 1, so it flips to 0 too. Every bit was 1: the counter wraps around to 0, after ${flips === 1 ? '1 flip' : `${flips} flips`}.`
-            : `Increment ${t}: A[${i}] is 1, so it flips to 0 and the carry moves on.`,
+            ? {
+                en: `Increment ${t}: A[${i}] is 1, so it flips to 0 too. Every bit was 1: the counter wraps around to 0, after ${flips === 1 ? '1 flip' : `${flips} flips`}.`,
+                zh: `第 ${t} 次加一：A[${i}] 是 1，所以它也翻转为 0。所有位都是 1：计数器回到 0，共翻转 ${flips} 次。`,
+              }
+            : {
+                en: `Increment ${t}: A[${i}] is 1, so it flips to 0 and the carry moves on.`,
+                zh: `第 ${t} 次加一：A[${i}] 是 1，所以它翻转为 0，进位继续向前。`,
+              },
           { vars: { i } },
         );
         A.set({ cell: col(i), value: 0 }).highlight({ cells: [col(i)] });
@@ -111,7 +127,10 @@ export const binaryCounter = defineAlgorithm({
         value += 1;
         trace.step(
           'set',
-          `Increment ${t}: A[${i}] is 0, so it flips to 1. The counter reads ${value}, after ${flips === 1 ? '1 flip' : `${flips} flips`}.`,
+          {
+            en: `Increment ${t}: A[${i}] is 0, so it flips to 1. The counter reads ${value}, after ${flips === 1 ? '1 flip' : `${flips} flips`}.`,
+            zh: `第 ${t} 次加一：A[${i}] 是 0，所以它翻转为 1。计数器现在是 ${value}，共翻转 ${flips} 次。`,
+          },
           { vars: { i } },
         );
         A.set({ cell: col(i), value: 1 }).highlight({ cells: [col(i)] });

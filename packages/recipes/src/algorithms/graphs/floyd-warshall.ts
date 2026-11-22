@@ -13,10 +13,12 @@ import { declareGraph, Graph, graphOf, shown } from './graph.ts';
 
 export const floydWarshall = defineAlgorithm({
   id: 'floyd-warshall',
-  title: 'Floyd–Warshall',
+  title: { en: 'Floyd–Warshall', zh: 'Floyd–Warshall 算法' },
   topic: 'graphs',
-  summary:
-    'Finds shortest paths between all pairs of vertices in a distance table, allowing paths through one more vertex in each pass.',
+  summary: {
+    en: 'Finds shortest paths between all pairs of vertices in a distance table, allowing paths through one more vertex in each pass.',
+    zh: '在一张距离表中求所有顶点对之间的最短路径，每一趟多允许路径经过一个顶点。',
+  },
   input: z.strictObject({ graph: Graph }),
   main: 'graph',
   examples: [
@@ -70,20 +72,28 @@ export const floydWarshall = defineAlgorithm({
       if (!g.directed) d[j]![i] = Math.min(d[j]![i]!, w);
     }
     const graph = trace.add('g', declareGraph(g, true));
-    const table = trace.add('dist', {
-      kind: 'table',
-      place: 'side',
-      initial: d.map((row) => row.map((x) => (x === Infinity ? '∞' : x))),
-      rowLabels: [...g.nodes],
-      columnLabels: [...g.nodes],
-    });
-    trace.step(
-      'start',
-      'Start from the edge weights: 0 on the diagonal, ∞ where there is no edge.',
+    const table = trace.add(
+      'dist',
+      {
+        kind: 'table',
+        place: 'side',
+        initial: d.map((row) => row.map((x) => (x === Infinity ? '∞' : x))),
+        rowLabels: [...g.nodes],
+        columnLabels: [...g.nodes],
+      },
+      { heading: { en: 'dist', zh: '距离' } },
     );
+    trace.step('start', {
+      en: 'Start from the edge weights: 0 on the diagonal, ∞ where there is no edge.',
+      zh: '从边的权重开始：对角线上为 0，没有边的地方为 ∞。',
+    });
     for (let k = 0; k < n; k++) {
       const via = g.nodes[k]!;
-      trace.step('through', `Allow paths through ${via}.`, { vars: { k } });
+      trace.step(
+        'through',
+        { en: `Allow paths through ${via}.`, zh: `允许路径经过 ${via}。` },
+        { vars: { k } },
+      );
       graph.pointer({ name: 'k', node: via });
       // Row and column k can only improve through a negative cycle at k.
       const cycleAtK = d[k]![k]! < 0;
@@ -97,8 +107,14 @@ export const floydWarshall = defineAlgorithm({
           trace.step(
             better ? 'update' : 'compare',
             better
-              ? `${path} costs ${through}, less than ${shown(d[i]![j]!)}: update the entry.`
-              : `${path} costs ${through}, no less than ${d[i]![j]}: keep it.`,
+              ? {
+                  en: `${path} costs ${through}, less than ${shown(d[i]![j]!)}: update the entry.`,
+                  zh: `${path} 的长度是 ${through}，小于 ${shown(d[i]![j]!)}：更新这一项。`,
+                }
+              : {
+                  en: `${path} costs ${through}, no less than ${d[i]![j]}: keep it.`,
+                  zh: `${path} 的长度是 ${through}，不小于 ${d[i]![j]}：保持不变。`,
+                },
             { vars: { k, i, j } },
           );
           table.depend({
@@ -118,8 +134,14 @@ export const floydWarshall = defineAlgorithm({
     trace.step(
       'done',
       negative.length === 0
-        ? 'Every pass is done: each entry is a shortest distance.'
-        : `Negative diagonal entries (${negative.join(', ')}) show a negative-weight cycle: paths through it have no shortest length.`,
+        ? {
+            en: 'Every pass is done: each entry is a shortest distance.',
+            zh: '所有趟都已完成：每一项都是最短距离。',
+          }
+        : {
+            en: `Negative diagonal entries (${negative.join(', ')}) show a negative-weight cycle: paths through it have no shortest length.`,
+            zh: `对角线上的负值（${negative.join(', ')}）说明存在负权环：经过它的路径没有最短长度。`,
+          },
     );
     if (negative.length > 0)
       table.highlight({

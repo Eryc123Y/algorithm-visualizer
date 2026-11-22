@@ -47,14 +47,14 @@ export const MatchInput = z.strictObject(MatchFields).superRefine(patternFits);
 export function declareMatch(trace: Trace, text: string, pattern: string) {
   const T = trace.add('T', {
     kind: 'array',
-    label: 'T and P',
+    label: trace.say({ en: 'T and P', zh: 'T 和 P' }),
     initial: [...text],
     pattern: [...pattern],
   });
   const shifts = trace.add('shifts', {
     kind: 'array',
     place: 'side',
-    label: 'valid shifts',
+    label: trace.say({ en: 'valid shifts', zh: '有效偏移' }),
     initial: [],
   });
   return { T, shifts };
@@ -81,3 +81,11 @@ export const shiftsFound = (found: readonly number[]) =>
     : found.length === 1
       ? `the pattern occurs once, with shift ${found[0]}`
       : `the pattern occurs ${found.length} times, with shifts ${found.slice(0, -1).join(', ')} and ${found.at(-1)}`;
+
+/** The same in Chinese (ADR 0045). */
+export const shiftsFoundZh = (found: readonly number[]) =>
+  found.length === 0
+    ? '模式没有在文本中出现'
+    : found.length === 1
+      ? `模式出现一次，偏移为 ${found[0]}`
+      : `模式出现 ${found.length} 次，偏移为 ${found.join('、')}`;

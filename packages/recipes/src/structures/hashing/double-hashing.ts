@@ -20,16 +20,27 @@ const step = (key: number, size: number) => 1 + mod(key, size - 1);
 
 export const doubleHashing = openAddressing({
   id: 'double-hashing',
-  title: 'Hash table with double hashing',
-  summary:
-    'Inserts and searches integer keys one after another in a hash table that probes h₁(k), then steps h₂(k) slots at a time, with h₁(k) = k mod m and h₂(k) = 1 + (k mod (m − 1)).',
-  sequence: '(h₁(k) + i·h₂(k)) mod m for i = 0, 1, and so on',
+  title: { en: 'Hash table with double hashing', zh: '双重散列表' },
+  summary: {
+    en: 'Inserts and searches integer keys one after another in a hash table that probes h₁(k), then steps h₂(k) slots at a time, with h₁(k) = k mod m and h₂(k) = 1 + (k mod (m − 1)).',
+    zh: '在散列表中依次插入和查找整数关键字：先探查 h₁(k)，再每次前进 h₂(k) 个槽，其中 h₁(k) = k mod m，h₂(k) = 1 + (k mod (m − 1))。',
+  },
+  sequence: {
+    en: '(h₁(k) + i·h₂(k)) mod m for i = 0, 1, and so on',
+    zh: '(h₁(k) + i·h₂(k)) mod m（i = 0, 1, …）',
+  },
   scheme: {
     slot: (key, i, size) => mod(mod(key, size) + i * step(key, size), size),
     narrate: (key, i, q, size, holds) =>
       i === 0
-        ? `h₁(${key}) = ${key} mod ${size} = ${q}, and the step is h₂(${key}) = 1 + (${key} mod ${size - 1}) = ${step(key, size)}: probe slot ${q}; ${holds}.`
-        : `Step ${step(key, size)} slots further: slot ${q}; ${holds}.`,
+        ? {
+            en: `h₁(${key}) = ${key} mod ${size} = ${q}, and the step is h₂(${key}) = 1 + (${key} mod ${size - 1}) = ${step(key, size)}: probe slot ${q}; ${holds}.`,
+            zh: `h₁(${key}) = ${key} mod ${size} = ${q}，步长 h₂(${key}) = 1 + (${key} mod ${size - 1}) = ${step(key, size)}：探查槽 ${q}；${holds}。`,
+          }
+        : {
+            en: `Step ${step(key, size)} slots further: slot ${q}; ${holds}.`,
+            zh: `再前进 ${step(key, size)} 个槽：槽 ${q}；${holds}。`,
+          },
     unfit: (size) =>
       isPrime(size)
         ? undefined

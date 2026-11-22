@@ -75,10 +75,12 @@ const COLUMNS = 17;
 
 export const strassen = defineAlgorithm({
   id: 'strassen',
-  title: 'Strassen matrix multiplication',
+  title: { en: 'Strassen matrix multiplication', zh: 'Strassen 矩阵乘法' },
   topic: 'foundations',
-  summary:
-    'Multiplies two square matrices with seven recursive products of half size, built from ten sums of quadrants, instead of eight.',
+  summary: {
+    en: 'Multiplies two square matrices with seven recursive products of half size, built from ten sums of quadrants, instead of eight.',
+    zh: '计算两个方阵的乘积：用象限的十个和构造出七个规模减半的递归乘积，而不是八个。',
+  },
   input: Input,
   examples: [
     {
@@ -201,9 +203,16 @@ export const strassen = defineAlgorithm({
     if (n === 1) {
       const x = a[0]![0]!;
       const y = b[0]![0]!;
-      outer.step('base', `1×1 matrices: c₀₀ = ${x} · ${y} = ${x * y + 0}.`, {
-        vars: { n },
-      });
+      outer.step(
+        'base',
+        {
+          en: `1×1 matrices: c₀₀ = ${x} · ${y} = ${x * y + 0}.`,
+          zh: `1×1 矩阵：c₀₀ = ${x} · ${y} = ${x * y + 0}。`,
+        },
+        {
+          vars: { n },
+        },
+      );
       tableA.highlight({ cells: [[0, 0]] });
       tableB.highlight({ cells: [[0, 0]] });
       tableC
@@ -216,7 +225,10 @@ export const strassen = defineAlgorithm({
     const run = new Strassen(calls, levels);
     calls.trace.step(
       'divide',
-      `Split A, B and C, each ${n}×${n}, into four ${n / 2}×${n / 2} quadrants.`,
+      {
+        en: `Split A, B and C, each ${n}×${n}, into four ${n / 2}×${n / 2} quadrants.`,
+        zh: `把 A、B 和 C（都是 ${n}×${n}）各分成四个 ${n / 2}×${n / 2} 的象限。`,
+      },
       { vars: { n } },
     );
     calls.push('call', `A · B, ${n}×${n}`);
@@ -259,7 +271,7 @@ function levelTables(trace: Trace, n: number): TableHandle[] {
     const h = size / 2;
     const rowLabels =
       h === 1
-        ? ['value']
+        ? [trace.say({ en: 'value', zh: '值' })]
         : Array.from(
             { length: h * h },
             (_, k) => `${Math.floor(k / h)},${k % h}`,
@@ -267,7 +279,10 @@ function levelTables(trace: Trace, n: number): TableHandle[] {
     tables.push(
       trace.add(level === 0 ? 'SP' : `SP${level}`, {
         kind: 'table',
-        label: `S and P of a ${size}×${size} call`,
+        label: trace.say({
+          en: `S and P of a ${size}×${size} call`,
+          zh: `${size}×${size} 调用的 S 和 P`,
+        }),
         place: 'side',
         rows: rowLabels.length,
         columns: COLUMNS,
@@ -339,6 +354,7 @@ class Strassen {
     const h = x.size / 2;
     const operands = { A: x, B: y } as const;
     const inCall = where === '' ? '' : `In ${where}'s call: `;
+    const inCallZh = where === '' ? '' : `在 ${where} 的调用中：`;
     const column = (k: number): View => ({
       size: h,
       at: (i, j) => sp[k]![i * h + j]!,
@@ -361,8 +377,14 @@ class Strassen {
       trace.step(
         `s${k + 1}`,
         h === 1
-          ? `${inCall}${formula} = ${left.at(0, 0)} ${op} ${right.at(0, 0)} = ${values[0]}.`
-          : `${inCall}${formula} = ${show(values)}, entry by entry.`,
+          ? {
+              en: `${inCall}${formula} = ${left.at(0, 0)} ${op} ${right.at(0, 0)} = ${values[0]}.`,
+              zh: `${inCallZh}计算 ${formula} = ${left.at(0, 0)} ${op} ${right.at(0, 0)} = ${values[0]}。`,
+            }
+          : {
+              en: `${inCall}${formula} = ${show(values)}, entry by entry.`,
+              zh: `${inCallZh}计算 ${formula} = ${show(values)}，逐个元素计算。`,
+            },
         { vars: { n: x.size } },
       );
       values.forEach((v, e) => table.set({ cell: [e, k], value: v }));
@@ -381,7 +403,10 @@ class Strassen {
         sp[rowK] = [v];
         trace.step(
           `p${k + 1}`,
-          `${inCall}${formula} = ${left.at(0, 0)} · ${right.at(0, 0)} = ${v}, a 1×1 product.`,
+          {
+            en: `${inCall}${formula} = ${left.at(0, 0)} · ${right.at(0, 0)} = ${v}, a 1×1 product.`,
+            zh: `${inCallZh}${formula} = ${left.at(0, 0)} · ${right.at(0, 0)} = ${v}，一个 1×1 的乘积。`,
+          },
           { vars: { n: x.size } },
         );
         highlight([left, right]);
@@ -390,7 +415,10 @@ class Strassen {
       }
       trace.step(
         `p${k + 1}`,
-        `${inCall}${formula}: call STRASSEN on ${h}×${h} matrices.`,
+        {
+          en: `${inCall}${formula}: call STRASSEN on ${h}×${h} matrices.`,
+          zh: `${inCallZh}${formula}：对 ${h}×${h} 矩阵调用 STRASSEN。`,
+        },
         { vars: { n: x.size } },
       );
       highlight([left, right]);
@@ -432,9 +460,16 @@ class Strassen {
             `${t === 0 ? '' : sign > 0 ? ' + ' : ' − '}P${p + 1}`,
         )
         .join('')}`;
-      trace.step(`c${q}`, `${inCall}${formula} = ${show(values)}.`, {
-        vars: { n: x.size },
-      });
+      trace.step(
+        `c${q}`,
+        {
+          en: `${inCall}${formula} = ${show(values)}.`,
+          zh: `${inCallZh}计算 ${formula} = ${show(values)}。`,
+        },
+        {
+          vars: { n: x.size },
+        },
+      );
       highlight(terms.map(([, p]) => column(10 + p)));
       const r0 = q[0] === '1' ? 0 : h;
       const c0 = q[1] === '1' ? 0 : h;

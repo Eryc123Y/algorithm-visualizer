@@ -9,10 +9,12 @@ import { SAMPLE, SortInput } from './input.ts';
 
 export const heapsort = defineAlgorithm({
   id: 'heapsort',
-  title: 'Heapsort',
+  title: { en: 'Heapsort', zh: '堆排序' },
   topic: 'sorting',
-  summary:
-    'Builds a max-heap in the array, then repeatedly moves the maximum to the end and sifts the new root down.',
+  summary: {
+    en: 'Builds a max-heap in the array, then repeatedly moves the maximum to the end and sifts the new root down.',
+    zh: '先在数组中建一个最大堆，再反复把最大值移到末尾，并让新的根下沉。',
+  },
   input: SortInput,
   main: 'values',
   examples: [SAMPLE],
@@ -79,56 +81,86 @@ export const heapsort = defineAlgorithm({
       const r = 2 * i + 2;
       if (l >= size) {
         // Both tests fail on a leaf, so largest stays i.
-        trace.step('stop', `${a[i]} has no children in the heap: stop.`);
+        trace.step('stop', {
+          en: `${a[i]} has no children in the heap: stop.`,
+          zh: `${a[i]} 在堆中没有孩子：停止。`,
+        });
         heap.pointer({ name: 'i', index: null });
         return;
       }
-      trace.step('left', `Compare ${a[i]} with its left child ${a[l]}.`, {
-        vars: { i, l, size },
-      });
+      trace.step(
+        'left',
+        {
+          en: `Compare ${a[i]} with its left child ${a[l]}.`,
+          zh: `比较 ${a[i]} 和它的左孩子 ${a[l]}。`,
+        },
+        {
+          vars: { i, l, size },
+        },
+      );
       heap.pointer({ name: 'i', index: i }).compare({ i, j: l });
       let largest = a[l]! > a[i]! ? l : i;
       if (r < size) {
         trace.step(
           'right',
-          `Compare the larger so far, ${a[largest]}, with the right child ${a[r]}.`,
+          {
+            en: `Compare the larger so far, ${a[largest]}, with the right child ${a[r]}.`,
+            zh: `比较目前较大的 ${a[largest]} 和右孩子 ${a[r]}。`,
+          },
           { vars: { i, largest, r } },
         );
         heap.compare({ i: largest, j: r });
         if (a[r]! > a[largest]!) largest = r;
       }
       if (largest === i) {
-        trace.step(
-          'stop',
-          `${a[i]} is at least as large as its children: this subtree is a max-heap.`,
-        );
+        trace.step('stop', {
+          en: `${a[i]} is at least as large as its children: this subtree is a max-heap.`,
+          zh: `${a[i]} 不小于它的孩子：这棵子树是最大堆。`,
+        });
         heap.pointer({ name: 'i', index: null });
         return;
       }
-      trace.step('swap', `Swap ${a[i]} with its larger child ${a[largest]}.`, {
-        vars: { i, largest },
-      });
+      trace.step(
+        'swap',
+        {
+          en: `Swap ${a[i]} with its larger child ${a[largest]}.`,
+          zh: `把 ${a[i]} 和它较大的孩子 ${a[largest]} 交换。`,
+        },
+        {
+          vars: { i, largest },
+        },
+      );
       // The pointer follows the value being sifted down.
       heap.swap({ i, j: largest }).pointer({ name: 'i', index: largest });
       [a[i], a[largest]] = [a[largest]!, a[i]!];
       maxHeapify(largest, size);
     };
 
-    trace.step(
-      'build',
-      'Build a max-heap: sift down every parent, from the last one up to the root.',
-    );
+    trace.step('build', {
+      en: 'Build a max-heap: sift down every parent, from the last one up to the root.',
+      zh: '建最大堆：从最后一个父节点往上直到根，让每个父节点下沉。',
+    });
     for (let i = Math.floor(n / 2) - 1; i >= 0; i--) {
-      trace.step('heapify', `Sift ${a[i]} down from position ${i}.`, {
-        vars: { i },
-      });
+      trace.step(
+        'heapify',
+        {
+          en: `Sift ${a[i]} down from position ${i}.`,
+          zh: `让 ${a[i]} 从位置 ${i} 下沉。`,
+        },
+        {
+          vars: { i },
+        },
+      );
       heap.pointer({ name: 'i', index: i }).highlight({ indices: [i] });
       maxHeapify(i, n);
     }
     for (let last = n - 1; last >= 1; last--) {
       trace.step(
         'extract',
-        `Move the maximum ${a[0]} to the end of the heap, position ${last}.`,
+        {
+          en: `Move the maximum ${a[0]} to the end of the heap, position ${last}.`,
+          zh: `把最大值 ${a[0]} 移到堆的末尾，位置 ${last}。`,
+        },
         { vars: { last } },
       );
       heap
@@ -138,7 +170,7 @@ export const heapsort = defineAlgorithm({
       [a[0], a[last]] = [a[last]!, a[0]!];
       maxHeapify(0, last);
     }
-    trace.step('sorted', 'The array is sorted.');
+    trace.step('sorted', { en: 'The array is sorted.', zh: '数组已排好序。' });
     heap.pointer({ name: 'i', index: null }).settle({ index: 0 });
   },
 });

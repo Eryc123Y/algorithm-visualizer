@@ -34,10 +34,12 @@ const show = (h: number) => (h / 100).toFixed(2);
 
 export const optimalBst = defineAlgorithm({
   id: 'optimal-bst',
-  title: 'Optimal binary search tree',
+  title: { en: 'Optimal binary search tree', zh: '最优二叉搜索树' },
   topic: 'dynamic-programming',
-  summary:
-    'Finds the binary search tree with the least expected search cost for keys and gaps searched with given probabilities, filling tables of the best cost of every range of keys, then builds the tree.',
+  summary: {
+    en: 'Finds the binary search tree with the least expected search cost for keys and gaps searched with given probabilities, filling tables of the best cost of every range of keys, then builds the tree.',
+    zh: '已知查找每个关键字和每个间隙的概率，求期望查找代价最小的二叉搜索树：填表记录每个关键字区间的最小代价，再构造出这棵树。',
+  },
   input: z
     .strictObject({
       p: listField(
@@ -146,7 +148,10 @@ export const optimalBst = defineAlgorithm({
     const root = empty();
     const E = trace.add('e', {
       kind: 'table',
-      label: 'e[i, j]: least expected cost on keys i to j',
+      label: trace.say({
+        en: 'e[i, j]: least expected cost on keys i to j',
+        zh: 'e[i, j]：关键字 i 到 j 的最小期望代价',
+      }),
       rows: n + 1,
       columns: n + 1,
       rowLabels: rows,
@@ -154,7 +159,10 @@ export const optimalBst = defineAlgorithm({
     });
     const W = trace.add('w', {
       kind: 'table',
-      label: 'w[i, j]: probability of the subtree',
+      label: trace.say({
+        en: 'w[i, j]: probability of the subtree',
+        zh: 'w[i, j]：子树的概率',
+      }),
       place: 'side',
       rows: n + 1,
       columns: n + 1,
@@ -172,7 +180,7 @@ export const optimalBst = defineAlgorithm({
     });
     const tree = trace.add('tree', {
       kind: 'tree',
-      label: 'the optimal tree',
+      label: trace.say({ en: 'the optimal tree', zh: '最优树' }),
       place: 'side',
       binary: true,
     });
@@ -182,7 +190,10 @@ export const optimalBst = defineAlgorithm({
 
     trace.step(
       'init',
-      `A range with no keys, e[i, i − 1], is the gap dᵢ₋₁ alone: its cost and weight are qᵢ₋₁, here ${q.map(show).join(', ')}.`,
+      {
+        en: `A range with no keys, e[i, i − 1], is the gap dᵢ₋₁ alone: its cost and weight are qᵢ₋₁, here ${q.map(show).join(', ')}.`,
+        zh: `没有关键字的区间 e[i, i − 1] 只有间隙 dᵢ₋₁：它的代价和权重都是 qᵢ₋₁，这里分别是 ${q.map(show).join(', ')}。`,
+      },
       { vars: { n } },
     );
     for (let i = 1; i <= n + 1; i++) {
@@ -199,7 +210,10 @@ export const optimalBst = defineAlgorithm({
         w[i - 1]![j] = weight;
         trace.step(
           'weight',
-          `w[${i}, ${j}] = w[${i}, ${j - 1}] + p${j} + q${j} = ${show(w[i - 1]![j - 1]!)} + ${show(p[j]!)} + ${show(q[j]!)} = ${show(weight)}.`,
+          {
+            en: `w[${i}, ${j}] = w[${i}, ${j - 1}] + p${j} + q${j} = ${show(w[i - 1]![j - 1]!)} + ${show(p[j]!)} + ${show(q[j]!)} = ${show(weight)}.`,
+            zh: `子树概率 w[${i}, ${j}] = w[${i}, ${j - 1}] + p${j} + q${j} = ${show(w[i - 1]![j - 1]!)} + ${show(p[j]!)} + ${show(q[j]!)} = ${show(weight)}。`,
+          },
           { vars: { i, j } },
         );
         W.set({ cell: at(i, j), value: show(weight) }).highlight({
@@ -213,7 +227,10 @@ export const optimalBst = defineAlgorithm({
           const t = left + right + weight;
           trace.step(
             'try',
-            `Keys ${i} to ${j} with root k${r}: e[${i}, ${r - 1}] + e[${r + 1}, ${j}] + w[${i}, ${j}] = ${show(left)} + ${show(right)} + ${show(weight)} = ${show(t)}${best === Infinity ? '' : t < best ? `, better than ${show(best)}` : `, no better than ${show(best)}`}.`,
+            {
+              en: `Keys ${i} to ${j} with root k${r}: e[${i}, ${r - 1}] + e[${r + 1}, ${j}] + w[${i}, ${j}] = ${show(left)} + ${show(right)} + ${show(weight)} = ${show(t)}${best === Infinity ? '' : t < best ? `, better than ${show(best)}` : `, no better than ${show(best)}`}.`,
+              zh: `关键字 ${i} 到 ${j}，以 k${r} 为根：e[${i}, ${r - 1}] + e[${r + 1}, ${j}] + w[${i}, ${j}] = ${show(left)} + ${show(right)} + ${show(weight)} = ${show(t)}${best === Infinity ? '' : t < best ? `，比 ${show(best)} 好` : `，不比 ${show(best)} 好`}。`,
+            },
             { vars: { i, j, r } },
           );
           E.depend({ cell: at(i, j), on: [at(i, r - 1), at(r + 1, j)] });
@@ -226,7 +243,10 @@ export const optimalBst = defineAlgorithm({
         root[i - 1]![j - 1] = choice;
         trace.step(
           'best',
-          `e[${i}, ${j}] = ${show(best)}, with k${choice} at the root: root[${i}, ${j}] = ${choice}.`,
+          {
+            en: `e[${i}, ${j}] = ${show(best)}, with k${choice} at the root: root[${i}, ${j}] = ${choice}.`,
+            zh: `e[${i}, ${j}] = ${show(best)}，以 k${choice} 为根：root[${i}, ${j}] = ${choice}。`,
+          },
           { vars: { i, j, r: choice } },
         );
         E.set({ cell: at(i, j), value: show(best) }).highlight({
@@ -248,8 +268,14 @@ export const optimalBst = defineAlgorithm({
       trace.step(
         'node',
         parent === null
-          ? `root[${i}, ${j}] = ${r}: k${r} is the root. The expected search cost is e[1, ${n}] = ${show(e[0]![n]!)}.`
-          : `root[${i}, ${j}] = ${r}: k${r} is the ${side} child of k${parent}.`,
+          ? {
+              en: `root[${i}, ${j}] = ${r}: k${r} is the root. The expected search cost is e[1, ${n}] = ${show(e[0]![n]!)}.`,
+              zh: `root[${i}, ${j}] = ${r}：k${r} 是根。期望查找代价是 e[1, ${n}] = ${show(e[0]![n]!)}。`,
+            }
+          : {
+              en: `root[${i}, ${j}] = ${r}: k${r} is the ${side} child of k${parent}.`,
+              zh: `root[${i}, ${j}] = ${r}：k${r} 是 k${parent} 的${side === 'left' ? '左' : '右'}孩子。`,
+            },
         { vars: { i, j, r } },
       );
       tree.addNode({

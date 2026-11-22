@@ -14,6 +14,7 @@ import {
   patternFits,
   record,
   shiftsFound,
+  shiftsFoundZh,
 } from './common.ts';
 
 /** Most characters the automaton's alphabet holds. */
@@ -33,10 +34,15 @@ function next(pattern: string, q: number, a: string): number {
 
 export const finiteAutomatonMatcher = defineAlgorithm({
   id: 'finite-automaton-matcher',
-  title: 'String matching with a finite automaton',
+  title: {
+    en: 'String matching with a finite automaton',
+    zh: '用有限自动机进行字符串匹配',
+  },
   topic: 'strings',
-  summary:
-    'Builds the automaton whose state is how many characters of the pattern the text read so far ends with, then reads the text once, one transition per character.',
+  summary: {
+    en: 'Builds the automaton whose state is how many characters of the pattern the text read so far ends with, then reads the text once, one transition per character.',
+    zh: '构造一个自动机，它的状态是已读文本的结尾与模式的多少个字符匹配，再把文本读一遍，每个字符做一次转移。',
+  },
   input: z
     .strictObject(MatchFields)
     .superRefine(patternFits)
@@ -116,10 +122,10 @@ export const finiteAutomatonMatcher = defineAlgorithm({
     );
     table.forEach((row, q) => {
       const read = q === 0 ? 'nothing yet' : pattern.slice(0, q);
-      trace.step(
-        'delta',
-        `State ${q}: the text read ends with ${read}. After one more character, the state is the longest prefix of P that the text then ends with: ${sigma.map((a, c) => `${a} gives ${row[c]}`).join(', ')}.`,
-      );
+      trace.step('delta', {
+        en: `State ${q}: the text read ends with ${read}. After one more character, the state is the longest prefix of P that the text then ends with: ${sigma.map((a, c) => `${a} gives ${row[c]}`).join(', ')}.`,
+        zh: `状态 ${q}：${q === 0 ? '已读文本的结尾还不与 P 的任何字符匹配' : `已读文本以 ${pattern.slice(0, q)} 结尾`}。再读一个字符后的状态，是那时文本结尾的最长的 P 的前缀：${sigma.map((a, c) => `${a} 得 ${row[c]}`).join('，')}。`,
+      });
       row.forEach((k, c) => delta.set({ cell: [q, c], value: k }));
       delta.highlight({ cells: row.map((_, c) => [q, c] as [number, number]) });
     });
@@ -131,8 +137,14 @@ export const finiteAutomatonMatcher = defineAlgorithm({
       trace.step(
         'read',
         to === 0
-          ? `Read T[${i}] = ${text[i]}: δ(${q}, ${text[i]}) = 0, so no prefix of P ends the text read.`
-          : `Read T[${i}] = ${text[i]}: δ(${q}, ${text[i]}) = ${to}, so the text read ends with the first ${to} character${to === 1 ? '' : 's'} of P.`,
+          ? {
+              en: `Read T[${i}] = ${text[i]}: δ(${q}, ${text[i]}) = 0, so no prefix of P ends the text read.`,
+              zh: `读 T[${i}] = ${text[i]}：δ(${q}, ${text[i]}) = 0，所以已读文本的结尾不是 P 的任何前缀。`,
+            }
+          : {
+              en: `Read T[${i}] = ${text[i]}: δ(${q}, ${text[i]}) = ${to}, so the text read ends with the first ${to} character${to === 1 ? '' : 's'} of P.`,
+              zh: `读 T[${i}] = ${text[i]}：δ(${q}, ${text[i]}) = ${to}，所以已读文本以 P 的前 ${to} 个字符结尾。`,
+            },
       );
       delta.highlight({ cells: [[q, c]] });
       q = to;
@@ -142,11 +154,17 @@ export const finiteAutomatonMatcher = defineAlgorithm({
       });
       if (q === m) {
         const s = i - m + 1;
-        trace.step('found', `State ${m} is reached: ${s} is a valid shift.`);
+        trace.step('found', {
+          en: `State ${m} is reached: ${s} is a valid shift.`,
+          zh: `到达状态 ${m}：${s} 是一个有效偏移。`,
+        });
         record(handles, s, m, found);
       }
     }
-    trace.step('done', `The text is read once: ${shiftsFound(found)}.`);
+    trace.step('done', {
+      en: `The text is read once: ${shiftsFound(found)}.`,
+      zh: `文本读完一遍：${shiftsFoundZh(found)}。`,
+    });
     T.pointer({ name: 'i', index: null });
     return { results: found };
   },

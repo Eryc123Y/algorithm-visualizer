@@ -15,10 +15,12 @@ export const MAX_COUNTED = 99;
 
 export const countingSort = defineAlgorithm({
   id: 'counting-sort',
-  title: 'Counting sort',
+  title: { en: 'Counting sort', zh: '计数排序' },
   topic: 'sorting',
-  summary:
-    'Counts each value, turns the counts into running sums, and places every value into an output array, keeping equal values in order.',
+  summary: {
+    en: 'Counts each value, turns the counts into running sums, and places every value into an output array, keeping equal values in order.',
+    zh: '统计每个值出现的次数，把计数变成累计和，再把每个值放进输出数组，相等的值保持原来的顺序。',
+  },
   input: z.strictObject({
     values: listField(
       z
@@ -74,9 +76,16 @@ export const countingSort = defineAlgorithm({
     });
     values.forEach((x, j) => {
       c[x]! += 1;
-      trace.step('count', `Count ${x}: c[${x}] becomes ${c[x]}.`, {
-        vars: { j, k },
-      });
+      trace.step(
+        'count',
+        {
+          en: `Count ${x}: c[${x}] becomes ${c[x]}.`,
+          zh: `计数 ${x}：c[${x}] 变为 ${c[x]}。`,
+        },
+        {
+          vars: { j, k },
+        },
+      );
       arr.pointer({ name: 'j', index: j }).highlight({ indices: [j] });
       counts.set({ index: x, value: c[x]! }).highlight({ indices: [x] });
     });
@@ -85,7 +94,10 @@ export const countingSort = defineAlgorithm({
       c[v]! += c[v - 1]!;
       trace.step(
         'sum',
-        `Add c[${v - 1}] to c[${v}]: ${c[v]} values are at most ${v}.`,
+        {
+          en: `Add c[${v - 1}] to c[${v}]: ${c[v]} values are at most ${v}.`,
+          zh: `把 c[${v - 1}] 加到 c[${v}]：有 ${c[v]} 个值不超过 ${v}。`,
+        },
         { vars: { v } },
       );
       counts.set({ index: v, value: c[v]! }).highlight({ indices: [v - 1, v] });
@@ -94,14 +106,24 @@ export const countingSort = defineAlgorithm({
       const x = values[j]!;
       c[x]! -= 1;
       const at = c[x]!;
-      trace.step('place', `c[${x}] drops to ${at}: place ${x} at b[${at}].`, {
-        vars: { j },
-      });
+      trace.step(
+        'place',
+        {
+          en: `c[${x}] drops to ${at}: place ${x} at b[${at}].`,
+          zh: `c[${x}] 减为 ${at}：把 ${x} 放到 b[${at}]。`,
+        },
+        {
+          vars: { j },
+        },
+      );
       arr.pointer({ name: 'j', index: j }).highlight({ indices: [j] });
       counts.set({ index: x, value: at }).highlight({ indices: [x] });
       out.set({ index: at, value: x }).settle({ index: at });
     }
-    trace.step('sorted', 'b holds the values in sorted order.');
+    trace.step('sorted', {
+      en: 'b holds the values in sorted order.',
+      zh: 'b 按从小到大的顺序存放了所有值。',
+    });
     arr.pointer({ name: 'j', index: null });
   },
 });

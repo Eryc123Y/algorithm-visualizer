@@ -21,10 +21,12 @@ export const MAX_EXPONENT = 2 ** 31 - 1;
 
 export const modularExponentiation = defineAlgorithm({
   id: 'modular-exponentiation',
-  title: 'Modular exponentiation',
+  title: { en: 'Modular exponentiation', zh: '模取幂' },
   topic: 'math',
-  summary:
-    'Computes a^b mod n by repeated squaring, reading the bits of b from the most significant: square for every bit, and multiply by a for every 1.',
+  summary: {
+    en: 'Computes a^b mod n by repeated squaring, reading the bits of b from the most significant: square for every bit, and multiply by a for every 1.',
+    zh: '用反复平方法计算 a^b mod n，从最高位开始读 b 的各个二进制位：每一位都平方一次，遇到 1 再乘以 a。',
+  },
   input: z.strictObject({
     a: z
       .int()
@@ -76,7 +78,7 @@ export const modularExponentiation = defineAlgorithm({
     const k = bits.length - 1;
     const table = trace.add('bits', {
       kind: 'table',
-      label: `b = ${b} in binary`,
+      label: trace.say({ en: `b = ${b} in binary`, zh: `b = ${b} 的二进制` }),
       initial: [
         [...bits].map(Number),
         [...bits].map(() => ''),
@@ -88,10 +90,10 @@ export const modularExponentiation = defineAlgorithm({
     const [A, N] = [BigInt(a), BigInt(n)];
     let c = 0;
     let d = 1n;
-    trace.step(
-      'start',
-      `Start with c = 0 and d = 1, since ${a}^0 = 1, then read the ${bits.length} bit${bits.length === 1 ? '' : 's'} of b = ${b}, ${bits}, from the left. After each bit, d = ${a}^c mod ${n}.`,
-    );
+    trace.step('start', {
+      en: `Start with c = 0 and d = 1, since ${a}^0 = 1, then read the ${bits.length} bit${bits.length === 1 ? '' : 's'} of b = ${b}, ${bits}, from the left. After each bit, d = ${a}^c mod ${n}.`,
+      zh: `从 c = 0、d = 1 开始，因为 ${a}^0 = 1；再从左往右读 b = ${b} 的 ${bits.length} 个二进制位 ${bits}。每读完一位，d = ${a}^c mod ${n}。`,
+    });
     [...bits].forEach((bit, j) => {
       const i = k - j;
       const before = d;
@@ -99,7 +101,10 @@ export const modularExponentiation = defineAlgorithm({
       d = (d * d) % N;
       trace.step(
         'square',
-        `Bit b_${i} = ${bit}. ${c === 0 ? 'Doubling c leaves it 0, and' : `Doubling c to ${c}`} squares d: (${before} · ${before}) mod ${n} = ${d}.`,
+        {
+          en: `Bit b_${i} = ${bit}. ${c === 0 ? 'Doubling c leaves it 0, and' : `Doubling c to ${c}`} squares d: (${before} · ${before}) mod ${n} = ${d}.`,
+          zh: `二进制位 b_${i} = ${bit}。${c === 0 ? 'c 加倍后仍是 0，' : `c 加倍为 ${c}，`}d 平方：(${before} · ${before}) mod ${n} = ${d}。`,
+        },
         { vars: { i } },
       );
       table
@@ -112,7 +117,10 @@ export const modularExponentiation = defineAlgorithm({
         d = (d * A) % N;
         trace.step(
           'multiply',
-          `The bit is 1, so c becomes ${c} and d is multiplied by a: (${squared} · ${a}) mod ${n} = ${d}.`,
+          {
+            en: `The bit is 1, so c becomes ${c} and d is multiplied by a: (${squared} · ${a}) mod ${n} = ${d}.`,
+            zh: `这一位是 1，所以 c 变为 ${c}，d 乘以 a：(${squared} · ${a}) mod ${n} = ${d}。`,
+          },
           { vars: { i } },
         );
         table
@@ -126,10 +134,10 @@ export const modularExponentiation = defineAlgorithm({
         ],
       });
     });
-    trace.step(
-      'done',
-      `Every bit is read, so c = b and ${a}^${b} mod ${n} = ${d}.`,
-    );
+    trace.step('done', {
+      en: `Every bit is read, so c = b and ${a}^${b} mod ${n} = ${d}.`,
+      zh: `所有位都读完了，所以 c = b，${a}^${b} mod ${n} = ${d}。`,
+    });
     table.highlight({ cells: [[2, k]] });
     return { results: [Number(d)] };
   },

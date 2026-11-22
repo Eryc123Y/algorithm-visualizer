@@ -12,6 +12,7 @@
 import { z } from 'zod';
 
 import { defineAlgorithm } from '../../algorithm.ts';
+import type { Text } from '../../text.ts';
 import { declareBipartite, edgesByPair, sides } from './bipartite-matching.ts';
 import { adjacency, Graph, graphOf, type GraphInput } from './graph.ts';
 
@@ -19,10 +20,12 @@ const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
 
 export const hopcroftKarp = defineAlgorithm({
   id: 'hopcroft-karp',
-  title: 'Hopcroft–Karp matching',
+  title: { en: 'Hopcroft–Karp matching', zh: 'Hopcroft–Karp 匹配' },
   topic: 'graphs',
-  summary:
-    'Finds a maximum matching in a bipartite graph in phases: a breadth-first search from every free vertex finds the length of the shortest augmenting paths, and depth-first searches through its layers flip a maximal set of disjoint ones at once.',
+  summary: {
+    en: 'Finds a maximum matching in a bipartite graph in phases: a breadth-first search from every free vertex finds the length of the shortest augmenting paths, and depth-first searches through its layers flip a maximal set of disjoint ones at once.',
+    zh: '分阶段求二分图的最大匹配：从所有未匹配顶点出发的广度优先搜索求出最短增广路径的长度，再沿着分层做深度优先搜索，一次翻转一组极大的互不相交的增广路径。',
+  },
   input: z.strictObject({
     graph: Graph.describe(
       'A bipartite graph; its edges are taken as undirected, the first vertex of each part goes on the left, and a vertex with no edges on the shorter side.',
@@ -79,8 +82,14 @@ export const hopcroftKarp = defineAlgorithm({
     trace.step(
       'start',
       g.edges.length === 0
-        ? 'No edge joins two vertices, so none can be matched.'
-        : `Split the vertices into two sides, ${left.join(' ')} and ${right.join(' ')}: every edge joins the two. Start with no edge matched.`,
+        ? {
+            en: 'No edge joins two vertices, so none can be matched.',
+            zh: '没有边连接两个顶点，所以无法匹配。',
+          }
+        : {
+            en: `Split the vertices into two sides, ${left.join(' ')} and ${right.join(' ')}: every edge joins the two. Start with no edge matched.`,
+            zh: `把顶点分成两边，${left.join(' ')} 和 ${right.join(' ')}：每条边都连接两边。开始时没有边被匹配。`,
+          },
     );
     for (const v of left) graph.group({ node: v, group: 0 });
     for (const v of right) graph.group({ node: v, group: 1 });
@@ -103,8 +112,14 @@ export const hopcroftKarp = defineAlgorithm({
         trace.step(
           'done',
           size === 0
-            ? 'No augmenting path is left, and the matching is empty.'
-            : `The ${plural(size, 'marked edge')} ${size === 1 ? 'forms' : 'form'} a maximum matching, found in ${plural(phase - 1, 'phase')}.`,
+            ? {
+                en: 'No augmenting path is left, and the matching is empty.',
+                zh: '已经没有增广路径，匹配为空。',
+              }
+            : {
+                en: `The ${plural(size, 'marked edge')} ${size === 1 ? 'forms' : 'form'} a maximum matching, found in ${plural(phase - 1, 'phase')}.`,
+                zh: `标出的 ${size} 条边构成一个最大匹配，用了 ${phase - 1} 个阶段找到。`,
+              },
         );
         for (const v of noted) graph.annotate({ node: v, text: null });
         return { results: [size] };
@@ -114,7 +129,10 @@ export const hopcroftKarp = defineAlgorithm({
       paths.forEach((p, k) => {
         trace.step(
           'path',
-          `Depth-first search from ${p[0]} through the layers finds ${p.join(' – ')}, of ${plural(shortest, 'edge')}${k === 0 ? '' : `, sharing no vertex with the ${plural(k, 'path')} before it`}.`,
+          {
+            en: `Depth-first search from ${p[0]} through the layers finds ${p.join(' – ')}, of ${plural(shortest, 'edge')}${k === 0 ? '' : `, sharing no vertex with the ${plural(k, 'path')} before it`}.`,
+            zh: `从 ${p[0]} 出发沿着分层做深度优先搜索，找到 ${p.join(' – ')}，共 ${shortest} 条边${k === 0 ? '' : `，与前面的 ${k} 条路径没有公共顶点`}。`,
+          },
           { vars: { phase } },
         );
         graph.pointer({ name: 'u', node: p[0]! }).highlight({
@@ -220,13 +238,25 @@ function layerText(
   phase: number,
   free: readonly string[],
   shortest: number,
-): string {
+): Text {
   if (free.length === 0)
-    return `Phase ${phase}: every vertex on the left is matched, so no augmenting path is left.`;
-  const from = `Phase ${phase}: breadth-first search from the free vertices on the left, ${free.join(' ')}, along unmatched edges to the right and matched edges back, puts each vertex it reaches in a layer, its note.`;
+    return {
+      en: `Phase ${phase}: every vertex on the left is matched, so no augmenting path is left.`,
+      zh: `第 ${phase} 阶段：左边的每个顶点都已匹配，所以没有增广路径了。`,
+    };
+  const from = {
+    en: `Phase ${phase}: breadth-first search from the free vertices on the left, ${free.join(' ')}, along unmatched edges to the right and matched edges back, puts each vertex it reaches in a layer, its note.`,
+    zh: `第 ${phase} 阶段：从左边的未匹配顶点 ${free.join(' ')} 出发做广度优先搜索，沿未匹配边到右边、沿匹配边回到左边，把到达的每个顶点放进一层，层号标在顶点旁。`,
+  };
   return shortest === Infinity
-    ? `${from} It reaches no free vertex on the right: no augmenting path is left.`
-    : `${from} A free vertex on the right is first reached in layer ${shortest}, so the shortest augmenting paths have ${plural(shortest, 'edge')}.`;
+    ? {
+        en: `${from.en} It reaches no free vertex on the right: no augmenting path is left.`,
+        zh: `${from.zh}搜索到达不了右边的未匹配顶点：没有增广路径了。`,
+      }
+    : {
+        en: `${from.en} A free vertex on the right is first reached in layer ${shortest}, so the shortest augmenting paths have ${plural(shortest, 'edge')}.`,
+        zh: `${from.zh}右边的未匹配顶点最早在第 ${shortest} 层到达，所以最短的增广路径有 ${shortest} 条边。`,
+      };
 }
 
 function augmentText(
@@ -234,20 +264,35 @@ function augmentText(
   paths: readonly (readonly string[])[],
   shortest: number,
   before: number,
-): string {
+): Text {
   const rest = free.filter((u) => !paths.some((p) => p[0] === u));
-  const left =
-    rest.length === 0
-      ? ''
-      : `${rest.join(' ')} ${rest.length === 1 ? 'has' : 'have'} no such path that shares no vertex with these. `;
   const k = paths.length;
+  const left = {
+    en:
+      rest.length === 0
+        ? ''
+        : `${rest.join(' ')} ${rest.length === 1 ? 'has' : 'have'} no such path that shares no vertex with these. `,
+    zh:
+      rest.length === 0
+        ? ''
+        : `${rest.join(' ')} 没有与这些路径不相交的这样的路径。`,
+  };
   const flip =
     shortest === 1
       ? k === 1
-        ? 'Match the pair'
-        : `Match the ${k} pairs at once`
+        ? { en: 'Match the pair', zh: '匹配这一对' }
+        : { en: `Match the ${k} pairs at once`, zh: `同时匹配这 ${k} 对` }
       : k === 1
-        ? 'Flip the path: its unmatched edges go in and its matched ones out'
-        : `Flip all ${k} paths at once: their unmatched edges go in and their matched ones out`;
-  return `${left}${flip}, so the matching grows from ${before} to ${before + k}.`;
+        ? {
+            en: 'Flip the path: its unmatched edges go in and its matched ones out',
+            zh: '翻转这条路径：它的未匹配边加入匹配，匹配边移出',
+          }
+        : {
+            en: `Flip all ${k} paths at once: their unmatched edges go in and their matched ones out`,
+            zh: `同时翻转这 ${k} 条路径：它们的未匹配边加入匹配，匹配边移出`,
+          };
+  return {
+    en: `${left.en}${flip.en}, so the matching grows from ${before} to ${before + k}.`,
+    zh: `${left.zh}${flip.zh}，匹配的大小从 ${before} 增加到 ${before + k}。`,
+  };
 }

@@ -19,10 +19,12 @@ export const MAX_BUCKET_VALUES = 16;
 
 export const bucketSort = defineAlgorithm({
   id: 'bucket-sort',
-  title: 'Bucket sort',
+  title: { en: 'Bucket sort', zh: '桶排序' },
   topic: 'sorting',
-  summary:
-    'Sorts n values in [0, 1) by putting each into one of n equal buckets, sorting each bucket with insertion sort, and joining the buckets in order.',
+  summary: {
+    en: 'Sorts n values in [0, 1) by putting each into one of n equal buckets, sorting each bucket with insertion sort, and joining the buckets in order.',
+    zh: '对 [0, 1) 中的 n 个值排序：把每个值放进 n 个等宽的桶之一，用插入排序排好每个桶，再按顺序把桶连起来。',
+  },
   input: z.strictObject({
     values: listField(
       z
@@ -73,12 +75,15 @@ export const bucketSort = defineAlgorithm({
     const arr = trace.add('a', { kind: 'array', initial: [...values] });
     const buckets = trace.add('b', {
       kind: 'hashTable',
-      label: `b: ${n} buckets of width 1/${n}`,
+      label: trace.say({
+        en: `b: ${n} buckets of width 1/${n}`,
+        zh: `b：${n} 个宽为 1/${n} 的桶`,
+      }),
       size: n,
     });
     const out = trace.add('out', {
       kind: 'array',
-      label: 'the lists joined',
+      label: trace.say({ en: 'the lists joined', zh: '连起来的各个链表' }),
       place: 'side',
       initial: values.map(() => ''),
     });
@@ -93,7 +98,10 @@ export const bucketSort = defineAlgorithm({
       lists[k]!.push({ id, value });
       trace.step(
         'bucket',
-        `⌊${n} · ${value}⌋ = ${k}: ${value} goes into bucket ${k}, which holds [${k}/${n}, ${k + 1}/${n}).`,
+        {
+          en: `⌊${n} · ${value}⌋ = ${k}: ${value} goes into bucket ${k}, which holds [${k}/${n}, ${k + 1}/${n}).`,
+          zh: `⌊${n} · ${value}⌋ = ${k}：${value} 放进桶 ${k}，它装 [${k}/${n}, ${k + 1}/${n}) 中的值。`,
+        },
         { vars: { i } },
       );
       arr.pointer({ name: 'i', index: i }).highlight({ indices: [i] });
@@ -111,8 +119,14 @@ export const bucketSort = defineAlgorithm({
         trace.step(
           'sort',
           at === j
-            ? `Bucket ${k}: ${key.value} is not smaller than ${list[j - 1]!.value}, so it stays.`
-            : `Bucket ${k}: ${key.value} is smaller than ${list[at]!.value}; insertion sort moves it ${at === 0 ? 'to the front' : `after ${list[at - 1]!.value}`}.`,
+            ? {
+                en: `Bucket ${k}: ${key.value} is not smaller than ${list[j - 1]!.value}, so it stays.`,
+                zh: `桶 ${k}：${key.value} 不小于 ${list[j - 1]!.value}，所以不动。`,
+              }
+            : {
+                en: `Bucket ${k}: ${key.value} is smaller than ${list[at]!.value}; insertion sort moves it ${at === 0 ? 'to the front' : `after ${list[at - 1]!.value}`}.`,
+                zh: `桶 ${k}：${key.value} 小于 ${list[at]!.value}；插入排序把它移到${at === 0 ? '最前面' : ` ${list[at - 1]!.value} 后面`}。`,
+              },
           { vars: { k, j } },
         );
         if (at !== j) {
@@ -134,7 +148,10 @@ export const bucketSort = defineAlgorithm({
       if (list.length === 0) return;
       trace.step(
         'concat',
-        `Bucket ${k} is sorted: copy ${list.map((e) => e.value).join(', ')} to the output, ${filled === 0 ? 'at its start' : `after the ${filled} value${filled === 1 ? '' : 's'} there`}.`,
+        {
+          en: `Bucket ${k} is sorted: copy ${list.map((e) => e.value).join(', ')} to the output, ${filled === 0 ? 'at its start' : `after the ${filled} value${filled === 1 ? '' : 's'} there`}.`,
+          zh: `桶 ${k} 已排好序：把 ${list.map((e) => e.value).join('、')} 复制到输出${filled === 0 ? '的开头' : `中已有的 ${filled} 个值之后`}。`,
+        },
         { vars: { k } },
       );
       buckets.highlight({ bucket: k });

@@ -46,6 +46,15 @@ function placeOf(n: BNode, k: KeyValue, i: number): string {
   return `${v} lies between ${String(n.keys[i - 1]!.value)} and ${String(n.keys[i]!.value)}`;
 }
 
+/** The same in Chinese (ADR 0045). */
+function placeOfZh(n: BNode, k: KeyValue, i: number): string {
+  const v = String(k);
+  if (n.keys.length === 0) return '这个节点是空的';
+  if (i === 0) return `${v} < ${String(n.keys[0]!.value)}`;
+  if (i === n.keys.length) return `${v} > ${String(n.keys.at(-1)!.value)}`;
+  return `${v} 介于 ${String(n.keys[i - 1]!.value)} 和 ${String(n.keys[i]!.value)} 之间`;
+}
+
 /** The node holding `k`, and its position there, if any. */
 function locate(b: BTree, k: KeyValue): { node: BNode; i: number } | null {
   for (let n = nodeOf(b, b.root); ;) {
@@ -64,7 +73,10 @@ export function search(b: BTree, k: KeyValue, run: BRun): boolean {
     const i = scan(n, k);
     const compared = n.keys.slice(0, Math.min(i + 1, n.keys.length));
     if (i < n.keys.length && compare(k, n.keys[i]!.value) === 0) {
-      step('found', `${String(k)} is in ${show(n)}: found.`);
+      step('found', {
+        en: `${String(k)} is in ${show(n)}: found.`,
+        zh: `${String(k)} 在 ${show(n)} 中：找到了。`,
+      });
       on.pointer({ name: 'x', node: n.id })
         .highlight({ keys: compared.map((c) => c.id) })
         .settle({ key: n.keys[i]!.id });
@@ -74,15 +86,24 @@ export function search(b: BTree, k: KeyValue, run: BRun): boolean {
       step(
         'missing',
         n.keys.length === 0
-          ? `The tree is empty: ${String(k)} is not in it.`
-          : `${placeOf(n, k, i)}, and ${show(n)} is a leaf: ${String(k)} is not in the tree.`,
+          ? {
+              en: `The tree is empty: ${String(k)} is not in it.`,
+              zh: `树是空的：${String(k)} 不在其中。`,
+            }
+          : {
+              en: `${placeOf(n, k, i)}, and ${show(n)} is a leaf: ${String(k)} is not in the tree.`,
+              zh: `${placeOfZh(n, k, i)}，而 ${show(n)} 是叶子：${String(k)} 不在树中。`,
+            },
       );
       on.pointer({ name: 'x', node: n.id });
       if (compared.length > 0)
         on.highlight({ keys: compared.map((c) => c.id) });
       return false;
     }
-    step('down', `${placeOf(n, k, i)}: go down to child ${i}.`);
+    step('down', {
+      en: `${placeOf(n, k, i)}: go down to child ${i}.`,
+      zh: `${placeOfZh(n, k, i)}：下到第 ${i} 个孩子。`,
+    });
     on.pointer({ name: 'x', node: n.id });
     if (compared.length > 0) on.highlight({ keys: compared.map((c) => c.id) });
     n = nodeOf(b, n.children[i]!);
@@ -134,7 +155,10 @@ export function insert(b: BTree, k: KeyValue, run: BRun): BTree {
   const { on, step } = run;
   const present = locate(b, k);
   if (present !== null) {
-    step('present', `${String(k)} is already in the tree: nothing changes.`);
+    step('present', {
+      en: `${String(k)} is already in the tree: nothing changes.`,
+      zh: `${String(k)} 已经在树中：什么都不变。`,
+    });
     on.pointer({ name: 'x', node: present.node.id }).highlight({
       keys: [present.node.keys[present.i]!.id],
     });
@@ -147,10 +171,10 @@ export function insert(b: BTree, k: KeyValue, run: BRun): BTree {
   if (full(nodeOf(tree, tree.root))) {
     const old = nodeOf(tree, tree.root);
     const s: BNode = { id: `n${tree.nextNode}`, keys: [], children: [old.id] };
-    step(
-      'grow',
-      `The root ${show(old)} is full: put a new, empty root above it and split the old root, so the tree grows by a level at the top.`,
-    );
+    step('grow', {
+      en: `The root ${show(old)} is full: put a new, empty root above it and split the old root, so the tree grows by a level at the top.`,
+      zh: `根 ${show(old)} 已满：在它上面放一个新的空根，再分裂原来的根，这样树在顶部长高一层。`,
+    });
     on.grow({ newRoot: s.id });
     tree = withNodes({ ...tree, nextNode: tree.nextNode + 1, root: s.id }, s);
     tree = splitChild(tree, s.id, 0, on);
@@ -161,10 +185,10 @@ export function insert(b: BTree, k: KeyValue, run: BRun): BTree {
     let i = scan(n, k);
     if (isLeaf(n)) {
       const key: BKey = { id: `k${tree.nextKey}`, value: k };
-      step(
-        'leaf',
-        `${placeOf(n, k, i)}, and ${show(n)} is a leaf: insert ${String(k)} at position ${i}.`,
-      );
+      step('leaf', {
+        en: `${placeOf(n, k, i)}, and ${show(n)} is a leaf: insert ${String(k)} at position ${i}.`,
+        zh: `${placeOfZh(n, k, i)}，而 ${show(n)} 是叶子：把 ${String(k)} 插入到位置 ${i}。`,
+      });
       on.pointer({ name: 'x', node: n.id }).insertKey({
         node: n.id,
         index: i,
@@ -178,16 +202,19 @@ export function insert(b: BTree, k: KeyValue, run: BRun): BTree {
     const child = nodeOf(tree, n.children[i]!);
     if (full(child)) {
       const m = child.keys[Math.floor((child.keys.length - 1) / 2)]!;
-      step(
-        'split',
-        `${placeOf(n, k, i)}, and child ${i}, ${show(child)}, is full: split it before going down, lifting its middle key ${String(m.value)} into ${show(n)}.`,
-      );
+      step('split', {
+        en: `${placeOf(n, k, i)}, and child ${i}, ${show(child)}, is full: split it before going down, lifting its middle key ${String(m.value)} into ${show(n)}.`,
+        zh: `${placeOfZh(n, k, i)}，而第 ${i} 个孩子 ${show(child)} 已满：下去之前先分裂它，把它中间的关键字 ${String(m.value)} 提升到 ${show(n)} 中。`,
+      });
       on.pointer({ name: 'x', node: n.id });
       tree = splitChild(tree, n.id, i, on);
       n = nodeOf(tree, x);
       if (compare(k, m.value) > 0) i++;
     }
-    step('down', `${placeOf(n, k, i)}: go down to child ${i}.`);
+    step('down', {
+      en: `${placeOf(n, k, i)}: go down to child ${i}.`,
+      zh: `${placeOfZh(n, k, i)}：下到第 ${i} 个孩子。`,
+    });
     on.pointer({ name: 'x', node: n.id });
     x = n.children[i]!;
   }
@@ -273,10 +300,10 @@ function shrinkRoot(b: BTree, run: BRun): BTree {
   const root = nodeOf(b, b.root);
   if (root.keys.length > 0 || isLeaf(root)) return b;
   const child = root.children[0]!;
-  run.step(
-    'shrink',
-    `The root has no keys left: its one child ${show(nodeOf(b, child))} becomes the root, and the tree loses a level at the top.`,
-  );
+  run.step('shrink', {
+    en: `The root has no keys left: its one child ${show(nodeOf(b, child))} becomes the root, and the tree loses a level at the top.`,
+    zh: `根已经没有关键字了：它唯一的孩子 ${show(nodeOf(b, child))} 成为根，树在顶部降低一层。`,
+  });
   run.on.shrink().pointer({ name: 'x', node: child });
   return { ...without(b, root.id), root: child };
 }
@@ -313,17 +340,20 @@ function deleteFrom(
     const here = i < n.keys.length && compare(k, n.keys[i]!.value) === 0;
     if (here && isLeaf(n)) {
       if (over !== null) {
-        step(
-          liftStep,
-          `${String(k)} leaves the leaf and rises into the place of ${String(over.value)}, which is gone.`,
-        );
+        step(liftStep, {
+          en: `${String(k)} leaves the leaf and rises into the place of ${String(over.value)}, which is gone.`,
+          zh: `${String(k)} 离开叶子，升到已删除的 ${String(over.value)} 原来的位置。`,
+        });
         on.pointer({ name: 'x', node: n.id }).lift({
           key: n.keys[i]!.id,
           over: over.id,
         });
         return liftKey(tree, n, i, over);
       }
-      step('case-1', `${String(k)} is in the leaf ${show(n)}: take it out.`);
+      step('case-1', {
+        en: `${String(k)} is in the leaf ${show(n)}: take it out.`,
+        zh: `${String(k)} 在叶子 ${show(n)} 中：把它取出。`,
+      });
       on.pointer({ name: 'x', node: n.id }).removeKey({ key: n.keys[i]!.id });
       return withNodes(tree, { ...n, keys: n.keys.filter((_, j) => j !== i) });
     }
@@ -335,10 +365,10 @@ function deleteFrom(
       ];
       if (y.keys.length >= t) {
         const pred = extreme(tree, y.id, false);
-        step(
-          'case-2a',
-          `${String(k)} is in ${show(n)}, and its left child has ${word(y.keys.length, 'key', 'keys')}, at least t = ${t}: its predecessor ${String(pred.value)} will take its place. First delete ${String(pred.value)} from that subtree.`,
-        );
+        step('case-2a', {
+          en: `${String(k)} is in ${show(n)}, and its left child has ${word(y.keys.length, 'key', 'keys')}, at least t = ${t}: its predecessor ${String(pred.value)} will take its place. First delete ${String(pred.value)} from that subtree.`,
+          zh: `${String(k)} 在 ${show(n)} 中，它的左孩子有 ${y.keys.length} 个关键字，至少 t = ${t} 个：由它的前驱 ${String(pred.value)} 取代它。先从那棵子树中删除 ${String(pred.value)}。`,
+        });
         on.pointer({ name: 'x', node: n.id }).highlight({
           keys: [key.id, pred.id],
         });
@@ -346,19 +376,19 @@ function deleteFrom(
       }
       if (z.keys.length >= t) {
         const succ = extreme(tree, z.id, true);
-        step(
-          'case-2b',
-          `${String(k)} is in ${show(n)}; its left child has only t − 1 = ${t - 1} keys but its right child has ${z.keys.length}: its successor ${String(succ.value)} will take its place. First delete ${String(succ.value)} from that subtree.`,
-        );
+        step('case-2b', {
+          en: `${String(k)} is in ${show(n)}; its left child has only t − 1 = ${t - 1} keys but its right child has ${z.keys.length}: its successor ${String(succ.value)} will take its place. First delete ${String(succ.value)} from that subtree.`,
+          zh: `${String(k)} 在 ${show(n)} 中；它的左孩子只有 t − 1 = ${t - 1} 个关键字，但右孩子有 ${z.keys.length} 个：由它的后继 ${String(succ.value)} 取代它。先从那棵子树中删除 ${String(succ.value)}。`,
+        });
         on.pointer({ name: 'x', node: n.id }).highlight({
           keys: [key.id, succ.id],
         });
         return deleteFrom(tree, z.id, succ.value, run, key, 'lift-succ');
       }
-      step(
-        'case-2c',
-        `${String(k)} is in ${show(n)}, and both its children have t − 1 = ${t - 1} keys: merge them, with ${String(k)} between them, and delete ${String(k)} from the merged node.`,
-      );
+      step('case-2c', {
+        en: `${String(k)} is in ${show(n)}, and both its children have t − 1 = ${t - 1} keys: merge them, with ${String(k)} between them, and delete ${String(k)} from the merged node.`,
+        zh: `${String(k)} 在 ${show(n)} 中，它的两个孩子都只有 t − 1 = ${t - 1} 个关键字：把它们和夹在中间的 ${String(k)} 合并，再从合并后的节点中删除 ${String(k)}。`,
+      });
       on.pointer({ name: 'x', node: n.id });
       tree = merge(tree, n.id, i, on);
       tree = shrinkRoot(tree, run);
@@ -366,10 +396,10 @@ function deleteFrom(
       continue;
     }
     if (isLeaf(n)) {
-      step(
-        'missing',
-        `${placeOf(n, k, i)}, and ${show(n)} is a leaf: ${String(k)} is not in the tree, so nothing changes.`,
-      );
+      step('missing', {
+        en: `${placeOf(n, k, i)}, and ${show(n)} is a leaf: ${String(k)} is not in the tree, so nothing changes.`,
+        zh: `${placeOfZh(n, k, i)}，而 ${show(n)} 是叶子：${String(k)} 不在树中，所以什么都不变。`,
+      });
       on.pointer({ name: 'x', node: n.id });
       return tree;
     }
@@ -383,26 +413,26 @@ function deleteFrom(
           ? nodeOf(tree, n.children[i + 1]!)
           : undefined;
       if (left !== undefined && left.keys.length >= t) {
-        step(
-          'case-3a',
-          `${placeOf(n, k, i)}, so ${String(k)} would be under child ${i}, ${show(c)}, which has only t − 1 = ${t - 1} keys. Its left sibling ${show(left)} has a key to spare: it moves up, and ${String(n.keys[i - 1]!.value)} moves down.`,
-        );
+        step('case-3a', {
+          en: `${placeOf(n, k, i)}, so ${String(k)} would be under child ${i}, ${show(c)}, which has only t − 1 = ${t - 1} keys. Its left sibling ${show(left)} has a key to spare: it moves up, and ${String(n.keys[i - 1]!.value)} moves down.`,
+          zh: `${placeOfZh(n, k, i)}，所以 ${String(k)} 应在第 ${i} 个孩子 ${show(c)} 下面，而它只有 t − 1 = ${t - 1} 个关键字。它的左兄弟 ${show(left)} 有多余的关键字：那个关键字上移，${String(n.keys[i - 1]!.value)} 下移。`,
+        });
         on.pointer({ name: 'x', node: n.id });
         tree = borrow(tree, n.id, i, 'left', on);
       } else if (right !== undefined && right.keys.length >= t) {
-        step(
-          'case-3a',
-          `${placeOf(n, k, i)}, so ${String(k)} would be under child ${i}, ${show(c)}, which has only t − 1 = ${t - 1} keys. Its right sibling ${show(right)} has a key to spare: it moves up, and ${String(n.keys[i]!.value)} moves down.`,
-        );
+        step('case-3a', {
+          en: `${placeOf(n, k, i)}, so ${String(k)} would be under child ${i}, ${show(c)}, which has only t − 1 = ${t - 1} keys. Its right sibling ${show(right)} has a key to spare: it moves up, and ${String(n.keys[i]!.value)} moves down.`,
+          zh: `${placeOfZh(n, k, i)}，所以 ${String(k)} 应在第 ${i} 个孩子 ${show(c)} 下面，而它只有 t − 1 = ${t - 1} 个关键字。它的右兄弟 ${show(right)} 有多余的关键字：那个关键字上移，${String(n.keys[i]!.value)} 下移。`,
+        });
         on.pointer({ name: 'x', node: n.id });
         tree = borrow(tree, n.id, i, 'right', on);
       } else {
         const at = right !== undefined ? i : i - 1;
         target = n.children[at]!;
-        step(
-          'case-3b',
-          `${placeOf(n, k, i)}, so ${String(k)} would be under child ${i}, ${show(c)}, which has only t − 1 = ${t - 1} keys, and so ${left !== undefined && right !== undefined ? 'do both its siblings' : 'does its one sibling'}: merge it with its ${right !== undefined ? 'right' : 'left'} sibling and ${String(n.keys[at]!.value)} between them.`,
-        );
+        step('case-3b', {
+          en: `${placeOf(n, k, i)}, so ${String(k)} would be under child ${i}, ${show(c)}, which has only t − 1 = ${t - 1} keys, and so ${left !== undefined && right !== undefined ? 'do both its siblings' : 'does its one sibling'}: merge it with its ${right !== undefined ? 'right' : 'left'} sibling and ${String(n.keys[at]!.value)} between them.`,
+          zh: `${placeOfZh(n, k, i)}，所以 ${String(k)} 应在第 ${i} 个孩子 ${show(c)} 下面，而它只有 t − 1 = ${t - 1} 个关键字，${left !== undefined && right !== undefined ? '它的两个兄弟也是' : '它唯一的兄弟也是'}：把它和${right !== undefined ? '右' : '左'}兄弟以及夹在中间的 ${String(n.keys[at]!.value)} 合并。`,
+        });
         on.pointer({ name: 'x', node: n.id });
         tree = merge(tree, n.id, at, on);
         tree = shrinkRoot(tree, run);
@@ -410,10 +440,10 @@ function deleteFrom(
       x = target;
       continue;
     }
-    step(
-      'down',
-      `${placeOf(n, k, i)}: go down to child ${i}, ${show(c)}, which has more than t − 1 keys.`,
-    );
+    step('down', {
+      en: `${placeOf(n, k, i)}: go down to child ${i}, ${show(c)}, which has more than t − 1 keys.`,
+      zh: `${placeOfZh(n, k, i)}：下到第 ${i} 个孩子 ${show(c)}，它的关键字多于 t − 1 个。`,
+    });
     on.pointer({ name: 'x', node: n.id });
     x = c.id;
   }

@@ -62,7 +62,7 @@ ${code(
 <tr><td><code>hide-controls</code></td><td>absent</td><td>Hide the playback controls.</td></tr>
 <tr><td><code>hide-code</code></td><td>absent</td><td>Hide the source listing.</td></tr>
 <tr><td><code>language</code></td><td>pseudocode, if present</td><td>Preferred source language, such as <code>python</code>.</td></tr>
-<tr><td><code>lang</code></td><td>the page’s</td><td>Language of the player’s controls and of an algorithm’s run: Chinese for any <code>zh</code> tag, English otherwise. Inherited like any <code>lang</code>, so <code>&lt;html lang="zh-Hans"&gt;</code> is enough. A document’s own text shows as written. The narration of the modules is being translated (roadmap 5.8).</td></tr>
+<tr><td><code>lang</code></td><td>the page’s</td><td>Language of the player’s controls and of an algorithm’s run: Chinese for any <code>zh</code> tag, English otherwise. Inherited like any <code>lang</code>, so <code>&lt;html lang="zh-Hans"&gt;</code> is enough. A document’s own text shows as written.</td></tr>
 <tr><td><code>mode</code></td><td><code>interactive</code></td><td><code>display</code> shows an animation alone.</td></tr>
 <tr><td><code>once</code></td><td>absent</td><td>In display mode, play once instead of looping.</td></tr>
 <tr><td><code>motion</code></td><td>mode's choice</td><td><code>arc</code> or <code>linear</code>; interactive defaults to arc, display to linear.</td></tr>

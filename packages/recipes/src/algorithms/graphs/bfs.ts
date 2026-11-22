@@ -18,10 +18,12 @@ import {
 
 export const bfs = defineAlgorithm({
   id: 'bfs',
-  title: 'Breadth-first search',
+  title: { en: 'Breadth-first search', zh: '广度优先搜索' },
   topic: 'graphs',
-  summary:
-    'Explores a graph in layers from a source with a queue, finding each vertex’s distance in edges and a breadth-first tree.',
+  summary: {
+    en: 'Explores a graph in layers from a source with a queue, finding each vertex’s distance in edges and a breadth-first tree.',
+    zh: '用一个队列从源点出发逐层探索图，求出每个顶点以边数计的距离，以及一棵广度优先树。',
+  },
   input: z.strictObject({
     graph: Graph,
     source: z
@@ -82,26 +84,35 @@ export const bfs = defineAlgorithm({
     const adj = adjacency(g);
     const d = new Map([[s, 0]]);
     const q = [s];
-    trace.step('start', `Start at ${s}, at distance 0.`);
+    trace.step('start', {
+      en: `Start at ${s}, at distance 0.`,
+      zh: `从 ${s} 开始，距离为 0。`,
+    });
     graph.visit({ node: s }).annotate({ node: s, text: '0' });
     queue.enqueue({ element: { id: `q-${s}`, value: s } });
     while (q.length > 0) {
       const u = q.shift()!;
-      trace.step('dequeue', `Take ${u} from the front of the queue.`);
+      trace.step('dequeue', {
+        en: `Take ${u} from the front of the queue.`,
+        zh: `从队头取出 ${u}。`,
+      });
       queue.dequeue();
       graph.pointer({ name: 'u', node: u });
       for (const { to: v, edge } of adj.get(u)!) {
         if (d.has(v)) {
-          trace.step('seen', `${v} was found already: skip it.`);
+          trace.step('seen', {
+            en: `${v} was found already: skip it.`,
+            zh: `${v} 已经发现过：跳过。`,
+          });
           graph.highlight({ edges: [edge] });
           continue;
         }
         d.set(v, d.get(u)! + 1);
         q.push(v);
-        trace.step(
-          'discover',
-          `Found ${v}, at distance ${d.get(v)}: its parent is ${u}.`,
-        );
+        trace.step('discover', {
+          en: `Found ${v}, at distance ${d.get(v)}: its parent is ${u}.`,
+          zh: `发现 ${v}，距离为 ${d.get(v)}：它的父节点是 ${u}。`,
+        });
         graph
           .highlight({ edges: [edge] })
           .visit({ node: v })
@@ -109,7 +120,10 @@ export const bfs = defineAlgorithm({
           .markEdge({ edge, mark: 'selected' });
         queue.enqueue({ element: { id: `q-${v}`, value: v } });
       }
-      trace.step('finish', `Every neighbour of ${u} is found: ${u} is done.`);
+      trace.step('finish', {
+        en: `Every neighbour of ${u} is found: ${u} is done.`,
+        zh: `${u} 的邻居都已发现：${u} 处理完毕。`,
+      });
       graph.settle({ node: u });
     }
     graph.pointer({ name: 'u', node: null });

@@ -14,10 +14,12 @@ import { SAMPLE, SortInput } from './input.ts';
 
 export const quicksort = defineAlgorithm({
   id: 'quicksort',
-  title: 'Quicksort',
+  title: { en: 'Quicksort', zh: '快速排序' },
   topic: 'sorting',
-  summary:
-    'Partitions around the last value as pivot, keeping smaller or equal values on its left, then sorts each part the same way.',
+  summary: {
+    en: 'Partitions around the last value as pivot, keeping smaller or equal values on its left, then sorts each part the same way.',
+    zh: '以最后一个值为主元划分，不大于它的值放在左边，再用同样的方法排序两部分。',
+  },
   input: SortInput,
   main: 'values',
   examples: [SAMPLE],
@@ -80,7 +82,10 @@ export function recordQuicksort(
   const sort = (p: number, r: number): void => {
     if (p > r) return;
     if (p === r) {
-      trace.step('single', `a[${p}] = ${a[p]} is alone: it is in place.`);
+      trace.step('single', {
+        en: `a[${p}] = ${a[p]} is alone: it is in place.`,
+        zh: `a[${p}] = ${a[p]} 只有一个：它已就位。`,
+      });
       calls.push(`call-${p}-${r}`, `sort a[${p}..${r}]`);
       arr.settle({ index: p });
       calls.leave();

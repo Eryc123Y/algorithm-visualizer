@@ -22,10 +22,12 @@ import {
 
 export const prim = defineAlgorithm({
   id: 'prim',
-  title: 'Prim’s algorithm',
+  title: { en: 'Prim’s algorithm', zh: 'Prim 算法' },
   topic: 'graphs',
-  summary:
-    'Grows a minimum spanning tree from a root, adding the lightest edge from the tree to a vertex outside it at each step.',
+  summary: {
+    en: 'Grows a minimum spanning tree from a root, adding the lightest edge from the tree to a vertex outside it at each step.',
+    zh: '从一个根出发生长一棵最小生成树，每一步加入从树连到树外顶点的最轻的边。',
+  },
   input: z.strictObject({
     graph: Graph.describe('A graph whose edges are taken as undirected.'),
     root: z
@@ -81,10 +83,10 @@ export const prim = defineAlgorithm({
     const key = new Map(g.nodes.map((v) => [v, v === r ? 0 : Infinity]));
     const via = new Map<string, string>();
     const queue = new Set(g.nodes);
-    trace.step(
-      'start',
-      `Every key is ∞, except the root ${r}'s, which is 0. Every vertex goes into the queue Q.`,
-    );
+    trace.step('start', {
+      en: `Every key is ∞, except the root ${r}'s, which is 0. Every vertex goes into the queue Q.`,
+      zh: `除根 ${r} 的关键字为 0 外，每个顶点的关键字都是 ∞。所有顶点都进入队列 Q。`,
+    });
     for (const v of g.nodes) {
       graph.annotate({ node: v, text: shown(key.get(v)!) });
       queueOf.insert({
@@ -102,32 +104,44 @@ export const prim = defineAlgorithm({
       trace.step(
         'extract',
         edge !== undefined
-          ? `The lightest edge into the tree reaches ${u}, with weight ${key.get(u)}: add ${u} and that edge.`
+          ? {
+              en: `The lightest edge into the tree reaches ${u}, with weight ${key.get(u)}: add ${u} and that edge.`,
+              zh: `连到树上最轻的边到达 ${u}，权重为 ${key.get(u)}：把 ${u} 和这条边加入树中。`,
+            }
           : u === r
-            ? `Start the tree at the root ${r}.`
-            : `${u} has key ∞: no edge joins it to the tree so far, so a new tree starts at ${u}.`,
+            ? {
+                en: `Start the tree at the root ${r}.`,
+                zh: `从根 ${r} 开始生长这棵树。`,
+              }
+            : {
+                en: `${u} has key ∞: no edge joins it to the tree so far, so a new tree starts at ${u}.`,
+                zh: `${u} 的关键字为 ∞：目前没有边把它连到树上，所以从 ${u} 开始一棵新树。`,
+              },
       );
       graph.pointer({ name: 'u', node: u }).settle({ node: u });
       queueOf.extract();
       if (edge !== undefined) graph.markEdge({ edge, mark: 'selected' });
       for (const { to: v, weight, edge: e } of adj.get(u)!) {
         if (!queue.has(v)) {
-          trace.step('check', `${v} is in the tree already: skip it.`);
+          trace.step('check', {
+            en: `${v} is in the tree already: skip it.`,
+            zh: `${v} 已经在树中：跳过。`,
+          });
           graph.highlight({ edges: [e] });
           continue;
         }
         if (weight >= key.get(v)!) {
-          trace.step(
-            'check',
-            `${u}–${v} weighs ${weight}, no lighter than ${v}'s key ${shown(key.get(v)!)}: keep it.`,
-          );
+          trace.step('check', {
+            en: `${u}–${v} weighs ${weight}, no lighter than ${v}'s key ${shown(key.get(v)!)}: keep it.`,
+            zh: `${u}–${v} 的权重是 ${weight}，不比 ${v} 的关键字 ${shown(key.get(v)!)} 轻：保持不变。`,
+          });
           graph.highlight({ nodes: [v], edges: [e] });
           continue;
         }
-        trace.step(
-          'lighter',
-          `${u}–${v} weighs ${weight}, lighter than ${shown(key.get(v)!)}: ${v}'s key becomes ${weight}, through ${u}.`,
-        );
+        trace.step('lighter', {
+          en: `${u}–${v} weighs ${weight}, lighter than ${shown(key.get(v)!)}: ${v}'s key becomes ${weight}, through ${u}.`,
+          zh: `${u}–${v} 的权重是 ${weight}，比 ${shown(key.get(v)!)} 轻：${v} 经由 ${u}，关键字变为 ${weight}。`,
+        });
         key.set(v, weight);
         via.set(v, e);
         graph
@@ -136,10 +150,10 @@ export const prim = defineAlgorithm({
         queueOf.setKey({ id: v, key: weight });
       }
     }
-    trace.step(
-      'done',
-      'The queue is empty: the selected edges form a minimum spanning tree, or a forest if the graph is not connected.',
-    );
+    trace.step('done', {
+      en: 'The queue is empty: the selected edges form a minimum spanning tree, or a forest if the graph is not connected.',
+      zh: '队列已空：选中的边构成一棵最小生成树；如果图不连通，则构成一片最小生成森林。',
+    });
     graph.pointer({ name: 'u', node: null });
   },
 });
