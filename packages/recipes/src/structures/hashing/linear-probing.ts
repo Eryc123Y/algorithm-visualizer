@@ -22,12 +22,12 @@ export const linearProbing = openAddressing({
     narrate: (key, i, q, size, holds) =>
       i === 0
         ? {
-            en: `${key} mod ${size} = ${q}: probe slot ${q}; ${holds.en}.`,
-            zh: `${key} mod ${size} = ${q}：探查槽 ${q}；${holds.zh}。`,
+            en: `${key} mod ${size} = ${q}: probe slot ${q}; ${holds}.`,
+            zh: `${key} mod ${size} = ${q}：探查槽 ${q}；${holds}。`,
           }
         : {
-            en: `Probe the next slot, ${q}; ${holds.en}.`,
-            zh: `探查下一个槽 ${q}；${holds.zh}。`,
+            en: `Probe the next slot, ${q}; ${holds}.`,
+            zh: `探查下一个槽 ${q}；${holds}。`,
           },
   },
   code: probingCode({

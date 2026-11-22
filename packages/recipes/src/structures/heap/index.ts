@@ -387,6 +387,7 @@ function heapStructure(order: HeapOrder): Structure {
       zh: `在用数组存放的二叉${order === 'min' ? '最小' : '最大'}堆中，依次插入、弹出和${changeZh}关键字。`,
     },
     name: 'heap',
+    heading: { en: 'heap', zh: '堆' },
     kind: 'array',
     from: From,
     examples: [

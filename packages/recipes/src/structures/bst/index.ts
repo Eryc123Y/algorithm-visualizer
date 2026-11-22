@@ -452,6 +452,7 @@ export const bst = defineStructure<BstState, From, 'tree'>({
     zh: '在二叉搜索树中依次查找、插入和删除关键字。',
   },
   name: 'bst',
+  heading: { en: 'bst', zh: '二叉搜索树' },
   kind: 'tree',
   from: listField(
     z

@@ -51,7 +51,7 @@ export function callStack(trace: Trace, label: Text = CALL_STACK): CallStack {
     trace: {
       locale: trace.locale,
       say: (text) => trace.say(text),
-      add: (name, decl) => trace.add(name, decl),
+      add: (name, decl, options) => trace.add(name, decl, options),
       section: (id, title) => trace.section(id, title),
       step(anchor, narration, options) {
         trace.step(anchor, narration, options);

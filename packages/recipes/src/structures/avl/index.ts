@@ -338,6 +338,7 @@ export const avl = defineStructure<AvlState, From, 'tree'>({
     zh: '向 AVL 树中依次插入关键字，用旋转重新平衡，使兄弟子树的高度至多相差一。',
   },
   name: 'avl',
+  heading: { en: 'avl', zh: 'AVL 树' },
   kind: 'tree',
   from: listField(
     z

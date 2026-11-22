@@ -122,11 +122,22 @@ function treeWalk(order: Order): Algorithm<TreeInput> {
     code: code(order),
     run({ levelOrder }, outer) {
       const { values, children } = shape(levelOrder);
-      const tree = outer.add('tree', {
-        kind: 'tree',
-        levelOrder: [...levelOrder],
-      });
-      const out = outer.add('out', { kind: 'array', initial: [] });
+      const tree = outer.add(
+        'tree',
+        {
+          kind: 'tree',
+          levelOrder: [...levelOrder],
+        },
+        { heading: { en: 'tree', zh: '树' } },
+      );
+      const out = outer.add(
+        'out',
+        {
+          kind: 'array',
+          initial: [],
+        },
+        { heading: { en: 'out', zh: '输出' } },
+      );
       // A call on a node is on the stack from its enter step until the
       // next step after it returns (ADR 0029).
       const calls = callStack(outer);

@@ -26,12 +26,12 @@ export const quadraticProbing = openAddressing({
     narrate: (key, i, q, size, holds) =>
       i === 0
         ? {
-            en: `${key} mod ${size} = ${q}: probe slot ${q}; ${holds.en}.`,
-            zh: `${key} mod ${size} = ${q}：探查槽 ${q}；${holds.zh}。`,
+            en: `${key} mod ${size} = ${q}: probe slot ${q}; ${holds}.`,
+            zh: `${key} mod ${size} = ${q}：探查槽 ${q}；${holds}。`,
           }
         : {
-            en: `Jump ${i} further than the last probe: (${mod(key, size)} + ${(i * (i + 1)) / 2}) mod ${size} = ${q}; ${holds.en}.`,
-            zh: `比上一次探查多跳 ${i} 个：(${mod(key, size)} + ${(i * (i + 1)) / 2}) mod ${size} = ${q}；${holds.zh}。`,
+            en: `Jump ${i} further than the last probe: (${mod(key, size)} + ${(i * (i + 1)) / 2}) mod ${size} = ${q}; ${holds}.`,
+            zh: `比上一次探查多跳 ${i} 个：(${mod(key, size)} + ${(i * (i + 1)) / 2}) mod ${size} = ${q}；${holds}。`,
           },
     unfit: (size) =>
       isPowerOf2(size)
