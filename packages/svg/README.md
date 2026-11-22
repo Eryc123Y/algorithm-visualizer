@@ -2,7 +2,7 @@
 
 The SVG painter of algomotion: it draws a scene from [`@algomotion/core`](https://www.npmjs.com/package/@algomotion/core) as a standalone SVG string, and exports chosen frames of a document as figures for notes, handouts and slides. It uses no DOM and no Node.js APIs.
 
-Text is drawn as glyph outlines of the bundled fonts, so a figure looks the same in a browser, in Typst and after conversion for LaTeX. Every figure of a document has the same size, so a series of steps lines up at one scale.
+Text is drawn as glyph outlines of the bundled fonts, so a figure looks the same in a browser, in Typst and after conversion for LaTeX. Chinese, which the bundled fonts do not cover, stays text, drawn by the reader's fonts. Every figure of a document has the same size, so a series of steps lines up at one scale.
 
 ## Install
 

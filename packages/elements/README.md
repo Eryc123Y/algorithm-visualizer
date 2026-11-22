@@ -48,7 +48,7 @@ Put an exact version in place of `alpha`, such as `1.0.0-alpha.1`, to pin it. To
 - `frame`: the frame to open at, a number or a selector such as `relax#3`, `insert-5` or `-1`.
 - `theme`: a built-in theme such as `textbook`, `auto` (light or dark by the reader's colour scheme), or a day and a night theme, `"textbook textbook-dark"`.
 - `layout` (`wide` or `narrow`), `speed`, `autoplay`, `loop`, `hide-controls`, `hide-code`, `language` (such as `python`), and `mode="display"` for an animation without controls.
-- `lang`, inherited like any `lang`, so `<html lang="zh-Hans">` is enough: with a Chinese tag, the controls are in Simplified Chinese and an algorithm's run is recorded in Chinese, as far as its module is translated. A document's own text shows as written.
+- `lang`, inherited like any `lang`, so `<html lang="zh-Hans">` is enough: with a Chinese tag, the controls are in Simplified Chinese and an algorithm's run is recorded in Chinese. A document's own text shows as written.
 
 The player fires `algo-load`, `algo-frame` (with `index`, `stepName` and `sectionId`) and `algo-error` (with the diagnostics). The [web guide](https://algomotion.turing2234.com/guide/web/) lists every attribute, property, event and CSS custom property.
 

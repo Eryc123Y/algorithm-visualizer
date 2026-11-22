@@ -34,7 +34,7 @@ An unknown id is `UNKNOWN_ALGORITHM` at `$.id`, and an input the module cannot s
 
 ## In Simplified Chinese
 
-`{ locale: 'zh' }` records the run in Simplified Chinese: its title, narration, section titles and labels. Step names, selectors, code and diagnostics stay as they are, so `improve#3` names the same step in both languages. The modules are being translated; until a module is, its run is in English.
+`{ locale: 'zh' }` records the run in Simplified Chinese: its title, narration, section titles and labels. Step names, selectors, code and diagnostics stay as they are, so `improve#3` names the same step in both languages. Every module is translated.
 
 ```js
 const zh = runAlgorithm('dijkstra', 'A-B 4, B-C 1, A-C 7, C-D 2', {
