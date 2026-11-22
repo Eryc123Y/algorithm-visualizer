@@ -29,15 +29,17 @@ function codeWords(a: Algorithm): Set<string> {
 }
 
 /**
- * The headings a figure draws: a structure's label, or its id when it has
- * none, so an id a reader sees must not be an English word either.
+ * The headings a figure draws, as the layout does: a structure's label, or
+ * its id when it has none, except that a lone structure without a label
+ * has no heading. An id a reader sees must not be an English word either.
  */
 function headings(document: { readonly structures: object }) {
-  return Object.entries(document.structures).map(([id, s]) => ({
-    path: `$.structures.${id}`,
-    key: 'heading',
-    text: (s as { readonly label?: string }).label ?? id,
-  }));
+  const structures = Object.entries(document.structures);
+  return structures.flatMap(([id, s]) => {
+    const { label } = s as { readonly label?: string };
+    if (label === undefined && structures.length === 1) return [];
+    return [{ path: `$.structures.${id}`, key: 'heading', text: label ?? id }];
+  });
 }
 
 /** The text fields a reader sees, outside the code, with where they are. */

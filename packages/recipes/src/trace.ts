@@ -31,10 +31,14 @@ export interface Trace {
    * recipe passes to its structures.
    */
   say(text: Text): string;
-  /** Declares a structure and returns the handle that records its actions. */
+  /**
+   * Declares a structure and returns the handle that records its actions.
+   * `heading` names it where a figure would show its id (ADR 0045).
+   */
   add<const D extends StructureDeclInput>(
     name: string,
     decl: D,
+    options?: { readonly heading?: Text },
   ): Handle<D['kind']>;
   /**
    * Starts a step at an anchor of the code, which names a line in every
@@ -49,21 +53,6 @@ export interface Trace {
    * same in every locale; its title is in the run's locale.
    */
   section(id: string, title: Text): void;
-}
-
-/**
- * The label that heads structure `id` with `text` in the trace's locale,
- * or none where that is `id` itself: a figure heads a structure without a
- * label with its id, so the English documents stay as they were while a
- * Chinese figure gets a Chinese heading (ADR 0045).
- */
-export function labelFor(
-  trace: Pick<Trace, 'say'>,
-  id: string,
-  text: Text,
-): { readonly label?: string } {
-  const said = trace.say(text);
-  return said === id ? {} : { label: said };
 }
 
 /** A handle whose methods record nothing. */
@@ -98,8 +87,16 @@ export function recordingTrace(
   return {
     locale,
     say: (text) => textIn(text, locale),
-    add: <const D extends StructureDeclInput>(name: string, decl: D) =>
-      recorder.add(name, decl),
+    add: <const D extends StructureDeclInput>(
+      name: string,
+      decl: D,
+      { heading }: { readonly heading?: Text } = {},
+    ) =>
+      recorder.add(
+        name,
+        decl,
+        heading === undefined ? {} : { heading: textIn(heading, locale) },
+      ),
     step(anchor, text, { id, vars } = {}) {
       if (anchor !== null && !anchors.has(anchor))
         throw new Error(`No anchor "${anchor}" in the code`);
@@ -135,8 +132,7 @@ export function listingTrace(
   return {
     locale: trace.locale,
     say: (text) => trace.say(text),
-    add: <const D extends StructureDeclInput>(name: string, decl: D) =>
-      trace.add(name, decl),
+    add: (name, decl, options) => trace.add(name, decl, options),
     step(marker, narration, options = {}) {
       const id = options.id ?? marker ?? undefined;
       trace.step(
@@ -162,8 +158,7 @@ export function afterFirstStep(trace: Trace, first: () => void): Trace {
   return {
     locale: trace.locale,
     say: (text) => trace.say(text),
-    add: <const D extends StructureDeclInput>(name: string, decl: D) =>
-      trace.add(name, decl),
+    add: (name, decl, options) => trace.add(name, decl, options),
     step(anchor, narration, options) {
       trace.step(anchor, narration, options);
       const run = pending;

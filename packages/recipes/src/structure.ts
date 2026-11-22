@@ -31,7 +31,7 @@ import {
   type Snippet,
 } from './snippet.ts';
 import { textIn, type Text } from './text.ts';
-import { labelFor, listingTrace, type Trace } from './trace.ts';
+import { listingTrace, type Trace } from './trace.ts';
 import { printOperations } from './notation/operations.ts';
 import { operationsField } from './notation/schema.ts';
 
@@ -245,12 +245,11 @@ function runCalls<S, From, K extends StructureKindName>(
   const code = joinListings(resolved.map((r) => r.listing));
   // Section ids are selectors: English in every locale.
   const ids = sectionIds(resolved.map((r) => textIn(r.title, 'en')));
-  const on = trace.add(def.name, {
-    ...def.declare(state),
-    ...(def.heading === undefined
-      ? {}
-      : labelFor(trace, def.name, def.heading)),
-  }) as Handle<K>;
+  const on = trace.add(
+    def.name,
+    def.declare(state),
+    def.heading === undefined ? {} : { heading: def.heading },
+  ) as Handle<K>;
   const sides: Sides = Object.fromEntries(
     Object.entries(def.auxiliary?.(from, calls) ?? {}).map(([name, decl]) => [
       name,

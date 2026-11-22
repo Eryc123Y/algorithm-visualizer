@@ -6,7 +6,6 @@
 import { z } from 'zod';
 
 import { defineAlgorithm } from '../../algorithm.ts';
-import { labelFor } from '../../trace.ts';
 
 /** Most characters the text takes, so it fits on one row. */
 export const MAX_TEXT = 32;
@@ -71,12 +70,15 @@ export const balancedBrackets = defineAlgorithm({
     // Characters, not UTF-16 code units, so that "é" or "🙂" is one cell.
     const chars = [...text];
     const input = trace.add('s', { kind: 'array', initial: chars });
-    const stack = trace.add('stack', {
-      kind: 'stack',
-      place: 'side',
-      ...labelFor(trace, 'stack', { en: 'stack', zh: '栈' }),
-      initial: [],
-    });
+    const stack = trace.add(
+      'stack',
+      {
+        kind: 'stack',
+        place: 'side',
+        initial: [],
+      },
+      { heading: { en: 'stack', zh: '栈' } },
+    );
     const open: string[] = [];
     for (const [k, ch] of chars.entries()) {
       if ('([{'.includes(ch)) {
