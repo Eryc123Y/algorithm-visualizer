@@ -39,6 +39,7 @@ The protocol is frozen at 1.0, and eleven structure kinds and 132 algorithms and
 
 - **npm:** every package is published as `1.0.0-alpha.1`, under the `alpha` tag. It is the only version so far, so a plain `npm install` gets it too; ask for `@alpha` to keep getting alphas once 1.0 is out.
 - **Typst Universe and CTAN:** not yet. Both review packages by hand and keep every version, so they wait for 1.0. Until then, install the Typst and LaTeX packages locally from the [GitHub release](https://github.com/Eryc123Y/algorithm-visualizer/releases) or from this repository, as the [Typst guide](https://algomotion.turing2234.com/guide/typst/) and the [LaTeX guide](https://algomotion.turing2234.com/guide/latex/) show.
+- **Chinese:** runs in Simplified Chinese are on `main` and on the site; they come with the next release, as `1.0.0-alpha.1` draws in English only. Until then, build from this repository.
 - **AI assistants:** the hosted MCP server at `https://algomotion-mcp.turing2234.com/mcp` works today.
 
 ## Quick start

@@ -47,12 +47,13 @@ const scene = (name: string) => ({
   height: 300,
   alt: `The ${name} scene`,
 });
-const scenes = {
-  notes: scene('notes'),
-  beamer: [scene('b1'), scene('b2'), scene('b3')],
-  terminal: scene('terminal'),
-  chat: scene('chat'),
-};
+const sceneSet = (suffix: string) => ({
+  notes: scene(`notes${suffix}`),
+  beamer: [scene(`b1${suffix}`), scene(`b2${suffix}`), scene(`b3${suffix}`)],
+  terminal: scene(`terminal${suffix}`),
+  chat: scene(`chat${suffix}`),
+});
+const scenes = { ...sceneSet(''), zh: sceneSet('-zh') };
 const load = (html: string) => {
   document.documentElement.innerHTML = html;
   return document;

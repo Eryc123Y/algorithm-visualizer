@@ -40,7 +40,7 @@ ${figure('after', '最后一帧，<code>-1</code>。')}
 
 <h2 id="beamer">Beamer 叠层</h2>
 <p>先安装 <a href="${root}guide/latex/">LaTeX 宏包和命令</a>。不带值的 <code>steps</code> 选中所有帧；范围、分节或花括号列表只选其中一部分。<code>start</code> 指定第一个叠层。</p>
-${scene('beamer', '一个 Beamer 帧在 <code>steps=extract\\#2..improve\\#3</code> 下的三个叠层，由 <code>latexmk</code> 编译而成。用 <code>npm run scenes</code> 从 <code>apps/site/scenes/slides.tex</code> 生成。')}
+${scene('beamer', '一个 Beamer 帧在 <code>steps=extract\\#2..improve\\#3</code> 下的三个叠层，由 <code>latexmk</code> 编译而成。用 <code>npm run scenes</code> 从 <code>apps/site/scenes/slides-zh.tex</code> 生成。')}
 ${code(
   String.raw`\documentclass{beamer}
 \usepackage{algomotion}

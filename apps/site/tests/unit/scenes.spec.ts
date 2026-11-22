@@ -11,7 +11,7 @@ import { describe, expect, it } from 'vitest';
 import {
   parseScenes,
   sceneFigure,
-  type SceneManifest,
+  type SceneSet,
 } from '../../src/docs/scenes.ts';
 import {
   expandTabs,
@@ -19,16 +19,20 @@ import {
   terminalSvg,
   wrap,
 } from '../../src/docs/terminal.ts';
-import { WALKTHROUGHS } from '../../src/docs/why.ts';
+import { walkthroughs } from '../../src/docs/why.ts';
 
 const SITE = join(import.meta.dirname, '../..');
 const read = (path: string) => readFileSync(join(SITE, path), 'utf8');
 const manifest = parseScenes(read('public/scenes/scenes.json'));
-const all = (m: SceneManifest) => [m.notes, ...m.beamer, m.terminal, m.chat];
+const all = (m: SceneSet) => [m.notes, ...m.beamer, m.terminal, m.chat];
+const LOCALES = [
+  ['en', manifest, ''],
+  ['zh', manifest.zh, '-zh'],
+] as const;
 
 describe('the committed scenes', () => {
-  it('exist, in both schemes, at the sizes the manifest gives', () => {
-    for (const art of all(manifest))
+  it('exist, in both schemes and both languages, at the sizes the manifest gives', () => {
+    for (const art of [...all(manifest), ...all(manifest.zh)])
       for (const file of [art.light, art.dark]) {
         const path = join(SITE, 'public', file);
         expect(existsSync(path), file).toBe(true);
@@ -41,30 +45,41 @@ describe('the committed scenes', () => {
         }
       }
     expect(manifest.beamer).toHaveLength(3);
+    expect(manifest.zh.beamer).toHaveLength(3);
+    // The Chinese scenes are files of their own, not the English ones.
+    for (const art of all(manifest.zh)) expect(art.light).toMatch(/-zh/);
   });
 
-  it('stay light: under 800 KB together', () => {
-    const files = new Set(all(manifest).flatMap((a) => [a.light, a.dark]));
-    const bytes = [...files].reduce(
-      (n, f) => n + statSync(join(SITE, 'public', f)).size,
-      0,
-    );
-    expect(bytes).toBeLessThan(800_000);
+  it('stay light: under 800 KB together in each language', () => {
+    for (const [locale, scenes] of LOCALES) {
+      const files = new Set(all(scenes).flatMap((a) => [a.light, a.dark]));
+      const bytes = [...files].reduce(
+        (n, f) => n + statSync(join(SITE, 'public', f)).size,
+        0,
+      );
+      expect(bytes, locale).toBeLessThan(800_000);
+    }
   });
 
   it('compile the very slides the Beamer walk-through shows', () => {
-    const shown = WALKTHROUGHS.find((w) => w.id === 'slides')!.steps.find(
-      (s) => s.label === 'slides.tex',
-    )!.code!;
-    expect(read('scenes/slides.tex').trimEnd()).toBe(shown);
+    for (const [locale, , suffix] of LOCALES) {
+      const shown = walkthroughs(locale, '')
+        .find((w) => w.id === 'slides')!
+        .steps.find((s) => s.label === 'slides.tex')!.code!;
+      expect(read(`scenes/slides${suffix}.tex`).trimEnd(), locale).toBe(shown);
+    }
   });
 
-  it('compile notes that use the walk-through’s figure call', () => {
-    const shown = WALKTHROUGHS.find((w) => w.id === 'notes')!.steps.find(
-      (s) => s.label === 'notes.typ',
-    )!.code!;
-    const call = /algomotion\("dijkstra".*\)/.exec(shown)![0];
-    expect(read('scenes/notes.typ')).toContain(call);
+  it('compile notes that use the walk-through’s figure call, in its language', () => {
+    for (const [locale, , suffix] of LOCALES) {
+      const shown = walkthroughs(locale, '')
+        .find((w) => w.id === 'notes')!
+        .steps.find((s) => s.label === 'notes.typ')!.code!;
+      const call = /algomotion\("dijkstra".*\)/.exec(shown)![0];
+      const notes = read(`scenes/notes${suffix}.typ`);
+      expect(notes, locale).toContain(call);
+      if (locale === 'zh') expect(notes).toContain('lang: "zh"');
+    }
   });
 
   it('rejects a manifest that is missing a scene', () => {
@@ -74,6 +89,12 @@ describe('the committed scenes', () => {
     >;
     delete broken['chat'];
     expect(() => parseScenes(JSON.stringify(broken))).toThrow(/chat/);
+    const noChinese = JSON.parse(read('public/scenes/scenes.json')) as Record<
+      string,
+      unknown
+    >;
+    delete noChinese['zh'];
+    expect(() => parseScenes(JSON.stringify(noChinese))).toThrow(/zh\./);
     expect(() =>
       parseScenes(
         JSON.stringify({ ...broken, chat: manifest.chat, beamer: [] }),
@@ -92,6 +113,20 @@ describe('a scene as a figure', () => {
     );
     expect(img.getAttribute('width')).toBe(String(manifest.terminal.width));
     expect(img.getAttribute('alt')).toBe(manifest.terminal.alt);
+  });
+
+  it('shows a Chinese page the scene in Chinese', () => {
+    document.body.innerHTML = sceneFigure(
+      manifest,
+      'notes',
+      '../',
+      '图注',
+      'scene',
+      'zh',
+    );
+    const img = document.querySelector('img')!;
+    expect(img.getAttribute('src')).toBe(`../${manifest.zh.notes.light}`);
+    expect(img.getAttribute('alt')).toBe(manifest.zh.notes.alt);
   });
 
   it('numbers the Beamer pages as overlays, in order', () => {

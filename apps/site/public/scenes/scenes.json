@@ -42,5 +42,51 @@
     "width": 720,
     "height": 1000,
     "alt": "A conversation: the question asks for Dijkstra’s algorithm on A-B 4, B-C 1, A-C 7, C-D 2; a line says algomotion_show was called; the interactive player shows step improve#3 with its controls and code; the answer explains why C drops from 7 to 5."
+  },
+  "zh": {
+    "notes": {
+      "light": "scenes/notes-zh.svg",
+      "dark": "scenes/notes-zh.svg",
+      "width": 567,
+      "height": 750,
+      "alt": "Typst 排出的一页中文笔记：一节讲最短路径的文字，以及 Dijkstra 算法在 improve#3 这一步的插图和图注，队列排在图的下方。"
+    },
+    "beamer": [
+      {
+        "light": "scenes/beamer-zh-1.svg",
+        "dark": "scenes/beamer-zh-1.svg",
+        "width": 484,
+        "height": 363,
+        "alt": "Beamer 幻灯片“Dijkstra 算法”，第 1 页，共 3 页：B 已确定，距离为 4。"
+      },
+      {
+        "light": "scenes/beamer-zh-2.svg",
+        "dark": "scenes/beamer-zh-2.svg",
+        "width": 484,
+        "height": 363,
+        "alt": "Beamer 幻灯片“Dijkstra 算法”，第 2 页，共 3 页：从 B 回到 A 的边没有改变任何距离。"
+      },
+      {
+        "light": "scenes/beamer-zh-3.svg",
+        "dark": "scenes/beamer-zh-3.svg",
+        "width": 484,
+        "height": 363,
+        "alt": "Beamer 幻灯片“Dijkstra 算法”，第 3 页，共 3 页：C 经由 B 被改进为 5。"
+      }
+    ],
+    "terminal": {
+      "light": "scenes/terminal-zh-light.svg",
+      "dark": "scenes/terminal-zh-dark.svg",
+      "width": 645,
+      "height": 449,
+      "alt": "一段终端会话：algomotion export 用中文写出 Dijkstra 算法的四幅图，ls 列出它们，algomotion run 写出中文的文档，algomotion inspect 显示 improve#3 这一步的中文讲解，最后一个写错的输入报告了出错的位置。"
+    },
+    "chat": {
+      "light": "scenes/chat-zh-light.webp",
+      "dark": "scenes/chat-zh-dark.webp",
+      "width": 720,
+      "height": 1000,
+      "alt": "一段对话：用户请求在 A-B 4, B-C 1, A-C 7, C-D 2 上演示 Dijkstra 算法；一行说明调用了 algomotion_show；交互式播放器停在 improve#3，显示中文的控制按钮、讲解和代码；回答解释了 C 为什么从 7 降到 5。"
+    }
   }
 }

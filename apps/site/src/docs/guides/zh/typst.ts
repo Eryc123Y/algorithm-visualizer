@@ -26,7 +26,7 @@ export const zh: Guide = {
   body: ({ root, code, figure, note, scene }) => `
 <h2 id="install">在本地安装</h2>
 <p>这个包还没有发布到 Typst Universe，1.0 时会发布。先安装 Typst 0.15 或更高版本。最快的办法是用 <a href="https://github.com/Eryc123Y/algorithm-visualizer/releases/tag/v1.0.0-alpha.1">GitHub Release</a>：把 <code>algomotion-typst-0.1.0.zip</code> 解压到本地 Typst 包目录（见下文），让它包含 <code>local/algomotion/0.1.0/</code>，然后导入 <code>@local/algomotion:0.1.0</code>。</p>
-<p>也可以从仓库构建引擎。仓库里已提交编译好的 WebAssembly 插件，正常使用不需要编译 Rust 代码。</p>
+<p>也可以从仓库构建引擎。仓库里已提交编译好的 WebAssembly 插件，正常使用不需要编译 Rust 代码。要用中文画运行过程，就按这种方法构建：<code>lang</code> 参数和跟随 <code>text.lang</code> 都是在 1.0.0-alpha.1 之后加入的，那个版本的包只能画英文，下一个版本才会带上它们。</p>
 ${code(
   `npm ci
 npm run build -w @algomotion/typst`,
@@ -51,7 +51,7 @@ ${code(
   '笔记中的一幅图',
 )}
 ${figure('insert', '<code>algomotion</code> 在 <code>insert#2</code> 画出的图。')}
-${scene('notes', 'Typst 编译出的一整页：这幅图和笔记里的其他图一样带着图注；版面只有一栏，队列排到了图的下方。由 <code>npm run scenes</code> 从 <code>apps/site/scenes/notes.typ</code> 生成。')}
+${scene('notes', 'Typst 编译出的一整页：这幅图和笔记里的其他图一样带着图注；版面只有一栏，队列排到了图的下方。由 <code>npm run scenes</code> 从 <code>apps/site/scenes/notes-zh.typ</code> 生成。')}
 <p><code>algomotion(source, input, ...)</code> 返回一张图片，可以放进 <code>figure</code>、<code>grid</code> 或 <code>box</code>。第一个参数是算法 id，后面跟它的输入；也可以只传一份文档。不给输入的算法运行它的第一个示例。<a href="${root}guide/inputs/">输入记法</a>可以直接写成字符串；结构化输入用 Typst 的数组和字典。</p>
 <div class="scroll" role="region" aria-label="Typst 选项" tabindex="0"><table class="params">
 <thead><tr><th>选项</th><th>默认值</th><th>用途</th></tr></thead><tbody>

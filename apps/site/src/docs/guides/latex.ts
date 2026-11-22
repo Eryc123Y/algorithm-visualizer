@@ -25,7 +25,7 @@ ${code(
 npm run build:standalone -w @algomotion/mcp`,
   'Build the command for LaTeX',
 )}
-<p>Put <code>packages/mcp/dist/standalone/algomotion</code> on your <code>PATH</code>, or pass its absolute path with <code>command=</code>. The <a href="${root}guide/cli/">Node.js command</a> also works, with <code>command={node /absolute/path/packages/mcp/dist/algomotion.js}</code>.</p>
+<p>Put <code>packages/mcp/dist/standalone/algomotion</code> on your <code>PATH</code>, or pass its absolute path with <code>command=</code>. The <a href="${root}guide/cli/">Node.js command</a> also works, with <code>command={node /absolute/path/packages/mcp/dist/algomotion.js}</code>. For figures in Chinese, take both the package and the command from the repository: the <code>lang</code> key came after 1.0.0-alpha.1, whose package and command draw in English only, and it comes with the next release.</p>
 
 <h2 id="figure">One figure</h2>
 ${code(

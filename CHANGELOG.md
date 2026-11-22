@@ -11,6 +11,7 @@ All notable changes to algomotion, newest first. The format follows [Keep a Chan
   - The command line's `--lang`, MCP's `locale`, Typst's `lang` (following `text.lang` by default), LaTeX's `lang` key, and TikZ through the figure options (#161).
   - Every module's title, summary, narration, sections and labels in Simplified Chinese, with a test that reads the sources so no narration stays in one language (#162).
   - The site's module pages and catalogue in Chinese under `/zh/`: every figure on a Chinese page is drawn from a run in Chinese, the catalogue can be searched by the English names too, and each page's snippets ask their output for Chinese (#163).
+  - The real scenes on the Chinese pages in Chinese: Typst notes that set `text.lang`, a `ctexbeamer` frame, a terminal session with `--lang zh` and a conversation that asks for Chinese (#164).
 
 ### Changed
 

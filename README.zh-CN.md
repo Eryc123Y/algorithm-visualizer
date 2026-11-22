@@ -35,6 +35,7 @@
 
 - **npm**：所有包都以 `1.0.0-alpha.1` 发布，带 `alpha` 标签。目前只有这一个版本，所以直接 `npm install` 也会装到它；想在 1.0 发布后继续用 alpha 版，就指定 `@alpha`。
 - **Typst Universe 和 CTAN**：暂未发布。这两个平台都由人工审核，并且会永久保留每个版本，所以等 1.0 再上。在那之前，可以从 [GitHub Release](https://github.com/Eryc123Y/algorithm-visualizer/releases) 或本仓库在本地安装 Typst 和 LaTeX 包，方法见 [Typst 指南](https://algomotion.turing2234.com/zh/guide/typst/)和 [LaTeX 指南](https://algomotion.turing2234.com/zh/guide/latex/)。
+- **中文**：中文的运行过程已在 `main` 分支和网站上可用，会随下一个版本发布；`1.0.0-alpha.1` 只能画英文。在那之前，请从本仓库构建。
 - **AI 助手**：托管的 MCP 服务器 `https://algomotion-mcp.turing2234.com/mcp` 现在就能用。
 
 ## 快速上手
