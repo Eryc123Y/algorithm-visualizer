@@ -129,15 +129,15 @@ ${code(
 )}
 <p>其他属性有 <code>--algo-bg</code>、<code>--algo-fg</code>、<code>--algo-muted</code>、<code>--algo-border</code>、<code>--algo-surface</code>、<code>--algo-error</code>、<code>--algo-line-bg</code>、<code>--algo-line-edge</code>、<code>--algo-font</code> 和 <code>--algo-mono</code>。语法高亮的颜色用 <code>--algo-code-keyword</code>、<code>--algo-code-string</code>、<code>--algo-code-number</code>、<code>--algo-code-comment</code>、<code>--algo-code-function</code> 和 <code>--algo-code-builtin</code>。这些只影响控件和代码；画面本身由主题决定。</p>
 
-<h2 id="bundlers">工作区导入与打包工具</h2>
-<p>在发布到 npm 之前，请使用仓库里的工作区包，并在本地构建。打包工具可以只导入这个类而不注册元素，先设置字体 URL，再定义元素：</p>
+<h2 id="bundlers">打包工具</h2>
+<p>从 npm 安装 <code>@algomotion/elements</code> 之后，打包工具可以只导入这个类而不注册元素，先设置字体 URL，再定义元素：</p>
 ${code(
   `import { AlgoPlayer } from '@algomotion/elements';
 AlgoPlayer.fontsUrl = '/assets/fonts/fonts.css';
 customElements.define('algo-player', AlgoPlayer);`,
   '用打包工具注册',
 )}
-<p>把 <code>packages/elements/dist/fonts/</code> 复制到那个资源文件夹，保持样式表里字体的相对 URL 不变。<code>fontsUrl</code> 要在第一个播放器挂载到页面之前设置。<code>AlgoPlayer.fontsUrl = null</code> 不加载字体，改用系统的后备字体。如果只需要注册，导入 <code>@algomotion/elements/define</code> 即可。</p>
+<p>把 <code>node_modules/@algomotion/elements/dist/fonts/</code> 复制到那个资源文件夹，保持样式表里字体的相对 URL 不变。<code>fontsUrl</code> 要在第一个播放器挂载到页面之前设置。<code>AlgoPlayer.fontsUrl = null</code> 不加载字体，改用系统的后备字体。如果只需要注册，导入 <code>@algomotion/elements/define</code> 即可。</p>
 ${note('<p>两个独立的 JavaScript 文件来自同一次构建。打包工具会自行处理分块；不要只复制它的入口文件而漏掉入口导入的分块。</p>')}
 `,
 };
