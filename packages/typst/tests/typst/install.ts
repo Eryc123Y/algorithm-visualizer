@@ -94,15 +94,18 @@ export async function installPackage(
 }
 
 /**
- * Why the slide frameworks cannot be used, or undefined when they can.
- * Typst downloads them from Typst Universe the first time, so this runs
- * while the tests are collected, before any of them is chosen.
+ * Why packages from Typst Universe, the slide frameworks by default, cannot
+ * be used, or undefined when they can. Typst downloads them the first
+ * time, so this runs while the tests are collected, before any of them is
+ * chosen.
  */
-export function frameworksMissing(): string | undefined {
+export function frameworksMissing(
+  frameworks: readonly string[] = FRAMEWORKS,
+): string | undefined {
   const dir = mkdtempSync(join(tmpdir(), 'algomotion-frameworks-'));
   try {
     const probe = join(dir, 'probe.typ');
-    writeFileSync(probe, FRAMEWORKS.map((f) => `#import "${f}"\n`).join(''));
+    writeFileSync(probe, frameworks.map((f) => `#import "${f}"\n`).join(''));
     const result = spawnSync(
       'typst',
       ['compile', probe, join(dir, 'probe.pdf')],
@@ -112,7 +115,7 @@ export function frameworksMissing(): string | undefined {
       return `The typst command is missing: ${result.error.message}`;
     return result.status === 0
       ? undefined
-      : `Typst could not load ${FRAMEWORKS.join(' and ')}, so the slide tests are skipped: ${result.stderr.trim()}`;
+      : `Typst could not load ${frameworks.join(' and ')}, so the tests that need them are skipped: ${result.stderr.trim()}`;
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

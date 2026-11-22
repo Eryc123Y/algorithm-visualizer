@@ -75,13 +75,26 @@ describe('the README’s signatures', () => {
   );
 });
 
+/** The other packages from Typst Universe an example imports. */
+const othersIn = (block: string) =>
+  [...block.matchAll(/#import "(@preview\/[a-z-]+:[^"]+)"/g)]
+    .map((m) => m[1]!)
+    .filter((spec) => spec !== preview);
+
 describe('the README’s examples', () => {
   const code = blocks.filter((b) => !isSignature(b));
-  // touying, like polylux, comes from Typst Universe, which Typst may fail
-  // to reach; its example is then skipped with the reason.
-  const missing = frameworksMissing();
-  const needsFramework = (block: string) =>
-    /@preview\/(touying|polylux):/.test(block);
+  // Other packages, such as touying, come from Typst Universe, which Typst
+  // may fail to reach. An example that needs them is then skipped with the
+  // reason, but in CI, where every example must run, it fails.
+  const missing = new Map(
+    [...new Set(code.flatMap(othersIn))].map(
+      (spec) => [spec, frameworksMissing([spec])] as const,
+    ),
+  );
+  const unavailable = (block: string) =>
+    othersIn(block)
+      .map((spec) => missing.get(spec))
+      .find((reason) => reason !== undefined);
 
   let installed: Installed | undefined;
   beforeAll(async () => {
@@ -111,7 +124,11 @@ describe('the README’s examples', () => {
   it.for(code.map((block, k) => [k, block.split('\n')[0]!, block] as const))(
     'example %i (%s) compiles without warnings or error boxes',
     ([k, , block], ctx) => {
-      if (missing !== undefined && needsFramework(block)) ctx.skip(missing);
+      const reason = unavailable(block);
+      if (reason !== undefined) {
+        if (process.env['CI'] !== undefined) throw new Error(reason);
+        ctx.skip(reason);
+      }
       const { root, tmp } = installed!;
       const typst = (args: readonly string[]) => installed!.typst(args);
       // A fragment continues an example above it, which imports the package.

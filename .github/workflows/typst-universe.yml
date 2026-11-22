@@ -4,7 +4,8 @@ name: Typst Universe
 # the README's examples compile with the oldest Typst the manifest allows,
 # importing `@preview/algomotion`, and Typst's own linter passes on the
 # package laid out as a submission adds it. It publishes nothing. It runs on
-# a version tag, by hand, and on pull requests that change the package.
+# a version tag, by hand, and on pull requests that change the package: its
+# files, the engine that engine.bc is built from, or the dependencies.
 on:
   push:
     tags: ['v*']
@@ -13,9 +14,13 @@ on:
     paths:
       - '.github/workflows/typst-universe.yml'
       - 'scripts/typst-universe.sh'
-      - 'packages/typst/package/**'
-      - 'packages/typst/tests/typst/install.ts'
-      - 'packages/typst/tests/typst/readme.spec.ts'
+      - 'packages/typst/**'
+      - 'packages/spec/src/**'
+      - 'packages/fonts/src/**'
+      - 'packages/core/src/**'
+      - 'packages/svg/src/**'
+      - 'packages/recipes/src/**'
+      - 'package-lock.json'
 
 concurrency:
   group: typst-universe-${{ github.ref }}
