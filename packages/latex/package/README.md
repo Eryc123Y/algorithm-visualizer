@@ -29,7 +29,7 @@ The package runs the `algomotion` command through shell escape, as `minted` runs
 
 ### Getting the `algomotion` program
 
-**A standalone executable**, about 3 MB, which needs nothing else. Download the archive for your platform from <https://github.com/Eryc123Y/algorithm-visualizer/releases>:
+**A standalone executable**, about 3 MB, which needs no Node.js. The Linux ones need glibc 2.35 or later, as in Ubuntu 22.04 and Debian 12; on an older or a musl system, such as Alpine, use npm. Download the archive for your platform from <https://github.com/Eryc123Y/algorithm-visualizer/releases>:
 
 | Platform             | File                            |
 | -------------------- | ------------------------------- |
@@ -39,7 +39,7 @@ The package runs the `algomotion` command through shell escape, as `minted` runs
 | Linux, ARM64         | `algomotion-linux-arm64.tar.gz` |
 | Windows, x86-64      | `algomotion-windows-x64.zip`    |
 
-Unpack it, and put the `algomotion` program inside (`algomotion.exe` on Windows) in a directory on your `PATH`, or name it with the package option `command=`, as in `\usepackage[command=/path/to/algomotion]{algomotion}`. The executables are not signed, so macOS and Windows may ask you to confirm the first time you run one.
+Unpack it, and put the `algomotion` program inside (`algomotion.exe` on Windows) in a directory on your `PATH`, or name it with the package option `command=`, as in `\usepackage[command=/path/to/algomotion]{algomotion}`. Write the whole path there, with `/` on Windows too, as in `command=C:/Tools/algomotion.exe`: LaTeX reads `~` and `\` as its own. The executables are not signed. Windows asks you to confirm the first time you run one. macOS refuses one that a browser downloaded until you allow it under Privacy & Security in System Settings, or remove the mark with `xattr -d com.apple.quarantine algomotion`.
 
 **With npm**, if you have Node.js 22 or later:
 
@@ -49,7 +49,7 @@ npm install -g @algomotion/mcp
 
 This installs the newest release and puts `algomotion` on your `PATH`; the same line updates it later.
 
-Either way, `algomotion --help` in a terminal shows that it is found. Use a release of the program that is at least as new as the package.
+Either way, `algomotion --help` in a terminal shows that it is found. Keep the program at least as new as the package. If the package ever says that a figure has another format, the program is of another release: install the one released with the package, and delete the cache directory.
 
 ## Commands
 
@@ -157,7 +157,7 @@ As TeX reads it:
 
 ## The cache
 
-Each figure is kept in `_algomotion/` under the MD5 of everything that changes its drawing: the input or the file's contents, the algorithm, the step, the theme, the layout, the file format and the package version.
+Each figure is kept in `_algomotion/` under the MD5 of everything that changes its drawing: the input or the file's contents, the algorithm, the step, the theme, the layout, the language, the file format and the package version.
 
 - A figure found there is drawn without running anything, so the next runs of a document cost only TikZ's time.
 - Fonts and sizes are applied when the figure is drawn, so changing them makes no new figure.

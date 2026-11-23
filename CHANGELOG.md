@@ -6,7 +6,7 @@ All notable changes to algomotion, newest first. The format follows [Keep a Chan
 
 ### Changed
 
-- **LaTeX:** the package's README and manual say where to get the `algomotion` program: the standalone executable from the GitHub releases, with the file for each platform, or npm. The CTAN team asked for it.
+- **LaTeX:** the package's README and manual say where to get the `algomotion` program: the standalone executable from the GitHub releases, with the file for each platform, or npm. The CTAN team asked for it. They also say what the Linux executables need (glibc 2.35), how to write a path in `command=`, what macOS asks of an unsigned download, and what to do when the program and the package are of different releases (#178).
 
 ## 1.0.0 (2026-11-23)
 
