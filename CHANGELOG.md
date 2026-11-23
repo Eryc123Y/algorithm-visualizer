@@ -4,6 +4,10 @@ All notable changes to algomotion, newest first. The format follows [Keep a Chan
 
 ## Unreleased
 
+### Changed
+
+- **LaTeX:** the package's README and manual say where to get the `algomotion` program: the standalone executable from the GitHub releases, with the file for each platform, or npm. The CTAN team asked for it.
+
 ## 1.0.0 (2026-11-23)
 
 The first stable release. The eight npm packages are published as `1.0.0` under the `latest` tag, and the GitHub release carries the standalone `algomotion` command for macOS (arm64 and x64), Linux (x64 and arm64) and Windows (x64), the Typst and LaTeX packages and the player's files. The LaTeX package goes to CTAN; Typst Universe follows later. Everything since `1.0.0-alpha.1` is in it, Chinese above all (#176).

@@ -90,11 +90,9 @@ shell escape at all.
 \section{Installation}
 
 \begin{itemize}
-  \item \textbf{The command.} Install \texttt{algomotion} with npm,
-    \texttt{npm install -g @algomotion/mcp}, or take the standalone
-    executable for your platform from the project's GitHub releases, a
-    program of about 3\,MB that needs no Node.js. Put it on the
-    \texttt{PATH}, or name it with the package option \key{command}.
+  \item \textbf{The program.} The package needs the \texttt{algomotion}
+    program, which makes the figures. It is not part of \TeX\
+    distributions; section~\ref{sec:program} says where to get it.
   \item \textbf{The package.} \texttt{algomotion.sty} comes with
     \TeX\ distributions that include it from CTAN; otherwise put it next to
     your document, or in your local \texttt{texmf} tree under
@@ -109,6 +107,48 @@ shell escape at all.
 \begin{lstlisting}
 latexmk -pdf -shell-escape notes.tex     % or -pdflua, -pdfxe
 \end{lstlisting}
+
+\subsection{Getting the \texttt{algomotion} program}
+\label{sec:program}
+
+There are two ways to install the program; take either.
+
+\paragraph{A standalone executable} of about 3\,MB needs nothing else.
+Download the archive for your platform from the project's releases,
+\url{https://github.com/Eryc123Y/algorithm-visualizer/releases}:
+
+\begin{center}
+  \begin{tabular}{@{}ll@{}}
+    \toprule
+    Platform & File \\
+    \midrule
+    macOS, Apple silicon & \texttt{algomotion-macos-arm64.tar.gz} \\
+    macOS, Intel & \texttt{algomotion-macos-x64.tar.gz} \\
+    Linux, x86-64 & \texttt{algomotion-linux-x64.tar.gz} \\
+    Linux, ARM64 & \texttt{algomotion-linux-arm64.tar.gz} \\
+    Windows, x86-64 & \texttt{algomotion-windows-x64.zip} \\
+    \bottomrule
+  \end{tabular}
+\end{center}
+
+\noindent Unpack it, and put the \texttt{algomotion} program inside
+(\texttt{algomotion.exe} on Windows) in a directory on your \texttt{PATH},
+or name it with the package option \key{command}, as in
+\cs{usepackage}\texttt{[command=/path/to/algomotion]\{algomotion\}}. The
+executables are not signed, so macOS and Windows may ask you to confirm the
+first time you run one.
+
+\paragraph{With npm,} if you have Node.js 22 or later:
+
+\begin{lstlisting}
+npm install -g @algomotion/mcp
+\end{lstlisting}
+
+\noindent This installs the newest release and puts \texttt{algomotion} on
+your \texttt{PATH}; the same line updates it later.
+
+Either way, \texttt{algomotion -{}-help} in a terminal shows that it is
+found. Use a release of the program that is at least as new as the package.
 
 \section{Commands}
 
