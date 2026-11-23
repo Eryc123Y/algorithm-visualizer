@@ -25,6 +25,31 @@ The package runs the `algomotion` command through shell escape, as `minted` runs
 - LaTeX 2024-06-01 or later, as in TeX Live 2024, and TikZ. The package is tested with TeX Live 2026.
 - pdfLaTeX, LuaLaTeX or XeLaTeX. `latex` with `dvips` works too, but PostScript has no transparency, so the shadows of the light and dark themes come out solid.
 - Shell escape (`-shell-escape`) the first time a figure is made.
+- The `algomotion` program, which makes the figures. It is not part of TeX distributions, so install it yourself, in one of the two ways below.
+
+### Getting the `algomotion` program
+
+**A standalone executable**, about 3 MB, which needs nothing else. Download the archive for your platform from <https://github.com/Eryc123Y/algorithm-visualizer/releases>:
+
+| Platform             | File                            |
+| -------------------- | ------------------------------- |
+| macOS, Apple silicon | `algomotion-macos-arm64.tar.gz` |
+| macOS, Intel         | `algomotion-macos-x64.tar.gz`   |
+| Linux, x86-64        | `algomotion-linux-x64.tar.gz`   |
+| Linux, ARM64         | `algomotion-linux-arm64.tar.gz` |
+| Windows, x86-64      | `algomotion-windows-x64.zip`    |
+
+Unpack it, and put the `algomotion` program inside (`algomotion.exe` on Windows) in a directory on your `PATH`, or name it with the package option `command=`, as in `\usepackage[command=/path/to/algomotion]{algomotion}`. The executables are not signed, so macOS and Windows may ask you to confirm the first time you run one.
+
+**With npm**, if you have Node.js 22 or later:
+
+```sh
+npm install -g @algomotion/mcp
+```
+
+This installs the newest release and puts `algomotion` on your `PATH`; the same line updates it later.
+
+Either way, `algomotion --help` in a terminal shows that it is found. Use a release of the program that is at least as new as the package.
 
 ## Commands
 

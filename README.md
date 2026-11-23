@@ -248,7 +248,7 @@ In LaTeX, [the algomotion package](packages/latex/package/README.md) draws them 
 \algomotionfile[step=delete-3/copy, theme=print, width=0.6\linewidth]{bst-delete.json}
 ```
 
-The package is not on CTAN yet; its README says how to use it, and how to build the standalone `algomotion` it calls, until it is.
+The package is not on CTAN yet; its README says how to use it, and where to get the `algomotion` program it calls.
 
 In slides, a series steps through one frame per overlay, all in one picture ([ADR 0028](docs/adr/0028-slides.md)): `steps` in a Beamer frame, and `algomotion-slides` with polylux's or touying's own `only` in Typst. A slide figure fills the frame's width and three quarters of its height, keeping its shape; `height` gives another share ([ADR 0033](docs/adr/0033-slide-figures-fill-the-frame.md)).
 

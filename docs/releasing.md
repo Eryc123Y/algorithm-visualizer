@@ -74,6 +74,8 @@ The tag also starts the **Typst Universe** workflow (`.github/workflows/typst-un
   - **Description.** Name an algorithm, give it your input and pick a step, and the package draws that step as a TikZ figure in the document's fonts; it also draws documents in the algomotion format. In Beamer, a figure steps through the run as overlays. About 130 algorithms and data structures, nine themes, English and Chinese.
   - **Licence** GNU General Public License, version 3 or later. **Home page** <https://algomotion.turing2234.com>; **repository** <https://github.com/Eryc123Y/algorithm-visualizer>; **bug tracker** its issues.
   - **Notes to the CTAN team.** The package runs an external program, `algomotion`, through shell escape, as minted runs Pygments; it comes from npm (`@algomotion/mcp`) or as a standalone executable from the GitHub releases. Figures are cached, so a document with its cache compiles without shell escape. The manual was built that way; its source needs the command and `-shell-escape` to build again.
+  - **CTAN path.** `/graphics/pgf/contrib/algomotion`, where the CTAN team puts packages that draw with TikZ.
+  - **Publish npm first.** The README and the manual send users to `npm install -g @algomotion/mcp` and to the release's files by name, and the CTAN team tries both. Check `npm view @algomotion/mcp dist-tags` shows the release under `latest` before uploading. If the release workflow's file names change, change the tables in the package's README and manual too.
   - The uploader's name and email are the owner's.
 
 ## 5. Deploy
