@@ -105,7 +105,7 @@ shell escape at all.
 \end{itemize}
 
 \begin{lstlisting}
-latexmk -pdf -shell-escape notes.tex     % or -pdflua, -pdfxe
+latexmk -pdf -shell-escape notes.tex     # or -pdflua, -pdfxe
 \end{lstlisting}
 
 \subsection{Getting the \texttt{algomotion} program}
@@ -113,7 +113,9 @@ latexmk -pdf -shell-escape notes.tex     % or -pdflua, -pdfxe
 
 There are two ways to install the program; take either.
 
-\paragraph{A standalone executable} of about 3\,MB needs nothing else.
+\paragraph{A standalone executable} of about 3\,MB needs no Node.js. The
+Linux ones need glibc 2.35 or later, as in Ubuntu 22.04 and Debian 12; on an
+older or a musl system, such as Alpine, use npm.
 Download the archive for your platform from the project's releases,
 \url{https://github.com/Eryc123Y/algorithm-visualizer/releases}:
 
@@ -134,9 +136,15 @@ Download the archive for your platform from the project's releases,
 \noindent Unpack it, and put the \texttt{algomotion} program inside
 (\texttt{algomotion.exe} on Windows) in a directory on your \texttt{PATH},
 or name it with the package option \key{command}, as in
-\cs{usepackage}\texttt{[command=/path/to/algomotion]\{algomotion\}}. The
-executables are not signed, so macOS and Windows may ask you to confirm the
-first time you run one.
+\cs{usepackage}\texttt{[command=/path/to/algomotion]\{algomotion\}}. Write
+the whole path there, with \texttt{/} on Windows too, as in
+\texttt{command=C:/Tools/algomotion.exe}: \LaTeX\ reads
+\texttt{\textasciitilde} and \texttt{\textbackslash} as its own.
+
+The executables are not signed. Windows asks you to confirm the first time
+you run one. macOS refuses one that a browser downloaded until you allow it
+under Privacy \& Security in System Settings, or remove the mark with
+\texttt{xattr -d com.apple.quarantine algomotion}.
 
 \paragraph{With npm,} if you have Node.js 22 or later:
 
@@ -148,7 +156,9 @@ npm install -g @algomotion/mcp
 your \texttt{PATH}; the same line updates it later.
 
 Either way, \texttt{algomotion -{}-help} in a terminal shows that it is
-found. Use a release of the program that is at least as new as the package.
+found. Keep the program at least as new as the package. If the package ever
+says that a figure has another format, the program is of another release:
+install the one released with the package, and delete the cache directory.
 
 \section{Commands}
 
@@ -370,7 +380,8 @@ programming table.
 
 Each figure is kept in \texttt{\_algomotion/} under the MD5 of everything
 that changes its drawing: the input or the file's contents, the algorithm,
-the step, the theme, the layout, the file format and the package version.
+the step, the theme, the layout, the language, the file format and the
+package version.
 
 \begin{itemize}
   \item A figure found there is drawn without running anything, so later
