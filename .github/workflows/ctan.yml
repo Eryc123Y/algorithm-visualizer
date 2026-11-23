@@ -74,7 +74,10 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/pkgcheck"
           cd "$RUNNER_TEMP/pkgcheck"
-          curl -fsSL --retry 3 -o pkgcheck https://mirrors.ctan.org/support/pkgcheck/bin/pkgcheck-x86_64-unknown-linux-musl
+          # mirrors.ctan.org redirects to a mirror picked per request, and
+          # one may answer with a broken certificate chain; every retry is
+          # redirected again, so all errors are retried.
+          curl -fsSL --retry 5 --retry-all-errors -o pkgcheck https://mirrors.ctan.org/support/pkgcheck/bin/pkgcheck-x86_64-unknown-linux-musl
           echo "$PKGCHECK_SHA256  pkgcheck" | sha256sum -c -
           chmod +x pkgcheck
           echo "PKGCHECK=$PWD/pkgcheck" >> "$GITHUB_ENV"
